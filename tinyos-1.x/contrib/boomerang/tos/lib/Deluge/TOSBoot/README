@@ -1,0 +1,24 @@
+How to compile TOSBoot for Tmote Invent:
+
+Copy all contents of this directory to:
+tinyos-1.x/tos/lib/Deluge/TOSBoot/
+
+Make sure you overwrite the Makefile in that directory.
+
+Change your working directory to:
+tinyos-1.x/tos/lib/Deluge/TOSBoot/
+
+type:
+make tmote
+(note: NOT telosb)
+
+build/telosb/ will now contain the Tmote Invent booloader.
+
+This will replace the telosb bootloader with the Tmote Invent booloader
+
+If you want to go back to the telosb bootloader, you will need to
+return to that directory and type:
+
+make telosb
+
+build/telosb/ will now contain the telosb booloader.

@@ -1,0 +1,15 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: dasa.extra,v 1.1 2006/03/06 10:07:40 palfrey Exp $
+
+ifndef DASA
+DASA = /dev/ttyS0
+endif
+
+PROGRAM = dasa
+PROGRAMMER_FLAGS = -dprog=dasa -dlpt=$(DASA) $(PROGRAMMER_PART) $(PROGRAMMER_EXTRA_FLAGS) -dt_sck=1
+
+program: FORCE
+	@echo "    installing $(PLATFORM) binary with dasa"
+	$(PROGRAMMER) $(PROGRAMMER_FLAGS) --erase --upload if=$(INSTALL_SREC)
+
+

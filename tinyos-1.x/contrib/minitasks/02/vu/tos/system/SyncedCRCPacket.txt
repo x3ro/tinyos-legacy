@@ -1,0 +1,21 @@
+README for SyncedCRCPacket
+
+Author/Contact: janos.sallai@vanderbilt.edu (Janos Sallai, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+This component provides a packet oriented communication layer that provides higher reliability with communication over the UART. It synchronizes the packets with a 2 byte preamble and uses CRC for integrity checking.
+
+FILES:
+
+SyncedCRCPacket.nc contains the implementation of the packet layer.
+
+UARTSyncedCRCPacket.nc provides SyncedCRCPacket's functionality over the UART.
+
+GenericComm.nc is a slightly modified version of the native GenericComm component. While the native implementation uses NoCRCPacket for serial communication, our version leverages the SyncedCRCPacket component.
+
+USAGE:
+
+Since SyncedCRCPacket uses a different protocol, we need to use a replacement serial stub (isis.nest.util.SyncedCRCSerialPortStub)instead of the native net.tinyos.util.SerialPortStub in the java programs.
+
+Similarly, the modified version of the native SerialForward application has to be used with motes programmed with UARTSyncedCRCPacket. This can be found in the isis.nest.sf java package.

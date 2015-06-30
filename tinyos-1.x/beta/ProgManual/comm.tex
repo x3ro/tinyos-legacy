@@ -1,0 +1,271 @@
+>
+\section{Communication}
+
+\subsection{Communication Model: Active Messages}
+
+Active message model. Use IDs to dispatch messages to message handler
+code. Refer to AM paper.
+
+Active message model used regardless of the underlying communication
+substrate: radio, UART (serial).
+
+\subsubsection{Buffer model}
+
+\emph{Sending.}
+To avoid potentially expensive memory management schemes in the AM
+layer but still allow concurrent operation, TinyOS Active Message
+buffers follow a strict alternating ownership protocol. Provided that the 
+messaging layer returns SUCCESS from the send() call, the active
+message layer 'owns' the send buffer provided by the higher-level
+component until
+the send is complete as indicated by the sendDone() event. That is, 
+the requesting component should not modify the buffer a between the
+successful send() call and the corresponding sendDone() event. 
+
+The send-buffer management simplicity usually requires that the
+application implement some buffer management. A common, simple mechanism is a
+pending flag which keeps track of a single buffer's status. If the previous
+message is still being sent, the application cannot modify the buffer
+and must return FAIL for any send requests.  If the flag indicates
+that the send buffer is available, the application is free to fill the
+buffer and send the message. Of course more complicated schemes can be
+implemented where necessary.
+
+\emph{Receiving.} AM memory management for incoming messages requires
+that the receiving component return a pointer to a free message
+buffer; the buffer can be the same buffer recieved in that call or a
+different buffer. A message arrives and fills a buffer, and then the Active
+Message layer dispatches the message based on the handler type. The buffer
+is handed to the application component (through the
+ReceiveMsg.receive() event), and  the application
+component must return a pointer to a free buffer upon completion.
+
+If the application is done with the buffer, it can return a pointer to
+that buffer. If your component needs to save the message contents for
+later use, it needs to copy the message to a new buffer, or return a
+new (free) message buffer for use by the network stack.
+
+\subsection{Packet definition}
+
+TOS_Msg defined in AM.h, but some platforms redefine TOS_Msg to make,
+for example, address handling or byte-order conversion more easy. In
+this case the definition is in tos/platforms/<platform>/AM.h, but the
+definitions remain very similar.
+
+Put definition in a nice box.
+
+typedef struct TOS_Msg
+{
+  /* The following fields are transmitted/received on the radio. */
+  uint16_t addr;
+  uint8_t type;
+  uint8_t group;
+  uint8_t length;
+  int8_t data[TOSH_DATA_LENGTH];
+  uint16_t crc;
+
+  /* The following fields are not actually transmitted or received 
+   * on the radio! They are used for internal accounting only.
+   * The reason they are in this structure is that the AM interface
+   * requires them to be part of the TOS_Msg that is passed to
+   * send/receive operations.
+   */
+  uint16_t strength;
+  uint8_t ack;
+  uint16_t time;
+  uint8_t sendSecurityMode;
+  uint8_t receiveSecurityMode;  
+} TOS_Msg;
+
+Slightly different fields for TinySec packets. See TinySec section.
+
+TOSMsg fields (table). 
+Columns would be field/semantics/when set and by whom
+addr 
+type
+
+TOSH_DATA_LENGTH. TOSH_DATA_LENGTH is a constant that defines the 
+\emph{maximum} length of the data payload in the messages. When 
+message buffers are allocated, the are generally done so by declaring
+a TOS_Msg structure. Rather than introduce potentially complicated 
+code that can handle data packets of arbitrary length, the TOS_Msg
+structure allocates space for the data using the TOSH_DATA_LENGTH 
+constant. 
+
+The actual length of
+the data payload is in the length field of the TOSMsg structure. The 
+communications components can handle transmission/receipt of the 
+actual data using the length field.
+
+There are hooks in the TinyOS make system (tools/make) that allow
+you can to set the value of TOS_DATA_LENGTH in your application by 
+defining MSG_SIZE to the size you'd like in your application's makefile
+where MSG_SIZE is the value you want to use for TOSH_DATA_LENGH.
+For example, 'MSG_SIZE=40' would effectively change TOSH_DATA_LENGTH to 
+40 bytes. 
+
+
+\subsection{Communication Interfaces}
+\subsubsection{SendMsg}
+\subsubsection{ReceiveMsg}
+
+\subsubsection{Mac-layer Control, Reliability & Error Detection}
+
+Always call radio control (SetRFPower(), MacControl.enableAck(), etc.)
+functions in StdControl.start() rather than StdControl.init().  The
+order of init() calls in TinyOS cannot be predetermined, so the radio's init()
+function may be called after the application's init() fucntion and
+reset any previously set settings.
+
+CRCs.
+
+interface MacBackoff
+{
+  async event int16_t initialBackoff(TOS_MsgPtr m);
+  async event int16_t congestionBackoff(TOS_MsgPtr m);
+}
+
+Acks (CC1000 & CC2420 below, RFM?)
+
+interface MacControl
+{
+  async command void enableAck();
+  async command void disableAck();
+}
+
+Acks are disabled by default. MacControl.enableAck() must be called
+before message is sent. If on, hardware will automatically send an
+acknowledgement.  If acknowledgements are enabled, the radio stack
+will wait for an ack or timeout before signaling the sendDone event.
+If an ack is received, the TOSMsg.ack field will be set to 1, it will
+be set to 0 otherwise.
+
+Note: cc1000 requires 250us to switch radio's mode from rcv to xmit,
+then 10-15 bytes to sync sending radio with receiver radio, and only
+then can you send the ACK. The effective throughput cut by
+1/3. Nevertheless, ACKs can be sent on CC1000 (Is this still true?)
+
+\subsection{Achievable Bandwidth}
+
+\subsection{Communication Components}
+
+\subsection{GenericComm}
+
+SendMsg, ReceiveMsg, StdControl. 
+
+\subsubsection{Low-level}
+\subsubsection{RadioCoordinator}
+\subsubsection{BareSendMsg}
+
+\subsection{Communication Implementations}
+\subsubsection{UART}
+
+\subsubsection{CC1000Radio}
+
+CC1000RadioControl
+
+\subsubsubsection{PowerManagement}
+
+App needs to call radio component's StdControl.stop() function. For
+  example: CC2420RadioC.StdControl.stop()
+
+\subsubsection{CC2420 Radio}
+
+High-level overview
+Design goals.
+
+High-level use by applications:
+CC2420RadioC 
+  - BareSendMsg
+  - ReceiveMsg
+  - CC2420Control
+  - MacControl
+  - MacBackoff
+
+(wired  to CC2420RadioM, CC2420RadioControlM)
+
+Mention that the sendDone and receive signals are signaled from
+the stack rather than from the radio interrupt contexts. Semantics
+could be important (i.e., task that signals sendDone behind other 
+long-running tasks).
+
+\subsubsubsection{CC2420 Implementation}
+
+A note about the mapping between spec, CC2420Const.h, and usage in
+HPL* files. Current parameters stored in a current parameter (CP)
+array.
+
+{\bf Initialization.} Done in split-phase. 
+Question: How deprecated is stdcontrol? That is, are we actively 
+porting all the StdControl() interfaces to SplitControl()? Or is this
+isolated to radio stack?
+
+SplitControl used because some of the init/start/stop calls 
+require delays. For example, 
+
+SplitControl and CC2420Control interfaces implemented by CC2420ControlM.
+
+{\bf Buffering.}: two receive buffers, one send buffer. 
+Question: In receive, the implementation checks for a valid 
+returned buffer (that is, a non-null pointer) and only sets
+bPacketReceiving to FALSE if it's non-null. If it is null, doesn't
+that completely screw up receiving? That is, isn't there not another
+way to give a receive buffer back to the stack?
+
+State machines: 
+timer
+radio
+    DISABLED_STATE = 0, (stopped, as in app called CC2420RadioM.StdControl.stop())
+    IDLE_STATE, 
+    TX_STATE, (attempting to transmitting (possibly must wait for radio
+      to switch to xmit or for SFD pin to go high)
+    TX_WAIT, 
+    PRE_TX_STATE, (if we're backed-off in a congestion timer)
+    POST_TX_STATE,
+    POST_TX_ACK_STATE,
+    RX_STATE,
+    POWER_DOWN_STATE,
+    WARMUP_STATE, (just called start)
+
+    TIMER_INITIAL = 0,
+    TIMER_BACKOFF,
+    TIMER_ACK
+
+Send: if the radio is in a state where it can transmit, wait for SFD
+(Start of Frame Delimeter) to go high. When the pin goes high, set
+state to TX_STATE . Will retry up to 8 times; reasons for not 
+being able to send include: 
+
+sfd.captured: 
+- could be one of several states:
+- 
+
+Send failed situation: if a send fails, sendDone is signaled w/ FAIL,
+pointer to txbuffer (duh).
+
+uses {
+    interface SplitControl as CC2420SplitControl;
+    interface CC2420Control;
+    interface HPLCC2420 as HPLChipcon;
+    interface HPLCC2420FIFO as HPLChipconFIFO; 
+    interface HPLCC2420Interrupt as FIFOP;
+    interface HPLCC2420Capture as SFD;
+    interface StdControl as TimerControl;
+    interface TimerJiffyAsync as BackoffTimerJiffy;
+    interface Random;
+    interface Leds;
+  }
+}
+
+\subsubsection{Hardware Resources}
+ 
+Timer1.
+
+Timer2.
+
+\subsubsubsection{PowerManagement}
+
+
+
+
+

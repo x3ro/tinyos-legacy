@@ -1,0 +1,4 @@
+This directory contains nCUnit, a unit testing framework for nesC components 
+similar to JUnit.
+
+Please see doc/readme.html for information about its installation and usage.

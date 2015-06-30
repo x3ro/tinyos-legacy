@@ -1,0 +1,7 @@
+README 
+
+
+Description:
+-Read temperature and light sensor readings
+-Output message to uart port
+-Output message to radio port

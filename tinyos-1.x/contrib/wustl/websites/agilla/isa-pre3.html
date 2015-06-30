@@ -1,0 +1,2210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla ISA</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+
+
+<h2><font face="Verdana, Arial, Helvetica, sans-serif">Instruction Set Architecture
+
+(ISA)</font></h2>
+
+<h2>Instruction Classes</h2>
+
+<table width="95%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+
+    <td><strong>Class</strong></td>
+
+    <td><strong>Format</strong></td>
+
+    <td><strong>Key</strong></td>
+
+  </tr>
+
+  <tr>
+
+    <td>b-class</td>
+
+    <td>00ii iiii</td>
+
+    <td>i = instruction</td>
+
+  </tr>
+
+  <tr>
+
+    <td>t-class</td>
+
+    <td>0100 ixxx</td>
+
+    <td>i = instruction, x = argument</td>
+
+  </tr>
+
+  <tr>
+
+    <td>e-class*</td>
+
+    <td>0101 iiii xxxx xxxx xxxx xxxx</td>
+
+    <td>i = instruction, x = argument</td>
+
+  </tr>
+
+  <tr>
+
+    <td>v-class</td>
+
+    <td>011i xxxx</td>
+
+    <td>i = instruction, x = argument</td>
+
+  </tr>
+
+  <tr>
+
+    <td>j-class</td>
+
+    <td>10ix xxxx</td>
+
+    <td>i = instruction, x = argument</td>
+
+  </tr>
+
+  <tr>
+
+    <td>x-class</td>
+
+    <td>11xx xxxx</td>
+
+    <td>x = argument</td>
+
+  </tr>
+
+</table>
+
+<p>* stored in big-endian format</p>
+<h2>Color Codes:</h2>
+<table width="400" border="1" cellpadding="2" cellspacing="2" bordercolor="#000000">
+  <tr>
+    <td>&nbsp;</td>
+    <td>General purpose instruction</td>
+  </tr>
+  <tr>
+    <td width="102" bgcolor="#99FF99">&nbsp; </td>
+    <td width="298">Sets condition code</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF0000">&nbsp;</td>
+    <td>Accessor to acquaintance list</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF6600">&nbsp;</td>
+    <td>Migration instruction</td>
+  </tr>
+  <tr>
+    <td bgcolor="#0099FF">&nbsp;</td>
+    <td>Accessor to the heap</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF00CC">&nbsp;</td>
+    <td>Accessor to sensors</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900">&nbsp;</td>
+    <td>Local tuple space operation</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FFFF33">&nbsp;</td>
+    <td>Remote tuple space operation</td>
+  </tr>
+</table>
+<h2>Variable type abbreviations</h2>
+<ul>
+  <li>[var] - any type of variable</li>
+  <li>[tuple] - [value = number of fields], [var = field1], [var = field2], ...</li>
+  <li>A ? after the variable indicates that it may or may not be pushed onto
+    the stack. The condition code is used to determine whether something was
+    pushed onto the stack.</li>
+</ul>
+<h2>B-class Instructions [00ii iiii]</h2>
+
+<table width="100%" border="1" bordercolor="#000000">
+
+  <tr bgcolor="#CCCCCC">
+
+    <td><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td><strong>Opcode</strong></td>
+
+    <td><strong>Initial Stack</strong></td>
+
+    <td><strong>Final Stack</strong></td>
+
+    <td width="100%"><strong>Long Description</strong></td>
+
+  </tr>
+
+  <tr>
+
+    <td>halt</td>
+
+    <td>Halt execution</td>
+
+    <td>0x00</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Halts execution of the issuing agent. This frees the agent's context
+
+      for another incomming agent.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>loc</td>
+
+    <td>Push host location</td>
+
+    <td>0x01</td>
+
+    <td>&nbsp;</td>
+
+    <td>[location]</td>
+
+    <td width="100%">Pushes the mote's location onto the operand stack as a value.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>aid</td>
+
+    <td>Push agent ID</td>
+
+    <td>0x02</td>
+
+    <td>&nbsp;</td>
+
+    <td>[agentid]</td>
+
+    <td width="100%">Pushes agent's ID onto the operand stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>rand</td>
+
+    <td>Push random number</td>
+
+    <td>0x03</td>
+
+    <td>&nbsp;</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pushes a 16-bit random number onto the operand stack as a value.</td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>cpush</td>
+
+    <td>Pushes condition onto the stack</td>
+
+    <td>0x04</td>
+
+    <td>&nbsp;</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pushes the issuing agent's condition variable onto its stack as a value.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>depth</td>
+
+    <td>Push stack depth</td>
+
+    <td>0x05</td>
+
+    <td>&nbsp;</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pushes the depth of the agent's operand stack onto the stack as a value;
+
+      the depth is the value before executing this operation.</td>
+
+  </tr>
+  <tr>
+
+    <td>vicinity</td>
+
+    <td>Checks if dist <= 2</td>
+
+    <td>0x06</td>
+
+    <td>[location]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Checks whether the location on the stack is within a distance
+      of &lt;= 2 of the location(s) on the heap. Heap [0] must be the number of
+      locations, Heap[1...n] must be the locations.</td>
+
+  </tr>
+  <!-- <tr>
+
+    <td>err</td>
+
+    <td>Enter error state</td>
+
+    <td>0x06</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Forces the agent executing this instruction to enter an error state.
+
+      Halts execution.</td>
+
+  </tr>-->
+
+  <tr>
+
+    <td>clear</td>
+
+    <td>Clear the operand stack</td>
+
+    <td>0x07</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Clear the operand stack.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF0000">
+
+    <td>numnbrs</td>
+
+    <td>number of neighbors</td>
+
+    <td>0x08</td>
+
+    <td>&nbsp;</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pushes the number of neighbors onto the stack.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF0000">
+
+    <td>randnbr</td>
+
+    <td>get random neighbor</td>
+
+    <td>0x09</td>
+
+    <td>&nbsp;</td>
+
+    <td>[location]</td>
+
+    <td width="100%">Pushes the location of a random neighbor onto the stack. Sets condition
+
+    = 1 if success, else sets condition = 0.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>wait</td>
+
+    <td>make agent wait</td>
+
+    <td>0x0a</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Stops agent execution without deallocating its resources. Allows it to
+
+      wait for a reaction to fire</td>
+
+  </tr>
+
+  <tr bgcolor="#CCCCCC">
+
+    <td><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td><strong>Opcode</strong></td>
+
+    <td><strong>Initial Stack</strong></td>
+
+    <td><strong>Final Stack</strong></td>
+
+    <td width="100%"><strong>Long Description</strong></td>
+
+  </tr>
+
+  <tr bgcolor="#FFFFFF">
+
+    <td>inc</td>
+
+    <td>Increment value</td>
+
+    <td>0x0b</td>
+
+    <td><p>[value]</p>
+
+      <p>or </p>
+
+      <p>[location]</p></td>
+
+    <td><p>[value+1] </p>
+
+      <p>or</p>
+
+      <p>[loction]</p></td>
+
+    <td width="100%"><p>Pops a value off the operand stack and pushes the incremented value back
+
+        onto the stack.</p>
+
+      <p>If the top of the stack is a location, it increments the location as
+
+        follows: If heap[11] = &lt;value:1&gt; increment only x, if heap[11] = &lt;value:2&gt;
+
+        increment only y, otherwise increment both x and y</p>
+
+      </td>
+
+  </tr>
+
+  <tr bgcolor="#FFFFFF">
+
+    <td>clearvar</td>
+
+    <td>Clear heap variable</td>
+
+    <td>0x0c</td>
+
+    <td>[value]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Pops a heap address value off the operand stack and clears the heap at
+
+      that address.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>inv</td>
+
+    <td>Invert a value</td>
+
+    <td>0x0d</td>
+
+    <td>[value]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pops a value off the operand stack, multiplies it by -1, and pushes the
+
+      result onto the stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>not</td>
+
+    <td>Boolean not</td>
+
+    <td>0x0e</td>
+
+    <td>[value]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pops a value off the operand stack. If the value is not 0, push a 0 onto
+
+      the stack, else push a 1.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>lnot</td>
+
+    <td>logical not</td>
+
+    <td>0x0f</td>
+
+    <td>[value]</td>
+
+    <td>[value]</td>
+
+    <td width="100%"> Pops a value off the operand stack and pushes its logical not (e.g.
+
+    0x2e will result in 0xffd1).</td>
+
+  </tr>
+
+  <!--
+
+  <tr bgcolor="#FF66FF">
+
+    <td><font color="#FF0000"><em>startsense<br>
+
+          <strong>[N/A]</strong></em></font></td>
+
+    <td><font color="#FF0000"><em>Start getting sensor data</em></font></td>
+
+    <td><font color="#FF0000"><em>0x11</em></font></td>
+
+    <td><font color="#FF0000"><em>[value=sensor],<br>
+
+    [value=period]</em></font></td>
+
+    <td><font color="#FF0000">&nbsp;</font></td>
+
+    <td><p><font color="#FF0000"><em>Pops two values off the operand stack. The first value specifies the
+
+        type of sensor, the second specifies the period. It tells the host to
+
+        start taking sensor
+
+        measurements,
+
+        the host
+
+        will put the sensor
+
+        readings
+
+        into
+
+        the host-level
+
+        tuple space using
+
+        pre-defined
+
+        names
+
+      at the specified interval.</em></font></p>
+
+      <ul>
+
+        <li><font color="#FF0000"><em>Photo = 1, name = &quot;sdp&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Temp = 2, name = &quot;sdt&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Microphone = 3, name = &quot;sdm&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Magnometer X and Y= 4, name = &quot;sdx&quot; and &quot;sdy&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Accelerometer X and Y= 5, name = &quot;sda&quot; and &quot;sdb&quot;</em></font></li>
+
+      </ul>
+
+      <p><font color="#FF0000"><em>The agent will then have to execute host-level tuple space operations
+
+        to retrieve the data. To prevent overflowing the host-level tuple space,
+
+        the previous sensor reading tuple will be removed prior to inserting
+
+        a new
+
+    one.</em></font></p></td>
+
+  </tr>
+
+  <tr bgcolor="#FF66FF">
+
+    <td><font color="#FF0000"><em>stopsense<br>
+
+          <strong>[N/A]</strong></em></font></td>
+
+    <td><font color="#FF0000"><em>Stop getting sensor data</em></font></td>
+
+    <td><font color="#FF0000"><em>0x12</em></font></td>
+
+    <td><font color="#FF0000"><em>[value]</em></font></td>
+
+    <td><font color="#FF0000">&nbsp;</font></td>
+
+    <td><font color="#FF0000"><em>Pops a value off the operand stack. This value corresponds to a particular
+
+    sensor (see instruction startsense). Tells the host to stop taking sensor
+
+      measurements. The host will only stop if no other agents are interested
+
+      in the sensor
+
+      reading.</em></font></td>
+
+  </tr>
+
+  -->
+
+  <tr>
+
+    <td>copy</td>
+
+    <td>Copy top of operand stack</td>
+
+    <td>0x10</td>
+
+    <td>[var]</td>
+
+    <td>[var], [var]</td>
+
+    <td width="100%">Pops a variable off the operand stack, pushes it back onto the stack
+
+      twice.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>pop</td>
+
+    <td>Pop top of operand stack</td>
+
+    <td>0x11</td>
+
+    <td>[var]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Pops a variable off the operand stack.</td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>cpull</td>
+
+    <td>Pulls value from stack onto condition</td>
+
+    <td>0x12</td>
+
+    <td>[value]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Pops the value off the stack and sets it to be the condition.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>sleep</td>
+
+    <td>Sleep</td>
+
+    <td>0x13</td>
+
+    <td>[value]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Halt the issuing agent for [value] * 0.125 seconds.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>jumpc</td>
+
+    <td>Absolute jump condition</td>
+
+    <td>0x14</td>
+
+    <td>[value]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Jump to the absolute address specified in the value on top of the operand
+
+      stack if the condition is &gt; 0. Decrements the condition code if jump.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>jumps</td>
+
+    <td>Absolute jump stack</td>
+
+    <td>0x15</td>
+
+    <td>[value]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Jump to the absolute address specified in the value on top of the operand
+
+      stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>putled</td>
+
+    <td>Actuate LEDs</td>
+
+    <td>0x16</td>
+
+    <td>[value] or [reading]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%"><p>Takes a single operand and lights the LEDs as follows. <br>
+  
+        <br>
+  
+      If the operand
+  
+      is a value: It uses the lowest five bits of the operand to determine
+  
+      how to actuate
+  
+      the
+  
+      LEDs.
+  
+      The
+  
+      lowest
+  
+      three
+  
+      bits
+  
+      denote the 3 LEDs; bit 0 is red, bit 1 is green, and bit 2 is yellow. The
+  
+      next two bits (3 and 4) specify which operation to apply; 00 is set, 01
+  
+      is off (active on 0), 10 is on, and 11 is toggle. For example, 31
+      (0x1f) toggles all 
+      three LEDs, 19 turns the red and green off (leaving yellow unchanged),
+  
+    and 0x2 sets the LEDS to be red off, green on, and yellow off.<br>
+    </p>
+      <table width="400" border="0" align="center" cellpadding="2" cellspacing="2">
+        <tr bgcolor="#CCCCCC">
+          <td><strong>Operation</strong></td>
+          <td><div align="center"><strong>Binary Value</strong></div></td>
+          <td><div align="center"><strong>Decimal Value</strong></div></td>
+        </tr>
+        <tr>
+          <td>set only red on</td>
+          <td><div align="center">00001</div></td>
+          <td><div align="center">1</div></td>
+        </tr>
+        <tr>
+          <td>set only green on</td>
+          <td><div align="center">00010</div></td>
+          <td><div align="center">2</div></td>
+        </tr>
+        <tr>
+          <td>set only yellow on</td>
+          <td><div align="center">00100</div></td>
+          <td><div align="center">4</div></td>
+        </tr>
+        <tr>
+          <td>Toggle red</td>
+          <td><div align="center">11001</div></td>
+          <td><div align="center">25</div></td>
+        </tr>
+        <tr>
+          <td>Toggle green</td>
+          <td><div align="center">11010</div></td>
+          <td><div align="center">26</div></td>
+        </tr>
+        <tr>
+          <td>Toggle yellow</td>
+          <td><div align="center">11100</div></td>
+          <td><div align="center">28</div></td>
+        </tr>
+        <tr>
+          <td>Toggle all 3 LEDs</td>
+          <td><div align="center">11111</div></td>
+          <td><div align="center">31</div></td>
+        </tr>
+        <tr>
+          <td>Turn off red</td>
+          <td><div align="center">01110</div></td>
+          <td><div align="center">14</div></td>
+        </tr>
+        <tr>
+          <td>Turn off green</td>
+          <td><div align="center">01101</div></td>
+          <td><div align="center">13</div></td>
+        </tr>
+        <tr>
+          <td>Turn off yellow</td>
+          <td><div align="center">01011</div></td>
+          <td><div align="center">11</div></td>
+        </tr>
+        <tr>
+          <td>Turn off all 3 LEDs</td>
+          <td><div align="center">01000</div></td>
+          <td><div align="center">8</div></td>
+        </tr>
+        <tr>
+          <td>Turn on red</td>
+          <td><div align="center">10001</div></td>
+          <td><div align="center">17</div></td>
+        </tr>
+        <tr>
+          <td>Turn on green</td>
+          <td><div align="center">10010</div></td>
+          <td><div align="center">18</div></td>
+        </tr>
+        <tr>
+          <td>Turn on yellow</td>
+          <td><div align="center">10100</div></td>
+          <td><div align="center">20</div></td>
+        </tr>
+        <tr>
+          <td>Turn on all LEDs</td>
+          <td><div align="center">10111</div></td>
+          <td><div align="center">23</div></td>
+        </tr>
+      </table>      
+      <p><br>
+    
+    If the operand is a reading, it simply displays the lower 3 bits in on the
+    
+    LEDs.</p>
+      </td>
+
+  </tr>
+
+  <tr bgcolor="#FF6600">
+
+    <td>smove</td>
+
+    <td>Strong migration </td>
+
+    <td>0x17</td>
+
+    <td>[location]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%"><p>Performs a strong migration to a remote host. The location of the remote
+
+        host is specified by the parameter on top of the operand stack. A strong
+
+        migration does not affect the execution of the agent (the pc, stack, and
+
+     heap are all maintained). The condition code is set as follows:</p>
+
+      <ul>
+
+        <li>0 - move failed (agent continues to run on original host)</li>
+
+        <li>1 - move succeeded (agent now runing on remote host)</li>
+
+     </ul></td>
+
+  </tr>
+
+  <tr bgcolor="#FF6600">
+
+    <td>wmove</td>
+
+    <td>Weak migration</td>
+
+    <td>0x18</td>
+
+    <td>[location]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">A weak version of smove.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF6600">
+
+    <td>sclone</td>
+
+    <td>Strong clone</td>
+
+    <td>0x19</td>
+
+    <td>[location]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%"><p>Pops the value off the operand stack. Clones itself at node with address
+
+      value. The clone inherits the initiating agent's program counter.</p>
+
+      <p> The condition code is set as follows:</p>
+
+      <ul>
+
+        <li>0 - clone failed (agent continues to run on original host)</li>
+
+        <li>1 - clone succeeded (agent now runing on remote host)</li>
+
+        <li>2 - child (this is the code set on the child agent prior to running)</li>
+
+      </ul></td>
+
+  </tr>
+
+  <tr bgcolor="#FF6600">
+
+    <td>wclone</td>
+
+    <td>Weak clone</td>
+
+    <td>0x1a</td>
+
+    <td>[location]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">A weak version of sclone.</td>
+
+  </tr>
+
+  <tr bgcolor="#0099FF">
+
+    <td>getvars</td>
+
+    <td>get a heap var, address in stack</td>
+
+    <td>0x1b</td>
+
+    <td>[value]</td>
+
+    <td>[var]</td>
+
+    <td width="100%">Retrieves a variable off the heap and pushes it onto the operand stack.
+
+      The address of the heap is specified by the value on top of the stack.      </td>
+
+  </tr>
+
+  <tr bgcolor="#0099FF">
+
+    <td>setvars</td>
+
+    <td>set heap var, address in stack</td>
+
+    <td>0x1c</td>
+
+    <td><p>[value]<br>
+
+      [var]</p>
+
+    </td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Saves a variable on the heap. The variable and address to store it must
+
+      both be on the operand stack.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF0000">
+
+    <td>getnbr</td>
+
+    <td>get neighbor address</td>
+
+    <td>0x1d</td>
+
+    <td>[value]</td>
+
+    <td bordercolor="#000000">[location]</td>
+
+    <td width="100%"><p>Get the address of the neighbor. All neighbors are stored in a list.
+  
+      The value specifies which position in the list to get. The value must be
+  
+      between 0 and numnbrs-1. Sets condition = 1 if success, else sets condition
+  
+      = 0.</p>
+      <p><strong>Note:</strong> There is no synchronization between a call to <em>numnbrs</em>        and
+        subsequent calls to <em>getnbr</em>, nor is there any between two
+        calls to <em>getnbr</em>. Since the neighbor list is dynamic, calling
+        <em>getnbr</em> may fail or may return the same neighbor using two different indices.
+        Failure
+        is indicated by setting the condition code to 0.</p>
+      <p>The suggested way of iterating through all neighbors is to take a snapshot
+        of the neighbor list by calling <em>numnbrs</em>, then immediately calling
+        <em>getnbr</em> to push the entire list onto the stack.</p></td>
+
+  </tr>
+
+  <tr bgcolor="#FF0000">
+
+    <td>cisnbr</td>
+
+    <td>is neighbor</td>
+
+    <td>0x1e</td>
+
+    <td>[location]</td>
+
+    <td bordercolor="#000000">&nbsp;</td>
+
+    <td>Pops a location off the operand stack, sets the condition = 1 if the
+
+      location is a neighbor.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF00CC">
+
+    <td>sense</td>
+
+    <td>take a sensor reading</td>
+
+    <td>0x1f</td>
+
+    <td>[value]</td>
+
+    <td><p>[reading]</p>
+
+    </td>
+
+    <td width="100%"><p>Reads a sensor. The sensor type is specified by the value on top of the
+
+      operand stack, defined as follows:</p>
+
+      <ul>
+
+        <li>Photo = 1</li>
+
+        <li>Temp = 2</li>
+
+        <li>Microphone = 3</li>
+
+        <li>Magnometer X = 4</li>
+
+        <li>Magnometer Y= 5</li>
+
+        <li>Accelerometer X =6</li>
+
+        <li>Accelerometer Y= 7</li>
+
+        <li>Sounder = 8</li>
+      </ul>      
+      <p>&nbsp;</p></td>
+
+  </tr>
+
+  <tr bgcolor="#FFFFFF">
+
+    <td>dec</td>
+
+    <td>decrement</td>
+
+    <td>0x20</td>
+
+    <td>[value] or [location]</td>
+
+    <td>[value] or [location]</td>
+
+    <td width="100%">decrements a value or location. heap[11] is used to determine
+
+      which axis to decrement in the case of a location. If heap[11] is not set,
+      it decrements both the x and y coordinates, if heap[11] is 1 it only decrements
+      the x coordinate, if heap[11] is 2 it only decrements the y coordinate.</td>
+
+  </tr>
+
+  <tr bgcolor="#CCCCCC">
+
+    <td><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td><strong>Opcode</strong></td>
+
+    <td><strong>Initial Stack</strong></td>
+
+    <td><strong>Final Stack</strong></td>
+
+    <td width="100%"><strong>Long Description</strong></td>
+
+  </tr>
+
+  <tr>
+    <td>dist</td>
+    <td>distance</td>
+    <td>0x21</td>
+    <td><p>[location1],<br>
+        [location2]</p>
+      <p>or </p>
+      <p>[reading1],<br>
+        [reading2]</p></td>
+    <td>[value]</td>
+    <td><p>Pops two variables off the operand stack. If the two variables are both
+        locations, this calculates the distance between them. The distance is
+        calcualted using
+        |x1-x2|^2
+        + |y1-y2|^2.</p>
+      <p>If the two variables are both sensor readings, this calculates how far
+        apart they are.</p></td>
+  </tr>
+  <tr>
+
+    <td>swap</td>
+
+    <td>Swap top two varibles</td>
+
+    <td>0x22</td>
+
+    <td>[var1], [var2]</td>
+
+    <td>[var2], <br>
+
+      [var1]</td>
+
+    <td width="100%">Pop [var1] then [var2] off the stack, then push [var2] then [var1]
+
+      back on stack. This swaps their positions on the stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>land</td>
+
+    <td>logical bitwise AND</td>
+
+    <td>0x23</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. Then perform a
+
+      logical bitwise AND between them and push
+
+      the resulting
+
+      value back onto the stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>lor</td>
+
+    <td>logical bitwise OR</td>
+
+    <td>0x24</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. Then perform a
+
+      logical bitwise OR between them and push the resulting value back onto
+
+    the stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>and</td>
+
+    <td>boolean AND</td>
+
+    <td>0x25</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. If both [value1] and [value2] are non-zero, push a 1 value onto the stack, else push
+
+      a 0.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>or</td>
+
+    <td>boolean OR</td>
+
+    <td>0x26</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. If [value1] or [value2] are
+
+    non-zero, push a 1 onto the stack, else push a 0.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>mul</td>
+
+    <td>Multiply</td>
+
+    <td>0x27</td>
+
+    <td>[variable1], [variable2]]</td>
+
+    <td>[variable1] * [variable2]</td>
+
+    <td width="100%">Pops two variables off the stack and performs a multiplication.
+      Valid parameters are:
+      <ul>
+        <li>Two values</li>
+        <li>Two loctaions</li>
+        <li>A a value and a location </li>
+        <li>A value  and a sensor reading</li>
+      </ul>
+      <p>If heap[11]=1, 
+	only consider the x-coordinate, else if heap[11]=2, only consider the y coordinate.  Otherwise, consider both coordinates.</p></td>
+
+  </tr>
+  <tr>
+
+    <td>div</td>
+
+    <td>Divide</td>
+
+    <td>0x28</td>
+
+    <td>[variable1], [variable2]</td>
+
+    <td>[variable2]<br>
+      -----------<br>
+      [variable1]</td>
+
+    <td width="100%"><p>Pops two variables off the stack and performs a division
+        operation. Valid parameters are:</p>
+      <ul>
+        <li>Two values</li>
+        <li>Two loctaions</li>
+        <li>A a value (variable 1) and a location (variable 2)</li>
+        <li>A value (variable 1) and a sensor reading (variable 2)</li>
+      </ul>      
+      <p>Whenever a location is involved, heap[11] indicates which axis to consider.
+        If heap[11]=1, only consider the x-coordinate, if heap[11]=2, only
+        consider the
+        y coordinate.
+        By default consider both coordinates.</p></td>
+
+  </tr>
+
+  <!--
+  <tr>
+
+    <td>shiftr</td>
+
+    <td>Shift right</td>
+
+    <td>0x27</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. Shift [value2]
+
+      right by [value1] bits and push resulting value back onto the stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>shiftl</td>
+
+    <td>Shift left</td>
+
+    <td>0x28</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. Shift [value2] left by [value1] bits and push resulting value back onto the stack.</td>
+
+  </tr>
+  -->
+
+  <tr>
+
+    <td>add</td>
+
+    <td>Add two values</td>
+
+    <td>0x29</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%"><p>Pop [value1] and [value2] off the stack, push [value1]
+
+        + [value2] onto the stack.</p>
+
+      <p>If adding a location and value, heap[11] is used: if 0 add value to
+
+        both x and y, if 1 add only to x, if 2 add only to y.</p></td>
+
+  </tr>
+
+  <tr>
+
+    <td>mod</td>
+
+    <td>Modulo</td>
+
+    <td>0x2a</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>Value</td>
+
+    <td width="100%">Pops the top two values off the stack. Pushes [value2] mod [value1]
+
+      onto the stack as a value.</td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>ceq</td>
+
+    <td>Equal</td>
+
+    <td>0x2b</td>
+
+    <td>[var1], 
+
+      [var2]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%"><p>Pop two variables off the stack. Set the condition to  true
+
+        if [var1] and [var2] have the same type and value. If one variable is an
+
+        AgentID and the other a Value, the condition is set to true if the AgentID's
+
+        unique id is equal to the value.</p>
+
+      <p>If the two values are type location and heap[11] contains a value, the
+
+        value determines what to compare: 1 = x, 2 = y, otherwise both axies.</p></td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>cneq</td>
+
+    <td>Not Equal</td>
+
+    <td>0x2c</td>
+
+    <td>[var1], 
+
+  [var2]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">The opposite of ceq.</td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>clt</td>
+
+    <td>Less than</td>
+
+    <td>0x2d</td>
+
+    <td>[Value1], [Value2] or [Reading1], [Reading2]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Pops the top two values off the stack. Set the condition to true if [Value2]
+
+      &lt; [Value1] or [Reading2] &lt; [Reading1], false otherwise</td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>cgt</td>
+
+    <td>Greater than</td>
+
+    <td>0x2e</td>
+
+    <td>[Value1], [Value2] or [Reading1], [Reading2]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Pops the top two values off the stack. Set the condition to true if [Value2]
+
+      &gt; [Value1] or [Reading2] &gt; [Reading1], false otherwise</td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>clte</td>
+
+    <td>Less than or equal</td>
+
+    <td>0x2f</td>
+
+    <td>[Value1], [Value2] or [Reading1], [Reading2]</td>
+
+    <td bgcolor="#99FF99">&nbsp;</td>
+
+    <td width="100%">Pops the top two values off the stack. Set the condition to true if [Value2] &lt;=
+
+      [Value1] or [Reading2] &lt;= [Reading1], false otherwise</td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>cgte</td>
+
+    <td>Greater than or equal</td>
+
+    <td>0x30</td>
+
+    <td>[Value1], [Value2] or [Reading1], [Reading2]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Pops the top two values off the stack. Set the condition to true if [Value2] &gt;= [Value1]
+
+    or [Reading2] &gt;= [Reading1], false otherwise</td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>ceqtype</td>
+
+    <td>Tests type equality</td>
+
+    <td>0x31</td>
+
+    <td>[var1], [var2]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Pops the top two variables off the operand stack and sets cond=1 if they
+
+      are of the same type, cond=0 otherwise.</td>
+
+  </tr>
+
+  <tr bgcolor="#99FF99">
+
+    <td>cistype</td>
+
+    <td>Checks type</td>
+
+    <td>0x32</td>
+
+    <td>[type], [var]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Pops a type and variable off the operand stack.
+
+      If the variable type equals the type popped off, set cond=1, else cond=0.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF9900">
+
+    <td>out<a name="LocalTS"></a></td>
+
+    <td>out on host tuple space</td>
+
+    <td>0x33</td>
+
+    <td>[tuple]</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Pops a tuple off the operand stack and places it into the local tuple
+
+      space. This tuple become a public tuple accessible to anybody.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF9900">
+
+    <td>inp</td>
+
+    <td>inp on host tuple space</td>
+
+    <td>0x34</td>
+
+    <td>[template]</td>
+
+    <td>[tuple] ?</td>
+
+    <td width="100%">Searches the host's local tuple space for a tuple matching a template.
+
+      If
+
+      a match is found, remove it from the tuple space, push its fields onto
+
+      the operand stack and set the condition to 1. If no matching tuple is found,
+
+      set condition to 0. </td>
+
+  </tr>
+
+  <tr bgcolor="#FF9900">
+
+    <td>rdp</td>
+
+    <td>rdp on host tuple space</td>
+
+    <td>0x35</td>
+
+    <td>[template]</td>
+
+    <td>[tuple] ?</td>
+
+    <td width="100%">Same as inp except do not remove tuple.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF9900">
+
+    <td>in</td>
+
+    <td>in on host tuple space</td>
+
+    <td>0x36</td>
+
+    <td>[template]</td>
+
+    <td>[tuple] </td>
+
+    <td width="100%">Same as inp except blocks until a tuple is found.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF9900">
+
+    <td>rd</td>
+
+    <td>rd on host tuple space</td>
+
+    <td>0x37</td>
+
+    <td>[template]</td>
+
+    <td>[tuple] </td>
+
+    <td width="100%">Same as rdp except blocks until a tuple is found.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF9900">
+
+    <td>tcount</td>
+
+    <td>counts the number of tuples in the local tuple space that match a template</td>
+
+    <td>0x38</td>
+
+    <td>[template]</td>
+
+    <td>[value]</td>
+
+    <td width="100%" bgcolor="#FF9900">Pops a template off the op stack and pushes the number of tuples that
+
+      match it onto the op stack. This operation only considers tuples that are
+
+      public, system, or private to the executing agent.</td>
+
+  </tr>
+
+  <tr bgcolor="#FFFF33">
+
+    <td>rout</td>
+
+    <td>remote OUT</td>
+
+    <td>0x39</td>
+
+    <td><p>[location],<br>
+
+      [tuple]</p>
+
+    </td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%"> Inserts a tuple into a remote hosts's tuple space. Sets cond=1 if successful,
+
+      0 otherwise. The tuple becomes a public tuple accessible to anybody.</td>
+
+  </tr>
+
+  <tr bgcolor="#FFFF33">
+
+    <td>rinp</td>
+
+    <td>remote INP</td>
+
+    <td>0x3a</td>
+
+    <td><p>[location],<br>
+
+      [template]</p>
+
+    </td>
+
+    <td>[tuple] ?</td>
+
+    <td width="100%">Performs a INP operation on a remote host. Blocks until the results are
+
+      received, a NACK is received, or AGILLA_RTS_MAX_NUM_TRIES timeouts occur.
+
+      If the results arrive, cond=1 and the result is placed onto operand stack.
+
+      Otherwise, cond=0. Only public tuples are considered.</td>
+
+  </tr>
+
+  <tr bgcolor="#FFFF33">
+
+    <td>rrdp</td>
+
+    <td>remote RDP</td>
+
+    <td>0x3b</td>
+
+    <td>[location],<br>
+
+    [template]</td>
+
+    <td>[tuple] ?</td>
+
+    <td width="100%">Same as rinp except performs a remote RDP.</td>
+
+  </tr>
+
+  <tr bgcolor="#FFFF33">
+
+    <td><p><font color="#FF0000"><em>rinpg</em></font></p>
+
+      <font color="#FF0000">      <strong>N/A</strong></font></td>
+
+    <td><font color="#FF0000"><em>remote INPG</em></font></td>
+
+    <td><font color="#FF0000"><em>0x3c</em></font></td>
+
+    <td><p><font color="#FF0000"><em>[location],<br>
+
+        [template]</em></font></p>
+
+    </td>
+
+    <td bordercolor="#000000"><font color="#FF0000">&nbsp;</font></td>
+
+    <td width="100%"><font color="#FF0000"><em>Performs an INPg operation on the host located at the specified location.
+
+      The results are
+
+      placed
+
+      into the
+
+      local tuple
+
+      space
+
+      marked
+
+      with the initiating agent
+
+      as the owner. The operation blocks until timeout occurs. If any result
+
+      arrive, cond=1, else cond=0. Only public tuples on the destination host
+
+      are considered. Tuples already
+
+      in the local tuple space are not considered.</em></font></td>
+
+  </tr>
+
+  <tr bgcolor="#FFFF33">
+
+    <td><p><font color="#000000">rrdpg</font></p>
+    </td>
+
+    <td><font color="#000000">remote RDPG</font></td>
+
+    <td><font color="#000000">0x3d</font></td>
+
+    <td><font color="#000000">
+    [template]</font></td>
+
+    <td><div align="center"><font color="#000000">&nbsp;[value],<br>
+        [location},<br>
+        ...<br>
+        or<br>
+        nothing</font></div></td>
+
+    <td width="100%">Searches all one-hop neighbors for
+        a matching tuple.  If at least one match is found, condition=1 and the
+		location(s) are stored on the heap where heap[0] is the number of results,
+		and heap[1...n] are the locations.  If no results are found, the heap is
+		not modified and cond=0.  Note that at most heap[0...8] will be used.
+		<!-- Pushes the location of each neighbor with a matching
+        tuple onto the operand stack. Then pushes the number of neighbors with
+        a match on top of the stack. If there are neighbors with a matching tuple,
+        set cond=1, otherwise, set cond=0 and do not push anything onto the stack--></td>
+
+  </tr>
+
+  <tr bgcolor="#FF9900">
+
+    <td>regrxn</td>
+
+    <td>register reaction</td>
+
+    <td>0x3e</td>
+
+    <td>[value], [template]</td>
+
+    <td bordercolor="#000000">&nbsp;</td>
+
+    <td width="100%">Registers a reaction on the tuplespace. The template specifies the type
+
+      of tuple that causes the reaction to fire. The value specifies what the
+
+      program counter should be set to when the reaction fires. Reactions are
+
+      carried across strong migrations and clones.</td>
+
+  </tr>
+
+  <tr bgcolor="#FF9900">
+
+    <td>deregrxn</td>
+
+    <td>deregister reaction </td>
+
+    <td>0x3f</td>
+
+    <td>[template]</td>
+
+    <td bordercolor="#000000">&nbsp;</td>
+
+    <td width="100%">Deregisters a reaction from the tuplespace.</td>
+
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<h2>T-Class Instructions [0100 ixxx]</h2>
+
+<table width="95%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+
+    <td><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td><strong>Opcode</strong></td>
+
+    <td><strong>Initial Stack</strong></td>
+
+    <td><strong>Final Stack</strong></td>
+
+    <td><strong>Long Description</strong></td>
+
+  </tr>
+
+  <tr>
+
+    <td>pushrt</td>
+
+    <td>push reading type</td>
+
+    <td>0x40-0x47</td>
+
+    <td>&nbsp;</td>
+
+    <td>[type]</td>
+
+    <td><p>Pushes a reading reading type onto the operand stack.</p>
+
+      <ul><li>001 - photo reading  [PHOTO]</li>
+        <li>010 - temperature reading [TEMP]</li>
+
+        <li>011 - microphone reading [MIC]</li>
+
+        <li>100 - magnometer x-axis reading [MAGX]</li>
+
+        <li>101 - magnometer y-axis reading [MAGY]</li>
+
+        <li>110 - accelerometer x-axis reading [ACCELX]</li>
+
+        <li>111 - accelerometer y-axis reading [ACCELY]</li>
+        </ul>
+      </td>
+
+  </tr>
+
+  <tr>
+
+    <td>pusht</td>
+
+    <td>Push  type</td>
+
+    <td>0x48-0x4d</td>
+
+    <td>&nbsp;</td>
+
+    <td>[type]</td>
+
+    <td><p>Pushes a type onto the operand stack.</p>
+
+      <ul>
+
+        <li>000 - ANY</li>
+
+        <li>001 - AGENTID</li>
+
+        <li>010 - STRING</li>
+
+        <li>011 - TYPE</li>
+
+        <li>100 - VALUE</li>
+
+        <li>101 - LOCATION</li>
+
+      </ul></td>
+
+  </tr>
+
+  <tr>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>0x4e-0xe4f</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+  </tr>
+
+</table>
+
+<h2>&nbsp;</h2>
+
+<h2>E-Class Instructions [0101 iiii xxxx xxxx xxxx xxxx]</h2>
+
+<table width="95%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+
+    <td><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td><strong>Opcode</strong></td>
+
+    <td><strong>Initial Stack</strong></td>
+
+    <td><strong>Final Stack</strong></td>
+
+    <td><strong>Long Description</strong></td>
+
+  </tr>
+
+  <tr>
+
+    <td>pushn</td>
+
+    <td>Push a name onto the operand stack</td>
+
+    <td>0x50</td>
+
+    <td>&nbsp;</td>
+
+    <td>[name]</td>
+
+    <td>Pushes a name onto the operand stack. A name is a 16-bit value with the
+
+      following format: [a-z,0-9][a-z,0-9][a-z,0-9]. It is encoded as follows:
+
+      [a = 1, b = 2, ...,  0 = 26, 1 = 27, ...]. </td>
+
+  </tr>
+
+  <tr>
+
+    <td height="62">pushcl</td>
+
+    <td>Push constant long</td>
+
+    <td>0x51</td>
+
+    <td>&nbsp;</td>
+
+    <td>[value]</td>
+
+    <td>Pushes a 16-bit value onto the operand stack. This is more powerful than
+
+      pushc since pushc can only push a 6-bit value onto the operand stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>pushloc</td>
+
+    <td>Push a location onto the stack</td>
+
+    <td>0x52</td>
+
+    <td>&nbsp;</td>
+
+    <td>[location]</td>
+
+    <td>Pushes a location onto the stack. Syntax is pushloc x y where (x,y) is
+
+      the location that is placed onto the stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>0x53-0x5f</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+  </tr>
+
+</table>
+
+<p>&nbsp;</p>
+
+<h2>V-Class Instructions [011i xxxx]</h2>
+
+<table width="95%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+
+    <td><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td><strong>Opcode</strong></td>
+
+    <td><strong>Initial Stack</strong></td>
+
+    <td><strong>Final Stack</strong></td>
+
+    <td><strong>Long Description</strong></td>
+
+  </tr>
+
+  <tr bgcolor="#0099FF">
+
+    <td>getvar</td>
+
+    <td>moves a variable from the heap to the stack</td>
+
+    <td>0x60 - 0x6b</td>
+
+    <td>&nbsp;</td>
+
+    <td>[var]</td>
+
+    <td><p>Copies a variable from the heap and pushes it onto the stack. The address
+
+        within the heap is specified by the last 4 bits of the instruction. Since
+
+        there is only a 12-word heap, only addresses 0-b are valid.</p>
+
+      <p>If the heap variable is INVALID, it does not push anything onto the
+
+        stack and sets condition=0. Otherwise, it sets condition=1.</p></td>
+
+  </tr>
+
+  <tr>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>0x6c - 0x6f</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+  </tr>
+
+  <tr bgcolor="#0099FF">
+
+    <td>setvar</td>
+
+    <td>Moves a variable from the stack to the heap</td>
+
+    <td>0x70 - 0x7b</td>
+
+    <td>[var]</td>
+
+    <td>&nbsp;</td>
+
+    <td>Pops a variable off the operand stack and puts it into the heap. The
+
+      address within the heap is specified by the last 4 bits of the instruction.
+
+      Since there is only a 12-word heap, only addresses 0-b are valid.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>0x7c-0x7f</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+  </tr>
+
+</table>
+
+<h2>&nbsp;</h2>
+
+<h2>J-Class Instructions [10ix xxxx]</h2>
+
+<table width="95%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+
+    <td><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td><strong>Opcode</strong></td>
+
+    <td><strong>Initial Stack</strong></td>
+
+    <td><strong>Final Stack</strong></td>
+
+    <td><strong>Long Description</strong></td>
+
+  </tr>
+
+  <tr>
+
+    <td>rjumpc</td>
+
+    <td>conditional relative jump</td>
+
+    <td>0x80 - 0x9f</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>Performs a relative jump if the condition code is &gt; 0. Decrements the
+
+      condition code if jump. The last 5 bits of the instruction is treated as
+
+      a 2-complement integer and
+
+      is added
+
+      to
+
+      the
+
+      agent's program counter. (Allows an agent to jump forward or backward 15
+
+      instructions).</td>
+
+  </tr>
+
+  <tr>
+
+    <td>rjump</td>
+
+    <td>unconditional relative jump</td>
+
+    <td>0xa0 - 0xbf</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td>Performs an unconditional relative jump. The last 5 bits of the instruction
+
+      is treated as a 2-complement integer and is added to the agent's program
+
+      counter. (Allows an agent to jump forward or backward 15 instructions).</td>
+
+  </tr>
+
+</table>
+
+<p>&nbsp;</p>
+
+<h2>X-Class Instructions [11xx xxxx]</h2>
+
+<table width="95%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+
+    <td><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td><strong>Opcode</strong></td>
+
+    <td><strong>Initial Stack</strong></td>
+
+    <td><strong>Final Stack</strong></td>
+
+    <td><strong>Long Description</strong></td>
+
+  </tr>
+
+  <tr>
+
+    <td>pushc</td>
+
+    <td>Push a constant value onto the stack</td>
+
+    <td>0xc0 - 0xff</td>
+
+    <td>&nbsp;</td>
+
+    <td>[value]</td>
+
+    <td>Pushes the least signicant 6 bits onto the operand stack as a value (range
+
+      is 0 to 63).</td>
+
+  </tr>
+
+</table>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

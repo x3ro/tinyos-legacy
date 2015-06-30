@@ -1,0 +1,202 @@
+/*									tab:4
+ * 
+ *  ======================================================================
+ *
+ *  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
+ *  By downloading, copying, installing or using the software you
+ *  agree to this license.  If you do not agree to this license, do
+ *  not download, install, copy or use the software.
+ *
+ *  Intel Open Source License 
+ *
+ *  Copyright (c) 1996-2000 Intel Corporation All rights reserved.
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ * 
+ *	Redistributions of source code must retain the above copyright
+ *	notice, this * list of conditions and the following
+ *	disclaimer.  Redistributions in binary form must reproduce the
+ *	above copyright notice, this * list of conditions and the
+ *	following disclaimer in the documentation and/or other *
+ *	materials provided with the distribution.  Neither the name of
+ *	the Intel Corporation nor the names of its contributors may *
+ *	be used to endorse or promote products derived from this
+ *	software without specific * prior written permission.
+ *  
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ *  CONTRIBUTORS ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ *  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED.  IN NO EVENT SHALL THE INTEL OR ITS CONTRIBUTORS BE
+ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ *  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ *  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+ *  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ *  SUCH DAMAGE.
+ * 
+ * ===================================================================
+ * 
+ * Authors:  SU Ping  
+ *           Intel Research Berkeley Lab
+ * Date:     3/26/2002
+ *
+ */
+ 
+/*****************************************************************
+     			TIMER Interface 
+
+
+  1. Overview
+             
+ 
+	The timer module is designed to be a time manager for tinyos 
+  applications.  It provides timer initalization, timer start, timer stop,
+  get time and set time  services to upper level modules.
+  It allows upper level modules to have up to 32 simutanuous
+  timers at a given time. Each timer is identified by a timer id. 
+  The valid range for a timer id  is 0 to 31 inclusive. A timer
+  id has to be unique  within a system. Although we could support a larger
+  member of timers than 32, we choose not to do so to avoid consuming too
+  much resource.
+  
+  A user can start a timer within a command or 
+  a task at run time. A timer can be a one-shot timer or a repeat 
+  forever timer. A one-shot timer  will expire after 
+  a specified interval and then stopped by the timer module.
+  A repeat timer will expire every  N milliseconds as specified by 
+  the user.  The OS will never voluteerily stop the a repeat timer. 
+  However, a timer can stoped by a user application  using 
+  TIMER_STOP service provided by this module. 
+  A stopped timer may be re-started by calling the TIMER_START command
+  at run time. 
+
+  
+  2. Timer service routines
+
+  This section describes each timer service routines or TOS interface command
+  in detail. All timer services will return 0 for success and a small 
+  positive number for error. 
+  
+
+  
+  	 char TIMER_INIT(void)
+
+  This interface  command start a  clock for all timers using a default 
+  prescale level.   This command should be before during application 
+  initialization and before  any other timer interface commands.
+  It should be called only once in a system. However, Multiple calling 
+  will not cause system error.
+
+  Return value: 0 Success
+		   
+  	char TIMER_TERMINATE(void)
+  This interface command terminates the clock started by TIMER_INIT() command.
+  If there are running timers, they will be stopped as well. 
+  Return value: 0 for succcess. 
+
+
+	char TIMER_START(char timer_id, char type,
+			unsigned long interval)
+					
+   This module will start a timer for the calling module with a 
+   timer ID as specified by timer_id and an interrupt interval in the unit
+   of milisecond as specified by argument interval. 
+   The type argument may be 1 or 0. If it is 1, the timer is a one-shot timer.
+   It will be immediately  stopped upon timer expiration, and consequently free
+   the timer ID "timer_id". If type = 0, a repeat timer will be started. 
+   A repeat timer will not be stopped by the OS. However, a user
+   can stop it by calling TIMER_STOP( timer_id) 
+
+   return value 0: success
+		1: a timer with this id has already been started 
+		2: invalid timer ID
+		3: invalid type
+
+
+	char TIMER_STOP(char timer_id)
+
+   This service is for stopping a running timer. 
+
+   return value 0: success
+		1: timer with this id has stoped  
+		2: invalid timer ID
+
+
+ 3. Timer expiration event handling
+ 
+   If one has created a timer with timer id N, he is expected to 
+   handle TIMER_EVENT_N by binding his own event handler to 
+   TIMER_EVENT_HANDLER_N. The signiture of the timer event handler is
+	 
+		void TIMER_EVENT_HANDLER_N(void) 
+
+
+   Let us assume there is a component named EXAMPLE. It uses timer 8. 
+   and its timer event handler is void EXAMPLE_TIMER_EVENT(void).
+   Then we need to bind the user timer event handler N to 
+   TIMER_EVENT_HANDLER_N. Assuming there is a component namingly EXAMPLE.
+   It uses timer 8. Then in example.desc file, one need to add : 
+   
+	EXAMPLE:EXAMPLE_TIMER_EVENT_HANDLER TIMER:TIMER_EVENT_HANDLER_8
+
+
+**************************************************************************/
+
+TOS_MODULE TIMER;
+JOINTLY IMPLEMENTED_BY TIMER;
+
+ACCEPTS{
+	char TIMER_INIT(void);
+	char TIMER_TERMINATE(void);
+	char TIMER_START(UINT8 timer_id, char type, UINT32 interval);
+	char TIMER_STOP(UINT8 timer_id);
+};
+SIGNALS{
+	void TIMER_EVENT_HANDLER_0(void);
+	void TIMER_EVENT_HANDLER_1(void);
+	void TIMER_EVENT_HANDLER_2(void);
+	void TIMER_EVENT_HANDLER_3(void);
+	void TIMER_EVENT_HANDLER_4(void);
+	void TIMER_EVENT_HANDLER_5(void);
+	void TIMER_EVENT_HANDLER_6(void);
+	void TIMER_EVENT_HANDLER_7(void);
+	void TIMER_EVENT_HANDLER_8(void);
+	void TIMER_EVENT_HANDLER_9(void);
+	void TIMER_EVENT_HANDLER_10(void);
+	void TIMER_EVENT_HANDLER_11(void);
+	void TIMER_EVENT_HANDLER_12(void);
+	void TIMER_EVENT_HANDLER_13(void);
+	void TIMER_EVENT_HANDLER_14(void);
+	void TIMER_EVENT_HANDLER_15(void);
+	void TIMER_EVENT_HANDLER_16(void);
+	void TIMER_EVENT_HANDLER_17(void);
+	void TIMER_EVENT_HANDLER_18(void);
+	void TIMER_EVENT_HANDLER_19(void);
+	void TIMER_EVENT_HANDLER_20(void);
+	void TIMER_EVENT_HANDLER_21(void);
+	void TIMER_EVENT_HANDLER_22(void);
+	void TIMER_EVENT_HANDLER_23(void);
+	void TIMER_EVENT_HANDLER_24(void);
+	void TIMER_EVENT_HANDLER_25(void);
+	void TIMER_EVENT_HANDLER_26(void);
+	void TIMER_EVENT_HANDLER_27(void);
+	void TIMER_EVENT_HANDLER_28(void);
+	void TIMER_EVENT_HANDLER_29(void);
+	void TIMER_EVENT_HANDLER_30(void);
+	void TIMER_EVENT_HANDLER_31(void);
+};
+
+USES{
+	char TIMER_SUB_INIT(char, char);
+	char TIMER_R_LED_TOGGLE(void);
+	char TIMER_Y_LED_TOGGLE(void);
+	char TIMER_G_LED_TOGGLE(void);
+};
+
+HANDLES{
+	void TIMER_CLOCK_EVENT(void);
+};

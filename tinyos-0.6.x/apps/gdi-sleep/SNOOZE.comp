@@ -1,0 +1,17 @@
+
+TOS_MODULE SNOOZE;	
+
+ACCEPTS{
+    char SNOOZE_INIT(void);
+    char SNOOZE_AWHILE(unsigned short timeout);
+};
+
+SIGNALS{
+    char SNOOZE_WAKEUP(void);
+};
+
+USES{
+};
+
+HANDLES{
+};

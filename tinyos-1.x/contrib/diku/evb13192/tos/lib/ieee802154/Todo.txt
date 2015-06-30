@@ -1,0 +1,37 @@
+To remember:
+------------
+Output sometimes halts on boot - wiring order wrong?
+Concurrency, SetTrxState.request
+Look into RX_MODE, etc. again
+Look into whether buffering is needed (currently semi-does, but probably shouldn't)
+- an example could be the CCA-request/confirm
+- should there be a mutex?
+What should the CCA threshold be? Ieee802154PhyM.nc
+What about phyTransmitPower? mc12192ControlM.adjustPAOutput?
+What about phyCCAMode?
+Consider what to do about power management. An extension to the standard might be needed (5.4.5)
+Maybe add TRX_POWEROFF, TRX_DOZE and TRX_SLEEP, and let TRX_OFF be mc13192 radio idle mode.
+
+Todo:
+--------------------
+PD-DATA.request
+PD-DATA.confirm
+
+PD-DATA.indication
+
+Implementation done:
+--------------------
+PLME-CCA.request
+PLME-CCA.confirm
+
+PLME-ED.request
+PLME-ED.confirm
+
+PLME-GET.request
+PLME-GET.confirm
+
+PLME-SET.request
+PLME-SET.confirm
+
+PLME-SET-TRX-STATE.request
+PLME-SET-TRX-STATE.confirm

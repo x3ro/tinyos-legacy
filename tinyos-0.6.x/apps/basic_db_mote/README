@@ -1,0 +1,22 @@
+basic_db_mote describes a mote with the standard (light,temp) sensor
+board.  
+
+basic_db_mote.schema:  The schema file for this mote.
+
+basic_db_mote.desc: Describes a minimum-functionality schema-equipped mote
+which can respond to the schema messages and report sensor readings.
+
+basic_db_mote_acc.c: The accessor functions to report readings for
+the sensors on this mote.  These functions are linked in basic_db_mote.desc
+to report when sensor data is ready -- the functions to retrieve sensor
+data are automatically generated in ACCESSORS.c (which is produced by the
+parseschema tool).
+
+See also:
+
+tools/parseschema.lex, tools/parseschema.yacc:  The parseschema tools turns
+a schema description file into an "ACCESSORS.c" file which allows
+this mote to describe its capabilities.
+
+tools/net/tinyos/schema/ : This package defines java classes for extracting
+information about mote schemas and sensor readings.

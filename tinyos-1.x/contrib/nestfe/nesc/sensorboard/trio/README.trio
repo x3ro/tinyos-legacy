@@ -1,0 +1,21 @@
+-----------------------------------------------------------
+Title: Trio sensor board driver
+Authors: Jaein Jeong
+Last Modified: May 31, 2005
+
+-----------------------------------------------------------
+
+This program module supports Trio sensor board with Telos rev. B platform
+and has the following sensing/actuating capability:
+
+  - Magnetometer (MagC)
+  - PIR (Passive Infra Red) sensor (PIRC)
+  - Microphone (MicC)
+  - Sounder (SounderC)
+  - Grenade Timer (GrenadeC)
+
+The test applications using these modules are in the following location:
+
+  tinyos-1.x/contrib/nestfe/apps/TestApps
+
+

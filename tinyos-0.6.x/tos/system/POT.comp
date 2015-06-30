@@ -1,0 +1,18 @@
+TOS_MODULE POT;
+
+ACCEPTS{
+	char POT_INIT(char val);
+	void POT_SET(char val);
+	void POT_INC(void);
+	void POT_DEC(void);
+	char POT_GET(void);
+};
+
+SIGNALS{ 
+};
+
+HANDLES{
+};
+
+USES{
+};

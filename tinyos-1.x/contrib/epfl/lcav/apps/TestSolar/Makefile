@@ -1,0 +1,6 @@
+COMPONENT=TestSolar
+CFLAGS += -DOSCOPE_MAX_CHANNELS=6
+PFLAGS += -I$(TOSDIR)/lib/Oscope
+PFLAGS += -DCUSTOM_SCOPE
+include ../Makerules
+

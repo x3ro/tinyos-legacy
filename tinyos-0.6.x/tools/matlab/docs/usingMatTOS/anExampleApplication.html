@@ -1,0 +1,157 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>An example application</title>
+</head>
+
+<body>
+
+<h1>An example application</h1>
+<p>Now we've seen how to interact with motes with the command prompt and how to 
+setup our environment.&nbsp; Now we will see how to automate the interaction 
+with motes into an application.&nbsp; Essentially, this means setting up a 
+function that will receive all incoming packets and do something with the data: 
+graph it or inject a packet or whatever.&nbsp; Let's go through an example 
+application to see how this works.&nbsp; You'll find another, more sophisticated 
+example application in nets/tools/matlab/contrib/template/myapp.</p>
+<p>The important thing to realize about writing an application in matTOS is that 
+all applications are <b><i>event driven.</i></b>&nbsp; When a packet arrives on 
+the serial port, it is parsed and handed over to your function, which must do 
+something with it.&nbsp; This happens every time a packet arrives.</p>
+<p>With this programming model in mind, we see that we generally need at least 3 
+functions for each application:</p>
+<p>1.&nbsp; Start<br>
+2.&nbsp; receivePackets<br>
+3.&nbsp; Stop</p>
+<p><i>receivePackets </i>will be given each packet as it arrives on the serial 
+ports.&nbsp; <i>Start </i>must tell the serial ports that <i>receivePackets </i>
+wants those packets.&nbsp; <i>Stop </i>must tell the serial ports that <i>
+receivePackets </i>doesn't want the packets, anymore.&nbsp; That's all there is 
+to it.&nbsp; Let's make a rough draft of our 3 main functions <i>start</i>, <i>
+stop</i>, and <i>receivePackets</i>.</p>
+<p><i><span style="background-color: #FFFFCC">startMyApp.m</span></i></p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber1">
+  <tr>
+    <td width="100%" bordercolor="#FFFFCC" bgcolor="#FFFFCC">
+    <font face="Courier New">function startMyApp(moteIDs)</font><p>
+    <font face="Courier New">addPacketListeners(getPortMapping(moteIDs, 'myAppReceivePackets');<br>
+&nbsp;</font></td>
+  </tr>
+</table>
+<p><i><span style="background-color: #FFFFCC">myAppReceivePackets.m</span></i></p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber2">
+  <tr>
+    <td width="100%" bordercolor="#FFFFCC" bgcolor="#FFFFCC">
+    <font face="Courier New">function <span style="background-color: #FFFFCC">
+    myAppReceivePackets</span>(packetPort, packet)</font><p>
+    <font face="Courier New">fprintf('My app received a packet on port: %s \n', 
+    get(packetPort, 'name'))</font></p>
+    <p><font face="Courier New">packet<br>
+&nbsp;</font></td>
+  </tr>
+</table>
+<p><i><span style="background-color: #FFFFCC">stopMyApp.m</span></i></p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber3">
+  <tr>
+    <td width="100%" bordercolor="#FFFFCC" bgcolor="#FFFFCC">
+    <font face="Courier New">function stopMyApp(moteIDs)<br>
+    <br>
+    removePacketListeners(getPortMapping(moteIDs, 'myAppReceivePackets');<br>
+&nbsp;</font></td>
+  </tr>
+</table>
+<p>This application prints all packets from a set of motes.&nbsp; <i>startMyApp
+</i>adds it's packetReceiver function as a listener on the ports with the motes 
+specified by the user.</p>
+<p>When one of those ports receives a packet, it parses it and sends both the 
+packet and itself to the <i>myAppReceivePackets </i>function.&nbsp; This 
+function just prints the name of the port and then prints the packet itself.&nbsp; 
+This is a simple version of the <i>listen </i>tool that just prints all packets 
+onto the screen.</p>
+<p>When the user is sick of seeing all the packets on the screen, he uses the <i>
+stopMyApp </i>function.&nbsp; This is equivalent to the <i>startmyApp </i>
+function accept that it removes the <i>packetReceiver </i>function as a listener 
+on the ports with the specified motes.&nbsp; Notice that you can stop the 
+application from running on some motes while it still runs on the rest of the 
+motes.</p>
+<p>This is quite a boring application and doesn't illustrate the main problem 
+with writing event driven applications:&nbsp; if I wanted my packetReceiver to 
+store data somewhere, where would it store it?&nbsp; As soon as the function 
+terminates it's local workspace is erased.&nbsp; There are two ways to solve 
+this problem: global variables and objects.&nbsp; To see how to solve the 
+problem using objects, see <a href="don't%20know%20yet">for advanced users</a></p>
+<p>To solve the problem using global variables, just define a myAppData global 
+variable.&nbsp; This variable is accessible by all functions that declare it 
+global so we can use it in all the functions in our application.&nbsp; Let's 
+modify the application above to store all the data from our packets in an array.</p>
+<p><i><span style="background-color: #FFFFCC">startMyApp.m</span></i></p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber4">
+  <tr>
+    <td width="100%" bordercolor="#FFFFCC" bgcolor="#FFFFCC">
+    <font face="Courier New">function startMyApp(moteIDs)</font><p>
+    <font face="Courier New">global MY_APP_DATA</font></p>
+    <p>MY_APP_DATA=[];<font face="Courier New"><br>
+    <br>
+    addPacketListeners(getPortMapping(moteIDs, 'myAppReceivePackets');<br>
+&nbsp;</font></td>
+  </tr>
+</table>
+<p><i><span style="background-color: #FFFFCC">myAppReceivePackets.m</span></i></p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber5">
+  <tr>
+    <td width="100%" bordercolor="#FFFFCC" bgcolor="#FFFFCC">
+    <font face="Courier New">function <span style="background-color: #FFFFCC">
+    myAppReceivePackets</span>(packetPort, packet)</font><p>
+    <font face="Courier New">global MY_APP_DATA</font></p>
+    <p><font face="Courier New">fprintf('My app received a packet on port: %s 
+    \n', get(packetPort, 'name'))</font></p>
+    <p><font face="Courier New">MY_APP_DATA = [MY_APP_DATA 
+    get(packet,'lightReadings')];<br>
+&nbsp;</font></td>
+  </tr>
+</table>
+<p><i><span style="background-color: #FFFFCC">stopMyApp.m</span></i></p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber6">
+  <tr>
+    <td width="100%" bordercolor="#FFFFCC" bgcolor="#FFFFCC">
+    <font face="Courier New">function stopMyApp(moteIDs)</font><p>
+    <font face="Courier New">global MY_APP_DATA</font></p>
+    <p><font face="Courier New">removePacketListeners(getPortMapping(moteIDs, 'myAppReceivePackets');</font></p>
+    <p><font face="Courier New">MY_APP_DATA</font></p>
+    <p><font face="Courier New">plot(MY_APP_DATA)<br>
+&nbsp;</font></td>
+  </tr>
+</table>
+<p>Now our application is slightly more sophisticated.&nbsp; startMyApp 
+initializes our array to be empty.&nbsp; Our packetReceiver appends the light 
+readings stored in the packet to our array (see myWorld to understand the 
+get(packet, 'lightReadings') command).&nbsp; Finally, stopMyApp prints the 
+entire array of light readings to the screen and then plots them.</p>
+<p>&nbsp;</p>
+<p>There are a few other functions that have proven useful in event driven 
+matlab apps.&nbsp; You should think about the usage of your app to see which of 
+these you might need.</p>
+<p>1.&nbsp; Initialize<br>
+2.&nbsp; Reset<br>
+3.&nbsp; Enable<br>
+4.&nbsp; Disable<br>
+5.&nbsp; Delete</p>
+<p><i>Initialize </i>might initialize all your variables and plots.&nbsp; This 
+is something you only do once.&nbsp; <i>Reset </i>might have to go through 
+variables or plots and erase old data and then reinitialize them.&nbsp; <i>
+Enable </i>and <i>disable </i>might be useful if you want to pause and restart 
+your application without actually resetting it.&nbsp; <i>Delete </i>might erase 
+all variables and, particularly, all plots.</p>
+<p>Of course, you will probably have private subroutines that you will call from
+<i>receivePackets </i>that won't be called directly by the user.&nbsp; These can 
+be located in a <i>private </i>subdirectory inside the application directory as 
+long as you add the subdirectory to your path.</p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

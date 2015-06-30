@@ -1,0 +1,3 @@
+process: tools for processing the output of experiments/simulations
+java: java tools for interacting with BVR
+run: general tools (shell and perl) to program and run experiments/simulations

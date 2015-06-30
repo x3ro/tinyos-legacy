@@ -1,0 +1,25 @@
+# 25 May 2005 : GWA : Figure out what we're compiling for.
+PLATAUX = micaz telos mica2 telosb shimmer
+PLATFORM := $(filter $(PLATAUX), $(MAKECMDGOALS))
+
+# 26 May 2005 : GWA : I don't like having this here, but what can you do?
+#VUDIR = $(SPAULDINGSRC)/timeSync/vu/tos/
+
+#include $(SPAULDINGSRC)/MultiTimer/Makefile.in
+PFLAGS += -I$(SPAULDINGSRC)/timeSync/ 
+#PFLAGS += -I$(VUDIR)/system/ClockTimeStamping
+
+ifeq ($(PLATFORM),telos) 
+    PFLAGS += -I$(SPAULDINGSRC)/timeSync/CC2420
+endif
+ifeq ($(PLATFORM),telosb) 
+    PFLAGS += -I$(SPAULDINGSRC)/timeSync/CC2420
+endif
+ifeq ($(PLATFORM),shimmer) 
+    PFLAGS += -I$(SPAULDINGSRC)/timeSync/CC2420
+endif
+ifeq ($(PLATFORM),micaz) 
+    PFLAGS += -I$(SPAULDINGSRC)/timeSync/dummySysTime/
+    PFLAGS += -I$(SPAULDINGSRC)/timeSync/CC2420
+endif
+

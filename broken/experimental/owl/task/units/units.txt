@@ -1,0 +1,113 @@
+[Editorial comments in []]
+
+Goals
+-----
+
+- support sensors calibrated centrally
+- add unit information into database of collected results
+
+Approach
+--------
+
+Some attributes are "virtual", i.e., computed centrally from one or more
+other real attributes (in an initial version, we won't support computing
+virtual attributes from other virtual attributes, though this framework
+would allow that). TASK will translate a query using virtual and physical
+attributes into one using physical attributes only and inject that into
+the sensor network. Returned results will be converted to the original
+query using java code registered in the attribute metadata table.
+
+To support converters that need calibration data, we augment the
+attribute metadata with some lifetime information:
+- variable: always changing
+- <int>: valid for this about of time (variable is the same as
+  <int> = 0)
+- infinite: same as <duration> = infinity
+- manual: entered manually
+[Wei: how do we want to store these attribute values? There's a proposal
+under the "latest attribute value table" below] The TASK server
+is responsible for appropriately refreshing attributes with lifetime > 0.
+
+So, for example, if Temperature needs some calibration data and a raw
+measurement, it would depend on physical attributes TemperatureRaw
+and TemperatureCalibration. TemperatureCalibration would have 
+lifetime=infinite, and TemperatureRaw would have lifetime=0
+
+Additionally, we will add to the attribute metadata table information on
+the attribute's unit, using the 10-byte IEEE1451.2 format.
+
+
+Attribute metadata
+------------------
+
+Just a list of columns...
+
+- name: string
+- converter: string
+    java class url, or null for physical attributes
+- converterdata: uninterpred bytes 
+    parameterisation for the java converter, null for physical attributes
+- base attributes: list of string
+    the attribute names a virtual attribute is computed from
+- lifetime: int, or INFINITE, or MANUAL
+    lifetime for this attribute (see above)
+- units: 10-byte IEEE 1451.2 unit description
+    note that this includes specific "raw" and "other" values
+- unitname: string
+    a user-friendly string for this attributes units (should be consistent
+    with units, but this will not be enforced!)
+    we will eventually define some standard unitnames for the specific case
+    of units=other
+
+Latest Attribute Value Table
+----------------------------
+
+To support the lifetime-based attributes, and provide easy access to the latest
+known value of each attribute on each node, TASK includes the following
+table:
+
+- attribute name: string
+- nodeid: int
+- value: <whatever this usually is>
+- last update: time
+
+[do we want to include a copy of the lifetime from the metadata?]
+
+Queries
+-------
+
+A user's query ("cooked") is translated using the attribute metadata
+table into:
+- a "raw" query for physical attributes with lifetime < <some threshold>,
+  and always including nodeid
+- a plan to update the latest attribute value table as necessary
+  [rather vague ;-), but it does require the nodeid attribute...]
+
+On reception of a raw query result, the TASK server creates the corresponding
+cooked query result by:
+  - fetching any missing attributes from the latest attribute value table
+    (these will have lifetime > <some threshold>...)
+  - loading and invoking the java converters
+
+Java converters
+---------------
+
+A java converter is a public class which:
+- has a public, no argument constructor
+- implements the following interface
+
+  package net.tinyos.task;
+  interface AttributeConverter {
+    // the value of the converterData field in the attribute metadata
+    void setParameters(byte[] parameters);
+
+    // The rawValues are in the order specified for attributes in
+    // the attribute metadata table
+    //   rawValues can have null values for missing entries
+    //   convert can return null to indicate conversion problems
+    Object convert(Object[] rawValues);
+  }
+
+We will provide some base classes simplifying implementation of
+converters for common cases.
+

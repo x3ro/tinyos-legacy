@@ -1,0 +1,3 @@
+COMPONENT=TestRFPowerSenderC
+include $(MAKERULES)
+

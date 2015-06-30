@@ -1,0 +1,38 @@
+1. INTRODUCTION
+
+  This application tests the Physical Layer (PHY) developed at USC/ISI.
+The primary component of the physical layer that provides the interface
+to upper layer is PHY_RADIO. The mote programmed by this application is a
+transmitter that sends packets with different options.
+
+2. FUNCTIONALITY
+
+  A sender will send a group of packets with different configurations,
+including packet length (fixed or random), packet interval, and additional
+preamble length (fixed or random).
+
+  In the transmitted packets, there is sequence number of the Tx duration 
+of the previous transmitted packet.
+
+  Red led toggles when a packet is send. After all packets are sent, all
+LEDs are turned on.
+
+3. HOW TO USE
+
+  To use all the default parameters, simply type 'make mica2' and/or 'make
+install mica2'.
+
+  To specify different options, look at config.h file for details.
+
+4. NOTES
+
+1) This application is to be used with a receiver part, which is at
+apps/PhyTestReceiver/.
+
+2) You can use a snooper (at apps/Snooper/) to see the contents of each packet.
+Please note that the sender does NOT clean the memory for each packet. So when
+sending variable length packets, a long packet following a short packet will
+contain all the payload of the short packet. Don't simply think that packet is
+corrupted because of the non-zero payload.
+
+

@@ -1,0 +1,3 @@
+COMPONENT=testTsync
+include ../Makerules
+

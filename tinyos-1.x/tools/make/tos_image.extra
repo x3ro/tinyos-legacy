@@ -1,0 +1,11 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: tos_image.extra,v 1.8 2005/06/21 09:34:47 cssharp Exp $
+
+TOS_IMAGE_PL ?= $(TOSDIR)/../tools/scripts/write_tos_image
+IDENT_PROGRAM_NAME ?= $(COMPONENT)
+
+build_tosimage: $(TOS_IMAGE_DEPS) FORCE
+	@echo "    writing TOS image"
+	@perl $(TOS_IMAGE_PL) $(IDENT_FLAGS) --ihex="$(MAIN_IHEX)" --exe="$(MAIN_EXE)" --objdump="$(OBJDUMP)" --platform="$(PLATFORM)" $(TOS_IMAGE_FLAGS) > $(BUILDDIR)/tos_image.xml
+	$(if $(TOS_IMAGE_REPO),cp $(BUILDDIR)/tos_image.xml $(TOS_IMAGE_REPO)/$(COMPONENT).$(PLATFORM).xml)
+

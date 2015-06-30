@@ -1,0 +1,54 @@
+1. INTRODUCTION
+
+   This application tests the basic functionality of the S-MAC.
+
+2. FUNCTIONALITY
+
+   The default configuration is to use 3 motes. Each mote alternately
+   sends a broadcast message and a unicast message. By default, such
+   transmission keeps forever until you turn off the motes, but you can
+   also set the number of messages a node needs to send.
+   
+   broadcast messages have only one fragment, and unicast message may
+   have multiple fragments (default: 5, maximum: 8). You can change all
+   these parameters as well as the configuration of S-MAC in the 
+   config.h file.
+   
+   The packets that each node transmits include the statistics of
+   packets that it received from all current active neighbors (receiver
+   based link quality measurement).
+
+   You can configure S-MAC to run in different modes: low duty cycle with
+   adaptive listen, low duty cycle without adaptive listen, and fully active
+   mode.
+
+   By default, each mote sends both broadcast messages and unicast messages.
+   You can change it to only test broadcast or unicast. Message length can
+   be changed by define PHY_MAX_PKT_LEN.
+
+   All the configurations are done in config.h. Please see it for details.
+   
+   The yellow LED shows the activity of the radio (on or off). The red LED
+   toggles when a packet/fragment is sent out. The green LED toggles when a
+   packet/fragment is received.
+
+3. HOW TO USE
+
+   Suppose you are using 3 motes as the default setting.
+   
+   1) Compile and install by 'make mica' and 'make install mica'.
+   2) You can either specify node ID (TOS_LOCAL_ADDRESS) in system/tos.h, or
+      simply using 'make install.x mica', where x is the node ID.
+   3) Each node first sends 10 broadcast messages, and followed by 10 
+      unicast message. The default unicast address for each node is
+      - node 1 sends to node 2
+      - node 2 sends to node 3
+      - node 3 sends to node 1
+     This triangle makes sure their transmissions are interfere with each other.
+   
+4. NOTES
+
+   All configurable parameters of the application, S-MAC, and the physical
+   layers are listed (and some are used) in config.h file.
+
+

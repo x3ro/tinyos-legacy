@@ -1,0 +1,429 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+  <head>
+    <title>TinyOS Lesson - Using TOSSIM</title>
+  </head>
+  <body>
+    
+    <h1>TOSSIM Lesson: Using the simulator to develop TinyOS components</h1>
+    <h3>TOSSIM, packet injection, packet sniffing, and <tt>dbg</tt></h3>
+    
+    <br>
+    <h2> Introduction </h2>
+    
+    <p>TOSSIM is the TinyOS simulator. TOSSIM compiles directly from
+    TinyOS code, and is by default automatically compiled (<tt>make
+    pc</tt>). TOSSIM has an extensible network, ADC, and spatial model
+    interface. The default provided models are very simplistic, but
+    the interfaces allow models of significant complexity if needed.</p>
+
+    <p>TOSSIM provides several mechanisms for interacting with the
+    network; packet traffic can be monitored, packets can be
+    statically or dynamically injected into the network, and TinyOS
+    call invocation can be logged.</p>
+
+    <p>Because TinyOS applications run as native code under TOSSIM,
+    traditional debugging tools can be used.</p>
+    
+    <h2> Building and Running the Application </h2>
+
+    <p>TOSSIM is compiled by typing <tt>make pc</tt> in an application
+    directory. In addition to the expected TinyOS components, a few
+    simulator-specific files are compiled, such as
+    <tt>external_comm.c</tt>, which contains the code for
+    communicating with the simulator over network sockets.</p>
+
+    <p>Enter the <tt>apps/router/router</tt> directory. This application
+    is an example use of a simple beacon-based ad-hoc routing
+    algorithm. The program listens for two types of AM messages: type
+    5 for beacons and type 6 for data. When a mote hears a beacon, it
+    checks to see if it currently has a network parent. If the mote
+    does not currently have a parent in the network tree, it makes the
+    source of the beacon its parent and retransmits it. If the mote
+    has a parent already, it does nothing. After a few system clock
+    ticks (currently 8), a mote reverts to a no-parent state.</p>
+
+    <p>When a component tries to send a data message, the routing
+    component examines if it currently has a parent. If so, it sends
+    the message to it. As the packet travels up the routing tree,
+    route information is stored in the packet. A base station can then
+    examine this information and see the last few (currently 5) hops
+    the packet took, which provides information about the network
+    topology.</p>
+    
+    <p>The code for this algorithm resides in
+    <tt>apps/router/shared/AM_ROUTE.c</tt> The
+    <tt>apps/router/router</tt> application does not send any data
+    messages; it only receives and retransmits beacons. There are
+    additional applications in the <tt>apps/router</tt> directory,
+    which we will not discuss here.</p>
+
+    <p>In the application directory, type <tt>make pc</tt>. You should
+    see the simulator build. The simulator executable lives in the
+    <tt>binpc</tt> subdirectory, and is named <tt>main</tt>. Type
+    <tt>binpc/main</tt>. You should see a short usage notice with all
+    of the simulator run options. Type <tt>binpc/main -h</tt> for a
+    more descriptive list:</p>
+
+    <blockquote>
+<br><tt>Usage: binpc/main [options] &lt;num_nodes&gt;</tt>
+<br><tt>  [options] are:</tt>
+      <table>
+
+	<tr><td><tt> -h, --help</tt></td> <td><tt> Display this
+	message.</tt></td></tr>
+	
+	<tr><td><tt> -k &lt;kb&gt;</tt></td> <td><tt> Set radio speed
+	to &lt;kb&gt; Kbits/s. Valid values: 10, 25,
+	50.</tt></td></tr>
+	
+	<tr><td><tt> -r </tt></td> <td><tt> specifies a radio model
+	(simple is default)</tt></td></tr>
+	
+	<tr><td><tt> -l </tt></td> <td><tt> invocation logging: will
+	block for connect on port 10583</tt></td></tr>
+	
+	<tr><td><tt> -e &lt;file&gt;</tt></td> <td><tt> use
+	&lt;file&gt; for eeprom; otherwise anonymous file is
+	used</tt></td></tr>
+	
+	<tr><td><tt> -p &lt;sec&gt;</tt></td> <td><tt> pause
+	&lt;sec&gt; seconds on each system clock
+	interrupt</tt></td></tr>
+	
+	<tr><td><tt> &lt;num_nodes&gt;</tt></td><td><tt> number of
+	nodes to simulate</tt></td></tr>
+	
+	<tr></tr>
+      </table>
+
+      <tt>Known dbg modes: all, boot, clock, task, sched, sensor, led,
+      route, am, crc, packet, encode, radio, logger, adc, i2c, uart,
+      prog, sim, queue, simradio, hardware, simmem, usr1, usr2, usr3,
+      temp, error, none</tt>
+    </blockquote>
+
+    <p>Most of these options are outside the scope of this tutorial;
+    they're all discussed in the TOSSIM manual. Right now, the only
+    important ones are <tt>-h</tt> and the required argument
+    <tt>&lt;num_nodes&gt;</tt>. <p>Try typing "<tt>binpc/main 1</tt>"
+    (without the quotes). This will run the simulation with a single
+    mote. After the simulator boots (which may take a few moments in
+    Cygwin), you'll see a lot of debugging information stream
+    by. Typing control-C will stop the simulation. If you look at the
+    simulator output, most of it pertains to events and radio clock
+    ticks; this is because the radio clock ticks at 20KHz when
+    listening for a packet. If you look carefully at the times stated
+    for the tick events, you'll see that they're 50 microseconds
+    apart. The interval of 200 means 200 clock cycles; since the
+    processor is 4MHz, this equal to 50 microseconds. Sample output:
+
+    <blockquote>
+      <br><tt>0: Popping event for mote 0 with time 0:0:0.11075450.</tt></br>
+      
+      <br><tt>0: Setting TOS_LOCAL_ADDRESS to 0</tt></br>
+      
+      <br><tt>0: RADIO: tick event handled for mote 0 at
+      0:0:0.11870450 with interval of 200.</tt></br>
+      
+      <br><tt>0: Inserting event with time 0:0:0.11080450.</tt></br>
+      
+      <br><tt>0: mote 0 in state 0</tt></br>
+      
+      <br><tt>0: RFM: Mote 0 got  bit 0</tt></br>
+      
+      <br><tt>0: TOS_schedule_task: 0 empty </tt></br>
+      
+      <br><tt>0: Popping event for mote 0 with time 0:0:0.11080450.</tt></br>
+      
+      <br><tt>0: Setting TOS_LOCAL_ADDRESS to 0</tt></br>
+      
+      <br><tt>0: RADIO: tick event handled for mote 0 at
+      0:0:0.11875450 with interval of 200.</tt></br>
+      
+      <br><tt>0: Inserting event with time 0:0:0.11085450.</tt></br>
+      
+      <br><tt>0: mote 0 in state 0</tt></br>
+      
+      <br><tt>0: RFM: Mote 0 got  bit 0</tt></br>
+      
+      <br><tt>0: TOS_schedule_task: 0 empty </tt></br>
+    </blockquote>
+
+    <p>Time is represented as hours:minutes:seconds. The zero
+    preceding each line states which mote is the source of the
+    debugging statement; since the simulation only had one mote, this
+    is always zero. Run "<tt>binpc/main 2</tt>", and you'll see both
+    mote 0 and mote 1 printing output. In the simulator, motes start
+    one after another, spaced by a short random period; this is to
+    prevent perfect synchronization. Therefore, if you stop the
+    simulator very soon after it starts, you might not see any of mote
+    1's messages, as it hadn't actually booted yet. Let the simulator
+    run for a few seconds and you should see messages from mote 1.</p>
+
+    <h2> Output Configuration </h2>
+
+    <p>If you look at the time values being printed out, the simulator
+    is running really slowly; we've been able to simulate 100 motes at
+    real life speed (on a Linux desktop) . With so much debugging
+    output, almost all of the simulator processing is
+    <tt>printf()</tt>. Also, most of the data is usually not
+    needed. For example, if you're debugging a packet routing
+    algorithm, radio bit events aren't very useful. For this reason,
+    you can specify which output messages should be displayed with the
+    environment variable <tt>DBG</tt>. When the simulator boots, it
+    reads the environment variable and sets which messages will be
+    printed and which won't (it's a bit-mask).</p>
+
+    <p>The available debugging modes are at the end of the simulator
+    help message:
+      
+      <blockquote>
+       <tt>Known dbg modes: all, boot, clock, task, sched, sensor,
+       led, route, am, crc, packet, encode, radio, logger, adc, i2c,
+       uart, prog, sim, queue, simradio, hardware, simmem, usr1, usr2,
+       usr3, temp, error, none</tt>
+      </blockquote></p>
+
+    <p>These modes can be combined by using a comma-delimited
+    string. For example, typing "<tt>export DBG=boot,clock</tt>" (in
+    <tt>bash</tt>) will enable boot and system clock
+    messages. <tt>usr1</tt>, <tt>usr2</tt>, and <tt>usr3</tt> are
+    intended for use by applications. Try setting <tt>DBG</tt> to
+    <tt>clock,boot</tt> and running the simulator with one mote. You
+    can see components being initialized, then system clock interrupts
+    being fired twice a second; note the difference in the rate the
+    simulator runs at from when radio clock events were being
+    displayed. The simulator is compiled with no optimizations by
+    default; this is to make debugging easier (optimized code can be
+    hard to debug).</p>
+
+    <h2>Injecting Packets into the Network</h2>
+
+    <p>Currently, our simulated motes do very little. The beacon-based
+    routing algorithm requires the root of the routing tree to
+    generate an initial beacon. However, all motes in TOSSIM run the
+    same code image; we need a way to create an initial seed beacon in
+    the network. We can do so by using TOSSIM's external communication
+    functionality.</p>
+
+    <p>Run the simulator for a single mote with <tt>DBG</tt> set to
+    <tt>sim</tt>. You'll see a bunch of messages pertaining to the
+    different models (RFM, ADC, etc.), followed by a series of
+    messages about connections. These refer to TCP sockets the
+    simulator either opens or tries to open on boot. The exact use of
+    each of these sockets is described in the TOSSIM user's guide,
+    which exists in the <tt>doc/</tt> directory of the release. The
+    one we're interested in here is port 10579, which the simulator
+    message says is for "dynamic packet injection." Dynamic packet
+    injection allows you to connect to the simulator and inject a
+    packet into the network as it's running. Static packet injection
+    reads in a a series of packets once, at boot, and injects them at
+    their specified times. The former is good to poke at your program
+    and see its behavior, while the latter is good for repeatable
+    results. Keep the simulator running, or if you stopped it, run it
+    again.</p>
+
+    <p>There's a Java GUI tool that makes injecting packets into
+    TOSSIM fairly easy. Compile
+    <tt>net/tinyos/tossim/NetworkInjector.java</tt> and run it. A
+    window with two tab panes will pop up. The different tab panes
+    refer to different packet types. Don't worry about the BLESS
+    packets, which are for a protocol built on top of AM; we want to
+    send an AM packet. You can see the four AM fields specified, as
+    well as the AM data payload of 32 bytes. (An AM packet is 38
+    bytes; two go to the destination, two to the CRC, one to the group
+    and one to the type.) The simulator bypasses the CRC check for
+    injected messages, so you don't have to calculate the CRC.</p>
+
+    <p>If you recall, <tt>router</tt> uses two AM types: 5 and
+    6. Beacon messages are type 5. Change the AM_type field in the
+    NetworkInjector to 5, and click the "Inject" button. The simulator
+    should say that the incoming packet had a specified time of 0;
+    this causes the simulator to make it arrive immediately, which is
+    not at time 0. We have our debugging output set to only simulator
+    messages; while we can see the packet arrive at the mote, but
+    have no idea what happened. Let's take a look at application level
+    messages.</p>
+
+    <p>Quit the NetworkInjector, <b>then</b> stop the simulator. It's
+    important you do it in this order; otherwise, the TCP port enters
+    a waiting state on the OS, and you can't reuse it for a minute or
+    so. If you get the order wrong, the simulator will block until it
+    can open the server port 10579, retrying every 10 seconds. Change
+    your DBG settings to <tt>usr1,sim,am</tt>. Don't run the simulator
+    just yet; we want to see what debug messages <tt>usr1</tt> will
+    give us.</p>
+
+    <p>Open <tt>AM_ROUTE.c</tt>. Look for <tt>dbg</tt>
+    statements. You'll notice they're of the form <tt>dbg(flag,
+    (message))</tt>, where <tt>message</tt> is a standard
+    <tt>printf(3)</tt> argument list. There are a few statements,
+    mostly dealing with the acquisition or rejection of parents from
+    beacon messages. The clock event is bound to <tt>usr2</tt>, while
+    all the others are bound to <tt>usr1</tt>. A complete list of the
+    flags and their DBG environment bindings can be found in
+    <tt>tos/include/dbg_modes.h</tt>. Try adding a <tt>DBG_TEMP</tt>
+    message at component initialization. Recompile the application,
+    set your DBG mode to <tt>temp</tt> and see your message
+    appear.</p>
+
+    <p>Since we've set <tt>DBG</tt> to include <tt>usr1</tt>, we
+    should see debugging messages associated with that mode. Start up
+    the simulator again, then the <tt>NetworkInjector</tt>. Try
+    injecting a message of AM type 0 (the default). You'll see the
+    simulator output that mote zero received an AM packet, but the
+    application component didn't do anything with it; it uses type 5
+    for beacons. Change the AM type to 5 and inject again. You should
+    see these messages:</p>
+
+    <blockquote>
+      <tt>0: got messaged number 5 for dispatch</tt><br>
+      <tt>0: route set to 0</tt><br>
+      <tt>0: Sending message: ffffffff, 5</tt>
+    </blockquote>
+		  
+    <p>If you look back at <tt>AM_ROUTE.c</tt>, you can see where
+    <tt>route set to 0</tt> comes from.</p> Try injecting two packets
+    in succession. If a long enough time has passed, the mote should
+    have forgotten its parent; the first will set the route, and the
+    second will result in a different message:</p>
+
+    <blockquote>
+      <tt>0: got messaged number 5 for dispatch</tt><br>
+      <tt>0: route already set to 0</tt>
+      <tt>0: Sending message: ffffffff, 5</tt>
+    </blockquote>
+		  
+    <p>Since the mote already has a parent, it doesn't pay attention
+    to the second message and doesn't transmit a beacon.</p>
+
+    <p>So far, we've only been simulating a single (or a pair) of
+    motes. The default simulator settings allow up to a thousand motes
+    to be simulated at once. Let's try simulating a small network of
+    10 motes. Since the AM messages are lengthy, change your
+    <tt>DBG</tt> setting to just <tt>sim,usr1</tt>. Run the simulator
+    with ten motes: <tt>binpc/main 10</tt>. Start up the NetworkInjector and
+    inject a single type 5 packet. You'll see that mote 0 receives the
+    packet, then transmits a beacon. All of the other motes here mote
+    0's beacon and make it their parent. The default radio model for
+    TOSSIM is a single cell with no bit errors; all motes hear one
+    another perfectly. The format of routing beacon messages means
+    that sending the default AM message (filled with zeroes) makes
+    mote 0 think it's heard itself as a parent; in the real world,
+    we'd have a base station which has different logic (knows it's the
+    root).</p>
+
+    <h2>Visualizing Network Traffic</h2>
+    
+    <p>We could turn on AM debugging messages to see the packets being
+    sent, but that would obscure other data about what's going
+    on. There's a Java GUI tool that allows us to sniff the network
+    traffic and see what's being sent. It needs to be started
+    <b>before</b> the simulator; the simulator tries to connect to a
+    certain port at startup. Compile and run
+    <tt>net/tinyos/tossim/TossimGUI.java</tt>.
+
+    <p>TossimGUI visualizes packets that have been <b>sent</b>, not
+    received, in the network. The simulator hasn't started, so there
+    shouldn't be anything displayed. Start up the simulator with ten
+    motes, then the NetworkInjector. Inject a single packet of type
+    5. You should see ten messages sent; the first is from mote 0,
+    when it sends out its beacon, then one for each of the other nine
+    motes. You can see the data being sent in the beacon. Atmel
+    processors are little-endian, so the more significant byte comes
+    first. Click on the packet that mote 0 sent. You should see the AM
+    broadcast address (<tt>0xffff</tt>), followed by the type
+    (<tt>0x05</tt>), followed by your local group. The next field in
+    the packet is the tree depth. Mote 0 thinks it is at depth 1, so
+    the next two bytes are <tt>0x01</tt> and <tt>0x00</tt>. The two
+    bytes after that contain the mote's address, which is zero. This
+    is more clear on one of the subsequent beacons. For example, if
+    you look at the beacon that mote 7 sent, you can see that it's
+    depth field says 2. The first address stored is mote 0; the second
+    is mote 7 (<tt>0x07 0x00</tt>).</p>
+
+    <p>Try injecting another packet. If the network has timed out, you
+    can see the beacon broadcast again; if not, you'll see simulator
+    debug messages saying that the motes already have routes set.<p>
+      
+    <p>This simple radio model doesn't really let us see complex
+    behavior; we automatically form a depth 2 tree. The simulator has
+    two additional radio models, <tt>static</tt> and
+    <tt>space</tt>. We're going to use the former; the latter is just
+    a demonstration that a spatial-based connectivity model can be
+    implemented with the TOSSIM radio model abstraction.</p>
+
+    <h2>Static Routes</h2>
+
+    <p>The static radio model allows you to specify an undirected
+    graph of mote connectivity. As with the simple model, bits are
+    perfectly transmitted, and there is no network noise. At startup,
+    the simulator tries to read in the file <tt>cells.txt</tt>; if no
+    such file exists, it defaults to the simple radio model. The
+    format of <tt>cells.txt</tt> is a set of colon-delimited pairs
+    A:B. Each pair means that A and B can hear one another. For
+    example, a file that looked like this:
+      
+    <blockquote>
+      <tt>0:1 1:2 2:3 3:4 4:5 5:0</tt>
+    </blockquote>
+
+    would create a ring of 6 motes. Create this file in
+    <tt>apps/router/router/cells.txt</tt>. Start up TossimGUI, then
+    the simulator, but specify this option: <tt>-r static</tt> (like
+    this: <tt>binpc/main -r static 6</tt>). Inject a beacon packet
+    into the network.</p>
+
+    <p>For some reason, mote 3 never transmits a beacon. If you look
+    at the simulator output, it never set a route. Why? It's connected
+    to mote 4 and 2, both of which sent beacons.</p>
+
+    <p>Mote 3 is victim of the hidden node problem. If you look at the
+    timestamps in the packet visualization, you can see that mote 4
+    and 2 send their packets very close to one another. Mote 3 is, at
+    one point, hearing the union of their bits.</p>
+
+    <p>Quit all the applications (remember: NetworkInjector before
+    simulator). Set your <tt>DBG</tt> mode to <tt>usr1,crc</tt>. This
+    will provide us with information about the packet-level CRC
+    checks. If mote 3 is hearing two packets at once, it's unlikely
+    the bytes heard will pass CRC.</p>
+
+    <p>Start up the applications as before, and inject a packet. You
+    should see messages similar to:</p>
+
+    <blockquote>
+      <tt>0: route set to 0</tt><br>
+      <tt>0: CRC: 1132</tt><br>
+      <tt>5: route set to 0</tt><br>
+      <tt>5: CRC: 37b4</tt><br>
+      <tt>1: route set to 0</tt><br>
+      <tt>1: CRC: ffffa672</tt><br>
+      <tt>2: route set to 1</tt><br>
+      <tt>2: CRC: ffffc16b</tt><br>
+      <tt>4: route set to 5</tt><br>
+      <tt>4: CRC: ffffe2a7</tt><br>
+      <tt>1: route already set to 0</tt><br>
+      <b><tt>3: crc check failed: ffffa24c, ffffd56b</tt></b><br>
+      <tt>5: route already set to 0</tt>
+    </blockquote>
+
+    <p>Part of the cause of this is that the random wait before
+    transmitting is much shorter than the time it takes to transmit a
+    packet at 10Kb. The simulator can also simulate a 25 or 50 Kb
+    radio stack; it still uses the <tt>GENERIC_COMM</tt> stack,
+    though. This functionality allows you to simulate a high-speed
+    mica stack while still using the standard 10Kb stack
+    components. At 50Kb, the random wait time overwhelms the
+    transmission time. Try running the simulator as so: <tt>binpc/main
+    -kb 50 -r static 6</tt>. Inject a beacon packet, and mote 3 can
+    associate with the network, because the packets from 2 and 4 are
+    spaced out enough in time.</p>
+    
+    <p>Try changing the topology to a seven mote ring; every mote
+    should join the routing tree with a 10Kb stack.</p>
+
+    
+</body>
+</html>

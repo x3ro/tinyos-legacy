@@ -1,0 +1,51 @@
+#
+# Makefile for Hogthrob contributions, Martin Leopold 29. april 2004
+# inspired by makefile by Mads Bondo Dydensborg
+#
+#
+# I prefrefer this method over "%T"/"%p" since otherwise
+# -print-platforms will not report all new platforms
+
+ifndef TOSDIR
+TOSDIR := $(shell ncc -print-tosdir)
+endif
+
+TOPDIR = $(TOSDIR)/../contrib/diku/mcs51
+
+NEW_PLATFORMS = $(wildcard $(TOPDIR)/tos/platform/*)
+
+TINYBT_DIR = %T/../contrib/tinybt
+INCLUDE_DIRS  = interfaces lib system types
+
+# We include all new platform directories in the call to ncc to display
+# all of our platforms in the list
+PLATFORMS = $(shell ncc -print-platforms $(PFLAGS) $(addprefix -I,$(NEW_PLATFORMS)))
+
+PFLAGS += $(addprefix -I$(TOPDIR)/tos/,$(INCLUDE_DIRS)) \
+	  $(addprefix -I$(TINYBT_DIR)/tos/,$(INCLUDE_DIRS))
+
+# use install/reinstall/... to upload to platform
+# Set AVRISP to something else on the commandline
+AVRISP=/dev/ttyS0
+PROGRAMMER_PART=-dpart=ATmega128
+PROGRAMMER_EXTRA_FLAGS_AVRISP = -v=2
+
+# Get the rest of the makefile. This will set the PLATFORM variable for us.
+-include $(shell ncc -print-tosdir)/../apps/Makerules
+
+# Include only the directory of the selected platform. If they share files
+# it must be shared via a "common platform" not a file used by both only
+# in one directory
+
+ifeq ($(PLATFORM), btnode2_2)
+PFLAGS := -I$(TOPDIR)/tos/platform/btnode2_2 $(PFLAGS)
+endif
+ifeq ($(PLATFORM), hogthrobV0)
+PFLAGS +=  -I$(TOPDIR)/tos/platform/hogthrobV0
+endif
+ifeq ($(PLATFORM), mcs51)
+PFLAGS +=  -I$(TOPDIR)/tos/platform/mcs51
+endif
+ifeq ($(PLATFORM), pc)
+PFLAGS += -I$(TOPDIR)/tos/platform -I$(TOPDIR)/tos/platform/pc
+endif

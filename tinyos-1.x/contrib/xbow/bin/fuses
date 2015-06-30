@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+#
+# FILE:         fuses
+# AUTHOR:       Martin Turon
+# DATE CREATED: October 5, 2004
+# DESCRIPTION:  Wrapper script around uisp to simplify fuse manipulation
+#               on MICA2 motes.
+#
+# $Id: fuses,v 1.2 2004/10/05 21:21:26 mturon Exp $
+#
+
+my $g_version = '$Id: fuses,v 1.2 2004/10/05 21:21:26 mturon Exp $';
+
+print "fuses Ver:$g_version\n";
+
+my %Cmds = (
+  read    => '--rd_fuses',
+  clkint  => '--wr_fuse_l=0xc4',
+  clkext  => '--wr_fuse_l=0xff',
+  jtagen  => '--wr_fuse_h=0x19',
+  jtagdis => '--wr_fuse_h=0xd9',
+);
+
+if( @ARGV == 0 ) {
+  print <<"EOF";
+  Usage: fuses [command] [port] [args]
+    read     = read fuses
+    clkint   = set to internal oscillator
+    clkext   = set to external oscillator
+    jtagen   = enable JTAG
+    jtagdis  = disable JTAG	
+	
+EOF
+
+  my $fmt = '%8s  %s'."\n";
+
+  printf( $fmt, "Command", "Flag" );
+  printf( $fmt, "-------", "-" x 60 );
+  for my $cmd (sort keys %Cmds) {
+    printf( $fmt, $cmd, $Cmds{$cmd} );
+  }
+  print "\n";
+
+  exit 0;
+}
+
+$command = shift();
+$comport = shift(); 
+if ($comport eq "") {
+   $comport = "/dev/ttyS0"; 
+}
+$uisp    = "uisp -dprog=mib510 -dpart=ATmega128 -dserial=$comport";
+
+print "FUSES $command on $comport\n";
+system "$uisp $Cmds{$command}";
+
+

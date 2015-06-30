@@ -1,0 +1,17 @@
+DetectionEventMsg.h
+*******************
+The file DetectionEventMsg.h is MANUALLY created by combining
+
+DetectionEventMsg from contrib/nestfe/lib/detectionevent/DetectionEvent.h
+DrainMsg          from beta/Drain/Drain.h
+
+This is because DetectionEventMsg is embedded in DrainMsg, and currently the
+MIG tool has no way of unpacking embedded messages.
+
+If either of those header files change, you must manually edit
+DetectionEventMsg.h .
+
+
+DummyM.nc
+*********
+DummyM.nc is necessary for MIG to work properly.

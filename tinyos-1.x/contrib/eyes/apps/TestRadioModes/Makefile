@@ -1,0 +1,3 @@
+COMPONENT=TestRadioModesC
+
+include ../MakeEyes

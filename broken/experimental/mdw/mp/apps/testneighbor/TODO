@@ -1,0 +1,7 @@
+- Add stopstring for "all motes" condition to arPlugin
+- Check validity of Yao Graph:
+   - Get positions of motes (check for bad positions due to missing
+     initialization)
+   - Build up graph from YaoNeighborhoodM's "fixed" edges set
+   - Check for crossed edges
+   - Look at invalidations sent vs. invalidations received 

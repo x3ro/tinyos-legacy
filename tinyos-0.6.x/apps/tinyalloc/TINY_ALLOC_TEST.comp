@@ -1,0 +1,31 @@
+TOS_MODULE TINY_ALLOC_TEST;
+
+ACCEPTS{
+	char TINY_ALLOC_TEST_INIT();
+	char TINY_ALLOC_TEST_START();
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	void COMPLETE(char *** handle, char success);
+	void REALLOC_COMPLETE(char ** handle, char success);
+	void COMPACT_COMPLETE();
+	void CLOCK_EVENT();
+};
+
+USES{
+	char ALLOC(char *** handle, short size);
+	char REALLOC(char ** handle, short size);
+	short FREE(char ** handle);
+	void LOCK(char ** handle);
+	void UNLOCK(char ** handle);
+	void ALLOC_DEBUG();
+	void COMPACT();
+	char GREEN_LED_ON();
+	char GREEN_LED_OFF();
+	char RED_LED_TOGGLE();	
+	char YELLOW_LED_TOGGLE();
+	char CLOCK_INIT(char interval, char scale);
+};

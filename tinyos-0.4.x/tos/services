@@ -1,0 +1,39 @@
+###############################################################################
+# Services file for TinyOS 			
+#					
+# Describes reserved services/active message ids	
+# in the current TOS release		
+#				
+# Each line describes one message type, and is of the form	
+#     ammsgid name component1[,component2,...] [#comment]	
+#          ammsgid is [0 - 255] ID of message 		
+#          name is one word name of message	
+#          component is command deliminated list of components 
+#            that use this message	
+#          comment is descriptive text about the message
+#
+###############################################################################
+# Author: Sam Madden (madden@cs.berkeley.edu)
+# Modified: 10/11/01				
+###############################################################################
+
+5						#beacon-based multihop routing beacons
+6						#beacon-based multihop routing data
+7						#beaconless multihop routing
+
+8						#Prob route beacon wave
+9						#Prob route report back
+10						#Prob route log report
+
+						# Network reprogramming
+47	NEW_PROG_MSG				#    new program
+48	START_PROG_MSG				#    start reprogramming
+49	WRITE_PROG_MSG				#    write code fragment
+50	READ_PROG_MSG				#    read code fragment
+249	SET_PERIOD_MSG 		PERIODIC 	#adjust the periodic broadcast of samples
+250	SENSOR_QUERY_REPLY	MOTEINFO	#response to a request for a sensor value
+251	SENSOR_QUERY		MOTEINFO	#request for a sensor value
+252	INFO_REQUEST_READING	MOTEINFO	#request id, version, or schema
+253	ID_READING		MOTEINFO	#report id
+254	VERSION_READING		MOTEINFO	#report version
+255	SCHEMA_READING		MOTEINFO	#report schema

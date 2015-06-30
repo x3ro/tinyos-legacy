@@ -1,0 +1,10 @@
+MIDlet-Name: MamaBoardDemo
+MIDlet-Version: 1.0
+MIDlet-Vendor: Shockfish SA
+MIDlet-Description: TODO
+MicroEdition-Profile: IMP-NG
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: MamaBoardDemo, , com.shockfish.tinyos.apps.demo.MamaBoardDemo
+MIDlet-Jar-URL: http://www2.shockfish.com/TODO
+MIDlet-Jar-Size: 2307
+

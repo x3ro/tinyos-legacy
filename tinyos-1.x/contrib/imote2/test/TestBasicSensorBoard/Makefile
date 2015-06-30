@@ -1,0 +1,3 @@
+COMPONENT=TestBasicSensorBoard
+include ../Makerules
+

@@ -1,0 +1,64 @@
+The ThreeAxisRecorder tinyos program acts as an accelerometer data logger
+program.  To start the datalogging, place the SHIMMER in the dock and
+run the python script start_recording.py
+
+python start_recording.py
+
+The script will autodetect the USB port of the dock.  If you have more
+than one dock connected, it will pick the one of them, which may not
+be the one you are using, so only have one dock connected when you are
+using this program.  
+
+This script syncronizes the time on the SHIMMER with the time on the
+PC and starts the SHIMMER data collection.  After runing this script,
+the green LED on SHIMMER will blink, letting you know it is collecting
+data.  You then can take SHIMMER out of the dock and use it.
+
+When you are done collecting data, place SHIMMMER back on the dock and
+press the square user button on the dock.  This will stop SHIMMER from
+recording data.  The green LED will shut off and the orange LED will
+come on, letting you know there is data to be downloaded. 
+
+To get the data off of SHIMMER, run the download_data.py script with
+SHIMMER still in the dock.  Run the program like this: 
+
+python download_data.py > output.csv
+
+This will store the data in the file output.csv
+
+The output is lines of 5 comma seperated values.  The first field is
+the timestamp (in localtime) in a format that SPSS handles.  The
+second field is the timestamp (in localtime) if Excel format.  The
+next 3 fields are the x, y, and z axis of the accelerometer.  The last
+field is the timestamp (in UTC) in standard Unix time format.  Not
+every sample tuplet (x,y,z) has a timestamp.  Only every 83 sample
+tuplets have an actual timestamp.  
+
+After the download is complete, the orange LED will shut off and the
+green LED will be on, letting you know that SHIMMER is ready to
+collect more data. 
+
+SD Card File Format:
+--------------------
+
+There is no filesystem on the SD card.  The accelerometer data is
+written to the SD card is sectors of 512 bytes.  The first written
+sector, which starts at SD card sector 2000, is the header for the
+file.  The first 4 bytes of the header contains 0s.  This is normally
+the timestamp of the sector.  The next 8 bytes the timstamp offset.
+This is the difference between the clock on the host PC and the clock
+running on the shimmer.  The next four bytes are the number of sectors
+in the file.  The rest of the 512 bytes are randomly generated. 
+
+Data sectors:
+-------------
+
+After the header, the rest of the sectors are data sectors.  Samples
+are taken as an x,y,z group every 20/1024 milliseconds, or 51.2 Hz.
+83 sample groups fit on one 512 byte sector.  Each sector has a 4 byte
+timestamp.  This number is the value of the SHIMMER clock after the
+first 3 samples have been taken for this sector.  The last two bytes
+of the sector is a crc16 checksum. 
+
+
+

@@ -1,0 +1,237 @@
+    <title>TinyOS Tutorial: Hardware Verification </title>
+</head>
+
+<body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%">
+<font face="tahoma,arial,helvetica"><b><big><big>
+TinyOS Tutorial:
+System and Hardware Verification</big></big></b>
+<p>
+Last updated 1 Aug. 2002
+</font>
+</td></tr>
+</table>
+
+    <p>
+    When working with embedded devices, it is very difficult to debug 
+    applications.&nbsp; Because of this, you want to make sure that the tools 
+    you are using are working properly and that the hardware is functioning 
+    correctly. This will save you countless hours of searching for bugs in 
+    your application when the real problem is in the tools. This lesson 
+    will show you how to check your system and the hardware.</p>
+
+    <p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">PC tools verification</font></b></nobr></td>
+</tr></table>
+
+    <p>
+    A TinyOS development environment requires the use of avr gcc compiler, perl, 
+    flex, cygwin if
+    you use windows operation system, and JDK 1.3.x or above. we provide a tool named
+    <tt>toscheck</tt> to check if 
+    the tools have been installed correctly and that 
+    the environment variables are set. 
+    </p>
+    <p>
+    Change into your alpha/tools directory and run toscheck. The output 
+    should be:</p>
+
+    <p>
+    <font face="Courier New" size="1">toscheck <br>
+    Path:<br>
+    /usr/local/bin<br>
+    /usr/bin<br>
+    /bin<br>
+    /cygdrive/c/jdk1.3.1_01/bin<br>
+    /cygdrive/c/WINDOWS/system32<br>
+    /cygdrive/c/WINDOWS<br>
+    /cygdrive/c/avrgcc/bin<br>
+    .<br>
+    <br>
+    Classpath:<br>
+    /c/alpha/tools/java:.:/c/jdk1.3.1_01/lib/comm.jar<br>
+    <br>
+    avrgcc:<br>
+    /cygdrive/c/avrgcc/bin/avr-gcc<br>
+    Version: 3.0.2<br>
+    <br>
+    perl:<br>
+    /usr/bin/perl<br>
+    Version: v5.6.1 built for cygwin-multi<br>
+    <br>
+    flex:<br>
+    /usr/bin/flex<br>
+    <br>
+    bison:<br>
+    /usr/bin/bison<br>
+    <br>
+    java:<br>
+    /cygdrive/c/jdk1.3.1_01/bin/java<br>
+    java version &quot;1.3.1_01&quot;<br>
+    Java(TM) 2 Runtime Environment, Standard Edition (build 1.3.1_01)<br>
+    Java HotSpot(TM) Client VM (build 1.3.1_01, mixed mode)<br>
+    <br>
+    Cygwin:<br>
+    cygwin1.dll major: 1003<br>
+    cygwin1.dll minor: 3<br>
+    cygwin1.dll malloc env: 28<br>
+    <br>
+    uisp:<br>
+    /usr/local/bin/uisp<br>
+    uisp version 20010909<br>
+    <br>
+    <br>
+    toscheck completed without error.</font><br>
+&nbsp;</p>
+
+    <p>
+    The last line is the most important.&nbsp; If any errors are reported, make 
+    sure to fix the problem.</p>
+
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">&nbsp;Hardware Verification</font></b></nobr></td>
+</tr></table>
+    <p>
+    To test the hardware, we have provided an application: <font color="#0000FF">
+    MicaHWVerify</font>.&nbsp; 
+    It is designed&nbsp; for the purpose of verifying mica mote hardware only.&nbsp; 
+    If you have different hardware platform, this application is not suitable. </P>    
+    <p>Change to the <font color="#0000FF"><a href="../../apps/MicaHWVerify">apps/MicaHWVerify</a></font> directory and type</p> 
+    <p> <tt> &nbsp;&nbsp;&nbsp; </tt></p>
+    <center>
+<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+<tr bgcolor="#e0e0e0">
+<td width="100%"><pre>		make mica 
+</td></tr></table></pre> </center>
+
+    <p> The compilation process should complete without any errors. 
+    If it compiled correctly it will print out a profile of the memory used by 
+    the application.&nbsp; It should look like:</p>
+
+    <p>
+    <font face="Courier New" size="1">grep _e binmica/img.file | grep =\.<br>
+    0x000015a0 _etext=.<br>
+    0x00800072 _edata=.<br>
+    0x008000b6 _end=.<br>
+    0x00810000 __eeprom_end=</font>.</p>
+
+    <p>
+    Next step is to install the application onto a mica node.&nbsp; Place a powered-on node 
+    into a programming board.&nbsp; The red LED on the programming board should 
+    light.&nbsp; Connect the programming board to the parallel port of your 
+    computer.&nbsp; To load the program on to the device, type&nbsp; </p>
+<center>
+<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+<tr bgcolor="#e0e0e0">
+<td width="100%"><pre>		make mica install
+</td></tr></table></pre> </center>
+
+
+    <p>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </p>
+
+    <p>
+    The output should look like:</p>
+
+    <p>
+    <font face="Courier New" size="1"><br>
+    Makefile:5: warning: overriding commands for target `all'<br>
+    ../Makeinclude:201: warning: ignoring old commands for target `all'<br>
+    make: Nothing to be done for `mica'.<br>
+    avr-objcopy --output-target=srec binmica/main.exe binmica/main.srec<br>
+    uisp -dprog=dapa -dlpt=3 --erase<br>
+    pulse<br>
+    Atmel AVR ATmega103 is found.<br>
+    Erasing device ...<br>
+    pulse<br>
+    Reinitializing device<br>
+    Atmel AVR ATmega103 is found.<br>
+    sleep 1<br>
+    uisp -dprog=dapa -dlpt=3 --upload if=binmica/main.srec<br>
+    pulse<br>
+    Atmel AVR ATmega103 is found.<br>
+    Uploading: flash<br>
+    sleep 1<br>
+    uisp -dprog=dapa -dlpt=3 --verify if=binmica/main.srec<br>
+    pulse<br>
+    Atmel AVR ATmega103 is found.<br>
+    Verifying: flash</font></p>
+
+    <p>
+    Now you know that the programming tools and the computer's parallel 
+    port are working.&nbsp;The next step is to verify the mote 
+    hardware.&nbsp; First, confirm that the LEDs are blinking like a counter. 
+    Next connect the programming board to the serial port of the computer. 
+    The hardware verify program will send data over the UART that contains it 
+    status.&nbsp; To read from the serial port, we provide a java tool called hardware_check.java. 
+    It is located in the same directory. Compiler&nbsp; and run this tool. 
+    The commands are shown below assuming you are using COM1 to connect to the 
+    programming board. </p>
+
+    <blockquote>
+
+<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+<tr bgcolor="#e0e0e0">
+<td width="100%">
+<pre>		
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; javac hardware_check.java<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; java hardware_check<tt> COM1</tt>
+</pre></td></tr></table> 
+    
+    </blockquote>
+    
+    <p><font face="Times New Roman">The output on the PC should be: </font>
+</p>
+    
+    <p><font face="Courier New" size="1">hardware_check started<br>
+    printing all ports...<br>
+    - COM3<br>
+    - COM1<br>
+    - LPT1<br>
+    - LPT2<br>
+    done.<br>
+    baud rate: 9600<br>
+    data bits: 8<br>
+    stop bits: 1<br>
+    parity: 0<br>
+    baud rate: 19200<br>
+    data bits: 8<br>
+    stop bits: 1<br>
+    parity: 0<br>
+    Node Serial ID: 1 60 48 fb 6 0 0 1d<br>
+    <font color="#FF0000"><br>
+    </font>Hardware verification successful.</font><br>
+</p>
+    <p>
+    This program checks the serial ID of the mote, the flash connectivity, 
+    the UART functionality and the external clock.&nbsp; If all status checks 
+    are positive,&nbsp; the hardware verification successful message will be 
+    printed on your PC scream. If you see any failure report on your monitor, 
+    you might need get another mote.</p>
+
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">Radio Verification</font></b></nobr></td>
+</tr></table>
+    <p>
+    To verify radio, you need two nodes.&nbsp; Take a second node (that has 
+    passed the hardware check up to this point) and install it with GenericBase.&nbsp; This node will act as a radio gateway to a 
+    second node.&nbsp; Once installed, leave this node in the programming board 
+    and place the original node next to it.&nbsp; Re-run the hardware_check java 
+    application. The output should be the same as shown in the previous section.&nbsp; 
+    the indication of a working radio system is again
+    <font face="Courier" size="1">Hardware verification successful.</font></p>
+
+    <p>
+    If your system and hardware have pass all the above tests, you are all set 
+    for&nbsp; having some fun with TinyOS. Congratulation. </p>

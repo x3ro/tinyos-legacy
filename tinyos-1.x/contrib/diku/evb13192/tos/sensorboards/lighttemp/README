@@ -1,0 +1,8 @@
+/* $Id: README,v 1.1 2005/01/31 21:05:56 freefrag Exp $ */
+This is the files to support the simple Light & Temperature sensor
+made for the 13192EVB's.
+
+The structure of the files is modelled/inspired by the micasb
+structure.
+
+November 2004, Mads Bondo Dydensborg <madsdyd@diku.dk>

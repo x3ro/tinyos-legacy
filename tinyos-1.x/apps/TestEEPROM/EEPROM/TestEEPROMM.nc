@@ -1,0 +1,238 @@
+// $Id: TestEEPROMM.nc,v 1.2 2003/10/07 21:45:17 idgay Exp $
+
+/*									tab:4
+ * "Copyright (c) 2000-2003 The Regents of the University  of California.  
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice, the following
+ * two paragraphs and the author appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Copyright (c) 2002-2003 Intel Corporation
+ * All rights reserved.
+ *
+ * This file is distributed under the terms in the attached INTEL-LICENSE     
+ * file. If you do not find these files, copies can be found by writing to
+ * Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA, 
+ * 94704.  Attention:  Intel License Inquiry.
+ */
+
+/**
+ * 
+ * This application serves as a test of off-chip EEPROM functionality. The
+ * application is meant to be used with net/tinyos/tools/TestEEPROM.java
+ * application; it provides interfaces for testing the reading and writing
+ * functions of the EEPROM. The mote running this code should turn on the red
+ * LED on initialization; from that point on the LEDs toggle.  Green LED is
+ * toggled when the app receives the command to either read or write to
+ * EEPROM; red LED toggles when the app attempt to send a response, and yellow
+ * LED toggles when the app thinks that the response transmission was
+ * successful.  Contents of the response can be displayed with GenericBase
+ * and ForwarderListen tools. 
+ *
+ * @author tinyos-help@millennium.berkeley.edu
+ *
+ */ 
+
+module TestEEPROMM
+{
+  provides interface StdControl;
+
+  uses {
+    interface StdControl as EEPROMControl;
+    interface EEPROMRead;
+    interface EEPROMWrite;
+
+    interface Leds;
+
+    interface StdControl as CommControl;
+    interface ReceiveMsg as ReceiveTestMsg;
+    interface SendMsg as SendResultMsg;
+  }
+}
+implementation
+{
+  TOS_Msg buffer; 
+  TOS_MsgPtr msg;
+  bool bufferInuse;
+
+  /** 
+   * Application initialization code. Initializes subcomponents: the eeprom
+   * driver and the communication stack. 
+   *
+   * @return always SUCCESS
+   */
+
+  command result_t StdControl.init() {
+    call EEPROMControl.init();
+    call CommControl.init();
+    call Leds.init();
+    
+    msg = &buffer;
+    bufferInuse = 0;
+    dbg(DBG_BOOT, "EETEST initialized\n");
+    call Leds.redOn();
+
+    return SUCCESS;
+  }
+
+  command result_t StdControl.start() {
+    call EEPROMControl.start();
+    call CommControl.start();
+    return SUCCESS;
+  }
+
+  command result_t StdControl.stop() { 
+    call EEPROMControl.stop();
+    call CommControl.stop();
+    return SUCCESS;
+  }
+
+  /** 
+   * When a message has been sent, the app marks the message buffer as
+   * available for further use. The buffer will be used in processing further
+   * directives from the network. 
+   * 
+   * @return Always SUCCESS.
+   */
+
+  event result_t SendResultMsg.sendDone(TOS_MsgPtr data, result_t success) {
+    call Leds.yellowToggle();
+    if(msg == data)
+      {
+	dbg(DBG_USR2, "EETEST send buffer free\n");
+	bufferInuse = FALSE;
+      }
+    return SUCCESS;
+  }
+
+  /** 
+   * Helper function used to produce the final response of the app to the
+   * command fron the network.  The first byte of the message is the success
+   * code; the remainder is the response specic data. The return codes are as
+   * follows: 
+   *<ul>
+   *<li> 0x80 -- READ command was not accepted by the driver
+   *<li> 0x82 -- WRITE command was not accepted by the driver
+   *<li> 0x84 -- READ command failed 
+   *<li> 0x85 -- WRITE command failed to write data into the temporary buffer
+   *<li> 0x86 -- WRITE command failed to flush the temporary buffer into
+   *nonvolatile storage. 
+   *<li> 0x90 -- READ command succeeded 
+   *<li> 0x91 -- WRITE command succeeded 
+   *</ul>
+   */ 
+
+  void sendAnswer(uint8_t code) {
+    TOS_MsgPtr lmsg = msg;
+
+    call Leds.redToggle();
+    lmsg->data[0] = code;
+    if (!call SendResultMsg.send(TOS_UART_ADDR, TOS_EEPROM_LINE_SIZE + 3, lmsg))
+      bufferInuse = FALSE;
+  }
+
+  /** 
+   * This event is called when the eeprom read command succeeds; it sends a
+   * message indicating the success or failure of the operation. If read
+   * succeeded the data read will be located in the response buffer, starting
+   * at the 3rd byte. 
+   *
+   * @return Always SUCCESS
+   */ 
+
+  event result_t EEPROMRead.readDone(uint8_t *buf, result_t success) {
+    sendAnswer(success ? 0x90 : 0x84);
+    return SUCCESS;
+  }
+
+  /**
+   * This event is invoked when EEPROM finishes transfering data into its
+   * temporary buffer. In this app the temporary buffer is immediately flushed
+   * to nonvolatile storage. If a transfer to the temporary buffer failed,
+   * this handler will send a response code over the radio. 
+   *
+   * @return Always SUCCESS. 
+   */ 
+
+  event result_t EEPROMWrite.writeDone(uint8_t *buf) {
+    if (call EEPROMWrite.endWrite() == FAIL)
+      sendAnswer(0x86);
+    return SUCCESS;
+  }
+
+  /**
+   * This event is invoked when EEPROM finishes transfering data into its
+   * nonvolatile storage. The handler signals the success of the write
+   * operation or the failure of commit operation, and sends that status to
+   * the application. 
+   *
+   * @return Always SUCCESS. 
+   */ 
+  event result_t EEPROMWrite.endWriteDone(result_t success) {
+    sendAnswer(success ? 0x91 : 0x85);
+    return SUCCESS;
+  }
+
+  /** 
+   * Decode the message buffer: pull out operation (0 for read, 2 for write),
+   * code, decode the address, and execute the operation. 
+   */ 
+
+  task void processPacket() {
+    TOS_MsgPtr lmsg = msg;
+    uint8_t error = 0x7f;
+
+    switch (lmsg->data[0])
+      {
+      case 0: /* Read a line */
+	if (call EEPROMRead.read(((unsigned char)lmsg->data[1] << 8) + (unsigned char)lmsg->data[2], ((uint8_t*)lmsg->data + 3)))
+	  return;
+	error = 0x80;
+	break;
+      case 2: /* Write a line */
+	if (call EEPROMWrite.startWrite() &&
+	    call EEPROMWrite.write(((unsigned char)lmsg->data[1] << 8) + (unsigned char)lmsg->data[2], ((uint8_t*)lmsg->data + 3)))
+	  return;
+	error = 0x82;
+	break;
+      }
+    sendAnswer(error);
+  }
+
+
+  /** 
+   * When the command message has been received, this handler check if the
+   * previous operation was completed, and if so it will dispatch the incoming
+   * message to processPacket task. 
+   *
+   */
+
+  event TOS_MsgPtr ReceiveTestMsg.receive(TOS_MsgPtr data) {
+    TOS_MsgPtr tmp = data;
+
+    call Leds.greenToggle();
+    dbg(DBG_USR2, "EETEST received packet\n");
+    if (!bufferInuse)
+      {
+	bufferInuse = TRUE;
+	tmp = msg;
+	msg = data;
+	dbg(DBG_USR2, "EETEST forwarding packet\n");
+	post processPacket();
+      }
+    return tmp;
+  }
+}

@@ -1,0 +1,19 @@
+/HplAtm128AdcC.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128AdcP.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128I2CBusC.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128I2CBusP.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128InterruptC.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128InterruptSigP.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128SpiC.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128SpiP.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128Timer0AsyncC.nc/1.1/Thu Jun 12 14:02:14 2008//
+/HplAtm128Timer0AsyncP.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128Timer1C.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128Timer1P.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128Timer2C.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128Timer3C.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128Timer3P.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128UartC.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplAtm128UartP.nc/1.2/Tue Jun 29 22:07:51 2010//
+/chip_thread.h/1.1/Thu Jun 12 14:02:18 2008//
+D

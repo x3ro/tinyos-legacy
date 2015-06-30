@@ -1,0 +1,4 @@
+COMPONENT=ConfigStoreTestC
+
+include ../Makerules
+

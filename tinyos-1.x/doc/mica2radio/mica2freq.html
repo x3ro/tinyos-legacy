@@ -1,0 +1,30 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>How to determine the operating frequency range of a MICA2 or MICA2DOT 
+mote</title>
+</head>
+
+<body>
+
+<h2>How to determine the operating frequency range of a MICA2 or MICA2DOT mote.</h2>
+<p>1) Read the frequency label on the MOTE.&nbsp; </p>
+<p>2) If the frequency label is missing, you can tell what type of device you 
+have by looking at capacitor <a href="mica2back.jpg">C13 (MICA2)</a> or 
+<a href="mica2dotback.jpg">C12 (MICA2DOT)</a>.</p>
+<p>&nbsp;&nbsp;&nbsp; <b><i>if</i></b> C13/C12 <b>IS NOT</b> populated (capacitor 
+missing), <b><i>then</i></b> the device is built to operate in the 868/915 MHz 
+range.</p>
+<p>&nbsp;&nbsp;&nbsp; <b><i>if</i></b> C13/C12 <b>IS</b> populated (capacitor present), <i><b>then</b> </i>the 
+device is built to operate in the 433 MHz range</p>
+<p>As yet, there is no processor accessible setting (in EEPROM, FLASH or other) 
+that indicates the device's operating frequency band.</p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

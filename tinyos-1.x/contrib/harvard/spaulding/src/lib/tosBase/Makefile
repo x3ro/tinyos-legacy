@@ -1,0 +1,7 @@
+COMPONENT=TOSBase
+
+include $(SPAULDINGSRC)/Makefile.in
+CFLAGS += -DTOSH_MAX_TASKS_LOG2=8
+
+include $(MAKERULES)
+

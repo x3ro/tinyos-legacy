@@ -1,0 +1,2 @@
+COMPONENT=SenseTask
+include ../Makerules

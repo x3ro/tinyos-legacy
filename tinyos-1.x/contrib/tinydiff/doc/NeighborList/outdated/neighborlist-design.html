@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Neighborlist Design</title>
+      
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+   
+  <meta name="author" content="Manamohan Mysore">
+</head>
+  <body>
+ 
+<h1 align="center">The Neighborlist Functionality: Design Document</h1>
+<br>
+<br>
+<h2>Introduction</h2>
+<br>
+This document discusses the design of the Neighborlist feature -- essentially,
+what it does and how it does what it does.<br>
+<br>
+<br>
+<h2>Purpose of the Neighborlist Functionality</h2>
+<br>
+This functionality is necessary/important in order to:<br>
+<ul>
+  <li>allow applications/other modules to query the current list of valid
+neighbors</li>
+  <li>characterize links and expose these statistics to other modules</li>
+  <li>provide a convenient API to allow applications to query these statistics</li>
+  <li>optionally, allow applications to filter out "bad" links based on configurable
+thresholds.</li>
+</ul>
+<br>
+We'll discuss each of these aspects in the following sections:<br>
+<br>
+<h2> Link Characterization: Design Considerations</h2>
+<br>
+In designing this aspect, we were faced with the following considerations/issues/choices.<br>
+<ul>
+  <li><u>active (beaconing) vs. passive (observing packets already in the
+air) </u>approaches to characterizing loss rate with neighbors</li>
+  <ul>
+    <li>The active approach takes care of periods of low network activity.
+&nbsp;Hence, the active ingredient has to be part of the design</li>
+    <li>Passive mode is useful because it comes free anyway. &nbsp;In this
+approach, each packet is given a per-node sequence number that is incremented
+for each packet sent from that node.. &nbsp;Sequence number gaps can then
+be used to calculate loss rate. &nbsp;</li>
+    <ul>
+      <li>In order to observe all packets (even those not destined to an
+observing node), we need to add a module in between two layers of the UC
+Berkeley stack -- and this is not "neat". &nbsp;</li>
+      <li>If we instead decided to have per-neighbor sequence numbers on
+each node, it would probably complicate things more than we want for the
+current implementation.</li>
+    </ul>
+    <li>Chosen approach: active approach (beaconing) only. &nbsp;Each node
+broacasts special beacon packets which contain sequence numbers. &nbsp;Neighbors
+can then calculate loss rate using sequence number gaps.</li>
+  </ul>
+  <li><u>1 way vs. 2 way loss statistics maintenance</u></li>
+  <ul>
+    <li>2 way is important because we want to have metrics that would accurately
+reflect link asymmetries, etc.</li>
+  </ul>
+  <li><u>Data structure used to calculate loss rate</u> -- bitmap + end sequence
+number (CHOSEN) vs. sequence array :&nbsp;</li>
+  <ul>
+    <ul>
+      <li>bitmap + end sequence number is preferable keeping in mind memory
+constraints</li>
+    </ul>
+  </ul>
+  <li><u>Strategy used for continuous maintenance of loss rates</u></li>
+  <ul>
+    <li>&nbsp;EWMA (CHOSEN) vs.&nbsp; simple windowed:&nbsp;</li>
+    <ul>
+      <li>EWMA in order to filter out transcients in link quality due to,
+say, an animal walking through the pasture.</li>
+    </ul>
+  </ul>
+</ul>
+<h2>API to access the per-neighbor statistics: Design Considerations</h2>
+<ul>
+  <li>Ability to configure parameters involved in loss rate calculation</li>
+  <ul>
+    <li>desirable if some application wants to have capture loss jitter.</li>
+  </ul>
+  <ul>
+    <li>  this can be done in the init() function for the NeighborBeacon
+module</li>
+  </ul>
+  <li>Single, unified API to access neighbor statistics from any application:</li>
+  <ul>
+    <li>It would be good to provide a single place where this API can be
+invoked (more in the next section)<br>
+    </li>
+  </ul>
+  <ul>
+    <li>The API provided :<br>
+      <br>
+command int <b>getNeighbors</b> (uint16_t *nList); // returns # neighbors<br>
+command int <b>getNumNeighbors</b> ();<br>
+command uint16_t <b>getNextNeighbor </b>(); &nbsp;// enables an interator
+on the neighbors in the NeighborStore<br>
+      <br>
+command <b>getMetric16ForAll</b> (NeighborValue16 *neighbors, uint8_t count,
+uint8_t type);<br>
+command <b>getNeighborMetric16</b> (uint16_t neighborId, uint8_t type, uint16_t
+*pVal);<br>
+// similarly for 32 bit metrics<br>
+      <br>
+command uint8_t <b>getNeighborBlob</b> (uint16_t neighbor, uint8_t type,
+uint8_t *buffer, uint8_t *pLength);<br>
+      <br>
+// set commands are similar<br>
+command result_t <b>setNeighborBlob</b> (uint16_t neighbor, uint8_t type,
+uint8_t *buffer, uint8_t length);<br>
+// and so on...<br>
+      <br>
+command result_t <b>removeNeighbor</b> (uint16_t neighbor);<br>
+      <br>
+struct <b>NeighborValue16</b><br>
+{<br>
+&nbsp; &nbsp;uint8_t neighborId;<br>
+&nbsp; &nbsp;uint16_t metric;<br>
+};<br>
+      <br>
+struct <b>NeighborValue32</b><br>
+ {<br>
+ &nbsp; &nbsp;uint8_t neighborId;<br>
+ &nbsp; &nbsp;uint32_t metric;<br>
+ }; <br>
+    </li>
+  </ul>
+</ul>
+<h2><br>
+</h2>
+<h2>Module Structure<br>
+  <br>
+  <br>
+  </h2>
+<div align="center"><img src="ModuleStructure.gif"
+ alt="Module Structure" width="614" height="259">
+<br>
+ </div>
+<h2></h2>
+<h2><br>
+</h2>
+<h3>Core Modules</h3>
+<br>
+<ul>
+  <li><b>NeighborBeacon</b> module :&nbsp;</li>
+  <ul>
+    <li>Sends out beacons at a specified interval. &nbsp;</li>
+    <ul>
+      <li>The format of these beacon packets is as below:<br>
+        <pre>+-------------+--------------+-------------+------------+-----------+---------+-----------+---------+------<br>| TOS_Msg ... | sequence no. | incarnation | numRecords | neighbor1 | value 1 | neighbor2 | value 2 | . . .<br>+-------------+--------------+-------------+------------+-----------+---------+-----------+---------+------<br>    7 bytes       2 bytes       1 byte          1 byte      2 bytes   2 bytes    2 bytes    2 bytes<br></pre>
+numNeighbors | (neighbor | value)+</li>
+      <li>This allows us to pack neighbor records in an unexpanded TOS_Msg
+packet.</li>
+      <li>For now, the packet format is kept really simple and functional...
+but later, if and when we have a need or have a bigger packet size, it can
+be expanded to include more metrics.<br>
+      </li>
+      <li>If all neighbor records do not fit in on beacon packet, they are
+rotated and included subsequent beacon packets.<br>
+      </li>
+    </ul>
+    <li>Receives all beacons and incorporates received loss values into the
+NeighborStore (see below)</li>
+    <li>Calculates loss rates based on gaps in beacon sequence numbers...<br>
+    </li>
+    <li>Handles ageing of neighbors that haven't responded for a little while<br>
+    </li>
+  </ul>
+  <ul>
+    <li>Uses a standard AM "port" (type 63, according to msg_types.h) as
+any other application</li>
+    <li>Stores intermediate values used in loss calculation (bitmap, end
+sequence number, incarnation) in a struct that is stored as a "blob" in the
+NeighborStore.<br>
+      <br>
+    </li>
+  </ul>
+  <li><b>NeighborStore</b> module:</li>
+  <ul>
+    <li>Stores various parameters corresponding to a neighbor</li>
+    <li>Supports three types of data:</li>
+    <ul>
+      <li><b>16 bit metrics</b>: stored as an array of a predefined size
+(which can be 0 if there are no 16 bit metrics)</li>
+      <li><b>32 bit metrics</b>: stored as an array of a predefined size
+(which can be 0 if there are no 32 bit metrics)</li>
+      <li><b>blobs</b>: stored as T-L-V tuples in a buffer of predefined
+size; &nbsp;the NeighborStore does not care how long a blob of a particular
+type is, as long as there is space to hold it. &nbsp;(the size of this buffer
+can be 0, thereby disabling blobs in favor of conserving memory)<br>
+        <pre>+--------+----------+----------------+-----------+--------+----------+----------------+------------+<br>| type 1 | length 1 | values 1 . . . |   . . .   | type n | length n | values n . . . | end marker |<br>+--------+----------+----------------+-----------+--------+----------+----------------+------------+<br>  1 byte   1 byte     length 1 bytes               1 byte   1 byte     length n bytes    1 byte<br></pre>
+      </li>
+    </ul>
+    <li>Supports the aforementioned API<br>
+    </li>
+  </ul>
+</ul>
+<h3>Application Design</h3>
+<br>
+In our implementation, the customer for the neighborlist functionality is
+TinyDiffusion, which assumes that all links that are seen are bidirectional
+and "good". &nbsp;Now, one design approach that would keep the TinyDiffusion
+code simple by providing it an abstraction of bidirectional and "good" links.
+&nbsp;To achieve this, the layered structure, as described below, involving
+the NeighborFilter module is provided. &nbsp;
+<ul>
+  <li>TinyDiffusion uses <b>NeighborFilter</b> as its communication layer</li>
+  <li>The NeighborFilter module itself uses GenericComm as its communication
+layer</li>
+  <li>The NeighborFilter module passes up packes only from "good" neighbors
+and sends out packets only to "good" neighbors (this might not be strictly
+necessary, but if nothing comes out of sending a packet to a "bad" neighbor,
+why waste the energy in doing so?)</li>
+  <li>The NeighborFilter module can be configured with two thresholds <b>lowWater</b>
+and <b>highWater</b> to implement<br>
+   hysterisis on the calculated "bidirectional loss rate" for that neighbor.</li>
+  <ul>
+    <li>hysterisis is important to prevent high frequence flapping of link
+status beween "good" and "bad".<br>
+    </li>
+  </ul>
+  <ul>
+    <li>bidirectional_loss_rate = in_loss_rate + (1 - in_loss_rate) * out_loss_rate</li>
+    <li>implementation of hysterisis needs state regarding whether we are
+going "up" (BAD_LINK) or going "down" (GOOD_LINK) ...&nbsp;</li>
+    <ul>
+      <li>This "good" or "bad" information can be stored in the NeighborStore
+module&nbsp;</li>
+      <ul>
+        <li>Other modules that may benefit from the notion of "good" or "bad"
+can use it</li>
+        <li>But would perhaps not allow simulataneous existence of multiple
+per-application NeighborFilter modules&nbsp;</li>
+      </ul>
+      <li>OR, It can be maintained internal to NeighborFilter module in a
+table.</li>
+      <ul>
+        <li>Allows multiple NeighborFilter modules to operate simultaneously</li>
+        <li>But consumes more memory</li>
+      </ul>
+      <li>For now, the former approach is implemented, but going to the latter
+(which seems to have its advantages) is a very small change, which should
+probably be done.<br>
+      </li>
+    </ul>
+  </ul>
+</ul>
+<h2><br>
+Future Work</h2>
+<br>
+<ul>
+  <li>Adding support for promiscuous mode listening to allow computation
+of loss rates more frequently: but this will need us to go and insert some
+code in between two layers of the Berkeley Communication Stack, which will
+need some thinking.</li>
+</ul>
+<br>
+<br>
+<hr width="100%" size="2"><br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+ <br>
+</body>
+</html>

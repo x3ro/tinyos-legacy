@@ -1,0 +1,3 @@
+COMPONENT=TOSBase
+include ../Makerules
+

@@ -1,0 +1,3 @@
+COMPONENT=TestHWMult
+include ../MakeEyes
+

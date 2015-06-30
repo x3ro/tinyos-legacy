@@ -1,0 +1,11 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: deps.extra,v 1.1 2004/04/14 21:16:02 cssharp Exp $
+
+INCLUDES = $(filter -I%,$(shell ncc -v -target=$(PLATFORM) -I. $(filter -I%,$(PFLAGS) $(CFLAGS)) 2>&1 | head -1))
+DEPS_CACHE = build/$(PLATFORM)/nesc_deps.txt
+BUILD_DEPS = deps0
+
+deps0: FORCE
+	@mkdir -p build/$(PLATFORM)
+	@$(TOSDIR)/../contrib/SystemC/scripts/list_nesc_deps.pl -v $(INCLUDES) $(COMPONENT).nc > $(DEPS_CACHE)
+

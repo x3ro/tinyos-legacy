@@ -1,0 +1,21 @@
+this samples the voltage monitor muxes to determine the voltage drop
+across a calibrated diode inline with the battery supply to determine
+a) current battery voltage, and b) momentary current draw by applying
+the diode's spec for voltage drop vs. current flow.
+
+we sample the two voltage lines.  the sampled value is measured
+against half the 3.0v reference, so to convert to voltage, calculate
+its percentage of 12 bits, multiply by two, then multiply by 3.0.
+
+for example, to convert a sampled value of 2700:
+
+2700 / 4095 = 0.65934 * 2.0 * 3.0 = 3.95v
+
+do this for both channels and subtract the two, giving voltage drop
+across the diode in the power supply in front of the regulator.
+according to the diode spec sheet, knowing the (forward) voltage drop
+will tell you the amount of current flowing though the diode, as this
+behaviour is non-linear.
+
+the shimmer2r user manual under section 2.4.4 "voltage and power
+measurement" provides a more definitive table and discussion.

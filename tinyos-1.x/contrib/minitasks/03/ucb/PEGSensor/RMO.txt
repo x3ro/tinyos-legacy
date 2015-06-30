@@ -1,0 +1,19 @@
+
+typedef uint8_t MovingObjectID_t;
+
+enum {
+  MOVING_OBJECT_BROADCAST = 0xff,
+};
+
+interface SendToMovingObjects
+{
+  command result_t send( MovingObjectID_t id, TOS_MsgPtr msg );
+  event result_t sendDone( TOS_MsgPtr msg, result_t success );
+}
+
+interface MovingObjectClient
+{
+  event TOS_MsgPtr receive( TOS_MsgPtr msg );
+  command result_t updateLocation( MovingObjectID_t id, MagPosition_t position );
+}
+

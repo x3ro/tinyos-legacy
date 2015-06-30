@@ -1,0 +1,108 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Getting started with the TOS</title>
+<style>
+<!--
+ li.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	margin-left:0in; margin-right:0in; margin-top:0in}
+-->
+</style>
+</head>
+
+<body>
+
+<h1>MatTOS</h1>
+
+<p>The purpose of matTOS is to provide an easy way to prototype
+applications and analyze sensor data.&nbsp; This environment has a few
+advantages over the Java tool set, including:</p>
+
+<ul type=disc style="margin-bottom: 0in">
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'>An interactive, interpreted environment</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'>Powerful data analysis and
+     graphing</li>
+</ul>
+
+<p>It also has disadvantages, including the fact that it is not open-source and 
+it is slower.&nbsp; </p>
+
+<p>Since matTOS is being built from scratch, there were a few
+things we included to make it much more useful, but these <i>can </i>and <i>should
+</i>also be done for
+the java tools environment also.</p>
+
+<ol start=1 type=1 style="margin-bottom: 0in">
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>An entire communications stack</b> has been implemented on the PC
+     side.&nbsp; This allows you to deal with several different abstractions of
+     your data.</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>A general packet object</b> was created to allow you to get
+     completely away from bytes and just think about your data.</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>Many standard utilities </b>and tools have been abstracted and
+     standardized for easy code sharing.</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>A directory structure </b>that mirrors that of the TOS
+     distribution is used for new tools, allowing us to keep specific
+     modifications of code in our own directory while leaving general tools to
+     be used by everybody.<span style='mso-spacerun:yes'>  </span>It also
+     emphasizes that we need a new tool to deal with each TOS component</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'><b>Simple manipulation of
+     multiple serial ports</b></li>
+</ol>
+
+<p>The following documentation should make it easier for you to get started with 
+matTOS</p>
+<h3>Table of Contents</h3>
+<p>1.&nbsp;&nbsp;&nbsp; <b>Before starting</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a.&nbsp;
+<a href="beforeStarting/SettingUpMatlab.html">Installation</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; b.&nbsp;
+<a href="beforeStarting/usingMatlab.html">Using matlab</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; c.&nbsp;
+<a href="beforeStarting/directoryStructure.html">The directory structure</a><br>
+2.&nbsp;&nbsp;&nbsp; <b>Using matTOS</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a.&nbsp;
+<a href="usingMatTOS/interactingWithMotes.html">Simple interaction with motes</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; b.&nbsp;
+<a href="usingMatTOS/applicationEnvironment.html">Defining your environment</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; c.&nbsp;
+<a href="usingMatTOS/injectingPackets.html">Injecting packets</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; b.&nbsp; 
+<a href="usingMatTOS/anExampleApplication.html">An example application</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; c.&nbsp; 
+<a href="usingMatTOS/matTOStools.htm">Using the matTOS tools</a><br>
+3.&nbsp;&nbsp;&nbsp; <b>Understanding how matTOS works</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a.&nbsp; 
+<a href="understandingMatTOS/theCommStack.html">The communication stack</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; b.&nbsp;
+<a href="understandingMatTOS/the6-1CommStack.html">The 6.1 communication stack</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; c.&nbsp; 
+<a href="understandingMatTOS/PacketClass.html">The packet object</a><br>
+4.&nbsp;&nbsp;&nbsp; <b>For advanced users</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a.&nbsp; 
+<a href="advancedMatTOS/speedingItUp.html">why is it so slow?</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; b.&nbsp; 
+<a href="advancedMatTOS/packetListenerParameters.html">passing parameters to packet 
+listeners</a></p>
+
+</body>
+
+</html>

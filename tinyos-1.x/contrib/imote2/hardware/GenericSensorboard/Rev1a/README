@@ -1,0 +1,28 @@
+README for GenericSensorboard for Imote2
+3/25/2007
+Robbie Adler
+
+Notes
+-----
+This directory contains all of the information created for the iMote2 
+GenericSensorboard, including manufacturing info and copies of the CAD 
+files used to create the board.  The files included represent the final version
+of the board.  They include the physical fix for the upside-down crystal
+footprint found on the original version of the board.  The BOM and schematics
+also represent the parts placed on the final version of the board.  Please note
+that the information included in this directory have has actually been used
+to manufacturer a real board.  They are, however, only a small variant from the
+original files that were used to make the original boards with the addition/correction
+of some known issues.
+
+Directory Structure
+-------------------
+
+Layout --> contains the Allegro .brd file
+
+Schmetics --> contains a .pdf copy and the original Orcad Capture/Allegro 
+Capture CIS schematic database
+
+Manufacturing --> contains gerbers and assembly information (gerbers + BOM) 
+for the board
+

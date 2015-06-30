@@ -1,0 +1,6 @@
+#!/bin/bash
+cd /cygdrive/c/tinyos-1.x/tools/java
+java net.tinyos.sf.SerialForward &
+cd /cygdrive/c/broken/experimental/mdw/surge3/tools/java/mdw/surge
+java mdw.surge.MainClass 0x11
+

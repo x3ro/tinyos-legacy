@@ -1,0 +1,18 @@
+This directory contains files needed to use the TinyGALS programming
+model with existing TinyOS 1.x components written in nesC (.nc) and
+TinyGALS actors written in galsC (.gc).  You must first download and
+install the galsC compiler from sourceforge:
+
+http://sourceforge.net/projects/galsc
+
+You must also set the "GALSC" environment variable to point to the top
+of the galsC installation directory (which should contain the scripts
+and binaries needed to run the galsC compiler).  Alternatively, you
+can add the galsC installation subdirectories to your path.  Note that
+these paths must come before any existing nesC installations.
+
+The structure of this directory mirrors that of the main TinyOS
+distribution.  The "apps" subdirectory contains sample applications
+written in the galsC programming language.  The "tos/system"
+subdirectory contains the TinyGALS scheduler, which replaces the
+original TinyOS scheduler.

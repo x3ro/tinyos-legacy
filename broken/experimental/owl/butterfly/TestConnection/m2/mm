@@ -1,0 +1,2 @@
+ncc -target=mica2 -Os -Wall -Wnesc-all -fnesc-cfile=app.c -board=basicsb TinyOS.nc && mica-install a.out
+

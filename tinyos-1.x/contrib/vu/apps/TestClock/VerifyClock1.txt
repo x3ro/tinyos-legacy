@@ -1,0 +1,8 @@
+VerifyClock1:
+
+The VerifyClock1C component is used to determine the actual interrupt rates for various scales. 
+This helped to verify the documentation of timers in ATmega103 (and ATmega128). You need to build
+and install two versions of the VerifyClockC and compare the rates they blink at. 
+They should blink about once per second.
+
+Author: miklos.maroti@vanderbilt.edu

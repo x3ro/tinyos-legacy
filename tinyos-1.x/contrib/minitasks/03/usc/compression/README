@@ -1,0 +1,45 @@
+Ning Xu (nxu@usc.edu)
+May 20,2003
+University of Southern California
+
+
+1.Component overview
+
+This component implementes LZ77 algorithm(it is chosen because of low memory requirement), it compresses accelerometer reading before 
+writing them to the logger. To compress data from other sensors ( Light, Magnetometer, Acoustic etc), it should be fairly easy by modifying 
+the wiring on the configure file. 
+
+Double buffers, each of which is 1600 bytes, are used to overlap sampling and compressing. When one buffer fills up, a task is posted to 
+compress the buffer. The whole compression is decomposed to a serials of tasks, each of which is responsible for compressing a chunk of data.
+The is an artificial delay of 1/32 second between 2 logger writes, to ensure correct logger write.
+
+The LZ77 algorithm trades memory off for computation. It is an in-place algorithm, which fits well in the 4KB motes memory. The value of 
+SLIDING_WINDOW_SIZE and MAX_MATCH_LENGTH can be changed to reduce computation. The bottom line is, compressing should finish before the other
+ buffer fills up.
+
+2.How to use
+
+Program one mote with GenericBase, this mote is used to inject control packets to start sensing, stop sensing, read logger etc.
+Program another motes with this component, you should have a sensorboard with accelerometer.
+Start SerialForward GUI, do a 
+      "java net.tinyos.tools.BcastInject 125 start_sensing" 
+and   
+      "java net.tinyos.tools.BcastInject 125 stop_sensing" 
+to start and stop the sensing-compressing-logging.
+
+To read out logger data, do a 
+      "java net.tinyos.tools.BcastInject 125 read_log <mote-id>" 
+note that the mote should connect to the PC via serial connection and ListenRaw run on the PC.
+
+To uncompress the logger data, run the perl script "lz.pl" that sits under tools directory.
+
+3.Limitations
+
+The max working sampling rate is 128Hz, higher frequency results in loss of logger lines.
+
+The logger suffer from missing line occasionally.
+
+Only X axis of the accelerometer is sampled. Modification for double axes sampling&compressing is straitforward, but should pay attention to
+ memory allocation. 
+
+

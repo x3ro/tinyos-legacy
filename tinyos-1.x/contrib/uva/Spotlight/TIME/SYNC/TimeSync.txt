@@ -1,0 +1,133 @@
+Author/Contact: 
+---------------
+branislav.kusy@vanderbilt.edu (Branislav Kusy, ISIS, Vanderbilt) 
+miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION: 
+------------
+ The TimeSync component provides global time synchronization in the network. All 
+ of the nodes in the network run the same algorithm, choosing a root of the 
+ network in the beginning. The root is maintaining the global time and all other 
+ nodes synchronize to this global time. To keep synchronized, each node 
+ periodically broadcasts TimeSync msgs once per 30 seconds (which is a 
+ configurable parameter). Each node keeps a certain number of msgs in a table 
+ and (re)calculates the skew and offset of his local time vs global time when a 
+ new TimeSync msg comes. We assume that the local time of a node A is a linear 
+ function of the local time of a node B, so we can use linear regression to 
+ estimate the skew of these times. The algorithm works multi-hop with an 
+ approximate error +-1.5 microseconds per hop when using CPU clock timestamping 
+ (7.37MHz) and with +-1-2 jiffies (30-60 microsecs) error when using external 
+ crystal timestamping (32kHz) - see the TestTimeSync component for more 
+ comprehensive results. See the REQUIRED SYSTEM FILES to correctly update tos 
+ system files with our modified versions of certain components. The recent 
+ development targets the MICA2 platform however it should work with MICA as 
+ well.
+
+ The TimeStamping component is used to time stamp incoming and outgoing 
+ messages. The TimeSyncMsg contains the node ID of the current syncronization 
+ root, the node ID of the sender, a sequence number that is only incremented by 
+ the root, and the global time of the sender at transmission time. See the 
+ TimeSyncMsg.h for more details.
+
+Phases of algorithm:
+--------------------
+ - INIT phase: triggered by switching the mote on. A node joining the network 
+ first listens to the radio for certain amount of time. If it does not receive 
+ TimeSync message from any other node in the network, it declares itself the 
+ root of the network. The length of this initial period is defined by 
+ ROOT_ALONE_TIMEOUT value = the number of Timer.fired() events (eg. if Timer 
+ fires each 30 secs and ROOT_ALONE_TIMEOUT is 4, then the node waits 20*4 = 80 
+ secs). 
+
+ - SENDING phase: triggered by Timer.fired() event Each node is periodically 
+ broadcasting TimeSync msgs. BEACON_RATE (curreently 30 secs) specifies the 
+ period of this broadcast. Eventually we would like the node with the smallest 
+ node ID to become the root of the network (the root is the only one who can 
+ increase the seq number of the time sync msg). However we do not want to force 
+ all the network to change its global time by a large amount each time a new 
+ node with smaller ID appears. Therefore, we are waiting for certain period of 
+ time (ROOT_SWITCH_TIMEOUT), during which the new root determines the skew and 
+ the offset of the global time and only after the root has a good estimate of 
+ the current global time, it announces itself to be the root. After a node 
+ becomes the root, its skew and offset estimates won't change until someone else 
+ becomes the root. A node also declares itself the root if he has not heard any 
+ time sync msgs for ROOT_SWITCH_TIMEOUT Timer events which helps to overtake the 
+ responsibility of the root that has died.
+
+ - UPDATE phase: triggered when a TimeSync msg comes, a receiving node stores it 
+ in its table of messages and recalculates the skew and offset of its local time 
+ with respect to the global time. The msg is considered to be new only if it has 
+ higher sequence number than the last heard msg. Only the root can increase the 
+ sequence number which helps us to distinguish the messages that came to a node 
+ along different routes originated at the root and to store just one of these 
+ messages in the table. The skew is normalized to zero, i.e. the skew is the 
+ slope of the best fitting line minus one, which alleviates arithmetic errors.
+
+for more information on the algorithm, see our technical report at:
+
+https://www.isis.vanderbilt.edu/projects/nest/documentation/Vanderbilt_NEST_TimeSynch.pdf
+
+TESTING:
+--------
+***See contribu/vu/apps/TestTimeSync directory for more details.***
+
+PARAMETERS:
+-----------
+ TIMESYNC_RATE - the period (seconds) in which each node broadcasts time sync 
+ message 
+ TIMESYNC_SYSTIME - if defined, the time sync algorithm will use the internal 
+ crystal of the atmel microprocessor (7.37 MHz) for timestamping - if not 
+ defined, the 32kHz external crystal is used for timestamping 
+ TIMESYNC_DEBUG - if defined, the multihop network is enforced in software, the 
+ nodes need to have special ids (see ReceiveMsg.receive() function in 
+ TimeSyncM.nc, or apps/TestTimeSync for more information)
+
+You can define these in your Makefile with something like the following line:
+
+  PFLAGS := $(PFLAGS) -DTIMESYNC_SYSTIME -DTIMESYNC_RATE=20 -DTIMESYNC_DEBUG
+ 			
+WIRING:
+-------
+ Include the TimeSyncC component into your application/component. The TimeSyncC 
+ component must be initialized through its StdControl interface. Once 
+ initialized, you can use its GlobalTime interface to obtain the global time in 
+ the network. TimeSync is also using the GenericComm and Timer, therefore you 
+ should also initialize these two components in your main application. Your 
+ code should contain sth like:
+ 
+ 	Main.StdControl -> TimerC;
+	Main.StdControl -> GenericComm;
+	Main.StdControl -> TimeSyncC;
+
+REQUIRED SYSTEM FILES:
+----------------------
+ You will need the following files from the contrib/vu/tos directory in order to 
+ use the TimeSync component if using fast clock (TIMESYNC_SYSTIME is defined):
+
+	lib/TimeSync/* 
+	
+ if using slow clock (TIMESYNC_SYSTIME is not defined) you need the following 
+ files from contrib/vu/tos directory:
+
+	lib/TimeSync/* 
+	platform/avrmote/*
+
+ You can copy all these files to a separate directory and include it in your 
+ makefile using 
+
+	PFLAGS := $(PFLAGS) -I<your dir>
+
+ Or you can use some Makefile magic to get them directly from the contrib/vu 
+ directory. If you want to change the rate of time sync messages, let's say to 
+ one message per minute per mote, then add the following line to your Makefile:
+
+	PFLAGS := $(PFLAGS) -DTIMESYNC_RATE=60
+
+ If you have a full copy of the tinyos-1.x CVS tree, a complete Makefile of your 
+ application could be:
+
+COMPONENT=XXXXXXXX 
+VUDIR=%T/../contrib/vu/tos 
+PFLAGS := -I$(VUDIR)/platform/mica2 -I$(VUDIR)/platform/avrmote -I$(VUDIR)/system 
+PFLAGS += -I$(VUDIR)/lib/TimeSync -I$(VUDIR)/lib/TimeStamping -DTIMESYNC_RATE=60 
+include ../Makerules

@@ -1,0 +1,29 @@
+program = decl-list statement-list
+
+decl-list = decl decl-list | <null>
+decl = single-decl | buffer-del
+single-decl = VAR <string>;
+buffer-decl = BUFFER <string>;
+
+statement-list = statement statement-list | <null>
+statement = assignment | control | call
+assignment = l-value = r-value;
+l-value = var-ref | buf-ref
+var-ref = <string>
+buf-ref = <string>[expr] | <string>[]  // implies tail
+r-value = call | expr
+call = CALL <string> | CALL <string> "(" param-list ")"
+param-list = param | param param-aux | <null> 
+param-aux = "," param | <null>
+expr =  "(" expr ")" | expr binary-op expr | unary-op expr | constant | var-ref | buf-ref
+binary-op = "+" | "--" | "*" | "^" | "AND" | "OR" | "XOR" | "IMPL" | "EQV"
+unary-op = "NOT" | "-"
+control = if-statement //x | for-statement
+if-statement = "IF" expr "THEN" if-exec "END" "IF"
+if-exec = statement-list | statement-list "ELSE" statement-list
+
+
+
+
+
+

@@ -1,0 +1,76 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Jason Hill
+ *
+ * This modules collects bytes from the byte layer and passes up a packet
+ * at a time to the higher layers.  It also accepts packets and feeds them down
+ * to the lower levels.
+ *
+ */
+
+TOS_MODULE STACK_MANAGER;
+JOINTLY IMPLEMENTED_BY STACK_MANAGER;
+
+ACCEPTS{
+  char MANAGER_TX_PACKET(AMBuffer_ptr packet, char max_wait);
+  void MANAGER_POWER(char mode);
+  char MANAGER_INIT(void);
+  void MANAGER_SET_HEADER_SIZE(char size);
+};
+
+SIGNALS{ 
+  char MANAGER_TX_PACKET_TIMEOUT(AMBuffer_ptr packet);
+  char MANAGER_TX_PACKET_DONE(AMBuffer_ptr packet);
+  char MANAGER_RX_HEADER_DONE(char* header, char size);
+  AMBuffer_ptr MANAGER_RX_PACKET_DONE(AMBuffer_ptr packet);
+};
+
+HANDLES{
+  char MANAGER_RX_BYTE_READY(char data, char error);
+  char MANAGER_TX_BYTE_READY(char success);
+  char MANAGER_BYTE_TX_DONE();
+  char MANAGER_SUB_DATA_SEND_READY(char data);
+  char MANAGER_SUB_START_SYM_DETECT();
+  char MANAGER_SUB_CHANNEL_IDLE();
+  char MANAGER_SUB_CHANNEL_IDLE_TIMEOUT();
+  char MANAGER_SUB_RADIO_ENCODE_DONE(char d1);
+  char MANAGER_SUB_RADIO_DECODE_DONE(char d1, char error);
+};
+USES{
+  char MANAGER_SUB_RADIO_ENCODE(char d1);
+  char MANAGER_SUB_RADIO_ENCODE_FLUSH();
+  char MANAGER_SUB_RADIO_DECODE(char d1);
+  char MANAGER_SUB_FIFO_IDLE(void);
+  char MANAGER_SUB_FIFO_SEND(char data);
+  char MANAGER_SUB_FIFO_READ(short timing);
+  char START_SYMBOL_SEARCH();
+  char MANAGER_SUB_INIT();
+  char MONITOR_CHANNEL();
+  char MONITOR_CHANNEL_INIT();
+  int MANAGER_SUB_GET_TIMING();
+  char MANAGER_SUB_ENCODE_BYTES(char byte);
+  char MANAGER_SUB_DECODE_BYTE(char d1, char d2);
+  char MANAGER_SUB_MAC_DELAY();
+};
+	
+

@@ -1,0 +1,6 @@
+# $Id: Makefile.component,v 1.1 2005/01/21 21:45:02 mturon Exp $
+
+COMPONENT=Surge
+SENSORBOARD=mts310
+
+INCLUDES= -I%T/lib/Attributes

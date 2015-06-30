@@ -1,0 +1,24 @@
+/BounceC.nc/1.1/Tue Aug 23 08:21:01 2005//
+/BounceM.nc/1.1/Tue Aug 23 08:21:01 2005//
+/Charger.h/1.1/Fri Aug 19 03:59:06 2005//
+/ChargerC.nc/1.3/Tue Aug 23 21:25:08 2005//
+/ChargerM.nc/1.7/Wed Aug 24 17:58:21 2005//
+/GoldenImage.nc/1.11/Tue Aug 23 18:11:04 2005//
+/IOSwitchC.nc/1.5/Tue Aug 23 21:25:08 2005//
+/IOSwitchM.nc/1.9/Wed Aug 24 17:57:39 2005//
+/Makefile/1.9/Wed Aug 24 18:09:33 2005//
+/PWSwitchC.nc/1.1/Fri Aug 19 03:59:06 2005//
+/PWSwitchM.nc/1.1/Fri Aug 19 03:59:06 2005//
+/PowerSource.nc/1.1/Tue Aug 23 18:11:04 2005//
+/PowerSourceStatus.nc/1.1/Tue Aug 23 21:25:08 2005//
+/RadioCRCPacket.nc/1.1/Tue Aug 23 08:21:01 2005//
+/RadioCRCPacketM.nc/1.1/Tue Aug 23 08:21:01 2005//
+/VoltageCheck.h/1.2/Fri Aug 19 03:59:06 2005//
+/VoltageCheckC.nc/1.3/Tue Aug 23 18:11:04 2005//
+/VoltageCheckM.nc/1.8/Wed Aug 24 17:57:39 2005//
+/VoltageStatus.nc/1.1/Tue Aug 23 18:11:04 2005//
+/WakeupC.nc/1.4/Wed Aug 24 17:57:39 2005//
+/WakeupHeader.h/1.4/Wed Aug 24 17:57:39 2005//
+/WakeupM.nc/1.5/Wed Aug 24 17:57:39 2005//
+/fileset_telosb.txt/1.17/Wed Aug 24 18:09:33 2005//
+D

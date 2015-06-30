@@ -1,0 +1,21 @@
+#-*-Makefile-*- vim:syntax=make
+
+PLATFORM = zlox
+
+# on the adapter board it does!
+HAS_USB=True
+MSP_MCU = msp430x1611
+MSP_BSL_FLAGS ?= --zlox
+USE_ID_CHIP=DS2411LiteM
+HAS_ID_CHIP_POWER=True
+
+# Disable MSP430 hardware multiply because it makes MSPGCC die
+
+PFLAGS += -mdisable-hwmul \
+ -I$(HHTOSDIR)/tos/platform/zlox \
+ -I$(HHTOSDIR)/tos/platform/msp430_crl_base
+
+$(call TOSMake_include_platform,msp)
+
+zlox: $(BUILD_DEPS)
+	@:

@@ -1,0 +1,3 @@
+COMPONENT=TestPowerSupplyMonitor
+
+include ../Makerules

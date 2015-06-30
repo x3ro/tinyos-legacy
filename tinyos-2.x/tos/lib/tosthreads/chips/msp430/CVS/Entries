@@ -1,0 +1,16 @@
+/HplAdc12P.nc/1.1/Thu Jun 12 14:02:24 2008//
+/HplMsp430DmaC.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplMsp430DmaP.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplMsp430InterruptC.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplMsp430InterruptNMIC.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplMsp430InterruptNMIP.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplMsp430InterruptP.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplMsp430Usart0C.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplMsp430Usart0P.nc/1.1/Thu Jun 12 14:02:25 2008//
+/HplMsp430Usart1C.nc/1.2/Tue Jun 29 22:07:51 2010//
+/HplMsp430Usart1P.nc/1.1/Thu Jun 12 14:02:26 2008//
+/Msp430Adc12P.nc/1.1/Thu Jun 12 14:02:26 2008//
+/Msp430TimerC.nc/1.2/Tue Jun 29 22:07:51 2010//
+/Msp430TimerCommonP.nc/1.1/Thu Jun 12 14:02:26 2008//
+/chip_thread.h/1.1/Thu Jun 12 14:02:26 2008//
+D

@@ -1,0 +1,105 @@
+* General
+
+This contrib directory contains an implementation of a Bluetooth stack
+for TinyOS. Not all Bluetooth operations are supported, and the only
+communication packets that can be communicated across the network is
+ACL packets. Extending the stack with support for e.g. RFCOMM should
+be straightforward though.
+
+This stack have been developed as part of the Manatee project at
+the department of Computer Science at the University of
+Copenhagen. See http://www.distlab.dk/manatee/ for more information.
+
+The hardware used to develop this stack was the BTNode hardware
+jointly developed by the Computer Engineering and Networks Laboratory
+(TIK) and the Research Group for Distributed Systems at the Swiss Federal 
+Institute of Technology (ETH) Zurich. More information about this 
+hardware can be found at 
+
+http://www.btnode.ethz.ch
+
+To use this hardware with TinyOS you may need to modify or configure
+the NesC compiler. You may find some information of use at
+http://www.distlab.dk/madsdyd/work/tinyos. Never versions of NesC
+should work by using the .platform files present in the contrib
+directory.
+
+* Applications
+
+The BTBench application uses a single Bluetooth device (onboard) to
+test the performance of various Bluetooth operations.
+
+The AssemblyCount uses two Bluetooth devices to build an adhoc
+multihop network towards which different simple queries can be
+send. The multihop network functionality have been isolated in the
+Assembly component, that follows the Assembly interface.
+
+A number of TinyOS components have been duplicated/modified to support
+this stack. Most important the interrupt handling of the serial ports
+have been changed to allow better throughput than the default TinyOS
+implementation.
+
+Please direct any questions about this stack to manatee@diku.dk 
+
+* To compile
+
+To compile for the pc target (tossim), you need to change a couple of
+files in the proper tinyos tree. 
+
+In the file "tos/platform/pc/hardware.h", change
+#include "nido.h"
+#include "hardware.nido.h"
+to
+#include <nido.h>
+#include <hardware.nido.h>
+
+in the file "tos/types/dbg_modes.h", change
+//DBG_RESERVED =	DBG_MODE(26),   /* reserved for future use      */
+to
+DBG_BT =              DBG_MODE(26),   /* Bluetooth simulation         */
+and, add the line
+        {"bt", DBG_BT|DBG_ERROR}, \
+after the line
+        {"simmem", DBG_MEM|DBG_ERROR}, \
+
+
+Finally, in the file "tos/system/tos.h", add the line
+#include <bt.h>
+at the very end of the file
+
+TODO: The last point, will break "normal" compilation...
+
+* Simulations
+
+Work is ongoing in supporting simulation of Bluetooth in TinyOS
+(nido/tossim) by using the code from the BlueHoc/Blueware simulator
+originally written for the NS2 network simulator.
+
+The current version (2003.10.02) includes support for compiling the
+application "TestBT" for the pc target. Afterwards, the TestBT
+application can be run with two simulated nodes to the point where
+node 1 receives an inquiry response. To view the Bluetooth related
+debug output, use the "bt" debug flag.
+
+* License and copyright
+
+These files are all, unless explicitly otherwise noted, licensed under
+the GNU Public License (GPL) version 2 or later. See the file COPYING
+for details. Derivate files from the Tiny OS distribution are licensed
+under their original license. Unless otherwise noted, the files are
+copyright Mads Bondo Dydensborg <madsdyd@diku.dk> and Martin Leopold
+<leopold@diku.dk>.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA

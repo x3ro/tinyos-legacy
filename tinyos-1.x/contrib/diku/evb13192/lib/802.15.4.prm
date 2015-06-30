@@ -1,0 +1,107 @@
+/************************************************************************************
+* This file contains some basic linker parameters.
+*
+* The linker file is made so it matches architecture for the Motorola HCS08 GB60/GT60 ucontroller
+* to be used in the 802.15.4/Zigbee project. 
+* 
+* Author(s):  Michael V. Christensen
+
+* Blatantly copied and modified by Mads Bondo Dydensborg,
+* <madsdyd@diku.dk>, Jan. 2005.
+
+*
+* (c) Copyright 2004, Freescale Semiconductor, Inc. All rights reserved.
+*
+* Freescale Confidential Proprietary
+* Digianswer Confidential
+*
+* No part of this document must be reproduced in any form - including copied,
+* transcribed, printed or by any electronic means - without specific written
+* permission from Freescale.
+*
+* Last Inspected: 29-03-01
+* Last Tested:
+*
+************************************************************************************/
+
+NAMES
+// Do not remove this block/section.
+// Description: The NAMES block contains a list of binary files building the application. This block
+// is mandatory and can only be specified once in a prm file.
+// Additional files may be specified by the option -Add. The object files specified with the option
+// -Add are linked before the files mentioned in the NAMES block. With the option -Add, additional
+// files can be added to a project without modifying the link parameter file.
+// If all binary files should be specified by the command line option -add, then an empty NAMES
+// block (just NAMES END) must be present in the link parameter file. Object files added with this
+// option are linked before the object files specified in the NAMES block.
+END
+
+// **************************************************************************
+
+// Memory map for HCS08 GB60/GT60. All memory areas are define below i.e. registers and stack etc.
+// are shown.
+
+// Options
+// READ_WRITE	is for normal variables
+// READ_ONLY	is for const variables and code
+// NO_INIT	is for uninitialized variables.
+
+SECTIONS 
+	DIRECT_PAGE_REGISTERS	        = READ_WRITE 0x0000 TO 0x007F; // This section contains often used registers
+	DIRECT_ADDRESSING_MEMORY        = READ_WRITE 0x0080 TO 0x00FF; // Direct addressing memory
+	USER_STACK		        = READ_WRITE 0x0100 TO 0x025F; // User stack
+	STATIC_USER_MEMORY	        = READ_WRITE 0x0260 TO 0x107D; // Static user memory
+
+	// Reserve space for NV RAM pointer
+	// MBD: OK, this is one of the great undocumented weirdness trips
+	// Check the TinyOS code for some comments on it.
+	// NB: You are _not_ supposed to move this somewhere. Stop thinking that.
+	// And, btw, we are not refering the segment in the TinyOS code, but
+	// use direct placement. Left in here so that you do not accidently
+	// allocate these two bytes somewhere else...
+	//	NV_RAM_POINTER_RAM       	= NO_INIT    0x107E TO 0x107F; // Static user memory
+	
+
+	// BootLoader/802.15.4/App. NV RAM flash memory.
+	// Initialized by 802.15.4.
+	// MBD: Nah, we wont need this.
+	FLASH 			        = READ_ONLY  0x1080 TO 0x17FF; // Flash section
+	//FLASH 			= READ_ONLY  0x1080 TO 0x13FF; // Flash section
+	// BOOTLOADER_MAC_NV_RAM0      	= READ_ONLY 0x01400 TO 0x148C; // Flash memory
+	// BOOTLOADER_PHY_NV_RAM0      	= READ_ONLY 0x0148D TO 0x14BB; // Flash memory
+	// BOOTLOADER_APP_NV_RAM0      	= READ_ONLY 0x014BC TO 0x15FF; // Flash memory
+	// BOOTLOADER_APP_NV_RAM1      	= NO_INIT   0x01600 TO 0x17FF; // Flash memory (erased)
+
+	HIGH_PAGE_REGISTERS	        = READ_WRITE 0x1800 TO 0x182B; // High page register section
+	FLASH2			        = READ_ONLY  0x182C TO 0xFFAF; // Flash section
+	NV_REGISTERS		        = READ_ONLY  0xFFB0 TO 0xFFBF; // Non-volatile registers
+	IRQ_VECTORS_TABLE	        = READ_ONLY  0xFFC0 TO 0xFFFD; // ISR vectors
+//	RESET_VECTOR		        = READ_ONLY  0xFFFE TO 0xFFFF; // System reset vector
+END
+
+// **************************************************************************
+
+// Here it is listed how the variables and code must be allocated.
+PLACEMENT
+	MY_ZEROPAGE			INTO DIRECT_ADDRESSING_MEMORY; 
+	DEFAULT_RAM                 	INTO DIRECT_ADDRESSING_MEMORY, STATIC_USER_MEMORY;
+	DEFAULT_ROM		        INTO FLASH, FLASH2;
+	SSTACK 			        INTO USER_STACK; // Put stack in user stack section
+// NB: Even though we do not use this segment/section, we need
+// to avoid putting something there.
+//	NV_RAM_POINTER		        INTO NV_RAM_POINTER_RAM;
+//	BOOTLOADER_MAC_NV_DATA0	    	INTO BOOTLOADER_MAC_NV_RAM0;
+//	BOOTLOADER_PHY_NV_DATA0	    	INTO BOOTLOADER_PHY_NV_RAM0;
+//	BOOTLOADER_APP_NV_DATA0     	INTO BOOTLOADER_APP_NV_RAM0;
+//	BOOTLOADER_APP_NV_DATA1     	INTO BOOTLOADER_APP_NV_RAM1;
+/// Not sure about these: /// - why they are there at all. 
+///	NV_REGISTERS_SECTION        	INTO NV_REGISTERS;
+///	IRQ_VECTOR_SECTION	        INTO IRQ_VECTORS_TABLE;
+//	RESET_VECTOR_SECTION	    	INTO RESET_VECTOR;
+END
+
+// **************************************************************************
+
+// Use our custom startup code
+VECTOR 0 _TinyOSStartup
+VECTOR 2 AbelInterrupt

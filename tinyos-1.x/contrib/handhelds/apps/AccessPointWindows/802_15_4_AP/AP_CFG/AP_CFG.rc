@@ -1,0 +1,182 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAIN DIALOGEX 0, 0, 424, 246
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "AP_CFG - 802.15.4 AP configuration program"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "&Network adapter:",IDC_STATIC_ADAPTER,18,46,336,8
+    COMBOBOX        IDC_COMBO_ADAPTER,24,58,372,156,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "SAVE settings and EXIT",IDOK,43,222,150,14
+    DEFPUSHBUTTON   "Cancel",IDCANCEL,229,222,150,14
+    LTEXT           "AP_CFG Version 0.4 Copyright (C) 2008",IDC_STATIC_C,18,
+                    6,384,10,SS_NOPREFIX
+    EDITTEXT        IDC_EDIT_COM,24,101,372,14,ES_AUTOHSCROLL
+    LTEXT           "&COM port:",IDC_STATIC_COM,18,89,372,8
+    CONTROL         "&UDP allowed",IDC_CHECK_UDP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,24,140,372,10
+    CONTROL         "&Only show TAP-Win32 v9",IDC_CHECK_ONLY_TAP9,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,18,34,97,10
+    CONTROL         "Verbose on &Events",IDC_CHECK_V_EVENTS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,24,168,174,10
+    CONTROL         "Verbose on &Unescape",IDC_CHECK_V_UNESCAPE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,24,180,174,10
+    CONTROL         "Verbose on &Data",IDC_CHECK_V_DATA,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,24,194,174,10
+    CONTROL         "Verbose on &All Unescape",IDC_CHECK_V_UNESC_ALL,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,225,168,174,10
+    CONTROL         "Verbose on all &ReadCOM",IDC_CHECK_V_COMM_ALL,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,225,180,174,10
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_CFG                 ICON                    "icon_cfg.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_MAIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 417
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 239
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "FileDescription", "AP_CFG Application"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "AP_CFG"
+            VALUE "LegalCopyright", "Copyright (C) 2008"
+            VALUE "OriginalFilename", "AP_CFG.exe"
+            VALUE "ProductName", " AP_CFG Application"
+            VALUE "ProductVersion", "1, 0, 0, 1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_APP_TITLE           "AP_CFG"
+    IDC_AP_CFG              "AP_CFG"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

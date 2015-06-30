@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "docbook/xml-dtd-4.2/docbookx.dtd" [
+  <!ENTITY introduction SYSTEM "introduction.xml">
+  <!ENTITY quickstart SYSTEM "quickstart.xml">
+  <!ENTITY utilities SYSTEM "utilities.xml">
+]>
+ 
+<book id="usersmanual" lang="en">
+  <bookinfo>
+    <title>The User's Manual for HP TinyOS Software Development</title>
+    <author>
+      <firstname>Andrew</firstname>
+      <surname>Christian</surname>
+      <affiliation>
+        <address>
+	  <email>andrew.christian@hp.com</email>
+	</address>
+      </affiliation>
+    </author>
+    <copyright>
+      <year>2005</year>
+      <holder>Hewlett-Packard Company</holder>
+    </copyright>
+    <revhistory>
+      <revision>
+        <revnumber>$Revision: 1.2 $</revnumber>
+	<date>$Date: 2005/08/18 12:15:29 $</date>
+	<authorinitials>$Author: adchristian $</authorinitials>
+      </revision>
+    </revhistory>
+    <abstract>
+      <para></para>
+    </abstract>
+  </bookinfo>
+
+  &introduction;
+  &quickstart;
+  &utilities;
+</book>

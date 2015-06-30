@@ -1,0 +1,37 @@
+BuzzerFreq:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+The BuzzerFreq component measures the buzzer frequency and sampling frequency
+and the overall noise level of the microphone and ADC. Many digital filters
+are tuned to specific sampling (and sound) frequencies, and different micro-
+controllers work at different speeds (MICA and MICA2), so it is essential to
+verify the observable frequencies for correct operation. Using this utility you
+can also filter out obviously bad sensor boards with high noise level.
+
+OPERATION:
+
+1. Program one mote with the BuzzerFreqC component. Attach a sensor board with
+   a buzzer and microphone
+2. Program another mote with the GenericBase application, with node id 1973.
+3. Turn them on, connect the base station to a PC. Please be silent while
+   the motes are running.
+4. On the PC run the following program:
+
+	java isis.nest.printmsgs.PrintDiagMsgs
+
+   The format of each line printed is
+
+	<node id> "buzzer" <buzzer freq> <buzzer ampl> "sampling" <sampling freq> <noise>
+
+   where
+
+	<node id> is the node id of the testing mote
+	<buzzer freq> is the frequency of the buzzer. Our sensor boards were
+		between 4200 and 4700, most of them were between 4400 and 4500.
+	<buzzer ampl> is the amplitude of the buzzer. 
+		In close range it should be over 100.
+	<samling freq> is the sampling frequency in continuous mode. On the MICA
+		this should be around 15300. On the MICA2 it should be (around) 17727.
+	<noise> the energy level when the buzzer is turned off. This value should
+		be less than or equal to 3.

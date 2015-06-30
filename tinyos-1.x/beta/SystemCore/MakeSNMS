@@ -1,0 +1,27 @@
+ifndef BETADIR
+BETADIR := $(shell ncc -print-tosdir)/../beta
+endif
+
+GOALS += perlnesc
+
+CFLAGS += -I$(TOSDIR)/lib/Flash \
+-I$(BETADIR)/SystemCore/ \
+-I$(BETADIR)/SystemCore/Hello \
+-I$(BETADIR)/SystemCore/Flood \
+-I$(BETADIR)/SystemCore/Drip \
+-I$(BETADIR)/SystemCore/MultiHopRSSI \
+-I$(BETADIR)/SystemCore/MgmtAttrs \
+-I$(BETADIR)/SystemCore/MgmtQuery \
+-I$(BETADIR)/SystemCore/EventLogger \
+-I$(BETADIR)/SystemCore/TaskQueueMonitor \
+-I$(BETADIR)/SystemCore/DelugeMonitor \
+-I$(BETADIR)/SystemCore/AM \
+-I$(BETADIR)/SystemCore/Grouper/ \
+-I$(BETADIR)/SystemCore/Reboot/ \
+-I$(BETADIR)/SystemCore/PowerMgmt/
+
+# JWHUI: The following should not be needed as the Makefile
+# will include the paths automatically.
+#-I$(TOSDIR)/lib/Deluge/ \
+#-I$(TOSDIR)/lib/Deluge/TOSBoot/include 
+

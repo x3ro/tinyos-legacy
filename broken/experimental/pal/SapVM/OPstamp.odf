@@ -1,0 +1,1 @@
+<FUNCTION name=stamp opcode=stamp numParams=1 param1=buffer returnVal=TRUE desc="Takes a buffer, timestamps it, adds a sequence number, and returns a new buffer." locks=true>

@@ -1,0 +1,89 @@
+USB Connection:
+
+    The USB cable has to be connected directly to the IMote for the boot loader to work.
+
+Installation Instructions:
+
+        Boot loader consist of three parts,
+
+  1. The boot loader firmware which is loaded in the mote.
+  2. The attribute tables which is loaded to the mote.
+  3. The PC application which communicates with the boot loader to load code to the mote.
+
+All the source code related to boot loader are completely C based and is independent of TinyOS.
+
+Attribute Table:
+
+  The attribute table generator code is located in blrAttribute directory. 
+
+  How to generate attribute table binary?
+    1. Run "make" in the blrAttribute directory to generate genAttr.exe.
+    2. Run "./genAttr.exe" to create the Attribute.bin file, which contains the attribute tables.
+
+  How to install the Attirbute.bin?
+    1. Run "make install" in the blrAttribute directory after generating Attribute.bin.
+    2. The attribute is loaded in to a fixed location in flash.
+
+  Communication with the JTAG?
+    JTAG is currently set for Raven, It has to be modified accordingly in the Makefile for different types.
+
+
+Boot Loader Firmware:
+
+  The boot loader firmware is located in the bootloader folder. 
+
+
+  How to generate the binary?
+
+     Run "make" in the bootloader/src folder to generate out.bin and vectory.bin which will be located in the build directory.
+
+
+  How to install the bootloader binary?
+
+     Run "make install" in the bootloader folder to install both out.bin and vector.bin. The binary files have their own fixed locations which is hardwired in the makefile.
+
+
+  Why two binaries?
+     
+    Vector.bin consists of the vector table which will be loaded at location 0x0 of the flash. The out.bin is the main bootloader code which will be loaded at the begining of the second partition.
+
+
+PC Application:
+
+  The PC application is located in blrconsole directory.
+
+
+  How to generate the PC application exe?
+
+    Run make in the blrconsole/src directory to generate USBLoaderHost.exe which is the executable for the application. 
+
+
+  How to use the USBLoaderHost.exe?
+
+    ./build/USBLoaderHost.exe will show the following message
+
+      out.exe [Options] [FileName]
+      Options:
+        -p FileName:    Upload a binary file to the Device.
+
+       -tp FileName:    Upload a binary file to the Device in
+                        a interactively. The display guides the user about
+                        the next action required. If the user has to send
+                        a command with parameter, then the value of the
+                        parameters are diplayed in stdout.
+
+        -c              Place the Device in command line mode.
+
+      -pst FileName:    Upload selftest image to the device.
+
+  
+     or run ./build/USBLoaderHost.exe -help to see the above message.
+
+
+  How to load code to the mote?
+ 
+    ./build/USBLoaderHost.exe -p FILE_PATH  will load the binary file in the FILE_PATH to the mote.
+
+  What is a command line mode (or -c)?
+ 
+    The command line mode is used for customizing the boot loader attributes. The boot loader could be placed in command line mode by ./build/USBLoaderHost.exe -c. The command prompt appears after synchronizing with the mote. The command prompt has an extensive and detailed manual about the available command and its usabilities which could be accessed through "help" command.

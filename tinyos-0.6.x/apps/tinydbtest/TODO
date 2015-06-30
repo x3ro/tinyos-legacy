@@ -1,0 +1,17 @@
+x Forward queries to neighbors
+x Implement network stubs (sending values to parents, queries to neighbors)
+  - Implement parent / child tracking
+x Clear aggregation state after each epoch
+- Don't always transmit at beginning of next epoch -- transmit sometime during
+  next epoch
+- Child value cache
+- Holistic aggregates
+- subqueries (e.g. max of average) -- allow aggregates to access local cache of values
+
+known bugs:
+
+? can't DELETE queries
+  - not tested
+- Delivery rate = 1, results appear to be empty? (get reset?)
+? query id != 0 doesn't work (qid always 0 in aggregate results?)
+  - fix not verified

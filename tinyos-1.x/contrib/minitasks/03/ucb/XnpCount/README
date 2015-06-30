@@ -1,0 +1,26 @@
+README for CntToLedsAndRfm
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+XnpCount is an extension of CntToLedsAndRfm that can take network
+reprogramming request.
+
+CntToLeds maintains a counter on a 4Hz timer; it displays the lowest
+three bits of the counter value on its LEDS. The red LED is the least
+significant of the bits, while the yellow is the most significant. It
+also sends out each counter value in an IntMsg AM packet.
+
+XnpCount stops Counter component when it receives network
+reprogramming request to make the application not compete
+for radio resources with network programming. XnpCount starts 
+Counter again after it is notified of successful network 
+reprogramming termination.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+None.

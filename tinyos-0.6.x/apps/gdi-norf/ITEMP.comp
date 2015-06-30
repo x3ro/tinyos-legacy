@@ -1,0 +1,21 @@
+
+TOS_MODULE ITEMP;	
+JOINTLY IMPLEMENTED_BY ITEMP;
+
+ACCEPTS{
+    char ITEMP_INIT(void);
+    char ITEMP_GET_DATA(void);
+};
+
+SIGNALS{
+    char ITEMP_DATA_READY(short data);
+};
+
+USES{
+    char ITEMP_SUB_ADC_INIT(void);
+    char ITEMP_SUB_ADC_GET_DATA(char port);
+};
+
+HANDLES{
+    char ITEMP_SUB_ADC_DONE(short data);
+};

@@ -1,0 +1,21 @@
+<VM NAME="MDA300VM" DESC="A basic motlle VM with single-hop communication and floating-point numbers." DIR="../../../../../../apps/MDA300VM">
+<OPTION CAPSULE_SIZE=1024>
+<SEARCH PATH="../../../opcodes">
+<SEARCH PATH="../../../contexts">
+<SEARCH PATH="../mate">
+<SEARCH PATH="../mate/rep-float">
+<SEARCH PATH="../mate/runtime">
+<SEARCH PATH="../mate/runtime/gen">
+<SEARCH PATH="../matelib">
+<SEARCH PATH="../matelib/gen">
+<SEARCH PATH="../../../../Util">
+
+<LANGUAGE NAME="motlle">
+<LOAD FILE="../mate/runtime/gen/floatfns.vmsf">
+
+<FUNCTION NAME="led">
+<FUNCTION name="id">
+<FUNCTION name="sleep">
+<CONTEXT NAME="Timer0">
+<LOAD FILE="../../../sensorboards/mda300ca.vmsf">
+<LOAD FILE="../matelib/gen/commfns.vmsf">

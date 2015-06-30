@@ -1,0 +1,3 @@
+COMPONENT=TestSleepModeC
+
+include ../MakeEyes

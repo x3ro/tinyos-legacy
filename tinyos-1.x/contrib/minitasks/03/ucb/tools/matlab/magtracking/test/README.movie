@@ -1,0 +1,107 @@
+
+From: David Culler <culler@eecs.berkeley.edu>
+To: nest@Millennium.Berkeley.EDU
+Subject: [Nest] Simple MatLab animation
+Date: Thu, 10 Jul 2003 08:55:44 -0700
+Sender: nest-bounces@Millennium.Berkeley.EDU
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US;	rv:1.0.2)
+ Gecko/20030208 Netscape/7.02
+
+In poking around further, I realized that it might not be easy to get 
+animations out of the GUI.  There are simple tools for doing this where 
+you are basically generating plots.  I don't know this for sure.
+
+Given that Cory has built on matlab functions for injecting and parsing 
+packets, it is not too hard to just build up a matlab data structure 
+containing the values or sequence of values that you want to see.  Once 
+it is a matlab variable, it is pretty easy to build plots and sequences 
+of plots that form movies.  Here is a simple piece of matlab code that
+does that.  nodes is a vector of positions.  M ends up being the movie 
+object.  If you are inside matlab, the movie object is what you want. 
+If you want to see it outside matlab, you can generate an avi file. 
+This does both.
+
+node = struct('x',0,'y',0,'id',0)
+node(1).x = 5.2
+node(1).y = 3.4
+node(1).id = '1'
+
+node(2).x = 2.2
+node(2).y = 5.4
+node(2).id = '2'
+
+node(3).x = 8.2
+node(3).y = 3.1
+node(3).id = '3'
+
+n = length(node)
+s = 0.5
+nframes = 50;
+
+x = [node.x]'
+y = [node.y]'
+
+h = plot(x,y,'.');
+set(h,'MarkerSize',18);
+axis([0 20 0 20])
+axis square
+grid off
+
+for k = 1:nframes
+    drawnow
+    x = x + s*randn(n,1);
+    y = y + s*randn(n,1);
+    set(h,'XData',x,'YData',y)
+    M(k) = getframe;
+end
+
+movie2avi(M,'nodemove')
+
+
+[nodes.m  text/plain (621 bytes)]
+node = struct('x',0,'y',0,'id',0)
+node(1).x = 5.2
+node(1).y = 3.4
+node(1).id = '1'
+
+node(2).x = 2.2
+node(2).y = 5.4
+node(2).id = '2'
+
+node(3).x = 8.2
+node(3).y = 3.1
+node(3).id = '3'
+
+n = length(node)
+s = 0.5
+nframes = 50;
+
+x = [node.x]'
+y = [node.y]'
+
+h = plot(x,y,'.');
+set(h,'MarkerSize',18);
+axis([0 20 0 20])
+axis square
+grid off
+
+for k = 1:nframes
+   drawnow
+   x = x + s*randn(n,1);
+   y = y + s*randn(n,1);
+   set(h,'XData',x,'YData',y)
+   M(k) = getframe;
+end
+
+movie2avi(M,'nodemove')
+
+
+
+
+[text/plain (278 bytes)]
+_______________________________________________
+Nest mailing list
+Nest@Millennium.Berkeley.EDU
+http://mail.Millennium.Berkeley.EDU/mailman/listinfo/nest
+
+

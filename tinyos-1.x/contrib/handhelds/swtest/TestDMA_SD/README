@@ -1,0 +1,10 @@
+this test application does three-port a/d conversion (e.g., from a
+three axis accelerometer) and performs a round-robin dma transfer of
+the data -- three 256 uint16_t buffers -- to three consecutive sectors
+on an sd card on a continuous basis, beginning at an arbitarily set
+"current_sector" value.  a tcpserver listens for connections from
+
+remote_client.c is a simple tcp socket client to connect to
+TestDMA_SD, send a command-lne provided flash sector number, and pull
+the three-axis accelerometer data buffers stored there.
+

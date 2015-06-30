@@ -1,0 +1,1 @@
+<FUNCTION name=HRMVoltage opcode=hrmvolt numparams=0 returnval=TRUE desc="HRMVoltage: null -> integer, HRMVoltage() = n where n is an integer representing the HRM device's supply voltage.">

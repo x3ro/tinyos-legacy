@@ -1,0 +1,28 @@
+
+NOTE : The SimDriver and TinyViz code is still very fresh. Your mileage
+may vary. This is an incomplete list of things that I know need to be
+done.
+
+- clean up reflect/Commands.java
+
+- fix bug in RadioModelGuiPlugin where it doesn't reflect the scripted
+  changes
+
+- pause callbacks to optionally take an event parameter
+
+- pauseSimInFuture is a misnomer since it doesn't really pause the
+  simulation, better would be eventInFuture
+
+- resolve variable failure shouldn't generate an exception
+
+- get rid of the AttributeChangedEvent for LEDs
+
+- fix up autorun (deprecate??)
+
+- autorun debug messages -> SimDebug
+
+- get rid of socket based console, make console default, socket
+  secondary
+
+
+

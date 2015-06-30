@@ -1,0 +1,25 @@
+README for Social
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+Social-network application. This application is a combined person tracker
+(like Ident) and social-network builder (i.e., it keeps track of which
+other people you spend time with).
+
+Read the USAGE file for detailed instructions on installing and using
+the Social application.
+
+Tools:
+
+net.tinyos.social.Social
+net.tinyos.social.names.Names
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:
+

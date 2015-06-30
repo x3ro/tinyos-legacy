@@ -1,0 +1,2 @@
+Beacon Vector Routing
+please read the bvr.html file in the html directory

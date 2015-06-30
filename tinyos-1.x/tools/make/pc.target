@@ -1,0 +1,16 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: pc.target,v 1.10 2005/07/21 03:01:49 kaminw Exp $
+
+PLATFORM = pc
+SENSORBOARD ?= micasb
+OPTFLAGS = -g -O0
+NESC_NIDO_TOSNODES ?= 1000
+PFLAGS += -pthread -fnesc-nido-tosnodes=$(NESC_NIDO_TOSNODES) -fnesc-simulate
+
+BUILD_DEPS ?= exe
+
+$(call TOSMake_include_platform,pc)
+
+pc: $(BUILD_DEPS)
+	@:
+

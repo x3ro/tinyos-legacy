@@ -1,0 +1,19 @@
+TOS_MODULE GDI;
+
+ACCEPTS{
+    char GDI_INIT(void);
+    char GDI_START(void);
+};
+
+HANDLES{
+    char GDI_SNOOZE_WAKEUP();
+    void GDI_CLOCK_EVENT();
+};
+
+USES{
+    char GDI_SUB_SNOOZE(unsigned short time);
+    char GDI_CLOCK_INIT(char interval, char scale);
+};
+
+SIGNALS{
+};

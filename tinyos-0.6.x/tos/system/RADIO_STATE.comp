@@ -1,0 +1,109 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2001 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Philip Levis
+ *
+ * This component specifies a state machine for radio communication. Using
+ * the specified states, it allows bit events to be handled by different
+ * components. The intention is to allow modular communication layer
+ * development; when a state is complete, it is expected to forward the
+ * component on to the next state. The state machines are:
+ *
+ * RX_IDLE -> RX_START -> RX_SYNC -> RX_DATA
+ * TX_MAC  -> TX_START -> TX_SYNC -> TX_DATA
+ *
+ * For example, once the TX_MAC has decided that it is safe to transmit,
+ * it should call TOS_CALL_COMMAND(RADIO_STATE_TX_SYNC_ACTIVATE)(). From
+ * then on, radio bit events will be forwarded to the TX_SYNC handler.
+ *
+ * Currently, the TX_MAC state can only be entered from the RX_IDLE or
+ * RX_SYNC states. Once RX_START or RX_DATA have begun, transmission
+ * must wait.
+ *
+ * It would be nice to allow for event notification of
+ * transmission state; a program requests to enter transmit state, which
+ * some time later results in an event notifying it that it is now
+ * in TX_MAC state. Otherwise, motes can end up always dropping a packet
+ * on the floor because they always happen to be in a receive state.
+ */
+
+
+TOS_MODULE RADIO_STATE;
+JOINTLY IMPLEMENTED_BY RADIO_STATE;
+
+ACCEPTS{
+	char RADIO_STATE_INIT(void);
+	char RADIO_STATE_TX_BIT(char bit);
+
+	char RADIO_STATE_PWR_OFF(short timer);
+	char RADIO_STATE_PWR_ON(short rate);
+	char RADIO_STATE_SET_BIT_RATE(short rate);
+
+	char RADIO_STATE_RX_IDLE_ACTIVATE();
+	char RADIO_STATE_RX_SYNC_ACTIVATE();
+	char RADIO_STATE_RX_START_ACTIVATE();
+	char RADIO_STATE_RX_DATA_ACTIVATE();
+
+	char RADIO_STATE_TX_MAC_ACTIVATE();
+	char RADIO_STATE_TX_SYNC_ACTIVATE();
+	char RADIO_STATE_TX_START_ACTIVATE();
+	char RADIO_STATE_TX_DATA_ACTIVATE();
+
+};
+SIGNALS{
+	char RADIO_STATE_RX_IDLE_START();
+	char RADIO_STATE_RX_IDLE_EVENT(char bit);
+
+	char RADIO_STATE_RX_START_START();
+	char RADIO_STATE_RX_START_EVENT(char bit);
+
+	char RADIO_STATE_RX_SYNC_START();
+	char RADIO_STATE_RX_SYNC_EVENT(char bit);
+
+	char RADIO_STATE_RX_DATA_START();
+	char RADIO_STATE_RX_DATA_EVENT(char bit);
+
+	char RADIO_STATE_TX_MAC_START();
+	char RADIO_STATE_TX_MAC_EVENT(char bit);
+
+	char RADIO_STATE_TX_START_START();
+	char RADIO_STATE_TX_START_EVENT();
+
+	char RADIO_STATE_TX_SYNC_START();
+	char RADIO_STATE_TX_SYNC_EVENT();
+
+	char RADIO_STATE_TX_DATA_START();
+	char RADIO_STATE_TX_DATA_EVENT();
+};
+HANDLES{
+	char RADIO_STATE_TX_BIT_EVENT(void);
+	char RADIO_STATE_RX_BIT_EVENT(char data);
+};
+USES{
+	char RADIO_STATE_SUB_INIT(void);
+	char RADIO_STATE_SUB_TX_MODE(void);
+	char RADIO_STATE_SUB_TX_BIT(char bit);
+	char RADIO_STATE_SUB_RX_MODE(void);
+	char RADIO_STATE_SUB_PWR_OFF(short timer);
+	char RADIO_STATE_SUB_PWR_ON(short bitrate);
+	char RADIO_STATE_SUB_SET_BIT_RATE(short timer);
+};

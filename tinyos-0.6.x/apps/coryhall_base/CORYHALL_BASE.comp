@@ -1,0 +1,69 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Jason Hill
+ *
+ *
+ * This module is simular to the AM_ROUTE module except it remembers the list
+ * of surrounding nodes that it can hear.  This allows it to build a more
+ * complete connectivity graph instead of a simple routing graph.
+ *
+ *
+ */
+
+TOS_MODULE CORYHALL_BASE;
+
+
+ACCEPTS{
+	char CORYHALL_INIT(void);
+	char CORYHALL_START(void);
+};
+
+HANDLES{
+	TOS_MsgPtr CORYHALL_SIGNAL_MSG(TOS_MsgPtr data);
+	TOS_MsgPtr CORYHALL_REPORT_SIGNAL(TOS_MsgPtr data);
+	TOS_MsgPtr CORYHALL_ROUTE_UPDATE(TOS_MsgPtr data);
+	TOS_MsgPtr CORYHALL_LIGTEMP_MSG(TOS_MsgPtr data);
+	char CORYHALL_SEND_DONE(TOS_MsgPtr data);
+	void CORYHALL_SUB_CLOCK(void);
+	char CORYHALL_TEMP_DATA_READY(short data);
+	char CORYHALL_LIGHT_DATA_READY(short data);
+};
+
+USES{
+	char CORYHALL_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	char CORYHALL_SUB_INIT();
+	char CORYHALL_SUB_CLOCK_INIT(char interval, char scale);
+	char CORYHALL_LED1_OFF();
+	char CORYHALL_LED1_ON();
+	char CORYHALL_LED1_TOGGLE();
+	char CORYHALL_LED2_OFF();
+	char CORYHALL_LED2_ON();
+	char CORYHALL_LED2_TOGGLE();
+	char CORYHALL_LED3_OFF();
+	char CORYHALL_LED3_ON();
+	char CORYHALL_LED3_TOGGLE();
+	char CORYHALL_SUB_LED_INIT();
+	char CORYHALL_LIGHT_READ();
+	char CORYHALL_TEMP_READ();
+};
+

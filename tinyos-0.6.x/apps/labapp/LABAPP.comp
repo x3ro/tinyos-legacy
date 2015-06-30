@@ -1,0 +1,75 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Jason Hill
+ *
+ *
+ */
+
+TOS_MODULE LABAPP;
+
+
+ACCEPTS{
+	char LABAPP_INIT(void);
+	char LABAPP_START(void);
+};
+
+HANDLES{
+	TOS_MsgPtr DATA_MSG(TOS_MsgPtr data);
+	TOS_MsgPtr RESET_HANDLER(TOS_MsgPtr data);
+	TOS_MsgPtr SURGE_PARAMETER_UPDATE(TOS_MsgPtr data);
+	TOS_MsgPtr SURGE_LINK_STATE_UPDATE(TOS_MsgPtr data);
+	void LABAPP_SUB_CLOCK(void);
+	char SURGE_PHOTO_DATA_READY(short data);
+	char SURGE_TEMP_DATA_READY(short data);
+	char SURGE_VOLTAGE_DATA_READY(short data);
+	char SEND_DONE(TOS_MsgPtr msg);
+};
+
+USES{
+	char LABAPP_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	char LABAPP_SUB_POWER(char mode);
+	char LABAPP_SUB_INIT();
+	char LABAPP_SUB_CLOCK_INIT(char interval, char scale);
+
+	char SURGE_PHOTO_INIT();
+	char SURGE_PHOTO_GET_DATA();
+	char SURGE_PHOTO_PWR(char mode);
+	char SURGE_TEMP_INIT();
+	char SURGE_TEMP_GET_DATA();
+	char SURGE_TEMP_PWR(char mode);
+	char SURGE_VOLTAGE_INIT();
+	char SURGE_VOLTAGE_GET_DATA();
+	char SURGE_LED_RED_ON();
+	char SURGE_LED_RED_TOGGLE();
+	char SURGE_LED_RED_OFF();
+	char SURGE_LED_YELLOW_ON();
+	char SURGE_LED_YELLOW_TOGGLE();
+	char SURGE_LED_YELLOW_OFF();
+	char SURGE_LED_GREEN_ON();
+	char SURGE_LED_GREEN_TOGGLE();
+	char SURGE_LED_GREEN_OFF();
+
+	void SURGE_POT_SET(char val);
+	
+};
+

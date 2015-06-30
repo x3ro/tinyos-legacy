@@ -1,0 +1,15 @@
+Mobiloc Application
+Author/Contact: Sarah Bergbreiter
+		Prabal Dutta
+
+This is the main application for the mobiloc algorithm.  This application
+uses the ultrasound and magnetometer components to estimate range and
+bearing to a moving target.  Using this information, location in a global
+coordinate frame is estimated and forwarded to the base station (and any
+other sensors that are intersted).
+
+Leds:
+
+green:	
+yellow:	 
+red:	

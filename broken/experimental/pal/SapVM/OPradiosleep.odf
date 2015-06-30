@@ -1,0 +1,1 @@
+<FUNCTION name=radiosleep opcode=radiosleep numparams=1 param1=value returnval=FALSE desc="radiosleep(x) turns the radio off for x seconds">

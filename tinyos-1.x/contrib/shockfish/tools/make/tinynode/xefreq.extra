@@ -1,0 +1,4 @@
+#-*-Makefile-*- vim:syntax=make
+
+CFLAGS+=-DXE1205_FREQ_PRESET=$(XEFREQ)
+

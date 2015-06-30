@@ -1,0 +1,16 @@
+** This file is designed to aid in the installation of Berkeley SP **
+
+The distribution can be found in the tinyos/tinyos-1.x/contrib/SP directory of the TinyOS CVS repository.  This guide assumes that this folder has already been downloaded onto local disk.
+
+The directory structure within the folder is designed to simulate the structure of the tinyos directory.  Consequently, three different areas of your local tinyos directory structure require modification:
+
+1) Place the tos/lib/SP (and consequently tos/lib/SP/CC2420) directory in your own tos/lib directory.
+
+2) Copy the files from the tos/platform directory (mica, pc, and telos) into your own directory structure in the same location.  These folders will already exist (or should at least), and consequently you just want to copy the files already in there into your structure).  These will be overwriting some files, so it is suggested that you initially back up the files in those directories if you want to be able to revert back.
+
+3) The last one, which is optional, is that target make files have been provided for the pc platform (p.target) and telos platform (t.target).  These are suggestions; obviously your own can be made.  The only key is that the files in tos/lib/SP and tos/lib/SP/CC2420 and tos/random be included before other directories.
+
+As a result of these changes, anything on top of SP should be able to wire directly to GenericComm for sending and receiving interfaces, and SPNeighbor separately for neighbor management.  Also, applications should work on the motes, as well as in TOSSIM
+
+# However, if use makefiles in /tools/make, you don't need to make changes above. t.target is for TelosB and p.target is for PC.
+

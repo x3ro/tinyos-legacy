@@ -1,0 +1,1 @@
+<FUNCTION name=fread opcode=fread numParams=2 param1=buffer param2=integer returnVal=TRUE desc="Reads data from the flash memory. Takes a buffer and an integer as parameters The integer represents the record number. The buffer is filled with data. A buffer is not returned instead because this allows us to see error codes.">

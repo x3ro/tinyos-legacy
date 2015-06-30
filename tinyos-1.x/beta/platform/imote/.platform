@@ -1,0 +1,21 @@
+@opts = ("-fnesc-target=env",
+         "-gcc=arm-thumb-elf-gcc",
+	 "-fnesc-no-debug",
+	 "-DTINY_OS",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/ChipBase/BlueOS",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/ChipBase/Common",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/ChipBase/Startup",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/ChipBase/TargetManager",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/ChipBase/TargetSupervisor",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/ChipBase/Utilities",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/BTLLStack/LinkManager",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/HCI",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/LMU",
+	 "-I$TOSDIR/platform/imote/zeevo1.2/ULS",
+	 "-I$TOSDIR/platform/imote/imotelib");
+
+push @opts, "-mingw-gcc" if $cygwin;
+
+$ENV{NESC_MACHINE} = "pointer=4,4 float=4,4 double=8,4 long_double=8,4 short=2,2 int=4,4 long=4,4 long_long=8,4 int1248_align=1,2,4,4 wchar_size_size=4,4 char_wchar_signed=false,true gcc=arm-thumb-elf-gcc";
+
+@commonplatforms = ("arm","imote");

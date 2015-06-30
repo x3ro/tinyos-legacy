@@ -1,0 +1,7 @@
+- Seem to be waking up too early from sleep on
+  YaoNeighborhood.getNeighborhood()
+
+- NCSLibM wants to wake up a fiber from location queue (and others??)
+  even when we haven't posted any location requests - due to getting
+  getLocDone event from elsewhere - need to maintain per-fiber state
+  (i.e. is fiber sleeping on this queue?)

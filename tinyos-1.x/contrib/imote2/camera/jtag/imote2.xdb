@@ -1,0 +1,19 @@
+! Startup Script
+! Konrad Lorincz
+! July 11, 2005
+
+! Load the symbolfile
+define button LoadSymbolfile "LOAD /SEGMENT /DEBUG=0/NOLOAD /GLOBAL OF \"C:/cygwin/opt/klApps/imote2Camera/hwTest/build/imote2/main.bd\"\n"
+LOAD /SEGMENT /DEBUG=0/NOLOAD /GLOBAL OF "C:/cygwin/opt/klApps/imote2Camera/hwTest/build/imote2/main.bd"
+
+!Exit from the debugger
+define button Exit "exit\n"
+
+
+!Start application; run until main
+!define button Start "restart;set reg pc=&_start;run until main\n"
+
+!Reload code, data, and debug information
+!define button Reload "delete debug 0;load /segment /debug=0 /global of \"C:/cygwin/opt/klApps/imote2Camera/hwTest/build/imote2/main.bd\";set reg pc=&_start\n"
+
+

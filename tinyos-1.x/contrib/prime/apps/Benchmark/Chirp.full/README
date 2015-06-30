@@ -1,0 +1,19 @@
+README for Chirp
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+Chirp is an application that periodically obtains sensor data from
+the photo sensor and sends the data over the radio.  The application
+demonstrates:
+  * how to obtain data from the ADC
+  * how to send a packet
+  * how to use the Timer configuration
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

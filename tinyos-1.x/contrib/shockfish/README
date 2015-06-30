@@ -1,0 +1,83 @@
+# $Id: README,v 1.12 2006/02/10 10:20:40 henridf Exp $
+
+TinyOS port and sample applications for the TinyNode platform by Shockfish SA. 
+The TinyNode is a msp430-based mote with a Xemics XE1205 transceiver.
+User's Manual and Fact sheet are available at http://www.tinynode.com/tinynode
+
+Port status: Beta. Most functionality is ready, but still missing some key pieces 
+in the radio stack (LPL, ACKs, CSMA). Some updates on port progress can be found at 
+http://lcavwww.epfl.ch/~henridf/tinynode.html
+
+
+Linux Installation (for win32, please consult User Manual provided by ShockFish)
+--------------------------------------------------------------------------------
+
+You will need the MSP430 toolchain. To install it:
+
+a) run the tinyos-1.x/tools/src/mspgcc/build-mspgcc script
+b) Download the file 
+   http://cvs.sourceforge.net/viewcvs.py/mspgcc/pybsl/bsl.py , and
+   save it to the directory where your msp430 binaries are located 
+   (ie, /opt/msp430/bin if you ran the script in step a without specifying another INSTALL_DIR)
+   and make a symlink called 'msp430-bsl' pointing to that file bsl.py
+
+   ln -s /opt/msp430/bin/bsl.py /opt/msp430/bin/msp430-bsl 
+
+   Note that msp430-bsl requires the python-serial module. 
+   On debian, installing this is as simple as 'apt-get install python-serial'.
+
+Compiling & Reprogramming
+-------------------------
+
+0. You will need nesc 1.2  -- if you have nesc 1.1.2 or 1.1.3, upgrade first.
+
+1. Add the lines
+
+   export TOSMAKE_PATH="$TOSDIR/../contrib/shockfish/tools/make"
+   export MAKERULES="$TOSDIR/../tools/make/Makerules"
+
+to your .bashrc file (or, if you use another shell, modify that that shell's startup file appropriately to set TOSMAKE_PATH).
+
+
+2. To reprogram via serial:
+
+   make tinynode install.0 bsl,/dev/ttyS1
+
+     [ replace '0' with whichever TOS_LOCAL_ADDRESS you which to set, 
+       replace '/dev/ttyS1' with your serial device. ]
+
+3. To reprogram via JTAG:
+
+   - Start a msp430-gdbproxy with the following command:
+
+         msp430-gdbproxy --port=3333 msp430
+
+	 After a few seconds, you should see a message like:
+
+         info:      msp430: Target device is a 'MSP430F1611' (type 39)
+         notice:    msp430-gdbproxy: waiting on TCP port 3333
+
+
+     - Then the following command (from an application directory) will reprogram the node
+       and drop you into the gdb prompt:
+
+         make tinynode gdb install  PROXY_HOST=hostname
+
+      [ where hostname is the name of the machine running the gdbproxy, and defaults to localhost if not provided. ]
+
+
+
+    Some handy extra JTAG params : Add 'noflash' to the above make command if you 
+    don't want to reprogram the node.
+
+
+
+Java Toolchain
+--------------
+
+To use the java toolchain, you must do a 'make' in contrib/shockfish/tools/java, and add 
+contrib/shockfish/tools/java to the CLASSPATH (make sure this is *before* the standard 
+tinyos-1.x/tools/java/ in the CLASSPATH).
+
+
+Launch SerialForwarder with '-comm serial@COM1:tinynode' if it is talking to a tinynode.

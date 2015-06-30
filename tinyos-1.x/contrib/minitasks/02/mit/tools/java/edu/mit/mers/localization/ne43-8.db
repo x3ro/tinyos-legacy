@@ -1,0 +1,8 @@
+motefield ID=0 BackgroundFile=ne43-8.jpg Screen1X=0 Screen1Y=0 World1X=0 World1Y=0 Screen2X=100 Screen2Y=100 World2X=100 World2Y=100 MoteSize=20 IconSize=40 TrackThrow=100 TrackDelta=8 UnitDistanceScaleX=12.5 UnitDistanceScaleY=15.0
+mote ID=0 X=830 Y=250 pot=9 edge=1 MoteType=5 Name=802
+mote ID=106 X=530 Y=230 pot=9 edge=1 MoteType=1 Name=801
+mote ID=108 X=240 Y=540 pot=9 edge=1 MoteType=1 Name=839
+mote ID=123 X=890 Y=890 pot=9 edge=1 MoteType=1 Name=ILab
+mote ID=5 X=1300 Y=950 pot=9 edge=1 MoteType=1 Name=IRoom
+tag ID=118 TagType=3
+

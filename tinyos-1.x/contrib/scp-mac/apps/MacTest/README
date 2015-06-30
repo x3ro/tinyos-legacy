@@ -1,0 +1,14 @@
+1. INTRODUCTION
+
+  This application tests the basic functionality of a MAC protocol.
+
+2. FUNCTIONALITY
+
+  The files in this directory is the common implementation for all MACs that
+provides the same interfaces (e.g. MacMsg).
+
+3. HOW TO USE
+
+  You can't compile an application in this directory. To test a specific 
+MAC protocol, go to its cooresponding directory that provides the wiring 
+and configuration. For example, to test CSMA, go to apps/CsmaTest/.

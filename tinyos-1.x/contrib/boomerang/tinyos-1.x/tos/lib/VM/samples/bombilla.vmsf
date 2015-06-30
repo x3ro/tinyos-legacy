@@ -1,0 +1,31 @@
+<VM NAME="BombillaVM" DESC="A simple VM that includes a range of triggering events and functions." DIR="../../../../apps/Bombilla">
+<SEARCH PATH="../opcodes">
+<SEARCH PATH="../contexts">
+<SEARCH PATH="../languages">
+<LOAD FILE="../sensorboards/micasb.vmsf">
+
+<LANGUAGE NAME="tinyscript">
+
+<FUNCTION NAME="bclear">
+<FUNCTION NAME="bfull">
+<FUNCTION NAME="bsize">
+<FUNCTION NAME="bufsorta">
+<FUNCTION NAME="bufsortd">
+<FUNCTION NAME="eqtype">
+<FUNCTION NAME="err">
+<FUNCTION NAME="id">
+<FUNCTION NAME="int">
+<FUNCTION NAME="led">
+<FUNCTION NAME="rand">
+<FUNCTION NAME="send">
+<FUNCTION NAME="sleep">
+<FUNCTION NAME="uart">
+
+
+<CONTEXT NAME="Trigger">
+<CONTEXT NAME="Timer0">
+<CONTEXT NAME="Timer1">
+<CONTEXT NAME="Once">
+<CONTEXT NAME="Reboot">
+<CONTEXT NAME="Broadcast">
+

@@ -1,0 +1,42 @@
+CC1000Radio, back-ported from TinyOS 2.0 with improvements.
+
+ADDED 8/29/06:
+* New interfaces to match the original CC1000 stack:
+  > RadioSendCoordinator
+  > RadioReceiveCoordinator
+  
+* Interface forwarding into the CSMA:
+  > CsmaBackoff
+  > CsmaControl
+  
+
+FEATURES OVER THE DEFAULT TINYOS 1.x CC1000 RADIO STACK:
+* Measured 21% faster throughput at the same baud rate
+
+* Better architecture makes it easier to understand and hack.
+
+* Smaller size (7% decrease in ROM, 12% decrease in RAM)
+
+* Auto-recalibration of the radio, every 8 hours by default, for outdoor applications
+
+* Ability to double the default baud rate to 76.8 kBaud (not compatible with some motes)
+
+* Joe and Jason's pulse-check implementation - instead of checking for preamble bits on
+  wakeup, check the RSSI reading on wakeup before the radio is fully in active mode.
+  35.5% increase in mote lifetime on power mode 8 (4.376 mAh/day or less, a 35.3% decrease!)
+  It can go lower if you adjust the microcontroller as well to use the internal oscillator.
+  Uisp with --wr_fuse_l=c4 (?) (needs verification)
+
+
+NOT IMPLEMENTED IN THIS PARTICULAR VERSION:
+* Restructured the way ack's work.  Ack's are truly on a per-packet basis, with the
+  ack field now transmitted to request an ack.  The radio can force all Tx packets
+  to request acks.  Transmitting the extra byte to specify ack's can actually increase
+  throughput by taking out the guess work on the receiving end.
+
+You should be able to drop this in place of your old stack.
+
+Bonus: Create a new platform to compile in using the new stack, so you still have access to the old.
+
+David Moss (dmm@rincon.com)
+

@@ -1,0 +1,98 @@
+INTRODUTION
+===========
+
+McCORD is a multi-channel core-based data dissemination protocol for sensor networks. By using multiple channels and coordinated sleep scheduling, McCORD greatly reduces dissemination latency and energy consumption for large data objects and large networks.
+
+McCORD consists of three main parts: neighbor probing, core setup and data transfer. A PC-based java program (net.tinyos.mccord.McCORD) uploads the data object (in form of a file) to an attached mote acting as the base station (whose ID should be BASE_ID defined in McCORD.h). The base station then broadcasts a schedule message, which is flooded to the network by other motes. The schedule message schedules the time to start neighbor probing on a pre-specified set of channels. The three parts: neighbor probing, core setup and data transfer, in this given order, are executed one after another.
+
+Although core setup and data transfer do not require time synchronization, the neighbor probing part needs time synchronization to probe neighbors on various channels. However, the current McCORD code is not integrated with any time synchronization scheme; it resorts to an external method. As an example, in the test code (TestMcCORD), a mote (programmed with TimeCalib) is used to send time sync beacons to all of the motes running TestMcCORD (this step is not needed in simulations). Although using one time sync mote to synchronize all other motes is impractical for multi-hop networks (unless it sits in a moving vehicle), McCORD itself is especially designed for multi-hop large networks.
+
+The code is tested in TinyOS 1.x on pc and telosb platforms. 
+
+
+DIRECTORY STRUCTURE
+===================
+
+apps
+|-- TestLogger: a utility to read the flash from a mote.
+|-- TestMcCORD: a sample application that has only McCORD running.
+    |-- TimeCalib: a utility that periodically broadcasts time sync beacons.
+|-- README: this file.
+|-- tools: 
+    |-- java: java tool to load data objects (in form of files) to the base station mote.
+    |-- Makefile: makefile to build the java tool.
+|-- tos
+    |-- interfaces: interfaces used in McCORD.
+    |-- lib
+        |-- McCORD: the McCORD component.
+    |-- platform: platform dependent components.
+        |-- pc
+        |-- telosb
+
+User should keep the directory structure, and move it as a whole if necessary. 
+
+
+BUILDING APPLICATIONS WITH MCCORD SUPPORT
+=========================================
+
+McCORD is provided as a TinyOS component (tos/lib/McCORD/McCORDC.nc). To Build an application with McCORD support, the StdControl interface of the Main component must be wired with the StdControl interface of McCORDC:
+	Main.StdControl -> McCORDC;
+
+And the main application component (for example, TestAppM) must use interface McCORD that is wired to McCORDC:
+	TestAppM.McCORD -> McCORDC;
+Interface McCORD consists of two events that should be handled by the user (you can neglect them by providing empty handlers):
+	event void started();
+	event void done(result_t result);
+
+The following two lines should also be added to the application's Makefile, before "include $(MAKERULES)":
+	MCCORD_ROOTDIR=../../..
+	include $(MCCORD_ROOTDIR)/tos/lib/McCORD/Makefile.include
+where MCCORD_ROOTDIR should be set properly.
+
+See the sample application in apps/TestMcCORD.
+
+
+RUNNING THE SAMPLE APPLICATION 
+==============================
+
+The following steps are used to run the sample application TestMcCORD:
+
+(1) Build the java tool net.tinyos.mccord.McCORD in tools/ directory using the provided Makefile.  Add the absolute path of tools/java directory to the $CLASSPATH environment variable so that the path does not have to be specified when running the java tool.
+
+(2) Format the flash with $TOSROOT/apps/TestDeluge/FormatFlash, where $TOSROOT is the TinyOS installation directory in the system. 
+
+(3) Program one mote with apps/TestMcCORD/TimeCalib and turn it off. This mote is time-sync'er.
+
+(4) Program other motes with apps/TestMcCORD and turn them on. One mote must be programmed with BASE_ID (default 0) and attached to the PC.
+
+(5) Turn the time-sync'er mote on. The other motes will turn green LED on when they are synchronized. 
+
+(6) From PC, run the java tool to load the file to the base station that is to be disseminated to the motes:
+	java net.tinyos.mccord.McCORD <file_name>
+The yellow LED will blink when data tranfer occurs at a mote (either as a sender or as a receiver). The red LED will be on when the mote finishes the data transfer.
+
+To verify the flash, you can use apps/TestLogger to download the flash content from the motes.
+
+To run the sample application in TOSSIM, specify the number of pages, TOTAL_PAGES, in tos/lib/McCORD/Makefile.include, and build TestMcCORD for pc platform (make pc). Turn on the "usr1" debug option (export DBG=usr1 in bash) for the output from McCORD. 
+
+By default, only node 0 (as known as base station) has the entire object at the beginning. The simulation stops when every node receives the entire object.
+
+
+PROTOCOL PARAMETERS
+===================
+
+A channel in McCORD is identified as an 8-bit integer (starting from 0) which is internally converted to the platform-specific radio frequency. The channels used by McCORD are defined in tos/lib/McCORD/McCORD.h:
+	uint8_t __gChannelsToProbe[] = { 0, 1, 2, 3 };
+Specify at least three channels (the max is 16 for telosb, and 256 for pc). Alternatively, you can just use one channel, which turns McCORD to CORD (the single channel core-based dissemination protocol). Using one channel instead of multiple channels normally leads to a longer dissemination latency.
+
+The motes write the received new object to the same volume of the flash, overwriting the old one. The ID of the volume, BLOCKSTORAGE_VOLUME_ID_0, is defined in tos/lib/McCORD/McCORD.h.
+
+
+CONTACT INFORMATION
+===================
+
+Leijun Huang
+Dept. of Computer Science
+George Mason University
+Email: lhuang2@gmu.edu
+

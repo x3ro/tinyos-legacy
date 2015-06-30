@@ -1,0 +1,101 @@
+$Id: README.TestPIRDetectNoReg,v 1.7 2005/07/19 17:47:46 phoebusc Exp $
+Author: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc)
+
+This directory works closely with TestPIRDetect.  Use strip_registry
+to strips out/replaces code that uses the registry from TestPIRDetect
+and PIRDetect components, so that we can compile without pulling in
+all of nestfe.  The new files will be dumped in this directory, which
+can then be compiled.
+
+This, of course, assumes that the files modified by strip_registry.pl
+actually follow careful coding/commenting conventions (see the comments
+in strip_registry.pl for details).  The sample input files that work
+with the script are all in the directory "samplefiles".
+
+You can also pass in an argument to select between PIRDetectSimple 
+or PIRDetect.  See the comments in strip_registry.pl for details.
+
+Lastly, a sample input file for simulation is in the directory 
+"samplefiles".
+
+
+
+Usage (from current directory):
+*******************************
+### for compiling to mote
+./strip_registry.pl   #use ./strip_registry.pl 1 if for TestPIRDetectSimple
+make telosb
+
+
+### TOSSIM-packet (preferred) ###
+./strip_registry.pl   #use ./strip_registry.pl 1 if for TestPIRDetectSimple
+make pc
+# This version can use the serial forwarder tossim-radio
+
+
+### TOSSIM-CC2420 (not preferred) ###
+# follow the instructions in beta/TOSSIM-CC2420 for TinyViz/Tython 
+# modifications
+./strip_registry.pl
+make pc sim,telos
+# This version cannot use tossim-radio because TossimSource does not
+# handle Telos packets provided by Tossim-CC2420 
+
+
+### Running TOSSIM once
+DBG=usr1,sim build/pc/main.exe -b=1 -gui 5 # starts 5 nodes, Do this in another window!
+./run.sh #edit as necessary
+
+## Running TOSSIM in a loop over a directory
+# may need to edit simPIRDetect.py for file format... see NOTES below
+./simLoop.sh # edit as necessary, especially DIRNAME
+             # can copy some sample files from 'samplefiles' directory
+             # but make sure all files in directory in same format
+
+
+# Plotting data output by TOSSIM for CC2420
+# -> in matlab, run: plotOscopeMsg.m
+# -> currently, need to use uniq and cut to remove extra fields from
+#    TOSSIM messages (see plotOscopeMsg.m)
+# -> run plotOscopeMsg with argument TypeFlag = 1 (telos)
+
+
+
+Notes/Bugs:
+***********
+- Places to edit the TOSSIM code for different runs:
+  * simPIRDetect.py/simPIRDetectBatch.py
+    ~ format ("telos", "xsm", "ggb", etc.) on line
+	dataList = parseInput.parseFile("telos",filename)
+    ~ sleep time to wait for simulator to update 'motes'
+	sleep(1)
+  * simLoop.sh
+    ~ number of nodes simulated
+        (DBG=usr1,sim build/pc/main.exe -b=1 -gui 6) &
+    ~ sleep time for simulator to initialize
+	sleep 1
+    ~ DIRNAME and SIMLOGNAME
+
+
+- TOSSIM-CC2420 does not communicate properly with tossim-radio on 
+  serial forwarder as of 7/14/2005.  Not a bug with the scripts here,
+  an issue with TossimSource.java in simulator.
+
+- The current version of simPIRDetectBatch does not seem to loop
+  through a directory properly. sim.reset() seems to reset the number
+  of nodes on the simulator.  This doesn't allow the simulation to
+  continue properly for the next file, and prints messages that not
+  enough nodes are being simulated.
+
+- I'm not 100% sure if sim.reset() actually sends any signals to
+  build/pc/main.exe to really reset the simulator, meaning the state
+  of the motes might be wrong for the next simulation.  This is of
+  concern only for simPIRDetectBatch.py.
+
+- Useful Features that I may never write (though you're welcome to):
+  ~ "guessing" an input file format from contents, a new function in
+    parseInput.py
+  ~ guessing the number of motes that need to be simulated in
+    simLoop.sh
+  ~ allowing more of the parameters in the list above to be set at
+    the command line (ex. sleep times)

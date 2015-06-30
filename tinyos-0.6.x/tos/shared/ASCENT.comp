@@ -1,0 +1,68 @@
+/*									tab{4
+ *  wave.h - Main component for simple application that waves the LEDs
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  David Culler
+ * Date:     Oct. 3, 2000
+ *
+ * This module sends out the value of  sensor readings to the radio.  It
+ * periodically samples the sensor value and then sends out a single radio
+ * packet.
+ *
+ */
+
+TOS_MODULE ASCENT;
+JOINTLY IMPLEMENTED_BY ASCENT;
+
+ACCEPTS{
+	char ASCENT_INIT(void);
+	char ASCENT_START(void);
+	char ASCENT_TX_PACKET(TOS_MsgPtr data);
+	char ASCENT_XMIT_HELP();
+};
+
+SIGNALS{
+	char ASCENT_TX_PACKET_DONE(TOS_MsgPtr data);
+	TOS_MsgPtr ASCENT_RX_PACKET_READY(TOS_MsgPtr data);
+};
+
+HANDLES{
+    TOS_MsgPtr ASCENT_RX_PACKET(TOS_MsgPtr data);
+	char ASCENT_SUB_TX_PACKET_DONE(TOS_MsgPtr data); 
+	char ASCENT_UART_TX_PACKET_DONE(TOS_MsgPtr packet);
+	TOS_MsgPtr ASCENT_UART_RX_PACKET_DONE(TOS_MsgPtr packet);
+};
+
+USES{
+	char ASCENT_SUB_INIT(void);
+	char ASCENT_TIMER_INIT();
+	char ASCENT_RFM_INIT();
+	char ASCENT_UART_INIT();
+	char ASCENT_ADD_TIMER(Timer *t, uint32_t tick);
+	char ASCENT_SUB_TX_PACKET(TOS_MsgPtr data);
+	char ASCENT_DEL_TIMER(Timer *t);
+	char ASCENT_UART_TX_PACKET(TOS_MsgPtr data);
+	char ASCENT_POT_INIT(char val);
+	void ASCENT_POT_SET(char val);
+	char ASCENT_POT_GET();
+	short ASCENT_RAND();
+};
+

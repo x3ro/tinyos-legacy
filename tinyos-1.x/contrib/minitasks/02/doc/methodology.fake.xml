@@ -1,0 +1,107 @@
+<!-- $Id: methodology.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="Architecture Methodologies">
+
+<p> The architecture defines a set of components which may implement algorithms
+and may behave as services.  The architecture further defines the input and
+output structures and protocols accepted and emitted by components, implicit or
+explicit constraints and behaviors pertinent to the components, and
+interrelationships between components. </p>
+
+<p> In this chapter, we first define just the subset of the architecture seen
+from the application layer: the pursuit-evasion game demo.  From there, we
+iteratively extend that architecture with likely supporting components up-to
+and including top-level TinyOS components.  As this document evolves, we will
+keep an eye toward abstraction and generality; ideally creating a refactored
+specification with broader application than just the game demo. </p>
+ 
+<section name="Overall Methodology">
+
+<section name="Prototypes">
+
+<p> Prototypes are the essence of the architecture.  Prototypes define the
+minimal interface provided by components.  The goal is to create an
+architecture in which dissimilar implementations of components are
+interchangeable if they provide equivalent facilities, while at the same time
+not imposing unnecessary constraints on the underlying algorithms. </p>
+
+<p> These Prototypes formally describe the API that certain classes of
+components and algorithms must adhere to.  Concrete implementations of these
+prototypes provide at least the described interfaces, but may include
+additional interfaces specific to the algorithm at hand, such as Sensor's and
+Actuator's.  Concrete implementations that wish to be used in the demo must
+fully specify themselves in the context of this document.  That is, they must
+clearly define their abstract, formal, NesC, and graphical architectures.
+These concrete specifications will be wholly included in the architecture
+document.  </p>
+
+</section>
+
+<section name="Services">
+
+<p> Each service is implemented as a separate component.  We intend a
+coordination component that provides scheduling of other components and
+management of shared resources.  Each component is initialized in turn, during
+which it is responsible for registering itself with the coordination component.
+Each component registers how often it should be executed (time-triggered) and
+which events it should receive (messages, sensor readings, etc).  The
+coordination component is responsible for meeting these demands of the
+components. </p>
+
+</section>
+
+<section name="Filtering and Calibration Interfaces">
+
+<p> To filter data or calibrate a sensor or actuator, we intend to create
+components that both provide and use the interface they are
+filtering/calibrating. This allows us to chain any number of filters or
+calibrations transparently.  </p>
+
+</section>
+
+</section>
+
+<section name="Implementation Methodology">
+
+<section name="Resources">
+
+<p> By default, we are not providing a resource sharing infrastructure beyond
+the sharing of the CPU and RF channel via the service coordination component.
+That is, we are assuming that in any particular configuration, no more than one
+component will want to use, say, the sounder.  Creating a configuration in
+which more than one component needs access to the same resource is considered
+malformed.  If this becomes a problem in practice, we will work to develop a
+resource sharing scheme.  We are deferring that solution until we see conflicts
+arise in practice.   That way, we can develop something well-suited for the
+problem (instead something ill-suited). </p>
+
+</section>
+
+<section name="Input/Output Convention">
+
+<p> Sensors readings (input) are event driven. Processing dependent on sensor
+readings are also events, say for filtering data. And, it cascades all the way
+up; events are fired for both estimating position and initiating the broadcast
+of those estimates. Actuation (output) is command driven; that includes both
+movement and outgoing communication.  </p>
+
+</section>
+
+<section name="Send/Receive Structures">
+
+<p> We want to abstract from byte-packed messages used for radio communication.
+Each component that communicates via messages to other components (either on
+the local mote or remote motes) operates in the context of a structure
+containing native types. We package all relevant information in a single
+structure. This reduces the need to redefine interfaces when/if we adjust only
+the particular data passed between components. This also results in a
+one-to-one correspondence between message interfaces and message structures.
+</p>
+
+</section>
+
+</section>
+
+</section>
+
+

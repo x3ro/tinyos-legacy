@@ -1,0 +1,198 @@
+A proposal for multi-client services
+====================================
+
+This has ended up looking like a cleaned up version of unique... There's
+several (independent) parts to the proposal, so we could go for some subset
+of this.
+
+All syntax is subject to change...
+
+Part 1: keysets
+---------------
+
+Keysets are essentially a way of bringing unique and uniqueCount into the
+language, in a type-safe way. A keyset is a new kind of C type:
+
+keyset Timer;
+// Timer is now an integer-like type
+
+Timer x, y;
+
+There's basically two operations on keyset types:
+
+  x = new Timer; // like unique("Timer")
+  for (y = 0; y < count Timer; y++) // count Timer is like uniqueCount("Timer")
+    if (y == x) ...
+
+There should be some restrictions on keyset types, so that:
+
+keyset Timer;
+keyset FileDescriptor;
+
+Timer x;
+FileDescriptor y;
+
+x = y; // should give a warning or error
+x = 0; // maybe this should warn too?
+x = (Timer)0; // this should definitely be ok
+
+
+Using this, Timer now looks like this:
+
+Timer.h:
+********
+keyset TimerKey;
+
+TimerC.nc:
+**********
+inludes Timer;
+configuration TimerC {
+  provides interface Timer[TimerKey id];
+  provides interface StdControl;
+}
+implementation {
+  components TimerM, ...;
+
+  ...
+  StdControl = TimerM;
+  Timer = TimerM.Timer; // keyset types must match!
+}
+
+TimerM.nc:
+**********
+module TimerM {
+    provides interface Timer[TimerKey id];
+    provides interface StdControl;
+    ...
+}
+
+implementation {
+  uint8_t queue[count TimerKey];
+
+  ...
+}
+
+
+---
+
+A client of TimerC would wire to it with:
+
+  MyApp.MyTimer -> TimerC.Timer[new TimerKey];
+
+as this is a rather common idiom, we should provide a shortcut:
+
+  MyApp.MyTimer -> new TimerC.Timer;
+
+---
+
+Part 2: keyset values and configurations
+----------------------------------------
+
+A multi-client service might want to, e.g., use a timer for every one of its
+clients. Because we're using parameterised interfaces, we can make the link
+between the client interface and the timer for that client by using the
+same keyset in two parameterised interfaces:
+
+module ServiceM {
+  provides interface Service[ClientKey id];
+  uses interface Timer[ClientKey id];
+}
+implementation { ... }
+
+[As a paranthetical remark, this is why parameterised interfaces are nicer than
+some more specific concept like an interface-set: we can make a link between
+two independent sets of interfaces]
+
+However there is an issue: how do we wire the Service component to the Timer
+service? The proposal is as follows:
+
+configuration ServiceC {
+  provides interface Service[ClientKey id];
+}
+implementation {
+  components ServiceM, TimerC;
+
+  Service = ServiceM.Service;
+  foreach k in ClientKey {
+    ServiceM.Timer[k] -> new TimerC.Timer;
+  }
+}
+
+It would be tempting to allow something like:
+  ServiceM.Timer -> TimerC.Timer;
+but then it isn't really clear (to the compiler or anyone else) when interfaces
+are created (do we create a ClientKey for every TimerKey, or a TimerKey for
+every ClientKey, or both?)
+
+[Last minute thought:
+  ServiceM.Timer -> new TimerC.Timer;
+ could be a shorthand for the foreach above, but I think you still want the
+ generality of foreach]
+
+
+Part 3: private keysets
+-----------------------
+
+With the proposal so far, how would one define a service in an abstract
+component? (where each instance of the service needs its own keyset)
+
+Something like the following would be possible:
+
+abstract configuration TimerC(keyset key) {
+  provides interface Timer[key id];
+  provides interface StdControl;
+}
+implementation {
+  components TimerM(key) as MyTimerM, ...;
+
+  ...
+  StdControl = MyTimerM;
+  Timer = MyTimerM.Timer; // keyset types must match!
+}
+
+And to create a timer service:
+
+SomeTimer.h:
+------------
+keyset SomeTimerKey;
+
+SomeTimer.nc:
+-------------
+includes SomeTimer;
+component SomeTimer is new TimerC(SomeTimerKey);
+
+and to use it:
+  MyApp.Timer -> new SomeTimer.Timer;
+
+
+
+As an alternative, we could allow components to define types in their
+specification (any types, not just keysets). This would give:
+
+abstract configuration TimerC() {
+  keyset key;
+  provides interface Timer[key id];
+  provides interface StdControl;
+}
+implementation {
+  components TimerM(key) as MyTimerM, ...;
+
+  ...
+  StdControl = MyTimerM;
+  Timer = MyTimerM.Timer; // keyset types must match!
+}
+
+Note that TimerM still receives the keyset as argument (as it's TimerC which
+is defining the keyset type).
+
+To create a timer service:
+
+SomeTimer.nc:
+-------------
+component SomeTimer is new TimerC();
+
+
+and to use it:
+  MyApp.Timer -> new SomeTimer.Timer;
+or, without the syntax shortcut:
+  MyApp.Timer -> SomeTimer.Timer[new SomeTimer.key];

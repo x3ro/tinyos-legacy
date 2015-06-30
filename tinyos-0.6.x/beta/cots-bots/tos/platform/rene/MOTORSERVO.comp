@@ -1,0 +1,30 @@
+/*
+ * Sarah Bergbreiter
+ * 9/27/2001
+ * COTS-BOTS project
+ *
+ * MOTOR module that ouputs two PWM signals with one timer, one of
+ * which is interpreted as a servo motor with feedback for position.
+ */
+
+TOS_MODULE MOTORSERVO;
+JOINTLY IMPLEMENTED_BY MOTORSERVO;
+
+ACCEPTS{
+	char MOTORSERVO_INIT(void);
+	char MOTOR1_SETSPEED(unsigned char speed1);
+	char MOTOR1_SETDIR(char direction1);
+	char SERVO_SET_DIRECTION(char direction);
+};
+USES{
+	char MOTORSERVO_SUB_INIT();
+	char MOTORSERVO_GET_DATA(char port);
+};
+HANDLES{
+	char MOTORSERVO_DATA_READY(int data);
+};
+SIGNALS{
+	void MOTORSERVO_FIRE_EVENT(int data, unsigned char speed);
+};
+
+

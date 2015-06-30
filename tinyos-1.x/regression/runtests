@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+
+do "./starttests";
+do "./runtest.pm";
+
+@failed = ();
+while (<*>) {
+    if (!/^(output|CVS)$/ && -d $_ && /$tests/) {
+	runtests($_);
+    }
+}
+
+if ($#failed >= 0) {
+    print "THE FOLLOWING TESTS FAILED for $platform:\n";
+    print join("\n", @failed);
+    print "\n";
+}
+else {
+    print "All tests PASSED\n";
+}
+
+END { kill 9, $pidapp; kill 9, $pidbase; }
+

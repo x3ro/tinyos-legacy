@@ -1,0 +1,73 @@
+TOS_MODULE TUPLE_ROUTER;
+#include "TinyDB.h"
+#include "SchemaAPI.h"
+
+ACCEPTS{
+	char TUPLE_ROUTER_INIT(void);
+	char TUPLE_ROUTER_START(void);
+	TinyDBError TUPLE_ROUTER_REMOVE_QUERY(char qid, bool *success);
+	void TR_SET_FIXED_COMM(bool fixed);
+};
+
+SIGNALS{
+	void TUPLE_ROUTER_NEW_EPOCH();
+	void QUERY_COMPLETE(ParsedQuery *q);
+};
+
+HANDLES{
+	void TUPLE_ROUTER_TIMER_EVENT(void);
+	TOS_MsgPtr TUPLE_ROUTER_QUERY_MESSAGE(TOS_MsgPtr msg);	
+	TOS_MsgPtr TUPLE_ROUTER_RESULT_MESSAGE(TOS_MsgPtr msg);	
+	void ALLOC_COMPLETE(char ***handle, char complete);
+	void REALLOC_COMPLETE(char **handle, char complete);
+	void COMPACT_COMPLETE();
+	void DATA_COMMAND_COMPLETE(CommandDescPtr commandDesc, char *resultBuf, SchemaErrorNo errorNo);
+	TinyDBError TUPLE_ROUTER_AGGREGATED_TUPLE_EVENT(Tuple *t, ParsedQuery *q,Expr *e);
+	TinyDBError TUPLE_ROUTER_AGGREGATED_RESULT_EVENT(QueryResult *qr, ParsedQuery *q,Expr *e);
+	TinyDBError TUPLE_ROUTER_FILTERED_TUPLE_EVENT(Tuple *t, ParsedQuery *q, Expr *e, bool passed);	
+	void TUPLE_ROUTER_SEND_DONE_EVENT(TOS_MsgPtr msg, char amId);
+	TOS_MsgPtr TUPLE_ROUTER_STATUS_MESSAGE(TOS_MsgPtr msg);
+	void DELIVER_TUPLE(void);
+	TOS_MsgPtr TUPLE_ROUTER_QUERY_REQUEST(TOS_MsgPtr msg);
+	TOS_MsgPtr TUPLE_ROUTER_SNOOPED_MESSAGE(TOS_MsgPtr msg, char amId, bool isParent);
+
+};
+
+USES{
+	AttrDescPtr GET_ATTR(char *name);
+	char DO_ALLOC(char ***handle, short size);
+	void LOCK_HANDLE(char **handle);
+	void UNLOCK_HANDLE(char **handle);
+	short FREE_HANDLE(char **handle);
+	void ALLOC_DEBUG();
+	short HANDLE_SIZE(char **handle);
+	char REALLOC_HANDLE(char **handle, short size);
+	char TUPLE_ROUTER_TIMER_START(UINT8 timer_id, char type, UINT32 interval);
+	char TUPLE_ROUTER_TIMER_STOP(UINT8 timer_id);
+	void INIT_TUPLE(ParsedQuery *q, Tuple *t);
+	CommandDescPtr GET_COMMAND_ID(int1 id);
+	char INVOKE_COMMAND(CommandDescPtr commandDesc, char *resultBuf, SchemaErrorNo *errorNo, ...);
+	CharPointer TUPLE_GET_FIELD_PTR(ParsedQuery *q, Tuple *t, char fieldNo);
+	void SET_TUPLE_FIELD(ParsedQuery *q, Tuple *t, char fieldNo, char *data);
+	AttrDescPtr GET_NEXT_QUERY_FIELD(ParsedQuery *q, Tuple *t);
+	short TUPLE_SIZE(ParsedQuery *q);
+	TinyDBError REQUEST_QUERY(TOS_MsgPtr msg, short from);
+	TinyDBError OUTPUT_RESULT(TOS_MsgPtr msg);
+	TinyDBError OUTPUT_QUERY(TOS_MsgPtr msg);
+	TinyDBError AGGREGATE_PARTIAL_RESULT(QueryResult *qr, ParsedQuery *q, Expr *e);
+	TinyDBError RESULT_FROM_BYTES(char *bytes, QueryResult *qr, ParsedQuery *q);
+	short GET_QID_FROM_RESULT(char *bytes);
+	TinyDBError TUPLE_TO_QR(QueryResult *qr, ParsedQuery *q, Tuple *t);
+	TinyDBError AGG_GET_NEXT_RESULT(QueryResult *qr, ParsedQuery *q, Expr *e);
+	TinyDBError AGGREGATE_TUPLE(ParsedQuery *q, Tuple *t, Expr *e);
+	TinyDBError FILTER_TUPLE(ParsedQuery *q, Tuple *t, Expr *e);
+	void TUPLE_READER_RESET_EXPR_STATE(ParsedQuery *q, Expr *e);
+	void TUPLE_ROUTER_CHILD_INIT();
+	TinyDBError SEND_UART(char *msg, char amId);
+	char TUPLE_ROUTER_SEND_MSG(short addr, char amId, TOS_MsgPtr msg);	
+	short NEXT_RAND();
+	char TR_TIMER_INIT();
+	char TR_TIMER_TERM();
+	AttrDescPtr TR_GET_SCHEMA_FIELD_BY_ID(char idx);
+};
+

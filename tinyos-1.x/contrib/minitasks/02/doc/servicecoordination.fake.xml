@@ -1,0 +1,176 @@
+<!-- $Id: servicecoordination.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="Proposal for Time-Triggered Function (TTF) Support in Coordinator Component in TinyOS (U.C.Irvine)">
+
+<section name="Requirement">
+
+<p> Three types of functions will be supported in the [[TTF_Coordinator]]
+component. </p>
+
+<ol>
+<li> Time-triggered function (TTF): A TTF can be described as, "From GlobalTime
+= T1 to T2, do a task TTF every P time-units (iteration-interval) by the GCT of
+D" where GCT denotes guaranteed completion time. </li>
+<li> Service function (SvF): A SvF should be started at the earliest convenient
+time (when a TTF initiated earlier is not in execution) and completed within
+the maximum execution duration (MED) of D after the invocation (i.e., one -way
+non-blocking request for execution of the SvF) occurs. The notion of a SvF is
+similar to that of a task in the current TinyOS if the MED for a task can be
+specified and the task can be invoked from other components. </li>
+<li> Conventional utility function to which a blocking-call can be made from
+within a TTF or a SvF. </li>
+</ol>
+
+</section>
+
+<section name="Assumption">
+
+<p> Clocks are well synchronized among motes. </p>
+
+</section>
+
+<section name="Interface">
+
+<code>
+module Coordinator {
+provides {
+interface TTF_Coordinator;
+}
+uses { }
+}
+</code>
+
+<code>
+interface TTF_Coordinator {
+/* to register a TT function with the coordinator */
+command INDEX RegisterTTF (TTFRequest *);
+/* to invoke a service function */
+command void InvokeSvF(SvFRequest *);
+/* to update t he execution schedule based on existing registered TTFs */
+command void UpdateExecSchedule();
+/* to dispatch next ready function in the execution engine */
+command FuncType* DispatchNextFunc();
+/* to retrieve a timing error report */
+command TimingErrorRept * RetrieveNextErrorRept();
+}
+</code>
+
+<image src="servicecoordination_fig1.png"/>
+
+<p> [[TTF_Coordinator]] component contains data structures which maintain
+timing requirements for TT functions, the execution schedule, and possible
+error records, and provides several APIs for manipulat ion of those data
+structures.  Application designers will provide bodies of Time -triggered (TT)
+functions in application components and will register them to
+[[TTF_Coordinator]] along with relevant timing requirements and interrupt
+enabling/disabling options.  [[TTF_Coordinator]] is responsible for maintaining
+the execution schedule by reflecting the timing requirements of registered TTFs
+and the SvF requests generated.  The function of main() will dispatch TTFs and
+SvFs according to the Execution Schedule and execute them with interrupts
+enabled and disabled as specified.  Possible error conditions, such as deadline
+violation, can be detected/reported either by [[TTF_Coordinator]] or by main(),
+and error records will be stored in [[TTF_Coordinator]].  Application
+components may retrieve the error records later and take appropriate actions.
+</p>
+
+</section>
+
+<section name="Appendix: Basic Data and Function Types">
+
+<code>
+/* function pointer type for all TTFs and SvFs */
+typedef void (*FuncPtr)(void*);
+</code>
+
+<code>
+/* an index to a registered TT function, used for future unregistration */
+typedef int INDEX;
+</code>
+
+<code>
+typedef int MicroSec;
+</code>
+
+<code>
+/* indicating the type of execution errors, such as deadline violation */
+typedef int ERR_CODE;
+</code>
+
+<code>
+typedef struct {
+/*the time when a TT function will be ready to be scheduled */
+MicroSec LoopStartTime;
+/* the time when a TT function will be deleted from the TT scheduler */
+MicroSec LoopEndTime;
+/*LoopStartTime+ (i-1)*IterationInterval is the time the i-th TT function will be scheduled /
+executed */
+MicroSec IterationInterval;
+/*The earliest time at which a TT function may start in each cycle */
+MicroSec EST;
+/*The latest time at which a TT function may star */
+MicroSec LST;
+/*LoopStartTime + (i-1)*IterationInterval +GCT is the time by which the i-th TT function
+should finish its execution */
+MicroSec GCT;
+} AAC;
+</code>
+
+<code>
+typedef struct {
+/* function pointer to TT function */
+TTFunc ptr_to_ttf;
+/* input parameters for TT function */
+void * parameter;
+/* timing requirements */
+AAC aac;
+/* indicating whether enabling/disabling certain interrupts during a TTF execution */
+int interrupt_vector;
+} TTFRequest;
+</code>
+
+<code>
+typedef struct {
+/* function pointer to SvF */
+TTFunc ptr_to_svf;
+/* input parameters for SvF */
+void * parameter;
+/* timing requirements */
+MicroSec MED;
+/* indicating whether enabling/disabling certain interrupts during a SvF execution */
+int interrupt_vector;
+} SvFRequest;
+</code>
+
+<code>
+typedef struct {
+/* indicating the type of the error detected, e.g., deadline violation */
+ERR_CODE err_code;
+/* indicating the reporter of the error, e.g., main() or timer interrupt handler ? */
+int reporter_id;
+/* indicating the time of error detection */
+MicroSec timestamp;
+} TimingErrorRept;
+</code>
+
+<code>
+typedef struct {
+/* indicating whether it is a TTF or a SvF */
+int func_type;
+/* function pointer to a TTF or a SvF */
+FuncPtr ptr_to_func;
+/* pointer to the input parameter of a TTF or a SvF */
+void * parameter;
+/* start time window of a TTF */
+MicroSec EST, LST;
+/* for a TTF, it represents GCT; for a SvF it represents MED */
+MicroSec GCT_or_MED;
+/ * interrupt enabling/disabling options */
+int interrupt_vector;
+} FuncInfo;
+</code>
+
+</section>
+
+</section>
+
+

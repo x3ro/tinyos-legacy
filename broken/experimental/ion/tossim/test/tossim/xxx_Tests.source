@@ -1,0 +1,41 @@
+/**
+ *  @file Xxx_Tests.cc
+ *
+ *  @author Ion Yannopoulos
+ */
+
+#include <tossim/test/private.hh>
+#include <tossim/test/Xxx_Tests.hh>
+
+namespace tos {
+namespace sim {
+
+namespace tests {
+
+Xxx_Tests::Xxx_Tests()
+{
+}
+
+Xxx_Tests::~Xxx_Tests()
+{
+}
+
+void
+Xxx_Tests::setUp()
+{
+}
+
+void
+Xxx_Tests::tearDown()
+{
+}
+
+void
+Xxx_Tests::runTest()
+{
+}
+
+} // namespace tests
+
+} // namespace sim
+} // namespace tos

@@ -1,0 +1,9 @@
+The implementation of the ESS application that runs over
+OnePhasePull, which in turn uses our Neighborlist implementation 
+underneath.
+
+See ../../doc/ for pointers to documentation.
+
+NOTE: this application currently works only on mica2s.  The mica2
+dependencies come from the sensorIB sensorboard code that this application
+uses.

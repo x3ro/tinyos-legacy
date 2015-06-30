@@ -1,0 +1,51 @@
+-*-outline-*-
+
+* misc
+.* 'landmark node' for routing
+.* in ucb/matlab/peglistener.m
+. o MagDataReflection
+. o MagCenterReport
+
+
+* misc TODO
+.* move code out of 'test'
+.* write README, describing useage
+.* bug Cory about getting data (or at least fields)
+.* 
+
+* questions
+.* routing: different crumb trail for each Pursuer?
+.* 
+
+* BUGS
+.* screen blanks if behind something, and isn't redrawn
+
+
+* features still needed
+.* routing
+. o show routing tree, in current state
+. o show crumb trees
+. o show messages as they are sent
+
+.* Pursuer / evader
+. o GPS position
+. o network estimated position
+. o heading
+
+.* mag tracking
+. o magnetometer readings
+.  = copy pretty picture from prev demo
+.  = 
+
+.* misc
+. o display text next to nodes
+.  = 
+. o select nodes w/ mouse
+.  = dump to matlab variable
+.  = display info somewhere
+. o 
+.* incorporate movie stuff
+
+
+* testing
+.* have matlab generate a data stream

@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+#
+# FILE:         flash
+# AUTHOR:       Martin Turon
+# DATE CREATED: February 15, 2004
+# DESCRIPTION:  Wrapper script around uisp to simplify flashing of mote
+#               firmware 
+#
+# $Id: flash,v 1.2 2005/02/22 17:55:50 mturon Exp $
+#
+
+my $g_version = '$Id: flash,v 1.2 2005/02/22 17:55:50 mturon Exp $';
+
+print "flash Ver:$g_version\n";
+
+
+my %Cmds = (
+  read    => '--rd_fuses',
+  clkint  => '--wr_fuse_l=0xc4',
+  clkext  => '--wr_fuse_l=0xff',
+  jtagen  => '--wr_fuse_h=0x19',
+  jtagdis => '--wr_fuse_h=0xd9',
+);
+
+if( @ARGV == 0 ) {
+  print <<"EOF";
+  Usage: fuses [command] [port] [args]
+    read     = read fuses
+    clkint   = set to internal oscillator
+    clkext   = set to external oscillator
+    jtagen   = enable JTAG
+    jtagdis  = disable JTAG	
+	
+EOF
+
+  my $fmt = '%8s  %s'."\n";
+
+  printf( $fmt, "Command", "Flag" );
+  printf( $fmt, "-------", "-" x 60 );
+  for my $cmd (sort keys %Cmds) {
+    printf( $fmt, $cmd, $Cmds{$cmd} );
+  }
+  print "\n";
+
+  exit 0;
+}
+
+#$command = shift();
+$image = shift();
+$nodeid = shift();
+$comport = shift(); 
+if ($comport eq "") {
+   $comport = "/dev/ttyS0"; 
+}
+$srecimage = $image;
+$srecimage =~ s/exe/srec/;
+
+$objcopy = "avr-objcopy --output-target=srec $image $srecimage";
+$setid   = "set-mote-id $srecimage $srecimage-$nodeid $nodeid";
+$uisp    = "uisp -dprog=mib510 -dpart=ATmega128 -dserial=$comport --wr_fuse_h=0xd9 --wr_fuse_e=ff  --erase --upload if=$srecimage-$nodeid";
+
+print "FLASH $image as node $nodeid to $comport\n";
+#system "$objcopy";
+#system "$setid";
+#system "$uisp";
+#system "$uisp $Cmds{$command}";
+
+print "\n$objcopy\n";
+system "$objcopy";
+print "\n$setid\n";
+system "$setid";
+print "\n$uisp\n";
+system "$uisp";
+
+

@@ -1,0 +1,31 @@
+<VM NAME="BombillaTelosBVM" DESC="A Bombilla virtual machine for the Telos RevB platform." DIR="../../../../apps/BombillaTelosB">
+
+
+<SEARCH PATH="../opcodes">
+<SEARCH PATH="../contexts">
+<SEARCH PATH="../languages">
+
+<LOAD FILE="../sensorboards/telosb.vmsf">
+<LANGUAGE NAME="tinyscript">
+
+<FUNCTION NAME="bclear">
+<FUNCTION NAME="bfull">
+<FUNCTION NAME="bsize">
+<FUNCTION NAME="bufsorta">
+<FUNCTION NAME="bufsortd">
+<FUNCTION NAME="eqtype">
+<FUNCTION NAME="err">
+<FUNCTION NAME="id">
+<FUNCTION NAME="int">
+<FUNCTION NAME="led">
+<FUNCTION NAME="rand">
+<FUNCTION NAME="sendlqi">
+<FUNCTION NAME="sleep">
+<FUNCTION NAME="uart">
+
+<CONTEXT NAME="Trigger">
+<CONTEXT NAME="Timer0">
+<CONTEXT NAME="Timer1">
+<CONTEXT NAME="Once">
+<CONTEXT NAME="Reboot">
+<CONTEXT NAME="Broadcast">

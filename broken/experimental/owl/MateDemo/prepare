@@ -1,0 +1,14 @@
+#!/bin/sh
+here=$PWD
+langs=`ncc -print-tosdir`/lib/VM/languages
+cd $langs/motlle/examples
+../tools/motllevm-build tsql.vmsf
+cd ../../../../../../apps/TSQLVM
+app=$PWD
+make clean
+make mica2
+
+cd $here
+rm -f msrc conf.mt
+ln -s $langs/motlle/src msrc
+ln -s $app/conf.mt

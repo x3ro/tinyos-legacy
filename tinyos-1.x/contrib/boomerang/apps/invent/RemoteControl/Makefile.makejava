@@ -1,0 +1,32 @@
+# $Id: Makefile.makejava,v 1.1.1.1 2007/11/05 19:08:58 jpolastre Exp $
+#
+# TinyOS Tools Makefile
+#
+# @author  TinyOS Team
+#
+
+MOTEIV_DIR ?= ../../../../
+
+TOS = $(shell ncc -print-tosdir)
+
+MIG = mig -v -target=telos -I%T/lib/CC2420Radio java
+NCG = ncg -v -target=telos -I%T/lib/CC2420Radio java
+
+MSGS = RemoteControlMsg.java
+
+INITIAL_TARGETS = $(MSGS)
+
+OTHER_CLEAN = cleanmig
+
+ROOT = $(TOS)/../tools/java
+include $(ROOT)/Makefile.include
+
+RemoteControlMsg.java:
+	$(MIG) -java-classname=RemoteControlMsg $(INCLUDES) RemoteControl.h RemoteControlMsg -o $@
+
+#
+# Clean
+#
+
+cleanmig:
+	rm -f $(MSGS)

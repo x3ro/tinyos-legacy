@@ -1,0 +1,39 @@
+$Id: README.RadioDemo,v 1.1.1.1 2007/11/05 19:08:59 jpolastre Exp $
+
+README for RadioDemo
+Author/Contact: support@moteiv.com
+
+Description:
+
+RadioDemo incorporates three radio demonstrations that exchange messages
+between two nodes.  The server node, defined as node address 1, presecribes the
+behavior of the other node in the network, most likely node address 2.
+
+The user can cycle through the demonstration applications by pressing the user
+button on the server node.  The demonstrations are
+
+  Count Demo (default) - This demo is equivalent to CountDual in apps/Count.
+  The server displays the lower three bits of the count on its LED's and sends
+  the count over the radio.  The client displays the lower three bits of the
+  received count on its LED's.
+
+  Exchange RSSI Demo - The server periodically sends a message.  The client
+  sends a message back in response.  Upon receiving a message, both server and
+  client display the message's RSSI (Radio Signal Strength Indicator) on their
+  LED's as "volume bars", where three LED's mean strong RSSI, two LED's mean
+  average RSSI, one LED means weak RSSI, and no LED's mean no message received.
+
+  Exchange LQI Demo - The Exchange LQI demo is equivalent to the Exchange RSSI
+  demo where the radio LQI (Link Quality Indicator) is displayed on the LED's
+  instead of RSSI.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+Node addresses must be strictly less than address 10000, because the operating
+mode is encoded as the source address, where address 10000 means Count Demo,
+10001 means Exchange RSSI demo, and 10002 means Exchange LQI demo.
+

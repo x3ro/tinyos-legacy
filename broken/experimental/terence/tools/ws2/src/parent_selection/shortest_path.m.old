@@ -1,0 +1,341 @@
+function output=shortest_path(varargin)
+output = feval(varargin{:});
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Public Functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% this is called to initialise this applicaton
+
+function void = settings
+global protocol_params;
+protocol_params.list_time_out = 2;
+protocol_params.route_packet_length =  666;% In bits
+protocol_params.phase_shift_window = 100000; % 1sec
+protocol_params.track_info_window = 80;
+protocol_params.neighbor_sel_threshold=0.5 ;
+protocol_params.min_samples = 8;
+void = -1;
+
+function void = initialise(id, start_time)
+global all_mote protocol_stat protocol_params sim_params route_phase_shift;
+
+all_mote.parent(id) = protocol_params.invalid_parent; 
+protocol_params.neighbor_list(id).nodeID = [];
+protocol_params.neighbor_list(id).in_est = [];
+protocol_params.neighbor_list(id).out_est = [];
+protocol_params.neighbor_list(id).track_info = [];
+protocol_params.neighbor_list(id).hop = [];
+protocol_params.neighbor_list(id).time_out = [];
+protocol_params.round_update(id) = 0;
+if id == sim_params.base_station
+    all_mote.hop(id)= 0;
+else
+    all_mote.hop(id)= +Inf;
+end
+
+protocol_stat.neighbor_update(id) = 0;
+void = -1;
+protocol_params.mote_func = 'square_mote_withno_menu';
+protocol_params.parent_line_func = 'parent_line_with_menu';
+protocol_params.mote_text_func = 'default_mote_text';
+route_phase_shift(id) = 0;
+ws('insert_event', 'shortest_path', 'clock_tick', start_time, id, {});
+
+% COMPILE %if sim_params.gui_mode, feval('gui_layer', protocol_params.mote_func, id, all_mote.X(id), all_mote.Y(id));, end
+% COMPILE %if sim_params.gui_mode, feval('gui_layer', protocol_params.mote_text_func, id, all_mote.X(id), all_mote.Y(id), ['Mote ' num2str(id)]);, end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% this is same as initialise but this is only called once for all mote. it is called after
+% each node is initialise.
+function void = global_initialise
+global protocol_params
+protocol_params.no_save = -2;
+void = -1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Clock tick function
+function void = clock_tick(id)
+global all_mote sim_params protocol_params app_params protocol_stat route_phase_shift;
+packet = shortestpath_routing_packet(id, all_mote.hop(id),  protocol_params.neighbor_list(id), protocol_params.route_packet_length);
+feval(sim_params.protocol_send, 'send_packet', id, packet);
+interval = protocol_params.route_clock_interval + route_phase_shift(id);
+
+% COLD Phase
+% Scale interval by 10 if this is before the warm up phase
+if sim_params.simulation_time <= 200*100000
+    interval = interval / 20;
+else
+    % WARM Phase
+    % No need to scale the interval by 10
+    % Have to figure out which neighbor is old
+    invalid_neighbor_index = find(protocol_params.neighbor_list(id).time_out <= 0);
+    protocol_params.neighbor_list(id).in_est(invalid_neighbor_index) = 0;
+    protocol_params.neighbor_list(id).time_out = protocol_params.neighbor_list(id).time_out - 1;
+end
+
+ws('insert_event', 'shortest_path', 'clock_tick', interval, id, {});
+route_phase_shift(id) = 0;
+void = -1;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function void= send_packet(id, packet)
+global sim_params;
+feval(sim_params.protocol_send, 'send_packet', id, packet);
+void = -1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function void = send_packet_done(id, packet, result)
+global sim_params protocol_params protocol_stat route_phase_shift;
+if packet.type ~= protocol_params.route_packet_type
+    feval(sim_params.application, 'send_packet_done', id, packet, result);
+    route_phase_shift(id) = floor(rand * protocol_params.phase_shift_window);
+else
+    protocol_stat.neighbor_update(id) = protocol_stat.neighbor_update(id) + 1; 
+end
+void = -1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function void = receive_packet(id, receive_packet)
+global sim_params protocol_params all_mote
+
+if receive_packet.type ~= protocol_params.route_packet_type
+    process_data_packet(id, receive_packet);
+    feval(sim_params.application, 'receive_packet', id, receive_packet);
+else
+    process_routing_packet(id, receive_packet);    
+end
+% COMPILE %if sim_params.gui_mode, feval('gui_layer', protocol_params.mote_text_func, id, all_mote.X(id), all_mote.Y(id), ...
+% COMPILE %        ['Mote ' num2str(id) ' p ' num2str(all_mote.parent(id))]);, end
+void = -1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function process_data_packet(id, receive_packet)
+global protocol_params all_mote
+
+[new, index] = find_neighbor_index(receive_packet.source, protocol_params.neighbor_list(id));
+if new
+    save_neighbor_list(id, index, receive_packet.source, +Inf, ... % hop
+        0, 0, ...
+        track_packet(receive_packet.link_seqnum, [])); % track_info
+else
+    if isempty(protocol_params.neighbor_list(id).track_info)
+        track_info = track_packet(receive_packet.link_seqnum, []);
+    else
+        track_info = track_packet(receive_packet.link_seqnum, protocol_params.neighbor_list(id).track_info(index));
+    end
+
+    save_neighbor_list(id, index, receive_packet.source, protocol_params.no_save, ...
+        protocol_params.no_save, calculate_est(track_info), ... % out_est
+        track_info); % track_info
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function process_routing_packet(id, receive_packet)
+global all_mote sim_params protocol_params;
+%% update the neighbor_list based on the input packet, return the source's neighbor struct
+update_neighbor_list(id, receive_packet);
+
+if id ~= sim_params.base_station
+    protocol_params.round_update(id) = protocol_params.round_update(id) + 1;    
+    % Find good neighbors greater than threshold
+    [r,c]=find(protocol_params.neighbor_list(id).in_est >= protocol_params.neighbor_sel_threshold);
+    potential_parents = protocol_params.neighbor_list(id).nodeID(c);
+    potential_hops = protocol_params.neighbor_list(id).hop(c);
+    potential_in_est = protocol_params.neighbor_list(id).in_est(c);
+    % Find the min hop among these good neighbors
+    [shortest_hop, shortest_index] = min(protocol_params.neighbor_list(id).hop(c));
+    %% find all nodes that have the min hop counts > threshold
+    if ~isempty(potential_parents) & shortest_hop ~= +Inf
+        [r,c]=find(potential_hops == shortest_hop);
+        potential_parents = potential_parents(c);
+        potential_in_est = potential_in_est(c);
+        [r,c]=max(potential_in_est);
+        if ~isempty(c)
+
+            
+%                 [a,b]=find(protocol_params.neighbor_list(potential_parents(c)).nodeID==id);
+%                 if abs(protocol_params.neighbor_list(potential_parents(c)).out_est(b) - r) > 0.5
+%                     disp('0.99');    
+%                 end
+
+            all_mote.parent(id) = potential_parents(c);
+            all_mote.hop(id) = shortest_hop + 1;
+% COMPILE %    if sim_params.gui_mode, 
+% COMPILE %        feval('gui_layer', protocol_params.parent_line_func, id, all_mote.X(id), all_mote.Y(id), ...
+% COMPILE %            all_mote.X(all_mote.parent(id)), all_mote.Y(all_mote.parent(id)), ...
+% COMPILE %            'Reliability', ['app_lib(''display_reliability'', ' num2str(id) ');']);
+% COMPILE %    end;
+        end
+    end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function update_neighbor_list(id, receive_packet)
+global protocol_params;
+
+[new, index] = find_neighbor_index(receive_packet.source, protocol_params.neighbor_list(id));
+[neighbor_new, index_feedback] = find_neighbor_index(id, receive_packet.neighbor_list);
+in_est = 0;
+if ~neighbor_new, in_est = receive_packet.neighbor_list.out_est(index_feedback);, end
+
+% if in_est == .99
+%     source = receive_packet.source;
+%     [r,c]=find(protocol_params.neighbor_list(source).nodeID==id);
+%     if (protocol_params.neighbor_list(source).out_est(c) ~= in_est)
+%         disp('0.99');    
+%     end
+% end
+if new
+    save_neighbor_list(id, index, receive_packet.source, receive_packet.hop, ...
+        in_est, 0, ...
+        track_packet(receive_packet.link_seqnum, []));
+else
+    if isempty(protocol_params.neighbor_list(id).track_info)
+        track_info = track_packet(receive_packet.link_seqnum, []);
+    else
+        track_info = track_packet(receive_packet.link_seqnum, protocol_params.neighbor_list(id).track_info(index));
+    end
+    save_neighbor_list(id, index, receive_packet.source, receive_packet.hop, ...
+        in_est, calculate_est(track_info), ...
+        track_info);
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% function track_info = track_packet(seq_num, track_info)
+% %% calculate how many packet we missed by subtracting the seqnum of the current packet to
+% %% the sequence number of the packet i receive
+% if isempty(track_info)
+%     track_info.seqnum = seq_num - 1;
+%     track_info.missed_packets = 0;
+%     track_info.got_packets = 0;
+% end
+% 
+% if seq_num <= track_info.seqnum
+%     return;    
+% end
+% 
+% missed_packet = seq_num - track_info.seqnum - 1;
+% %% update missed packet
+% track_info.missed_packets = track_info.missed_packets + missed_packet;
+% %% increment got_packets
+% track_info.got_packets = track_info.got_packets + 1;
+% %% save down the sequence number
+% track_info.seqnum = seq_num;
+% 
+% function prob = calculate_est(track_info)
+% % %% receive estimation will be how many packet we receive over the total packet that we got. 
+% % prob = track_info.got_packets / ( track_info.got_packets + track_info.missed_packets);
+% % % Put bound on probability estimate
+% % if prob >= 1
+% %     prob = .99;
+% % end
+% global protocol_params;
+% if track_info.got_packets > protocol_params.min_samples
+%     %% receive estimation will be how many packet we receive over the total packet that we got. 
+%     prob = track_info.got_packets / ( track_info.got_packets + track_info.missed_packets);
+% else
+%     prob = 0;
+% end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function track_info_output = track_packet(seq_number, track_info)
+global protocol_params
+if isempty(track_info);
+    track_info.start = seq_number;
+    track_info.buffer = [];
+end
+
+%% i calculate the relative index to the array
+position = seq_number - track_info.start + 1;
+%% save it down to 1
+track_info.buffer(position) = 1;
+windowsize = protocol_params.track_info_window;
+buffer_length = length(track_info.buffer);
+%% if this is bigger then the windowsize
+if buffer_length >= windowsize
+    %% then we just want the last part of the array and advance our offset
+    track_info.buffer = track_info.buffer((buffer_length - windowsize + 1):buffer_length);
+    track_info.start = track_info.start + (buffer_length - windowsize);
+end
+track_info_output = track_info;
+
+% 
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% input: track_info
+% %% output: estimation
+function prob = calculate_est(track_info)
+if isempty(track_info)
+    prob = 0;
+    return;
+end
+buffer = track_info.buffer;
+counter = 0;
+%% we sum up how many packet we get from the buffer
+counter = sum(buffer);
+%% sum over total = probability
+if length(buffer) > 8
+    prob = counter / length(buffer);
+else
+    prob = 0;
+end
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function shortestpath_packet = shortestpath_routing_packet(source, hop, neighbor_list, length)
+global protocol_params radio_params;
+shortestpath_packet.source = source;
+shortestpath_packet.hop = hop;
+shortestpath_packet.neighbor_list = neighbor_list;
+shortestpath_packet.type = protocol_params.route_packet_type;
+shortestpath_packet.length = length;
+shortestpath_packet.parent = radio_params.broadcast_addr;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function est = link_est(source, dest)
+global protocol_params
+dest_index = find(protocol_params.neighbor_list(source).nodeID == dest);
+est = protocol_params.neighbor_list(source).in_est(dest_index);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [new, index] = find_neighbor_index(nodeID, neighbor_list)
+index = [];
+if ~isempty(neighbor_list.nodeID)
+    index = find(nodeID == neighbor_list.nodeID);
+end
+new = 0;
+if isempty(index), index = length(neighbor_list.nodeID) + 1; new = 1;, end;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function save_neighbor_list(id, index, nodeID, hop, in_est, out_est, track_info)
+global protocol_params
+protocol_params.neighbor_list(id).nodeID(index) = nodeID;
+if in_est ~= protocol_params.no_save, protocol_params.neighbor_list(id).in_est(index) = in_est;, end;
+if hop ~= protocol_params.no_save, protocol_params.neighbor_list(id).hop(index) = hop;, end;
+if out_est ~= protocol_params.no_save, protocol_params.neighbor_list(id).out_est(index) = out_est;, end;
+
+% No reason to check for seqnum is a field in track info
+%
+%no_save_track_info = isfield(track_info, 'seqnum');
+%if isempty(protocol_params.neighbor_list(id).track_info) & no_save_track_info
+%    protocol_params.neighbor_list(id).track_info = [track_info];
+%elseif no_save_track_info
+%    protocol_params.neighbor_list(id).track_info(index) = track_info;
+%end
+
+if isempty(protocol_params.neighbor_list(id).track_info)
+    protocol_params.neighbor_list(id).track_info = [track_info];
+else
+    protocol_params.neighbor_list(id).track_info(index) = track_info;
+end
+
+protocol_params.neighbor_list(id).time_out(index) = protocol_params.list_time_out;

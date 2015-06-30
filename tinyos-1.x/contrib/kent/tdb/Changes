@@ -1,0 +1,28 @@
+0.1:
+	*First release. Has working cygwin support, can retrieve values of
+	globals.
+
+0.2:
+	*Did some refactoring - cleaned up the handle* functions
+	*Fixed minor issue with stopped messages - was still printing out
+	if it was in a .h file
+	*Watchpoint support!
+		* New commands: delete, togglecontinue
+		* Watch button is now active
+
+0.3: 
+	*Breakpoints Support
+	*Redid whole GUI
+		*Watchpoints are now listed, and the display updates the 
+		 values when they change
+	*Added some bugs (ahh... race conditions and sychronization issues :)
+	*Fixed a bunch of bugs
+
+0.3.1:
+	*Fixed bug on Cygwin so you can resume after a breakpoint
+0.4:
+	*Has per-mote breakpoints working
+
+0.4.1:
+	*Command field now sends prefixed with SENDLIT, so it goes straight
+	 to GDB

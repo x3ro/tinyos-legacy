@@ -1,0 +1,13 @@
+
+run the matlab script analyzeRSSI.m and you will see 6 graphs pop up.  They are from 3 data sets, as follows:
+
+1. a 3 x 8 grid with 3 meter spacing outdoors in the grass
+2. a 4 x 4 grid with 3 meter spacing outdoors in the grass
+3. a 3 x 5 grid with 2 meter spacing indoors in a lab setting
+
+The antennas and nodes were placed completely randomly. 
+
+the first graph for each node is simply the distribution of distance estimates over true distance.
+
+The second graph will be the histograms of error.
+

@@ -1,0 +1,621 @@
+#!/usr/bin/perl -w
+#use lib "/home/august/lib/perl5/vendor_perl/5.8.4/i686-linux/";
+#use Bio::Coordinate::Graph;
+if ($ARGV[0] =~/^-(.+)/) {
+    $print_rrep = $print_rreq = $write_log = $print_lost = $print_failed = 0;
+    my $match = $1;
+    if ($match =~ /p/) {
+	$print_rrep = 1;
+    }
+    if ($match =~ /q/) {
+	$print_rreq = 1;
+    }
+    if ($match =~ /w/) {
+	$write_log = 1;
+    }
+    if ($match =~ /l/) {
+	$print_lost = 1;
+    }
+    if ($match =~ /f/) {
+	$print_failed = 1;
+    }
+
+    $file = $ARGV[1];
+}
+else {
+    $file = $ARGV[0];
+}
+open(LOG, $file) or die $!;
+if ($write_log) {
+    open(OUT, ">".$file.".csv") or die $!;
+}
+while(<LOG>) { # read each line
+    if (/^SIM: Read in packet entry (\d+)->(\d+), packet loss: (\d\.\d{6})/) {
+	${$graph{$1}}{$2} = 1/(1-$3);
+	if (!defined $num_nodes || $num_nodes < $1) {
+	    $num_nodes = $1;
+	}
+	next;
+    }
+    elsif (/^\D/) { # skip lines that don't start with a time or SIM: Read ...
+	next;
+    }
+
+    
+    if (!defined($paths_count) || $paths_count < 1) {
+	&paths;
+    }
+
+
+    chop; # remove \n at end of line
+
+    /^(\d+): (\d+): (.*)/;
+    my $time = $1/4000.0/1000.0;
+    &leader($2, $3);
+    #&max_throughput($time, $2, $3);
+    &total_routing_msgs($time, $2, $3);
+    &avg_cost($time, $2, $3);
+    &avg_latency($time, $2, $3);
+    &lost_route($time, $2, $3);
+    &num_rreq_msgs_sent($time, $2, $3);
+    &num_rrep_msgs_sent($time, $2, $3);
+    &num_repeated_routing_msgs($time, $2, $3);
+    &failed($time, $2, $3);
+    &total_msgs($3);
+    $endtime = $time;
+}
+close(LOG);
+&print_duration($endtime);
+print "--- Mutation Routing ---\n";
+&print_lost_route($print_lost);
+&print_num_rreq_msgs_sent($print_rreq);
+&print_num_rrep_msgs_sent($print_rrep);
+&print_num_repeated_routing_msgs;
+&print_failed($print_failed);
+&print_avg_cost;
+&print_avg_latency;
+&print_latency_per_cost;
+#&print_max_throughput;
+&print_total_msgs;
+&print_total_routing_msgs;
+print "--- Optimal Routing ---\n";
+&print_avg_latency_opt;
+&print_total_msg_opt;
+if ($write_log) {
+    close(OUT);
+}
+sub leader {
+    my ($node, $rest) = @_;
+    if ($rest =~ /^leader/) {
+	$leader = $node;
+    }
+}
+sub total_routing_msgs {
+    my ($time, $node, $rest) = @_;
+    if ($rest =~ /^sending to 65535 { id = (\d+), dest = (\d+)/) {
+	if ($1 == $leader && $2 != 0) {
+	    $rest =~ /seqNo = (\d+)/;
+	    if ($1 != 0 && $start_latency{$1} != -1) {
+		my @seq = @{${$paths{$start_node{$1}}}{$leader}};
+		#print "from $start_node{$1} to $leader: ";
+		#print "@seq\n";
+		my $size = @seq;
+		$optimal_latency{$1} = $size * .02;
+		$opt_total_routing_msgs += $size - 1;
+		for (my $i = 0; $i < $size - 1; $i++) {
+		    $optimal_latency{$1} += (${$graph{$seq[$i]}}{$seq[$i+1]} - 1) * .3;
+		    $opt_total_routing_msgs += (${$graph{$seq[$i]}}{$seq[$i+1]} - 1);
+		}
+		$opt_latency_num++;
+		$opt_latency += $optimal_latency{$1};
+		
+		$route_total++;
+		$latency{$1} = $time - $start_latency{$1};
+		$start_latency{$1} = -1;
+		$avg_latency += $latency{$1};
+		$avg_latency_num++;
+		if ($write_log) {
+		    #print OUT $latency{$1}."\n";
+		}
+	    }
+	}
+    }
+}
+sub print_total_routing_msgs {
+    print "A total of $route_total routing messages recieved.\n";
+}
+sub max_throughput {
+    if (!defined $max_throughput) {
+	$max_throughput = 0;
+    }
+    if (!defined $global_seq_no) {
+	$global_seq_no = 0;
+    }
+    my ($time, $node, $rest) = @_;
+    if ($rest =~ /^Sending message:\s([a-fA-F0-9]{2}) ([a-fA-F0-9]{2}) ([a-fA-F0-9]{2}) (?:[a-fA-F0-9]{2} ){8}([a-fA-F0-9]{2})/) {
+	$to_1 = hex $1;
+	$to_2 = hex $2;
+	$am = hex $3;
+	$seqNo = hex $4;
+	if ($am == 127) {
+	    my $t;
+	    if ($to_1 == 255 && $to_2 == 255) {
+		$t = 65535;
+	    }
+	    else {
+		$t = $to_1;
+	    }
+	    if ($t == 65535) {
+		if ($seqNo != 0) {
+		    my $end_time = $time;
+		    my $latency = $end_time - $start_time{$seqNo};
+		    if ($latency < $max_throughput || $max_throughput == 0) {
+			$max_throughput = $latency;
+		    }
+		}
+	    }
+	    else {
+		if ($seqNo > $global_seq_no) {
+		    $global_seq_no = $seqNo;
+		    $start_time{$seqNo} = $time;
+		}
+	    }
+	}
+    }
+}
+sub print_max_throughput {
+    if ($max_throughput != 0) {
+	print "Max throughput: ".$max_throughput." seconds/packet.\n";
+    }
+}
+sub total_msgs {
+    my ($rest) = @_;
+    if ($rest =~ /^Sending message:\s[a-fA-F0-9]{2} [a-fA-F0-9]{2} ([a-fA-F0-9]{2}) (?:[a-fA-F0-9]{2} ){8}([a-fA-F0-9]{2})/) {
+	$total_msgs++;
+	my $am = hex $1;
+	my $r = hex $2;
+	if ($am == 127 && $r != 0) {
+	    if (!defined $total_routing_msgs) {
+		$starting_routing_msg = $r;
+	    }
+	    $total_routing_msgs = $r;
+	}
+    }
+}
+sub print_total_msgs {
+    print "A total of $total_msgs messages sent.\n";
+    print "A total of ".($total_routing_msgs-$starting_routing_msg)." routing messages sent.\n";
+}
+sub print_total_msg_opt {
+    print "A total of ".int($opt_total_routing_msgs)." sent.\n";
+}
+sub num_repeated_routing_msgs {
+    my ($time, $node, $rest) = @_;
+    if ($rest =~ /sending to \d+ { id = \d+, dest = 2, child = \d+, cost = \d+, seqNo = (\d+) }/) {
+	my $seqNo = $1;
+	if (!exists($route_rep{$node})) {
+	    $route_rep{$node} = $seqNo;
+	}
+	else {
+	    if ($route_rep{$node} == $seqNo) {
+		$num_rep_route++;
+	    }
+	}
+    }
+}
+sub print_num_repeated_routing_msgs {
+    print "Routing messages repeated $num_rep_route time";
+    if ($num_rep_route > 1) {
+	print "s.\n";
+    }
+    else {
+	print "./n";
+    }
+}
+sub failed {
+    my ($time, $node, $rest) = @_;
+    if ($rest =~ /trying to shortcut/) {
+	$failed_shortcuts{$node}++;
+    }
+    elsif ($rest =~ /shortcut succeded/) {
+	$failed_shortcuts{$node}--;
+    }
+    elsif($rest =~ /trying to recruit/) {
+	$failed_recruits{$node}++;
+    }
+    elsif($rest =~ /recruiting succeded/) {
+	$failed_recruits{$node}--;
+    }
+    elsif($rest =~ /shortcut failed: (.+)/) {
+	push(@{$fail_shortcut_reasons{$node}}, $1);
+    }
+    elsif($rest =~ /recruiting failed: (.+)/) {
+	push(@{$fail_recruit_reasons{$node}}, $1);
+    }
+    elsif($rest =~ /trying to certify/) {
+	$failed_certifies{$node}++;
+    }
+    elsif($rest =~ /certifying succeded/) {
+	$failed_certifies{$node}--;
+    }
+    elsif($rest =~ /certifying failed: (.+)/) {
+	push(@{$fail_certify_reasons{$node}}, $1);
+    }
+}
+sub print_failed {
+    $scount = $rcount = $ccount = 0;
+    foreach my $svalue (values %failed_shortcuts) {
+	$scount += $svalue;
+    }
+    foreach my $rvalue (values %failed_recruits) {
+	$rcount += $rvalue;
+    }
+    foreach my $cvalue (values %failed_certifies) {
+	$ccount += $cvalue;
+    }
+    print "Shortcutting failed $scount times.\n";
+    if ($_[0]) {
+	foreach my $skey (sort{$a <=> $b}(keys %fail_shortcut_reasons)) {
+	    print "$skey: ".join(', ',@{$fail_shortcut_reasons{$skey}})."\n";
+	}
+    }
+    print "Recruiting failed $rcount times.\n";
+    if ($_[0]) {
+	foreach my $rkey (sort{$a <=> $b}(keys %fail_recruit_reasons)) {
+	    print "$rkey: ".join(', ',@{$fail_recruit_reasons{$rkey}})."\n";
+	}
+    }
+    print "Certifiying failed $ccount times.\n";
+    if ($_[0]) {
+	foreach my $ckey (sort{$a <=> $b}(keys %fail_certify_reasons)) {
+	    print "$ckey: ".join(', ',@{$fail_certify_reasons{$ckey}})."\n";
+	}
+    }
+}
+sub avg_latency {
+    my ($time, $node, $rest) = @_;
+    if ($rest =~ /^sending to \d+ /) {
+	if ($rest =~ /cost = 0/ && $rest =~ /child = $node/) {
+	    $rest =~ /seqNo = (\d+)/;
+	    if ($1 != 0 && !exists($start_latency{$1})) {
+		$start_latency{$1} = $time;
+		$start_node{$1} = $node;
+	    }
+	}
+    }
+}
+sub print_avg_latency {
+    my $avg = $avg_latency/$avg_latency_num;
+    if ($avg =~ /(\d*\.\d{4})/) {
+	$avg = $1;
+    }
+    print "Average latency per routing message: $avg secs.\n";
+}
+sub print_avg_latency_opt {
+    $avg = $opt_latency/$opt_latency_num;
+    if ($avg =~ /(\d*\.\d{4})/) {
+	$avg = $1;
+    }
+    print "Average optimal latency per routing message: $avg secs.\n";
+}
+sub avg_cost {
+    my ($time, $node, $rest) = @_;
+    if ($rest =~ /^sending to 65535/) {
+	$rest =~ /cost = (\d+), seqNo = (\d+)/;
+	if ($2 != 0 && !exists($cost{$2})) {
+	    $cost{$2} = $1;
+	    if ($write_log) {
+		#print OUT "$node,$time,$1,";
+	    }
+	}
+    }
+}
+sub print_avg_cost {
+    foreach my $key (keys %cost) {
+	$avg_cost += $cost{$key};
+	$avg_cost_num++;
+    }
+    my $avg = $avg_cost/$avg_cost_num;
+    if ($avg =~ /(\d*\.\d{4})/) {
+	$avg = $1;
+    }
+    print "Average cost per routing message: ".$avg.".\n";
+}
+sub print_latency_per_cost {
+    foreach my $key (keys %cost) {
+	if (exists($latency{$key})) {
+	    $cost = $cost{$key};
+	    $latency_cost{$cost} += $latency{$key};
+	    if ($latency_cost{$cost} != $latency{$key}) {
+		$latency_cost{$cost} /= 2;
+	    }
+	}
+    }
+    print "Average latency per cost:\n";
+    my $i = 0;
+    foreach my $lc (sort{$a <=> $b} (keys %latency_cost)) {
+	if ($write_log) {
+	    print OUT "$lc,$latency_cost{$lc}\n";
+	}
+	$i %= 5;
+	$strlc = $lc;
+	if ($lc < 10) {
+	    $strlc = ' '.$strlc;
+	}
+	$latency_cost{$lc} =~ /(\d*\.\d{4})/;
+	if ($i == 0) {
+	    print "$strlc : $1";
+	}
+	elsif ($i == 4) {
+	    print "\t$strlc : $1\n";
+	}
+	else {
+	    print "\t$strlc : $1";
+	}
+	$i++;
+    }
+    if ($i % 5 != 0) {
+	print "\n";
+    }
+}
+sub num_rreq_msgs_sent {
+    my ($time, $node, $rest) = @_;
+    if ($rest =~ /^sending RREQ/) {
+	$num_times_sent_rreq++;
+	$rreq_msgs{$node} += 1;
+    }
+}
+sub print_num_rreq_msgs_sent {
+    if ($num_times_sent_rreq) {
+	print "Sent RREQ messages $num_times_sent_rreq times";
+	if ($_[0]) {
+	    print ":\n";
+	    my $i = 0;
+	    foreach my $key (sort{$a <=> $b} (keys %rreq_msgs)) {
+		$i %= 5;
+		if ($rreq_msgs{$key} != 0) {
+		    $strkey = $key;
+		    if ($key < 100) {
+			$strkey.=' ';
+		    }
+		    if ($key < 10) {
+			$strkey.=' ';
+		    }
+		    $strval = $rreq_msgs{$key};
+		    if ($rreq_msgs{$key} < 100) {
+			$strval = ' '.$strval;
+		    }
+		    if ($rreq_msgs{$key} < 10) {
+			$strval = ' '.$strval;
+		    }
+		    if ($i == 0) {
+			print "$strkey: $strval times";
+		    }
+		    elsif ($i == 4) {
+			print "\t$strkey: $strval times\n";
+		    }
+		    else {
+			print "\t$strkey: $strval times";
+		    }
+		    $i++;
+		}
+	    }
+	    if ($i % 5 != 0) {
+		print "\n";
+	    }
+	}
+	else {
+	    print ".\n";
+	}
+    }
+}
+sub num_rrep_msgs_sent {
+    my ($time, $node, $rest) = @_;
+    if ($rest =~ /^sending RREP/) {
+	$num_times_sent_rrep++;
+	$rrep_msgs{$node} += 1;
+    }
+}
+sub print_num_rrep_msgs_sent {
+    if ($num_times_sent_rrep) {
+	print "Sent RREP messages $num_times_sent_rrep times";
+	if ($_[0]) {
+	    print ":\n";
+	    my $i = 0;
+	    foreach my $key (sort{$a <=> $b} (keys %rrep_msgs)) {
+		$i %= 5;
+		if ($rrep_msgs{$key} != 0) {
+		    $strkey = $key;
+		    if ($key < 100) {
+			$strkey.=' ';
+		    }
+		    if ($key < 10) {
+			$strkey.=' ';
+		    }
+		    $strval = $rrep_msgs{$key};
+		    if ($rrep_msgs{$key} < 100) {
+			$strval = ' '.$strval;
+		    }
+		    if ($rrep_msgs{$key} < 10) {
+			$strval = ' '.$strval;
+		    }
+		    if ($i == 0) {
+			print "$strkey: $strval times";
+		    }
+		    elsif ($i == 4) {
+			print "\t$strkey: $strval times\n";
+		    }
+		    else {
+			print "\t$strkey: $strval times";
+		    }
+		    $i++;
+		}
+	    }
+	    if ($i % 5 != 0) {
+		print "\n";
+	    }
+	}
+	else {
+	    print ".\n";
+	}
+    }
+}
+sub lost_route {
+    my ($time, $node, $rest) = @_;
+    if($rest =~ /^lost route/i) {
+	$num_times_lost_route++;
+	$lost_route{$time} = $node;
+    }
+}
+sub print_lost_route {
+    if ($num_times_lost_route) {
+	print "Lost the route $num_times_lost_route time";
+	if ($num_times_lost_route > 1) {
+	    print "s";
+	}
+	if ($_[0]) {
+	    print ":\n";
+	    my $i = 0;
+	    foreach my $key (sort(keys %lost_route)) {
+		my $val = $lost_route{$key};
+		$key =~ /(\d*\.\d{4})/;
+		$i %= 5;
+		if ($i == 0) {
+		    print "$lost_route{$key} at $1";
+		}
+		elsif ($i == 4) {
+		    print "\t$lost_route{$key} at $1\n";
+		}
+		else {
+		    print "\t$lost_route{$key} at $1";
+
+		}
+		$i++;
+	    }
+	    if ($i % 5 != 4) {
+		print "\n";
+	    }
+	}
+	else {
+	    print ".\n";
+	}
+    }
+}
+sub print_duration {
+    my ($endtime) = @_;
+    my $days = $endtime / (24 * 60 * 60);
+    $days =~ /(\d+).\d+/;
+    $days = $1;
+    $endtime -= $days * (24 * 60 * 60);
+    my $hours = $endtime / (60 * 60);
+    $hours =~ /(\d+).\d+/;
+    $hours = $1;
+    $endtime -= $hours * (60 * 60);
+    my $mins = $endtime / (60);
+    $mins =~ /(\d+).\d+/;
+    $mins = $1;
+    $endtime -= $mins * (60);
+    my $secs = $endtime;
+    if ($endtime =~ /(\d*\.\d{4})/) {
+	$secs = $1;
+    }
+    print "Simmulation lasted for ";
+    if ($days != 0) {
+	print "$days day";
+	if ($days > 1) {
+	    print "s";
+	}
+    }
+    if ($hours != 0) {
+	print " $hours hour";
+	if ($hours > 1) {
+	    print "s";
+	}
+    }
+    if ($mins != 0) {
+	print " $mins min";
+	if ($mins > 1) {
+	    print "s";
+	}
+    }
+    if ($secs != 0) {
+	print " $secs sec";
+	if ($secs != 1) {
+	    print "s";
+	}
+    }
+    print ".\n";
+}
+sub paths {
+    $paths_count = 1;
+    &dijkstra;
+    foreach my $start (keys %routes) {
+	foreach my $end (keys %{$routes{$start}}) {
+	    my $u = $end;
+	    my @seq;
+	    while (defined $u) {
+		unshift(@seq, $u);
+		$u = ${routes{$start}}{$u}{'prev'};
+	    }
+	    @{${$paths{$start}}{$end}} = @seq;
+	}
+    }
+}
+sub dijkstra {
+    foreach my $start (keys %graph) {
+    	my %est = ();          # estimate hash
+	my %res = ();          # result hash
+
+	my $maxdist = 1000000;
+
+	for (my $node = 0; $node < $num_nodes; $node++) {
+	    $est{$node}{'prev'} = undef;
+	    $est{$node}{'dist'} = $maxdist;
+	}
+	$est{$start}{'dist'} = 0;
+
+	# remove nodes from %est until it is empty
+	while (keys %est) {
+
+	    #select the node closest to current one, or root node
+	    my $min_node;
+	    my $min = $maxdist;
+	    foreach my $node (keys %est) {
+		#print "$node ";
+		if ($est{$node}{'dist'} < $min) {
+		    $min = $est{$node}{'dist'};
+		    $min_node = $node;
+		}
+	    }
+
+	    # no more links between nodes
+	    last unless ($min_node);
+
+	    # move the node from %est into %res;
+	    $res{$min_node} = delete $est{$min_node};
+
+	    # recompute distances to the neighbours
+	    my $dist = $res{$min_node}{'dist'};
+	    foreach my $neighbor ( keys %{$graph{$min_node}} ){
+		if (!defined($est{$neighbor})) {
+		    next;
+		}
+		my $cost = ${$graph{$min_node}}{$neighbor};
+		if ($est{$neighbor}{'dist'} > $dist + $cost) {
+		    $est{$neighbor}{'dist'} = $dist + $cost;
+		    $est{$neighbor}{'prev'} = $min_node;
+		}
+		#next unless $est{$neighbour}; # might not be there any more
+		#$est{$neighbor}{'prev'} = $min_node;
+		#$est{$neighbor}{'dist'} =
+		#    $dist + $self->{'_dag'}{$min_node}{$neighbor}
+		#if $est{$neighbor}{'dist'} > $dist + 1 ;
+	    }
+	}
+	#foreach my $k (keys(%res)) {
+	#    print "$k: dist: $res{$k}{'dist'}, prev: $res{$k}{'prev'}\n"
+	#}
+	#print "\n";
+	%{$routes{$start}} = %res;
+    }
+}

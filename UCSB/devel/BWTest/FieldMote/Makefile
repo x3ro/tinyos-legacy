@@ -1,0 +1,3 @@
+COMPONENT=FieldMote
+include ../../Makerules
+

@@ -1,0 +1,66 @@
+#-*-Makefile-*- vim:syntax=make
+TMACDIR ?= $(TOSDIR)/../contrib/t-mac/tos
+PFLAGS += -I$(TMACDIR)/platform/$(PLATFORM)
+
+MICA_DERIVE=mica2 mica2dot tnode
+IS_DERIVE:=$(strip $(filter $(MICA_DERIVE),$(GOALS)))
+ifneq ($(IS_DERIVE),)
+   PFLAGS += -I$(TMACDIR)/platform/mica2
+   PFLAGS += -I$(TMACDIR)/platform/mica
+endif
+
+NESC_VERSION =`nescc --version | sed 1q | sed 's/ncc: //`
+
+PFLAGS += -I$(TMACDIR)/interfaces -I$(TMACDIR)/system -I$(TMACDIR)/types
+PFLAGS += -Wall
+
+# enable to add T-MAC debug code
+#PFLAGS += -DTMAC_DEBUG
+
+# required for UART_LL as debug layer
+#PFLAGS += -DENABLE_UART_DEBUG 
+
+# required for latest T-MAC CVS code
+PFLAGS += -DPC_POWERSTATE
+
+ifeq ($(findstring tnode,$(GOALS)),tnode)
+	# setting for 868 Mhz radio
+	# PFLAGS += -DCC1K_MANUAL_FREQ=868611600
+	PFLAGS += -DCC1K_DEFAULT_FREQ=CC1K_868_611_MHZ
+
+	# setting for 914 Mhz radio
+	# PFLAGS +=-DCC1K_MANUAL_FREQ=914998800
+	# PFLAGS += -DCC1K_DEFAULT_FREQ=CC1K_914_988_MHZ
+	
+	# PFLAGS += -DCC1K_MANUAL_FREQ=799798800
+	# PFLAGS += -DCC1K_MANUAL_FREQ=780000000
+	# PFLAGS += -DCC1K_MANUAL_FREQ=940000000
+	# 
+	# PFLAGS+= -DCC1K_MANUAL_BAUDRATE=CC1K_600_BAUD
+	# PFLAGS+= -DCC1K_MANUAL_BAUDRATE=CC1K_1200_BAUD
+	# PFLAGS+= -DCC1K_MANUAL_BAUDRATE=CC1K_2400_BAUD
+	# PFLAGS+= -DCC1K_MANUAL_BAUDRATE=CC1K_9600_BAUD
+	PFLAGS+= -DCC1K_MANUAL_BAUDRATE=CC1K_19200_BAUD
+else
+ifeq ($(findstring mica2,$(GOALS)),mica2)
+	PFLAGS+=-DCC1K_DEF_PRESET=0
+else
+ifeq ($(findstring pc,$(GOALS)),pc)
+	# ignore. nothing to do
+else
+ifeq ($(findstring clean,$(GOALS)),clean)
+	# ignore. nothing to do
+else
+ifeq ($(findstring mica,$(GOALS)),mica)
+$(warning T-MAC is unsupported on the Mica)
+else
+$(warning T-MAC didnt see a platform. tmac.extra may need editing)
+$(warning goals = $(GOALS))
+endif
+endif
+endif
+endif	
+endif	
+
+#OPTFLAGS += $(INCLUDE) $(CFLAGS)
+

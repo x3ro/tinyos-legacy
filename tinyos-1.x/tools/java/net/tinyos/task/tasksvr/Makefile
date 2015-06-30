@@ -1,0 +1,2 @@
+TINYDB_MAKEFILE=Makefile
+include MakeInclude

@@ -1,0 +1,79 @@
+SELECT e1, ..., en [ WHERE cond-e ] INTERVAL constant
+
+e ::= attribute |
+      constant |
+      op ( e1, ..., en )
+
+op ::= avg | # global: 1 non-global arg
+       max | min | # global: 1 non-global arg
+       expdecay | # temporal: 2 args: 1 non-global, 1 constant
+       timeavg | # temporal: 2 args: 1 non-global, 1 constant
+       ...
+
+cond-e ::=
+  e1 relop e2 | # e1, e2 must be non-global
+  cond-e boolop cond-e |
+  NOT cond-e
+
+relop ::= < | > | <= | >= | = | ==
+boolop ::= AND | OR 
+
+
+--------------------
+
+Requirements:
+- all e1, ..., en must be global or, all e1, ..., en must be non-global
+
+--------------------
+
+Compiling:
+
+Step 1: include motlle support code for all operators used
+
+Step 2: for each ei:
+- define a global var g_ei = [ei] (the expression can be used "unchanged")
+  [optional: CSE]
+  and compute s_ei, the size in bytes needed to pass ei around
+- same for any expressions in cond-e
+- report error if epoch-size + sum(i=1..n) s_ei > max-message-size
+
+Step 3: for non-global queries, generate:
+  GEN "Timer0 = fn () { next_epoch(); "
+  if WHERE present:
+    GEN "if ([cond-e])"
+    where [cond-e] is the obvious translation of cond-e, replacing
+      expressions with calls to the global vars created in Step 2
+  GEN "mhopsend(encode(vector(epoch(), g_e1(), ..., g_en())))"
+  GEN "};"
+
+Step 4: for global queries, generate:
+  GEN "Timer0 = fn () { bool tosend; if (id()) { next_epoch(); ";
+  if WHERE present:
+    GEN "if ([cond-e])"
+    where [cond-e] is the obvious translation of cond-e, replacing
+      expressions with calls to the global vars created in Step 2
+  GEN "{ tosend = g_e1[localwork]() | ... | g_en[localwork](); };"
+  GEN "} else { tosend = true; };"
+  GEN "if (tosend)
+         mhopsend(encode(vector(epoch(), g_e1[summary](), ..., g_en[summary]())));"
+  GEN "};"
+
+Step 5:
+  GEN "snoop = fn () snoop_epoch(decode_message(snoop_msg())[0]);"
+  GEN "intercept = fn () {
+      vector fields = decode_message(intercept_msg());
+      snoop_epoch(fields[0]);";
+  if global query:
+    GEN "g_e1[accumulate](fields[1]); ... g_en[accumulate](fields[n]); };"
+    GEN "decode_message = fn (msg) decode(msg, vector(2, s_e1, ..., s_en));"
+  else
+    GEN "};"
+    GEN "decode_message = fn (msg) decode(msg, vector(2));"
+
+Step 6:
+  if global query:
+    GEN "mhop_set_forwarding(0);"
+  GEN "mhop_set_update(2 * interval);
+       settimer0(interval * 10);"
+
+

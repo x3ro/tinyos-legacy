@@ -1,0 +1,9 @@
+MIDlet-Name: Tc65Listen
+MIDlet-Version: 1.0
+MIDlet-Vendor: Shockfish SA
+MIDlet-Description: TODO
+MicroEdition-Profile: IMP-NG
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: TinyListen, , com.shockfish.tinyos.tools.Tc65Listen
+MIDlet-Jar-URL: http://www2.shockfish.com/TODO
+MIDlet-Jar-Size: 2307

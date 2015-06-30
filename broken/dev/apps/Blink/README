@@ -1,0 +1,21 @@
+README for Blink
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+Blink is a basic application that toggles the leds on the mote
+on every clock interrupt.  The clock interrupt is scheduled to
+occur every second.  The initialization of the clock can be seen
+in the Blink initialization function, StdControl.start().
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:
+
+apps/Blink2

@@ -1,0 +1,2 @@
+This code base is deprecated.  See ../MagTrackingSensor/ and ../CameraPointer/.
+

@@ -1,0 +1,162 @@
+Implementation of Link Quality Measurement in S-MAC
+
+Wei Ye (11/11/2003)
+
+1. What to measure
+2. How to measure
+3. APIs
+4. Changes to packet format
+5. Changes to internal data structure
+
+
+1. What to measure
+
+The measurement is performed on each receiver only. Each node measures
+uni-directional link quality from each neighbor to itself. Only raw
+statistics are collected, and no aggregated estimation is performed 
+within S-MAC.
+
+We assume that there is a separate link quality estimation (LQE)
+component  above S-MAC that performs aggregated estimation and collect
+bi-directional information by exchanging data with its neighbors. This
+separate layer enables  different estimation algorithms to be developed
+in parallel, which may combine these raw measurement results in
+different ways, e.g., putting different weights on different data. 
+
+2. How to measure
+
+On the sender side, separate sequence number streams are added for 
+SYNC packets, broadcast data packets and unicast packets. For unicast
+packets, the number of retransmissions (for each fragment) is also
+added.
+
+All measurements are done at the receiver side. The following statistics 
+are collected by each node when it receives a packet.
+
+   1) When S-MAC detects a new neighbor, it add the node into its
+neighbor  list, and signal the LQE component, so that they can keep
+their neighbor list consistent. In the low-duty-cycle mode, it happens
+when the first SYNC packet from the neighbor is received. In the fully
+active mode, It happens when the first data packet is received from a
+neighbor.
+
+   2) When S-MAC determines that a neighbor is dead/gone, it removes
+the neighbor from its neighbor list, and signals the LQE component. In
+low-duty-cycle mode, this happens when a node fails to receives any
+SYNC packets from that neighbor within a specified period. In the fully
+active mode, it happens when a node fails to receive any data packets
+from a neighbor within a specified period. 
+
+   3) When a node receives a SYNC packet, S-MAC will signal the LQE
+component with fromAddr and sequence number. The LQE component can then
+detect sequence number jumps. Since each node periodically broadcast
+SYNC packets, this is a reliable measure when there is little data in
+the network. This signal will not be generated if S-MAC works in fully
+active mode, since there is no SYNC packets in this mode.
+
+   4) When a node receives a broadcast data packet, S-MAC will signal
+the LQE component with fromAddr and sequence number. The LQE component
+can then detect sequence number jumps.
+
+   5) When a node receives a unicast data packet, S-MAC will signal the
+LQE component with fromAddr, sequence number, number of transmissions 
+(first + retransmissions) and number of copies received. The LQE
+component  can get the following statistics.
+
+   a) Sequence number jumps on each received unicast packet. This happens
+      when a sender tried a few times to send a data packet, but none of
+      them succeeded.
+   b) Reception rate on each packet. S-MAC signals how many
+      retransmissions and how many copies (duplicates) it receives.
+
+Note that there might be duplicate signals on the same message, if the
+last fragment (or the message only has one fragment) is received more
+than once. Every time a last fragment is received (the entire message is
+received), S-MAC will generate this signal.
+
+3. APIs
+
+S-MAC provides the following new interface with the signals described
+above. 
+
+interface LinkState
+{
+   // signal if a new neighbor joins
+   event void nodeJoin(uint16_t nodeAddr);
+    
+   // signal if a neighbor is gone/dead
+   event void nodeGone(uint16_t nodeAddr);
+    
+   // signal the Rx of a SYNC packet with sequence number
+   event void rxSyncPkt(uint16_t fromAddr, uint8_t seqNo);
+    
+   // signal the Rx of a broadcast data packet with sequence number
+   event void rxBcastPkt(uint16_t fromAddr, uint8_t seqNo);
+    
+   // signal the Rx of a unicast packet with sequence number,
+   // number of transmissions and number of copies received
+   event void rxUcastPkt(uint16_t fromAddr, uint8_t seqNo, 
+                        uint8_t numTx, uint8_t numRx);
+}
+
+
+4. Changes to packet format
+
+The goal is to minimize additional bytes transmitted over the air. As a
+result, the link quality measurement scheme does not increase the size
+of any packets transmitted over the air. The following changes are made
+to packet formats: 
+
+The type field will be divided into 2 parts: type (higher 4 bits) and
+subtype (lower 4 bits). The subtype can be used by each type of packet
+in different ways.
+
+1) SYNC packet
+
+   The 'seqNo' field will be used to measure link quality. It is already
+   in the existing packet format, but was only used for debugging.
+
+2) MAC header
+
+   The 'fragNo' is renamed to 'seqFragNo'.
+   a) for broadcast data packets, it only represents sequence number.
+   b) for unicast data packets, the higher 5 bits represent sequence
+      number, and the lower 3 bits represent fragment number. This
+      implies that the limit on the number of fragments in a packet will
+      be 8. 
+
+3) Usage of subtype (4 bits) field
+
+   a) RTS packet
+      Use the subtype field to tell the receiver the total number of
+      fragments to be transmitted.
+
+   b) Unicast data packet
+      Use the subtype field to tell the receiver how many
+      retransmissions have done for each fragment.
+      
+5. Changes to internal data structure
+
+Some changes are made to the schedule table and neighbor list to
+remember sequence numbers, and to ensure the uniqueness of each sequence
+numbers.
+
+1) Schedule table
+   Now there is only timer to tigger the sending of SYNC packets. A SYNC
+   packet will be sent to all schedules with the same sequence number.
+   Even if a node changes its schedule, the sequence number will not be
+   messed up.
+   
+2) Neighbor list
+   Unicast data packets are sent to individual neighbors. As a sender, a
+   node needs to remember the current seqNo to each neighbor. As a
+   receiver, it needs to remember the current received seqNo in order to
+   detect if the received packet is a new one or a duplicate from
+   retransmission.
+   
+   As a by product, duplicated unicast packets (due to retransmissions)
+   will be dropped, eliminating the need for each application to detect
+   duplicated packets.
+
+3) A new variable bcastSeqNo is added for the current sequence no of
+   broadcast data packets.

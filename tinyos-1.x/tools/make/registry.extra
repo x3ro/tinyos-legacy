@@ -1,0 +1,17 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: registry.extra,v 1.1 2005/09/23 10:18:00 kaminw Exp $
+
+REGISTRY_GEN_PL ?= $(TOSDIR)/../tools/scripts/codeGeneration/generateRegistry.pl
+BUILD_EXTRA_DEPS += registry_wiring
+ifndef NO_RPC
+GOALS += rpc
+endif
+#POST_BUILD_EXTRA_DEPS += registry_schema
+
+PFLAGS += -I$(BUILDDIR)
+
+registry_wiring:
+	@echo
+	@echo "**** GENERATING REGISTRY ****"
+	@perl $(REGISTRY_GEN_PL) -d $(BUILDDIR) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc
+

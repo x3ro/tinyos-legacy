@@ -1,0 +1,1 @@
+<FUNCTION name=fformat opcode=fformat numParams=1 param1=integer returnVal=TRUE desc="Reformats the flash, resets sequence numbers, and sets the record size to param1's size. Returns 1 if success, 0 if failed.">

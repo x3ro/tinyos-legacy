@@ -1,0 +1,57 @@
+The diag component is a tool for monitoring packet loss for now 
+and may be extended to monitor and manage other aspect of a Mote.
+
+How to use it?
+==============
+The current diag component works with the latest versions of host SW tools namely
+BcastInject and oscilloscope. Following the procedures to test diag component
+
+1. load "Diagnostic" component to a number of motes with different mote ID.
+
+	%cd apps/Diagnostic/
+	% make mica install.2 
+
+2. load GenericBase to another mote. This mote is then the base Station mote.
+   Make sure that the base station mote has a different mote ID 
+
+	%cd apps/GenericBase
+	%make mica install.1
+
+3. Start serial forwarder tool in the PC that is connected to the 
+   programming board
+        % cd tools/java
+	% java net/tinyos/sf/SerialForward
+
+4. Start oscilloscope tool in the PC 
+	% java net/tinyos/oscilloscope/oscilloscope
+
+5. Run the BcastInject tool in the PC to send diagnostic request message
+   to the "diag" motes
+
+    %cd tools/java
+    %java net.tinyos.tools.BjastInject group_id diag diag_pattern repeat_times interval
+
+	where diag_pattern is a 16 bit integer; 
+	repeat_times, a 16 bit interger, is the number of diagnostic responses expected;
+	interval, a 16 bit integer, is the interval between two diagnostic responses in milliseconds
+
+		  
+Useful tips:
+============
+*  Make sure that you have the latest oscilloscope and BcastInject code
+   and compile them.
+    
+*  Keep an eye on the GenericBase mote. If its leds does not toggle,.
+   it is not working. Reset it. If reset does not work, reload the code.
+   
+*   If the "diag" motes receives a diagnostic msg, its green LED will toggle.
+   When it sends a diagnostic response, its yellow LED will toggle.
+   If you are sure that the BS mote is working and BcastInject does not
+   cause diag mote LED to change, reset the diag mote. 
+
+*   Packet loss diagrams in difference color are shown in oscilloscope GUI
+   
+
+Get help and report bugs:
+=========================
+     contact Su Ping by email su.ping@intel.com

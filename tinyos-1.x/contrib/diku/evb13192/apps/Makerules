@@ -1,0 +1,60 @@
+# Setup TOSDIR if not provided by user
+ifndef TOSDIR
+TOSDIR = $(shell ncc -print-tosdir)
+endif
+export TOSDIR
+
+# Setup TOSROOT if not provided by user.
+# This assumes that TOSDIR is located in
+# the TOSROOT dir.
+ifndef TOSROOT
+TOSROOT = $(TOSDIR)/..
+endif
+export TOSROOT
+
+# Basic makerules
+ifndef MAKERULES
+MAKERULES = $(TOSDIR)/../tools/make/Makerules
+endif
+export MAKERULES
+
+# Setting up evb13192 specific paths.
+# Only change the below settings if your evb13192 directory is
+# not in $TOSROOT/contrib/diku/
+#################################################################
+
+# Our evb13192 base directory
+ifndef TINYOS_EVB13192DIR
+TINYOS_EVB13192DIR = $(TOSROOT)/contrib/diku/evb13192
+endif
+export TINYOS_EVB13192DIR
+
+# Our makerules for evb13192
+ifndef TOSMAKE_PATH
+TOSMAKE_PATH = $(TINYOS_EVB13192DIR)/tools/make
+endif
+export TOSMAKE_PATH
+
+# The below stuff is OS specific setup of compile host.
+################################################################
+OSNAME = $(shell uname)
+
+ifeq ($(OSNAME),Darwin)
+	COMPILEHOST = http://www.distlab.dk/testbed/compile_gateway.pl
+	CWPATH = ""
+else
+	ifeq ($(OSNAME),Linux)
+		COMPILEHOST = http://www.distlab.dk/testbed/compile_gateway.pl
+		CWPATH = ""
+	else
+		# Windows
+		COMPILEHOST = http://www.distlab.dk/testbed/compile_gateway.pl
+		CWPATH = c\:/Program\ Files/Metrowerks/CW08\ V3.1/
+		FREESCALE_LIBDIR = C:/cygwin/home/ADMINI~1/SMAC/SMAC4_~1/CW_IDE~2/smac/bin/
+	endif
+endif
+export COMPILEHOST
+export CWPATH
+export FREESCALE_LIBDIR
+
+include $(TOSROOT)/apps/Makerules

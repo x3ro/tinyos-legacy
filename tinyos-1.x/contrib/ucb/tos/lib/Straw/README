@@ -1,0 +1,5 @@
+This tool is made for collecting large amounts of data from a single node at a time.
+This implementation is a rewrite of the concept from contrib/nestfe/nesc/lib/Straw, 
+except that it uses Python tools instead of java tools.
+
+The tool for this library can be found in tinyos-1.x/contrib/ucb/tools/python/pytos/tools

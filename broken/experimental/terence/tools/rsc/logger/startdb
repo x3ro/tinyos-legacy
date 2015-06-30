@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# This is going to start the database on cygwin platform
+
+echo ">> Starting db"
+ipc_running=`ps | grep 'ipc-daemon'`
+if [ -z "$ipc_running" ]; then
+  ipc-daemon &
+fi
+pgdata_path=$HOME/pgdata
+/usr/bin/rm -rf $pgdata_path/postmaster.pid
+
+pgsql_running=`ps | grep 'postgres'`
+if [ -z "$pgsql_running" ]; then
+  /usr/bin/postmaster -i -D $pgdata_path &
+fi
+
+
+
+

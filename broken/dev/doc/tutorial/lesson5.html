@@ -1,0 +1,367 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+  <head>
+    <title>Lesson 5: Simulating TinyOS Applications in Nido</title>
+  </head>
+  <body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+    
+    <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+      <tr bgcolor="#e0e0ff">
+	<td width="100%">
+	  <font face="tahoma,arial,helvetica"><b><big><big>
+		  Lesson 5: Simulating TinyOS Applications in Nido</big><br>Nido, packet sniffing, and <tt>dbg</tt></big></b>
+<p>
+Last updated 6 Aug. 2002
+</font>
+</td></tr>
+</table>
+		  
+   <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">Introduction</font>
+	      </b></td> </tr>
+      </table>
+      
+    <p>Nido, the TinyOS simulator, compiles directly from TinyOS
+    code. Built with <tt>make pc</tt>, the simulation runs natively
+    on a desktop or laptop. Nido can simulate thousands of nodes
+    simultaneously. Every mote in a simulation runs the same TinyOS
+    program.</p>
+      
+    <p>Nido provides run-time configurable debugging output, allowing
+    a user to examine the execution of an application from different
+    perspectives without needing to recompile. The simulation provides
+    several mechanisms for interacting with the network; packet
+    traffic can be monitored, packets can be statically or dynamically
+    injected into the network. In this lesson, we won't be dealing
+    with packet injection, which is discussed in <a
+    href="lesson9.html">Lesson 9</a> </p>
+    
+    <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">Building and Running an Application</font>
+	      </b></td> </tr>
+      </table>
+
+      <p>Nido is compiled by typing <tt>make pc</tt> in an application
+      directory. In addition to the expected TinyOS components, a few
+      simulator-specific files are compiled; these files provide
+      functionality such as support for networking monitoring over TCP
+      sockets.</p>
+      
+      <p>Enter the <a
+      href="../../apps/CntToLedsAndRfm"><tt>apps/CntToLedsAndRfm</tt></a>
+      directory. This application runs a 4Hz counter. On each counter
+      tick, the application displays the least significant three bits
+      of the counter on the mote LEDs and sends the entire 16-bit
+      value in a packet. Build and install the application on a
+      mote. You should see the LEDs blink; if you listen with a
+      GenericBase mote, you should see messages of AM type 4 with an
+      incrementing counter in the payload.</p>
+      
+      <p>Build a Nido version of the application with <tt>make
+      pc</tt>. The Nido executable is <tt>build/pc/main.exe</tt>. Type
+      <tt>build/pc/main.exe --help</tt> to see a brief summary of its
+      command-line usage. Nido has a single required parameter, the
+      number of nodes to simulate. Type <tt>build/pc/main.exe 1</tt>
+      to run a simulation of a single node.</p>
+      
+      <p>You should see a long stream of output fly by, most of which
+      refer to radio bit events. Hit control-C to stop the
+      simulation. If you look, almost every message is preceded by a
+      <tt>0:</tt>; this means that the message pertains to the
+      execution of mote 0. Run a simulation of two motes
+      (<tt>build/pc/main.exe 2</tt>); after it runs for a few seconds,
+      stop the simulation with control-C. You should see messages for
+      both mote 0 and mote 1.</p>
+
+      <p>By default, Nido prints out all debugging information. As
+      radio bit events are fired at 20 or 40 KHz, these are the most
+      frequent events in the simulator, they comprise most of the
+      output in CntToLedsAndRfm. Given the application, we're more
+      concerned with the packet output and mote LEDs than individual
+      radio bits. Nido output can be configured by setting the
+      <tt>DBG</tt> environment variable in a shell. Type <tt>export
+      DBG=am,led</tt> in your shell; this makes only LED and AM packet
+      output enabled. Run a one-mote simulation. You should see output
+      similar to this:</p>
+	  
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre><code>
+0: LEDS: Yellow off.
+0: LEDS: Green off.
+0: LEDS: Red off.
+0: Sending message: ffff, 4
+    ff ff 04 7d 08 20 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 3b f3 00 00 01 00 00 00
+0: LEDS: Yellow off.
+0: LEDS: Green off.
+0: LEDS: Red on.
+0: Sending message: ffff, 4
+    ff ff 04 7d 08 21 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 ac e6 00 00 01 00 00 00
+	      </code></pre></tr></tr></table></center>
+
+	    
+	
+      <p>The sixth byte of the packet contains the least significant
+      byte of the two byte counter; in the first packet, it's hex 0x20
+      (32), in the second, it's hex 0x21 (33). As the LEDs show the
+      bottom three bits of the counter, they are all off for the first
+      packet and bit one is on for the second.</p>
+
+      <p>The full set of DBG modes can be seen by typing
+      <tt>build/pc/main.exe --help</tt>; they are listed at the bottom
+      of the output. For example:</p>
+	
+	<center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre><code>
+		  
+Usage: build/pc/main.exe [options] &lt;num_nodes&gt;
+  [options] are:
+  -h, --help        Display this message.
+  -k &lt;kb&gt;           Set radio speed to &lt;kb&gt; Kbits/s. Valid values: 10, 25, 50.
+  -r                specifies a radio model (simple is default)
+  -l                invocation logging: will block for connect on port 10583
+  -e &lt;file&gt;         use &lt;file&gt; for eeprom; otherwise anonymous file is used
+  -p &lt;sec&gt;          pause &lt;sec&gt; seconds on each system clock interrupt
+  &lt;num_nodes&gt;       number of nodes to simulate
+
+  -ri [=portnumber] pauses simulation waiting for incoming packet connection;
+  default portnumber is 10576
+  -ro [=portnumber] pauses simulation watiing for outgoing packet connection;
+  default portnumber is 10577
+
+Known dbg modes: all, boot, clock, task, sched, sensor, led, route, am, crc,
+packet, encode, radio, logger, adc, i2c, uart, prog, sounder, sim, queue,
+simradio, hardware, simmem, usr1, usr2, usr3, temp, error, none</code></pre></tr></tr></table></center>
+
+     <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">Adding Debugging Statements</font>
+	      </b></td> </tr>
+      </table>
+
+      <p>Set <tt>DBG</tt> to <tt>crc</tt>. Run two mote imulation of
+      CntToLedsAndRfm. You should see output indicating that both
+      nodes are successfully receiving packets from each-other.</p>
+
+      <p>Four DBG modes are reserved for application components and
+      debugging use: <tt>usr1</tt>, <tt>usr2</tt>, <tt>usr3</tt>, and
+      <tt>temp</tt>. In TinyOS code, debug message commands have this
+      syntax:</p>
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre>dbg(&lt;mode&gt;, const char* format, ...);</pre>
+	    </td></tr></table>
+      </center>
+      
+      <p>The mode parameter specifies which under which DBG modes this
+      message will be printed. The full set of modes can be found in
+      <tt>tos/system/dbg_modes.h</tt>. The format and following
+      parameters specify the string to output and have printf()
+      semantics. For example, open <tt>tos/lib/Counter.td</tt> in your
+      editor. In <tt>Clock.fire()</tt>, add this line just before the
+      return statement:</p>
+	
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre>dbg(DBG_TEMP, "Counter: Value is %i\n", (int)state);</pre>
+	    </td></tr></table>
+      </center>
+
+      <p>Set <tt>DBG</tt> to be <tt>temp</tt> and run a single mote
+      simulation. You'll see the counter increment. In general, the
+      DBG mode name in TinyOS code is the name used when you run the
+      simulator, with <tt>DBG_</tt>prepended. For example, <tt>am</tt>
+      is <tt>DBG_AM</tt>, <tt>packet</tt> is <tt>DBG_PACKET</tt> and
+      <tt>boot</tt> is <tt>DBG_BOOT</tt>.</p>
+
+      <p>Just as you can enable multiple modes when running the
+      simulator, a single debug message can be activated on multiple
+      modes. Each mode is a bit in a large bitmask; one can use all of
+      the standard logical operators (e.g. <tt>|</tt>,
+      <tt>~</tt>) . For example, change the debug message you just
+      added to:</p>
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre>dbg(DBG_TEMP|DBG_USR1, "Counter: Value is %i\n", (int)state);</pre>
+	    </td></tr></table>
+      </center>
+
+      <p>It will now be printed if either <tt>temp</tt> or
+      <tt>usr1</tt> is enabled. Run the application to see this is the
+      case..</p>
+      
+      
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">Network Monitoring</font>
+	      </b></td> </tr>
+      </table>
+
+      <p>Open another shell and go to the <tt>tools/java</tt>
+      directory.</p>
+      
+      <p>Run a four mote simulation of <tt>CntToLedsAndRfm</tt> in
+      your original shell. Go back the shell in which you compiled the
+      Java tools and run <tt>SimGUI</tt> (this order is important):</p>
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre>java net/tinyos/sim/SimGUI</pre>
+	    </td></tr></table>
+      </center>
+      
+      <p>You should see the packets from the different motes in the
+      window, something like this:</p>
+	
+      <p><img src="imgs/SimGUI.gif"></img></p>
+      
+      <p>The checkboxes on the left side of the GUI enable or disable
+      visualization of output from motes; the "Clear All" and "Select
+      All" buttons refer to these selections. You can click on a
+      specific packet to display a small window showing the entire
+      message payload. Clicking the "Pause" button will pause the
+      simulation and its output.</p>
+
+      <p>Quit the SimGUI.</p>
+      
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">Using gdb</font>
+	      </b></td> </tr>
+
+      </table>
+
+      
+      <p>One significant advantage of Nido is that, because it runs
+      natively on a PC, you can use traditional debugging tools such
+      as <tt>gdb</tt>. However, because Nido is a discrete event
+      simulation for large numbers of motes, traditional step-through
+      debugging techniques only work on an event basis, and not
+      cross-events.</p>
+
+      <p>Unfortunately, <tt>gdb</tt> is generally designed for C and
+      not nesC; the component model of nesC means that a single
+      command can have multiple providers; referring to a specific
+      command requries specifying the component, interface, and
+      command. For example, to break on entry to the <tt>redOff</tt>
+      command of the <tt>Leds</tt> interface of <tt>LedsC</tt>, one
+      must type:</p>
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre><tt>
+(gdb) break *LedsC$Leds$redOff
+Breakpoint 1 at 0x804c644: file tos/system/LedsC.td, line 97.</tt></pre>
+	    </td></tr></table>
+      </center>
+
+      <p>The leading * is necessary so <tt>gdb</tt> can parse the
+      function name correctly; otherwise, it looks for the function
+      <tt>LedsC</tt>.</p>
+
+      <p>Variables are similarly named. For example, to print the
+      <tt>ledsOn</tt> variable of <tt>LedsC</tt> (which keeps track of
+      on/off for the toggle commands), one types:</p>
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre><tt>
+(gdb) print LedsC$LedsOn
+$3 = '\0' &lt;repeats 999 times&gt;
+	    </td></tr></table>
+      </center>
+
+      <p>Actually, this isn't quite correct, as the output above shows;
+      in Nido, <tt>ledsOn</tt> isn't a single <tt>uint8_t</tt>, but an
+      array of 1000 of them. This is how Nido handles the state of
+      many motes; it compiles fields to be arrays of <i>n</i>
+      elements, where <i>n</i> is the maximum simulation
+      size. Whenever a mote accesses a component's state, it indexes
+      into the array based on its node ID. Therefore, to refer to a
+      specific mote's state, one needs to index into the array
+      properly:</p>
+
+<center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre><tt>
+(gdb) print LedsC$ledsOn[tos_state.current_node]
+$2 = 0 '\0'
+	    </td></tr></table>
+      </center>
+
+      <p>We've supplied a simple <tt>gdb</tt> macro named <tt>VAR</tt>
+      that handles this for you. Copy
+      <tt>tos/platform/pc/.gdbinit</tt> to your home directory (if
+      there's already a <tt>.gdbinit</tt> there, just append this
+      file). Quit <tt>gdb</tt> and start it again. Break in
+      <tt>LedsC$Leds$redOff</tt> as before. Now, instead of the above
+      command line, you can type:</p>
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <pre><tt>
+(gdb) VAR LedsC$ledsOn
+$3 = 0 '\0'
+	    </td></tr></table>
+      </center>
+
+      
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">Further Use</font>
+	      </b></td> </tr>
+
+      </table>
+
+      <p>This tutorial only covers some of the functionality and
+      usefulness of Nido; for example, as Nido simulates the TinyOS
+      networking stack at bit granularity, radio models can accurately
+      simulate difficult issues that arise, such as the hidden node
+      problem. Similarly, one can test and debug low-level protocols
+      (such as start symbol detection) in addition to application
+      components and routing protocols. The <a href="../nido.pdf">Nido
+      System Description</a> goes into greater details on these
+      capabilities and presents some information on Nido's
+      implementation.</p>
+
+      
+<p>
+<b><a href="lesson4.html">&lt; Previous Lesson</a></b> |
+<b><a href="lesson6.html">Next Lesson &gt;</a></b>
+
+</body>
+</html>

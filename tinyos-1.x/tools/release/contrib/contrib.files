@@ -1,0 +1,14 @@
+NAME=tinyos-contrib
+VERSION=1.1.4Apr2005cvs
+
+cd ../..
+rm -rf $NAME-$VERSION
+tools/release/extractor $NAME-$VERSION <<'EOF' | gzip >../$NAME-$VERSION.tar.gz
+!.
+^./contrib/(ucb|moteiv)
+!^./contrib/(hsn|prime|ucbRobo|ucbce|xbow)
+^./beta/(STM25P|Deluge|TOSSIM-CC2420|TOSComm)
+!/CVS/
+!/CVS$
+EOF
+rm -rf $NAME-$VERSION

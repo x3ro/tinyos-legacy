@@ -1,0 +1,8 @@
+?package(field-tool): \
+ needs=x11 \
+ title="Field Tool" \
+ logtitle="Field Tool" \
+ command=field-tool \
+ icon48=/home/owl/field/scythe.png \
+ section=Utilities \
+ windowtitle=field-tool

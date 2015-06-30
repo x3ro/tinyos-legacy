@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Agilla Basic Instruction Classes</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../styles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>Basic Instruction Classes</h1>
+<table width="95%" border="1">
+  <tr bgcolor="#CCCCCC">
+    <td><strong>Class</strong></td>
+    <td><strong>Format</strong></td>
+    <td><strong>Key</strong></td>
+  </tr>
+  <tr>
+    <td>b-class</td>
+    <td>00ii iiii</td>
+    <td>i = instruction</td>
+  </tr>
+  <tr>
+    <td>t-class</td>
+    <td>0100 ixxx</td>
+    <td>i = instruction, x = argument</td>
+  </tr>
+  <tr>
+    <td>e-class*</td>
+    <td>0101 iiii xxxx xxxx xxxx xxxx</td>
+    <td>i = instruction, x = argument</td>
+  </tr>
+  <tr>
+    <td>v-class</td>
+    <td>011i xxxx</td>
+    <td>i = instruction, x = argument</td>
+  </tr>
+  <tr>
+    <td>j-class</td>
+    <td>10ix xxxx</td>
+    <td>i = instruction, x = argument</td>
+  </tr>
+  <tr>
+    <td>x-class</td>
+    <td>11xx xxxx</td>
+    <td>x = argument</td>
+  </tr>
+  <tr>
+    <td>ext[1-13]</td>
+    <td>iiii iiii</td>
+    <td>i = instruction</td>
+  </tr>
+    <tr>
+      <td>ext1-x</td>
+      <td>1ixx xxxx</td>
+      <td>i = instruction, x = argument (0-63)</td>
+    </tr>
+</table>
+<p>* stored in big-endian format</p>
+</body>
+</html>

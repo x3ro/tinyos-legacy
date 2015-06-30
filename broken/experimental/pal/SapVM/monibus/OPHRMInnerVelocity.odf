@@ -1,0 +1,1 @@
+<FUNCTION name=HRMInnerVelocity opcode=hrminner numparams=0 returnval=TRUE desc="HRMInnerVelocity: null -> integer, HRMInnerVelocity() = n where n is an integer representing the most recent inner sapflow measurement.">

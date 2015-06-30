@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+
+do "./runtest.pm";
+system("rm -rf output/$ARGV[0]");
+runtests($ARGV[0]);

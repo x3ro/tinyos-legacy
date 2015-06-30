@@ -1,0 +1,3 @@
+COMPONENT=Diagnostic
+include ../Makerules
+

@@ -1,0 +1,3 @@
+COMPONENT=Compass
+include ../Makerules
+

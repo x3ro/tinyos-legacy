@@ -1,0 +1,36 @@
+COMPONENT=GSK
+SENSORBOARD=micasb
+TXRES_VAL=58
+# Real Motes Mica 42, Mica2 49, Simulator 50. TinyDBMain.java:DATA_SIZE!!
+MSG_SIZE=58
+
+PFLAGS=-I./tos_patch -I$(BASEDIR)lib/Attributes -I$(BASEDIR)lib/Commands -I$(BASEDIR)lib/TinyDB -I$(BASEDIR)lib/FS -I$(BASEDIR)lib/TinyDB/Aggregates
+
+PFLAGS += -DNETWORK_MODULE=TinyDBShim -DGENERICCOMM=PromiscuousCommNoUART -DGENERICCOMMPROMISCUOUS=PromiscuousCommNoUART -DBOARD_MICASB -DMAX_NUM_SERVICES=2 -fno-strict-aliasing -DLogicalTime=SimpleTime
+
+# ADJUVANT_NODE_ID = ID only use in simulator to specify Adj node id
+# Don't define SINK_NODE or = 0 when Simulator
+PFLAGS += -DHSN_ROUTING #-DADJUVANT_NODE_ID=1
+
+# TinyDBShim jitter to delay SendDataMessage & random delay from 0 ~ 0.8 sec
+PFLAGS += #-DTINYDBSHIM_JITTER=0 -DTINYDBSHIM_JITTER_FACTOR=8
+
+# DSDV Related Settings
+PFLAGS += -DNEIGHBOR_AGE_CACHE_TIMEOUT=3 #-DDUPLICATE_REMOVAL=1
+
+# To provide TraceRoute, TR_PLUGIN_LEN = 3 is for HSNValue
+PFLAGS += #-DTRACE_ROUTE -DTR_SEND_RATE=9999 -DTR_PIGGYBACK_LEN=1 -DTR_PLUGIN_LEN=3
+
+# Not to smooth the energy to get better result for TinyDB aggregation query
+PFLAGS += -DSMOOTH_ENERGY=0
+
+# Real - Talk to TinyDB and WSN apps, set tinydb.conf SF to false
+#   FRAMED - run uartserver COM2 9001 -r49 9000
+#   NO_FRAMED - run uartserver 9001 -r49 COM2 9000
+# Simulator - set tinydb.conf SF to TRUE and use NO_FRAMED
+PFLAGS += -DNO_UART_FRAMED #-DTINYDBSHIM_UART_MEASURE
+
+# To reduce RAM size, can't more than 3K
+PFLAGS += -DCONST_NEIGHBOR_LIST_LEN=15 -DCONST_GSET_MAX_FEEDBACK_VALUES=1
+
+include ../MakeHSN

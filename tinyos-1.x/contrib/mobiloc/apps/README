@@ -1,0 +1,31 @@
+Current Mobiloc Applications
+Author/Contact: Sarah Bergbreiter
+		Prabal Dutta
+
+NOTE: 	If you have a Makelocal file in your tinyos-1.x/apps directory, 
+	be sure to copy it to contrib/mobiloc/apps
+
+Mobiloc:
+This is the main application for the mobiloc algorithm.  This application
+uses the ultrasound and magnetometer components to estimate range and
+bearing to a moving target.  Using this information, location in a global
+coordinate frame is estimated and forwarded to the base station (and any
+other sensors that are intersted).
+
+TimeSync:
+This is an application used to test the Time Synchronization component
+of Mobiloc.  The green LED should all blink simultaneously.
+
+MagSensor:
+This is an application used to test the magnetometer bearing information.
+It sends information back to the base station for testing and debugging
+purposes.
+
+UltrasoundSensor:
+This application tests the ultrasound receiving capabilities.  It will
+send range information back to a base station for testing and debugging.
+
+UltrasoundTransmitter:
+This application sends out ranging chirps (radio msg + ultrasound beep) and
+is used both for testing purposes with the ultrasound sensor and will
+serve as the transmitter on the mobile object driving through the network.

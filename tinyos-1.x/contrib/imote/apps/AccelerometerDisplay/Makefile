@@ -1,0 +1,3 @@
+COMPONENT=AccelerometerDisplay
+include ../Makerules
+

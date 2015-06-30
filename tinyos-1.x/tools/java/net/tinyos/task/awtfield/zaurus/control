@@ -1,0 +1,13 @@
+Package: field-tool-@ZAURUS@
+Installed-Size: 196k
+Filename: ./field-tool-@ZAURUS@_@VERSION@_arm.ipk
+Version: @VERSION@
+Depends: qpe-base (1.5.0) jeode
+Priority: optional
+Section: qpe
+Maintainer: David Gay <dgay@intel-research.net>
+Architecture: arm
+Description: TASK field tool
+ The field tool for in-the-field maintenance of TASK (Tiny Application
+ Sensor Kit) sensor networks
+

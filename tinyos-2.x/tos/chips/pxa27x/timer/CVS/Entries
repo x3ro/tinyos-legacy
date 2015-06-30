@@ -1,0 +1,26 @@
+/Alarm32khzC.nc/1.3/Wed Jun 11 00:42:13 2008//
+/AlarmMilliC.nc/1.3/Wed Jun 11 00:42:13 2008//
+/BusyWait32khzC.nc/1.3/Wed Jun 11 00:42:13 2008//
+/BusyWaitMicroC.nc/1.3/Wed Jun 11 00:42:13 2008//
+/Counter32khz32C.nc/1.1/Tue Jun 17 07:19:51 2008//
+/Counter32khzC.nc/1.3/Wed Jun 11 00:42:13 2008//
+/CounterMilliC.nc/1.3/Wed Jun 11 00:42:13 2008//
+/HalPXA27xAlarmM.nc/1.3/Wed Jun 11 00:42:13 2008//
+/HalPXA27xBusyWaitM.nc/1.3/Wed Jun 11 00:42:13 2008//
+/HalPXA27xCounterM.nc/1.3/Wed Jun 11 00:42:13 2008//
+/HalPXA27xOSTimerMapC.nc/1.3/Wed Jun 11 00:42:13 2008//
+/HalPXA27xSleep.nc/1.3/Tue Dec 12 18:23:12 2006//
+/HalPXA27xSleepC.nc/1.2/Mon Nov  6 11:57:12 2006//
+/HalPXA27xSleepM.nc/1.3/Tue Dec 12 18:23:12 2006//
+/HalPXA27xWatchdog.nc/1.2/Mon Nov  6 11:57:12 2006//
+/HalPXA27xWatchdogC.nc/1.2/Mon Nov  6 11:57:12 2006//
+/HalPXA27xWatchdogM.nc/1.2/Mon Nov  6 11:57:12 2006//
+/HplPXA27xOSTimer.nc/1.3/Wed Jun 11 00:42:13 2008//
+/HplPXA27xOSTimerC.nc/1.3/Wed Jun 11 00:42:13 2008//
+/HplPXA27xOSTimerM.nc/1.3/Wed Jun 11 00:42:13 2008//
+/HplPXA27xOSTimerWatchdog.nc/1.3/Wed Jun 11 00:42:13 2008//
+/HplPXA27xPower.nc/1.2/Mon Nov  6 11:57:12 2006//
+/HplPXA27xPowerM.nc/1.2/Mon Nov  6 11:57:12 2006//
+/HplPXA27xRTC.nc/1.2/Mon Nov  6 11:57:12 2006//
+/HplPXA27xRTCM.nc/1.2/Mon Nov  6 11:57:12 2006//
+D

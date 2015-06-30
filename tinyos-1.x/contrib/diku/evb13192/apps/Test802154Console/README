@@ -1,0 +1,6 @@
+This application is based on information from the Freescale
+802154MPSUG/D Rev. 0.0, 11/2004 and 802154MPSRM/D Rev. 1.1, 11/2004
+documents.
+
+Additionally, based on information from the source files, as well as
+the 802.15.4 TinyOS interface by Joe Polastre.

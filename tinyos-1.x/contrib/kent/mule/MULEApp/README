@@ -1,0 +1,9 @@
+MULEApp:
+
+This is the program that runs on the real motes. Install it on them and
+give each one a different ID, or else things may get a little wacky. The
+IDs of the real motes do not have to match those of the simulated motes - 
+this is all handled.
+
+If you have $TOSDIR set properly, you should be able to just run 
+'make mica2', otherwise you'll probably have to edit the makefile.

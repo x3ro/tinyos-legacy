@@ -1,0 +1,111 @@
+Drain is a collection routing layer for TinyOS.
+Author: Gilman Tolle <get@cs.berkeley.edu>
+
+== Mote Side ==
+
+Add the directory to your Makefile:
+
+  CFLAGS += -I$(TOSDIR)/../beta/Drain
+
+Wire it into your application:
+
+  includes Drain;
+
+  TestAppM.Send -> DrainC.Send[AM_TESTAPPMSG];
+  TestAppM.SendMsg -> DrainC.SendMsg[AM_TESTAPPMSG];
+
+When sending a message, you need to use both interfaces:
+
+  uint16_t bufLen;
+  TestAppMsg* msg = (TestAppMsg*)
+      call Send.getBuffer(&buf, &bufLen);
+
+  call SendMsg.send(destAddr, sizeof(TestAppMsg), &buf);    
+
+Drain includes a destination address, meaning a node can belong to
+more than one collection tree. When you just want to send to the
+default collection tree, use TOS_DEFAULT_ADDR, defined in Drain.h to
+be 0.
+
+== Host Side ==
+
+Instead of working through node 0, Drain works through a TOSBase (and
+only through a TOSBase). For reliability, Drain requires that the
+TOSBase have link-layer packet acknowledgements turned on. The Drain
+directory includes a version of TOSBase, called DrainBase, that
+enables ACKs. Otherwise, it bridges packets exactly like TOSBase.
+
+Choose an address for your DrainBase. You need to do this, because
+link-layer ACKs require an address. I tend to use 65534. Compile and
+install your DrainBase on a mote.
+
+  make <platform> install,65534
+
+Attach the DrainBase through SerialForwarder
+
+  java net.tinyos.sf.SerialForwarder -comm serial@COM???:telos
+
+Drain doesn't build a routing tree until you run a host-side
+tool. This tool is written in Java, and located in
+Drain/tools/java/net/tinyos/drain. Add this to your classpath:
+
+  export CLASSPATH="$CLASSPATH;c:/cygwin/opt/tinyos-1.x/beta/Drain/tools/java/"
+
+The Drain java tool needs to know the address of the
+DrainBase. Currently, you have to export the MOTEID environment
+variable before running the Drain tool. If you forget this, you may
+not receive any packets. Just set it and run the tool again.
+
+  export MOTEID=65534
+
+Now, to build a Drain tree, run the tool:
+
+  java net.tinyos.drain.Drain
+
+A tree-building message will propagate through the network, and you
+will have a collection tree.
+
+You can also perform this programmatically:
+
+  Drain drain = new Drain();
+  drain.buildTree();
+
+Then, you need to receive messages from the Drain tree. Use the
+DrainConnector java tool.
+
+  class MyClass implements MessageListener {
+   
+    public MyClass() {
+      private DrainConnector drainConnector = new DrainConnector();
+      drainConnector.registerListener(TestAppConsts.AM_TESTAPPMSG, this);
+    }
+ 
+    public void messageReceived(int to, Message m) {
+      DrainMsg drainMsg = (DrainMsg) m;
+
+      TestAppMsg testAppMsg = 
+        new TestAppMsg(drainMsg, 
+                       drainMsg.offset_data(0),
+                       drainMsg.dataLength() - drainMsg.offset_data(0));
+
+      testAppMsg.get_something();
+    }
+
+If you want the tree to adapt to changes in the network, execute the
+Drain tool every so often. 30-60 seconds seems like a reasonable
+period.
+
+If you want to sniff the packets arriving over the Drain tree, you can
+run the DrainSniff tool:
+
+  java net.tinyos.drain.DrainSniff
+
+The output is one packet per line.
+
+
+
+	
+
+
+
+

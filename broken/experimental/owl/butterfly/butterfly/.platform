@@ -1,0 +1,8 @@
+@opts = ("-gcc=avr-gcc",
+	 "-mmcu=atmega169",
+	 "-fnesc-target=avr",
+	 "-fnesc-no-debug");
+
+push @opts, "-mingw-gcc" if $cygwin;
+
+@commonplatforms = ("avrmote");

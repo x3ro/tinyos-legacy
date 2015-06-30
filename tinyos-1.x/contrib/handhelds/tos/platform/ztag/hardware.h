@@ -1,0 +1,281 @@
+/*
+ * Copyright (c) 2004,2005 Hewlett-Packard Company
+ * All rights reserved
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ *       copyright notice, this list of conditions and the following
+ *       disclaimer in the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of the Hewlett-Packard Company nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef _H_hardware_h
+#define _H_hardware_h
+
+#include "msp430hardware.h"
+#include "MSP430ADC12.h"
+
+#include "CC2420Const.h"
+
+#define USART0_RTS_CTS 1
+
+// unused pins
+TOSH_ASSIGN_PIN(UNUSED_4_4, 4, 4);
+TOSH_ASSIGN_PIN(UNUSED_4_5, 4, 5);
+TOSH_ASSIGN_PIN(UNUSED_5_0, 5, 0);
+TOSH_ASSIGN_PIN(UNUSED_5_7, 5, 7);
+TOSH_ASSIGN_PIN(UNUSED_1_6, 1, 6);
+TOSH_ASSIGN_PIN(UNUSED_2_7, 2, 7);
+TOSH_ASSIGN_PIN(UNUSED_1_1, 1, 1);
+TOSH_ASSIGN_PIN(UNUSED_2_2, 2, 2);
+
+
+// LEDs
+TOSH_ASSIGN_PIN(GREEN_LED, 4, 6);
+TOSH_ASSIGN_PIN(RED_LED, 4, 7);
+
+// CC2420 RADIO 
+TOSH_ASSIGN_PIN(RADIO_FIFO, 1, 0);
+TOSH_ASSIGN_PIN(RADIO_FIFOP, 1, 7);
+
+TOSH_ASSIGN_PIN(RADIO_CCA, 1, 5);
+TOSH_ASSIGN_PIN(RADIO_CSN, 5, 4);
+TOSH_ASSIGN_PIN(RADIO_RESET, 5, 5);
+TOSH_ASSIGN_PIN(RADIO_VREF, 5, 6);
+TOSH_ASSIGN_PIN(RADIO_SFD, 4, 1);
+
+// flash pins
+TOSH_ASSIGN_PIN(FLASH_CS, 2, 3);
+TOSH_ASSIGN_PIN(FLASH_RDY, 2, 5);
+TOSH_ASSIGN_PIN(FLASH_WP, 3, 6);
+TOSH_ASSIGN_PIN(FLASH_RST_L, 2, 4);
+
+// battery
+//TOSH_ASSIGN_PIN(BATTERY_ADC0, 6, 0);
+
+// ADC lines on the testpoints
+TOSH_ASSIGN_PIN(ADC_0, 6, 0);
+TOSH_ASSIGN_PIN(ADC_1, 6, 1);
+TOSH_ASSIGN_PIN(ADC_2, 6, 2);
+
+// UART pins
+// SPI1 attached to flash, cc2420
+TOSH_ASSIGN_PIN(UCLK1, 5, 3);
+TOSH_ASSIGN_PIN(SOMI1, 5, 2);
+TOSH_ASSIGN_PIN(SIMO1, 5, 1);
+
+// used as GPIOs but need defs
+#if 1
+TOSH_ASSIGN_PIN(UCLK0, 3, 3);
+TOSH_ASSIGN_PIN(SOMI0, 3, 2);
+TOSH_ASSIGN_PIN(SIMO0, 3, 1);
+#endif
+
+// connected to IrDA
+TOSH_ASSIGN_PIN(UTXD0, 3, 4);
+TOSH_ASSIGN_PIN(URXD0, 3, 5);
+
+TOSH_ASSIGN_PIN(MCP2150_EN_H, 3, 1);
+TOSH_ASSIGN_PIN(MCP2150_RESET_L, 3, 2);
+TOSH_ASSIGN_PIN(RTS0, 3, 3);
+TOSH_ASSIGN_PIN(CTS0, 1, 4);
+TOSH_ASSIGN_PIN(DSR0, 1, 3);
+TOSH_ASSIGN_PIN(DTR0, 6, 3); /* set to 1 */
+TOSH_ASSIGN_PIN(CD0, 2, 6); /* set to 1 */
+
+TOSH_ASSIGN_PIN(IR_RX_H, 1, 2); /* input to detect IrDA traffic */
+TOSH_ASSIGN_PIN(IR_LOWPRW_H, 3, 0); /* set to 1 */
+
+TOSH_ASSIGN_PIN(PAD_SPI_CSN, 3, 7);
+
+TOSH_ASSIGN_PIN(ACCEL_X, 2, 0);
+TOSH_ASSIGN_PIN(ACCEL_Y, 2, 1);
+
+TOSH_ASSIGN_PIN(UART_SEL_CONN_L, 4, 0);
+TOSH_ASSIGN_PIN(UART_SEL_IRDA_L, 4, 3);
+TOSH_ASSIGN_PIN(UART_SEL_PAD_L, 4, 2);
+
+TOSH_ASSIGN_PIN(ENABLE_PAD_VDD_H, 6, 4);
+TOSH_ASSIGN_PIN(ENABLE_CONN_VDD_H, 6, 5);
+TOSH_ASSIGN_PIN(ENABLE_CC2420_VDD_H, 6, 6);
+TOSH_ASSIGN_PIN(ENABLE_ACCEL_VDD_H, 6, 7);
+
+
+// 1-Wire
+TOSH_ASSIGN_PIN(ONEWIRE, 5, 0);
+
+
+#define UART_HACK 1
+#ifdef UART_HACK
+//XXX these are now routed to test points so they dont hurt anyone
+TOSH_ASSIGN_PIN(UTXD1, 2, 7);
+TOSH_ASSIGN_PIN(URXD1, 2, 7);
+#endif
+
+
+
+
+void TOSH_SET_PIN_DIRECTIONS(void)
+{
+  //LEDS
+  TOSH_SET_RED_LED_PIN();
+  TOSH_SET_GREEN_LED_PIN();
+  TOSH_MAKE_RED_LED_OUTPUT();
+  TOSH_MAKE_GREEN_LED_OUTPUT();
+
+    //RADIO PINS
+  //CC2420 pins
+  TOSH_SET_RADIO_RESET_PIN();
+  TOSH_MAKE_RADIO_RESET_OUTPUT();
+  TOSH_CLR_RADIO_VREF_PIN();
+  TOSH_MAKE_RADIO_VREF_OUTPUT();
+  TOSH_SET_RADIO_CSN_PIN();
+  TOSH_MAKE_RADIO_CSN_OUTPUT();
+  TOSH_MAKE_RADIO_FIFOP_INPUT();
+  TOSH_MAKE_RADIO_SFD_INPUT();
+  TOSH_MAKE_ENABLE_CC2420_VDD_H_OUTPUT();
+  TOSH_SET_ENABLE_CC2420_VDD_H_PIN();
+
+  
+  // Flash Pins
+  TOSH_MAKE_FLASH_CS_OUTPUT();
+  TOSH_SET_FLASH_CS_PIN();
+  TOSH_MAKE_FLASH_RST_L_OUTPUT();
+  TOSH_SET_FLASH_RST_L_PIN();
+  TOSH_MAKE_FLASH_WP_OUTPUT();  
+  TOSH_SET_FLASH_WP_PIN();
+  TOSH_MAKE_FLASH_RDY_INPUT();
+  
+
+  //XXX need to remove eventually
+  //UART PINS
+#ifdef UART_HACK
+  TOSH_MAKE_UTXD1_OUTPUT();
+  TOSH_MAKE_URXD1_OUTPUT();
+  TOSH_CLR_UTXD1_PIN();
+  TOSH_CLR_URXD1_PIN();
+#endif
+  TOSH_MAKE_UTXD0_OUTPUT();
+  TOSH_CLR_UTXD0_PIN();
+  TOSH_MAKE_URXD0_INPUT();
+
+  TOSH_MAKE_RTS0_OUTPUT();
+  TOSH_MAKE_CTS0_INPUT();
+  TOSH_MAKE_DTR0_OUTPUT();
+  TOSH_MAKE_DSR0_INPUT();
+  TOSH_MAKE_CD0_INPUT();
+
+  TOSH_CLR_DTR0_PIN(); /* set 1 so mcp2150 does not enter programming mode */
+  TOSH_SET_RTS0_PIN(); /* set 1: msp430 not ready to receive */
+  // connections to MCP2150 pins
+  TOSH_MAKE_MCP2150_EN_H_OUTPUT();
+  TOSH_CLR_MCP2150_EN_H_PIN();
+  TOSH_MAKE_MCP2150_RESET_L_OUTPUT();
+  TOSH_SET_MCP2150_RESET_L_PIN();
+
+  // put ir transceiver in working mode when you need it
+  TOSH_MAKE_IR_LOWPRW_H_OUTPUT();
+  TOSH_CLR_IR_LOWPRW_H_PIN();
+  //make it an input only when you are using it.
+  TOSH_MAKE_IR_RX_H_OUTPUT(); 
+  TOSH_CLR_IR_RX_H_PIN();
+   
+  // by default, run the 2150's uart rx to the msp 
+  TOSH_MAKE_UART_SEL_IRDA_L_OUTPUT();
+  TOSH_SET_UART_SEL_IRDA_L_PIN();
+  TOSH_MAKE_UART_SEL_CONN_L_OUTPUT();
+  TOSH_SET_UART_SEL_CONN_L_PIN();
+  TOSH_MAKE_UART_SEL_PAD_L_OUTPUT();
+  TOSH_SET_UART_SEL_PAD_L_PIN();
+
+
+  //Accel
+  TOSH_MAKE_ENABLE_ACCEL_VDD_H_OUTPUT();  
+  TOSH_CLR_ENABLE_ACCEL_VDD_H_PIN();
+  TOSH_MAKE_ACCEL_X_INPUT();
+  TOSH_MAKE_ACCEL_Y_INPUT();  
+  
+  //Pads
+  TOSH_MAKE_ENABLE_PAD_VDD_H_OUTPUT();
+  TOSH_CLR_ENABLE_PAD_VDD_H_PIN();
+  //Conector
+  TOSH_MAKE_ENABLE_CONN_VDD_H_OUTPUT();
+  TOSH_CLR_ENABLE_CONN_VDD_H_PIN();
+  TOSH_MAKE_PAD_SPI_CSN_OUTPUT();
+  TOSH_CLR_PAD_SPI_CSN_PIN();
+  
+
+
+  
+  //Unused
+  TOSH_MAKE_UNUSED_4_4_OUTPUT();
+  TOSH_CLR_UNUSED_4_4_PIN();
+  TOSH_MAKE_UNUSED_4_5_OUTPUT();
+  TOSH_CLR_UNUSED_4_5_PIN();
+  TOSH_MAKE_UNUSED_5_0_OUTPUT();
+  TOSH_CLR_UNUSED_5_0_PIN();
+  TOSH_MAKE_UNUSED_5_7_OUTPUT();
+  TOSH_CLR_UNUSED_5_7_PIN();
+  TOSH_MAKE_UNUSED_1_6_OUTPUT();
+  TOSH_CLR_UNUSED_1_6_PIN();
+  TOSH_MAKE_UNUSED_2_7_OUTPUT();
+  TOSH_CLR_UNUSED_2_7_PIN();
+  TOSH_MAKE_UNUSED_2_2_OUTPUT();
+  TOSH_CLR_UNUSED_2_2_PIN();
+  TOSH_MAKE_UNUSED_1_1_OUTPUT();
+  TOSH_CLR_UNUSED_1_1_PIN();
+
+  // Force known states
+  TOSH_MAKE_UCLK1_OUTPUT();
+  TOSH_CLR_UCLK1_PIN();
+  TOSH_MAKE_SIMO1_OUTPUT();
+  TOSH_CLR_SIMO1_PIN();
+  // missing the 11k for now, though it should be n input making it an input adds about 5-6 uAmp and some bounce.
+  //TOSH_MAKE_SOMI1_INPUT();
+  TOSH_MAKE_SOMI1_OUTPUT();
+  TOSH_SET_SOMI1_PIN();
+
+
+
+
+  //TOSH_MAKE_BATTERY_ADC0_INPUT();
+
+  // ADC lines on the testpoints inputs
+#if 1
+  TOSH_MAKE_ADC_0_OUTPUT();
+  TOSH_SET_ADC_0_PIN();
+  TOSH_MAKE_ADC_1_OUTPUT();
+  TOSH_SET_ADC_1_PIN();
+  TOSH_MAKE_ADC_2_OUTPUT();
+  TOSH_SET_ADC_2_PIN();
+#else
+  TOSH_MAKE_ADC_0_INPUT();
+  TOSH_MAKE_ADC_1_INPUT();
+  TOSH_MAKE_ADC_2_INPUT();
+#endif
+  
+}
+
+
+#endif // _H_hardware_h
+

@@ -1,0 +1,61 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>An example application</title>
+</head>
+
+<body>
+
+<h1>An example application</h1>
+<p>This file will walk you through the process of designing an application in 
+Matlab.&nbsp; This consists of two parts: 1)&nbsp; setting up your environment 
+and 2) running your application</p>
+<p>11.&nbsp; <b>Create your own packets to inject.</b>&nbsp; You can use the 
+template provided in nest/tools/matlab/contrib/template/myPacket.&nbsp; This 
+will show you how to create a packet with values and fields.&nbsp; If you run 
+myPacket, it will return the packet and print it to the screen so you can see 
+what it really does.&nbsp; You can then use it in a command such as: 
+routePackets('all', myPacket)</p>
+<p><b>12.&nbsp; Build your own functions</b>.&nbsp; You can start with the 
+template that I provided in contrib/template/myApp.&nbsp; That is an app that 
+doesn't do anything, but almost all apps will probably have the same sort of 
+interface.&nbsp; It has a 'define' file that defines it's environment once and 
+for all.&nbsp; It has a 'myApp' function that gets it ready to run each time you 
+want to run it.&nbsp;&nbsp; It has enable/disable functions that 
+register/deregister it as a packet listener on it's motes, and it has a delete 
+function that kills it.&nbsp; This should be standard for such event-based 
+applications.</p>
+<p>&nbsp;</p>
+<p>The best way to really get started with the environment is to look at what 
+already works.&nbsp; I have a directory in the contrib directory that has my 
+code in it that you can look at: matlab/contrib/kamin.&nbsp; The important 
+things to look at are:</p>
+<p><b>How I set up the environment every time I start matlab</b>.&nbsp; This is 
+described in more detail in this <a href="ApplicationEnvironments.html">file</a>:</p>
+<p><b>How I use the tools</b>: for example, I use watch and surface watch from a 
+couple of files called watchRF and watchRFSurface, which can be found in contrib/kamin/rfCharacterization</p>
+<p><b>How I use the comm stack</b>:&nbsp;&nbsp; for example, there is a script 
+in the contrib/kamin/POTCharacterization that allows me to designate one 
+transmitter and several receivers.&nbsp; The script then changes the pot setting 
+on the transmitter (which changes the RF signal strength) one step at a time and 
+reads the values on the BBout pin (the received signal strength) and stores them 
+and plots them.&nbsp; An important part of this file is the ability to start and 
+stop this function since it is CPU intensive and since I want it to be 
+synchronous.</p>
+<p>&nbsp;</p>
+<p>While you are looking at these files, read the
+<a href="MatlabToolsEnvironment.html">matlabToolsEnvironment.html </a>which 
+explains from a theoretical viewpoint what how the environment is structured and 
+what it is supposed to do.</p>
+<p>Before you do that, you of course have to setup Matlab, so read this
+<a href="SettingUpMatlab.html">file</a>:</p>
+
+<p>&nbsp;</p>
+
+</body>
+
+</html>

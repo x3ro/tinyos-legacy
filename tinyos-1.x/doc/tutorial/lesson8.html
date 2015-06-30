@@ -1,0 +1,297 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.78 [en] (X11; U; Linux 2.4.7-10 i686) [Netscape]">
+   <title>TinyOS Tutorial Lesson 8: Data logging application</title>
+</head>
+<body bgcolor="#F8F8FF" link="#005BB7" vlink="#005BB7">
+&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><font face="tahoma,arial,helvetica"><font size=-1>Lesson
+8: Data logging application</font></font></b>
+<p><font face="tahoma,arial,helvetica">Last updated 9 September 2003</font></td>
+</tr>
+</table>
+
+<p>This lesson will discuss a fairly complete application for remote data
+logging and collection, called <tt>SenseLightToLog</tt>. This is an extension
+to <tt>SimpleCmd</tt> that accepts two new commands: one that causes the
+mote to collect sensor readings and write them to the EEPROM, and another
+that causes the mote to transmit sensor readings from the EEPROM over the
+radio.
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">The SenseLightToLog
+Application</font></nobr></b></td>
+</tr>
+</table>
+
+<p>The high-level functionality of <tt>SenseLightToLog</tt> can be best
+understood by looking at the <tt><a href="../../apps/SenseLightToLog/SimpleCmdM.nc">apps/SenseLightToLog/SimpleCmdM.nc</a></tt>
+component. This is an extended version of the original <tt>SimpleCmd</tt>
+component from the previous lesson. The <tt>cmdInterpret()</tt> task now
+recognizes two additional commands:
+<ul>
+<li>
+<tt>START_SENSING</tt>: This command invokes the
+<tt>Sensing</tt> interface
+to collect a specified number of samples at a specified sampling rate,
+and to store these samples in mote's EEPROM. The <tt>LoggerWrite</tt> interface
+is used to write the data to the EEPROM.</li>
+
+<li>
+<tt>READ_LOG</tt>: This command will retrieve a line of data from the EEPROM
+and broadcast it in a radio packet.</li>
+</ul>
+
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">The Sensing interface</font></nobr></b></td>
+</tr>
+</table>
+
+<p>We have abstracted the concept of taking a number of sensor readings
+behind the <tt>Sensing</tt> interface, which is implemented by the
+<tt>SenseLightToLog</tt>
+component. This interface provides the <tt>start()</tt> command to initiate
+a series of sensor readings, and signals the <tt>done()</tt> event when
+sensing has completed.
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%"><b>SenseLightToLogM.nc</b>
+<pre>&nbsp; command result_t Sensing.start(int samples, int interval_ms) {
+&nbsp;&nbsp;&nbsp; nsamples = samples;
+&nbsp;&nbsp;&nbsp; call Timer.start(TIMER_REPEAT, interval_ms);
+&nbsp;&nbsp;&nbsp; return SUCCESS;
+&nbsp; }
+
+&nbsp; event result_t Timer.fired() {
+&nbsp;&nbsp;&nbsp; nsamples--;
+&nbsp;&nbsp;&nbsp; if (nsamples== 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; call Timer.stop();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; signal Sensing.done();
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; call Leds.redToggle();
+&nbsp;&nbsp;&nbsp; call ADC.getData();
+&nbsp;&nbsp;&nbsp; return SUCCESS;
+&nbsp; }
+
+&nbsp; async event result_t ADC.dataReady(uint16_t this_data){
+&nbsp;&nbsp; atomic {
+&nbsp;&nbsp;&nbsp; int p = head;
+&nbsp;&nbsp;&nbsp; bufferPtr[currentBuffer][p] = this_data;
+&nbsp;&nbsp;&nbsp; head = (p+1);
+&nbsp;&nbsp;&nbsp; if (head == maxdata) head = 0; // Wrap around circular buffer
+&nbsp;&nbsp;&nbsp; if (head == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; post writeTask();&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; return SUCCESS;
+&nbsp; }
+
+&nbsp; task void writeTask() {
+&nbsp;&nbsp;&nbsp; char* ptr;
+&nbsp;&nbsp;&nbsp; atomic {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ptr = (char*)bufferPtr[currentBuffer];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; currentBuffer ^= 0x01; // Toggle between two buffers
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; call LoggerWrite.append(ptr);
+&nbsp; }
+
+</pre>
+</td>
+</tr>
+</table></center>
+
+<p>When <tt>start()</tt> is invoked, the timer is started to tick at the
+given interval. When the timer event fires, <tt>ADC.getData()</tt> is invoked
+to get a sensor reading. The <tt>ADC.dataReady()</tt> event causes the
+sensor reading to be stored in a circular buffer. When the appropriate
+number of samples have been collected the
+<tt>Sensing.done()</tt> event
+is signaled.
+<p>When <tt>SimpleCmd</tt> receives a <tt>READ_LOG</tt> command, it initiates
+an EEPROM read (through <tt>LoggerRead</tt>). When the read has completed
+it broadcasts the data in a packet. There are 16 bytes in each log entry,
+which are displayed when you run <tt>BcastInject</tt> tool (as described
+below).
+<p>Notice the atomic statements in <tt>ADC.dataReady()</tt> async event.
+They protect access to the shared variables <tt>head</tt>, <tt>bufferPtr</tt>,
+and <tt>currentBuffer</tt>.&nbsp; Why do you think the command <tt>LoggerWrite.append()</tt>
+is called from a task and&nbsp; not from the <tt>ADC.dataReady()</tt> async
+event ? That is because <tt>LoggerWrite.append()</tt> is <i>not async</i>,
+so it may not safely preempt other code and should not be called from an
+async event.
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Logger component,
+interfaces, usage, and limitations</font></nobr></b></td>
+</tr>
+</table>
+
+<p>The Mica mote has an on-board, 512 kbyte flash EEPROM. The EEPROM serves
+as a persistent storage device for the mote, and is indispensable for many
+applications involving data collection, such as sensor data and debugging
+traces. The <tt>EEPROMRead</tt> and <tt>EEPROMWrite</tt> interfaces provide
+a clean abstraction to this hardware. The EEPROM may be read and written
+in 16-byte blocks, called <i>lines</i>. Read and write to the EEPROM are
+split-phase operations: one must first initiate a read or write operation
+and wait for the corresponding <tt>done</tt> event before performing another
+operation.
+<p>To simplify access to the EEPROM even further, the <tt>Logger</tt> component
+is provided (see <tt><a href="../../tos/system/LoggerM.nc">tos/system/LoggerM.nc</a></tt>).
+<tt>Logger</tt>
+maintains an internal pointer to the next EEPROM line to be read or written,
+treating the EEPROM as a circular buffer that may be accessed sequentially.
+The logger does not read or write data at the beginning of the EEPROM,
+which is set aside to store persistent data for the mote. For example,
+when using network reprogramming of motes, this region stores the <tt>TOS_LOCAL_ADDRESS</tt>
+of the mote.
+<p>The <tt>LoggerRead</tt> and <tt>LoggerWrite</tt> interfaces are used
+for reading and writing, respectively. <tt>LoggerRead</tt> provides the
+commands:
+<ul>
+<li>
+<tt>readNext(buffer)</tt> - Read the next line from the log</li>
+
+<li>
+<tt>read(line, buffer)</tt> - Read an arbitrary line from the log</li>
+
+<li>
+<tt>resetPointer()</tt> - Set the current line pointer to the beginning
+of the log</li>
+
+<li>
+<tt>setPointer(line)</tt> - Set the current line pointer to the given line</li>
+</ul>
+Likewise, <tt>LoggerWrite</tt> provides the following commands:
+<ul>
+<li>
+<tt>append(buffer)</tt> - Append data to the log</li>
+
+<li>
+<tt>write(line, buffer)</tt> - Write data to the log at the given line</li>
+
+<li>
+<tt>resetPointer()</tt> - Set the current line pointer to the beginning
+of the log</li>
+
+<li>
+<tt>setPointer(line)</tt> - Set the current line pointer to the given line</li>
+</ul>
+
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Logging performance</font></nobr></b></td>
+</tr>
+</table>
+
+The <tt>Logger</tt> component does not offer very high performance. Please
+see the <tt>apps/HighFrequencySampling</tt> application if you are
+interested in high-frequency sampling (up to around 5kHz), using the
+<tt>ByteEEPROM</tt> component. This lesson will eventually be updated to
+reflect this new component.
+
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Data collection
+using SenseLightToLog</font></nobr></b></td>
+</tr>
+</table>
+
+<p>Program one mote with <tt>SenseLightToLog</tt> and another with TOS<tt>Base</tt>,
+as before. You may want to attach a sensor board to your mote to get meaningful
+photo readings.
+<p>The first step is to instruct the mote to take a number of sensor readings.
+Type
+<p>&nbsp;&nbsp;&nbsp; <tt>export MOTECOM=serial@COM1:19200</tt>
+<p>Run
+<pre>&nbsp; java net.tinyos.tools.BcastInject start_sensing &lt;num_samples> &lt;interval></pre>
+where <tt>num_samples</tt> is the number of samples to take (say, 8 or
+16), and <tt>interval</tt> is the time in milliseconds between samples
+(say, 100). For example:
+<pre>&nbsp; java net.tinyos.tools.BcastInject start_sensing 16 100</pre>
+You should see the mote's red LED blink while samples are being taken.
+<p>To get the log data back from the mote, use:
+<pre>&nbsp; java net.tinyos.tools.BcastInject read_log &lt;mote_address></pre>
+where <tt>mote_address</tt> is the address of the mote to read log data
+from. For example:
+<pre>&nbsp; % java net.tinyos.tools.BcastInject read_log 2
+&nbsp; Sending payload: 65 6 0 0 0 2 0 0 0 0 0&nbsp;
+&nbsp; serial@COM1:19200: resynchronizing&nbsp;
+&nbsp; Waiting for response to read_log...
+&nbsp; Received log message: Message &lt;LogMsg> [sourceaddr=0x2]&nbsp;
+&nbsp; Log values: 48 1 38 1 33 1 32 1 32 1 33 1 34 1 34 1</pre>
+The program will wait 10 seconds for a response to the <tt>read_log</tt>
+command; if you don't see a response, try again. If you don't get a reply,
+then possibly the mote didn't get the command (the green LED will toggle
+for each command received), or you didn't specify the right
+<tt>mote_address</tt>.
+Each subsequent <tt>read_log</tt> command you send will read the next log
+entry from the mote; if you want to reset the read pointer, just power-cycle
+the mote. Remember that the EEPROM data is persistent across power-cycles,
+but the current read pointer is kept in volatile memory!
+<p>
+<hr><b><a href="lesson7.html">&lt; Previous Lesson</a></b> |
+<b><a href="index.html">Index
+Page ></a></b> | <b><a href="index.html">Top</a></b>
+</body>
+</html>
+
+<!--  LocalWords:  TinyOS nesC nc async norace BlinkM FooM ncc SingleTimer Leds
+ -->
+<!--  LocalWords:  LedsC StdControl tos init TimerC redOn redOff uint redToggle
+ -->
+<!--  LocalWords:  metadata html nesdoc gcc exe avr objcopy srec uisp mib dprog
+ -->
+<!--  LocalWords:  towards dapa xff ThinkPad dlpt Makelocal micasb Wshadow DDEF
+ -->
+<!--  LocalWords:  finline fnesc cfile lm Atmel ATmega nesC's nesc SenseM rdata
+ -->
+<!--  LocalWords:  ADCControl SounderControl dataReady getData rcombine someval
+ -->
+<!--  LocalWords:  ADControl fooControl barControl MyTimer uniqueCount basicsb
+ -->
+<!--  LocalWords:  sensorboard Makerules sensorboards SenseTask taskname INTMSG
+ -->
+<!--  LocalWords:  SenseTaskM putdata processData CntToLedsAndRfm RfmToLeds Msg
+ -->
+<!--  LocalWords:  CntToRfmAndLeds IntToLeds IntToRfm IntOutput outputComplete
+ -->
+<!--  LocalWords:  IntToRfmM GenericComm SendMsg bool struct IntMsg src BCAST
+ -->
+<!--  LocalWords:  ADDR sizeof TOSH sendDone GenricComm AMStandard RfmToInt pc
+ -->
+<!--  LocalWords:  UARTNoCRCPacket RadioCRCPacket ActiveMessage RfmToIntM xfff
+ -->
+<!--  LocalWords:  ReceiveIntMsg ReceiveMsg MsgPtr addr SenseToRfm TOSSIM DBG
+ -->
+<!--  LocalWords:  TinyViz ffff crc usr dbg const printf prepended bitmask gdb
+ -->
+<!--  LocalWords:  ledsOn gdbinit plugin API TestTinyViz cd tinyviz plugins RFM
+ -->
+<!--  LocalWords:  FakeLocation RadioModelPlugin LocationPlugin afterwards disc
+ -->
+<!--  LocalWords:  DebugMsgEvent TestTinyVizM AutoRun autorun numsec stopstring
+ -->
+<!--  LocalWords:  gridrandom DebugMsgPlugin RadioLinkPlugin radiomodel precmd
+ -->
+<!--  LocalWords:  radioscaling nummotes logfile txt logfiles arConfig TOSSIM's
+ -->
+<!--  LocalWords:  SimpleCmd TOSBase SerialForwarder BcastInject SimpleCmdM ret
+ -->
+<!--  LocalWords:  SimpleCmdMsg Multihop Bcast BcastM ReceiveCmdMsg pmsg msg
+ -->
+<!--  LocalWords:  retval greenToggle ProcessCmd SenseLightToLog EEPROM maxdata
+ -->
+<!--  LocalWords:  cmdInterpret LoggerWrite SenseLightToLogM nsamples bufferPtr
+ -->
+<!--  LocalWords:  currentBuffer writeTask ptr LoggerRead kbyte EEPROMRead num
+ -->
+<!--  LocalWords:  EEPROMWrite readNext resetPointer setPointer ByteEEPROM
+ -->
+<!--  LocalWords:  HighFrequencySampling MOTECOM LogMsg sourceaddr
+ -->

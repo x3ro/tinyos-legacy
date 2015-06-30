@@ -1,0 +1,36 @@
+Package: net.tinyos.Listen
+Description: provides a GUI that displays and logs
+a packet stream originating from the SerialForwarder
+Author: Bret Hull <bwhull@uclink4.berkeley.edu>
+
+This application connects to a SerialForwarder, displays 
+the resulting packet stream, and logs the bytes to a file.
+
+Executables: none
+
+Program: SerialForwarder Logger
+
+net.tinyos.Listen
+        usage: java net.tinyos.Listen.InitLogger
+        descr: main logger/listen application
+
+Classes:
+
+ClientWindow.java
+
+The main window that is displayed when the SerialForwarder Logger is 
+operating in GUI mode
+
+InitLogger.java
+
+This class contains the "main" function and processes command line
+arguments.
+
+Logger.java
+
+This class that makes a connection with the SerialForwarder and logs
+the packet stream to a file.
+
+
+
+

@@ -1,0 +1,1 @@
+PATH=/usr/local/lib/ncc:$PATH gdb --command=GDB-COMMANDS

@@ -1,0 +1,6 @@
+
+This is the older version of Transceiver that works with older version of
+moted that was being maintained on the microteers repo at hey.isi.edu.
+
+Now, unless you have copies of the older moted source or binaries, this
+code is history.

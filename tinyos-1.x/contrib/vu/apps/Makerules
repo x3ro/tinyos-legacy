@@ -1,0 +1,14 @@
+#Use the "new" Make structure
+MAKERULES = $(TOSDIR)/../tools/make/Makerules
+TOSMAKE_PATH += $(VUTOS)/../tools/make
+
+#ifdef TINYOS_NP
+  ifeq ($(TINYOS_NP),XNP)
+  	CFLAGS += -I$(VUTOS)/lib/Xnp -I$(shell ncc -print-tosdir)/lib/Xnp
+  endif
+#endif
+
+include $(TOSDIR)/../apps/Makerules
+
+#Include the Vanderbilt Libs and platforms
+$(call TOSMake_include,vandy.extra)

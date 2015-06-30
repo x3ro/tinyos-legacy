@@ -1,0 +1,72 @@
+/*									tab{4
+ *  
+ *
+ * "Copyright (c) 2001 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Sam Madden
+ * Date:     June, 2001
+ *
+
+Description file for component which broadcasts indentifying information about motes
+over the radio.
+
+- ID : A single character ID for this mote;  used to differentiate this mote from other motes
+- VERSION : A single character version of the software running on this mote.  Two motes with
+  the same version code run the same release of the same application
+- SCHEMA : A single character used to identify which sensor readings are available on this
+  mote. See Schema.h for routines to parse this code.
+
+ *
+ */
+
+TOS_MODULE MOTEINFO;
+JOINTLY IMPLEMENTED_BY MOTEINFO;
+
+
+ACCEPTS{
+	char MOTEINFO_INIT(void);
+	char MOTEINFO_START(void);
+	char SCHEMA_OUTPUT(void);
+	char ID_OUTPUT(void);
+	char VERSION_OUTPUT(void);
+};
+
+SIGNALS{
+/* probably nobody wants to hear these */
+/*	char SCHEMA_TO_RFM_COMPLETE(char success);
+	char ID_TO_RFM_COMPLETE(char success);
+	char VERSION_TO_RFM_COMPLETE(char success);
+*/
+};
+
+HANDLES{
+	char MOTEINFO_SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr SCHEMA_READING(TOS_MsgPtr val);
+	TOS_MsgPtr VERSION_READING(TOS_MsgPtr val);
+	TOS_MsgPtr ID_READING(TOS_MsgPtr val);
+	TOS_MsgPtr INFO_REQUEST_READING(TOS_MsgPtr val);
+
+};
+
+USES{
+	char MOTEINFO_SUB_INIT(void);
+	char MOTEINFO_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+};
+

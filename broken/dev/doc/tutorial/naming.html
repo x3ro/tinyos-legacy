@@ -1,0 +1,199 @@
+<title>TinyOS Coding and Naming Conventions</title>
+</head>
+
+<body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%">
+<font face="tahoma,arial,helvetica"><b><big><big>
+TinyOS Naming Conventions</big></big></b>
+<p>
+Last updated 28 August 2002
+</font>
+</td></tr>
+</table>
+
+<p>This document outlines the naming conventions used in TinyOS. They
+are strongly influenced by the Java coding conventions.</p>
+
+
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">Names</font></b></nobr></td>
+</tr></table></p>
+
+
+    <table border=3 cellpadding=10>
+      <tr>
+	<td>Identifier Type</td>
+	<td>Rules for Naming</td>
+	<td>Examples</td>
+      </tr>
+
+      <tr>
+	<td>Interfaces</td>
+
+	<td>Components should be verbs or nouns, in mixed case with
+	the first letter of each internal word capitalized.</td>
+	
+	<td><code>
+	  ADC<br></br>
+	  Range<br></br>
+	  SendMsg<br></br>
+	  BombillaLocks<br></br>
+	  </code></td>
+      </tr>
+
+
+       <tr>
+	<td>Components</td>
+	<td>
+	  <p>Components should be nouns, in mixed case with the first
+	  letter of each internal word capitalized.</p>
+
+	  <p>There are two special cases of component names; those
+	  terminating with an uppercase C and those terminating with
+	  an uppercase M. These are used to distinguish interfaces
+	  from components and configurations from modules.</p>
+
+	  <p>The uppercase C stands for <b>Component</b>. It is used
+	  to distinguish between an interface (e.g <a
+	  href="../../tos/interfaces/Timer.ti">Timer</a>) and a
+	  component that provides the interface (e.g <a
+	  href="../../tos/system/TimerC.td">TimerC</a>).</p>
+
+	  <p>The uppercase M stands for <b>Module</b>. This naming
+	  convention is used when a single logical component has both
+	  a configuration and a module. An example of this is the
+	  Timer in <a href="../../tos/system">tos/system</a>. The <a
+	  href="../../tos/system/TimerC.td">TimerC</a> component,
+	  providing the <a
+	  href="../../tos/interfaces/Timer.td">Timer</a> interface, is
+	  a configuration that links its implementation (<a
+	  href="../../tos/system/TimerM.td">TimerM</a>) to Clock and
+	  LED providers. Otherwise, any user of TimerC would have to
+	  explicitly wire its subcomponents.</p>
+	</td>
+	
+	<td><code>
+	  Counter<br></br>
+	  IntToRfm<br></br>
+	  IntToRfmM<br></br>
+	  TimerC<br></br>
+	  TimerM<br></br>
+	  UARTM<br></br>
+	</code></td>
+      </tr>
+
+      <tr>
+	<td>Files</td>
+
+	<td>Filenames should be the name of the type contained within;
+	all nesC files have ".nc" as a suffix.</td>
+	
+	<td><code>
+	  Counter.nc<br></br>
+	  IntToRfm.nc<br></br>
+	  IntToRfmM.nc<br></br>
+	  TimerC.nc<br></br>
+	  TimerM.nc<br></br>
+	  UARTM.nc<br></br>
+	</code></td>
+      </tr>
+
+       <tr>
+	<td>Applications</td>
+
+	<td>Applications should be the name of the top level
+	component, with trailing Cs removed. If an application tests a
+	piece of TinyOS code, its first word should be "Test." If an
+	application tests TinyOS hardware, its first word should be
+	"Verify." If an application was part of a demonstration, its
+	first word should be "Demo."
+	  
+	<td><code>
+	  CntToRfm<br></br>
+	  Chirp<br></br>
+	  DemoTracking<br></br>
+	  TestTinyAlloc<br></br>
+	  VerifyMicaHW<br></br>
+	  TestTimer<br></br>
+	</code></td>
+      </tr>
+
+      
+      <tr>
+	<td>Commands, Events and Tasks</td>
+
+	<td>Commands, events and tasks should be verbs, in mixed case
+	with the first letter of each internal word capitalized, with
+	the first letter lowercase. If a command/event pair form a
+	split-phased operation, the name of the event should be the
+	command suffixed with "Done" or "Complete". Commands that
+	directly access hardware should be prefixed with "TOSH_" and
+	follow the constant naming conventions (described below).
+
+	</td>
+
+	
+	<td><code>
+	  sendMsg<br></br>
+	  output<br></br>
+	  outputComplete<br></br>
+	  put<br></br>
+	  putDone<br></br>
+	  fired<br></br>
+	  TOSH_SET_RED_LED_PIN();
+	  </code></td>
+	
+      </tr>
+
+      
+      <tr>
+	<td>Variables</td>
+
+	<td>Variables should be nounds, in mixed case with the first
+	letter of each internal word capitalized, with the first
+	letter lowercase. They should be descriptive, although
+	temporary and loop variables (e.g. the ubiquitous <tt>i</tt>)
+	may be used.</td>
+	
+	<td><code>
+	  bool state<br></br>
+	  uint16_t lastCount<br></br>
+	  uint16_t counter<br></br>
+	  result_t writeResult<br></br>
+	  uint8_t noHeader<br></br>
+	</code></td>
+	
+      </tr>
+
+
+      <tr>
+	<td>Constants</td>
+
+	<td>
+	  Constants should be in all caps, with underscores delimiting
+	  internal words.
+	</td>
+	
+	<td><code>
+	  TOS_UART_ADDR<br></br>
+	  TOS_BCAST_ADDR<br></br>
+	  TOS_LOCAL_GROUP<br></br>
+	  TOSH_S1PS<br></br>
+	</code></td>
+	
+      </tr>
+      
+	
+      
+    </table>
+	  
+<b><font size=4><a href="index.html">Index &gt;</a></font></b>
+
+
+</body>

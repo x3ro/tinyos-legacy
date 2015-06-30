@@ -1,0 +1,13 @@
+./mudlle <<-!
+	garbage_collect(1024*1024)
+	load("xc.mud")
+	load("pxslow.mud")
+!
+./mudlle <<-!
+	garbage_collect(1024*1024)
+	load("icxc.mud")
+	load("pxslow.mud")
+!
+umask 007
+/bin/cp *.obj $HOME/mumelib/obj-mudlle/compiler
+/bin/cp *.mud $HOME/mumelib/mudlle/compiler

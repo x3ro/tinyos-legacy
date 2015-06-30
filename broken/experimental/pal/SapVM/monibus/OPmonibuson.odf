@@ -1,0 +1,1 @@
+<FUNCTION name=monibuson opcode=monibuson numParams=0 returnVal=FALSE desc="Enables power to the monibus interface" schedpoint=true>

@@ -1,0 +1,27 @@
+/.cvsignore/1.1.1.1/Mon Nov  5 19:09:50 2007//
+/arith.c/1.1.1.1/Mon Nov  5 19:09:50 2007//
+/arith.h/1.1.1.1/Mon Nov  5 19:09:50 2007//
+/basic.c/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/basic.h/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/bitset.c/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/bitset.h/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/debug.c/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/debug.h/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/files.c/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/files.h/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/io.c/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/io.h/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/list.c/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/list.h/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/prim.pl/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/runtime.c/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/runtime.h/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/string.c/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/stringops.h/1.1.1.1/Mon Nov  5 19:09:51 2007//
+/support.c/1.1.1.1/Mon Nov  5 19:09:52 2007//
+/support.h/1.1.1.1/Mon Nov  5 19:09:52 2007//
+/symbol.c/1.1.1.1/Mon Nov  5 19:09:52 2007//
+/symbol.h/1.1.1.1/Mon Nov  5 19:09:52 2007//
+/vector.c/1.1.1.1/Mon Nov  5 19:09:52 2007//
+/vector.h/1.1.1.1/Mon Nov  5 19:09:52 2007//
+D

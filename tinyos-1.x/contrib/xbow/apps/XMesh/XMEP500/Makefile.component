@@ -1,0 +1,9 @@
+# $Id: Makefile.component,v 1.2 2005/01/11 00:36:26 mturon Exp $
+
+COMPONENT=XMEP500
+SENSORBOARD=mep500
+
+INCLUDES = -I$(TOSROOT)/tos/sensorboards/micawb
+
+
+

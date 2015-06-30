@@ -1,0 +1,85 @@
+TestAcousticRanging:
+
+Authors/Contact: bogyom@isis-server.isis.vanderbilt.edu (Gyorgy Balogh, ISIS)
+  and miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+This component exercises the acoustic ranging component (OutsideRanger). It periodically 
+emits an acoustic ranging signals (one radio message followed by several buzzes) and 
+at the same time listens for them. When a ranging measurement is made, then it forwards 
+the distance measurement to the base station. This application runs on the MICA motes 
+only with the standard sensor board (with mic and buzzer).
+
+The application turns on the red LED when sending the acoustic ranging signal,
+turns on the green LED when receiving an acoustic ranging signal, and blinks the
+yellow LED periodically (10 times per second).
+
+ACCURACY:
+
+For the outside ranger, the maximum range is around 10 meters (depends on GOOD radio 
+and antenna). The average of the absolute value of distance error should
+be less than 10 or 20 centimeter. This value does not depend on the distance.
+
+The manufacturing differences in the microphones and buzzers should not influence
+the accuracy of the ranging. 
+
+OPERATION:
+
+0. You have to download the FULL minitasks/02/vu CVS directory from SourceForge 
+	to a new local directory (do not load it over your tinyos-1.x directory).
+1. Program several (up to 10-15) MICA motes with the TestRangingC component. Use unique
+	mote id's. Attach the standard MICA sensorboard (with mic and buzzer) to these.
+2. Program one MICA mote with the BufferedGenericBase (or GenericBase) component 
+	with id 1973.
+3. Turn on each of the motes, waiting a couple of seconds in between.
+4. The buzzer motes should buzz around once in every minute, watch the LEDs to
+	monitor their operation.
+5. Deploy the motes OUTSIDE, for example in a 10x10 meter area.
+6. Connect the base station mote to a PC/laptop and run the following program:
+
+	java isis.nest.printmsgs.PrintDiagMsgs -comm COM1
+
+   This program will display the distance measurements on the screen. The format of
+   each line is:
+
+	"ranging" <buzzer nodeid> <listener nodeid> <distance in centimeters>
+
+   The distance value -1 will indicate that the radio message was heard, but the
+   acoustic signal was not clear enough to make a good distance estimate.
+
+7. Enjoy. Oh, do not forget to take your measuring tape :)
+
+LIMITATIONS:
+
+- This algorithm is optimized for OUTSIDE and STATIONARY use. Inside buildings there can
+be substantially more echoes. We plan to release an acoustic ranger for inside use and 
+for moving targets.
+
+- We use a primitive algorithm to avoid two motes sending the acoustic signal at the 
+same time. However, if the motes cannot hear each other (in one hop) or started at the
+wrong phase, they can still buzz at the same time. Listen for this and stop/restart these
+motes.
+
+ALGORITHM:
+
+- First we emit a radio signal. The SendMsg.sendDone and ReceiveMsg.receive events are
+used to synchronize the acoustic beacon and acoustic rangers.
+
+- When receiving the radio signal, we turn on the microphone. Both sides wait 0.5 seconds
+for the microphone to power up.
+
+- Then we emit 16 buzzes, each of which is 122 millisecond long. The acoustic ranger samples
+each of the buzzes by streaming the microphone (950 samples per buzz) and adds these samples
+together. The sampling frequency is around 15600 HZ on the MICA and a little bit higher on 
+the MICA2s.
+
+- By sampling 16 times we increase the signal to noise ratio. Also, we vary the delay 
+between the buzzes to eliminate some of the unwanted echoes and other motes' buzzes.
+
+- Once the recording is done, we use a 35-length digital filter (with integer coefficients)
+to filter out the 4-5 KHZ range.
+
+- Then we run a nice peak detection algorithm to detect the start of the buzz.
+
+- Finally, we convert the range to centimeters.

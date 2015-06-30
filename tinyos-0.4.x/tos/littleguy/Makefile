@@ -1,0 +1,59 @@
+AS     = avr-gcc -x assembler-with-cpp
+LD     = avr-gcc -mmcu=at90s2343
+CC     = avr-gcc 
+FULLCC = gcc
+OBJCOPY= avr-objcopy
+CFLAGS = -c -Os -Wall -I/usr/local/avr/include -I. -mmcu=at90s2343
+
+#use for base station
+#CFLAGS += -DBASE_STATION
+#VHDL = wv/motebase.vhd
+
+#use for mobile mote
+VHDL = wv/motesch.vhd
+
+
+SFLAGS = -S -g -Os -I/usr/local/avr/include -I. -mmcu=at90s2343
+LIBS   =
+PROGRAMER= uisp
+
+all: I2CSPI
+
+
+%.o : %.c 
+	$(CC) $(CFLAGS) -o $@ $<
+
+
+%.s: %.S
+	cpp $< $@ -I/usr/local/atmel/lib/uTools/ava/avr
+
+%.o : %.s
+	$(AS) $(CFLAGS) -o $@ $<
+
+%.s : %.c
+	$(CC) $(SFLAGS) -o $@ $<
+
+%: %.o
+	$(LD) $< -o $@ $(LIBS)
+
+I2CSPI: I2CSPI.o
+	$(LD) -o $@ I2CSPI.o
+
+%.install: %.srec
+	sleep 1
+	$(PROGRAMER) -dapa   -dno-poll --erase
+	sleep 1
+	$(PROGRAMER) -dapa   --upload if=$<
+	sleep 1
+	$(PROGRAMER) -dapa   -dno-poll --verify if=$<
+
+%.srec : %
+	$(OBJCOPY) --output-target=srec $< $@
+
+install: I2CSPI.install
+
+
+clean:
+	rm -f *.o I2CSPI I2CSPI.srec Makefile.objs super.h
+
+

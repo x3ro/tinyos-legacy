@@ -1,0 +1,1182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla Basic ISA</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+
+
+<h2><font face="Verdana, Arial, Helvetica, sans-serif">Instruction Set Architecture
+
+(ISA)</font></h2>
+
+<p>Agilla has an extensible instruction set.  The basic instructions are listed
+below.  These are the most common instructions used.  </p>
+<p>Note that Agilla has an <a href="isa/extended_isa.html">Extended Instruction Set</a>. </p>
+<h2>B-class Instructions [00ii iiii]</h2>
+<table width="100%" border="1" bordercolor="#000000">
+
+  <tr>
+    <td width="10" bgcolor="#CCCCCC"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160" bgcolor="#CCCCCC"><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td bgcolor="#CCCCCC"><strong>Short Description</strong></td>
+
+    <td width="100" bgcolor="#CCCCCC"><strong>Opcode</strong></td>
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/halt.html">halt</a></td>
+
+    <td>Halt execution</td>
+
+    <td width="100">0x00</td>
+
+  </tr>
+
+
+  
+    <tr>
+      <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/addr.html">addr</a></td>
+
+    <td>Push host address</td>
+
+    <td width="100">0x01</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/aid.html">aid</a></td>
+
+    <td>Push agent ID</td>
+
+    <td width="100">0x02</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/rand.html">rand</a></td>
+
+    <td>Push random number</td>
+
+    <td width="100">0x03</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/cpush.html">cpush</a></td>
+
+    <td>Pushes condition onto the stack</td>
+
+    <td width="100">0x04</td>
+
+  </tr>
+
+  <!-- <tr>
+
+    <td>depth</td>
+
+    <td>Push stack depth</td>
+
+    <td>0x05</td>
+
+    <td>&nbsp;</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pushes the depth of the agent's operand stack onto the stack as a value;
+
+      the depth is the value before executing this operation.</td>
+
+  </tr> -->
+  
+    <tr>
+      <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/loc.html">loc</a></td>
+
+    <td>Push host location</td>
+
+    <td width="100">0x05</td>
+
+  </tr>
+  
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/vicinity.html">vicinity</a></td>
+
+    <td>Checks if dist <= 2</td>
+
+    <td width="100">0x06</td>
+
+  </tr>
+  <!-- <tr>
+
+    <td>err</td>
+
+    <td>Enter error state</td>
+
+    <td>0x06</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Forces the agent executing this instruction to enter an error state.
+
+      Halts execution.</td>
+
+  </tr>-->
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/clear.html">clear</a></td>
+
+    <td>Clear the operand stack</td>
+
+    <td width="100">0x07</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF0000"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/numnbrs.html">numnbrs</a></td>
+
+    <td>number of neighbors</td>
+
+    <td width="100">0x08</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF0000"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/randnbr.html">randnbr</a></td>
+
+    <td>get random neighbor</td>
+
+    <td width="100">0x09</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/wait.html">wait</a></td>
+
+    <td> wait</td>
+
+    <td width="100">0x0a</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#CCCCCC"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160" bgcolor="#CCCCCC"><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td bgcolor="#CCCCCC"><strong>Short Description</strong></td>
+
+    <td width="100" bgcolor="#CCCCCC"><strong>Opcode</strong></td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FFFFFF"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/inc.html">inc</a></td>
+
+    <td>Increment</td>
+
+    <td width="100">0x0b</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FFFFFF"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/clearvar.html">clearvar</a></td>
+
+    <td>Clear heap variable</td>
+
+    <td width="100">0x0c</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/inv.html">inv</a></td>
+
+    <td>Invert a value</td>
+
+    <td width="100">0x0d</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/not.html">not</a></td>
+
+    <td>Boolean not</td>
+
+    <td width="100">0x0e</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/lnot.html">lnot</a></td>
+
+    <td>logical not</td>
+
+    <td width="100">0x0f</td>
+
+  </tr>
+
+  <!--
+
+  <tr bgcolor="#FF66FF">
+
+    <td><font color="#FF0000"><em>startsense<br>
+
+          <strong>[N/A]</strong></em></font></td>
+
+    <td><font color="#FF0000"><em>Start getting sensor data</em></font></td>
+
+    <td><font color="#FF0000"><em>0x11</em></font></td>
+
+    <td><font color="#FF0000"><em>[value=sensor],<br>
+
+    [value=period]</em></font></td>
+
+    <td><font color="#FF0000">&nbsp;</font></td>
+
+    <td><p><font color="#FF0000"><em>Pops two values off the operand stack. The first value specifies the
+
+        type of sensor, the second specifies the period. It tells the host to
+
+        start taking sensor
+
+        measurements,
+
+        the host
+
+        will put the sensor
+
+        readings
+
+        into
+
+        the host-level
+
+        tuple space using
+
+        pre-defined
+
+        names
+
+      at the specified interval.</em></font></p>
+
+      <ul>
+
+        <li><font color="#FF0000"><em>Photo = 1, name = &quot;sdp&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Temp = 2, name = &quot;sdt&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Microphone = 3, name = &quot;sdm&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Magnometer X and Y= 4, name = &quot;sdx&quot; and &quot;sdy&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Accelerometer X and Y= 5, name = &quot;sda&quot; and &quot;sdb&quot;</em></font></li>
+
+      </ul>
+
+      <p><font color="#FF0000"><em>The agent will then have to execute host-level tuple space operations
+
+        to retrieve the data. To prevent overflowing the host-level tuple space,
+
+        the previous sensor reading tuple will be removed prior to inserting
+
+        a new
+
+    one.</em></font></p></td>
+
+  </tr>
+
+  <tr bgcolor="#FF66FF">
+
+    <td><font color="#FF0000"><em>stopsense<br>
+
+          <strong>[N/A]</strong></em></font></td>
+
+    <td><font color="#FF0000"><em>Stop getting sensor data</em></font></td>
+
+    <td><font color="#FF0000"><em>0x12</em></font></td>
+
+    <td><font color="#FF0000"><em>[value]</em></font></td>
+
+    <td><font color="#FF0000">&nbsp;</font></td>
+
+    <td><font color="#FF0000"><em>Pops a value off the operand stack. This value corresponds to a particular
+
+    sensor (see instruction startsense). Tells the host to stop taking sensor
+
+      measurements. The host will only stop if no other agents are interested
+
+      in the sensor
+
+      reading.</em></font></td>
+
+  </tr>
+
+  -->
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/cpull.html">copy</a></td>
+
+    <td>Copy top of operand stack</td>
+
+    <td>0x10</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/pop.html">pop</a></td>
+
+    <td>Pop top of operand stack</td>
+
+    <td>0x11</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/cpull.html">cpull</a></td>
+
+    <td>Pulls value from stack onto condition</td>
+
+    <td>0x12</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/sleep.html">sleep</a></td>
+
+    <td>Sleep</td>
+
+    <td>0x13</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/jumpc.html">jumpc</a></td>
+
+    <td>Absolute jump condition</td>
+
+    <td>0x14</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/jumpc.html">jumps</a></td>
+
+    <td>Absolute jump stack</td>
+
+    <td>0x15</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/putled.html">putled</a></td>
+
+    <td>Actuate LEDs</td>
+
+    <td>0x16</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF6600"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/smove.html">smove</a></td>
+
+    <td>Strong migration </td>
+
+    <td>0x17</td>
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF6600"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/wmove.html">wmove</a></td>
+
+    <td>Weak migration</td>
+
+    <td>0x18</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF6600"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/sclone.html">sclone</a></td>
+
+    <td>Strong clone</td>
+
+    <td>0x19</td>
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF6600"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/wclone.html">wclone</a></td>
+
+    <td>Weak clone</td>
+
+    <td>0x1a</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#0099FF"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/getvars.html">getvars</a></td>
+
+    <td>get a heap var, address in stack</td>
+
+    <td>0x1b</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#0099FF"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/setvars.html">setvars</a></td>
+
+    <td>set heap var, address in stack</td>
+
+    <td>0x1c</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF0000"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/getnbr.html">getnbr</a></td>
+
+    <td>get neighbor address</td>
+
+    <td>0x1d</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF0000"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/cisnbr.html">cisnbr</a></td>
+
+    <td>is neighbor</td>
+
+    <td>0x1e</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF00CC"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/sense.html">sense</a></td>
+
+    <td>take a sensor reading</td>
+
+    <td>0x1f</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FFFFFF"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/dec.html">dec</a></td>
+
+    <td>decrement</td>
+
+    <td>0x20</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#CCCCCC"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160" bgcolor="#CCCCCC"><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td bgcolor="#CCCCCC"><strong>Short Description</strong></td>
+
+    <td bgcolor="#CCCCCC"><strong>Opcode</strong></td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+    <td width="160"><a href="isa/dist.html">dist</a></td>
+    <td>distance</td>
+    <td>0x21</td>
+  </tr>
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/swap.html">swap</a></td>
+
+    <td>Swap top two variables</td>
+
+    <td>0x22</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/land.html">land</a></td>
+
+    <td>logical bitwise AND</td>
+
+    <td>0x23</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/lor.html">lor</a></td>
+
+    <td>logical bitwise OR</td>
+
+    <td>0x24</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/and.html">and</a></td>
+
+    <td>boolean AND</td>
+
+    <td>0x25</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/or.html">or</a></td>
+
+    <td>boolean OR</td>
+
+    <td>0x26</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/mul.html">mul</a></td>
+
+    <td>Multiply</td>
+
+    <td>0x27</td>
+
+  </tr>
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/div.html">div</a></td>
+
+    <td>Divide</td>
+
+    <td>0x28</td>
+
+  </tr>
+
+  <!--
+  <tr>
+
+    <td>shiftr</td>
+
+    <td>Shift right</td>
+
+    <td>0x27</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. Shift [value2]
+
+      right by [value1] bits and push resulting value back onto the stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>shiftl</td>
+
+    <td>Shift left</td>
+
+    <td>0x28</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. Shift [value2] left by [value1] bits and push resulting value back onto the stack.</td>
+
+  </tr>
+  -->
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/add.html">add</a></td>
+
+    <td>Add two values</td>
+
+    <td>0x29</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/mod.html">mod</a></td>
+
+    <td>Modulo</td>
+
+    <td>0x2a</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/ceq.html">ceq</a></td>
+
+    <td>Equal</td>
+
+    <td>0x2b</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/cneq.html">cneq</a></td>
+
+    <td>Not Equal</td>
+
+    <td>0x2c</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/clt.html">clt</a></td>
+
+    <td>Less than</td>
+
+    <td>0x2d</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/cgt.html">cgt</a></td>
+
+    <td>Greater than</td>
+
+    <td>0x2e</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/clte.html">clte</a></td>
+
+    <td>Less than or equal</td>
+
+    <td>0x2f</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/cgte.html">cgte</a></td>
+
+    <td>Greater than or equal</td>
+
+    <td>0x30</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/ceqtype.html">ceqtype</a></td>
+
+    <td>Tests type equality</td>
+
+    <td>0x31</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#99FF99"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/cistype.html">cistype</a></td>
+
+    <td>Checks type</td>
+
+    <td>0x32</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF9900"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/out.html">out</a><a name="LocalTS"></a></td>
+
+    <td>out on host tuple space</td>
+
+    <td>0x33</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF9900"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/inp.html">inp</a></td>
+
+    <td>inp on host tuple space</td>
+
+    <td>0x34</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF9900"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/rdp.html">rdp</a></td>
+
+    <td>rdp on host tuple space</td>
+
+    <td>0x35</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF9900"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/in.html">in</a></td>
+
+    <td>in on host tuple space</td>
+
+    <td>0x36</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF9900"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/rd.html">rd</a></td>
+
+    <td>rd on host tuple space</td>
+
+    <td>0x37</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF9900"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/endrxn.html">endrxn</a></td>
+
+    <td>end of reaction</td>
+
+    <td>0x38</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FFFF33"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/rout.html">rout</a></td>
+
+    <td>remote OUT</td>
+
+    <td>0x39</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FFFF33"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/rinp.html">rinp</a></td>
+
+    <td>remote INP</td>
+
+    <td>0x3a</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FFFF33"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/rrdp.html">rrdp</a></td>
+
+    <td>remote RDP</td>
+
+    <td>0x3b</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FFFF33"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><p><a href="isa/routg.html">routg</a></p>
+    </td>
+
+    <td>remote group out</td>
+
+    <td>0x3c</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FFFF33"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><p><font color="#000000"><a href="isa/rrdpg.html">rrdpg</a></font></p>
+    </td>
+
+    <td><font color="#000000">remote RDPG</font></td>
+
+    <td><font color="#000000">0x3d</font></td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF9900"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/regrxn.html">regrxn</a></td>
+
+    <td>register reaction</td>
+
+    <td>0x3e</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#FF9900"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/deregrxn.html">deregrxn</a></td>
+
+    <td>deregister reaction </td>
+
+    <td>0x3f</td>
+
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<h2>T-Class Instructions [0100 ixxx]</h2>
+
+<table width="100%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td width="100"><strong>Opcode</strong></td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/pushrt.html">pushrt</a></td>
+
+    <td>push reading type</td>
+
+    <td width="100">0x40-0x47</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/pusht.html">pusht</a></td>
+
+    <td>Push  type</td>
+
+    <td width="100">0x48-0x4d</td>
+
+  </tr>
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160">&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100">0x4e-0xe4f</td>
+
+  </tr>
+
+</table>
+
+<h2>&nbsp;</h2>
+
+<h2>E-Class Instructions [0101 iiii xxxx xxxx xxxx xxxx]</h2>
+
+<table width="100%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Short Description</strong></td>
+
+    <td width="100"><strong>Opcode</strong></td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/pushn.html">pushn</a></td>
+
+    <td>Push a name onto the operand stack</td>
+
+    <td width="100">0x50</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160" height="62"><a href="isa/pushcl.html">pushcl</a></td>
+
+    <td>Push constant long</td>
+
+    <td width="100">0x51</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/pushloc.html">pushloc</a></td>
+
+    <td>Push a location onto the stack</td>
+
+    <td width="100">0x52</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#000000"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><strong><code>reserved (N/A)</code></strong></td>
+
+    <td>Reserved for supporting extended ISA</td>
+
+    <td width="100">0x53-0x5f</td>
+
+  </tr>
+
+</table>
+
+<p>&nbsp;</p>
+
+<h2>V-Class Instructions [011i xxxx]</h2>
+
+<table width="100%" border="1">
+
+  <tr>
+    <td width="10" bgcolor="#CCCCCC"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160" bgcolor="#CCCCCC"><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td bgcolor="#CCCCCC"><strong>Short Description</strong></td>
+
+    <td width="100" bgcolor="#CCCCCC"><strong>Opcode</strong></td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#0099FF"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/getvar.html">getvar</a></td>
+
+    <td>moves a variable from the heap to the stack</td>
+
+    <td width="100">0x60 - 0x6f</td>
+
+  </tr>
+
+  <tr>
+    <td width="10" bgcolor="#0099FF"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/setvar.html">setvar</a></td>
+
+    <td>Moves a variable from the stack to the heap</td>
+
+    <td width="100">0x70 - 0x7f</td>
+
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<h2>J-Class Instructions [10ix xxxx]</h2>
+
+<table width="100%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Description</strong></td>
+
+    <td width="100"><strong>Opcode</strong></td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/rjumpc.html">rjumpc</a></td>
+
+    <td>conditional relative jump</td>
+
+    <td width="100">0x80 - 0x9f</td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/rjump.html">rjump</a></td>
+
+    <td>unconditional relative jump</td>
+
+    <td width="100">0xa0 - 0xbf</td>
+
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<h2>X-Class Instructions [11xx xxxx]</h2>
+
+<table width="100%" border="1">
+
+  <tr bgcolor="#CCCCCC">
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><p><strong>Instruction</strong></p>
+
+    </td>
+
+    <td><strong>Description</strong></td>
+
+    <td width="100"><strong>Opcode</strong></td>
+
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+
+    <td width="160"><a href="isa/pushc.html">pushc</a></td>
+
+    <td>Push a constant value between 0-63 onto the stack</td>
+
+    <td width="100">0xc0 - 0xff</td>
+
+  </tr>
+</table>
+
+<p><a href="isa/extended_isa.html">Extended Instruction
+Set</a></p>
+
+<p>&nbsp;</p>
+
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

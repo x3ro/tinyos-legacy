@@ -1,0 +1,3 @@
+COMPONENT = BatteryTest
+include $(MAKERULES)
+

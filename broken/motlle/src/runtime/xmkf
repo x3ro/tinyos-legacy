@@ -1,0 +1,26 @@
+OBJS=  basic.o arith.o runtime.o list.o vector.o mote.o
+
+CFLAGS=-Wall -Wshadow -Wnested-externs -Wno-char-subscripts -Wno-parentheses -Wno-unused -I.. -DSTANDALONE -DTINY -DNDEBUG
+CC=gcc
+MAKEDEPEND=gcc -MM
+
+all: librun.a
+
+clean:
+	rm -f *.o librun.a
+
+librun.a: $(OBJS)
+	-rm librun.a
+	ar r librun.a $(OBJS)
+	-ranlib librun.a
+
+%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+primops.c: basic.c arith.c list.c vector.c mote.c
+	perl avrprim.pl "$(CC) $(CFLAGS)" $^ >primops.c
+
+dep depend:
+	$(MAKEDEPEND) $(CFLAGS) -I../.. *.c > .xdepend
+
+-include .xdepend

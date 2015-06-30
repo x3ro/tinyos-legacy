@@ -1,0 +1,10 @@
+- '.self' and '.length' syntax
+- sync() call
+- '.neighbors[n]' syntax to access neighbor sets
+
+- Add back notion of tasks - allow event handlers to post tasks that
+  run in a fiber context
+
+- Add back component model - not difficult, just have ncs.jj understand
+  'call' and 'signal' as well as basic structure ('provides', 'uses',
+  etc.)

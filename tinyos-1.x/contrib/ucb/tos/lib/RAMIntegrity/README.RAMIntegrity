@@ -1,0 +1,62 @@
+$Id: README.RAMIntegrity,v 1.2 2004/09/04 04:10:11 cssharp Exp $
+
+README for RAMIntegrity
+Author/Contact: tinyos-help@millennium.berkeley.edu
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+Description:
+
+RAMIntegrity manages a CRC for given regions of RAM, and can be asked to
+verify if those regions remain unchanged since the previous explicit
+update.  Each unique module wired to RAMIntegrity gets its own CRC.
+
+Wire RAMIntegrity into your application.  
+
+  MyModuleM.RAMIntegrity ->
+    RAMIntegrityC.RAMIntegrity[unique("RAMIntegrity")];
+
+Your application must handle the RAMRegion.calcCRC() event, which must
+return a calculated (not buffered) crc value for the RAM of interest,
+quite probably using the crcRegion(crc,start,length) helper function.
+Call RAMIntegrity.updated() to initialize and after updating the values in
+the RAM regions.  Test RAM with RAMIntegrity.verify() just before
+modifying those RAM value, and just before using them.
+
+  int mmm_beer;
+  int mmm_candy;
+
+  event uint16_t RAMIntegrity.calcCRC()
+  {
+    uint16_t crc = crcRegion( 0, &mmm_beer, sizeof(mmm_beer) );
+    return crcRegion( crc, &mmm_candy, sizeof(mmm_candy) );
+  }
+
+  command result_t StdControl.init()
+  {
+    // ...
+    mmm_beer = 100;
+    mmm_candy = 0;
+    call RAMIntegrity.update();
+    // ...
+  }
+
+  void some_other_func()
+  {
+    if( call RAMIntegrity.verify() == FALSE )
+    {
+      // ... do something, like reset the mote ...
+    }
+  }
+
+
+Tools:
+
+None.
+
+
+Known bugs/limitations:
+
+Should verify return TRUE/FALSE like it does now?  Or should it just reset
+the mote, assuming that some other module just went stomping through
+memory?
+

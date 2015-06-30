@@ -1,0 +1,518 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\iMoteConsole.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_IMOTE2              ICON                    "res\\imote2.ico"
+IDR_MAINFRAME           ICON                    "res\\iMoteConsole.ico"
+IDI_IMOTE               ICON                    "res\\imote.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 55
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About iMoteConsole"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "iMoteConsole Version 1.1b",IDC_STATIC_ABOUT_VER,21,19,
+                    119,8,SS_NOPREFIX,WS_EX_TRANSPARENT
+    LTEXT           "Copyright (C) 2002, 2005",IDC_STATIC_ABOUT_COPY,21,37,
+                    119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
+    LTEXT           "Developed by Robbie Adler, Josh Herbach",
+                    IDC_STATIC_ABOUT_DEV,21,28,142,9
+    ICON            IDI_IMOTE,IDC_STATIC_ABOUT_IMOTE,5,1,21,20,0,
+                    WS_EX_TRANSPARENT
+END
+
+IDD_IMOTECONSOLE_DIALOG DIALOGEX 0, 0, 320, 52
+STYLE DS_SETFONT | DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "iMoteConsole"
+MENU IDR_MENU1
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Close",IDOK,263,6,50,14
+    LTEXT           "Selected iMote 2",IDC_STATIC_DISPLAYED_IMOTE,7,6,98,9
+    COMBOBOX        IDC_COMBO_DISPLAYED_IMOTE,7,18,107,56,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "COM 1",IDC_STATIC_COM_NUM,117,18,34,11
+    LTEXT           "Detached",IDC_STATIC_DETACHED,117,29,49,10,NOT 
+                    WS_VISIBLE
+    PUSHBUTTON      "View Buffer In Window",IDC_BUTTON_WINDOW_BUFFER,179,6,
+                    79,15
+END
+
+IDD_PP_CONFIGURATION DIALOGEX 0, 0, 254, 172
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Configuration"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Channel Assignment",IDC_STATIC_ASSIGNMENTBOX,16,76,222,
+                    81
+    GROUPBOX        "COM Port Configuration",-1,14,17,92,50
+    PUSHBUTTON      "Settings",IDC_BUTTON_SETTINGS,24,43,50,14
+    COMBOBOX        IDC_COMBO_COMPORT,23,26,48,65,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "# of Channels",-1,149,30,47,8
+    EDITTEXT        IDC_EDIT1,196,28,40,14,ES_AUTOHSCROLL
+END
+
+IDD_PP_DATAFORMAT DIALOGEX 0, 0, 254, 172
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Data Format"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Order",IDC_STATIC,16,108,222,49
+    GROUPBOX        "Attributes",IDC_STATIC,14,17,224,87
+    LTEXT           "Value",IDC_STATIC,186,26,47,8
+    LISTBOX         IDC_LIST1,34,117,111,40,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Move Up",IDC_BUTTON1,171,117,50,14
+    PUSHBUTTON      "Move Down",IDC_BUTTON2,172,135,50,14
+    CONTROL         "Magiic Number",IDC_CHECK_MAGICNUMBER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,35,35,65,10
+    CONTROL         "Fragment Length",IDC_CHECK_FRAGMENTLENGTH,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,35,67,71,10
+    CONTROL         "Channel ID",IDC_CHECK_CHANNELID,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,35,49,51,10
+    CONTROL         "16 bit data",IDC_CHECK_16BITDATA,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,35,86,51,10
+    COMBOBOX        IDC_COMBO_MAGICNUMBER,113,34,48,30,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_CHANNELID,113,54,48,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_FRAGMENTLENGTH,113,68,48,30,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Length (bytes)",IDC_STATIC,119,24,47,8
+    EDITTEXT        IDC_EDIT_MAGICNUMBER_VALUE,172,35,40,14,ES_AUTOHSCROLL
+END
+
+IDD_PP_SAVESETTINGS DIALOGEX 0, 0, 254, 172
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Save Settings"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Channel Assignment",IDC_STATIC,16,76,222,81
+    GROUPBOX        "COM Port Configuration",IDC_STATIC,14,17,92,50
+    PUSHBUTTON      "Settings",IDC_BUTTON_SETTINGS,24,43,50,14
+    COMBOBOX        IDC_COMBO_COMPORT,23,26,48,65,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "# of Channels",IDC_STATIC,149,30,47,8
+    EDITTEXT        IDC_EDIT1,196,28,40,14,ES_AUTOHSCROLL
+END
+
+IDD_DIALOG_MAPPINGFUNCTION DIALOGEX 0, 0, 170, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Set Mapping Function"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,113,14,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,113,31,50,14
+    EDITTEXT        IDC_EDIT_MINRANGE,52,14,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MAXRANGE,52,31,40,14,ES_AUTOHSCROLL
+    LTEXT           "Min Range",IDC_STATIC,7,21,34,8
+    LTEXT           "Max Range",IDC_STATIC,7,35,37,8
+END
+
+IDD_IMOTETERMINAL DIALOGEX 0, 0, 320, 172
+STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU | WS_THICKFRAME
+MENU IDR_MENU_TERM
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Clear Buffer",IDC_BUTTON_TERM_CLEAR_BUFFER,7,25,50,14
+    PUSHBUTTON      "Connect",IDC_BUTTON_TERM_CONNECT,7,7,50,14
+    PUSHBUTTON      "Send Break",IDC_BUTTON_TERM_SENDBREAK,7,74,50,14
+    LTEXT           "COM 1",IDC_STATIC_TERM_COM_NUM,7,92,34,11
+    LTEXT           "Detached",IDC_STATIC_TERM_DETACHED,7,103,49,10,NOT 
+                    WS_VISIBLE
+    PUSHBUTTON      "Send File",IDC_BUTTON_TERM_SENDFILE,7,43,50,14
+    CONTROL         "Text file",IDC_CHECK_TERM_TEXT_FILE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,60,41,10
+    CONTROL         "",IDC_RICHEDIT_TERM_FILE,"RichEdit20A",ES_AUTOHSCROLL | 
+                    WS_BORDER | WS_TABSTOP,66,7,247,14
+    CONTROL         "",IDC_RICHEDIT_TERM_ADDR,"RichEdit20A",ES_AUTOHSCROLL | 
+                    NOT WS_VISIBLE | WS_BORDER | WS_TABSTOP,149,24,164,14
+    LTEXT           "Write / Execute Address",IDC_STATIC_TERM_ADDR,68,26,79,
+                    10,NOT WS_VISIBLE
+    PUSHBUTTON      "Execute",IDC_BUTTON_TERM_EXECUTE,7,74,50,14,NOT 
+                    WS_VISIBLE
+END
+
+IDD_IMOTESTATUS DIALOGEX 0, 0, 179, 59
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "% Complete"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_PROGRESS_STATUS_VERIFY,"msctls_progress32",
+                    WS_BORDER,7,41,165,11
+    LTEXT           "0 / 0 Burned",IDC_STATIC_STATUS_BNUMBER,7,7,143,10
+    LTEXT           "0 / 0 Verified",IDC_STATIC_STATUS_VNUMBER,7,31,144,9
+    CONTROL         "",IDC_PROGRESS_STATUS_BURN,"msctls_progress32",
+                    WS_BORDER,7,18,165,11
+END
+
+IDD_IMOTEBATCH DIALOGEX 0, 0, 276, 249
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Batch Program"
+MENU IDR_MENU_BATCH
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_PROGRESS_BATCH_VERIFY,"msctls_progress32",
+                    WS_BORDER,7,231,262,11
+    LTEXT           "0 / 0 Burned",IDC_STATIC_BATCH_BNUMBER,7,196,143,10
+    LTEXT           "0 / 0 Verified",IDC_STATIC_BATCH_VNUMBER,7,220,144,9
+    CONTROL         "",IDC_PROGRESS_BATCH_BURN,"msctls_progress32",WS_BORDER,
+                    7,207,262,11
+    CONTROL         "",IDC_RICHEDIT_BATCH_FILE,"RichEdit20A",ES_AUTOHSCROLL | 
+                    WS_BORDER | WS_TABSTOP,62,7,207,14
+    PUSHBUTTON      "Burn",IDC_BUTTON_BATCH_BURN,7,7,50,14
+    LTEXT           "0 / 0 Total",IDC_STATIC_BATCH_TNUMBER,7,173,143,10
+    CONTROL         "",IDC_PROGRESS_BATCH_TOTAL,"msctls_progress32",
+                    WS_BORDER,7,183,262,11
+    PUSHBUTTON      "Abort",IDC_BUTTON_BATCH_ABORT,7,23,50,14,NOT WS_VISIBLE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "iMoteConsole MFC Application"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "iMoteConsole"
+            VALUE "LegalCopyright", "Copyright (C) 2002"
+            VALUE "OriginalFilename", "iMoteConsole.EXE"
+            VALUE "ProductName", "iMoteConsole Application"
+            VALUE "ProductVersion", "1, 0, 0, 1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        VERTGUIDE, 21
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_IMOTECONSOLE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 45
+    END
+
+    IDD_PP_CONFIGURATION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 247
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 165
+    END
+
+    IDD_PP_DATAFORMAT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 247
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 165
+    END
+
+    IDD_PP_SAVESETTINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 247
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 165
+    END
+
+    IDD_DIALOG_MAPPINGFUNCTION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+
+    IDD_IMOTETERMINAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 165
+        HORZGUIDE, 21
+        HORZGUIDE, 25
+        HORZGUIDE, 39
+        HORZGUIDE, 43
+    END
+
+    IDD_IMOTESTATUS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 172
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 52
+    END
+
+    IDD_IMOTEBATCH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 269
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 242
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",                       ID_FILE_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Options",                    ID_EDIT_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "Test New&Win",                ID_EDIT_NEWWIN
+        MENUITEM "Test New&List",               ID_EDIT_TESTNEWLIST
+        MENUITEM "&Test",                       ID_EDIT_TEST
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Smooth",                     ID_VIEW_SMOOTH, CHECKED
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About...",                   ID_HELP_ABOUT
+    END
+END
+
+IDR_MENU_TERM MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open File",                  ID_TERM_FILE_OPENFILE
+        MENUITEM SEPARATOR
+        MENUITEM "&Save",                       ID_TERM_FILE_SAVE
+        MENUITEM "Save &As",                    ID_TERM_FILE_SAVEAS
+        MENUITEM SEPARATOR
+        MENUITEM "&Hide",                       ID_TERM_FILE_HIDE
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Copy",                       ID_TERM_EDIT_COPY
+        MENUITEM SEPARATOR
+        MENUITEM "C&lear Buffer",               ID_TERM_EDIT_CLEAR_BUFFER
+        MENUITEM "C&onnect",                    ID_TERM_EDIT_CONNECT
+        MENUITEM "&Echo",                       ID_TERM_EDIT_ECHO
+        MENUITEM "&Send File",                  ID_TERM_EDIT_SENDFILE
+        MENUITEM "E&xecute",                    ID_TERM_EDIT_EXECUTE
+    END
+END
+
+IDR_MENU_BATCH MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open File",                  ID_BATCH_FILE_OPENFILE
+        MENUITEM SEPARATOR
+        MENUITEM "&Hide",                       ID_BATCH_FILE_HIDE
+        MENUITEM "&Close",                      ID_BATCH_FILE_CLOSE
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Burn",                       ID_BATCH_EDIT_BURN
+        MENUITEM "&Abort",                      ID_BATCH_EDIT_ABORT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP_ZOOMIN       BITMAP                  "res\\bitmap_zoomin.bmp"
+IDB_BITMAP_ZOOMOUT      BITMAP                  "res\\bitmap_zoomout.bmp"
+IDB_BITMAP_CONNECT      BITMAP                  "res\\bitmap_connect.bmp"
+IDB_BITMAP_DISCONNECT   BITMAP                  "res\\bitmap_disconnect.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ACCELERATOR_CARTESIAN ACCELERATORS 
+BEGIN
+    "M",            ID_EDIT_SETMAPPINGFUNCTION, VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_ACCELERATOR_TERM ACCELERATORS 
+BEGIN
+    "O",            ID_TERM_FILE_OPENFILE,  VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_TERM_FILE_SAVE,      VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_TERM_FILE_SAVEAS,    VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "C",            ID_TERM_EDIT_COPY,      VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_ACCELERATOR_BATCH ACCELERATORS 
+BEGIN
+    "O",            ID_BATCH_FILE_OPENFILE, VIRTKEY, CONTROL, NOINVERT
+    "B",            ID_BATCH_EDIT_BURN,     VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "&About iMoteConsole..."
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\iMoteConsole.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

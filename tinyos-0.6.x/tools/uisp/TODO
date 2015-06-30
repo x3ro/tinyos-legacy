@@ -1,0 +1,23 @@
+
+ - improve pavr support (many thanks to Jason Kyle for sending me one
+   of these nice programmers, see http://avr.jpk.co.nz/pavr/pavr.html):
+   - add option to force device type for chips with broken signature bytes
+   - use consistent -dpart=... device names
+   - more firmware improvements, speed optimizations (send OK response
+     and receive the next command while executing the previous one, use
+     data polling if supported by device, etc.)
+ - test/improve/fix ATmega8/16/323/128 support (datasheets now available!)
+ - support for parallel port JTAG programming of ATmega8/16/323/128
+ - AT89S52 support (similar commands as AVR, but RESET active high)
+ - option to generate XTAL1 clock for target device while programming,
+   as in FBPRG / AVREAL / modified ByteBlaster / STK200 (LED output)
+ - how to talk to these new USB programmers Kanda is advertising now?
+ - better documentation
+ - clean rewrite in C ;)
+   (for parallel port interfaces only, maybe port the program already
+   available at http://www.bsdhome.com/avrprog/ from FreeBSD to Linux
+   and extend it to support all these different cables?)
+   or at least, some better way to add all these parallel interfaces
+   invented by various people, with different pin assignments.
+ - better portability (no longer Linux-only), add autoconf/automake?
+

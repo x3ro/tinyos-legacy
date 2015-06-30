@@ -1,0 +1,48 @@
+apps
+----
+s-mac/apps/Makesmac -> t-mac/apps/Maketmac
+
+tos/interfaces
+----------
+s-mac/tos/interfaces/ClockSMAC.nc -> t-mac/tos/interfaces/ClockTMAC.nc
+s-mac/tos/interfaces/PhyComm.nc -> t-mac/tos/interfaces/PhyComm.nc
+
+tos/platform/mica
+-------------
+s-mac/tos/platform/mica/ClockSMACM.nc -> t-mac/tos/platform/mica/ClockTMACM.nc
+s-mac/tos/platform/mica/PhyConst.h -> t-mac/tos/platform/mica/PhyConst.h
+s-mac/tos/platform/mica/RadioControlM.nc -> t-mac/tos/platform/mica/RadioSPIM.nc
+s-mac/tos/platform/mica/RadioControl.nc -> t-mac/tos/platform/mica/RadioSPIC.nc
+s-mac/tos/platform/mica/uartDebug.h -> t-mac/tos/platform/mica/UARTLL.nc
+
+tos/platform/mica2
+--------------
+s-mac/tos/platform/mica2/ClockSMACM.nc -> t-mac/tos/platform/mica2/ClockTMACM.nc
+s-mac/tos/platform/mica2/PhyConst.h -> t-mac/tos/platform/mica2/PhyConst.h
+s-mac/tos/platform/mica2/RadioControlM.nc -> t-mac/tos/platform/mica2/RadioSPIM.nc
+s-mac/tos/platform/mica2/RadioControl.nc -> t-mac/tos/platform/mica2/RadioSPIC.nc
+s-mac/tos/platform/mica2/uartDebug.h -> t-mac/tos/platform/mica2/UARTLL.nc
+
+tos/platform/pc
+-----------
+s-mac/tos/platform/pc/ClockSMACM.nc -> t-mac/tos/platform/pc/ClockTMACM.nc
+s-mac/tos/platform/pc/CodecManchester.nc -> t-mac/tos/platform/pc/CodecManchester.nc
+s-mac/tos/platform/pc/PhyConst.h -> t-mac/tos/platform/pc/PhyConst.h
+
+tos/platform/tnode
+--------------
+s-mac/tos/platform/mica2/PhyConst.h -> t-mac/tos/platform/tnode/PhyConst.h
+
+tos/system
+------
+s-mac/tos/platform/pc/PhyRadioMsg.h -> t-mac/tos/system/PhyRadioMsg.h
+s-mac/tos/platform/pc/{PhyRadio.nc,RadioControl.nc} -> t-mac/tos/system/RadioControl.nc
+s-mac/tos/platform/pc/{PhyRadioM.nc,RadioControlM.nc} -> t-mac/tos/system/RadioControlM.nc
+s-mac/tos/system/RadioCRCPacket.nc -> t-mac/tos/system/RadioCRCPacket.nc
+s-mac/tos/system/SMAC.nc -> t-mac/tos/system/TMAC.nc
+s-mac/tos/system/smacEvents.h -> t-mac/tos/system/TMACEvents.h
+s-mac/tos/system/SMACM.nc -> t-mac/tos/system/TMACM.nc
+s-mac/tos/system/SMACMsg.h -> t-mac/tos/system/TMACMsg.h
+s-mac/tos/system/SMACWrapperMsg.h -> t-mac/tos/system/TMACWrapperMsg.h
+s-mac/tos/system/SMACWrapper.nc -> t-mac/tos/system/TMACWrapper.nc
+s-mac/tos/platform/pc/UARTDebug.h -> t-mac/tos/system/UARTDebugM.nc

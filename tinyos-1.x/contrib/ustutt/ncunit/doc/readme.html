@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>nCUnit: A Unit Testing Framework for nesC</title><style type="text/css">
+p,li  {text-align:justify; }
+h2 {margin-top:3em;}
+.output {
+font-family: Courier New,Courier,monospace;
+font-size: smaller;
+}
+.code {
+font-family: Courier New,Courier,monospace;
+font-size: smaller;
+}
+</style></head>
+<body><h1>nCUnit:
+A Unit Testing Framework for nesC</h1><p>nCUnit is a unit
+testing framework similar to <a href="http://www.ipvs.uni-stuttgart.de/ipvs/impressum/impressum/en" target="_blank">
+<img src="http://www.ipvs.uni-stuttgart.de/ipvs/layout/bilder/linkexternicon_klein.gif" alt="external link" title="external link" border="0" height="8" hspace="1" width="10"></a><a href="http://www.junit.org">JUnit</a>
+for <a href="http://www.ipvs.uni-stuttgart.de/ipvs/impressum/impressum/en" target="_blank">
+<img src="http://www.ipvs.uni-stuttgart.de/ipvs/layout/bilder/linkexternicon_klein.gif" alt="external link" title="external link" border="0" height="8" hspace="1" width="10"></a><a href="http://www.tinyos.net">TinyOS</a>-based
+sensor network
+components that have been developed with the <a href="http://www.ipvs.uni-stuttgart.de/ipvs/impressum/impressum/en" target="_blank">
+<img src="http://www.ipvs.uni-stuttgart.de/ipvs/layout/bilder/linkexternicon_klein.gif" alt="external link" title="external link" border="0" height="8" hspace="1" width="10"></a><a href="http://nescc.sourceforge.net/">nesC programming
+language</a>. It is available from the <a href="http://www.ipvs.uni-stuttgart.de/ipvs/impressum/impressum/en" target="_blank">
+<img src="http://www.ipvs.uni-stuttgart.de/ipvs/layout/bilder/linkexternicon_klein.gif" alt="external link" title="external link" border="0" height="8" hspace="1" width="10"></a><a href="http://sourceforge.net/cvs/?group_id=28656">TinyOS
+SourceForge repository</a> in the <span style="font-weight: bold;">tinyos-1.x/contrib/ustutt/ncunit</span>
+directory. It uses the <a href="http://www.ipvs.uni-stuttgart.de/ipvs/impressum/impressum/en" target="_blank">
+<img src="http://www.ipvs.uni-stuttgart.de/ipvs/layout/bilder/linkexternicon_klein.gif" alt="external link" title="external link" border="0" height="8" hspace="1" width="10"></a><a href="http://compilers.cs.ucla.edu/avrora/">Avrora
+simulator</a>
+to execute test code.</p><ul><li><a href="#Installation">Installation</a></li><li><a href="#Usage">Usage</a></li><li><a href="#Implementation">Implementation</a></li><li><a href="#Contact">Contact</a></li><li><a href="#License">License</a></li></ul><br><br><h2><a name="Installation"></a>Installation</h2><p>Before
+you can use nCUnit, make sure you have the following software properly
+installed:</p><ul><li>TinyOS 1.x using the "new make system"</li><li>nesC
+1.2 or newer:</li><li>Avrora 1.6.0</li><li>Java 1.5 or newer</li><li>If
+you want to modify nCUnit's parser: JavaCC 4.0</li></ul><p>Then
+you have to set the following environment variables. Note that even if
+you are using Windows <span style="font-weight: bold;">all
+path names have to be specified in Unix style</span> (e.g.,
+"/opt/tinyos-1.x/contrib/ustutt/nCUnit").</p><ul><li>NCUNIT_ROOT:
+Directory in which you have installed nCUnit</li><li>NESC_CP:
+Path to nesc.jar (usually /usr/local/lib/ncc/nesc.jar)</li><li>AVRORA_ROOT:
+Directory in which Avora is installed. Note that we recommand to use
+the source distribution of Avrora instead of the jar version.</li></ul><p>Go
+into $NCUNIT_ROOT and type "make". This command compiles the Java files
+(including patches and modifications to Avrora and nesC files) and
+installs the new platform mica2test in your TinyOS directory. Therefore, you have to use TinyOS's "new make system".</p>
+
+<h2><a name="Usage"></a>Usage</h2><p>nCUnit
+has to make
+some modifications
+to the code created by nesC by changing the call of the
+compiler. Whenever you want
+to compile a file for use with nCUnit, you have to use its new platform
+"mica2test" by calling "make mica2test". Currently, nCUnit just
+supports this Mica2-based platform.<br>In order to test a
+component you
+have to create a separate component which contains the test functions
+(see $NCUNIT_ROOT/example/TestAssertM.nc). These functions have to be
+tagged with the "@test()" attribute, which is defined in "ncunit.h".
+</p><span class="code">void testFunction1() @test() {</span><br class="code"><span class="code">}<br><br class="code"></span><p>You do not have to call these functions
+yourself; nCUnit creates
+calls to them automatically. In addition, it ensures that for each
+such&nbsp;function a separate simulation run is executed.
+Therefore, in each
+run the application is in a consistent state even if a previous test
+case has failed. As in a normal application you can use
+the&nbsp;StdControl interface to setup
+the application before each test case.</p><p>To check whether or not a test
+case
+has failed you can use the Assert interface provided by AssertC.
+Such asserts can not only check if a simple condition is fulfilled but
+you can also perform more advanced checks using the simulator. For
+example, you can specify a Java class implementing the interface
+"ncunit.avrora.NCAssert" that can check the simulation state (e.g.,
+check hardware properties that are unavailable on the sensor node
+itself). The class "example.TestJavaAssert" shows an example of how to
+use this functionality. In addition, you can add an assertion to see if
+the component
+under test calls a specific function with a given parameter value.
+Please note that nCUnit does not check which function called the
+monitored function. Therefore, it could have been called indirectly or
+by another, unrelated component. Finally, you can use a function to
+modify or inspect the value of variables in the component under test. </p>
+
+<span class="code"><br>void testFunction1() @test() {</span><br class="code"><span class="code">&nbsp;
+uint8_t* varPtr;</span><br class="code"><br class="code"><span class="code">&nbsp; //
+create Java class to check simulator assertion</span><br class="code"><span class="code">&nbsp; call
+Assert.assertJavaClassMsg("java class", "example.TestJavaAssert", 1000);</span><br class="code"><span class="code">&nbsp; //
+check if function under test toggles the red LED</span><br class="code"><span class="code">&nbsp; call
+Assert.assertCalls("ToTestM.Leds.redToggle", NULL, NULL, COMP_NONE);</span><br class="code"><span class="code">&nbsp; //
+modify variable to cause previous assert fail</span><br class="code"><span class="code">&nbsp; </span><span class="code">varPtr = (uint8_t*) call
+Assert.getDataPointer("ToTestM.variable");</span><br class="code"><span class="code">&nbsp;&nbsp;*varPtr
+= 0;</span><br class="code"><br class="code"><span class="code">&nbsp; // call function under test</span><br class="code"><span class="code">&nbsp;&nbsp;call
+TestControl.start();</span><br class="code"><span class="code">}</span><br class="code"><p>You
+can find a complete example in $NCUNIT_ROOT/example/TestAssertM.nc and
+more information about the types of assertions available in the
+comments of $NCUNIT_ROOT/mote/Assert.nc.</p><p>Finally,
+insert the following lines into the make file of your test application:</p><span class="code"><br>PFLAGS += -I$(NCUNIT_ROOT)/mote</span><br class="code"><span class="code">GOALS += ncunit</span><br class="code"><span class="code">TOSMAKE_PATH +=
+$(NCUNIT_ROOT)/scripts</span><br class="code"><p>After
+having compiled your test application with "make mica2test", call
+"./build/ncunit/start_tests" which runs all test cases. At the end of
+the simulation you get a summary of the success. If you need more
+information about a specific test case, you can look up its log file
+mentioned in the summary.</p><span class="output">$
+./build/ncunit/start_tests</span><br class="output"><span class="output">testoutput1.out: Assertion failed in
+TestAssertM.testFunction1</span><br class="output"><span class="output">testoutput2.out: Successfully executed
+TestAssertM.testFunction2</span><br class="output"><span class="output">===============================================</span><br class="output"><span class="output">Test cases:
+2</span><br class="output"><span class="output">Successful:
+1</span><br class="output"><span class="output">Failed:&nbsp;&nbsp;&nbsp;&nbsp;
+1</span><p>Besides the functionality of a unit
+testing framework nCUnit adds the ability to output arbitrary debug
+strings just like with TOSSIM. The only thing you have to do is call
+the function "debug" with the type of output (e.g., "DBG_USR1") and the
+output itself:</p><span class="code"><br>debug(DBG_USR1,
+"You can output arbitrary text similar to TOSSIM: %u", i);</span><p>This
+output string will then appear in the log file if the appropriate
+output class has been enabled. By default all output classes are
+enabled. If you want to output floating point numbers, the make file
+has to specify the following compiler flags:</p><span class="code"><br>-Wl,-u,vfscanf
+-lscanf_flt -lm</span><p>Please see the <a href="http://www.ipvs.uni-stuttgart.de/ipvs/impressum/impressum/en" target="_blank">
+<img src="http://www.ipvs.uni-stuttgart.de/ipvs/layout/bilder/linkexternicon_klein.gif" alt="external link" title="external link" border="0" height="8" hspace="1" width="10"></a><a href="http://www.nongnu.org/avr-libc/user-manual/group__avr__stdio.html">documentation
+of avr-libc</a> for more details.</p><p>If you want to use
+such debug output in your own application without using nCUnit, you
+have to include the directory $NCUNIT_ROOT/mote in your make file and
+add to Avrora's command line the monitor class
+"ncunit.avrora.DebugOutputMonitor". With its parameter "-debug-levels"
+you can specify a list of the debug classes that you want to enable.
+Note
+that such output can have significant overhead on the sensor node for
+string processing, even if the corresponding output class has been
+disabled. In addition, it increases the size both in program memory
+and in RAM significantly. Therefore, this mechanism is only a tool to
+facilitate debugging.
+Before installing an application on a sensor node,
+all calls
+to the debug functions should be removed.</p>
+
+<h2><a name="Implementation"></a>Implementation</h2><p>nCUnit
+uses a pre-compiler that inserts calls to the test case functions,
+which are tagged with the "@test()" attribute. By modifying a constant
+in the compiled code, one of the test functions is selected for each
+simulation run. In addition, by running its own processor betwen the
+nesC and the avr-gcc compilers, it modifies the declaration of
+functions that are monitored using the "assertCalls" assertion. Then
+these functions are no longer inlined to allow for easier detection
+when they are called. This is the reason for the use of the separate
+testing platform "mica2test".</p><p>At runtime nCUnit passes
+information
+to the simulator using Avrora's probing interface. Whenever one of
+nCUnit's&nbsp;functions is called, a probe fires an event in
+Avrora. As the nCUnit's functions receive all information as parameter
+values in the processor's registers (see the <a href="http://www.ipvs.uni-stuttgart.de/ipvs/impressum/impressum/en" target="_blank">
+<img src="http://www.ipvs.uni-stuttgart.de/ipvs/layout/bilder/linkexternicon_klein.gif" alt="external link" title="external link" border="0" height="8" hspace="1" width="10"></a><a href="http://www.nongnu.org/avr-libc/user-manual/FAQ.html#faq_reg_usage">avr-libc
+documentation</a>), nCUnit's Avrora monitor can easily read this
+data from the processor.</p><h2><a name="Contact"></a>Contact</h2><p>If
+you have any questions about nCUnit, please contact <a href="&#x6d;&#x61;&#105;&#108;&#116;&#x6f;&#x3a;&#x61;&#110;&#100;&#x72;&#101;&#x61;&#x73;&#x2e;&#108;&#97;&#x63;&#x68;&#101;&#x6e;&#109;&#x61;&#110;&#110;&#x40;&#x69;&#x70;&#x76;&#115;&#x2e;&#x75;&#110;&#x69;&#x2d;&#x73;&#116;&#x75;&#x74;&#x74;&#x67;&#x61;&#x72;&#116;&#46;&#100;&#x65;">&#x61;&#110;&#x64;&#114;&#101;&#97;&#x73;&#46;&#x6c;&#x61;&#99;&#104;&#x65;&#110;&#x6d;&#x61;&#110;&#110;&#64;&#x69;&#x70;&#x76;&#115;&#46;&#117;&#x6e;&#105;&#45;&#x73;&#x74;&#117;&#x74;&#116;&#103;&#97;&#114;&#x74;&#x2e;&#x64;&#x65;</a>.
+</p><h2><a name="License"></a>License</h2><p>nCUnit
+has been released under an adapted BSD license. Note that some files
+included in its directory, which are modified versions from TinyOS,
+nesC, or Avrora files, might have differing&nbsp;but in my opinion
+similar licenses. By downloading nCUnit you accept the terms of this
+license:</p><p>Copyright (c) 2007, Institute of Parallel
+and Distributed Systems (IPVS), Universität Stuttgart. <br>All
+rights reserved.</p><p>Redistribution
+and use in source and binary forms, with or without modification, are
+permitted provided that the following conditions are met:</p><ul><li>Redistributions
+of source code must retain the above copyright notice, this list of
+conditions and the following disclaimer.</li><li>Redistributions
+in binary form must reproduce the above copyright notice, this list of
+conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.</li><li>Neither
+the
+names of the Institute of Parallel and Distributed Systems and
+Universität Stuttgart nor the names of its contributors may be used to
+endorse or promote products derived from this software without specific
+prior written permission.<br></li></ul><p>THIS
+SOFTWARE IS PROVIDED
+BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p></body></html>

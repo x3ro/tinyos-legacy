@@ -1,0 +1,102 @@
+<!-- Utilities -->
+
+<chapter id="utilities">
+  
+  <title>Utilities</title>
+  <para>
+    A number of Python utilites are available in
+    <filename>tools/scripts</filename>. This section contains a
+    description of each utility.
+  </para>
+
+  <sect1>
+    <title>Memory usage</title>
+    <para>
+      The <command>memuse.py</command> script parses compiled
+      MSP430 programs and extracts information about memory usage
+      including detailed statistics for the data and text section use
+      for NC module.  What it actually does is to use the
+      <command>msp430-nm</command> program to extract the symbol
+      table and parses each entry for space usage.  The NESCC tools
+      create symbol table entries of the form
+      <varname>Module$Element</varname>.  The
+      <command>memuse.py</command> script chops the symbol name and
+      uses this to compile statistics.
+    </para>
+    <para>
+      Here is a sample run of
+      <command>memuse.py</command>:<informalexample>
+	<programlisting>cd contrib/handhelds/swtest/WebServer
+memuse.py build/telosb/main.exe</programlisting>
+      </informalexample>
+    </para>
+    <para>which generates
+      the following output:
+      <informalexample>
+<screen>Module                   Data    Text
+other                      73   18038
+UIP_M                     312    4548
+ClientM                    42    3288
+HTTPServerM               446    2952
+MSP430ADC12M               25    2002
+CC2420HighLevelM           35    1788
+CC2420RxM                  60    1456
+TimerM                     77    1114
+IEEEUtilityM                0     796
+CC2420LowLevelM             0     662
+HPLUSART0M                  4     546
+WebServerM                430     480
+RefVoltM                    3     476
+ADCM                        7     452
+DS2411LiteM                 0     372
+LinkLayerM                  0     352
+TimerJiffyAsyncM            5     222
+MessagePoolM              803     210
+MSP430ClockM                0     164
+MSP430DCOCalibM             2     100
+RandomLFSR                  6      72
+LedsC                       1      52
+HPLADC12M                   0      46
+InternalVoltageM            1      18
+InternalTempM               1      18
+
+Summary:
+          Data  1100-111c (28 bytes)
+           BSS  111c-1a01 (2277 bytes)
+         Stack  1a01-3900 (7935 bytes)
+   Above stack  3900-4000 (1792 bytes)
+   Text (code)  4000-e172 (41330 bytes)
+     Data init  e172-e18e (28 bytes)
+     Free Text  e18e-ffe0 (7762 bytes)
+</screen>
+      </informalexample>
+    </para>
+    <para>To get detailed information, use <command>memuse.py
+	-v</command> which dumps detailed information about each
+      module (most of the output omitted):<informalexample>
+	<screen>HTTPServerM             DATA=446 bytes  TEXT=2952 bytes
+
+      DATA   436  g_server_state
+              10  g_stats
+      TEXT   860  processTSP
+             408  eval_function
+             360  copySource
+             278  parseInputLine
+             238  strCopyEncoded
+             194  TCPServer.dataAvailable
+             192  startWrite
+             180  extractArguments
+             106  TCPServer.writeDone
+             100  handleTSP
+              36  s_HTTP
+	</screen>
+      </informalexample>
+    </para>
+  </sect1>
+</chapter>
+
+<!--
+Local Variables:
+sgml-parent-document: ("usermanual.xml" "book" "chapter" )
+End:
+-->

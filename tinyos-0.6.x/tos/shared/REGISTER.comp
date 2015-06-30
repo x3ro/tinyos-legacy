@@ -1,0 +1,21 @@
+/* Do not use id 0 */
+TOS_MODULE REGISTER;
+
+ACCEPTS{
+	char REGISTER_INIT(void);
+	char REGISTER_SET_ID(unsigned short id);
+	char REGISTER_CLEAR_ID(void);
+	unsigned short REGISTER_GET_ID(void);
+};
+
+HANDLES{
+	TOS_MsgPtr REGISTER_MSG(TOS_MsgPtr val);
+};
+
+USES{
+	void REGISTER_LEDS(unsigned char led_action);
+};
+
+SIGNALS{
+	char REGISTERED(unsigned short id);
+};

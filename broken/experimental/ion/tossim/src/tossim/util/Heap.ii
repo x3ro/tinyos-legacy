@@ -1,0 +1,297 @@
+// -*- c++ -*-
+/**
+ *  @file Heap.ii
+ *
+ *  Inline methods for tos.sim.util.Heap.
+ *
+ *  @author Phil Levis
+ *  @author Ion Yannopoulos
+ */
+
+#ifndef TOS_SIM_HEAP_II
+#define TOS_SIM_HEAP_II
+
+namespace tos {
+namespace sim {
+namespace util {
+
+namespace impl {
+
+// ---------------------------------------------------------------------
+// _HeapBase
+
+inline
+_HeapBase::_HeapBase()
+{
+}
+
+inline
+_HeapBase::~_HeapBase()
+{
+}
+
+
+// ---------------------------------------------------------------------
+// _TreeHeap
+
+inline
+_TreeHeap::_TreeHeap()
+  : _root(NULL)
+  , _last(NULL)
+  , _free(NULL)
+  , _size(0)
+{
+}
+
+inline
+_TreeHeap::~_TreeHeap()
+{
+  _remove_all(_root);
+}
+
+inline size_t
+_TreeHeap::size() const
+{
+  return _size;
+}
+
+inline bool
+_TreeHeap::is_empty() const
+{
+  return (_size == 0);
+}
+
+inline _TreeHeap::Key
+_TreeHeap::minimum_key() const
+{
+  return _root->key;
+}
+
+inline _TreeHeap::Value *
+_TreeHeap::peek()
+{
+  return _root->value;
+}
+
+
+// ---------------------------------------------------------------------
+// _ArrayHeap
+
+inline
+_ArrayHeap::~_ArrayHeap()
+{
+}
+
+inline size_t
+_ArrayHeap::size() const
+{
+  //- return _nodes.size();
+  return _size;
+}
+
+inline bool
+_ArrayHeap::is_empty() const
+{
+  //- return _nodes.empty();
+  return (_size == 0);
+}
+
+inline _ArrayHeap::Key
+_ArrayHeap::minimum_key() const
+{
+  Key key = INVALID_KEY;
+
+  if (!is_empty())
+  {
+    key = _root()->key;
+  }
+
+  return key;
+}
+
+inline _ArrayHeap::Value *
+_ArrayHeap::peek()
+{
+  Value * value = NULL;
+
+  if (!is_empty())
+  {
+    value = _root()->value;
+  }
+
+  return value;
+}
+
+inline _ArrayHeap::_Node *
+_ArrayHeap::_root()
+{
+  //- return &_nodes.front();
+  return &_nodes[0];
+}
+
+inline const _ArrayHeap::_Node *
+_ArrayHeap::_root() const
+{
+  //- return &_nodes.front();
+  return &_nodes[0];
+}
+
+inline _ArrayHeap::_Node *
+_ArrayHeap::_last()
+{
+  //- return &_nodes.back();
+  return &_nodes[_size - 1];
+}
+
+inline const _ArrayHeap::_Node *
+_ArrayHeap::_last() const
+{
+  //- return &_nodes.back();
+  return &_nodes[_size - 1];
+}
+
+
+// ---------------------------------------------------------------------
+// _StandardHeap
+
+inline size_t
+_StandardHeap::size() const
+{
+  return _heap.size();
+}
+
+inline bool
+_StandardHeap::is_empty() const
+{
+  return _heap.empty();
+}
+
+inline _StandardHeap::Key
+_StandardHeap::minimum_key() const
+{
+  Key key = INVALID_KEY;
+
+  if (!is_empty())
+  {
+    key = _heap.top().key;
+  }
+
+  return key;
+}
+
+inline _StandardHeap::Value *
+_StandardHeap::peek()
+{
+  Value * value = NULL;
+
+  if (!is_empty())
+  {
+    value = _heap.top().value;
+  }
+
+  return value;
+}
+
+inline void
+_StandardHeap::push(const Key& key, Value * value)
+{
+  _Node node(key, value);
+
+  _heap.push(node);
+}
+
+inline _StandardHeap::Value *
+_StandardHeap::pop(Key& key)
+{
+  _Node node = _heap.top();
+
+  _heap.pop();
+
+  key = node.key;
+  Value * value = node.value;
+
+  return value;
+}
+
+
+inline
+_StandardHeap::_Node::_Node(const Key& key, Value * value)
+  : key(key)
+  , value(value)
+{
+}
+
+// ---------------------------------------------------------------------
+// Heap<_T, Impl_T>
+
+template <typename _T, typename Impl_T>
+inline
+Heap<_T, Impl_T>::Heap()
+  : _heap()
+{
+}
+
+template <typename _T, typename Impl_T>
+inline
+Heap<_T, Impl_T>::~Heap()
+{
+}
+
+template <typename _T, typename Impl_T>
+inline size_t
+Heap<_T, Impl_T>::size() const
+{
+  return this->_heap.size();
+}
+
+template <typename _T, typename Impl_T>
+inline bool
+Heap<_T, Impl_T>::is_empty() const
+{
+  return this->_heap.is_empty();
+}
+
+template <typename _T, typename Impl_T>
+inline typename Heap<_T, Impl_T>::Key
+Heap<_T, Impl_T>::minimum_key() const
+{
+  return this->_heap.minimum_key();
+}
+
+template <typename _T, typename Impl_T>
+inline typename Heap<_T, Impl_T>::Value *
+Heap<_T, Impl_T>::peek()
+{
+  return static_cast<Value*>(this->_heap.peek());
+}
+
+template <typename _T, typename Impl_T>
+inline void
+Heap<_T, Impl_T>::push(const Key& key, Value * value)
+{
+  return this->_heap.push(key, static_cast<void *>(value));
+}
+
+template <typename _T, typename Impl_T>
+inline typename Heap<_T, Impl_T>::Value *
+Heap<_T, Impl_T>::pop(Key& key)
+{
+  return static_cast<Value*>(this->_heap.pop(key));
+}
+
+template <typename _T, typename Impl_T>
+inline typename Heap<_T, Impl_T>::Value *
+Heap<_T, Impl_T>::pop()
+{
+  Key discard;
+
+  return this->_heap.pop(discard);
+}
+
+} // namespace impl
+
+} // namespace util
+} // namespace sim
+} // namespace tos
+
+#endif // TOS_SIM_HEAP_II

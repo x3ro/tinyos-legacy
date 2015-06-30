@@ -1,0 +1,14 @@
+all: libgetenv.so
+
+libgetenv.so: net_tinyos_util_Env.h net_tinyos_util_Env.c
+	gcc "-I$(JDK)/include/linux" "-I$(JDK)/include" -shared -fpic net_tinyos_util_Env.c -o$@
+
+install: libgetenv.so
+	install libgetenv.so "$(JNI)"
+
+rpminstall: libgetenv.so
+	install -d "$(prefix)/lib/tinyos"
+	install libgetenv.so "$(prefix)/lib/tinyos"
+
+clean:
+	rm -rf libgetenv.so

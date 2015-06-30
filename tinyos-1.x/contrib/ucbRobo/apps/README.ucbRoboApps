@@ -1,0 +1,157 @@
+README for tinyos-1.x/contrib/ucbRobo/apps/ Directory
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+
+
+Description:
+************
+This directory contains applications meant to be run on the 330 Cory
+Testbed.  The goal of the testbed is to monitor and better understand
+control algorithms that close the loop around sensor networks.  The
+target application is a Pursuit Evasion Game (PEG), where a team of
+pursuer robots chase after a team of evader robots, using the sensor
+network as "eyes" to see where the evaders are located.
+
+Note that throughout much of the documentation here and elsewhere, the
+word "application" is overloaded... sometimes its used to mean the
+application as a whole: the sensor network component, the robot
+actuator component, and the computational component; other times its
+used to mean any one of those sub components.  Oh well.
+
+ucbRobo/README.ucbRobo contains an explanation of how this directory
+is organized.
+
+Further documentation can be found under each subdirectory.  Note that
+Capitalized directories are typically not directories where you
+'build' the application, but where you get instructions (and other
+miscellaneous things... like suggested calibration values, etc.).  The
+lowercase directories are 'build' directories.
+
+cotsbot		contains applications to run on the cotsbot (see
+		README.cotsbots for more details)
+sensornet	contains applications to run on the sensor network
+		(see README.sensornet for more details)
+MagLightTrail	simple program where motes light their LEDs once they
+		sense a magnetic disturbance above a threshold
+MagMHopRpt	simple program derived from MagLightTrail for
+		multihopping event detections back to a basestation.
+
+
+
+Constructing Multihop Messages
+******************************
+One of the difficulties with Multihop Routing is that it uses
+embedded packets.  This means that depending on the routing scheme,
+the packets will have extra fields to hold routing information.
+Unfortunately, the packet header for a single hop packet and a
+multihop packet look exactly the same.  It is up to the application
+programmer to ensure that the motes and the base station parse the
+packets properly.
+
+In the current TinyOS implementation, an embedded packet with routing
+information has groups of fields as follows:
+1) TOS_Msg header fields (using the AM_ID of the original packet) 
+2) Routing fields
+3) Original packet fields
+
+To complicate matters, the choice of routing fields varies depending
+on the routing scheme used.  For example, if we choose to use Bcast,
+there is one 2-byte routing field.  On the other hand, if we choose to
+use MintRoute, there are four fields occupying 7 bytes.
+
+An implication of this is that the routing schemes cannot distinguish
+between packets embedded with the fields of one routing scheme
+(ex. Bcast) from packets embedded with the fields of another routing
+scheme (ex. MintRoute).  As a result, the application developer must
+choose unique AM id's for packets in each routing scheme.
+
+For example, if I were to send MagReportMsg using a BCast routing
+scheme and a MintRoute routing scheme, I should create two separate
+messages MagReportBcastMsg and MagReportMhopMsg that have unique AM
+ids.  The message fields may be exactly the same, but duplicate
+message structures are needed to assign them distinct AM ids.  Note
+that in this example, Bcast actually only forwards messages that are
+explicitly connected via Comm.ReceiveMsg[AM_ID].  Throughout the
+transmission, the TOS_Msg destination address == TOS_BCAST_ADDR.
+MintRoute, on the other hand, only forwards messages that have TOS_Msg
+destination address == the node's local address (unambiguously parsed
+field for all messages).  So only the Bcast routing schemes gets
+confused if you use the same AM id for both types of messages
+(assuming the basestation remembers to send messages out using
+TOS_BCAST_ADDR.  See the footnote at the bottom for a further
+discussion.).  The packet parser at the basestation will also get
+confused if you don't differentiate between the two.
+
+Currently, MIG (message interface generator) does not generate java
+files that account for the embedded nature of the packets.  As a
+result, the convention adopted in the ucbRobo subtree is to add extra
+message structures to our *Msg.h files, ones with the extra routing
+fields explicitly added to the structure.  We call these MIG message
+structures, and denote them by appending a _MIG to their name.  The
+original message structures are used by the NesC code, while the MIG
+message structures are used by the mig tool to generate the MIG java
+file, as specified by the application Makefile in the java tree.
+Furthermore, since MIG associates an AM id to a message by searching
+for a constant with the same name as the message but in capital
+letters, we must define extra AM id constants with the same numeric
+values.  So, for example, if we have AM_MAGREPORTMHOPMSG = 100, we
+must define AM_MAGREPORTMHOPMSG_MIG = 100.
+
+For a sample implementation, look at the application
+sensornet/MagMHopRpt .
+
+
+Tools:
+******
+see tinyos-1.x/contrib/ucbRobo/tools/matlab/apps
+see tinyos-1.x/contrib/ucbRobo/tools/java/net/tinyos/RobotTB
+
+
+
+Other Useful Directories/Websites:
+**********************************
+tinyos-1.x/contrib/cotsbots	for the robot platform we are using
+tinyos-1.x/contrib/PEGSensor	for PEG demoed in the Summer of 2003
+tinyos-1.x/contrib/SystemC	for Middleware demonstrated by PEG'03
+tinyos-1.x/contrib/testbed	for tools to program testbeds
+
+http://www.eecs.berkeley.edu/~phoebusc/330NEST/welcome.html
+
+
+
+Known bugs/limitations:
+***********************
+MagLightTrail is still under development.
+
+
+
+Footnote Discussion on Multihop Routing:
+****************************************
+(continued from above)
+
+Consider if Bcast did not use a broadcast address, but actually used a
+specific motes address as the target address.  Then, MintRoute has the
+potential to get confused by Bcast packets, and the application
+programmer doesn't really have an easy way to prevent this situation.
+Assume a node receives a Bcast packet.  Both the Bcast routing module
+and the MintRoute routing module on the node will receive the Bcast
+packet.  The routing module assumes all packets are multihop packets.
+This is OK when checking whether the TOS_Msg destination address ==
+the node's local address.  If the TOS_Msg destination address ==
+TOS_BCAST_ADDR, MintRoute does not forward the packet, and everything
+behaves properly.  However, if the TOS_Msg destination address == the
+node's local address, MintRoute will continue to access what it thinks
+are the other multihop routing fields and use its routing table to
+figure out the next node to route this packet to.  The packet may end
+up being routed back to the basestation, or something else, depending
+on the routing algorithm and the value of the fields.  It may even
+"break" your routing tree, depending on how your routing tree is
+constructed (ex. depending on the values of the fields, MintRoute may
+interpret this as a duplicate packet and try to break cycles in the
+tree).
+
+To see the code in MintRoute that makes the decision whether to
+forward a packet or not, see MultiHopEngineM.ReceiveMsg.receive.
+
+While BCast and MintRoute Interact properly, some other combination of
+routing schemes may not.  Thus, proceed with caution.

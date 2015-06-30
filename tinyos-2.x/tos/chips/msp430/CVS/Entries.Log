@@ -1,0 +1,12 @@
+A D/adc12////
+A D/bus////
+A D/bus_resource////
+A D/dma////
+A D/io////
+A D/pins////
+A D/sensors////
+A D/timer////
+A D/usart////
+R D/io////
+R D/bus_resource////
+R D/bus////

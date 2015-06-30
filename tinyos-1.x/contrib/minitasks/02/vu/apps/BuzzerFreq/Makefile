@@ -1,0 +1,2 @@
+COMPONENT=BuzzerFreqC
+include ../Makerules

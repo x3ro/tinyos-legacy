@@ -1,0 +1,634 @@
+
+
+             FREQUENTLY ASKED QUESTIONS ON TINYOS
+
+             ====================================
+
+
+
+The TinyOS FAQ is maintained by the University of California
+at Berkeley Electrical Engineering and Computer Science
+Department. For more information visit the official TinyOS
+website at http://tinyos.millennium.berkeley.edu.
+
+
+Version date: July 1, 2001
+
+
+Revision history:
+   July 1, 2001 - by Julius Kusuma <kusuma@eecs.berkeley.edu>
+      Start writing the FAQ. Now I'm more worried with the organization
+      of the questions in this document. I'm also trying to decide
+      whether this should be more tutorial or less tutorial in nature.
+      I've finished a first big cut of the setup instructions, copying
+      mostly from the online instructions.
+   July 8, 2001 - by Julius Kusuma <kusuma@eecs.berkeley.edu>
+      Added instructions on how to use sourceforge.net's CVS stuff.
+   July 19, 2001 - by R. Martin <rmartin@cs.rutgers.edu.edu>
+      Added info on the "Implemented By" clauses.
+
+
+0. Disclaimer
+
+
+1. What is TinyOS?
+
+   1.1. Description
+   1.2. Relevant links
+   1.3. Getting the distribution
+        1.3.1. Developmental support on Sourceforge
+   1.4. Supported platforms and setting up
+        1.4.1. UNIX/Linux
+        1.4.2. Windows
+   1.5. How hard is it to learn?
+
+
+2. What is the idea of TinyOS?
+
+   2.1. Modular support for embedded architectures
+   2.2. Dynamic generation of hardware support
+
+
+3. What is in TinyOS? / What are the development tools for TinyOS?
+
+   3.0. Component list
+   3.1. Modular support 
+
+
+4. Software setup problems
+
+   4.1. GCC errors
+   4.2. Java setup problems
+   4.3. Java execution problems
+   4.4. Lex/Yacc problems
+
+
+5. Hardware setup problems
+
+   5.1. Parallel port / programming problems
+   5.2. Serial port / communication and data acquisition problems
+
+6. Developing applications for TinyOS
+   
+   6.1. Sourceforge online code repository
+   6.2. What do IMPLEMENTED_BY and JOINTLY IMPLEMENTED_BY mean?
+
+
+xx. Who maintains this FAQ?
+
+
+
+
+
+0. Disclaimer
+=============
+
+
+Copyright ©2001 The Regents of the University of California (Regents). 
+All Rights Reserved. 
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose, without fee, and without written agreement is
+hereby granted, provided that the above copyright notice and the following
+two paragraphs appear in all copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+
+
+
+
+1. What is TinyOS?
+==================
+
+
+
+   1.1. Description
+   ----------------
+
+TinyOS is an event based operating environment designed for use with 
+embedded networked sensors.  It is designed to support the concurrency 
+intensive operations required by networked sensors with minimal hardware 
+requirements.
+
+The programming language of TinyOS is stylized C. 
+
+TinyOS was initially developed by the U.C. Berkeley EECS Department,
+and is distributed under the disclaimer above.
+
+At the present it has been used in various hardware platforms:
+:::Kris Pister's Smartdust...
+:::make mention of other platforms like what the Rutgers and USC people
+   have used??
+
+We also have support for "offline simulation", i.e. running virtual
+motes on your computer. Very handy debugging/development tool!
+
+TinyOS - because size matters!
+
+
+
+   1.2. Relevant links
+   -------------------
+
+The official website of TinyOS is at 
+  http://tinyos.millennium.berkeley.edu
+
+The code distribution website is at 
+  http://tinyos.sourceforge.net
+
+An online repository is available through 
+  http://sourceforge.net/projects/tinyos/
+
+To help you get started, there is a website available at:
+  http://tinyos.millennium.berkeley.edu/Getting_Started.html
+
+There are also powerpoint slides from the first bootcamp at UC Berkeley
+available for downloading at the official website.
+
+
+
+   1.3. Getting the distribution
+   -----------------------------
+
+The "official" distribution is available at the websites above.
+
+
+        1.3.1. Developmental support on Sourceforge
+        -------------------------------------------
+
+Since a lot of development is currently in the works for TinyOS and its
+components, the quickest way to get the latest greatest but not cleanest
+distribution in through Sourceforge.net. 
+
+Access is available through CVS. For anonymous access, use the following:
+
+  cvs -z3 -d:pserver:anonymous@cvs.tinyos.sourceforge.net:/cvsroot/tinyos 
+    co tos
+
+This should download ALL the components of TinyOS.
+
+
+
+   1.4. Supported development platforms and setting up
+   ---------------------------------------------------
+
+So far TinyOS has been installed and rigorously tested on two platforms:
+Linux and Windows on personal computers. In principal any hardware can 
+be made to work with the current distribution of TinyOS, but the current
+version for UC Berkeley's Smartdust motes uses a parallel port for the
+programming board and serial port for communication.
+
+
+        1.4.1. UNIX/Linux
+        -----------------
+
+
+Instructions on getting started and some files are available at:
+  http://tinyos.millennium.berkeley.edu/Getting_Started.html
+
+At the minimum need to have the following:
+- C compiler
+- Java compiler
+- Perl compiler
+- Parallel port support
+- Java Serial port comm support
+
+Here are the steps to get started:
+
+A. Hardware setup
+
+   You need to have serial and parallel port support on your hardware.
+   
+B. Software setup
+
+   Download TinyOS from the official website, and uncompress the files
+   into a directory of your choice. We now need to setup several additional
+   components:
+
+   1. ATMEL tools
+
+      The current version of the Smartdust mote uses ATMEL processors,
+      and the compiler is available for download from:
+
+        http://tinyos.millennium.berkeley.edu/release/atmeltools.tar.gz
+
+      For these binaries to work, you must install them into 
+      /usr/local/atmel.  Otherwise the compiler will not be able to find 
+      required components. (the full path of avr-gcc should be 
+      /usr/local/bin/avr-gcc)   You should add /usr/local/bin to you path.  
+      Additionally, we assume that you have Perl and a native C compiler 
+      already installed. Extract the tar file in your root directory (/) 
+      and the files will be placed in the right location. 
+
+   2. Java library setup
+      
+      You also need to download and install the java.comm libraries for linux
+      available at:
+
+        http://java.sun.com/products/javacomm/
+
+      If you are on the Berkeley network, you can download the javax.comm 
+      RPMs from http://tinyos.millennium.berkeley.edu/release/linux-jdk. 
+
+      Extracting javacomm will create a comapi directory containing 
+      instructions for installing it in the jdk.  Be careful to follow the 
+      instructions contained in the commapi\Readme.html file.  This tells 
+      you how to copy several of the commapi files into the JDK installation 
+      directory.  MAKE SURE THIS IS DONE. You will want to create a CLASSPATH 
+      environment variable (with the same procedure as above for your PATH 
+      variable) and make sure that comm.jar and . are both on the path. 
+      For example: C:\jdk1.3.1\lib\comm.jar;. 
+
+
+
+        1.4.2. Windows
+        --------------
+
+Instructions on getting started and some files are available at:
+  http://tinyos.millennium.berkeley.edu/Getting_Started.html
+
+At the minimum need to have the following:
+- C compiler
+- Java compiler
+- Perl compiler
+- Parallel port support
+- Java Serial port comm support
+
+It is highly recommended that you download Cygwin from
+http://www.cygwin.com. It's a BASH emulator for Windows that
+includes GCC and other essential tools.
+
+Here are the steps to get started:
+
+A. Hardware setup
+
+   You need to have serial and parallel port support on your hardware.
+   
+B. Software setup
+
+   Log in as Administrator. Some programs you'll use (such as tvicport) 
+   can only be run by Administrator (or someone with Administrator 
+   priviledges). 
+
+   Download TinyOS from the official website, and uncompress the files
+   into a directory of your choice. We now need to setup several additional
+   components:
+
+   1. Cygwin (optional but highly recommended)
+
+      You first need to install the cygwin development tools that provide 
+      unix-like functionality under windows.  Get them from 
+
+        http://www.cygwin.com/
+
+      When you get to their website click on the setup.exe link to download 
+      and run their setup program. Here are the choices I made when going 
+      through the installation.... 1) just click next (only option) 
+      2) Install from Internet 3) enter c:\temp 4) Specify the install 
+      directory (install for all and file type unix) 5)Direct Connection 
+      6) choose mirror ftp://mirrors.rcn.net (it's the most complete).  
+      7) Accept the default. This should install all the files and leave 
+      you with a cygwin icon on the desktop. For the remainder, we'll assume 
+      you installed  cygwin into c:\cygwin\
+
+      Cygnus shell info: First off, for those of you not familiar with 
+      Cygnus Cygwin shell, to get to your C drive type "cd /cygdrive/c" 
+      at the command prompt. You can then cd to the directory where you 
+      installed the TOS release. Alternatively, cd .. till you get to / 
+      and look around.
+
+   2. ATMEL tools
+
+      The current version of the Smartdust mote uses ATMEL processors,
+      and the compiler is available for download from:
+
+        http://tinyos.millennium.berkeley.edu/release/avrgcc20010211.exe
+
+      It will install the compiler and the bin-utils. Towards the end of 
+      the process you will get an error message: Access Is Denied: outreset.
+      Click OK and a console window will pop up and perform the installation 
+      of the compiler and libraries. This will run for several seconds.  It 
+      is OK to receive this single error message as long at it continues to 
+      install (several hundred lines of commands will go by).   
+
+      You will need to set your environment variables so the 
+      $(AVRGCC_INSTALL)\bin directory is in your path.  This will be the 
+      directory you extracted the compiler to plus /bin, typically 
+      c:\avrgcc\bin.  Under windows 2000,  accomplish this by right-clicking 
+      on My Computer, choosing properties, going to the advanced tab, 
+      selecting Environment Variables,  finding the "Path" variable in the 
+      lower window and then editting it, adding ";c:\avrgcc\bin" to the 
+      entry. To confirm that you have done this correctly, OPEN UP A NEW 
+      command prompt and type avr-gcc.  You should get "avr-gcc: No input 
+      files", not "'avr-gcc' is not recognized as an internal or external 
+      command," 
+
+      If you open up a cygwin shell you can type echo $PATH. You will see 
+      that it has converted your windows paths to valid cygwin paths. If 
+      avr-gcc is not on the path you will get an error like bash: 
+      avr-gcc: command not found.  You will need to use the Cygwin shell 
+      to run make.
+
+   3. Programming / parallel port library setup: TVIC port
+
+      Additionally, in order to flash the atmel microcontroller, we 
+      require the use of win/tvicport.zip, a hardware access library.  
+      Please download and install it. It will be a normal windows install. 
+      tvicport is used by programs included in the TinyOS release. 
+
+   4. Data / serial port setup: Java comm library
+
+      To read from the serial port you'll want to download and install: 
+      JDK 1.3 and javax.comm from 
+
+        http://java.sun.com/j2se/1.3/ 
+        http://java.sun.com/products/javacomm/.    
+
+      Unpack both of these packages and then install the jdk. Extracting 
+      javacomm will create a comapi directory containing instructions for 
+      installing it in the jdk.  Be careful to follow the instructions 
+      contained in the commapi\Readme.html file.  This tells you how to 
+      copy several of the commapi files into the JDK installation directory.
+      MAKE SURE THIS IS DONE. You will want to create a CLASSPATH 
+      environment variable (with the same procedure as above for your PATH 
+      variable) and make sure that comm.jar and . are both on the path. For 
+      example: "C:\jdk1.3.1\lib\comm.jar;.". After you've created the 
+      variable, OPEN A NEW cygwin shell and type echo $CLASSPATH; check to 
+      make sure it includes both entries. 
+
+      If the JDK install complains about insufficent disk space when your 
+      machine has plenty, you're experiencing a bug in the installer. This 
+      bug occurs if your disk space is just over a multiple of 4GB. The 
+      installer seemingly uses a 32-bit value to examine the available space, 
+      so if you have 4GB + 100K, it thinks you only have 100K. Create a 
+      large file (~100MB) and the problem should go away. If not, Sun has 
+      instructions This large file can be created in cygwin with the 
+      following command: 
+
+        touch /tmp/big_file;for (( i=0;i<100;i++ )) ...
+          cat /usr/lib/libc.a >> /tmp/big_file; done; 
+
+      Be sure to remove the file when the install completes. 
+
+
+
+
+
+   1.5. How hard is it to learn?
+   -----------------------------
+
+The concurrency concept requires some effort to get used to but it's 
+essentially C. Proficiency and/or experience with GNU development
+tools is a plus, but not mandatory.
+
+
+
+
+2. What is the idea behind TinyOS?
+==================================
+
+The idea behind TinyOS is to be able to have modular support for embedded
+software, and good management of concurrency-intensive operations. TinyOS
+is an event-based programming environment.
+
+
+
+
+   2.1. Modular support
+   --------------------
+
+Mention about DESC, COMP, C files.
+
+
+
+
+
+3. What is in TinyOS?
+=====================
+
+
+   3.0. Component list
+   -------------------
+
+TinyOS consists of these main parts:
+- Development tools.
+- Data acquisition tools.
+
+
+
+   3.1. 
+
+
+
+
+4. Software setup problems
+==========================
+
+
+
+   4.1. GCC errors
+   ---------------
+
+
+        1. Make retuns "'avr-gcc' is not recognized as an internal or 
+           external command".
+
+           Avr-gcc is the ATMEL processor compiler. Make sure that you 
+           have installed it at /usr/local/atmel for Linux and that you
+           have set up your PATH environment to include 
+           $(AVRGCC_INSTALL)\bin under Windows. See setup instructions
+           above.
+
+
+
+
+   4.2. Java compilation errors
+   ----------------------------
+
+
+        1. Which version of Java?
+
+           We recommend the IBM Java compiler, available at:
+           http://www.alphaworks.ibm.com/
+
+           Note that we use several libraries that you need to download
+           separately. See the getting started section for instructions.
+
+        2. Insificient disk space when installing JDK
+
+           If the JDK install complains about insufficent disk space when 
+           your machine has plenty, you're experiencing a bug in the 
+           installer. This bug occurs if your disk space is just over a 
+           multiple of 4GB. The installer seemingly uses a 32-bit value to 
+           examine the available space, so if you have 4GB + 100K, it thinks 
+           you only have 100K. Create a large file (~100MB) and the problem 
+           should go away. If not, Sun has instructions This large file can 
+           be created in cygwin with the following command: 
+
+             touch /tmp/big_file;for (( i=0;i<100;i++ )) ... 
+               cat /usr/lib/libc.a >> /tmp/big_file; done; 
+
+           Be sure to remove the file when the install completes. 
+
+
+
+
+   4.3. Java run environment problems
+   ----------------------------------
+
+
+
+   4.4. Lex/Yacc problems
+   ----------------------
+
+We included lex/yacc support for version control in the deployment
+of TinyOS.
+
+If the compiler complains that lex/yacc is not available, you need to
+install either lex/yacc or flex/bison. 
+
+For Linux machines, you can download them from:
+  http://www.gnu.org/software/flex/flex.html
+
+For Windows Cygwin users, note that different mirror sites may give
+you different sets of tools installed with Cygwin. Download/install
+again from the RCN.net mirror site since it has the most complete
+package, and comes with flex/bison.
+
+
+
+
+5. Hardware setup problems
+==========================
+
+
+
+   5.1. Parallel port / programming problems
+   -----------------------------------------
+
+
+        1. TVIC returns "unreachable memory address ....".
+
+           Check and make sure that the programming board switch
+           is in the correct position: "big guy" instead of "little
+           guy". If you're in the "little guy" position it can only
+           access address 0000 - ..... and the "big guy" position
+           lets you access the entire address space. This feature
+           is for developers who want to use only the "little guy",
+           which is the secondary processor on the mote.
+
+
+        2. 
+   
+
+
+   5.2. Serial port / communication and data acquisition problems
+   --------------------------------------------------------------
+
+
+        1. Listen.java returns "port busy".
+
+           This means either you are reading from the wrong port,
+           or that the correct port is currently being used by another
+           application. Check to see if some other software is currently
+           occupying the port (your Palm desktop software, etc.)
+
+           If you're using Linux make sure that your current user
+           has read/write access to the port.
+
+
+        2. Not getting anything on oscilloscope.java after successful
+           compilation.
+
+           Oscilloscope.java is currently hard-wired to read from serial
+           port 1. If your mote is connected to serial port 3, you need
+           to change the setup and recompile oscilloscope.java.
+
+
+
+6. Developing applications for TinyOS
+=====================================
+
+
+In this section we will discuss several points on how to contribute
+to the development of TinyOS.
+
+
+   6.1. Sourceforge online code repository
+   ---------------------------------------
+
+
+There is an online repository of TinyOS-related codes at Sourceforge.net.
+The URLs are:
+
+  http://tinyos.sourceforge.net
+  http://sourceforge.net/projects/tinyos/
+
+Everybody is welcome to contribute to the development of TinyOS!
+
+
+   6.2. What do IMPLEMENTED_BY and JOINTLY IMPLEMENTED_BY mean?
+   ---------------------------------------
+Components in TinyOS require both an external interface and an
+internal behavior. The external interface definition is specified in
+the component, or ".comp" file. For example, if a component called
+MESS would define the events and commands usable by other components
+in "MESS.comp".
+
+On the other hand, a component's internal behavior can be defined in
+more than one file because the internals can be constructed out of a
+mix of C code as well as other components. Not suprsizingly, the
+component's C code is defined in the component's .c file. E.g., for a
+component built only from C code, MESS, all commands and events could
+be found in "MESS.c". TOS assumes that most components are built only
+from C code, so you do not need to add any extra clauses in the component
+file in this case.
+
+A component can also be built from other components such that they are
+automatically included.  In case the where there's no C code at all,
+you must use the IMPLEMENTED_BY clause in the component file. 
+This tells the TOS compilation system to look for the commands and events
+only in the component's description file. E.g., if we had a component
+that was built only from other components called SMALLER_MESS, we
+might define it's behavior in a wiring file "SMALLER_MESS.desc".
+Another example is the GENERIC_COMM component. It's completely built
+from other components so it doesn't need a C file; the internal behavior 
+is found in "GENERIC_COMM.desc".
+
+If a component is built from a mix of both C code and other
+components, you would use the JOINTLY IMPLEMENTED_BY clause in the
+component file.  Say a component, BIG_MESS, had both some commands and
+events defined as C code as well as some commands built from other
+components. In that case, the behaviors are in "BIG_MESS.c",
+"BIG_MESS.desc", and we would have to add a "JOINTLY IMPLEMENTED_BY
+BIG_MESS" clause in the "BIG_MESS.comp" file.
+
+
+
+xx. Who maintains this FAQ?
+===========================
+
+
+This is a (partial) list of contributors to this FAQ:
+
+Dave Culler <dculler@cs.berkeley.edu>
+Jason Hill <jhill@cs.berkeley.edu>
+Julius Kusuma <kusuma@eecs.berkeley.edu>
+Robert Szewczyk <szewczyk@cs.berkeley.edu>
+Alec Woo <awoo@cs.berkeley.edu>
+
+
+
+
+---
+(c) 2001 Regents of the University of California
+

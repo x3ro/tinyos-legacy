@@ -1,0 +1,53 @@
+Macroprogramming library and tools
+Matt Welsh <mdw@eecs.harvard.edu>
+May 23, 2003
+
+This is an initial release of a runtime environment and set of tools for
+sensor network macroprogramming. The eventual goal is to provide a
+clean, high-level programming interface and set of tools for writing
+sensor network programs that operate on aggregate data within volatile
+networks. The first step in this work is to define a runtime environment
+that provides a set of useful communication and coordination primitives,
+as well as to simplify application design using blocking (rather than
+split-phase/event-driven) APIs.  
+
+This is definitely a work in progress; not all of these interfaces have
+been completely implemented or tested. Also, experience with this
+programming environment should suggest new runtime primitives, so I'm
+looking for feedback and input on what they should be.
+
+Here is a rough breakdown of what's in this tree:
+
+ lib/				Core runtime library
+ |-- collective/		Collective ops: barrier, reduction, command
+ |-- fiber/			Fibers: Lightweight "threads" for blocking
+ |-- location/			Localization	
+ |-- neighborhood/		Neighborhood discovery
+ |-- network/			Spanning tree and queued transmit
+ |-- sharedvar/			Shared variables within neighborhoods
+ `-- sim/			Python simulation (for testing)
+
+ apps/				Example applications
+ |-- centroid/			Object tracking
+ |-- contour/			Contour finding
+ |-- testfiber/			Testing fiber support
+ |-- testneighbor/		Neighborhood discovery
+ `-- testreduce/		Tree-based reductions
+
+ ncs/				NCS - "nesC Script" runtime and tools
+ |-- lib/			NCS runtime library - blocking wrappers
+ `-- apps/			Example applications using blocking ops
+     |-- contour/		Contour finding
+     `-- testneighbor/		Neighborhood discovery
+
+The apps directory represents example applications using the core
+runtime, while the NCS/apps directory using the ncs/lib runtime, which
+consists of blocking wrappers to most of the routines in the core. This
+will evolve into a "nesCScript" language for which the compiler is
+currently under development, providing clean syntactic support for the
+runtime environment and blocking operations.
+
+Let me know if you have questions!
+
+Matt
+

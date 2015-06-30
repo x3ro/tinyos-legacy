@@ -1,0 +1,62 @@
+#-*-Makefile-*- vim:syntax=make
+# Target file. Inspired by the eyesIFX.target file.
+#$Id: evb13192.target,v 1.7 2005/08/31 13:54:39 janflora Exp $
+
+# Jan Flora <janflora@diku.dk>, October 2005
+
+PLATFORM = dig536
+
+# We need to set up some variables
+# TOSDIR: The basic tos directory. We can get that from ncc, if
+# the user did not supply it
+# TODO: May not be strictly neccesary.
+ifndef TOSDIR
+TOSDIR := $(shell ncc -print-tosdir)
+endif
+
+# The contribdir
+ifndef TINYOS_CONTRIBDIR
+TINYOS_CONTRIBDIR := $(TOSDIR)/../contrib
+endif
+
+# Our base directory
+ifndef TINYOS_EVB13192DIR
+TINYOS_EVB13192DIR := $(TINYOS_CONTRIBDIR)/diku/evb13192
+endif
+
+# Flags for the compilation. Note, that some of these are also set in 
+# makeEvb13192.sh!
+
+# The order of the nesc-includes is important!
+ifndef NESC_FLAGS
+NESC_FLAGS := -Wnesc-all
+endif
+NESC_FLAGS += -fnesc-include=tos -fnesc-include=$(TINYOS_EVB13192DIR)/tos/system/802154
+
+# Make sure ncc can find our platform and other files we need.
+PFLAGS += \
+-I$(TINYOS_EVB13192DIR)/tos/platform/$(PLATFORM) \
+-I$(TINYOS_EVB13192DIR)/tos/chips/hcs08 \
+-I$(TINYOS_EVB13192DIR)/tos/chips/hcs08/interfaces \
+-I$(TINYOS_EVB13192DIR)/tos/chips/hcs08/timers \
+-I$(TINYOS_EVB13192DIR)/tos/chips/mc13192 \
+-I$(TINYOS_EVB13192DIR)/tos/chips/mc13192/interfaces \
+-I$(TINYOS_EVB13192DIR)/tos/types \
+-I$(TINYOS_EVB13192DIR)/tos/interfaces \
+-I$(TINYOS_EVB13192DIR)/tos/interfaces/ieee802154 \
+-I$(TINYOS_EVB13192DIR)/tos/interfaces/ieee802154/phy \
+-I$(TINYOS_EVB13192DIR)/tos/interfaces/ieee802154/mac \
+-I$(TINYOS_EVB13192DIR)/tos/lib \
+-I$(TINYOS_EVB13192DIR)/tos/system \
+-I$(TINYOS_EVB13192DIR)/tos/sensorboards/$(SENSORBOARD)
+
+
+# This is where we should probably do something if we wish to support
+# Deluge network (re)programming. We don't for know.
+
+# Include the stuff for hcs08
+$(call TOSMake_include_platform,CodeWarrior)
+
+dig536: $(BUILD_DEPS)
+	@:
+

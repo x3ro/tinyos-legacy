@@ -1,0 +1,1266 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Mat&eacute; Tutorial: Lesson 5</title>
+    <LINK HREF="../mate.css" REL="stylesheet" TYPE="text/css">
+  </head>
+  
+  <BODY>
+    <CENTER>
+      <TABLE BGCOLOR=BLACK CELLPADDING=1>
+	<TR>
+	  <TD>
+	    <TABLE BGCOLOR=WHITE WIDTH=700 CELLPADDING=6>
+	      <TR>
+		<TD BGCOLOR=#BEBEBE>
+		  <IMG SRC="../img/banner.gif">
+		</TD>
+	      </TR>
+	      <TR>
+		<TD>
+		  <CENTER>
+		    <TABLE>
+		      <TR>
+			<TD>[<a href="index.html">Tutorial Home</A>]</TD>
+			<TD>[<a href="lesson1.html">Lesson 1</A>]</TD>
+			<TD>[<a href="lesson2.html">Lesson 2</A>]</TD>
+			<TD>[<a href="lesson3.html">Lesson 3</A>]</TD>
+			<TD>[<a href="lesson4.html">Lesson 4</A>]</TD>
+			<TD>[Lesson 5]</TD>
+			<TD>[<a href="lesson6.html">Lesson 6</A>]</TD>
+		      </TR>
+		      
+		    </TABLE>
+		    <HR>
+		  </CENTER>
+		</TD>
+	      </TR>
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <h3>Lesson 5: Adding Functions</h3>
+		  <!-- Created: Wed Jun 16 16:09:01 PDT 2004 -->
+		    <!-- hhmts start -->
+Last modified: Wed Jul 14 11:24:01 PDT 2004
+<!-- hhmts end -->
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  <p></p>
+		</TD>
+	      </TR>
+
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Introduction</b>
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  <p>Lessons 1-3 show you how to install a Mat&eacute;
+		  and write TinyScript programs. Lesson 4 shows you
+		  how to build a new Mat&eacute; environment from
+		  existing functions and handlers. This lesson
+		  describes how to write new functions and how to
+		  incorporate them into your VMs. Doing so allows you
+		  to extend VMs to meet the computational requirements
+		  of particular applications.
+		  </p>
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Mat&eacute;'s <tt>dbg</tt> Statements</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>The existing Mat&eacute; code uses TOSSIM's
+		  <tt>dbg</tt> functionality heavily; we strongly
+		  recommend that you test any new function or event in
+		  TOSSIM before running it on a mote. Mat&eacute; uses
+		  three DBG settings: USR1, USR2, and USR3. Each has
+		  its own partilcuar use.</p>
+
+		  <p>USR1 pertains to execution; almost every
+		  instruction has a USR1 statement to say that it's
+		  executing, so a tester can see what happens as a
+		  program executes. Also, events that trigger contexts
+		  to run or halt (as you'll see in Lesson 6) fall
+		  under USR1.</p>
+
+		  <p>USR2 pertains to synchronization. USR2 statements
+		  instrumetn the Mat&eacute; scheduler, its wait and
+		  ready queues, and system locks. Unless you are
+		  delving into Mat&eacute; much more deeply than these
+		  tutorials do, you shouldn't need to add any USR2
+		  statements.</p>
+
+		  <p>USR3 pertains to code propagation and
+		  installation: the capsule propagation component,
+		  <tt>MVirus</tt>, uses USR3 for information on its
+		  timers and state. You shouldn't need to add any USR3
+		  statements.</p>
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Adding a Simple Function</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>A Mat&eacute; function is a TinyOS component that
+		  provides the <tt>MateBytecode</tt> interface, which
+		  has two commands:</p>
+
+		  <quote>
+		    <pre>
+interface MateBytecode {
+  command result_t execute(uint8_t instr, MateContext* context);
+  command uint8_t byteLength();
+}
+		    </pre>
+		  </quote>
+
+		  <p><tt>byteLength()</tt> returns the length of an
+		  instruction in bytes. Function's <tt>byteLength</tt>
+		  must always return 1. <tt>execute</tt> is the actual
+		  logic of the function. <tt>execute</tt> takes two
+		  parameters. The first, <tt>instr</tt> is the opcode
+		  of the instruction that led to the function being
+		  called; this can be ignored. The second,
+		  <tt>context</tt>, is the execution context that is
+		  calling the function. <tt>context</tt> can be
+		  used to access execution state, such as parameters
+		  passed to the function.</p>
+
+		  <p>In addition to a TinyOS component, a function
+		  must have an ODF file that describes it. The
+		  Mat&eacute; toolchain uses the description to check
+		  that a program passes the right number of
+		  parameters, to figure out which component implements
+		  the function, and provide information to a user. An
+		  ODF file contains a FUNCTION element with several
+		  tags. For example, this is the ODF for the
+		  <tt>bfull</tt> function:</p>
+
+		  <quote>
+		    <pre>
+<FUNCTION name=BFULL opcode=bfull numparams=1 param1=buffer returnval=TRUE
+	  desc="Takes a buffer as a parameter; returns true if the buffer
+	        is full, false otherwise.">
+		    </pre>
+		  </quote>
+
+		  <p>The following table describes the set of tags
+		  that a FUNCTION element must have, and their
+		  meanings. There are also several optional tags,
+		  which you'll cover later.</p>
+
+		  <table border=2 cellpadding=10>
+
+		    <tr>
+		      <td><b>name</b></td>
+
+		      <td>The name of the function as a user writing a
+		      script will use it.</td>
+		    </tr>
+
+		    <tr>
+		      <td><b>opcode</b></td>
+
+		      <td>The name of the function as the toolchain
+		      and VM use it. While the name tag should be
+		      human readable, the opcode tag need not be. When
+		      VMBuilder generates the files for a VM, it
+		      generates a constant based on the opcode tag to
+		      identify the binary instruction.</td>
+		    </tr>
+		    
+		    <tr>
+		      <td><b>numParams</b></td>
+
+		      <td>The number of parameters that the function
+		      takes. For example, <tt>bfull</tt> takes a
+		      single parameter. The TinyScript compiler checks
+		      that the number of parameters passed to a
+		      function match this value.</td>
+		      
+		    </tr>
+		    
+		    <tr>
+		      <td><b>param1...N</b></td>
+
+		      <td>For each parameter (specified by numParams),
+		      there must be a tag of the form param<i>N</i>,
+		      where <i>N</i> is the parameter number, starting
+		      at 1.  A function with zero parameters has no
+		      <tt>param</tt> tags For example, a function that
+		      takes two parameters must have a <tt>param1</tt>
+		      tag and a <tt>param2</tt> tag. Each tag should
+		      say what type the corresponding parameter
+		      is. These types are currently unchecked by the
+		      TinyScript compiler; they serve only as
+		      documentation. For example, <tt>bfull</tt>'s
+		      parameter is a buffer.</td>
+		    </tr>
+
+		    <tr>
+		      <td><b>returnval</b></td>
+
+		      <td>Either <tt>true</tt> or <tt>false</tt>;
+		      denotes whether the function has a return
+		      value. <tt>bfull</tt> has a return value (an
+		      integer, denoting whether the buffer is full).</td>
+		    </tr>
+
+		    <tr>
+		      <td><b>desc</b></td>
+
+		      <td>Text, describing the function. The Scripter
+		      and VMBuilder GUIs display this text.</td>
+		    <tr>
+
+		  </table>
+
+		  <p>To understand how writing a function works,
+		  you'll start by writing <tt>increment</tt>, a very
+		  simple new function. <tt>increment</tt> takes a
+		  single integer as a parameter and returns it
+		  incremented by one. The first step is to write the
+		  function description file. Make a new directory in
+		  <tt>tos/lib/VM</tt>, named <tt>extensions</tt>:</p>
+		    
+		  <quote>
+		    <pre>mkdir extensions</pre>
+		  </quote>
+
+		  <p>In the extensions directory, open a file named
+		  <tt>"OPincrement.odf"</tt>.  This will contain the
+		  FUNCTION element describing your function. The
+		  function takes a single parameter, an integer, and
+		  has a return value. Write the FUNCTION element
+		  describing increment. It should look something like
+		  this:</p>
+
+		  <quote>
+		    <tt>
+		      &lt;FUNCTION name=increment opcode=incr numparams=1 param1=integer returnval=TRUE desc="Takes an integer as a parameter; returns that integer incremented by one.">
+		    </tt>
+		  </quote>
+		  
+		  <p>By default Mat&eacute; toolchain looks for a
+		  function in a TinyOS component generated from the
+		  <tt>opcode</tt> tag. If the tag's value is
+		  <i>incr</i>, Mat&eacute; looks for a component named
+		  OP<i>incr</i> (the nesC rules require this component
+		  to be in the file OPincr.nc). The component should
+		  provide a single instance of the
+		  <tt>MateBytecode</tt> interface, and nothing else:
+		  it will almost always be a configuration. For
+		  example, this is <tt>OPbfull.nc</tt>:</p>
+
+		    
+		  <quote>
+		    <pre>
+includes Mate;
+
+configuration OPbfull {
+  provides interface MateBytecode;
+}
+
+implementation {
+  components OPbfullM, MStacksProxy, MTypesProxy;
+  
+  MateBytecode = OPbfullM;
+
+  OPbfullM.Stacks -> MStacksProxy;
+  OPbfullM.Types -> MTypesProxy;
+}
+		    </pre>
+		  </quote>
+
+		  <p><tt>OPbfull</tt> takes the actual implementation
+		  of the function -- in <tt>OPbfullM</tt> -- and wires
+		  it to the needed components. The configuration then
+		  exports the function as a provided
+		  interface. This is <tt>OPbfullM.nc</tt>: </p>
+		  
+		  <quote>
+		    <pre>
+module OPbfullM {
+  provides interface MateBytecode;
+  uses interface MateStacks as Stacks;
+  uses interface MateTypes as Types;
+}
+
+implementation {
+
+  command result_t MateBytecode.execute(uint8_t instr,
+                                            MateContext* context) {
+    MateStackVariable* arg = call Stacks.popOperand(context);
+    dbg(DBG_USR1, "VM (%i): Checking if buffer full.\n", (int)context->which);  
+                
+    if (!call Types.checkTypes(context, arg, MATE_TYPE_BUFFER)) {return FAIL;}
+    call Stacks.pushValue(context, (arg->buffer.var->size == MATE_BUF_LEN)? 1: 0);
+    return SUCCESS;
+  }
+  
+  command uint8_t MateBytecode.byteLength() {return 1;}
+
+		    </pre>
+		  </quote>
+
+		  <p>The implementation of the function,
+		  <tt>execute</tt>, has five lines. We'll step through
+		  them, one by one, but touch on the interfaces it
+		  uses first.</p>
+
+		  <p>bfull uses two interfaces, <tt>MateStacks</tt>
+		  and <tt>MateTypes</tt>. Looking back at the
+		  configuration, the component MateStacksProxy
+		  provides the first, while MateTypesProxy provides
+		  the latter. <tt>MateStacks</tt> has a
+		  set of commands for manipulating the operand stack
+		  of a Mat&eacute; context. Before performing an
+		  operation, the VM pushes operands onto the stack;
+		  the operation then pops the operands, using them as
+		  parameters. For example, to add two integers, a
+		  program pushes the two integers onto the operand
+		  stack, then executes the <tt>add</tt>
+		  instruction. The instruction's implementation pops
+		  the two integers off the stack, adds them, and
+		  pushes the result back onto the stack. TinyScript
+		  passes function parameters on the operand stack; the
+		  buffer a program is testing to see if it's full is
+		  on top of the stack.</p>
+
+		  <p>The operands that <tt>MateStacks</tt> returns
+		  from <tt>popOperand</tt> commands must be handled
+		  carefully. Specifically, they can be corrupted or
+		  invalidated by any command that pushes something
+		  onto the operand stack. The pointer that
+		  <tt>popOperand</tt> returns is a pointer onto the
+		  actual stack. If something is pushed, the region of
+		  the stack where the return value of the pop points
+		  to may be overwritten. Therefore, when writing a
+		  function, you should process all operands before
+		  pushing anything back onto the stack.</p>
+		  
+		  <p><tt>MateTypes</tt> has commands for examining the
+		  types of operands. There are two types of commands,
+		  checks and queries. Checks begin with
+		  <tt>check</tt>, while queries begin with
+		  <tt>is</tt>. For example, <tt>MateTypes</tt> has a
+		  <tt>checkInteger</tt> and an
+		  <tt>isInteger</tt>. Both kinds of commands return
+		  TRUE if the operand matches the type. In addition to
+		  returning the result, check commands will trigger an
+		  error condition if the test fails. For example, if
+		  you call <tt>isInteger</tt> on a buffer, it will
+		  return FALSE; if you call <tt>checkInteger</tt> on a
+		  buffer, it will return FALSE and trigger a type check
+		  error in the core VM, halting execution.</p>
+
+		  <p>The first line of <tt>execute</tt> pops the top
+		  of the operand stack, followed by a <tt>dbg</tt>
+		  statement for when using TOSSIM. Functions should
+		  always print a <tt>dbg</tt> message of type USR1
+		  when they execute; this makes debugging in TOSSIM
+		  much easier.</p>
+
+		  <quote>
+		    <pre>MateStackVariable* arg = call Stacks.popOperand(context);
+dbg(DBG_USR1, "VM (%i): Checking if buffer full.\n", (int)context->which);</pre>
+		  </quote>
+		  
+
+		  <p>If the programmer called <tt>bfull</tt> properly,
+		  then this argument should be a buffer; the third
+		  line checks that this is the case:</p>
+
+		  <quote>
+		    <pre>if (!call Types.checkTypes(context, arg, MATE_TYPE_BUFFER)) {return FAIL;}</pre>
+		  </quote>
+
+		  <p>If the operand is not a buffer, then
+		  <tt>checkTypes</tt> will trigger an error in the VM;
+		  the instruction exits immediately, and the VM halts
+		  execution.</p>
+
+		  <p>Since the operand is a buffer, the function does
+		  the actual work, checking if the buffer is full:</p>
+
+		  <quote>
+		    <pre>call Stacks.pushValue(context, (arg->buffer.var->size == MATE_BUF_LEN)? 1: 0);</pre>
+		  </quote>
+
+		  <p>This line pushes an integer onto the operand
+		  stack: if the buffer is full, it pushes 1, if false
+		  it pushes 0. Operands (<tt>MateStackVariables</tt>s)
+		  are a union of their possible types: arg->buffer
+		  accesses the variable as a buffer, while arg->value
+		  accesses it as a value. In TinyScript, the actual
+		  structure is:</p>
+
+		  <quote>
+		    <pre>
+typedef struct {
+  int16_t var;
+} MateValueVariable;
+
+typedef struct {
+  uint8_t type;
+  uint8_t size;
+  int16_t entries[MATE_BUF_LEN];
+} MateDataBuffer;
+
+typedef struct {
+  MateDataBuffer* var;
+} MateBufferVariable;
+
+typedef struct {
+  uint8_t type;
+  union {
+    MateValueVariable value;
+    MateBufferVariable buffer;
+  };
+} MateStackVariable;
+		    </pre>
+		  </quote>
+
+		  <p>These and other Mat&eacute; types can be found in
+		  <tt>tos/lib/VM/types/Mate.h</tt>.</p>
+
+		  
+		  <p>The function has consumed its parameter (it
+		  popped the buffer off the operand stack), and
+		  produced a return value (it pushed the result onto
+		  the operand stack).</p>
+
+		  <p>With <tt>increment</tt>, we want to do something
+		  similar to <tt>bfull</tt>: it takes a single
+		  parameter, and returns a value. In the
+		  <tt>extensions</tt> directory, open a file named
+		  <tt>OPincrementM.nc</tt> and type:</p>
+
+		  <quote>
+		    <pre>
+module OPincrementM {
+  provides interface MateBytecode;
+  uses interface MateStacks as Stacks;
+  uses interface MateTypes as Types;
+}
+
+implementation {
+
+  command result_t MateBytecode.execute(uint8_t instr,
+                                            MateContext* context) {
+    MateStackVariable* arg = call Stacks.popOperand(context);
+    dbg(DBG_USR1, "VM (%i): Incrementing an integer.\n", (int)context->which);  
+                
+    if (!call Types.checkInteger(context, arg)) {return FAIL;}
+    call Stacks.pushValue(context, (arg->value.var + 1));
+    return SUCCESS;
+  }
+  
+  command uint8_t MateBytecode.byteLength() {return 1;}
+}
+		    </pre>
+		  </quote>  
+
+		  <p>It also needs a configuration. Open
+		  <tt>OPincrement.nc</tt> and type:</p>
+
+		  <quote>
+		    <pre>
+includes Mate;
+
+configuration OPincrement {
+  provides interface MateBytecode;
+}
+
+implementation {
+  components OPincrementM, MStacksProxy, MTypesProxy;
+  
+  MateBytecode = OPincrementM;
+
+  OPincrementM.Stacks -> MStacksProxy;
+  OPincrementM.Types -> MTypesProxy;
+}
+		    </pre>
+		  </quote>
+
+		  <p>Now that you've written all three files (the ODF,
+		  the configuration, and the implementation),
+		  <tt>increment</tt> is ready to use. Go back to your
+		  specification file for SimpleVM,
+		  <tt>simple.vmsf</tt>, and add the following two lines:</p>
+
+		  <quote>
+		    <pre>
+&lt;SEARCH PATH="../extensions">
+&lt;FUNCTION NAME="increment">			
+		    </pre>
+		  </quote>
+
+		  <p>The first line tells VMBuilder to look in your
+		  new extensions directory, while the second tells it
+		  to include your new function. Rebuild the VM and
+		  install it on a mote. You can now write CntToLeds
+		  using the function instead of addition:</p>
+
+		  <quote>
+		    <pre>
+private counter;
+counter = increment(counter);
+led(counter % 8);
+		    </pre>
+		  </quote>
+		</TD>
+	      </TR>
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Mat&eacute; Abstractions and Split-Phase Operations</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>When writing the <tt>increment</tt> function, the
+		  configuration wired <tt>OPincrementM</tt> to a
+		  component named <tt>MateStacksProxy</tt>, which
+		  provided interfaces for manipulating the operand
+		  stack and type checking. You can find the full set
+		  of data abstraction components in
+		  <tt>tos/lib/VM/components</tt>. They include:</p>
+
+		  <ul>
+		    <li><b>MateEngine:</b> The core VM scheduler. It
+		    signals when the VM has rebooted (e.g., when new
+		    code arrives), which contexts and some functions
+		    need to know, to clear state properly.</li>
+		    
+		    <li><b>MBufferProxy:</b> Commands for accessing
+		    data buffers.</li>
+
+		    <li><b>MContextSynchProxy:</b> Commands and events
+		    for controlling context execution: the section on
+		    writing a new handler component goes into how to
+		    use this component's interface.</li>
+
+		    <li><b>MErrorProxy:</b> Commands for triggering an
+		    error condition in the VM.</li>
+
+		    <li><b>MHandlerStoreProxy:</b> Commands and events
+		    for monitoring and controlling code propagation:
+		    the section on writing a new handler component
+		    goes into how to use this component's interface.</li>
+
+		    <li><b>MQueueProxy:</b> Commands for manipulating
+		    context queues. Functions that encapsulate
+		    split-phase operations usually need to maintain a
+		    queue of pending requests, if more than one
+		    context wants to execute it at once.</li>
+		    
+		    <li><b>MStacksProxy:</b> Commands for manipulating
+		    the operand stack.</li>
+		    
+		    <li><b>MTypesProxy:</b> Commands for type checking.
+
+		    <li><b>MTypeManager:</b>: Commands for transforming
+		    data types to and from network representations.
+
+		  </ul>
+
+		  <p>There are a few additional components, such as
+		  <tt>MateLocksProxy</tt>, but they are only relevant
+		  if you're modifying VM internals, as opposed to
+		  adding new functions and contexts. Using "Proxy"
+		  components allows components to refer to VM
+		  abstractions in terms of interfaces, instead of
+		  implementation. For example, MHandlerStore is a a
+		  component that provides an implementation of code
+		  storage; wiring to MHandlerStore specifies an
+		  implementation. If components wired to
+		  MHandlerStore, then changing the implementation used
+		  would either require changing all of the components
+		  that wire to it (to wire to something else),
+		  changing MHandlerStore itself, or trying to use
+		  search path tricks to use a different component also
+		  named MHandlerStore.</p>
+
+		  <p>In contrast, MHandlerStoreProxy is a
+		  configuration wrapper around an implementation; by
+		  having components wire to MHandlerStoreProxy, one
+		  can change the implementation the entire VM uses by
+		  modifying only this component.</p>
+		  </p>
+
+		  <p>Earlier in the lesson, you wrote a simple
+		  function that incremented an integer. Functions can
+		  also encapsulate underlying TinyOS operation. For
+		  example, the <tt>rand()</tt> Mat&eacute; function
+		  calls the standard Tiny)S
+		  <tt>RandomLFSR.Random.random()</tt> command to
+		  generate a random number:</p>
+
+		  <quote>
+		    <pre>command result_t MateBytecode.execute(uint8_t instr,
+                                      MateContext* context) {
+  uint16_t rval = call Random.rand();
+  dbg(DBG_USR1, "VM (%i): Pushing random number: %hu.\n", (int)context->which,
+ rval);
+  call Stacks.pushValue(context, rval);
+  return SUCCESS;
+}</pre>
+		  </quote>
+
+		  <p>Functions can also encapsule split-phase
+		  operations, such as sending a packet or sampling a
+		  sensor. This is a bit more complex than calling a
+		  TinyOS command, and requires using several of the
+		  abstractions described above. A function that
+		  encapsulates a split-phase operation has to interact
+		  with the Mat&eacute; scheduler and synchronization
+		  subsystem, in order to suspend and resume the
+		  executing context properly. Some split-phase
+		  operations require the function component to
+		  allocate some state; for example, the <tt>send</tt>
+		  function component (<tt>OPsendM</tt>) allocates a
+		  TOS_Msg for sending. The implementing module has to
+		  ensure atomic access to this state, to make sure
+		  that it doesn't corrupt it if multiple contexts
+		  execute the function concurrently.</p>
+
+		  <p>Finally, the function must keep track of when the
+		  VM reboots; if new code arrives while it's in the
+		  middle of its split-phase operation, then it must
+		  keep the lock on any state, but can release the
+		  executing context. This is the basic pseudocode for
+		  a function that encapsulates a split-phase
+		  operation. There are three entry points:
+		  <tt>MateBytecode.execute()</tt>, the event
+		  signalling completion of the split-phase event, and
+		  the reboot event signalling that the VM has
+		  rebooted.</p>
+
+		  <quote>
+		    <pre>
+MateQueue queue;      // A wait queue
+MateContext* execing; // The currently executing context
+bool busy;            // Whether the state is in use
+State state;              // State that requires atomic access
+
+// Only execute if busy == FALSE, try starting the split-phase op
+// If you can't start it, put the context on the wait queue
+try_exec(context) {
+  // access state, etc
+  if (split_phase_command(state) == SUCCESS) {
+    execing = context;
+    mark context as executing operation
+    busy = TRUE;
+    call Synch.yieldContext(context); // We've started the operation,
+                                      // Let the scheduler know
+  }
+  else { // For some reason we can't start the op, put on wait queue
+    mark context as waiting
+    put context on queue
+  }
+}
+
+// MateBytecode.execute: a context is trying to execute the function
+execute(context) {
+  // Somebody is using the shared state: put the context on a wait queue
+  if (busy) {
+    context->state = WAITING;
+    enqueue(queue, context);
+  }
+  // Noboody is using the shared state: try starting the op
+  else {
+    try_exec(context);
+  }
+}
+
+// Split phase op complete: if it's for us, resume who was executing,
+// try letting another context execute the operation
+split_phase_event(State s) {
+  if (s != state) {return;} // Not for us
+  if (execing != NULL) {
+    call Synch.resumeContext(execing);
+    execing = NULL;
+  }
+  busy = FALSE;
+
+  if (!empty(queue)) {
+    pull next context off queue
+    try_exec(context);
+  }
+}
+
+// Rebooting means that nobody is execing the op any longer,
+// and nobody is waiting for it; if a completion event comes in,
+// execing must be null or it may try to resume somebody who isn't waiting.
+reboot() {
+  execing = NULL;
+  empty queue
+}
+		    </pre>
+		  </quote>
+
+		  <p>There's a good deal of pseudocode, because the
+		  function has to deal with many corner cases. The
+		  function needs to keep track of whether anyone is
+		  accessing the shared state (the <tt>busy</tt> flag),
+		  whether there is a context waiting to resume when
+		  the operation completes (the <tt>execing</tt>
+		  pointer), and whether any contexts are waiting for
+		  the shared state to be available or the underling
+		  resource (the wait <tt>queue</tt>).</p>
+
+		  <p>A function which has a wait queue must handle
+		  reboot events from the VM. Otherwise, system state
+		  can become inconsistent if the VM reboots (due to
+		  new code arriving) in the middle of the
+		  operation. Rebooting requires all of the executing
+		  contexts to halt and reset, waiting for their
+		  triggering event. However, when the split-phase op
+		  completes, then the function component will try to
+		  resume the context that was executing it. This could
+		  cause a halted context to start execution when it
+		  shouldn't. When the VM reboots, the function
+		  component must clear its wait queue and executing
+		  context. The components that implement individual
+		  contexts are responsible for clearing their state;
+		  all the function needs to do is clear its queue.</p>
+
+		  <p>However, as the operation is still executing, it
+		  should not clear the busy flag on the shared
+		  state. If, after reboot, a context tries to execute
+		  the function before the underlying operation
+		  completes, then the component should put the context
+		  on a wait queue. When the split-phase operation
+		  completes, releasing the shared state, the component
+		  can let a context on the wait queue execute. If the
+		  function component wants a context to stop executing
+		  Mat&eacute; instructions(e.g., wait on a queue), it
+		  must change the context's <tt>state variable</tt>
+		  from <tt>MATE_STATE_RUN</tt>; otherwise, the
+		  scheduler will continue to have the context issue
+		  instructions.</p>
+
+		  <p>Here is the full code of the <tt>uart</tt>
+		  function, which sends a packet to the UART. Its
+		  shared state is the message buffer it passes to
+		  <tt>SendMsg.send()</tt>:</p>
+
+		  <quote>
+		    <pre>
+includes Mate;
+
+module OPuartM {
+
+  provides {
+    interface MateBytecode;
+    interface StdControl;
+    event result_t sendDone();
+  }
+
+  uses {
+    interface MateQueue as Queue;
+    interface MateContextSynch as Synch;
+    interface MateError as Error;
+    interface MateTypes as TypeCheck;
+    interface MateType as Type[uint8_t typeID];
+    interface MateStacks as Stacks;
+    interface MateEngineStatus as EngineStatus;
+
+    interface SendMsg as SendPacket;
+  }
+}
+
+implementation {
+  MateQueue sendWaitQueue;
+  MateContext* sendingContext;
+  bool busy;
+  TOS_Msg msg;
+    
+  command result_t StdControl.init() {
+    call Queue.init(&sendWaitQueue);
+    sendingContext = NULL;
+    busy = FALSE;
+    return SUCCESS;
+  }
+  
+  command result_t StdControl.start() {
+    return SUCCESS;
+  }
+  
+  command result_t StdControl.stop() {
+    return SUCCESS;
+  }
+
+  result_t trySend(MateContext* context) {
+    MateStackVariable* arg = call Stacks.popOperand(context);
+    if (!call Type.supported[arg->type]()) {
+      call Error.error(context, MATE_ERROR_TYPE_CHECK);
+      dbg(DBG_USR1|DBG_ERROR, 
+          "VM (%i): UART tried to send data type %i, \
+          doesn't have a network representation.\n", 
+          (int)context->which, (int)arg->type);
+      return FAIL;
+    }
+    else {
+      uint16_t maxLen = TOSH_DATA_LENGTH;
+      uint8_t len = call Type.length[arg->type]((void*)arg->buffer.var);
+      MateStructMsg* destMsg = (MateStructMsg*)msg.data;
+      if (len >= maxLen) {
+        call Error.error(context, MATE_ERROR_BUFFER_OVERFLOW);
+        return FAIL;
+      }
+                                                                                
+      destMsg->type = arg->type;
+                                                                                
+      call Type.encode[arg->type](&(destMsg->data), arg->buffer.var);
+                                                                                
+      if (call SendPacket.send(TOS_UART_ADDR, TOSH_DATA_LENGTH, &msg) == SUCCESS) {
+        dbg(DBG_USR1, 
+            "VM (%i): OPuartM sending data of length %i to uart.\n", 
+            (int)context->which, (int)len);
+        busy = TRUE;
+        sendingContext = context;
+        context->state = MATE_STATE_BLOCKED;
+        call Synch.yieldContext(context);
+      }
+      else {
+        call Stacks.pushOperand(context, arg);
+        context->state = MATE_STATE_WAITING;
+        call Queue.enqueue(context, &sendWaitQueue, context);
+      }
+    }
+    return SUCCESS;
+  }
+  
+  command result_t MateBytecode.execute(uint8_t instr,
+					MateContext* context) {
+    if (busy) {
+      dbg(DBG_USR1,
+          "VM (%i): Executing OPuart, but UART busy, put on queue.\n",
+          (int)context->which);
+      context->state = MATE_STATE_SEND_WAITING;
+      call Queue.enqueue(context, &sendWaitQueue, context);
+      return SUCCESS;
+    }
+    else {
+      dbg(DBG_USR1, "VM (%i): Executing OPuart.\n", (int)context->which);
+      return trySend(context);
+    }
+  }
+  command uint8_t MateBytecode.byteLength() {return 1;}
+  
+  event result_t SendPacket.sendDone(TOS_MsgPtr mesg, result_t success) {
+    if (mesg != &msg) {return SUCCESS;}
+
+    busy = FALSE;
+    if (sendingContext != NULL) {
+      call Synch.resumeContext(sendingContext, sendingContext);
+      sendingContext = NULL;
+    }
+
+    if (!call Queue.empty(&sendWaitQueue)) {
+      MateContext* context = call Queue.dequeue(NULL, &sendWaitQueue);
+      trySend(context);
+    }
+    dbg(DBG_USR1, "VM: UART send completed with code. %i\n", (int)success);
+    return SUCCESS;
+  }
+
+  // It may be that we couldn't send a packet because another component was.
+  // If someone is waiting and we're not sending, try sending.
+  event result_t sendDone() {
+    if (!busy &&
+	sendingContext == NULL &&
+	!call Queue.empty(&sendWaitQueue)) {
+      MateContext* context = call Queue.dequeue(NULL, &sendWaitQueue);
+      trySend(context);
+    }
+    return SUCCESS;
+  }
+  
+  event void EngineStatus.rebooted() {
+    sendingContext = NULL;
+    call Queue.init(&sendWaitQueue);
+  }
+}
+		    </pre>
+		  </quote>
+		 
+		  <p>OPuartM introduces another Mat&eacute; framework
+		  service, <tt>MateType</tt>. This interface has commands
+		  for components to transform an on-mote data structure
+		  into a network-friendly representation. This is important
+		  for functions to be language independent. To take
+		  a program type and convert it to a network representation,
+		  a component calls the <tt>encode</tt> command. To
+		  convert a network type back into an on-mote representation,
+		  the component calls the <tt>decode</tt> command. A
+		  component, MTypeManagerProxy, provides a parameterized
+		  interface whose parameter is a type ID of the type.</p>
+
+		  <p>To include an additional type into a VM,
+		  a component must wire to MTypeManager. This is how,
+		  for example, TinyScript includes the buffer type.
+		  The MBuffer component provides the MateType interface,
+		  and wires to MTypeManager so that calls which go
+		  to MTypeManagerProxy for encoding/decoding buffers
+		  pass through to MBuffer. If any component (such as the one
+		  which implements the opcode for putting an element in
+		  a buffer) wires to the
+		  MBuffer component, that is, uses buffers, then
+		  full support for the buffer type will be included.
+ 
+		  <p>Function components can interact with the
+		  Mat&eacute; synchronization component
+		  (<tt>MContextSynchProxy</tt>) to improve
+		  parallelism. When a context executes, it has
+		  exclusive access to any shared resources (such as
+		  shared variables or buffers) that it uses. This
+		  prevents race conditions between concurrent
+		  contexts. A context can release shared resources it
+		  holds as it executes; this allows other contexts
+		  that need them to execute. The most useful time to
+		  release resources is during split-phase
+		  operations, as the context executing the operation
+		  cannot use the resources and is not running (it's
+		  waiting for the operation to complete).</p>
+
+		  <p>As a context executes, it may mark some resources
+		  as safe to release. A function encapsulating a
+		  split-phase operation should have the context
+		  actually release the resources it has marked by
+		  calling <tt>MateContextSynch.yield()</tt>. If the
+		  function calls this, then it must call
+		  <tt>MateContextSynch.resume()</tt> when the context
+		  resumes (the operation completes). <tt>yield()</tt>
+		  makes the context yield any resources it has marked,
+		  and resume contexts that were waiting for those
+		  resources. <tt>resume()</tt> tells the
+		  synchronization component that the context is ready
+		  to run again. If there are any resources the context
+		  needs to reacquire but are held by another context,
+		  then <tt>resume()</tt> will cause the context to
+		  wait until those resources are available (either
+		  through another <tt>yield</tt>, or the holder
+		  halting).</p>
+
+		  <p>In the above <tt>uart</tt> function, the buffer
+		  passed on the operand stack is a shared
+		  variable. The function cannot yield a context until
+		  its state has been copied into the TOS_Msg to send
+		  (otherwise, it's possible someone else may modify
+		  it).</p>
+		</TD>
+	      </TR>
+
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>A Complex Function</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>Now that you've seen a complex Mat&eacute;
+		  function, you'll write your own. Instead of
+		  encapsulating a split-phase operation, you'll take
+		  <tt>increment</tt> and have it perform its
+		  computation in a separate task: posting the task is
+		  equivalent to starting a split-phase operation,
+		  while the task running is equivalent to a completion
+		  event. However, by using a task, it will be easier
+		  to debug and test what's going on. We strongly
+		  recommend that you first run and test your function
+		  in TOSSIM, before trying a mote.</p>
+
+		  <p>Return to <tt>OPincrementM.nc</tt>. Because it
+		  will increment an integer in a task, the component
+		  needs to store the value in its frame. It also needs
+		  a wait queue, a context pointer, and a busy
+		  flag. Add the following variables to
+		  <tt>OPincrementM</tt>'s frame:</p>
+
+		  <quote>
+		    <pre>MateContext* executingContext;
+MateQueue waitQueue;
+bool busy;
+int16_t value;</pre>
+		  </quote>
+
+		  <p>Some of these variables need initialization;
+		  <tt>OPincrementM</tt> must provide
+		  <tt>StdControl</tt>. Also, the component must
+		  monitor when the VM reboots, so it must use
+		  <tt>MateEngineStatus</tt>. Finally, it manages a
+		  queue, so needs to use <tt>MateQueue</tt>. Change
+		  the module declaration to:</p>
+		    
+		  <quote>
+		    <pre>
+module OPincrementM {
+  provides {
+    interface StdControl;
+    interface MateBytecode;
+  }
+  uses {
+    interface MateStacks as Stacks;
+    interface MateTypes as Types;
+    interface MateQueue as Queue;
+    interface MateEngineStatus as EngineStatus;
+  }
+}
+		    </pre>
+		  </quote>
+
+		  <p>The next step is to initialize the variables in
+		  <tt>StdControl.init()</tt>. Add the following code
+		  to the module implementation:</p>
+		  
+		  	    
+		  <quote>
+		    <pre>
+  command result_t StdControl.init() {
+    call Queue.init(&waitQueue);
+    executingContext = NULL;
+    busy = FALSE;
+    return SUCCESS;
+  }
+  command result_t StdControl.start() {return SUCCESS;}
+  command result_t StdControl.stop() {return SUCCESS;}
+		    </pre>
+		  </quote>
+
+		  <p>Next, add the handler for when the VM reboots:</p>
+
+		  <quote>
+		    <pre>
+  event void EngineStatus.rebooted() {
+    executingContext = NULL;
+    call Queue.init(&waitQueue);
+  }
+		    </pre>
+		  </quote>
+
+		  <p>All that's left to write are the <tt>execute</tt>
+		  and completion code. Most complex functions in the
+		  standard Mat&eacute; release have a "try to execute"
+		  function in the component, as both <tt>execute</tt>
+		  and the completion event need to get contexts to
+		  execute the operation. Putting it in a separate C
+		  function allows both of them to share the same code
+		  and reduces the chances of bugs. The component only
+		  calls <tt>try_execute</tt> if the local state is
+		  free. Change <tt>MateBytecode.execute</tt> to:</p>
+
+		  <quote>
+		    <pre>
+  command result_t MateBytecode.execute(uint8_t instr, MateContext* context) {
+    if (busy) {
+      dbg(DBG_USR1,
+          "VM (%i): Executing increment, but busy, put on queue.\n",
+          (int)context->which);
+      context->state = MATE_STATE_WAIT;
+      call Queue.enqueue(context, &waitQueue, context);
+      return SUCCESS;
+    }
+    else {
+      dbg(DBG_USR1, "VM (%i): Executing increment.\n", (int)context->which);
+      return try_execute(context);
+    }
+  }
+		    </pre>
+		  </quote>
+
+		  <p>Next, add the code for actually trying to execute
+		  the function: this involves type-checking the
+		  parameter, saving the local state and posting the
+		  task:</p>
+
+		  <quote>
+		    <pre>
+  result_t try_execute(MateContext* context) {
+    MateStackVariable* arg = call Stacks.popOperand(context);
+    if (!call Types.checkInteger(context, arg)) {return FAIL;}
+    else {
+      executingContext = context;
+      busy = TRUE;
+      value = arg->value.var;
+      post incrementTask();
+      context->state = MATE_STATE_BLOCKED;
+      call Synch.yieldContext(context);
+      return SUCCESS;
+    }
+  }
+		    </pre>
+		  </quote>
+
+		  <p>Finally, there's the task itself, which acts as
+		  the completion event:</p>
+
+		  <quote>
+		    <pre>
+  task void incrementTask() {
+    busy = FALSE;
+    if (executingContext != NULL) {
+      call Stacks.pushInteger(executingContext, value + 1);
+      call Synch.resumeContext(executingContext, executingContext);
+      executingContext = NULL;
+    }
+    if (!call Queue.empty(&waitQueue)) {
+      MateContext* context = call Queue.dequeue(NULL, &waitQueue);
+      try_execute(context);
+    }
+    dbg(DBG_USR1, "VM: Increment completed.\n");
+  }
+		    </pre>
+		  </quote>
+
+		  <p>Many Mat&eacute; data abstractions -- queues, for
+		  example -- require a context as their first
+		  argument. This parameter represents the context
+		  performing the action (if there is one); this is so
+		  that, if an error occurs, the VM can report which
+		  context caused the error. Passing NULL means there
+		  isn't really a context responsible for the call (as
+		  is the case, for example, in dequeueing a context
+		  off of the wait queue in <tt>incrementTask</tt>): if
+		  an error occurs, Mat&eacute; will report that it
+		  does not know who is responsible. Commands that
+		  actually modify or access the context, however, such
+		  as operand stack manipulation, cannot take NULL as a
+		  parameter. Calling <tt>Queue.dequeue</tt> with NULL
+		  as the first parameter is safe, calling
+		  <tt>Stacks.pushInteger</tt> with NULL as the first
+		  parameter will most probably cause the node to
+		  crash.</p>
+
+		  <p>Because your SimpleVM already includes
+		  <tt>increment</tt> as a function, all you need to do
+		  is recompile it. Run the VM in TOSSIM and inject a
+		  handler that calls increment. If you've set DBG to
+		  include <tt>usr1</tt>, you'll see messages showing
+		  you that increment has executed as a split-phase
+		  operation (the separate execute and task
+		  messages).</p>
+
+		  <p>Each function must have a configuration which
+		  wires to the appropriate interface on a module; this
+		  means that a particular module can implement more
+		  than one function. This is useful for functions that
+		  share state. For example, if you wanted to write a
+		  set of functions for accessing non-volatile storage,
+		  you could implement them in a single module,
+		  allowing you to easily keep track of state relevant
+		  to all of them (such as a seek pointer).</p>
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Optional Tags</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>You've implemented <tt>increment</tt> as a
+		  split-phase operation, which now interacts with the
+		  Mat&eacute; scheduler. For the TinyScript compiler
+		  to be aware that the function blocks, you have to
+		  add an additional tag to the ODF file. Open
+		  <tt>OPincrement.odf</tt> and add the following tag
+		  to the FUNCTION element:</p>
+
+		  <quote>
+		    <pre>schedpoint=true</pre>
+		  </quote>
+
+		  <p>If you forget to include this tag, nothing bad
+		  will happen: the compiler will just think it is a
+		  regular instruction, and not try to have a program
+		  release shared resources which are safe to
+		  release.</p>
+		  
+		  <p>As described in Lesson 4, a FUNCTION element in a
+		  VM specification file causes VMBuilder to look for a
+		  ODF. For example, <tt>&lt;FUNCTION
+		  name=increment&gt;</tt> causes VMBuilder to look for
+		  a file named <tt>OPincrement.odf</tt>. When
+		  VMBuilder loads this file, it uses the
+		  <tt>opcode</tt> tag of the FUNCTION element to
+		  determine what component implements the
+		  function. For example, in your ODF for
+		  <tt>increment</tt>, <tt>opcode=increment</tt> leads
+		  VMBuilder to wire to the nesC component
+		  <tt>OPincrement</tt>, contained in
+		  <tt>OPincrement.nc</tt>, for the function
+		  implementation. You can tell VMBuilder to wire to a
+		  different component. This is useful when the opcode
+		  name is not a good name for a component, as
+		  functions are case insensitive in TinyScript. For
+		  example, if you add the tag</p>
+
+		  <quote>
+		    <pre>component=IncrementInteger</pre>
+		  </quote>
+
+		  <p>to the FUNCTION element, then VMBuilder will wire
+		  the <tt>increment</tt> function to a component named
+		  <tt>OPIncrementInteger</tt>, which is implemented in
+		  <tt>OPIncrementInteger.nc</tt>.</p>
+		  
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Conclusion</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>You implemented a new function,
+		  <tt>increment</tt>, and incorporated it into your
+		  SimpleVM. You then re-implemented it as a
+		  split-phase operation, and learned how to let the
+		  TinyScript compiler know that it is a blocking
+		  call. The next and final lesson describes how to add
+		  new execution events to a VM.</p>
+
+		  <hr></hr>
+		  <CENTER>
+		    <b><a href="lesson4.html">&lt; Previous Lesson</a></b> |
+		    <b><a href="lesson6.html">Next Lesson ></a></b> |
+		    <b><a href="index.html">Top</a></b>
+		  </CENTER>
+		</TD>
+	      </TR>
+	    </TABLE>
+	  </TD>
+	</TR>
+      </TABLE>
+    </CENTER>
+  </body>
+</html>

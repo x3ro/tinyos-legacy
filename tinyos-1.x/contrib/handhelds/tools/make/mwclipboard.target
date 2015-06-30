@@ -1,0 +1,14 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: mwclipboard.target,v 1.1 2005/07/29 18:29:24 adchristian Exp $
+
+PLATFORM = mwclipboard
+
+PFLAGS += -mdisable-hwmul \
+ -I$(HHTOSDIR)/tos/platform/mwclipboard \
+ -I$(HHTOSDIR)/tos/platform/msp430_crl_base
+
+$(call TOSMake_include_platform,msp)
+
+mwclipboard: $(BUILD_DEPS)
+	@:
+

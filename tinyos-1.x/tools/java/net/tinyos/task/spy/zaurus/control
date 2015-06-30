@@ -1,0 +1,12 @@
+Package: spy-tool-@ZAURUS@
+Installed-Size: 196k
+Filename: ./spy-tool-@ZAURUS@_@VERSION@_arm.ipk
+Version: @VERSION@
+Depends: qpe-base (1.5.0) jeode
+Priority: optional
+Section: qpe
+Maintainer: David Gay <dgay@intel-research.net>
+Architecture: arm
+Description: TASK spy tool
+ Spy on TASK messages for debugging purposes
+

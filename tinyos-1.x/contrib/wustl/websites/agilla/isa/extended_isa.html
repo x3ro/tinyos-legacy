@@ -1,0 +1,321 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Agilla</title>
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+<h1>Extended ISA</h1>
+<p>The following instructions are part of Agilla's extended ISA. They require
+  an extra byte of code to switch the agent VM into an extended ISA mote. Thus,
+  each instruction consumes at least two bytes. The extended ISA consists of
+   13 modes, each with up to 256 instructions. When an agent encounters an extended
+  instruction, it automatically switches to the appropriate mode. The programmer
+  does not need to manually switch the processor into an extended mode.</p>
+<h2>Extension 1</h2>
+<h3>Extended1 Basic Instructions [0011 1111]
+</h3>
+<table width="100%" border="1" bordercolor="#000000">
+  <tr>
+    <td width="10" bgcolor="#CCCCCC"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+    <td width="160" bgcolor="#CCCCCC"><p><strong>Instruction</strong></p>
+    </td>
+    <td bgcolor="#CCCCCC"><strong>Short Description</strong></td>
+    <td width="100" bgcolor="#CCCCCC"><strong>Opcode</strong></td>
+  </tr>
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+    <td width="160"><a href="shiftl.html">shiftl</a></td>
+    <td>Shift left</td>
+    <td width="100">0x00</td>
+  </tr>
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+    <td width="160"><a href="shiftr.html">shiftr</a></td>
+    <td>Shift right</td>
+    <td width="100">0x01</td>
+  </tr>
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+    <td width="160"><a href="depth.html">depth</a></td>
+    <td>Push depth of op stack onto stack</td>
+    <td width="100">0x02</td>
+  </tr>
+
+  <tr>
+    <td width="10"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+    <td width="160"><a href="err.html">err</a></td>
+    <td>Put the mote into an error mode</td>
+    <td width="100">0x03</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900">&nbsp;</td>
+    <td><a href="tcount.html">tcount</a></td>
+    <td>counts the number of tuples in the local tuple space that match a template</td>
+    <td>0x04</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FFFF00">&nbsp;</td>
+    <td><a href="routgs.html">routgs</a></td>
+    <td>Sequential group remote out</td>
+    <td>0x05</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900">&nbsp;</td>
+    <td><a href="remove.html">remove</a></td>
+    <td>Remove tuple from tuple space</td>
+    <td>0x06</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><a href="hid.html">hid</a></td>
+    <td>Pushes the host ID onto the stack</td>
+    <td>0x07</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><a href="locToValue.html">locToValue</a></td>
+    <td>Converts a location to a value</td>
+    <td>0x08</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><a href="rrdpgs.html">rrdpgs</a></td>
+    <td>serial remote rdpg operation (reliable <a href="rrdpg.html">rrdpg</a>)</td>
+    <td>0x09</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><a href="sub.html">sub</a></td>
+    <td>Subtract</td>
+    <td>0x0a</td>
+  </tr>
+  
+  <!-- <tr>
+
+    <td>depth</td>
+
+    <td>Push stack depth</td>
+
+    <td>0x05</td>
+
+    <td>&nbsp;</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pushes the depth of the agent's operand stack onto the stack as a value;
+
+      the depth is the value before executing this operation.</td>
+
+  </tr> -->
+  <!-- <tr>
+
+    <td>err</td>
+
+    <td>Enter error state</td>
+
+    <td>0x06</td>
+
+    <td>&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+    <td width="100%">Forces the agent executing this instruction to enter an error state.
+
+      Halts execution.</td>
+
+  </tr>-->
+  <!--
+
+  <tr bgcolor="#FF66FF">
+
+    <td><font color="#FF0000"><em>startsense<br>
+
+          <strong>[N/A]</strong></em></font></td>
+
+    <td><font color="#FF0000"><em>Start getting sensor data</em></font></td>
+
+    <td><font color="#FF0000"><em>0x11</em></font></td>
+
+    <td><font color="#FF0000"><em>[value=sensor],<br>
+
+    [value=period]</em></font></td>
+
+    <td><font color="#FF0000">&nbsp;</font></td>
+
+    <td><p><font color="#FF0000"><em>Pops two values off the operand stack. The first value specifies the
+
+        type of sensor, the second specifies the period. It tells the host to
+
+        start taking sensor
+
+        measurements,
+
+        the host
+
+        will put the sensor
+
+        readings
+
+        into
+
+        the host-level
+
+        tuple space using
+
+        pre-defined
+
+        names
+
+      at the specified interval.</em></font></p>
+
+      <ul>
+
+        <li><font color="#FF0000"><em>Photo = 1, name = &quot;sdp&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Temp = 2, name = &quot;sdt&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Microphone = 3, name = &quot;sdm&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Magnometer X and Y= 4, name = &quot;sdx&quot; and &quot;sdy&quot;</em></font></li>
+
+        <li><font color="#FF0000"><em>Accelerometer X and Y= 5, name = &quot;sda&quot; and &quot;sdb&quot;</em></font></li>
+
+      </ul>
+
+      <p><font color="#FF0000"><em>The agent will then have to execute host-level tuple space operations
+
+        to retrieve the data. To prevent overflowing the host-level tuple space,
+
+        the previous sensor reading tuple will be removed prior to inserting
+
+        a new
+
+    one.</em></font></p></td>
+
+  </tr>
+
+  <tr bgcolor="#FF66FF">
+
+    <td><font color="#FF0000"><em>stopsense<br>
+
+          <strong>[N/A]</strong></em></font></td>
+
+    <td><font color="#FF0000"><em>Stop getting sensor data</em></font></td>
+
+    <td><font color="#FF0000"><em>0x12</em></font></td>
+
+    <td><font color="#FF0000"><em>[value]</em></font></td>
+
+    <td><font color="#FF0000">&nbsp;</font></td>
+
+    <td><font color="#FF0000"><em>Pops a value off the operand stack. This value corresponds to a particular
+
+    sensor (see instruction startsense). Tells the host to stop taking sensor
+
+      measurements. The host will only stop if no other agents are interested
+
+      in the sensor
+
+      reading.</em></font></td>
+
+  </tr>
+
+  -->
+  <!--
+  <tr>
+
+    <td>shiftr</td>
+
+    <td>Shift right</td>
+
+    <td>0x27</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. Shift [value2]
+
+      right by [value1] bits and push resulting value back onto the stack.</td>
+
+  </tr>
+
+  <tr>
+
+    <td>shiftl</td>
+
+    <td>Shift left</td>
+
+    <td>0x28</td>
+
+    <td>[value1], [value2]</td>
+
+    <td>[value]</td>
+
+    <td width="100%">Pop [value1] and [value2] off the stack. Shift [value2] left by [value1] bits and push resulting value back onto the stack.</td>
+
+  </tr>
+  -->
+</table>
+
+<h2>&nbsp;</h2>
+<h3>Extended1 X-Class Instructions [1ixx xxxx]</h3>
+<table width="100%" border="1" bordercolor="#000000">
+  <tr>
+    <td width="10" bgcolor="#CCCCCC"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+    <td width="160" bgcolor="#CCCCCC"><p><strong>Instruction</strong></p>
+    </td>
+    <td bgcolor="#CCCCCC"><strong>Short Description</strong></td>
+    <td width="100" bgcolor="#CCCCCC"><strong>Opcode</strong></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><a href="egetvar.html">egetvar</a></td>
+    <td>Fetches a variable from the heap</td>
+    <td>0x80-0xbf</td>
+  </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td><a href="esetvar.html">esetvar</a></td>
+      <td>Stores a variable onto the heap</td>
+      <td>0xc0-0xff</td>
+    </tr>
+</table>
+<h2>&nbsp;</h2>
+<h2>Extension 2</h2>
+<table width="100%" border="1" bordercolor="#000000">
+  <tr>
+    <td width="10" bgcolor="#CCCCCC"><a href="isa/color.html" target="_blank">&nbsp;&nbsp;</a></td>
+    <td width="160" bgcolor="#CCCCCC"><p><strong>Instruction</strong></p>
+    </td>
+    <td bgcolor="#CCCCCC"><strong>Short Description</strong></td>
+    <td width="100" bgcolor="#CCCCCC"><strong>Opcode</strong></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

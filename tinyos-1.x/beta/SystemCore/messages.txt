@@ -1,0 +1,25 @@
+AM:
+ 0   - TOSBase Control
+
+ 1   - Local Hello Announcement
+
+ 2   - Local Hello Request
+
+ 3   - Drip Protocol
+   Dissemination:
+   1   - PowerMgmt
+   2   - Hello
+   3   - NetProg
+   4   - Grouper
+   5   - EventLogger
+   11-14 - MgmtQuery
+
+ 4   - MultiHopRSSI Protocol
+   Collection:
+   5   - EventLogger 
+   11  - MgmtQuery
+
+ 5   - MultiHopRSSI Beacon
+ 
+ 161-163 - Deluge
+ 

@@ -1,0 +1,10 @@
+tinyos-1.x/contrib/nestfe/configurations
+
+This directory contains configuration files shared by different applications.
+
+*.cfg files
+-----------
+Mote layout files, modeled after tinyos-1.x/contrib/testbed/testbed,
+without IP addresses.  Known to be used by python scripts to set the
+location of motes and by matlab to draw positions of motes in
+displays.

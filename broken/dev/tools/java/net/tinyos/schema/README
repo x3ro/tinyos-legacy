@@ -1,0 +1,61 @@
+Package: net.tinyos.schema 
+
+Description: Package to manage the schemas
+of motes that include the MOTEINFO layer and
+use a schema (see nest/apps/basic_db_mote for an example mote) 
+
+Author: Sam Madden (madden@cs.berkeley.edu)
+
+This package allows mote-schemas to be parsed in Java.  Mote schemas
+represent the capabilities of motes, including:
+  1) number and types of sensors
+  2) code revision
+
+Schemas are sent and received via a number of AM messages, as follows:
+
+kSCHEMA_MESSAGE:         A message containing schema information for a single field
+	                 of a mote.  See Schema.java for a description of the contents
+	                 of this message.
+
+kVERSION_MESSAGE:        A message containing version information for a mote.  Version
+	                 is meant to indicate the sensor program type and revision; it
+	                 consists of four bytes of information, and is specified in
+	                 tos/include/version.h.  See tos/shared/MOTEINFO.c for information
+	                 about how motes can incorporate versions.
+
+kINFO_MESSAGE:           A message requesting version or schema information from a mote with
+                         the MOTEINFO component included.
+
+kFIELD_MESSAGE:          A message requesting the value of a sensor field from a mote with the
+	                 MOTEINFO component.
+
+kFIELD_REPLY_MESSAGE:    The value of a field sent by a mote in response to a kFIELD_MESSAGE.
+
+
+Executables: none
+
+Test Programs: MoteDBGUI.java, net.tinyos.amhandler.AMTest
+
+net.tinyos.schema.MoteDBGUI.java
+        usage: java net.tinyos.schema.MoteDBGUI [COM1 | COM2 | COM3]
+        descr: Broadcasts requests for mote schemas, shows responding
+	       motes in the a simple GUI.  Polls motes for sensor readings
+	       and shows those too.
+
+Classes: 
+
+Schema.java
+
+Java class representing a mote schema.  Given a string from a kSCHEMA_MESSAGE, returns
+a data structure containing one or more SchemaFields which can be queried for schema
+information.
+
+SchemaField.java
+
+Java class representing a single field of the mote schema.
+
+SensorTracker.java
+
+Java class which polls for motes via a kSCHEMA_REQUEST_MESSAGE and builds a vector
+of Schemas which represent all motes which respond to that message.  Also periodically
+polls those motes for the values of their sensors.

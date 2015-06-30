@@ -1,0 +1,14 @@
+#
+# Makefile to be included by each application's Makefile for HSN
+#
+
+ifndef HSNDIR
+   #HSNDIR = ../../../hsn/tos
+   HSNDIR = /cygdrive/c/imote/HSN/tinyosDev/pub/tos
+endif
+
+LOCAL_PATH += -I. -I$(HSNDIR)/interfaces -I$(HSNDIR)/system -I$(HSNDIR)/lib -I$(HSNDIR)/lib/neighborhood
+
+PFLAGS := $(LOCAL_PATH) $(PFLAGS)
+
+MSG_SIZE := 108

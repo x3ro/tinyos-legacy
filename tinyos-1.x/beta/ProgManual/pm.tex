@@ -1,0 +1,41 @@
+\documentclass[10pt]{article}
+
+\usepackage{verbatim}
+\usepackage{fullpage}
+\usepackage{xspace}
+
+\newcommand{\code}[1]{{\tt #1}}
+
+\newcommand{\tinyos}{TinyOS\xspace}
+\newcommand{\nesc}{nesC\xspace}
+\newcommand{\ncc}{\code{ncc}\xspace}
+
+\parindent 0em
+\parskip 0.2cm
+
+\begin{document}
+  
+\title{TinyOS Programmer's Manual}
+\author{Kristin Wright and the TinyOS Team}
+\date{October 2004}
+
+\maketitle
+
+\input{intro}
+\input{core}
+%\input{env}
+\input{comm}
+%\input{timers}
+%\input{memory}
+\input{power}
+%\input{sensors}
+%\input{misc}
+%\input{sub}
+
+% Appendix
+
+\bibliographystyle{plain}
+\bibliography{pm}
+
+\end{document}
+

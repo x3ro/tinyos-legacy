@@ -1,0 +1,5 @@
+TOSDIR ?= $(shell ncc -print-tosdir)
+TOSMAKE_PATH ?= $(TOSDIR)/../contrib/eyes/make
+MAKERULES ?=$(TOSDIR)/../tools/make/Makerules
+CFLAGS += -DTOSH_MAX_TASKS_LOG2=8
+include $(MAKERULES)

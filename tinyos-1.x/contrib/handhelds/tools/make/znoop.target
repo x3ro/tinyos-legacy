@@ -1,0 +1,20 @@
+#-*-Makefile-*- vim:syntax=make
+
+PLATFORM = znoop
+
+HAS_USB=True
+MSP_MCU = msp430x1611
+MSP_BSL_FLAGS ?= --ztag
+
+# Disable MSP430 hardware multiply because it makes MSPGCC die
+
+PFLAGS += -mdisable-hwmul \
+ -I$(HHTOSDIR)/tos/platform/znoop \
+ -I$(HHTOSDIR)/tos/platform/msp430_crl_base
+
+$(call TOSMake_include_platform,msp)
+
+MSP_JTAG_FLAGS = -R 2048
+
+znoop: $(BUILD_DEPS)
+	@:

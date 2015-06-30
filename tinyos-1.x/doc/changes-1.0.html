@@ -1,0 +1,130 @@
+<title>TinyOS Coding and Naming Conventions</title>
+</head>
+
+<body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%">
+<font face="tahoma,arial,helvetica"><b><big><big>
+Significant Changes in TinyOS between v0.6 and 1.0b</big></big></b>
+<p>
+Last updated 23 August 2002
+</font>
+</td></tr>
+</table>
+
+<p> This document outlines the major changes that have occured in
+TinyOS since the last release (0.6.1) and the current release (1.0
+beta). These changes include the use of a new language, an improved
+networking stack, greatly increased documentation, and the inclusion
+of several large systems. There are many small changes (bug fixes,
+etc.), but the following describes these major changes which every user should 
+be aware of.</p>
+
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">nesC</font></b></nobr></td>
+</tr></table></p>
+
+    <p>TinyOS components used to be written in a highly decorated
+    version of C, using preprocessor macros; TinyOS 1.0b uses a new
+    C-like language, nesC (network-embedded-systems-C). The 1.0b
+    release includes the nesC compiler (ncc) as well as a language
+    reference and language transition help documents.</p>
+
+    <p>nesC has several advantages to older TinyOS code, such as
+    interfaces, wire error detection, automatic document
+    generation, and facilitation of significant code optimizations over
+    previous TinyOS builds. One of its major goals is to make TinyOS
+    code cleaner, easier to understand, and easier to write.</p>
+
+    <p>The TinyOS tutorials now provide an introduction to nesC and
+    its syntactic constructions.</p>
+
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">Networking Stack</font></b></nobr></td>
+</tr></table></p>
+
+    <p>The 40Kb mica networking stack has several added
+    features. These include data-link level synchronous
+    acknowledgements, variable length packets, and a rough estimate of
+    network activity. An in-depth description of the workings of the
+    stack is provided in the documentation directory /doc. 
+    The modified <code>TOS_Msg</code> structure is as follows:</p>
+
+    
+<pre><code>
+typedef struct TOS_Msg {
+  uint16_t addr;
+  uint8_t type;
+  uint8_t group;
+  uint8_t length;
+  int8_t data[TOSH_DATA_LENGTH];
+  uint16_t crc;
+  uint16_t strength;
+  uint8_t ack;
+  uint16_t time;
+} TOS_Msg;
+</code></pre>
+
+    <p>The message send interface has also changed to include a
+    length parameter, which specifies how much data is in the data
+    field.</p>
+      
+    <p>The networking stack does not forward CRC values for packets.
+    Instead, the crc field is set to 0 or 1 to denote whether the
+    packet passed the check; the default networking stack discards all
+    packets that fail CRC checks.</p>
+      
+    <p>The <code>ack</code> field is only meaningful on packet
+    sends. If the field is 1, then the mote received an explicit
+    link-level acknowledgement from a receiver. In the case of
+    broadcast messages, <code>ack</tt> will be set to 1 if one or more
+    motes received the message. These acknowledgements are synchronous
+    and take roughly the same amount of time as transmitting one
+    byte.</p>
+    
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">Documentation</font></b></nobr></td>
+</tr></table></p>
+
+    <p><code>ncc</code>, the nesC compiler, can automatically generate
+    documentation for TinyOS components. Typing <code>make
+    &lt;platform&gt; docs</code> in an application directory will
+    build HTML docs for each component and interface (as well as build
+    the application). These documents are placed in
+    <code>doc/nesdoc</code> and the top-level application document is
+    symlinked in the application directory.</p>
+
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">Systems</font></b></nobr></td>
+</tr></table></p>
+
+    <p>TinyOS 1.0b includes two large systems as examples of complex
+    TinyOS applications. The first, Bombilla, is a bytecode
+    interpreter for simple application programming. The second,
+    TinyDB, is a tiny database engine for routing queries to and data
+    from a network. Both have PC tools. Bombilla has tools for writing
+    and injecting assembly-style programs, while TinyDB has tools for
+    writing SQL-like queries and displaying the results. Documentation
+    for both systems exists in the <code>doc/</code> directory.</p>
+      
+
+   <!-- There is no index.html, but maybe there will be in the near future so 
+        I'll merely comment this out. -->
+   <!--    <b><font size=4><a href="index.html">Index &gt;</a></font></b> -->
+
+
+</body>

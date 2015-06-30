@@ -1,0 +1,40 @@
+<LANGUAGE name="TinyScript" desc="A simple, BASIC-like language.">
+<PRIMITIVE opcode="halt">
+<PRIMITIVE opcode="bcopy">
+<PRIMITIVE opcode="add">
+<PRIMITIVE opcode="sub">
+<PRIMITIVE opcode="land">
+<PRIMITIVE opcode="lor">
+<PRIMITIVE opcode="or">
+<PRIMITIVE opcode="and">
+<PRIMITIVE opcode="not">
+<PRIMITIVE opcode="lnot">
+<PRIMITIVE opcode="div">
+<PRIMITIVE opcode="btail">
+<PRIMITIVE opcode="eqv">
+<PRIMITIVE opcode="exp">
+<PRIMITIVE opcode="imp">
+<PRIMITIVE opcode="lxor">
+<PRIMITIVE opcode="2pushc10">
+<PRIMITIVE opcode="2jumps10">
+<PRIMITIVE opcode="getlocal3">
+<PRIMITIVE opcode="setlocal3">
+<PRIMITIVE opcode="unlock">
+<PRIMITIVE opcode="punlock">
+<PRIMITIVE opcode="bpush3" locks=true>
+<PRIMITIVE opcode="getvar4" locks=true>
+<PRIMITIVE opcode="setvar4" locks=true>
+<PRIMITIVE opcode="pushc6">
+<PRIMITIVE opcode="mod">
+<PRIMITIVE opcode="mul">
+<PRIMITIVE opcode="bread">
+<PRIMITIVE opcode="bwrite">
+<PRIMITIVE opcode="pop">
+<PRIMITIVE opcode="eq">
+<PRIMITIVE opcode="gte">
+<PRIMITIVE opcode="gt">
+<PRIMITIVE opcode="lt">
+<PRIMITIVE opcode="lte">
+<PRIMITIVE opcode="neq">
+<PRIMITIVE opcode="copy">
+<PRIMITIVE opcode="inv">

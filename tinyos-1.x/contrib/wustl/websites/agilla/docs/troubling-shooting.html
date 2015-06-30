@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Troubleshooting Agilla</title>
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+<h1>Troubleshooting Agilla</h1>
+<p>Here's a collection of tips on how to get around potential problems.</p>
+<ol>
+  <li>Problem: Sometimes injecting an agent into a simulated network
+        fails with the AgentInjector asserting a &quot;TIMEOUT&quot;. The operating
+        system is Debian Linux. <strong><br>
+        </strong><br>
+    Solution: Increase the value of DAGILLA_RCVR_ABORT_TIMER within 
+    <code>$TOSROOT/contrib/wustl/apps/Agilla/Makefile.Agilla</code> to 1500.</li>
+  <li>Problem: When an agent migrates from a simulated node to the uart,
+          the simulation prints &quot;<code>SendStateM: Ack_Timer.fired(): TIMED
+          OUT! (# = 1)</code>&quot; and the AgentInjector receives duplicate
+          State messages.<strong><br>
+          <br>
+          </strong>Solution: Increase the value of DAGILLA_SNDR_RXMIT_TIMER within <code>$TOSROOT/contrib/wustl/apps/Agilla/Makefile.Agilla</code> to
+    280.</li>
+  <li>Problem: You fail to inject an agent into the network. You sometimes
+            get  errors saying that the acknowledgement messages contain the
+      wrong message
+          number. The execution trace of an agent trying to migrate onto the
+  base station looks like:</li>
+
+
+  <pre class="screen">0: ReceiveStateM: Rcv_State.receive: Received STATE for agent id = 3.
+0: ReceiveStateM: Rcv_State.receive: Sending ACCEPT STATE ACK back to 3.
+0: ReceiveCodeM: Rcv_Code.receive: Received CODE message 1 of 3 for agent 3.
+0: ReceiveCodeM: Rcv_Code.receive: Sending ACCEPT CODE ACK (0) back to node 126.
+0: ReceiveCodeM: Rcv_Code.receive: Resuming ABORT timer for agent 3.
+0: ReceiveCodeM: Rcv_Code.receive: Received CODE message 2 of 3 for agent 3.
+0: ReceiveCodeM: Rcv_Code.receive: Sending ACCEPT CODE ACK (1) back to node 126.
+0: ReceiveCodeM: Rcv_Code.receive: Resuming ABORT timer for agent 3.
+0: ReceiverCoordinatorM: rTimeout(0): agent timed out while arriving.
+0: AgentMgrI.reset(): Resetting agent 3...
+0: AgentMgrI.reset(): Done resetting agent.</pre>
+  <p>Solution: You need to switch the MIG message format to generate TinyOS messages
+      compatible with TOSSIM.  Open <code>$TOSROOT/contrib/wustl/tools/java/edu/wustl/mobilab/agilla/Makefile.Agilla
+      and ensure it contains the following:</code></p>
+  <pre class="screen">MIG = mig -target=pc java</pre>
+  <li>Problem: When compiling the AgentInjector, you get the following error:
+  
+  <pre class="screen">$ make
+... /opt/tinyos-1.x/contrib/wustl/tools/java/edu/wustl/mobilab/agilla
+mig java -java-classname=edu.wustl.mobilab.agilla.messages.AgillaAddressAckMsg /
+opt/tinyos-1.x/contrib/wustl/apps/Agilla/types/Agilla.h AgillaAddressAckMsg -o m
+essages/AgillaAddressAckMsg.java
+nesc1: failed to create temporary file
+failed to parse message file /opt/tinyos-1.x/contrib/wustl/apps/Agilla/types/Agi
+lla.h
+make: *** [AgillaAddressAckMsg.java] Error 1</pre>
+
+Solution: You need to update your version of NesC. Download the RPM off of TinyOS's
+website:
+<ul><li>Windows: <a href="http://www.tinyos.net/dist-1.1.0/tinyos/windows/nesc-1.1.2b-1.cygwin.i386.rpm">nesc-1.1.2b-1.cygwin.i386.rpm</a></li>
+  <li>Linux: <a href="http://www.tinyos.net/dist-1.1.0/tinyos/linux/nesc-1.1.2b-1.i386.rpm">nesc-1.1.2b-1.i386.rpm</a> </li>
+</ul>
+Install the RPM using:
+ 
+  <pre class="screen">$ rpm -Uvh --ignoreos --force nesc-1.1.2b*</pre>
+  </li>
+  <li>Problem: When compiling the AgentInjector, you get the following error:
+  
+  <pre class="screen">Agent.java:47: package edu.wustl.mobilab.agilla.messages does not exist
+import edu.wustl.mobilab.agilla.messages.*;
+^</pre>
+  
+  Solution: Add the directory containing the AgentInjector package to the CLASSPATH.
+  For example, most Windows users would add <code>C:\tinyos\cygwin\opt\tinyos-1.x\contrib\wustl\tools\java</code>.
+  </li>
+  <li><a name="javacomm"></a>Problem: When launching the AgentInjector, you get the following error:
+  
+  <pre class="screen">Exception in thread "main" java.lang.NoClassDefFoundError: javax/comm/SerialPortEventListener
+        at java.lang.ClassLoader.defineClass1(Native Method)
+        at java.lang.ClassLoader.defineClass(ClassLoader.java:620)
+        at java.security.SecureClassLoader.defineClass(SecureClassLoader.java:124)
+        at java.net.URLClassLoader.defineClass(URLClassLoader.java:260)
+        at java.net.URLClassLoader.access$100(URLClassLoader.java:56)
+        at java.net.URLClassLoader$1.run(URLClassLoader.java:195)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at java.net.URLClassLoader.findClass(URLClassLoader.java:188)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:306)
+        at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:268)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:251)
+        at java.lang.ClassLoader.loadClassInternal(ClassLoader.java:319)
+        at net.tinyos.packet.BuildSource.makeSerial(BuildSource.java:360)
+        at net.tinyos.packet.BuildSource.makeArgsSerial(BuildSource.java:349)
+        at edu.wustl.mobilab.agilla.AgentInjector.connect(AgentInjector.java:157)
+        at edu.wustl.mobilab.agilla.AgentInjector.<init>(AgentInjector.java:132)
+        at edu.wustl.mobilab.agilla.AgentInjector.main(AgentInjector.java:532)</pre>
+		Solution 1: You need to install <a href="http://java.sun.com/products/javacomm/">JavaCOMM</a>.
+		To install it, copy <code>comm.jar</code> into <code>$JAVA_HOME/jre/lib/ext</code>, <code>javax.comm.properties</code> into <code>$JAVA_HOME/jre/lib</code>,
+		and <code>win32comm.dll</code> into <code>$JAVA_HOME/jre/bin</code>.
+        <br>
+        <br>
+  Solution 2 (<a href="http://www.eclipse.org/">Eclipse</a>-Specific): Sometimes Eclipse's settings get screwed up.
+  You can reset it by removing and re-configuring the JRE used by Eclipse. Go
+  into Window, Preferences, Java, Installed JREs. Select the current JRE you
+  are using, and hit &quot;Remove,&quot; then OK. Now, go back into the same window, select
+  &quot;Add&quot; and re-configure your JRE.</li>
+  <li>Problem:  When you run the SerialForwarder, you get the following error:
+  
+  <pre class="screen">Couldn't instantiate tossim packet source
+  Did you compile tossim?</pre>
+  
+  Solution: Ensure <code>tinyos-1.x/tools/java</code> is in the classpath. Then recompile
+  the source files by typing <code>make</code> from within <code>tinyos-1.x/tools/java.</code></li>
+</ol>
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

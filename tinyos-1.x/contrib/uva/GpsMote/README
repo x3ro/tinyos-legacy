@@ -1,0 +1,17 @@
+README for GpsMote
+
+Author/Contact: rs6bd@cs.virginia.edu
+
+Description: GpsMote is an application that allows an external GPS device 
+(i.e. Garmin eTrex Legend) to be connected and communicate with a mote through 
+the serial port. NMEA messages sent by the GPS device are parsed by the mote, 
+and the global GPS coordinates (latitude and longitude in decimal minutes) 
+present in the $GPGLL records are converted into a local Cartesian coordinate 
+sytem. These local coordinates, as well as the origin of the local coordinate 
+system (reference point), are then broadcast at periodic intervals. 
+
+Tools: The calculator.xls spreadsheet can help in converting the GPS 
+coordinates of the reference point from dd mm.mmmm (NMEA 1803) format to a more
+compact (8 bytes total) format that uses 1/1000 of a second.
+
+Known Bugs: none

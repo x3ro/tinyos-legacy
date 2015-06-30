@@ -1,0 +1,440 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+<table width="95%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><p>&nbsp;</p>
+      <table width="100%" border="1" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80%">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><!-- InstanceBeginEditable name="MainText" -->
+
+          <h2><font face="Verdana, Arial, Helvetica, sans-serif">Lesson 1: Getting
+
+            Started - Installing Agilla</font></h2>
+
+          <ol>
+
+            <li>Install <a href="http://www.tinyos.net/">TinyOS</a> and upgrade
+
+              to the most recent version, which, as of this writing, is 1.1.11.</li>
+
+            <li>Create <font face="Courier New, Courier, mono">&lt;tos&gt;/myApps </font>where<font face="Courier New, Courier, mono"> &lt;tos&gt;</font><em> </em>is
+
+              the location of your TinyOS installation (for Windows users, it
+
+              is usually <font face="Courier New, Courier, mono">/opt/tinyos-1.x</font>).
+
+              If you're unsure what it is, type <font face="Courier New, Courier, mono">echo
+
+              $TOSROOT</font>.</li>
+
+            <li><a href="../../download/index.htm">Download</a> the NesC portion
+
+              of Agilla and extract it to <font face="Courier New, Courier, mono">&lt;tos&gt;/myApps</font>.
+
+              The NesC portion of Agilla is located in <font face="Courier New, Courier, mono">&lt;tos&gt;/myApps/Agilla</font>.
+
+              From here on, this directory is <font face="Courier New, Courier, mono">&lt;agilla&gt;</font>.</li>
+
+            <li><a href="../../download/index.htm">Download</a> the Java portion
+
+              of Agilla and extract it to <font face="Courier New, Courier, mono">&lt;tos&gt;/tools/java</font>.
+
+              Agilla's agent injector should now be in <font face="Courier New, Courier, mono">&lt;tos&gt;/tools/java/edu/wustl/mobilab/agilla</font>.</li>
+
+            <li>Add the following lines to the bottom of <font face="Courier New, Courier, mono">/etc/profile</font>. <br>
+
+                <a name="AgillaAliases"></a><br>
+
+                <table width="96%" border="1">
+
+                  <tr>
+
+                    <td bgcolor="#CCCCCC"># Agilla Aliases<br>
+
+                      alias cda=&quot;cd $TOSROOT/myApps/Agilla&quot;<br>
+
+                      alias cdaj=&quot;cd $TOSROOT/tools/java/edu/wustl/mobilab/agilla&quot;<br>
+
+                      alias ri=&quot;cd $TOSROOT/tools/java; java -Djava.security.policy=java.policy
+
+                      edu.wustl.mobilab.agilla.AgentInjector -comm COM1:57600
+
+                      -d &amp;&quot;<br>
+
+                      alias ri_sim=&quot;cd $TOSROOT/tools/java; java -Djava.security.policy=java.policy
+
+                      edu.wustl.mobilab.agilla.AgentInjector -comm tossim-serial
+
+                      -d &amp;&quot;<br>
+
+                      alias ri_nc=&quot;cd $TOSROOT/tools/java; java -Djava.security.policy=java.policy
+
+                      edu.wustl.mobilab.agilla.AgentInjector -nc -d &amp;&quot;<br>
+
+                      alias ri_rmi=&quot;cd $TOSROOT/tools/java; java -Djava.security.policy=java.policy
+
+                      edu.wustl.mobilab.agilla.AgentInjector -comm RMI:localhost
+
+                      -d &amp;&quot;<br>
+
+                      alias mj=&quot;cd $TOSROOT/tools/java/edu/wustl/mobilab/agilla;
+
+                      javac *.java&quot;<br>
+
+                      alias riall_m2=&quot;cd $TOSROOT/myApps/Agilla; gawk -f
+
+                      installer_m2.awk&quot;<br>
+
+                      alias riall_mz=&quot;cd $TOSROOT/myApps/Agilla; gawk -f
+
+                    installer_mz.awk&quot;</td>
+
+                  </tr>
+
+                </table>
+
+                <p>These aliases allow you to quickly compile and install Agilla.
+
+                  Here is a brief description of each:                
+
+                <ul>
+
+				  <li>cda - change directory to Agilla's NesC code</li>
+
+				  <li>cdaj - change directory to Agilla's Java code (the agent injector)</li>
+
+				  <li>ri - run injector. The programming board must be connected to the
+
+				    specified serial port. <strong><font color="#FF0000">Be sure to set the
+
+				    correct COM port!</font></strong>                    </li>				  
+
+				  <li>ri_sim - run injector, simulation. Connects to the TOSSIM running
+
+				    locally. See <a href="debug.htm">debugging</a> for more information
+
+				    on how to use this.</li>				  
+
+                  <li>ri_nc - runs the injector without connecting to anything.
+
+                    Allows you to compile an agent into NesC code, which can
+
+                    then be simulated. See <a href="debug.htm">debugging</a> for
+
+                    more information on how to use this.</li>
+
+                  <li>mj - make java, recompiles the Agent Injector without re-generating
+
+                    the message files</li>
+
+                  <li>riall_m2 - reinstall all mica2 - runs the script that reinstalls
+
+                    Agilla's NesC code on all mica2 motes</li>
+
+                  <li>riall_mz - reinstall all micaz - runs the script that reinstalls
+
+                    Agilla's NesC code on all micaz motes<br>
+
+              </li>
+
+                </ul>
+
+              </li>
+
+		     <p>For additional convenience, I recommend adding the following additional
+
+	       aliases to the profile file for navitgating around TinyOS in general:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       </p>
+
+		     <table width="96%" border="1">
+
+               <tr>
+
+                 <td bgcolor="#CCCCCC">alias cdj=&quot;cd $TOSROOT/tools/java&quot;<br>
+
+                   alias cdtos=&quot;cd $TOSROOT&quot;<br>
+
+                   alias cdxbowapps=&quot;cd $TOSROOT/contrib/xbow/apps&quot;<br>
+
+                   alias cdapps=&quot;cd $TOSROOT/apps&quot;<br>
+
+                   alias cdmyapps=&quot;cd $TOSROOT/myApps&quot;<br>
+
+                   <p>alias runsf_pc=&quot;cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder
+
+                     -comm tossim-serial &amp;&quot;<br>
+
+                     alias runsf_com1=&quot;cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder
+
+                     -comm serial@COM1:mica2 &amp;&quot;<br>
+
+                     alias runsf_com4=&quot;cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder
+
+                     -comm serial@COM4:mica2 &amp;&quot;<br>
+
+                     alias runsf_com5=&quot;cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder
+
+                     -comm serial@COM5:mica2 &amp;&quot;<br>
+
+                     alias runsf_com6=&quot;cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder
+
+                     -comm serial@COM6:mica2 &amp;&quot;<br>
+
+                     alias runsf_com8=&quot;cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder
+
+                     -comm serial@COM8:mica2 &amp;&quot;<br>
+
+                     alias runsf_com9=&quot;cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder
+
+                     -comm serial@COM9:mica2 &amp;&quot;<br>
+
+                     alias runsf_com10=&quot;cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder
+
+                     -comm serial@COM10:mica2 &amp;&quot;<br>
+
+                  </p>
+
+                  </td>
+
+               </tr>
+
+             </table>
+
+		     <br>
+
+		     <br>
+
+		     <li><a href="../../download/Makelocal">Download</a> the makelocal file
+		       and install it to &lt;tos&gt;/tools/make. Open it up and customize the
+		       radio frequency, group address and serial port number. The group
+		       address should be unique. The serial port number is the port that
+		       your mote programming board is connected to.</li>
+
+			  
+
+             <li>Customize the number of rows and
+
+			    columns (see <a href="../network_topology.htm">Customizing
+
+              the Network Topology</a>).</li>
+             <li><strong><font color="#FF0000">Attention MicaZ users:</font></strong> As
+
+              of TinyOS 1.1.8, you have go into &lt;tos&gt;/tos/system/Reset.h
+
+              and add <font face="Courier New, Courier, mono"><br>
+
+                    <br>
+
+      || defined (PLATFORM_MICAZ)</font> <br>
+
+                            <br>
+
+      to the end of line 47. This allows the user to remote reset the motes.</li>
+
+            <li>Install the NesC code on every mote, including the basestation.
+
+              Before using the installation scripts, customize <em>&lt;agilla&gt;/installer_m2.awk</em>              or <em>&lt;agilla&gt;/installer_mz.awk</em>!
+
+              Specifically, change the programming board and COM port settings
+
+              on line 20 to fit your setup.<font face="Courier New, Courier, mono"><br>
+
+                <br>
+
+                </font>For Mica2 motes, type: <font face="Courier New, Courier, mono">riall_m2 <br>
+
+              </font>For MicaZ motes, type: <font face="Courier New, Courier, mono">riall_mz<br>
+
+              <br>
+
+              </font>Follow the on-screen instructions. Besure to select 'y'
+
+              when prompted to recompile for the first time. You should see
+
+              something like:<br>
+
+              <br>
+
+              <font face="Courier New, Courier, mono"><img src="../install.jpg" width="748" height="847"><br>
+
+                </font><br>
+
+    If you did not add the Agilla aliases to your profile, you can manually install
+
+    agilla by typing the following:<br>
+
+    <em><font face="Courier New, Courier, mono"><br>
+
+    cda<br>
+
+    </font> <font face="Courier New, Courier, mono">make [platform] reinstall.[id][programming
+
+    board],[port]</font></em><br>
+
+              <font face="Courier New, Courier, mono"><br>
+
+              </font>where <em><font face="Courier New, Courier, mono">[platform] </font></em>is
+
+              the target platform (e.g., mica, mica2, mica2dot, or micaz), <font face="Courier New, Courier, mono"><em>[id]</em></font> is
+
+              the mote ID, <em><font face="Courier New, Courier, mono">[programming
+
+              board]</font></em> is the programming board (e.g., MIB510), and <em>[<font face="Courier New, Courier, mono">port</font>]</em> is
+
+              the serial port the programming board is attached to (e.g., COM1). <br>
+
+            </li>
+
+            <li>Compile the Java code: <font face="Courier New, Courier, mono"><br>
+
+                  <br>
+
+    cdaj<br>
+
+    make</font><em><br>
+
+    <br>
+
+    </em>This will take some time since it has to use MIG to generate all of
+
+    the message  files.<br><br>If you get the following error:
+    
+    <pre>rmic -d ../../../../../..  edu.wustl.mobilab.agilla.rmi.agentInjector.AgentInjectorServerSide
+java.lang.Exception: compiler exited with status: 1
+   at gnu.java.rmi.rmic.CompilerProcess.compile(java.lang.String) (/usr/lib/libgcj.so.5.0.0)
+   at gnu.java.rmi.rmic.RMIC.compile(java.lang.String) (/usr/lib/libgcj.so.5.0.0)
+   at gnu.java.rmi.rmic.RMIC.processClass(java.lang.String) (/usr/lib/libgcj.so.5.0.0)
+   at gnu.java.rmi.rmic.RMIC.run() (/usr/lib/libgcj.so.5.0.0)
+   at gnu.java.rmi.rmic.RMIC.main(java.lang.String[]) (/usr/lib/libgcj.so.5.0.0)
+   at gnu.java.rmi.rmic.CompilerProcess.compile(java.lang.String) (/usr/lib/libgcj.so.5.0.0)
+   ...4 more</pre>
+   
+   Go into the base java directory (e.g., /opt/tinyos-1.x/tools/java) and type
+   
+   <pre>
+   $ rmic edu.wustl.mobilab.agilla.rmi.remoteTupleSpace.RemoteTupleSpaceServerSide
+   $ rmic edu.wustl.mobilab.agilla.rmi.agentInjector.AgentInjectorServerSide</pre>
+   
+   to generate the stub files.
+   
+</li>
+
+            <li>If you want to use RMI to allow users to remotely inject mobile
+
+              agents, download the <a href="../../download/java.policy">java.policy</a> and
+
+              install it in <font face="Courier New, Courier, mono">&lt;tos&gt;/tools/java</font>.              </li>
+
+            <li>Test the installation by installing mote 0 to the programming
+
+              board and launching the rmi registry and AgentInjector: <br>
+
+              <ol>
+
+                <li>Open a new command window, and type <em>rmiregistry.</em> After
+
+                  hitting enter, the curser should not come back and nothing
+
+                  should be printed to the screen, as shown below:<br>
+
+                  <br>
+
+                  <img src="../rmiregistry.jpg" width="508" height="199"><br>
+
+                  <br>
+
+                  <strong>Note</strong>: If you get a <em>java.rmi.RemoteException:
+
+                  failed to export: class gnu.java.rmi.dgc.DGCImpl </em>error,
+
+                  be sure your path is set to point to the correct version of
+
+                  rmiregistry. On a Windows system running Cygwin, it is usually
+
+                  /cygdrive/c/tinyos/jdk1.4.1_02/j2sdk1.4.1_02/bin/rmiregistry.<br>
+
+                </li>
+
+    <li>In the original command window, type <em>ri</em>. You should see something
+
+      like:<br>
+
+      <br>
+
+      <img src="injector.jpg" width="510" height="496"><br>
+
+      <br>
+
+      Note: If you do not have the aliases configured, you can start the AgentInjector
+
+      manually by typing:<br>
+
+      <br>
+
+      <em>cd /opt/tinyos-1.x/tools/java</em><br>
+
+      <em>java -Djava.security.policy=java.policy edu.wustl.mobilab.agilla.AgentInjector
+
+      -comm COM1:57600 -d &amp;</em><br>
+
+      <br>
+
+      First hit <em>Ctrl+r</em> while looking at the motes. All motes should
+
+      blink all 3 LEDs on for 1 second indicating that they are resetting. If
+
+      this does
+
+      not
+
+      occur,
+
+      check
+
+      to ensure
+
+      mote (0,0)
+
+      is correctly seated on the programming board and hit the programming board's
+
+      reset button.<br>
+
+          <br>
+
+      To start creating and injecting agents, see the <a href="index.htm">tutorials</a>.</li>
+
+	</ol>
+
+              <br>
+
+            </li>
+
+          </ol>
+
+          <!-- InstanceEndEditable --></td>
+        </tr>
+        <tr>
+          <td width="80%" cellpadding="2" cellspacing="2" bgcolor="#990000">&nbsp;           </td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

@@ -1,0 +1,117 @@
+README for TestIvyApp
+Author/Contact: Barbara Hohlt <hohltb@cs.berkeley.edu>
+
+Description:
+TestIvyApp is a test application for MultiHopApp, the multihop
+routing component for Ivy application motes.
+
+Ivy sensor networks separate network functionality from application
+functionality. Ivy network motes route packets and Ivy application
+motes sense data and send messages to Ivy network motes.
+
+This is an example application for an Ivy application mote. It
+demonstrates how to send a packet every SYNCH_FREQ using the
+Ivy MultiHopApp component.  In IvyNet.h, SYNCH_FREQ = 750 and 
+SLOT_FREQ = 80, so a packet will be sent about once per minute.
+
+NOTE: To run in Nido (TOSSIM), set NidoHack = TRUE in IvyNet.h.
+Nido runs one program at a time, so this flag allows the
+application motes to run in a standalone mode (without network motes).
+
+NOTE: To run on live motes, in IvyNet.h set
+	NidoHack = FALSE
+	IVY_APPID = your application id
+	SynchLeds = FALSE (if you are planning on running for a long time)
+
+TestIvyAppM
+	This module is responsible for sensing data, buffering data,
+	and powering it's sensors on and off. Every SYNCH_FREQ it 
+	receives a notification from the MultiHopApp component 
+	indicating when the application can send messages.  
+	It is the application's responsibility to power down its 
+	sensors. 
+
+MultiHopApp Component
+	MultiHopApp does simple power scheduling based on SYNCH_FREQ.
+	Every SYNCH_FREQ the radio is turned on and the application
+	is notified.  MultiHopApp selects the nearest Ivy network mote 
+	and forwards a data packet.  After one message has been sent the 
+	radio is turned off. It is the application's responsibility to 
+	power down its sensors. 
+1. AppScheduler 
+	This module listens to advertisements from Ivy network motes
+	and selects a parent. It maintains a schedule of NUM_SLOTS
+	time slots which can be in one of six states (T,TP,R,RP,A,I).
+	Every SLOT_FREQ it changes state and notifies MultiHopSendApp
+	when there is a TRANSMIT (T) state. 
+
+	Every SYNCH_FREQ:
+	  - re-synchs with parent 
+	  - if it cannot hear its parent it finds a new one
+	  - notifies MultiHopSendApp of new parent and time to wakeup 
+
+2. MultiHopSendApp
+	This module is responsible for sending messages and
+	turning the radion on/off.  MultiHopSendApp receives 
+	messages from the application and puts them on a transmit 
+	queue. Every SYNCH_FREQ it turns the radio on and notifies 
+	the application.  When it is notified by the AppScheduler 
+	of a TRANSMIT state it sends one message, turns the radio 
+	off and notifies the application. 
+
+3. MultiHopRouteSelectApp 
+	This module determines the criteria for parent
+	selection (an Ivy network mote). It can be changed 
+	in any way except that it needs to provide the 
+	command bestCandidate.  The command, bool 
+	bestCandidate(TOS_MsgPtr msg), can and should 
+	be re-implemented. AppScheduler expects to be able 
+     	to call this command. Currently it selects a parent
+	at random. 
+
+4. SlackerQueueM
+	This is a circle buffer queue of type TOS_MsgPtr. It is
+	used by MultiHopSendApp. This module is located in the 
+	IvyNet directory. Copy files SlackerQ.nc and SlackerQueueM.nc 
+	to your TestIvyApp directory.
+
+Tools:
+
+net.tinyos.sf.SerialForward
+net.tinyos.tools.ForwarderListen
+
+Known bugs/limitations:
+ 1. In AppScheduler::sendReq()
+
+        TOSH_uwait(REQ_WAIT);
+
+  this command causes a wait before sending the
+  reservation REQ. This allows the radio receiver
+  of the destination mote to warm up. This is
+  radio specific.
+  Make sure REQ_WAIT and SLOT_FREQ are set appropriately.
+
+ 2. TBD: Decrease demand. Coming soon.
+     Currently, demand only increases and does not decrease.
+     That translates into, if the application motes are mobile
+     their reservations remain after they have moved away
+     from their parent network mote.
+
+ 3. TBD: Mobility.
+     For now Ivy network nodes assume all application nodes are fixed.
+     In IvyNet.h
+     	FaultTolerance = FALSE
+
+     Mobile nodes require implementation of bestCandidate(..) in 
+     MultiHopRouteSelectApp as described above as well as identifying 
+     themselves as mobile nodes. On the network side network nodes 
+     need to handle transient reservations and decrease their demand.
+
+     Unsupported mobility is available by setting the following 
+     paramenters in IvyNet.h
+     	FaultTolerance = TRUE 
+	FAULT_FREQ = some value in slots
+
+     A problem occurs when FAULT_FREQ is set too low the
+     mote will incorrectly seek another parent.
+

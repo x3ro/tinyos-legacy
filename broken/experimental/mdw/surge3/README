@@ -1,0 +1,181 @@
+Surge 3.0
+Matt Welsh, mdw@cs.berkeley.edu
+Dennis Chi
+
+This is an updated version of the Surge demo, ported to NesC.
+
+DESCRIPTION:
+
+This is a demonstration of multihop routing in a sensor network. Each
+mote periodically takes a light sensor reading and transmits it to its
+"parent", a node which it believes is closer to the base station (the
+parent may be the base station itself). When a mote receives a messages
+from one of its children, it forwards the message to its parent. 
+
+When initialized, each mote starts with no parent, and does not transmit
+sensor readings until it has established one. The GUI periodically
+broadcasts a "root beacon" that seeds the formation of the multihop
+routing tree; the beacon merely indicates that the root node (node 0) is
+available and has a hopcount of 0. If a mote with no parent hears the
+root beacon, it will set its parent to the root.
+
+A mote continues to use the same parent until the "link quality" to the
+parent falls below some threshold. The link quality is defined as the
+fraction of messages that did not require retransmission -- that is, 
+the fraction of transmissions from a child to a parent that were
+successful. When the parent link quality falls below a threshold (20% by
+default), the node chooses a new parent from its neighbors, which is the
+set of nodes that the mote has overhead messages from recently. Roughly,
+the mote chooses a new parent that is (a) not a child of the current
+node, (b) has the lowest hopcount of all known neighbors, and (c) has
+the highest "goodness" of all known neighbors. "Goodness" is defined as
+the fraction of messages overheard from this neighbor.
+
+Note that the root beacon will tend to cause motes to choose the root
+as a parent. A mote that hears the root beacon will choose the root as
+its parent if its current parent link quality is below 50% (rather than
+20%, as above). If you disable the root beacon (from the GUI) before 
+powering on some motes, they will necessarily have to choose a parent 
+that is *not* the root. This is a good way to induce multihop paths for
+demo purposes.
+
+MEANING OF THE LEDS:
+
+Yellow LED: The mote has received a message.
+Green LED: The mote has sent a message.
+Red LED: The mote did not receive an ACK for a sent message, and is
+retransmitting.
+
+RUNNING THE DEMO:
+
+  1) Set up your environment. You need to add
+       $PWD/surge3/tools/java
+     to your CLASSPATH. Also, edit 
+       $PWD/surge3/apps/Makerules
+     and set DEFAULT_LOCAL_GROUP to the same value that you are using in
+     your tinyos-1.x/apps/Makerules file. It is very important that the
+     DEFAULT_LOCAL_GROUP is the same in both places.
+
+  2) Install GenericBase on one mote with ID 0:
+       cd tinyos-1.x/apps/GenericBase
+       make mica install.0
+     It is important that the base is node 0.
+
+  3) On other motes, install the Surge app:
+       cd experimental/mdw/surge3/apps/Surge
+       make mica install.<ID>  
+     where <ID> is distinct for each mote (1 through 10).
+   
+  4) Plug the GenericBase into your programming board and make sure 
+     SerialForward is running:
+       java net.tinyos.sf.SerialForward
+
+  5) Compile the Java GUI:
+       cd surge3/tools/java/net/tinyos/surge; make
+
+  6) Run the Java GUI:
+       java net.tinyos.surge.MainClass <GROUP ID>
+     where <GROUP ID> is the DEFAULT_LOCAL_GROUP that you have specified
+     in Step (1), above. This can be specified in hex or decimal.
+     For example,
+       java net.tinyos.surge.MainClass 125
+     is equivalant to
+       java net.tinyos.surge.MainClass 0x7d
+
+  7) Turn on the Surge motes. The motes will not blink initially, since
+     they are not receiving or sending messages.
+  
+  8) To get the Surge motes to start transmitting data, you need to seed
+     the creation of the spanning tree by clicking on "Start root beacon"
+     on the Java GUI. This starts a periodic root beacon (once per
+     second), and soon you should see motes start to connect to the
+     root in the GUI.
+
+DESCRIPTION OF THE GUI:
+
+Each mote "blinks" with a red circle when the GUI has heard a sensor
+sample from that mote. Below each mote the total number of received
+sensor messages is given, as well as the average message rate taken over
+a 2-second sample. (Note that this does NOT include messages that this 
+mote has forwarded -- only those sample messages that it originated!)
+
+The color bar labelled "Quality" gives the mote's current parent link
+quality, as described above, with 100% being perfect quality (no
+retransmissions). The color of the bar (from green to red) represents
+this value. The color of the edge from the mote to its parent is the
+same as the color of the "Quality" bar -- this is intentionally redundant.
+
+The color bar labelled "Yield" represents the rate of sensor messages
+heard from this mote as a fraction of the expected number of sensor
+messages. For example, if each mote is generating a sample at 1 message
+a second, and the GUI is hearing a message every 2 seconds, the "Yield"
+is 0.5. Note that yield can be greater than 1 if the GUI hears more
+messages from the mote than it should be generating -- this can be
+caused by forwarding backlog as well as a lag in the update rate of the
+GUI itself.
+
+You can click on each mote and drag it to a new position. Clicking on
+"Fit to Screen" will fit all of the motes in the current window, since
+the initial random placement of motes might put some of them off the
+screen. Clicking on "Status" will turn off the display of the detailed 
+statistics for each mote, but otherwise unaffects the operation of the
+application. Clicking on "Debug" will cause each sent and received
+message to be printed to stderr (the console window).
+
+Clicking on "Start root beacon" will start sending the root beacon at a
+specified rate (once per second by default). Clicking on "Stop root
+beacon" stops sending the root beacon, which is useful if you want to
+force motes to connect to their neighbors instead of the root.
+
+"Control Panel" brings up a window that allows you to set two
+parameters: The root beacon rate and the rate at which motes transmit
+light sensor readings. Moving the "Beacon rate" slider sets the time
+between beacons between 1 and 10 sec, and takes effect immediately
+(assuming that "Start root beacon" has been clicked previously).
+Moving the "Sample rate" slider sets the sample rate, which is
+transmitted to the motes when you click on the "Change sample rate"
+button immediately below the slider. In other words, this slider has no
+effect until you click "Change sample rate".
+
+Note that when motes are rebooted they reset their sample rate to 1 Hz,
+so even if you have set the sample rate to something else in the GUI, 
+you will need to click on "Control panel" and "Change sample rate" again
+if any motes are rebooted.
+
+The "Send sleep" button broadcasts a command to all motes to put
+themselves to "sleep" - that is, to stop forwarding messages, stop
+generating sensor readings, etc. This is a good way to quiesce all the
+motes for ending the demo. The "Send wakeup" button broadcasts a command
+that undoes the effect of "Send sleep" - it allows motes to start
+transmitting again. Note that if you send a wakeup command, but the
+root beacon is inactive, then the motes won't do anything as they have
+no parent. In this case just click "Start root beacon" after clicking 
+"Send wakeup".
+
+Clicking the RIGHT mouse button on a mote causes the demo to "focus" on
+that mote -- it highlights the mote in the display and sends it a
+command to increase its sample rate to 5 Hz. All other motes reduce
+their sample rate to 0.5 Hz, giving the "focused" mote the opportunity
+to get a greater proportion of the radio bandwidth. The focused node
+will also periodically beep its sounder, so whomever is holding the mote
+knows that it is active. Note that you may need to right-click on the
+focused mote several times to get the command to propagate.
+
+Clicking on "Cancel focus" undoes the focus operation, causing all motes
+to return to normal operation. As with focus (and the other commands,
+see below) it may be necessary to click this button several times - you
+will know it worked when the mote stops beeping. In the worst case have
+the person holding the beeping mote power-cycle it.
+
+IMPORTANT:
+
+When sending commands to the motes (e.g., Sleep, Wakeup, Change sample
+rate, Focus, and Unfocus), it is important to keep in mind that command 
+flooding is unreliable, so it is possible that not all motes will hear
+the command the first time you send it. It is not a bad idea to click
+the button several times to ensure that the message has been flooded.
+
+If things appear to get wedged during the demo, it is perfectly safe to
+restart the GUI - just be sure to click on "Start root beacon" again.
+
+

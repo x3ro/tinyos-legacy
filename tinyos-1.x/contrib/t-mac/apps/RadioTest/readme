@@ -1,0 +1,46 @@
+T-MAC Radio Tester by Tom Parker <T.E.V.Parker@ewi.tudelft.nl>
+--------------------------------------------------------------
+genradio.py generates a variety of different Radio testing applications
+for use with the T-MAC Radio stack.
+
+Quick start guide
+=================
+Plug in a node to the programmer and run the following commands
+	python genradio.py -r radiocontrol -d tx
+	make tnode install
+Unplug this node, this is now the "transmitter" node.
+
+Plug in another node to the programmer and run the following commands
+	python genradio.py -r radiocontrol -d rx
+	make tnode install
+Leave this node plugged into the programmer. This is the "receiver" node.
+
+Switch on the transmitter node and run 'python check.py' to test reception rates.
+
+Detailed Instructions
+=====================
+Usage: ./genradio.py [-r,--radio radiocontrol|raw|tmac] [-d,--data both|rx|tx] (-s,--sleepy -u,--unicast)
+
+The -r/--radio parameter specifies the level of the Radio stack to input
+data at. 
+	raw: Raw radio data is inputted into RadioSPI
+	radiocontrol: The RadioControl module is used for data input
+	tmac: The standard TinyOS message inputs are used, for testing the whole stack.
+
+-u/--unicast makes tmac work in unicast mode
+
+The -d/--data parameter specifies what the app will actually do
+	tx: Packets will be transmitted continually
+	rx: Packets will be listened for continually
+	both: A packet will be transmitted, then one is listened for, then repeat.
+		For raw data transmission (i.e. start symbol-less) the node simply
+		listens for the amount of time a packet takes to transmit, but no
+		check whether the incoming data is actually a valid packet is done.
+
+The -s/-sleepy parameter makes the app go to sleep before each transmit. This is irrelevant
+when the data parameter is 'rx'.
+
+
+genradio.py generates RadioTest.nc, RadioTestM.nc and in 'tmac' radio mode, a RadioTestMSG.h
+These can then be compiled and used as per normal ('make mica2 install', etc)
+

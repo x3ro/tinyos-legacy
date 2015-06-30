@@ -1,0 +1,21 @@
+
+TOS_MODULE IPHOTO;	
+JOINTLY IMPLEMENTED_BY IPHOTO;
+
+ACCEPTS{
+    char IPHOTO_INIT(void);
+    char IPHOTO_GET_DATA(void);
+};
+
+SIGNALS{
+    char IPHOTO_DATA_READY(short data);
+};
+
+USES{
+    char IPHOTO_SUB_ADC_INIT(void);
+    char IPHOTO_SUB_ADC_GET_DATA(char port);
+};
+
+HANDLES{
+    char IPHOTO_SUB_ADC_DONE(short data);
+};

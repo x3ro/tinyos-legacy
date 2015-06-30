@@ -1,0 +1,29 @@
+
+TOS_MODULE INTERSEMA_LOWER;
+JOINTLY IMPLEMENTED_BY INTERSEMA_LOWER;
+
+ACCEPTS{
+	char INTERSEMA_INIT();
+	char INTERSEMA_POWER(char state);
+	char INTERSEMA_COMMAND(unsigned char cmd);
+};
+
+SIGNALS{
+	char INTERSEMA_COMMAND_DONE(unsigned short data);
+	char INTERSEMA_POWER_DONE(char success);
+};
+
+HANDLES{
+	char INTERSEMA_SPI_DONE(unsigned char spi_in);
+	char INTERSEMA_SET_SWITCH_DONE(char success);
+	char INTERSEMA_SET_SWITCH_ALL_DONE(char success);
+	char INTERSEMA_GET_SWITCH_DONE(char value);
+};
+
+USES{
+	char SPI_SUB_INIT();
+	char SPI_SUB_BYTE(unsigned char out);
+
+	char SWITCH_SUB_SET_ALL(char addr, char value);
+	char SWITCH_SUB_INIT(void);
+};	

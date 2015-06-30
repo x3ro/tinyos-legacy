@@ -1,0 +1,30 @@
+# -----------------------------------------------------------------------
+# INTEL CORPORATION MAKES NO WARRANTY OF ANY KIND WITH REGARD TO THIS
+# MATERIAL, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+# INTEL CORPORATION ASSUMES NO RESPONSIBILITY FOR ANY ERRORS THAT MAY
+# APPEAR IN THIS DOCUMENT. INTEL CORPORATION MAKES NO COMMITMENT TO
+# UPDATE NOR TO KEEP CURRENT THE INFORMATION CONTAINED IN THIS DOCUMENT.
+# -----------------------------------------------------------------------
+
+# This is a Configuration File for the XDB-Flash-Programmer-Plugin-DLL
+
+[Addresses]
+Image offset=0
+Burnalgaddress=0x5c000000
+Flashbase=0
+
+[Files]
+InitScript=
+
+Datafile=C:\cygwin\opt\klApps\imote2Camera\hwTest\build\imote2\main.bin
+Database=C:\cygwin\opt\klApps\imote2Camera\jtag\database.fdb
+Datafileformat=Autodetect
+
+[Others]
+Flashname=GP_J3_K3_K18_8
+Blocktype=3
+Blocks=0
+Downloadburnalg=true
+OverwriteData=true
+ExecuteInitScript=true

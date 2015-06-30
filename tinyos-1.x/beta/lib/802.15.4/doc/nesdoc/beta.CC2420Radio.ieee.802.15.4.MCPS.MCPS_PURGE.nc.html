@@ -1,0 +1,102 @@
+
+<html>
+<head>
+<title>Interface: MCPS_PURGE</title>
+</head>
+<body>
+<table BORDER="0" CELLPADDING="3" CELLSPACING="0" width="100%">
+<tr><td>
+<font size="-1">
+<b><font color="blue"><a href="apps_p.html">Apps</a></font></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="components_p.html">Components</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="interfaces_p.html">Interfaces</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="allfiles_p.html">All Files</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="index.html">Source Tree</a></b>
+&nbsp;&nbsp;&nbsp;
+</font>
+</td>
+<td align="right">
+<font size="-1">
+source: <b><a href="beta.CC2420Radio.ieee.802.15.4.MCPS.MCPS_PURGE.nc.source">beta.CC2420Radio.ieee.802.15.4.MCPS.MCPS_PURGE.nc</a></b>
+</font>
+</td></tr></table>
+<hr>
+
+<h1 align="center">Interface: MCPS_PURGE</h1>
+<p>
+
+ MCPS_PURGE is used to manage MSDU handles in the transaction queue of
+ the MCPS of the MAC sublayer.
+ The MCPS-SAP supports the transport of SSCS protocol data units (SPDUs)
+ between peer SSCS entities.
+
+ <table border="0" cellpadding="0">
+<tr valign="top"><td><b>Author:</b>
+<td> Joe Polastre
+</td></tr></table>
+
+<p>
+
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Commands</h3></td></tr></table>
+<ul>
+<li>
+         void     <a href="# void request(uint8_t msduHandle)">
+<b>request</b>    </a>
+(uint8_t msduHandle)
+<menu>
+ Request MSDU to be purged from the transaction queue.
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Events</h3></td></tr></table>
+<ul>
+<li>
+         void     <a href="# void confirm(uint8_t msduHandle, IEEE_status status)">
+<b>confirm</b>    </a>
+(uint8_t msduHandle, IEEE_status status)
+<menu>
+ Confirm reports the results of a request to purge a data MSDU.
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Commands - Details</h3></td></tr></table>
+    <a name=" void request(uint8_t msduHandle)"></a>
+        <h4>request</h4>
+         void <b>request</b>(uint8_t msduHandle)<P><menu>
+ Request MSDU to be purged from the transaction queue.
+ See page 62 of the IEEE 802.15.4 specification.
+ 
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>msduHandle</b> -  The handle of the MSDU to be purged from the
+                   transaction queue
+</menu></menu>
+</td></tr></table>
+</menu><table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Events - Details</h3></td></tr></table>
+    <a name=" void confirm(uint8_t msduHandle, IEEE_status status)"></a>
+        <h4>confirm</h4>
+         void <b>confirm</b>(uint8_t msduHandle, IEEE_status status)<P><menu>
+ Confirm reports the results of a request to purge a data MSDU.
+ See page 59 of the IEEE 802.15.4 specification.
+
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>msduHandle</b> -  The handle associated with the MSDU
+ </p><p STYLE="text-indent: -1cm"><b>status</b> -  That status of the last MSDU transmission
+</menu></menu>
+</td></tr></table>
+</menu>

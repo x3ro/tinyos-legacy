@@ -1,0 +1,6 @@
+snms_schema: exe
+	@echo "*** Generating schema for MgmtQuery (snms_schema.txt)"
+	@$(TOSDIR)/../beta/SystemCore/scripts/mgmtquery_keys.pl < $(BUILDDIR)/app.c > $(BUILDDIR)/snms_schema.txt
+	@echo "*** Generating RAM cschema for MgmtQuery (snms_ram_schema.txt)"
+	@$(TOSDIR)/../beta/SystemCore/scripts/mgmtquery_ram_keys.pl $(BUILDDIR)/main.exe > $(BUILDDIR)/snms_ram_schema.txt
+

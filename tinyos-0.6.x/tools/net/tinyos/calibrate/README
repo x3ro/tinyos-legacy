@@ -1,0 +1,25 @@
+Package: net.tinyos.calibrate
+
+Description: Package to set up calibration information in a mote
+with the CALIBRATE component installed
+
+Author: Sam Madden (madden@cs.berkeley.edu)
+
+Executables: none
+
+Test Programs: none
+
+Classes: 
+
+Calibrate.java
+
+Class to interface to the calibration component running on a mote
+connected to the serial port.  See apps/calib_test/CALIBRATION.c --
+motes must include this component to take advantage of this tool.
+
+Displays a text menu and allows calibration information to be
+downloaded into the mote, the mote to be queried for calibration data,
+and interpolation to be performed on the currently stored calibration
+values.
+
+Uses AMInterface to communicate with motes.

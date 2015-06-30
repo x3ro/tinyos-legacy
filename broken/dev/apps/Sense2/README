@@ -1,0 +1,17 @@
+README for Sense2
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+Sense2 is an application in Lesson 3 of the tutorial.  It periodically 
+samples the photo sensor, post a task to compute averaging of recent raw samples, 
+and displays the highest 3 bits of the average to the LEDs, with RED being the 
+most signficant bit and YELLOW being the least significant bit.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

@@ -1,0 +1,27 @@
+/ClkDiv.nc/1.1/Sat Mar 10 22:01:58 2007//
+/HplTda5250Config.nc/1.4/Tue Dec 12 18:23:13 2006//
+/HplTda5250ConfigC.nc/1.4/Tue Dec 12 18:23:13 2006//
+/HplTda5250ConfigP.nc/1.5/Fri Jun 13 13:40:59 2008//
+/HplTda5250Data.nc/1.4/Tue Dec 12 18:23:13 2006//
+/HplTda5250DataC.nc/1.4/Tue Dec 12 18:23:13 2006//
+/HplTda5250DataControl.nc/1.2/Mon Nov  6 11:57:15 2006//
+/HplTda5250DataP.nc/1.4/Tue Dec 12 18:23:13 2006//
+/RfPower.nc/1.1/Fri Jun 13 13:40:59 2008//
+/Tda5250ActiveMessageC.nc/1.7/Tue Jun 29 22:07:46 2010//
+/Tda5250ActiveMessageP.nc/1.11/Tue Jun 29 22:07:46 2010//
+/Tda5250Control.nc/1.4/Tue Dec 12 18:23:13 2006//
+/Tda5250Packet.nc/1.1/Tue Jul 24 12:22:42 2007//
+/Tda5250RadioC.nc/1.7/Tue Jun 17 16:53:50 2008//
+/Tda5250RadioP.nc/1.9/Wed Jun 18 01:25:54 2008//
+/Tda5250ReadReg.nc/1.4/Tue Dec 12 18:23:13 2006//
+/Tda5250RegComm.nc/1.2/Wed Jul 12 17:02:00 2006//
+/Tda5250RegCommP.nc/1.4/Tue Dec 12 18:23:13 2006//
+/Tda5250RegistersC.nc/1.4/Tue Dec 12 18:23:13 2006//
+/Tda5250RegistersP.nc/1.4/Tue Dec 12 18:23:13 2006//
+/Tda5250WriteReg.nc/1.4/Tue Dec 12 18:23:13 2006//
+/tda5250Const.h/1.4/Tue Dec 12 18:23:13 2006//
+/tda5250Control.h/1.4/Tue Dec 12 18:23:13 2006//
+/tda5250RegDefaultsSettings.h/1.4/Tue Dec 12 18:23:13 2006//
+/tda5250RegTypes.h/1.4/Tue Dec 12 18:23:13 2006//
+/tda5250_message.h/1.6/Thu Jul 10 12:40:02 2008//
+D

@@ -1,0 +1,340 @@
+#-*-Makefile-*-
+# Base Makefile for nesC apps.
+#
+# Created: 6/2002,  Philip Levis <pal@cs.berkeley.edu>
+#
+# Updated: 6/18/2002 Rob von Behren <jrvb@cs.berkeley.edu>
+#          Multi-platform support
+#
+# Updated: 6/20/2002 David Gay <dgay@intel-research.net>
+#          Compile via gcc, make tos.th system-wide, not app-wide
+#          (still need to ponder group selection)
+#
+######################################################################
+
+# User configuration:
+# Specify user values in Makelocal to override the defaults here
+
+ifndef DEFAULT_LOCAL_GROUP
+DEFAULT_LOCAL_GROUP := 0x7d
+endif
+
+# this needs to be -dlpt=3 on thinkpads
+# PROGRAMMER_EXTRA_FLAGS :=
+# We don't actually set it here, so you can either set the 
+# PROGRAMMER_EXTRA_FLAGS environment variable (recommended) or
+# define it in ../Makelocal
+
+-include ../Makelocal
+
+EXTRA_INCLUDES = -I. -Ibuild \
+-I../routing \
+-I../common \
+-I../magsensor \
+-I../localization \
+-I../neighborhood \
+-I../ptzcamera \
+-I../commandInterpreter \
+-I../TimedLeds \
+-I../Config \
+-I../TickSensor \
+-I../CameraPointer \
+-I../PhotoSensor
+
+
+# Take the application from the command-line if it's not already specified
+ifeq ($(filter clean,$(MAKECMDGOALS))$(filter reinstall.%,$(MAKECMDGOALS)),)
+ ifndef COMPONENT
+  ifneq ($(filter %.nc,$(MAKECMDGOALS)),)
+   COMPONENT := $(patsubst %.nc,%,$(filter %.nc,$(MAKECMDGOALS)))
+   MAKECMDGOALS := $(filter-out %.nc,$(MAKECMDGOALS))
+  endif
+ endif
+ ifndef COMPONENT
+  $(error No component specified, try "make mica AppFoo.nc")
+ endif
+endif
+
+
+# configure the base for the app dirs.  This is used to generate more
+# useful package names in the documentation.
+ifeq ($(BASEDIR)_x, _x)
+BASEDIR := ..
+endif
+
+# The output directory for generated documentation
+ifeq ($(DOCDIR)_x, _x)
+DOCDIR := $(BASEDIR)/doc/nesdoc
+endif
+
+# The source scripts directory
+ifndef SCRIPTSDIR
+SCRIPTSDIR := ../scripts
+endif
+
+# NestArch dependencies
+ifndef NESTARCH_DEPS
+NESTARCH_DEPS := build/RoutingC.nc build/RoutingMsgExt.h build/NeighborExt.h build/Config.h
+endif
+
+##################################################
+#
+##################################################
+
+PLATFORMS = mica mica128 mica2 mica2dot pc rene2 motor
+#PLATFORMS = mica mica128 pc rene2 motor
+#PLATFORMS = rene pc mica dot
+
+OBJCOPY        = avr-objcopy
+SET_ID         = set-mote-id
+PROGRAMER      = uisp
+PROGRAMMER_FLAGS_DAPA=-dprog=dapa $(PROGRAMMER_EXTRA_FLAGS)
+PROGRAMMER_FLAGS_STK=-dprog=stk500 -dpart=ATmega128 $(PROGRAMMER_EXTRA_FLAGS_STK)
+
+ifdef MSG_SIZE
+PFLAGS := -DTOSH_DATA_LENGTH=$(MSG_SIZE) $(PFLAGS)
+endif
+
+ifdef APP_DIR
+EXTRA_INCLUDES := $(EXTRA_INCLUDES) -I$(APP_DIR)
+endif
+
+PFLAGS_INLINE  := -finline-limit=100000
+
+
+ifeq ($(TINYSEC)_x,true_x)
+# The tinysec keyfile to use and the default key name (this re matches the
+# first key. you can explicitly list keys by: make mica KEYNAME=mykeyname
+KEYFILE        := $(BASEDIR)/.keyfile
+KEYNAME        := '\w+'
+CFLAGS         := $(CFLAGS) -I$(TINYSECDIR)/lib -I$(TINYSECDIR)/interfaces -I$(TINYSECDIR)/system
+EXTRA_INCLUDES := $(EXTRA_INCLUDES) -I../tinysec
+PFLAGS_INLINE  := -fno-inline
+PFLAGS         := $(PFLAGS) -DTINYSEC_KEY="$(shell mote-key -kf $(KEYFILE) -kn $(KEYNAME))" -DTINYSEC_KEYSIZE=8
+endif
+
+PFLAGS         := $(PFLAGS) -Wall -Wshadow -DDEF_TOS_AM_GROUP=$(DEFAULT_LOCAL_GROUP)
+NCC            = ncc
+LIBS	       = -lm
+
+PFLAGS := $(EXTRA_INCLUDES) $(PFLAGS)
+
+
+######################################################################
+# Choose platform options, based on MAKECMDGOALS
+######################################################################
+
+
+# be quieter....
+#ifeq ($(VERBOSE_MAKE)_x, _x)
+#MAKEFLAGS += -s
+#endif
+#export VERBOSE_MAKE
+
+define USAGE
+
+
+Usage:   make <platform>
+         make all
+         make clean
+         make install[.n] <platform>
+         make reinstall[.n] <platform> # no rebuild of target
+         make docs <platform>
+
+         Valid platforms are: $(PLATFORMS)
+
+
+endef
+
+
+PLATAUX=$(PLATFORMS) all
+PLATFORM := $(filter $(PLATAUX), $(MAKECMDGOALS))
+PFLAGS := -target=$(PLATFORM) $(PFLAGS)
+MAKECMDGOALS := $(filter-out $(PLATAUX), $(MAKECMDGOALS))
+
+
+#Sensor Board Defaults
+ifeq ($(SENSORBOARDS),)
+	ifeq ($(PLATFORM),mica)
+		SENSORBOARDS = micasb
+	endif
+	ifeq ($(PLATFORM),mica128)
+		SENSORBOARDS = micasb
+	endif
+	ifeq ($(PLATFORM),rene2)
+		SENSORBOARDS = basicsb
+	endif
+	ifeq ($(PLATFORM),pc)
+		SENSORBOARDS = micasb
+	endif
+endif
+
+BUILDDIR = build/$(PLATFORM)
+MAIN_EXE = $(BUILDDIR)/main.exe
+MAIN_SREC = $(BUILDDIR)/main.srec
+MAIN_HEX = $(BUILDDIR)/main.hex
+
+ifeq ($(PLATFORM), pc)
+PFLAGS := -g -O0 -pthread $(PFLAGS) -fnesc-nido-tosnodes=1000 -fnesc-cfile=$(BUILDDIR)/app.c
+MAIN_TARGET = $(MAIN_EXE)
+else
+PFLAGS := -g -Os $(PFLAGS) $(PFLAGS_INLINE) -fnesc-cfile=$(BUILDDIR)/app.c
+MAIN_TARGET = $(MAIN_SREC)
+endif
+
+NCC := $(NCC) $(addprefix -board=,$(SENSORBOARDS))
+
+ALL_INCLUDES = $(filter -I%,$(PFLAGS) $(CFLAGS))
+
+BUILD_NESC_DEPS := echo "    creating build/nesc_deps.txt" && perl $(SCRIPTSDIR)/list_nesc_deps.pl $(ALL_INCLUDES) $(COMPONENT).nc > build/nesc_deps.txt
+
+
+######################################################################
+# Rules for documentaiton generation
+######################################################################
+
+# add documentation flags to ncc, if requested
+DOCS := $(filter docs, $(MAKECMDGOALS))
+MAKECMDGOALS := $(filter-out docs, $(MAKECMDGOALS))
+ifeq ($(DOCS)_x, docs_x)
+NCC := $(NCC) -docdir=$(DOCDIR)/$(PLATFORM) -fnesc-is-app
+endif
+
+# dummy rule for 'docs' target - so make won't complain about it
+docs:
+	@true
+
+
+
+######################################################################
+# top-level rules.  switch based on MAKECMDGOALS
+######################################################################
+
+#
+# rules for make clean
+#
+ifeq ($(MAKECMDGOALS)_x, clean_x)
+
+PLATFORM=
+
+$(PLATAUX):
+	@echo ""
+
+else
+
+ifeq ($(PLATFORM)_x,_x)
+$(error $(PLATAUX) $(MAKECMDGOALS) $(USAGE))
+endif
+
+MAKECMDGOALS := $(patsubst install.%,install,$(MAKECMDGOALS))
+MAKECMDGOALS := $(patsubst reinstall.%,reinstall,$(MAKECMDGOALS))
+
+#
+# rules for make install <platform>
+#
+ifneq ($(filter install reinstall bytes,$(MAKECMDGOALS))_x, _x)
+
+$(PLATAUX):
+	@true
+
+else
+all:
+	for platform in $(PLATFORMS); do \
+		$(MAKE) $$platform $(DOCS) || exit 1; \
+	done
+
+$(PLATFORMS): build
+
+endif
+endif
+
+
+######################################################################
+######################################################################
+##                                                                  ##
+##                      Begin main rules                            ##
+##                                                                  ##
+######################################################################
+######################################################################
+
+build: $(MAIN_TARGET)
+
+install: $(MAIN_SREC) FORCE
+	@$(MAKE) $(PLATFORM) re$@
+
+install.%: $(MAIN_SREC) FORCE
+	$(MAKE) $(PLATFORM) re$@
+
+ifeq (x$(STK),x)  ### If STK is unset or blank, program via parallel port
+
+reinstall: FORCE
+	@echo "    installing $(PLATFORM) binary"
+	$(PROGRAMER) $(PROGRAMMER_FLAGS_DAPA) --erase 
+	sleep 1	     
+	$(PROGRAMER) $(PROGRAMMER_FLAGS_DAPA) --upload if=$(MAIN_SREC)
+	sleep 1	     
+	$(PROGRAMER) $(PROGRAMMER_FLAGS_DAPA) --verify if=$(MAIN_SREC)
+
+reinstall.%: FORCE
+	@echo "    installing $(PLATFORM) binary"
+	$(SET_ID) $(MAIN_SREC) $(MAIN_SREC).out `echo $@ |perl -pe 's/^reinstall.//; $$_=hex if /^0x/i;'`
+	$(PROGRAMER) $(PROGRAMMER_FLAGS_DAPA) --erase 
+	sleep 1	     
+	$(PROGRAMER) $(PROGRAMMER_FLAGS_DAPA) --upload if=$(MAIN_SREC).out
+	sleep 1	     
+	$(PROGRAMER) $(PROGRAMMER_FLAGS_DAPA) --verify if=$(MAIN_SREC).out
+
+else  ### Otherwise, program via the stk500 where STK specifies a network address
+
+reinstall: FORCE
+	@echo "    installing $(PLATFORM) binary"
+	$(PROGRAMER) $(PROGRAMMER_FLAGS_STK) -dhost=$(STK) --erase --upload if=$(MAIN_SREC)
+
+reinstall.%: FORCE
+	@echo "    installing $(PLATFORM) binary"
+	$(SET_ID) $(MAIN_SREC) $(MAIN_SREC).out `echo $@ |perl -pe 's/^reinstall.//; $$_=hex if /^0x/i;'`
+	$(PROGRAMER) $(PROGRAMMER_FLAGS_STK) -dhost=$(STK) --erase --upload if=$(MAIN_SREC).out
+
+endif  ### Done programming
+
+
+$(MAIN_EXE): $(LOCAL_DEPS) $(NESTARCH_DEPS) $(BUILDDIR) FORCE
+	@$(BUILD_NESC_DEPS)
+	@echo "    compiling $(COMPONENT) to a $(PLATFORM) binary"
+	$(NCC) -o $(MAIN_EXE) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc $(LIBS)
+	@echo "    compiled $(COMPONENT) to $@"
+
+$(MAIN_SREC): $(MAIN_EXE) bytes
+	$(OBJCOPY) --output-target=srec $(MAIN_EXE) $(MAIN_SREC)
+	$(OBJCOPY) --output-target=ihex $(MAIN_EXE) $(MAIN_HEX)
+
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
+
+bytes: FORCE
+	@objdump -h $(MAIN_EXE) | perl -ne '$$b{$$1}=hex $$2 if /^\s*\d+\s*\.(text|data|bss)\s+(\S+)/; END { printf("%16d bytes in ROM\n%16d bytes in RAM\n",$$b{text}+$$b{data},$$b{bss}); }'
+
+clean: $(LOCAL_CLEAN) FORCE
+	rm -rf $(BUILDDIR) 
+	rm -f core.*
+	rm -f *~
+
+build/RoutingC.nc: FORCE
+	perl $(SCRIPTSDIR)/create_routing.pl $(ALL_INCLUDES) RoutingC.routing.nc
+
+build/RoutingMsgExt.h: FORCE
+	@$(BUILD_NESC_DEPS)
+	cat build/nesc_deps.txt | perl $(SCRIPTSDIR)/create_RoutingMsgExt.pl -ncstdin
+
+build/NeighborExt.h: FORCE
+	@$(BUILD_NESC_DEPS)
+	cat build/nesc_deps.txt | perl $(SCRIPTSDIR)/create_NeighborExt.pl -ncstdin $(ALL_INCLUDES)
+
+build/Config.h: FORCE
+	@$(BUILD_NESC_DEPS)
+	cat build/nesc_deps.txt | perl $(SCRIPTSDIR)/create_Config.pl $(ALL_INCLUDES)
+
+FORCE:
+
+.phony: FORCE
+

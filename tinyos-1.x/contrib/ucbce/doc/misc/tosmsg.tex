@@ -1,0 +1,581 @@
+
+\documentclass[10pt]{article}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setlength{\topmargin}{0.in}
+\setlength{\textheight}{8.5in}  % Use for proofreading.
+\setlength{\textwidth}{6.5in}
+\setlength{\oddsidemargin}{0.in}
+
+
+\renewcommand{\textfraction}{.1}
+\renewcommand{\bottomfraction}{.3}
+\setlength{\textfloatsep}{13pt}
+\setlength{\abovedisplayskip}{8pt}
+\setlength{\belowdisplayskip}{8pt}
+
+
+
+%\usepackage{endfloat}
+%\usepackage{doublespace}
+%%%  Use for initial submission, remove for final.
+\usepackage{fancyhdr}
+
+
+\lhead{D. M. Doolin}
+\chead{}
+\rhead{Sensor power}
+\lfoot{\today}
+\cfoot{}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\pagestyle{fancy}
+
+
+\input {comment}
+\usepackage{chicago}
+\usepackage{draftcopy}
+\usepackage{subfigure}
+\usepackage{psfig}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amstext,amsmath}
+\usepackage{latexsym}
+\usepackage{mathrsfs}  %  command: \mathscr{#}
+\usepackage{psfrag}
+\usepackage{comment}
+\usepackage{url}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{lscape}
+\usepackage{color}
+
+
+\newcommand{\eq}{Eq.}
+\newcommand{\eqs}{Eqs.}
+\newcommand{\tab}{Tab.}
+\newcommand{\tabs}{Tabs.}
+\newcommand{\fig}{Fig.}
+\newcommand{\figs}{Figs.}
+\newcommand{\Fig}{Fig.}
+\newcommand{\Figs}{Figs.}
+\newcommand{\alg}{Alg.}
+\newcommand{\page}{page}
+
+
+\newcommand{\dphidn}{\frac{\partial\phi}{\partial\mathbf{n}}}
+%\newcommand{\pdiff}[2]{\frac{\partial{#1}}{\partial{#2}}}
+\newcommand{\ab}[1]{{\ensuremath{\langle #1\rangle}}}
+
+\newcommand{\Iota}{\ensuremath{\mathrm{I}}}
+\newcommand{\gapfunc}{\ensuremath{\mathbf{g}}}
+\newcommand{\lagrange}{\ensuremath{\mathcal{L}}}
+\newcommand{\action}{\ensuremath{\mathcal{A}}}
+\newcommand{\VE}{vertex-edge}
+
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{cor}{Corollary}[section] % No numbers....  (?)
+\newtheorem{dfn}{Definition}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{proposition}{Prop.}[section]
+
+\newcommand{\nth}{\ensuremath{n^{\text{th}}}}
+\newcommand{\mth}{\ensuremath{m^{\text{th}}}}
+\newcommand{\ith}{\ensuremath{i^{\text{th}}}}
+\newcommand{\jth}{\ensuremath{j^{\text{th}}}}
+
+\newcommand{\ee}[1]{\ensuremath{\times 10^{#1}}}
+
+
+\newcommand{\Rone}{\ensuremath{\mathbb{R}^1}}
+\newcommand{\goesto}{\ensuremath{\to}}
+\newcommand{\imples}{\ensuremath{\ \Rightarrow\ }}
+
+
+%  A couple of macros...
+\def\matlab{{\tt Matlab}}
+\def\maple{{\tt Maple}}
+
+
+%Give a little extra space in the equation arrays because
+%of all the sums and fractions.
+\setlength{\jot}{.2in}
+
+
+
+%%%%%  FIXME: Move this up:
+\def\smallfig{55mm}
+
+
+\newcommand{\Comment}[1]{\textcolor{red}{#1}}
+
+
+\pagestyle{plain}
+
+\begin{document}
+
+
+\title{TOS Message format issues}
+%\author{D. M. Doolin\thanks{%
+%Post-doctoral researcher, University of California,
+%Civil and Environmental Engineering,
+%2108 Shattuck Ave., Berkeley, CA 94720-1716}}
+\date{\today}
+\maketitle
+
+
+\section*{1}
+
+\begin{verbatim}
+From get@eecs.berkeley.edu Wed Mar 24 13:39:39 2004
+Date: Tue, 23 Mar 2004 12:01:45 -0800
+From: Gilman Edwin Tolle <get@eecs.berkeley.edu>
+To: tinyos-users@Millennium.Berkeley.EDU
+Subject: [Tinyos-users] A conceptual question about Active Messages
+
+I've been thinking a bit about a question, and I'd like to get the 
+opinions of the list:
+
+Are Active Message IDs intended to be in 1-1 correspondence with message 
+formats?
+
+Most of what I've seen indicates yes:
+* We give names like AM_SURGEMSG to numeric IDs.
+* The mig-generated Java message classes contain explicit AM IDs.
+* TinyOS components expect to be able to correctly extract pieces from
+   messages based only on the "type" field in the container TOS_Msg
+   structure.
+
+However, some messages have been designed to be "generic container" 
+messages, of which I can think of two: BcastMsg and MultihopMsg. These 
+messages seem to have no uniquely associated type, and to use them, the 
+programmer must take explicit action to copy the type from the "inner 
+messages" they contain to the outer TOS_Msg containing them. In a TinyOS 
+component, this action requires an extra line of wiring directly to 
+GenericComm. In a Java app, this requires passing the inner message 
+containing the correct type to the registerListener() function, then 
+typecasting each incoming message to the "outer message". In addition, 
+to correctly send a container message, Java developers must hand-edit 
+the generated container message class file to set the type because none 
+is automatically included.
+
+This departure from the 1-1 model makes several techniques much more 
+challenging, in addition to requiring extra effort by the programmer to 
+understand and use. For instance, creating an independent Java program 
+that can receive all MultihopMsgs passed over the UART, parse the 
+MultihopMsg part, and then keep statistics is not possible in a generic 
+way. In addition, automatically and recursively extracting the parts 
+from a nested message for more effective message logging is impossible 
+without explicit type information at each level of nesting.
+
+So, I wonder why this decision was made, and whether it would be a good 
+idea to reverse it.
+
+Reassociating container messages with a unique type is easy enough, and 
+adding an internal type field to each container message can re-establish 
+the missing type information about the internal message. Parameterized 
+TinyOS interfaces can be dispatched just as easily on inner type fields 
+as on outer type fields, and this would obviate the need to wire 
+GenericComm directly. Java interface classes will no longer need 
+hand-editing or misdirection, and much more flexible message parsing 
+becomes possible.
+
+If I've misunderstood anything, let me know.
+
+Gil
+
+\end{verbatim}
+
+
+
+\section*{2}
+
+\begin{verbatim}
+From cssharp@eecs.berkeley.edu Wed Mar 24 13:39:52 2004
+Date: Tue, 23 Mar 2004 12:56:01 -0800
+From: Cory Sharp <cssharp@eecs.berkeley.edu>
+To: tinyos-users@Millennium.Berkeley.EDU
+Cc: Alec Woo <awoo@cs.berkeley.edu>, Gilman Edwin Tolle <get@eecs.berkeley.edu>
+Subject: Re: [Tinyos-users] A conceptual question about Active Messages
+
+I took me a second to realize what you're arguing for, but I think I'll 
+agree.  You propose that for a TOS_Msg.data structured something like this
+
+     /-- TOS_Msg.data ------------------------\
+     AM1 [header1] AM2 [header2] ... AMn [body]
+
+then all AM's (AM1, AM2, ..., AMn) should live is a globally unique namespace.
+
+This directly addresses a problem we had developing PEG's routing where each 
+AM generated a new namespace for the nested AM's within it.  This required 
+wiring information be available to mig, etc (which I never did and just 
+created the extremely grotesque peg.m in matlab).  Placing AM's in a global 
+namespace removes that need for wiring, just looping over consequitive AM's 
+in the message.
+
+One problem, managing and posibly exhausing that namespace are issues for a 
+large project.  In PEG, we had more than 50 Config values.  Each config 
+value effectively had it's own AM within the Config namespace, and it was 
+hard enough to coordinate AM's just for those Config values.
+
+It might be worth considering solutions to namespace exhaustion, otherwise 
+you might hit a hard wall at just the wrong time -- deep into development. 
+Otherwise, I think it's a great idea.
+
+- Cory
+\end{verbatim}
+
+\section*{3}
+
+\begin{verbatim}
+From get@eecs.berkeley.edu Wed Mar 24 13:40:02 2004
+Date: Tue, 23 Mar 2004 13:33:24 -0800
+From: Gilman Edwin Tolle <get@eecs.berkeley.edu>
+To: Cory Sharp <cssharp@eecs.berkeley.edu>
+Cc: tinyos-users@Millennium.Berkeley.EDU, Alec Woo <awoo@cs.berkeley.edu>
+Subject: Re: [Tinyos-users] A conceptual question about Active Messages
+
+Let me see if I understand what you mean.
+
+The current system looks like this:
+
+TOS_Msg.type = AM_SURGEMSG
+TOS_Msg.data ---------> MultihopMsg.fields
+                         MultihopMsg.data -----> SurgeMsg.fields
+
+What we have now is a single global namespace for all nested 
+combinations of messages. That is, a TOS_Msg with type AM_SURGEMSG must 
+contain a MultihopMsg containing a SurgeMsg.
+
+
+What I'm arguing for is something more like this:
+
+TOS_Msg.type = AM_MULTIHOPMSG
+TOS_Msg.data ---------> MultihopMsg.fields
+                         MultihopMsg.type = MH_SURGEMSG
+                         MultihopMsg.data ------> SurgeMsg.fields
+
+I'd like to see explicit type information at each level, with a separate 
+namespace for each level of containment. Following what Alec said, this 
+allows a cleaner encapsulation of services, and requires less 
+coordination between users of protocols at different layers.
+
+Your message seems to imply something like my second example, but with 
+each nested type having a globally unique value. I would actually argue 
+that as long as the type of each contained message is always stored by 
+the container message in a field named "type", possibly with a fixed 
+offset from the start of the message, then we could have a separate 
+namespace at each level and still perform automatic recursive 
+processing. Each message type will still have a uniquely associated ID, 
+but it needs only to be interpreted in the context of its containing 
+messages.
+
+I'm not sure why this would require wiring information in mig, and in 
+fact, because each message is wholly independent of its container, it 
+should require even less information about the containment hierarchy.
+
+If a unique name is required for each distinct nested set of messages, 
+as in the current model, then the namespace would probably be exhausted 
+sooner than if a name was only associated with each message. If we 
+allowed overlap, such that two messages could share the same ID as long 
+as one was intended to be sent out within a MultihopMsg and the other to 
+be sent out within a BcastMsg, then we would have even less chance of 
+namespace exhaustion.
+
+Gil
+
+\end{verbatim}
+
+\section*{4}
+
+\begin{verbatim}
+From pal@eecs.berkeley.edu Wed Mar 24 13:40:14 2004
+Date: Tue, 23 Mar 2004 15:03:22 -0800
+From: Philip Levis <pal@eecs.berkeley.edu>
+To: Gilman Edwin Tolle <get@eecs.berkeley.edu>
+Cc: tinyos-users@Millennium.Berkeley.EDU, Alec Woo <awoo@cs.berkeley.edu>,
+     Cory Sharp <cssharp@eecs.berkeley.edu>
+Subject: Re: [Tinyos-users] A conceptual question about Active Messages
+
+On Tuesday, March 23, 2004, at 01:33 PM, Gilman Edwin Tolle wrote:
+
+> Let me see if I understand what you mean.
+>
+> The current system looks like this:
+>
+> TOS_Msg.type = AM_SURGEMSG
+> TOS_Msg.data ---------> MultihopMsg.fields
+>                         MultihopMsg.data -----> SurgeMsg.fields
+>
+> What we have now is a single global namespace for all nested 
+> combinations of messages. That is, a TOS_Msg with type AM_SURGEMSG 
+> must contain a MultihopMsg containing a SurgeMsg.
+>
+>
+> What I'm arguing for is something more like this:
+>
+> TOS_Msg.type = AM_MULTIHOPMSG
+> TOS_Msg.data ---------> MultihopMsg.fields
+>                         MultihopMsg.type = MH_SURGEMSG
+>                         MultihopMsg.data ------> SurgeMsg.fields
+>
+> I'd like to see explicit type information at each level, with a 
+> separate namespace for each level of containment. Following what Alec 
+> said, this allows a cleaner encapsulation of services, and requires 
+> less coordination between users of protocols at different layers.
+>
+
+The issue is the possibility of wasted space. If you have 256 AM IDs 
+available, why add another level of dispatch? For one level, this makes 
+sense; but when you have fine-grained layering (as Cory's stuff does), 
+this becomes onerous. E.g.:
+
+AM -> ReliableAM (retransmissions) -> Routing -> SurgeMsg -> 
+SurgeMsgType
+
+I recall that we wanted to do this way back when with mig, to allow 
+nested packet types, but there was this tricky corner case where it 
+would break down.
+
+
+> Your message seems to imply something like my second example, but with 
+> each nested type having a globally unique value. I would actually 
+> argue that as long as the type of each contained message is always 
+> stored by the container message in a field named "type", possibly with 
+> a fixed offset from the start of the message, then we could have a 
+> separate namespace at each level and still perform automatic recursive 
+> processing. Each message type will still have a uniquely associated 
+> ID, but it needs only to be interpreted in the context of its 
+> containing messages.
+>
+> I'm not sure why this would require wiring information in mig, and in 
+> fact, because each message is wholly independent of its container, it 
+> should require even less information about the containment hierarchy.
+>
+> If a unique name is required for each distinct nested set of messages, 
+> as in the current model, then the namespace would probably be 
+> exhausted sooner than if a name was only associated with each message. 
+> If we allowed overlap, such that two messages could share the same ID 
+> as long as one was intended to be sent out within a MultihopMsg and 
+> the other to be sent out within a BcastMsg, then we would have even 
+> less chance of namespace exhaustion.
+
+Namespace exhaustion isn't nearly as great a problem as namespace 
+management and efficient structuring. The current getBuffer() approach 
+pushes all of this to run-time, when really it could be done at compile 
+time with some dynamic component generation (as Cory has done). This 
+also gives you better type checking.
+
+However, I think that you're right, at a coarse grain. One could 
+imagine, for certain major services, such as routing and dissemination, 
+you may add another single level of dispatch. The problem is, when done 
+at a fine grain, things go ill.
+
+Phil
+
+\end{verbatim}
+
+\section*{5}
+
+\begin{verbatim}
+From mdw@eecs.harvard.edu Wed Mar 24 13:40:28 2004
+Date: 23 Mar 2004 18:03:25 -0500
+From: Matt Welsh <mdw@eecs.harvard.edu>
+To: Philip Levis <pal@eecs.berkeley.edu>
+Cc: tinyos-users@Millennium.Berkeley.EDU,
+     Gilman Edwin Tolle <get@eecs.berkeley.edu>
+Subject: Re: [Tinyos-users] A conceptual question about Active Messages
+
+I like the approach that Cory has taken with his protocol code, and
+think this could be extended further. Most RPC systems support a notion
+of a stub generator that emits specialized code to marshal/unmarshal
+message types on the wire. Generating appropriate NesC components to
+handle this as well as the buffer management would be fantastic. It
+could even be extended to support specific retransmission policies, etc.
+moving the complexity from runtime to compile time. Good course project
+idea...
+
+\end{verbatim}
+
+\section*{6}
+
+\begin{verbatim}
+From pal@eecs.berkeley.edu Wed Mar 24 13:40:37 2004
+Date: Tue, 23 Mar 2004 15:26:02 -0800
+From: Philip Levis <pal@eecs.berkeley.edu>
+To: Matt Welsh <mdw@eecs.harvard.edu>
+Cc: tinyos-users@Millennium.Berkeley.EDU,
+     Gilman Edwin Tolle <get@eecs.berkeley.edu>
+Subject: Re: [Tinyos-users] A conceptual question about Active Messages
+
+On Tuesday, March 23, 2004, at 03:03 PM, Matt Welsh wrote:
+
+> I like the approach that Cory has taken with his protocol code, and
+> think this could be extended further. Most RPC systems support a notion
+> of a stub generator that emits specialized code to marshal/unmarshal
+> message types on the wire. Generating appropriate NesC components to
+> handle this as well as the buffer management would be fantastic. It
+> could even be extended to support specific retransmission policies, 
+> etc.
+> moving the complexity from runtime to compile time. Good course project
+> idea...
+
+That's what MIG does, except that the packing/unpacking is merely from 
+Java object representations to TinyOS structures. RPC is quite a 
+different beast; the purpose of marshalling/unmarshalling there has 
+much to do with pointers and platform independence; the appearance of a 
+function call is very different than packing a message structure.
+
+The whole issue of platform dependence on issues such as byte packing 
+(between motes and TOSSIM, for example, were it to run on a Motorola 
+instead of an Intel) has raised the question of whether nesC should 
+have a message type. Field accesses would be transformed into the right 
+packing/unpacking operations. There would be some limitations over 
+standard structs (e.g., no taking pointers). The idea is to do it at 
+the language level, instead of through components. Once you do this, 
+all of the buffer management issues go away.
+
+Phil
+
+\end{verbatim}
+
+\section*{7}
+
+\begin{verbatim}
+From get@eecs.berkeley.edu Wed Mar 24 13:40:47 2004
+Date: Tue, 23 Mar 2004 15:44:23 -0800
+From: Gilman Edwin Tolle <get@eecs.berkeley.edu>
+To: tinyos-users@Millennium.Berkeley.EDU, Alec Woo <awoo@eecs.berkeley.edu>,
+     Cory Sharp <cssharp@eecs.berkeley.edu>,
+     Philip Levis <pal@eecs.berkeley.edu>
+Subject: Re: [Tinyos-users] A conceptual question about Active Messages
+
+
+Your wasted space issue makes a lot of sense to me. For deeply-nested 
+messages, the extra overhead of storing a message type at each level may 
+be unjustifiable, especially if a given message is not likely to be used 
+to contain more than one different submessage.
+
+Perhaps there could be a compromise, with some sort of prefix code 
+system. For instance, given your example below, I would consider it 
+highly likely that many different components would like to use a Routed 
+Reliable Active Messages, so we could associate that three-message 
+prefix with a single AM type. Automatic recursive unmarshalling would 
+still be possible with such a prefix scheme, but might require a bit 
+more "smarts" in the decoder.
+
+Conversely, I don't consider it very likely that different applications 
+would put their own messages under SurgeMsg, so perhaps SurgeMsg is not 
+really a container msg and thus does not even need its own type at all.
+
+As a sidenote, getBuffer() doesn't seem to do anything that couldn't be 
+done at compile time. All it does is make a call to offsetof() to find 
+the start of the data field, and I'd imagine that's a compile-time macro 
+anyway.
+
+Gil
+
+\end{verbatim}
+
+\section*{8}
+
+\begin{verbatim}
+From pal@eecs.berkeley.edu Wed Mar 24 13:40:59 2004
+Date: Tue, 23 Mar 2004 16:00:25 -0800
+From: Philip Levis <pal@eecs.berkeley.edu>
+To: Gilman Edwin Tolle <get@eecs.berkeley.edu>
+Cc: tinyos-users@Millennium.Berkeley.EDU,
+     Cory Sharp <cssharp@eecs.berkeley.edu>, Alec Woo <awoo@eecs.berkeley.edu>
+Subject: Re: [Tinyos-users] A conceptual question about Active Messages
+
+On Tuesday, March 23, 2004, at 03:44 PM, Gilman Edwin Tolle wrote:
+
+> Conversely, I don't consider it very likely that different 
+> applications would put their own messages under SurgeMsg, so perhaps 
+> SurgeMsg is not really a container msg and thus does not even need its 
+> own type at all.
+>
+
+I sort of meant that there are different kind of Surge messages; sensor 
+data messages, route data messages, etc.
+
+> As a sidenote, getBuffer() doesn't seem to do anything that couldn't 
+> be done at compile time. All it does is make a call to offsetof() to 
+> find the start of the data field, and I'd imagine that's a 
+> compile-time macro anyway.
+
+Absolutely. But it requires a bit of language/compiler support to fold 
+the constants. The idea was basically, "How can we get the behavior we 
+want, without doing a lot of work on what might be the wrong thing, or 
+introducing compilation complexities?" That is, just use C. It's not 
+the right long-term solution.
+
+Phil
+
+\end{verbatim}
+
+\section*{9}
+
+\begin{verbatim}
+From mdw@eecs.harvard.edu Wed Mar 24 13:41:09 2004
+Date: 23 Mar 2004 20:58:04 -0500
+From: Matt Welsh <mdw@eecs.harvard.edu>
+To: Philip Levis <pal@eecs.berkeley.edu>
+Cc: tinyos-users@Millennium.Berkeley.EDU,
+     Gilman Edwin Tolle <get@eecs.berkeley.edu>
+Subject: Re: [Tinyos-users] A conceptual question about Active Messages
+
+> The whole issue of platform dependence on issues such as byte packing 
+> (between motes and TOSSIM, for example, were it to run on a Motorola 
+> instead of an Intel) has raised the question of whether nesC should 
+> have a message type. Field accesses would be transformed into the right 
+> packing/unpacking operations. There would be some limitations over 
+> standard structs (e.g., no taking pointers). The idea is to do it at 
+> the language level, instead of through components. Once you do this, 
+> all of the buffer management issues go away.
+
+Right - that is *exactly* what I am advocating.
+
+M.
+
+\end{verbatim}
+
+\section*{10}
+
+\begin{verbatim}
+From pal@eecs.berkeley.edu Wed Mar 24 13:41:51 2004
+Date: Wed, 24 Mar 2004 11:31:13 -0800
+From: Philip Levis <pal@eecs.berkeley.edu>
+To: Matt Welsh <mdw@eecs.harvard.edu>
+Cc: tinyos-users@Millennium.Berkeley.EDU,
+     Gilman Edwin Tolle <get@eecs.berkeley.edu>
+Subject: Re: [Tinyos-users] A conceptual question about Active Messages
+
+On Tuesday, March 23, 2004, at 05:58 PM, Matt Welsh wrote:
+
+>> The whole issue of platform dependence on issues such as byte packing
+>> (between motes and TOSSIM, for example, were it to run on a Motorola
+>> instead of an Intel) has raised the question of whether nesC should
+>> have a message type. Field accesses would be transformed into the 
+>> right
+>> packing/unpacking operations. There would be some limitations over
+>> standard structs (e.g., no taking pointers). The idea is to do it at
+>> the language level, instead of through components. Once you do this,
+>> all of the buffer management issues go away.
+>
+> Right - that is *exactly* what I am advocating.
+
+Ah, excellent. I misunderstood. Sorry.
+
+Phil
+
+\end{verbatim}
+
+
+\end{document}
+
+

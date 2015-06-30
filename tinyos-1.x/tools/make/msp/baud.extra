@@ -1,0 +1,5 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: baud.extra,v 1.1 2005/03/28 09:24:52 cssharp Exp $
+
+PFLAGS += -DDEFAULT_BAUDRATE=$(BAUD)
+

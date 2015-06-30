@@ -1,0 +1,8 @@
+?package(field-tool): \
+ needs=x11 \
+ title="Field Config" \
+ logtitle="Field Config" \
+ command=field-config \
+ icon48=/home/owl/field/scythe-config.png \
+ section=Utilities \
+ windowtitle=field-config

@@ -1,0 +1,34 @@
+<!-- Introductory chapter -->
+
+<chapter id="about">
+  <title>About this Document</title>
+  <para>
+    This document describes the hardware and software architecture
+    used by Hewlett-Packard's Cambridge Research Laboratory for our
+    experiments in small computer platforms.  
+  </para>
+  <para>
+    This document is very much work in progress.  Please send Andrew
+    your suggestions, comments, and updates.
+  </para>
+    <para>
+      The members of the CRL Metro Project Team are: 
+      <simplelist type='inline'>
+	<member>Brian Avery</member>
+	<member>Steven Ayer</member>
+	<member>Bor-rong Chen</member>
+	<member>Andrew Christian</member>
+	<member>Don Denning</member>
+	<member>Ben Kuris</member>
+	<member>Jamey Hicks</member>
+	<member>Bodhi Priyantha</member>
+      </simplelist>
+    </para>
+
+</chapter>
+
+<!--
+Local Variables:
+sgml-parent-document: ("usermanual.xml" "book" "chapter")
+End:
+-->

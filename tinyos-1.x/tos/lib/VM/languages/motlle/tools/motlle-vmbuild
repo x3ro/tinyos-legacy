@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+# Copyright (c) 2004-2005 Intel Corporation
+# All rights reserved.
+#
+# This file is distributed under the terms in the attached INTEL-LICENSE     
+# file. If you do not find these files, copies can be found by writing to
+# Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA, 
+# 94704.  Attention:  Intel License Inquiry.
+java net.tinyos.script.VMBuilder -nw $1 || exit $?
+grep -q 'rep-float' $1; float=$?
+VM=`grep DIR= $1 | sed -e 's/.*DIR="\([^"]*\)".*/\1/'`
+cd "$VM"
+
+# set classpath to include motlle tools dir
+tosdir=`ncc -print-tosdir`
+if uname | grep -q CYGWIN; then
+  tdir=`cygpath -w $tosdir/lib/VM/languages/motlle/tools`
+  CLASSPATH="$tdir;$CLASSPATH"
+else
+  CLASSPATH="$tosdir/lib/VM/languages/motlle/tools:$CLASSPATH"
+fi
+
+# generate nesC primitive source code
+java GenPrims vmargs vm.vmdf >primitive_args.h
+java GenPrims vmret vm.vmdf >>primitive_args.h
+java GenPrims vmdispatch vm.vmdf >MotllePrimitives.nc
+
+# generate configuration for the motlle compiler
+grep '\<OP_' MateConstants.h | sed -e 's/OP_/any rbytecode_/' -e 's/,/;/' > conf.mt
+java GenPrims motlle vm.vmdf >>conf.mt
+msg_size=`grep MSG_SIZE= Makefile | sed -e 's/MSG_SIZE=//'`
+ncg  -DTOSH_DATA_LENGTH=$msg_size -java-classname=foo java MateConstants.h MateConstants.h >/tmp/motlle$$.tmp || exit 1
+grep MATE_HANDLER /tmp/motlle$$.tmp | grep -v 'MATE_HANDLER_\(GLOBAL_\|INVALID \|SIZE \|NUM \)' | sed -e 's/.*MATE_HANDLER_\(.*\) = \([0-9]*\);/motehandler("\1", \2);/' >>conf.mt
+grep MVIRUS /tmp/motlle$$.tmp | sed -e 's/^.*MVIRUS_/any MVIRUS_/' >>conf.mt
+rm -f /tmp/motlle$$.tmp
+
+# language and constants
+if grep -q '^<VM .*language="tinyscheme"' vm.vmdf; then
+  echo "is_scheme = true;" >>conf.mt
+  grep '^CST ' vm.vmdf | sed -e 's/^CST \([-a-zA-Z_0-9$_?!]*\)=\([-0-9]*\).*/motecst("\1", \2);/' | tr _ - >>conf.mt
+else
+  grep '^CST ' vm.vmdf | sed -e 's/^CST \([-a-zA-Z_0-9$_?!]*\)=\([-0-9]*\).*/motecst("\1", \2);/' >>conf.mt
+  echo 'motecst("true", 1);' >>conf.mt
+  echo 'motecst("false", 0);' >>conf.mt
+  echo 'motecst("null", null);' >>conf.mt
+fi
+
+# value representation
+if test $float -eq 0; then
+  echo "value_size = 4;" >>conf.mt
+  echo "any new_mate_state = new_fmate_state;" >>conf.mt
+else
+  echo "value_size = 2;" >>conf.mt
+  echo "any new_mate_state = new_imate_state;" >>conf.mt
+fi

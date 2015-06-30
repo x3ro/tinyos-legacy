@@ -1,0 +1,40 @@
+/**
+ *  @file Xxx.hh
+ *
+ *  @author Phil Levis
+ *  @author Ion Yannopoulos
+ */
+
+#ifndef TOS_SIM_XXX_HH
+#define TOS_SIM_XXX_HH
+
+#include <tossim/public.hh>
+
+namespace tos {
+namespace sim {
+
+namespace impl {
+
+/** 
+ */
+
+class Xxx
+{
+public:                         // Types
+
+public:                         // Methods
+  Xxx();
+ ~Xxx();
+
+private:                        // Fields
+  
+}; // class Xxx
+
+} // namespace impl
+
+using impl::Xxx;
+
+} // namespace sim
+} // namespace tos
+
+#endif // TOS_SIM_XXX_HH

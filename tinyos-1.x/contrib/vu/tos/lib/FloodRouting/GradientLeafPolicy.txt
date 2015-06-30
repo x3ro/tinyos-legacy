@@ -1,0 +1,14 @@
+GradientLeafPolicy:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The GradientLeafPolicy can be used in conjunction with the GradientPolicy in
+non-heterogenious networks. If some nodes are "leaf" nodes, that possibly can
+be suspended and/or turned on/off, and do not participate in the routing then
+this less resource hungry version of the GradientPolicy can be used. In 
+particular, these leaf nodes with this policy can have a very small buffer 
+(one that can hold only one or two data packets plus 10 bytes). The non-leaf 
+nodes must form a "back-bone" of the network and all must be used with the 
+GradientPolicy together with larger buffers.

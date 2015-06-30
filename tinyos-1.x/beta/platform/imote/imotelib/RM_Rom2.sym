@@ -1,0 +1,35 @@
+#<SYMDEFS>#
+;
+; RM_Rom2.sym
+;
+;       Symbols for refrencing function in ROM version 2
+
+0x210030 A RM2_ResetHandler
+0x210034 A RM2_NextCRC
+0x210038 A RM2_CRCBuffer
+0x21003C A RM2_FlshPollAlg1
+
+0x210040 A RM2_FlshPollAlg2
+0x210044 A RM2_FlshToglAlg1
+0x210048 A RM2_FlshToglAlg2
+0x21004c A RM2_FlshSetComnd
+
+0x210050 A RM2_FlshWrRecWrdByWrd
+0x210054 A RM2_FlshWrRecByPass
+0x210058 A RM2_FlshEraseSector
+0x21005c A RM2_FlshCopyCmdData
+
+0x210060 A RM2_FlshPollAlg3
+0x210064 A RM2_FlshToglAlg3
+0x210068 A RM2_memmove
+0x21006c A RM2_memcpy
+
+0x210070 A RM2_memcmp
+0x210074 A RM2_memset
+0x210078 A RM2_memsetzero
+0x21007c A RM2_memchr
+
+0x210080 A RM2_memTests
+0x210084 A RM2_ChkCrc
+0x210088 A RM2_FlshWrRecWrdByWrd2
+0x21008c A RM2_Diags

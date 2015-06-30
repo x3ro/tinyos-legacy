@@ -1,0 +1,46 @@
+
+eraseFlash.elf:     file format elf32-msp430
+
+Disassembly of section .text:
+
+00000200 <start>:
+ 200:	00 02       	.word	0x0200;	????
+ 202:	0c 02       	.word	0x020c;	????
+ 204:	4e 02       	.word	0x024e;	????
+
+00000206 <srinit>:
+	...
+
+00000208 <type>:
+	...
+
+0000020a <addr>:
+	...
+
+0000020c <main>:
+ 20c:	b2 40 80 5a 	mov	#23168,	&0x0120	;#0x5a80
+ 210:	20 01 
+ 212:	32 c2       	dint			
+ 214:	12 40 f0 ff 	mov	0xfff0,	r2	;PC rel. 0x0206
+ 218:	b2 40 41 a5 	mov	#-23231,&0x012a	;#0xa541
+ 21c:	2a 01 
+ 21e:	b2 40 00 a5 	mov	#-23296,&0x012c	;#0xa500
+ 222:	2c 01 
+ 224:	39 40 0a 00 	mov	#10,	r9	;#0x000a
+ 228:	92 40 de ff 	mov	0xffde,	&0x0128	;PC rel. 0x0208
+ 22c:	28 01 
+ 22e:	1a 40 da ff 	mov	0xffda,	r10	;PC rel. 0x020a
+ 232:	ba 43 00 00 	mov	#-1,	0(r10)	;r3 As==11
+ 236:	3a 40 7a 22 	mov	#8826,	r10	;#0x227a
+ 23a:	1a 83       	dec	r10		;
+ 23c:	fe 23       	jnz	$-2      	;abs 0x23a
+ 23e:	b2 40 00 a5 	mov	#-23296,&0x0128	;#0xa500
+ 242:	28 01 
+ 244:	b2 40 00 a5 	mov	#-23296,&0x012c	;#0xa500
+ 248:	2c 01 
+ 24a:	19 83       	dec	r9		;
+ 24c:	ed 23       	jnz	$-36     	;abs 0x228
+
+0000024e <stop>:
+ 24e:	ff 3f       	jmp	$+0      	;abs 0x24e
+Disassembly of section .data:

@@ -1,0 +1,30 @@
+#include "tos.h"
+
+TOS_MODULE TIMER_HEAP;
+
+ACCEPTS{
+        char TIMER_INIT(void);
+        char ADD_TIMER_RELATIVE(Timer*, uint32_t);
+        char ADD_TIMER_ABSOLUTE(Timer *);
+        char DELETE_TIMER(Timer *);
+};
+
+USES{
+        char TIMER_SUB_CLOCK_INIT(uint16_t interval,  uint8_t scale);
+        char GET_TIME(uint32_t*);
+};
+
+SIGNALS{
+};
+
+INTERNAL{
+        void timer_fire();
+        void check_timer();
+	void reset_heap(Timer *t);
+	void heap_dump();
+	void clock_init();
+	void clock_get_time();
+};
+
+
+

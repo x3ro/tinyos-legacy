@@ -1,0 +1,4 @@
+This directory is for time sync demo.
+GraphPanel.java and oscilloscope.java are modified to display
+the time diference between received time stamps in TimeResp message.
+

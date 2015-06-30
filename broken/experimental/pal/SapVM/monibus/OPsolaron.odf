@@ -1,0 +1,1 @@
+<FUNCTION name=solaron opcode=solaron numParams=0 returnVal=FALSE desc="Enables solar recharging" schedpoint=true>

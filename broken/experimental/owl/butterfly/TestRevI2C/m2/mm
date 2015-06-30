@@ -1,0 +1,3 @@
+I2C=~/motes/tinyos-1.x/beta/I2C
+ncc -I$I2C/platform/mica2 -I$I2C/platform/mica -I$I2C/platform/avrmote -I$I2C/interfaces -I$I2C/system -DHARDWARE_I2C -target=mica2 -O1 -g -fnesc-no-inline -Wall -Wnesc-all -fnesc-cfile=app.c -board=basicsb TinyOS.nc && mica-install a.out
+

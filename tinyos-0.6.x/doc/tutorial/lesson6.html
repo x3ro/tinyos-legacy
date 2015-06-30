@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 FINAL//EN">
+<html>
+  <head>
+    <title>Lesson 6: Broadcasting packets</title>
+  </head>
+
+  <body>
+    <h1>Lesson 6: Broadcasting packets</h1>
+
+    <p>
+
+    This tutorial consists of three parts: first we'll demonstrate how to
+    inject control packets into the network, and to control various functions
+    on the mote. As an exercise, we'll add a code to control the buzzer. Then
+    we'll look at how to implement a simple multihop broadcast protocol.
+
+      <h2> Part a: Injecting packets </h2> 
+
+    In most of the mote applications the bridge between the mote network and
+    your PC is provided by two applications: <tt>GENERIC_BASE_HIGH_SPEED</tt>
+    on the mote side and <tt>SerialForwarder</tt> on the PC side.  Program one
+    mote with <tt>GENERIC_BASE_HIGH_SPEED</tt>, and another with
+    <tt>COMMAND</tt> which can be found in <tt>nest/apps/bcast</tt>.  You'll
+    note that the <tt>COMMAND</tt> mote seems to be idle; that's the expected
+    behavior, since it is purely reactive. Plug the <tt>
+    GENERIC_BASE_HIGH_SPEED</tt> mote into the programming board, and make
+    sure that the programming board is also connected to the serial port. Turn
+    on the mote.  On your laptop start the SerialForwarder (if you haven't
+    already) by executing:</p>
+   
+<pre>
+cd tools
+java net/tinyos/SerialForwarder/SerialForward
+</pre>
+
+    Now you're ready to start injecting packets.  We provided a simple packet
+    injector called <a href="../../tools/net/tinyos/tools/BcastInject.java">
+    net.tinyos.tools.BcastInject</a>. To inject a specific into the network
+    run
+
+<pre>
+javac net/tinyos/tools/BcastInject.java
+java net.tinyos.tools.BcastInject
+</pre>
+
+    <tt> BcastInject</tt> constructs TinyOS packets, and injects them into the
+    network using the SerialForwarder.  The <tt>BcastInject</tt> currently
+    understands  how to generate packets that will cause the <tt>COMMAND</tt>
+    mote to turn LEDs on and off, and to adjust the transmit strength.</p>
+
+    <h3> Part a: Exercise</h3>
+    
+    Add commands that will enable the <tt>COMMAND</tt> mote to turn its
+    sounder on and off. You'll need to perform the following modifications:
+
+    <ul> 
+      <li> In <tt>COMMAND.comp</tt> declare that the component uses the
+	sounder methods 
+
+      <li> In <tt>COMMAND.c</tt> initialize the sounder and add statements
+	that will turn the sounder on and off. 
+
+      <li> Finally in the description file, connect the <tt>SOUNDER</tt>
+	component to the <tt>COMMAND</tt> component. 
+    </ul> 
+
+    <h2> Part b: Multihop broadcast</h2>
+
+    In this part of the exercise, we'll take the <tt>COMMAND</tt> component
+    from the previous part, and we'll insert a flooding layer to forward the
+    messages.  The <tt>BCAST</tt> component shows a simple implementation of
+    flooding the network from a single location. It doesn't depend on any
+    routing schemes, at the core of the module, we embedded the following
+    decision: if a node hears a packet that has not been heard before, it will
+    rebroadcast it.  The following message handler shows this functionality:
+    </p>
+<PRE>
+// Handler for the flooding the message.
+TOS_MsgPtr TOS_MSG_EVENT(BCAST_UPDATE)(TOS_MsgPtr msg) {
+    bcastmsg_t * bmsg = (bcastmsg_t *) msg->data;
+    TOS_MsgPtr tmp = msg;
+    
+    // Check if this is a new broadcast message
+    if (is_new_msg(bmsg)) {
+	remember_msg(bmsg);
+	
+	// Execute the split-phase command handler for the message.  If the
+	// command handler failed, just drop the message, and forget that the
+	// message was pending
+	if (TOS_CALL_COMMAND(BCAST_CMD_EXEC)(msg) == 0) {
+		VAR(bcast_pending) = 0;
+	}
+
+	// Return a message buffer to the lower levels, and hold on to the
+	// current buffer
+	tmp = VAR(msg); VAR(msg) = msg;
+    }
+    return tmp;
+}
+</PRE>
+
+    The main challenge lies in determining what constitutes a new message. The
+    <tt>BCAST</tt> component expects that each message carries a sequence
+    number:
+
+<PRE>
+typedef struct {
+    char seqno;            // Sequence number which determines whether the
+                           // message needs to be rebroadcast.
+}bcastmsg_t;
+</PRE>
+
+    Given the sequence number, we can determine whether the message is new by
+    remembering the sequence number of the last message we heard and comparing
+    it to the sequence number of the current message:
+
+<PRE>
+// Decision whether the message is new: it has to be within 127 sequence
+// numbers of the last number. We'll also throw out the message if we're still
+// dealing with the previous broadcast. 
+
+inline char is_new_msg(bcastmsg_t *bmsg) {
+    return ((((bmsg->seqno) - VAR(lastSeqno)) > 0) && 
+	    (VAR(bcast_pending) == 0));
+}
+</PRE>
+    <p>
+    <tt>BCAST</tt> expects to process only a single message at a time, so if
+    the component is busy, even a message that is potentially new, will be
+    discarded.  Also note that the component does a fair bit of
+    overbroadcasting, so it is possible that the component will get another
+    chance to rebroadcat the packet.</p>
+
+
+    <p>The command interpreter presented here is used primarily for
+    demonstration of the broadcast component. You'll see a more complex
+    interpreter in the next tutorial, however the basic design of the module
+    stays the same.  You may find this structure useful in other applications.
+    In this toy interpreter, the command packets are of the following form:
+    </p>
+
+<PRE>
+typedef struct {
+    char seqno;             //sequence no. for compatibility with BCAST layer
+    char action;            //operation mnemonic for the COMMAND component, 
+    short source;           //who was the immediate sender of this packet 
+    unsigned char hop_count; // how far away from the origin are we?
+    char arg[0];            //arguments that the interpreter will act upon
+} cmdmsg_t;    
+</PRE>
+
+    <p> Note that this violates strict layer separation, since the
+    <tt>COMMAND</tt> module sees the fields not relevant to its function
+    (e.g. <tt>seqno</tt>). </p>
+    
+    <p>
+      The component exposes two commands: an initialization command,
+      <tt>COMMAND_INIT()</tt> and a split-phase interpreter command
+      <tt>COMMAND_EXECUTE(TOS_MsgPtr msg)</tt>. The command execution works as
+      follows:
+    <ul>
+      <li> An upper level component calls the <tt>COMMAND_EXECUTE</tt> with a
+	<tt>TOS_MsgPtr</tt>. The component is designed to process only a
+	single message at a time; if no message is being processed, 
+	<tt>COMMAND_EXECUTE </tt> will accept the message for processing, and
+	schedule a task <tt>eval_cmd</tt> to do the actual processing.
+      <li> At some point in the future, the <tt>eval_cmd</tt> task will
+	run. In the current interpreter, the task performs 3 separate
+	functions: it updates the fields in the handler, it performs functions
+	dependent on the level in the tree, and it executes the command. 
+      <li> When the task successfully reaches its end, it signals the upper
+	component the completion by invoking <tt>COMMAND_DONE(TOS_MsgPtr msg,
+	  char status)</tt>. The status word indicates whether the
+	<tt>msg</tt> was "consumed", i.e. whether the calling layer should be
+	procssing it further. This allows for a more flexible composition of
+	packet processing modules. 
+    </ul> 
+
+    The interpreter will keep a pointer to the messsage and will release it
+    only when the command contained within the packet has finished
+    executing. The layers that interact with it should be aware of this
+    property. </p>
+
+    <h3> Part b: Simple exercise</h3> 
+
+    Repeat the exercise from Part a. The red and green LEDs are used to
+    display the number of hops a message has traveled from the base; position
+    the network such that you observe at least 2 hops.
+
+    <h3>Part b: Advanced Exercise</h3>
+    As written, the broadcast protocol is fairly fragile: it depends on a
+    property that the sequence number on the BcastInject and the the sequence
+    number on the mote differ by less that 127.  A better way to distinguish
+    between the messages would be to create an index of a few, say 5, most
+    recently seen messages.  If the message currently received is not in that
+    index, then the node would forward it.  <tt>BcastInjector</tt> can then
+    run unmodified, or it could send out messages with random message
+    numbers. 
+    
+<hr>
+<b><font size=4><a href="lesson5.html">&lt; Previous Lesson</a></font></b> |
+<b><font size=4><a href="lesson7.html">Next Lesson &gt;</a></font></b>
+
+  </body>
+</html>

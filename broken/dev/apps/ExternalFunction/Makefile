@@ -1,0 +1,3 @@
+COMPONENT=ExternalFunction
+include ../Makerules
+

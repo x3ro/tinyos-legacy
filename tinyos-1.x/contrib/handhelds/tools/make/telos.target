@@ -1,0 +1,10 @@
+#-*-Makefile-*- vim:syntax=make
+# We rely on the original telos file to specify most of the parameters
+
+HAS_USB=True
+
+PFLAGS += \
+ -I$(HHTOSDIR)/tos/platform/telos \
+ -I$(HHTOSDIR)/tos/platform/msp430_crl_base
+
+

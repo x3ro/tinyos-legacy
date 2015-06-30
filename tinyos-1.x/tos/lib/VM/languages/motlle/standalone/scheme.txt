@@ -1,0 +1,65 @@
+missing:
+  (lambda (x1 x2 . rest) ...)
+  `(...)
+  named let (would need tail recursion to be useful)
+  tail recursion elimination
+  no delayed evaluation
+  standard procedures:
+    input and output
+    scheme number stuff:
+      exact->ineact, inexact->exact, exact?, inexact?
+      all complex number stuff
+      rationalize, numerator, denominator
+      lcm, gcd
+      round
+    control flow:
+      call-with-current-continuation
+      dynamic-wind
+      eval&co
+    strings and characters:
+      character functions
+      string-append, substring, string{-ci}relop?
+      number->string, string->number
+      symbol->string, string->symbol
+    equal?, member, assoc
+
+changes:
+  (lambda allargs ...)
+    makes allargs a vector, not a list
+  (apply proc vector)
+  (if cond truecase)
+    returns an undefined result even when truecase is executed
+  chars are ints
+  booleans are ints (0 is false), #t, #f are missing
+  make-vector doesn't have a fill argument
+  make-string doesn't have a fill argument
+  ceil, truncate, floor don't work when the result is not a 16-bit int
+
+comments:
+  on motes, 
+    numbers are either 15 bit ints, or 16 bit ints + 32-bit floats
+  on pcs,
+    numbers are 31 bit ints
+  eqv? and eq? are the same
+
+todo(?)
+  booleans
+  standard procedures corresponding to builtins as values
+  cond, case, and, or
+  more scheme-like lexing
+
+
+procedures to do:
+  quotient, remainder, modulo
+  +, -, *, /
+  min, max
+  zero?, positive?, negative?, odd?, even?
+  =, <, >, <=, >=
+
+procedures added:
+  |, &, ^, <<, >>
+
+
+more todo
+  make-string, make-vector fill arg
+  string-copy, string-append

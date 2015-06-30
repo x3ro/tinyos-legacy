@@ -1,0 +1,37 @@
+#!/bin/sh
+MOTE=`motelist -c | perl -e '@f=split /,/, <>; print $f[1];'`
+
+echo "Trawler Application"
+
+if [ x$MOTE = x ]; then
+  cat <<EOF
+
+ERROR: No mote detected.
+
+Please first insert a Tmote Invent device, then run Trawler.
+
+Aborted.  Press ENTER to continue.
+EOF
+  read a
+  exit 1
+fi
+
+echo
+echo "Detected mote on $MOTE"
+echo
+echo "Running Trawler Applicaiton"
+echo
+
+# Run Trawler from ~/.trawler because it creates files
+cd "$HOME"
+[ -d .trawler ] || mkdir .trawler
+cd .trawler
+
+export MOTECOM=serial@${MOTE}:telos
+java com.moteiv.trawler.Trawler
+if [ $? != 0 ]; then
+  echo "Error.  Press ENTER to continue."
+  read a
+  false
+fi
+

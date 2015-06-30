@@ -1,0 +1,51 @@
+#ifndef TOS_SIM_XXX_II          // -*- c++ -*-
+#define TOS_SIM_XXX_II
+
+namespace tos {
+namespace sim {
+
+namespace impl {
+
+inline
+Mote::Mote()
+  : _id(UNINITIALIZED)
+{
+}
+
+inline
+Mote::Mote(unsigned id)
+  : _id(id)
+{
+}
+
+inline
+Mote::Mote(const Mote& other)
+  : _id(other._id)
+{
+}
+
+inline
+Mote::~Mote()
+{
+}
+
+Mote&
+Mote::operator=(const Mote& other)
+{
+  _id = other._id;
+
+  return *this;
+}
+
+Mote::operator unsigned()
+{
+  return _id;
+}
+
+} // namespace impl
+
+
+} // namespace sim
+} // namespace tos
+
+#endif // TOS_SIM_XXX_II

@@ -1,0 +1,24 @@
+README for MicasbTest2
+Author/Contact: tinyos-help@millennium.berkeley.edu
+ 
+Description:
+ 
+The MicasbTest2 tests out light, microphone, and sounder.  
+Covering the light sensor will trigger the sounder to beeps.  If the microphone
+detects the sounder's signal, it will turn on the yellow LED to signal the
+tone is detected.
+ 
+
+Tools:
+ 
+None
+ 
+Known bugs/limitations:
+ 
+Since the microphone is very close to the sounder, the signal it gets
+may clip at the amplifier and you may not be able to see the 
+microphone detecting the sounder's signal.  
+
+To avoid this problem, either decrease the microphone gain or
+use another MICA running the TestSounder application and try this
+test with the two MICAs separated by a feet or two.

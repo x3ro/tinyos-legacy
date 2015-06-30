@@ -1,0 +1,30 @@
+#ifndef TOS_SIM_RFMMODEL_II          // -*- c++ -*-
+#define TOS_SIM_RFMMODEL_II
+
+namespace tos {
+namespace sim {
+
+namespace impl {
+  
+
+inline double
+LossyRfmModel::get_noise_probability()
+{
+  return _noise_probability;
+}
+
+
+inline void
+LossyRfmModel::set_noise_probability(double probability)
+{
+  _noise_probability = probability;
+}
+
+
+} // namespace impl
+
+
+} // namespace sim
+} // namespace tos
+
+#endif // TOS_SIM_RFMMODEL_II

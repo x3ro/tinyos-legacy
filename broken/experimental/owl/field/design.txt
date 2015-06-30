@@ -1,0 +1,85 @@
+Goals:
+
+- assist in-field installation, problem-fixing by allowing commands
+to be sent directly to a mote
+- assist GSK debugging
+
+
+Means:
+- on the mote side: a special "field debug" component responds to
+  field messages
+- an Ipaq is programmed with the "field debug" application with
+  a simple GUI for sending commands and showing responses
+
+
+Functionality:
+- commands can be sent to all motes in radio range or to a specific mote
+- commands take no arguments (for GUI simplicity)
+- the following commands are available (but both mote and Ipaq side should
+  allow for easy extension)
+
+  command: ping
+  returns: status (what exactly? battery voltage? routing info?)
+
+  command: sleep
+  returns: OK
+  effects: mote goes back to its regular sleep pattern (see below)
+
+  command: reset
+  returns: OK
+  effects: mote resets in 5s
+
+  Note: this list is partial. Please suggest additions.
+
+
+Mote-side behaviour:
+- When awake, the mote is constantly listening for wakeup messages
+- On receipt of a wakeup message, a mote switches to a "wide awake"
+  mode where its regular sleep pattern is suspended
+  the wakeup messages are only answered (from a particular ipaq)
+  every <n> minutes (to avoid overuse of bw)
+  issue: should it only respond to field messages in the period where
+  it is normally asleep?
+  This wide awake mode times out after 5 minutes during which no field
+  messages are received
+- field messages are answered only in "wide awake" mode
+
+Ipaq-side behaviour:
+- see GUI picture
+  command list: double-click on a command to start sending that command
+    (see below)
+
+  response area:
+    remembers results from last <n> commands
+    <, >: move through these results
+    command text area: command time, destination, command
+
+    response list:
+      1 line for each response
+      issue: this limits amount of status per message. could allow
+             multiple lines.
+
+- wakeup is sent constantly, ipaq maintains list of "valid" (recent)
+  answers. This list is displayed in the GUI, along with an ALL entry.
+
+- commands are sent once, with answers displayed in command output area
+
+
+
+Field command format:
+am type: field-message-request
+dest: broadcast or specific mote
+struct {
+  uint16_t ipaqAddress;
+  uint16_t cmdId;
+  TinyDBCmd command;
+}
+
+am type: field-message-response
+dest: ipaqAddress from request
+struct {
+  uint16_t moteAddress;
+  uint16_t cmdId;
+  TinyDBCmdResponse response;
+}
+

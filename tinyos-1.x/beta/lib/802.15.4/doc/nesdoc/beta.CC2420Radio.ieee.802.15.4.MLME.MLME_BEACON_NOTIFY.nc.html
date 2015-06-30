@@ -1,0 +1,81 @@
+
+<html>
+<head>
+<title>Interface: MLME_BEACON_NOTIFY</title>
+</head>
+<body>
+<table BORDER="0" CELLPADDING="3" CELLSPACING="0" width="100%">
+<tr><td>
+<font size="-1">
+<b><font color="blue"><a href="apps_p.html">Apps</a></font></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="components_p.html">Components</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="interfaces_p.html">Interfaces</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="allfiles_p.html">All Files</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="index.html">Source Tree</a></b>
+&nbsp;&nbsp;&nbsp;
+</font>
+</td>
+<td align="right">
+<font size="-1">
+source: <b><a href="beta.CC2420Radio.ieee.802.15.4.MLME.MLME_BEACON_NOTIFY.nc.source">beta.CC2420Radio.ieee.802.15.4.MLME.MLME_BEACON_NOTIFY.nc</a></b>
+</font>
+</td></tr></table>
+<hr>
+
+<h1 align="center">Interface: MLME_BEACON_NOTIFY</h1>
+<p>
+
+ The MLME-SAP beacon notification primitive defines how a device may be 
+ notified when a beacon is received during normal operation conditions.
+
+ <table border="0" cellpadding="0">
+<tr valign="top"><td><b>Author:</b>
+<td> Joe Polastre
+</td></tr></table>
+
+<p>
+
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Events</h3></td></tr></table>
+<ul>
+<li>
+         void     <a href="# void indication(uint8_t BSN, PANDescriptor_t PANDescriptor, uint8_t PendAddrSpec, uint16_t *AddrList, uint8_t sduLength, uint8_t *sdu)">
+<b>indication</b>    </a>
+(uint8_t BSN, PANDescriptor_t PANDescriptor, uint8_t PendAddrSpec, uint16_t *AddrList, uint8_t sduLength, uint8_t *sdu)
+<menu>
+ Notification is issued upon receipt of a beacon frame either when
+ macAutoRequest is set to FALSE or when the beacon frame contains one
+ or more octets of payload.
+
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Events - Details</h3></td></tr></table>
+    <a name=" void indication(uint8_t BSN, PANDescriptor_t PANDescriptor, uint8_t PendAddrSpec, uint16_t *AddrList, uint8_t sduLength, uint8_t *sdu)"></a>
+        <h4>indication</h4>
+         void <b>indication</b>(uint8_t BSN, PANDescriptor_t PANDescriptor, uint8_t PendAddrSpec, uint16_t *AddrList, uint8_t sduLength, uint8_t *sdu)<P><menu>
+ Notification is issued upon receipt of a beacon frame either when
+ macAutoRequest is set to FALSE or when the beacon frame contains one
+ or more octets of payload.
+
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>BSN</b> -  The beacon sequence number
+ </p><p STYLE="text-indent: -1cm"><b>PANDescriptor</b> -  The PANDescriptor for the received beacon.
+                      See IEEE 802.15.4 specification page 76.
+ </p><p STYLE="text-indent: -1cm"><b>PendAddrSpec</b> -  The beacon pending address specification
+ </p><p STYLE="text-indent: -1cm"><b>AddrList</b> -  List of addresses of the devices for which the beacon
+                 has source data
+ </p><p STYLE="text-indent: -1cm"><b>sduLength</b> -  The number of octets contained in the beacon payload
+ </p><p STYLE="text-indent: -1cm"><b>sdu</b> -  Set of octets comprising the beacon payload
+</menu></menu>
+</td></tr></table>
+</menu>

@@ -1,0 +1,35 @@
+A regression suite for TinyOS. The setup assumes you have two motes, each on a
+programming board. 
+
+Setup the motes and boards as follows:
+- one mote is the "base" mote. Program it with TOSBase, and place it on
+a programming board connected to the PC via a seriable cable on some
+serial port (COMb).
+
+- one mote is the "app" mote. Place it on a programming board connected to
+the PC via a seriable cable on some serial port (COMa). If you're using
+a parallel-port programming board, connect the PCs parallel port to this
+board (the "base" mote does not need a programming cable).
+
+Then, just run the runtests script with arguments:
+  runtests MOTEKIND COMa COMb
+where MOTEKIND is mica, mica2, etc (the pc target is currently unsupported).
+
+You can run only some tests with
+  runtests MOTEKIND COMa COMb TEST-REGEXP
+where TEST-REGEXP is a regular expression matching the tests you wish to run.
+
+Each test is composed of a number of (named) subtests, the first of which,
+"app" is to compile and install a particular application. Further subtests
+check that application's functionality.
+
+The result of each subtest is printed, one of PASS, FAIL or SKIP (test
+ignored for this MOTEKIND).
+
+If you didn't specify a TEST-REGEXP, the last test is zzblink, which
+installs Blink on your "app" mote, to avoid spamming the airwaves...
+
+At the end, a summary of failed tests is printed. Detailed output from
+a particular test can be found in output/TESTNAME/SUBTESTNAME.
+
+To add a new test, see the ADDING-TESTS file.

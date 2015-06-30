@@ -1,0 +1,280 @@
+README for Heterogeneous Sensor Routing (HSN) Tools
+Contact: Mark Yarvis at mark.d.yarvis@intel.com
+
+1. UART Server
+
+ 1.1. Introduction
+
+      The UART Server is used to abstract the serial port away from the
+      application.
+
+ 1.2. Functionality
+
+      The UART Server acts as a hub for a collection of interfaces.  Packets
+      received on one interface are printed to stdout and forwarded to all
+      of the other interfaces.
+
+      Supported interfaces include serial ports, client sockets, and
+      server sockets.  Serial communication can be used in two modes: raw
+      and framed.  Raw serial communication is compatible with standard
+      TinyOS UART modules.  Framed serial communication is compatible
+      with the UARTFramedNoCRCPacket provided with this package and is
+      more robust to dropped bytes.
+
+      Server sockets allow other applications to connect to the UART
+      Server and receive packets.  There are two server socket modes:
+      raw and ASCII.  Raw server sockets are compatible with the TinyOS
+      SerialForwarder.  ASCII sockets are compatible with the tools
+      provided in this package.  By using a combination of raw and ASCII
+      server sockets, it is possible to use our visualization and control
+      tools together with the TinyDB and GSK Java applications.
+
+      Client sockets allow the UART Server to connect to other
+      applications, including other UART Server processes.  Client
+      sockets are available in either raw or ASCII mode.  Client sockets
+      are persistent and will attempt to reconnect upon failure.
+      
+
+ 1.3. How to use UART Server
+
+      To compile the uartserver, type 'make' in tools/packet_tools.
+
+      When running the uartserver, the following parameters are allowed:
+
+         -1 or -2      - Mica or Mica2, -1 uses 19200 and -2 uses 57600
+         COM<N>        - Connect to a serial port
+         <port>        - Create a server socket on a given port number
+         <host>:<port> - Create a client socket connected to the given host 
+                         and port
+         -r<size>      - Subsequent options will be interpreted to be raw 
+                         serial and/or sockets with the given packet size
+
+      For example:
+
+         ./uartserver COM1 9001 -r49 9000
+
+      This command creates a connection to COM1, a server socket on port
+      9001 that expects packets in an ASCII format with framed header, and
+      a server socket on port 9000 that expects 49-byte packets (including
+      TOS header) in a raw format, which is compatible with TinyDB/GSK.
+
+      Basically, the -r option specifies the packet length for raw unframed
+      sockets, and anything on the command line after the -r option will be a
+      raw socket rather than an ASCII socket.
+
+      You can also enable unframed serial communication by putting the COM
+      argument after the -r option, like './uartserver 9001 -r49 COM1 9000'.
+
+ 1.4. Notes
+
+      The framing bytes sent from a mote are 0x97, 0x53, 0x71 followed by
+      packet length; first 3 bytes are hard-coded in 
+      tos/system/FramedNoCRCPacket.nc and the last byte (length) can be
+      overwritten by MSG_SIZE flag in Makefile.
+      For default TOS packets (payload = 29) it is 0x97, 0x53, 0x71, 0x24.
+      For TinyDB packets (payload = 42) it is 0x97, 0x53, 0x71, 0x31.
+
+      To enable unframed serial communication, the sink mote has to be
+      configured as NOT_UART_FRAMED in the Makefile at compile time.
+
+2. Parse & Print
+
+ 2.1. Introduction
+
+      Parse & Print is used to parse different types of packets and print
+      out the header information in a human readable format.
+
+ 2.2. Functionality
+
+      The Parse & Print tool connects to the UART server and parses packets
+      based on the header information defined in packet_parser.tcl.
+      Each packet is printed to the screen in a human-readable format
+      for debugging purposes.
+
+ 2.3. How to use Parse and Print
+
+      1) Run the UART Server as described above.
+      2) Run Parse & Print by 'tclsh parse_and_print_packets.tcl'.
+
+      Parse & Print accepts an optional argument "-r <host>:<port>"
+      to connect to a remote uartserver.  The default is port 9001 on
+      the local machine.
+
+ 2.4. Notes
+
+      1) Parse & Print does not currently support TinyDB packet types.
+      2) Parse & Print only supports 1 byte for the settings feedback. For a 
+         feedback list of more than 1 byte, it only parses and prints the last 
+         byte.
+
+3. Settings GUI
+
+ 3.1. Introduction
+
+      The Settings GUI is used to alter the behavior of one or all of the
+      motes inside the network.
+
+ 3.2. Functionality
+
+      The Settings GUI connects to the UART Server, generates a FLOOD packet
+      containing the settings message, and delivers it to the sink node (with
+      UART_Gateway included) to forward it.  Each settings message is
+      flooded to all motes, but can be directed at an individual mote
+      or all motes. Each settings message can contain any subset of the
+      available settings (described below).  The receiver flashes the yellow
+      LED after receiving, and changes the setting accordingly.
+      For the value greater than 255, it automatically adjusts to 255.
+
+      The details of the settings are:
+
+      Feedback List
+         Selects which configuration options are to be sent back as a
+         "piggyback."  Currently the TraceRouteTest application attaches
+         this piggyback to each traceroute packet.  The size of the
+         piggyback is controlled using TR_PIGGYBACK_LEN at compile time.
+         The default piggyback length is 1, and the default feedback
+         list begins with the settings version.  So, each traceroute
+         reports the current settings version number.
+
+      Feedback ID
+         Sets the feedback ID for future piggyback setting messages.
+         The value of the feedback ID can be used to identify the data
+         represented by the feedback list. Value range is 0 ~ 255.
+
+      Setting Version
+         Sets the settings version to an arbitrary number that allows the
+         user to determine if a given settings message has been received
+         by the intended nodes.  As described above, by default the
+         last received settings version number is reported in traceroute
+         packets. Value range is 0 ~ 255.
+
+      Pot Set
+         Sets the value of the radio strength potentiometer (0 - 100); 0 is
+         largest.
+
+      Trace Route
+         Sets the transmit interval of traceroute packets, in seconds, 0 ~ 255.
+
+      DSDV Packet Forwarding
+         Sets the passive acknowledgement to retransmit when not hearing neighbor
+         forwarding packets. DSDV_PASSIVE_ACK has to be 1 at compile time.
+
+      DSDV Rupdate
+         Rupdate Interval -
+            How frequently the sink node sends out the route
+            advertisement, in seconds, 0 ~ 255.
+         Randomize -
+            Enable/Disable a random delay in route update forwarding.
+            RUPDATE_RANDOMIZE has to be 1 at compile time
+
+      Neighbor History
+         Timeout -
+            If a node does not hear from a given neighbor within the
+            specified number of seconds, the node assumes that
+            packets are being dropped from that neighbor. Value range is
+            0 ~ 255.
+         Penalty -
+            The number of packets that are assumed to be dropped after each
+            timeout. Value range is 0 ~ 255.
+
+      Neighbor Quality
+         Sets the neighbor quality threshold.  Neighbors are divided
+         into four categories in terms of their reliability.  These values
+         specify the number of packets out of the last 32 that must have
+         been successfully received to be placed in a given category.
+         Th0 is the lower bound on the top category.  Thus 32>Th0>Th1>Th2>0.
+
+      DSDV Quality Metric
+         When DSDV_Quality is used, the cost of a hop depends on the
+         quality of the link to a given neighbor.  Links in the lowest
+         quality category (as defined above) are assigned a cost of Est0.
+         Links in the highest quality category are assigned a cost of Est3.
+      
+      Mesh Interface
+         Mesh Interface on the motes can be turned on and off by specifying 
+         a list of node IDs. By default the MESH interface is turned on. By 
+         turning MESH off, the sensor nodes no longer route packet through the
+         overlay 802.11 network.
+
+      SoI Control
+         SoI On -
+            When DSDV_SoI is used, the SoI feature can be turned on and off by
+            checking the "SoI On" button (default is on). DSDV_SoI with SoI off
+            is equivalent to the DSDV_Quality metric.
+         Add Adj, Rmv Adj & Node List -
+            The adjuvant capability of the node "Node List" can be added or removed by clicking the "Add Adj" or "Rmv Adj" buttons. When
+            adding an adjuvant node, a value function "ValFunc" has to be
+            specified (default is 2) to indicate how special the node is.
+         ValFunc -
+            The ValFunc ranges from 1 ~ 255. 1 means no special attraction, and
+            when working with TinyDBShim (GSK), 255 means to get the adjuvant
+            value from TinyDB's value function.
+     
+      Tx Control
+      Metric Measurement
+         These settings have no effect in this release.
+
+      Message Size      - Sets the TOS payload size; the default is 29.
+      Payload Size      - Settings payload size, calculated automatically.
+      Flood TTL         - Sets the Time to Live length for the Flood data.
+      Local Group (hex) - Sets the TOS local group; the default is 7d.
+      Destination Addr  - Sets the target mote; 255 is used for broadcast.
+
+ 3.3. How to use the Settings GUI
+
+      1) Run the UART Server by './uartserver COMx 9001' where x is the
+         serial port number or './uartserver COMx 9001 -r49 9000' for
+         TinyDB/GSK.
+      2) Run the Settings GUI by 'wish settings_gui_nesc.tcl'.
+      3) Adjust the message size based on the application. Default message
+         size is 29; for TinyDB/GSK it should be 42.
+      4) Have the TraceRouteTest or GSK/TinyDB sink node on the programming
+         board connected to a PC, which is used to forward the settings message.
+
+ 3.4. Notes
+
+      Due to the nature of the sensor network, settings messages could get
+      lost during the flood mechanism. You might need to click Send several
+      times to ensure that all the nodes receive it.
+
+4. SoI GUI
+
+ 3.1. Introduction
+
+      The SOI GUI is used to graphically show the network topology of
+      the sensor network.
+
+ 3.2. Functionality
+
+      The SOI_GUI connects to the UART server and parses trace route packets
+      to get the path information and displays it graphically on the screen.
+      By looking at the GUI, one can find out the last path taken by any
+      particular node in the sensor network. It supports physical topology
+      display. A map can be added as the background to depict the physical
+      location of individual motes in the sensor network. The GUI can treat certain nodes as special by assigning different colors, and it can show
+      the "Sphere of Influence" by grouping the same-color nodes. This is
+      useful for displaying a heterogeneous sensor network.
+      
+ 3.3. How to use SOI_GUI
+
+      1) Edit the test.topo file to indicate the physical location of the
+         node. Look at the example test.topo file. The format is:
+	   <command> <nodeID> <column> <row>
+	   In order to make a node special, use the soigui_register_adjuvant
+	   command.
+      2) Edit the test.gif file to reflect your physical topology. The
+         example test.gif file reflects a multi-cube setup.
+      3) Run the SOI GUI by 
+         "wish soi_gui.tcl -m -t test.topo -bg test.gif -sp 50".
+         sp indicates the spacing between nodes. -m indicates to display
+         metric information, and -t indicates the name of the topology file.
+      5) Run the TraceRouteTest or SensorMesh applications to see a topology
+         formed on the GUI.
+
+ 3.4. Notes
+       The color of the node turns darker and the arrow disappears
+       if it has not heard from a node for a long time.
+       In the HSN routing, the solid color (representing an adjuvant node) is
+       not removed after disabling the adjuvant feature. It requires a restart
+       of the SOI GUI to reflect the correct color schema.
+

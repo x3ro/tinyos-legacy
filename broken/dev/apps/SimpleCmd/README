@@ -1,0 +1,30 @@
+README for SimpleCmd and Bcast
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+This directory contains two Tiny OS applications: SimpleCmd and Bcast.
+
+SimpleCmd --- handles AM message type 8. This type of message is typically
+a command from  a PC that is connected to the base station. 
+Currently SimpleCmd only support command 4 commands:
+	led_on --- turn the yellow LED on 
+        led_off -- turn the yellow LED off
+        radio_quieter --- decrease the input to RFM.
+        radio_louder  --- increate the input to RFM
+
+Bcast --- can process a command as  SimpleCmd does and forward 
+          a new command over RFM to other motes.
+
+Tools:
+
+net.tinyos.sf.SerialForward
+net.tinyos.tools.BcastInject
+
+These PC tools are used to inject a Am message wich contains a 
+command to the SimpleCmd module
+
+Known bugs/limitations:
+
+Only 4 commands as described above are supported. 
+

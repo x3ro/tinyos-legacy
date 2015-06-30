@@ -1,0 +1,3 @@
+COMPONENT=ReceiverSync
+include ../../Makerules
+

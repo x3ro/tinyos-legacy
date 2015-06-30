@@ -1,0 +1,28 @@
+TOS_MODULE DEBUG;
+JOINTLY IMPLEMENTED_BY DEBUG;
+
+ACCEPTS{
+	void DEBUG_INIT(void);
+    	void LEDS(unsigned char led_action);
+    	void NLEDS(unsigned char led_action);
+    	void FLASH_LEDS(unsigned char led_action);
+    	void NFLASH_LEDS(unsigned char led_action);
+};
+USES{
+	char LEDS_INIT(void);
+        char LEDy_toggle(void);
+        char LEDy_on(void);
+        char LEDy_off(void);
+        char LEDr_toggle(void);
+        char LEDr_on(void);
+        char LEDr_off(void);
+        char LEDg_toggle(void);
+        char LEDg_on(void);
+        char LEDg_off(void);
+
+	char SUB_TIMERS_REGISTER(char, char);
+};
+
+HANDLES{
+	void LEDS_FLASH(short);
+};

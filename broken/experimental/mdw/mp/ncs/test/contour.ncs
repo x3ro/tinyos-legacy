@@ -1,0 +1,80 @@
+
+extern void dbg();
+extern void get_reading();
+extern void get_location();
+extern void sync();
+
+int MAX_NEIGHBORS = 8;                 // Max # neighbors to consider
+int THRESHOLD = 50;                    // Sensor threshold
+
+mirrored onehop bool belowset[];
+mirrored onehop struct location_3d_t location[];
+bool belowset_remote[MAX_NEIGHBORS];
+struct location_3d_t location_remote[MAX_NEIGHBORS];
+struct location_3d_t contourpoints[MAX_NEIGHBORS];
+
+void init() {
+  dbg(DBG_USR1, "Contour: init() called\n");
+}
+
+void start() {
+  dbg(DBG_USR1, "Contour: start() called\n");
+}
+
+void stop() {
+  dbg(DBG_USR1, "Contour: stop() called\n");
+}
+
+static struct location_3d_t midpoint(struct location_3d_t a, struct location_3d_t b) {
+  struct location_3d_t mid;
+  mid.x = (a.x + b.x) / 2.0;
+  mid.y = (a.y + b.y) / 2.0;
+  mid.z = (a.z + b.z) / 2.0;
+  return mid;
+}
+
+periodic(1000) {
+
+  int n, num_cpoints;
+  uint16_t adc_data;
+  bool found = FALSE;
+
+  for (n = 0; n < MAX_NEIGHBORS; n++) belowset_remote[n] = FALSE;
+  adc_data = get_reading();
+  my_location = get_location();
+
+  location.self = get_location();
+
+  if (adc_data < THRESHOLD) {
+    belowset.self = TRUE;
+  } else {
+    belowset.self = FALSE;
+  }
+
+  if (adc_data >= THRESHOLD) {
+    for (n = 0; n < belowset.length; n++) {
+      belowset_remote[n] := belowset[n];
+    }
+    sync();
+
+    for (n = 0; n < location.length; n++) {
+      if (belowset_remote[n]) {
+	found = TRUE;
+	location_remote[n] = location[n];
+      }
+    }
+    sync();
+
+    // Calculate contour points
+    if (found) {
+      for (n = 0; n < belowset.length; n++) {
+       	if (belowset_remote[n]) {
+  	  num_cpoints++;
+  	  contourpoints[n] = midpoint(location.self, location_remote[n]);
+  	  dbg(DBG_USR1, "CONTOUR POINT: %f %f %f\n", contourpoints[n].x, contourpoints[n].y, contourpoints[n].z);
+   	}
+      }
+    }
+  }
+
+}

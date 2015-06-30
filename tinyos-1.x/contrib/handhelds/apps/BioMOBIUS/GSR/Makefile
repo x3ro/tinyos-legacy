@@ -1,0 +1,3 @@
+COMPONENT=GSR
+
+include ../../Makerules

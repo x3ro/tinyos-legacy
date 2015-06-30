@@ -1,0 +1,394 @@
+<html>
+<title>TinyOS Tutorial: Using Matlab with TinyOS</title>
+</head>
+
+<body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%">
+<font face="tahoma,arial,helvetica"><b><big><big>
+Using Matlab with TinyOS</big></big></b>
+<p>
+Last updated 28 April 2005
+</font>
+</td></tr>
+</table>
+
+<p> This tutorial explains how to interact with a mote or sensor network using
+Matlab.  Matlab is matrix-based programming language with a number of libraries
+available for plotting and analyzing data.  It provides a command-line like
+environment (like your bash shell) from which you can send/receive messages
+to/from your sensor network and analyze data.  You can also use all of TinyOS's
+Java tools from within the Matlab environment.  </p>
+
+<p>This tutorial will show how to write a simple Oscilloscope application similar
+to the Java Oscope application that you used in <a href="lesson6.html">Tutorial
+6</a>.  Before you begin this tutorial, be sure that you have read Lesson 6,
+that you have a node connected to your PC that is running the TinyOS
+Oscilloscope application, and that you have <a href="../../tools/matlab/doc/faq.html#setup">set up</a> your Matlab environment to work with TinyOS.</p>
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">Understanding the Basics</font></b></td>
+</tr></table>
+
+<p>The first step in using Matlab with TinyOS is to connect to your Matlab session
+to your sensor network using the <font face="Courier
+New">connect</font> command.  This command takes a single
+argument using the same notation that serialForwarder uses to indicate how it
+should connect.  For example, you can connect directly to your serial port, to a
+serialForwarder, or to an instance of TOSSIM.</p>
+
+<blockquote>
+  <blockquote>
+<p><b><font face="Courier New">connect('serial@COM1:telosb');<br>
+connect('sf@localhost:9001);</font></b></p>
+  </blockquote>
+</blockquote>
+
+<p>This command can be called multiple times to connect your Matlab session to
+several different ports.  For example, you could be connected to a real network
+as well as an instance of TOSSIM.  </p>
+
+<p>The second step is to send a message to the network using the <font
+face="Courier New">send</font> command, which takes two arguments: 1) a node ID
+and 2) a MIG message (MIG is a tool that automatically generates Java
+representations of TinyOS packets.  see <a href="">MIG</a>).  We will be using
+the Oscope MIG objects, so make sure you compile them in the
+tinyos-1.x/tools/java/net/tinyos/oscope directory.  Then, we need to instantiate
+the MIG message, which is a Java class that is a subclass of
+net.tinyos.message.Message.  In Matlab, we can instantiate java objects on the
+command line as follows:</p>
+
+</p> <blockquote> <blockquote>
+<p><b><font face="Courier New">msg=net.tinyos.oscope.OscopeResetMsg</font></b></p>
+  </blockquote>
+</blockquote>
+<p>
+
+<p>Once the java object is instantiated, we can send it to the network:</p>
+</p> <blockquote> <blockquote>
+<p><b><font face="Courier New">
+send(1, msg)</font></b></p>
+  </blockquote>
+</blockquote>
+<p>
+
+<p>This command automatically addresses the message to node 1.  However, it could
+also be addressed to all nodes (just as in TinyOS) using TOS_BCAST_ADDR, which
+is available in a predefined global struct called COMM:</p>
+</p> <blockquote> <blockquote>
+<p><b><font face="Courier New">
+send(COMM.TOS_BCAST_ADDR, msg)</font></b></p>
+  </blockquote>
+</blockquote>
+<p>
+
+<p>When used with only two arguments, the <font
+face="Courier New">send</font> command sends to all ports to which the Matlab
+session is connected.  You may also pass optional parameters to specify that the
+packet should only be send to certain ports:</p>
+
+</p> <blockquote> <blockquote>
+<p><b><font face="Courier New">
+send(COMM.TOS_BCAST_ADDR, msg, serial@COM1:telosb, sf@localhost:9001, ...);</font></b></p>
+  </blockquote>
+</blockquote>
+<p>
+
+<p>The next step is to receive messages from our network using the <font
+face="Courier New">receive</font> command, which takes two parameters: 1) the
+Matlab function that will handle the incoming message events and 2) an example
+instance of the MIG object that should be received.  We would like to receive
+the OscopeMsg, which is the message type that the TinyOS Oscilloscope application uses
+to transmit its data.  Therefore, we first instantiate a OscopeMsg object.</p>
+
+<blockquote>
+  <blockquote>
+<p><b><font face="Courier New">
+omsg = net.tinyos.oscope.OscopeMsg</font></b></p>
+  </blockquote>
+</blockquote>
+
+<p>Then, we create a Matlab function that takes two parameters: an address and a 
+message. (Look at tools/matlab/util/printMsg.m as an example). Finally, we
+register the function as an event handler for messages of this type: </p>
+
+<blockquote>
+  <blockquote>
+<p><b><font face="Courier New">
+receive('printMsg', omsg);</font></b></p>
+  </blockquote>
+</blockquote>
+
+<p>Whenever a message of type OscopeMsg is received, the printMsg function will be 
+called with the message passed to it as a parameter.  If you have an Oscilloscope
+mote attached to serial@COM1 or sf@localhost:9001, the messages will start appearing on 
+the screen.</p>
+
+<p>Similar to <font
+face="Courier New">send</font>, <font
+face="Courier New">receive</font> takes a port, e.g. serial@COM1 or 
+sf@localhost:9001, as an optional third argument to indicate that this Matlab
+function should only serve as a message handler for messages on these ports.</p>
+
+<p>At this point, the OscopeMsg objects should be printing to your screen about
+once per second.  To stop this, you could use the <font
+face="Courier New">stopReceiving</font> command to de-register your Matlab
+function as a message handler.
+
+<blockquote>
+  <blockquote>
+<p><b><font face="Courier New">
+stopReceive('printMsg', omsg);</font></b></p>
+  </blockquote>
+</blockquote>
+
+Alternatively, if you have several message handlers, you could simply start and
+stop the entire Matlab comm stack.  Both of these functions take optional
+parameters that specify which ports should be started and stopped.
+
+<blockquote>
+  <blockquote>
+<p><b><font face="Courier New">
+startComm('printMsg', omsg);<br>
+startComm('printMsg', omsg, serial@COM1);</font></b></p>
+  </blockquote>
+</blockquote>
+
+<blockquote>
+  <blockquote>
+<p><b><font face="Courier New">
+stopComm('printMsg', omsg);<br>
+stopComm('printMsg', omsg, serial@COM1);</font></b></p>
+  </blockquote>
+</blockquote>
+
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">A Sample Application: Oscope</font></b></td>
+</tr></table>
+
+<p>In this part of the tutorial we explain how to put all of the basic commands
+together to form a complete application.  The application we will use as an
+example is <a href=../../tools/matlab/apps/oscope.m>Oscope</a> which performs the same functionality as the Java Oscope
+application described in Lesson 6. </p>
+
+<p>The structure of Matlab applications may resemble that of a TinyOS
+application: it has a StdControl section, timer event handlers, and message
+event handlers.  The first few lines in the application should resemble these:</p>
+
+<center>
+<table hspace="4" width="80%" cellpadding="3" cellspacing="2" border="0">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>oscope.m</b>
+      <pre>
+<b>function oscilloscope(varargin)</b>
+
+if nargin>0 & ischar(varargin{1})
+&nbsp;&nbsp;  feval(varargin{1},varargin{2:end});
+elseif nargin==0 
+&nbsp;&nbsp;  usage;
+end
+
+<b>function usage</b>
+fprintf('USAGE:\n\toscilloscope(''init'')\n\toscilloscope(''start'')\n\toscilloscpe(''reset'')\n\tetc.\n')
+
+      </pre>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+
+<p>This code indicates that the application name is "oscope".  All other code is
+used to dispatch the rest of the commands, which are defined below.  </p>
+
+<p> The next section of the application indicates how to initialize,
+start, and stop the application.
+</p>
+
+<center>
+<table hspace="4" width="80%" cellpadding="3" cellspacing="2" border="0">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>oscope.m</b>
+      <pre>
+<b>function init(varargin)</b>
+%% create a global structure to hold persistent state for this application
+global OSCOPE
+
+%% import all necessary java packages
+import net.tinyos.*
+import net.tinyos.message.*
+import net.tinyos.oscope.*
+
+%% connect to the network
+connect('sf@localhost:9001');
+
+%% instantiate the application message types for future use
+OSCOPE.oscopeMsg = oscope.OscopeMsg;
+OSCOPE.resetMsg = oscope.OscopeResetMsg;
+
+OSCOPE.plot = plot(1);
+
+<b>function start</b>
+global OSCOPE
+%% register as a listener to OscopeMsg objects
+receive(@oscopeMessageReceived,OSCOPE.oscopeMsg);
+
+<b>function stop</b>
+global OSCOPE
+%% unregister as a listener to OscopeMsg objects
+stopReceiving(@oscopeMessageReceived,OSCOPE.oscopeMsg);
+      </pre>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+ 
+<p> To initialize the application, we first connect to a running
+SerialForwarder.  Then, we instantiate the two MIG messages that we will be
+using later, and we store them as fields in the OSCOPE global struct.  This
+struct is used to hold persistent state of this application.  We also create a
+Matlab "plot" which we will use to display the incoming Oscilloscope data.  The
+"start" and "stop" functions register and un-register this application's message
+handler, which is defined below.  The "@" notation indicates that we are passing
+a reference to the locally-defined function called "oscopeMessageReceived".
+</p>
+
+
+<p>The next step is to define our message handler.  This message handler
+takes the data from the plot and appends the data from the message to it, adding
+it back to the plot.
+</p>
+
+<center>
+<table hspace="4" width="80%" cellpadding="3" cellspacing="2" border="0">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>oscope.m</b>
+      <pre>
+<b>function oscopeMessageReceived(address, oscopeMsg, varargin)</b>
+global OSCOPE
+xdata = get(OSCOPE.plot,'XData');
+ydata = get(OSCOPE.plot,'YData');
+set(OSCOPE.plot,'XData',[xdata oscopeMsg.lastSampleNumber-9:oscopeMsg.lastSampleNumber]);
+set(OSCOPE.plot,'YData',[ydata oscopeMsg.get_data']);
+      </pre>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+ 
+<p>We can also define a "reset" function, which will perform two functions
+similar to those found in the Java oscope application: 1)
+reset the oscilloscope node and 2) reset the plot.  In this case, we will
+parameterize this function with an optional "address".  If the address is
+defined, only that node will be reset.  Otherwise, all nodes will be reset
+</p>
+
+<center>
+<table hspace="4" width="80%" cellpadding="3" cellspacing="2" border="0">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>oscope.m</b>
+      <pre>
+<b>function reset(address)</b>
+global OSCOPE
+global COMM
+if nargin<1 address = COMM.TOS_BCAST_ADDR; end
+send(address,OSCOPE.resetMsg);
+set(OSCOPE.plot,'XData',[]);
+set(OSCOPE.plot,'YData',[]);
+      </pre>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+ 
+<p>Finally, we can include timers in our application.  This allows us to do
+repeated or time-based actions.  In our example, we will use a timer to reset
+the node every 10 seconds.  To use timers, we need to change the StdControl
+functions to initialize, start and stop the timer.  We also need to define a
+timer event handler.  In our case, the event handler will be called "timerFired"
+and will simple call the "reset" function we defined earlier.
+</p>
+
+<center>
+<table hspace="4" width="80%" cellpadding="3" cellspacing="2" border="0">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>oscope.m</b>
+      <pre>
+<b>function init(varargin)</b>
+...
+OSCOPE.timer = timer('Name', 'Oscope Timer','TimerFcn',@timerFired,'ExecutionMode','fixedRate','Period',10);
+
+<b>function start</b>
+...
+startTimer(OSCOPE.timer)
+
+<b>function stop</b>
+...
+stopTimer(OSCOPE.timer)
+
+<b>function timerFired</b>
+reset;
+      </pre>
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+ 
+<p>This application can now be used from the command line by calling any of its
+functions.  Here is an example session that will initialize, start, reset, and
+stop the oscope.m application. We also call the "reset" function with a
+parameter of "10" to only reset node number 10.
+</p>
+
+</p> <blockquote> <blockquote>
+<p><b><font face="Courier New">
+oscope init;<br>
+oscope start;<br>
+oscope reset;<br>
+oscope reset 10;<br>
+oscope stop;<br>
+</font></b></p>
+  </blockquote>
+</blockquote>
+<p>
+
+<p>We leave it as an exercise to the reader to plot oscope data from multiple
+different oscope nodes.  Another useful exercise is to add a "reset" button to the plot
+so that the user can simply click on the button instead of resetting the
+application from the command line.  HINT: use the "guide" function in Matlab to
+create a GUI.  A third useful exercise is to add the pan/zoom functionality that
+is in the java application.  HINT:  use the "plt" function instead of the "plot"
+function.  "plt" can be found on the web on the Mathworks.com file exchange web pages.  
+</p>
+
+For more information about using Matlab and TinyOS, see the <a
+href=../../tools/matlab/doc/faq.html>FAQ</a>.
+
+<p>
+<hr>
+<b><a href="index.html"> Tutorial Index </a></b>
+<hr>
+
+----------------<br>
+Kamin Whitehouse
+</body>
+</html>

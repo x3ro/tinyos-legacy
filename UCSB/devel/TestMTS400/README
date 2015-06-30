@@ -1,0 +1,14 @@
+The purpose of this test today is to implement power conservation in the 
+IntrusionDetection Mote.
+
+Testing will be done on 4/28/2006
+
+Here is what I want to test:
+
+--Power conservation with the use of HPLPowerManagementM.
+	-- I will try to find out the pros and cons of turning power off in 
+		between radio Transmissions
+	-- I will then work on turning off the power in between taking samples.
+		-- I am sampling 
+	
+

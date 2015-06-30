@@ -1,0 +1,7 @@
+This directory holds two test apps which should be installed on the mica2dot if it has an ultrasound ranging sensorboard with ultrasoundBoardApp installed on it.   The two apps are TransmitterApp and ReceiverApp, and they configure the mica2dot to be only a transmitter or a receiver.  TransceiverApp in this directory is broken; look at ../micaUltrasoundApp/TransmitterApp for a transceiverApp (historical misnaming problem).
+
+The TransmitterApp will make the node transmit one ranging message every two seconds.
+
+The ReceiverApp will cause the node to send a TimestampMsg over the radio whenever a ranging message is received.  
+
+

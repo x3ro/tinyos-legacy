@@ -1,0 +1,17 @@
+README for CntToRfm
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+CntToLeds maintains a counter on a 4Hz timer and sends out the value
+of the counter in an IntMsg AM packet on each increment.
+
+
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+None.

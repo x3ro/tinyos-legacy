@@ -1,0 +1,34 @@
+Test file for TINY_ALLOC. Docs below copied from TINY_ALLOC.c, 4/2/02.
+
+TINY_ALLOC is a simple, handle-based compacting memory manager.  It
+allocates bytes from a fixed size frame and returns handles (pointers
+to pointers) into that frame.  Because it uses handles, TINY_ALLOC can
+move memory around in the frame without changing all the external
+references.  Moving memory is a good thing because it allows frame
+compacting and tends to reduce wasted space.  Handles can be accessed
+via a double dereference (**), and a single dereference can be used
+wherever a pointer is needed, but if a single dereference is to be
+stored, the handle must be locked first as otherwise TINY_ALLOC may
+move the handle and make the reference invalid.
+
+   Like all good TinyOS programs, TINY_ALLOC is split phase with
+respect to allocation and compaction.  Allocation completion is
+signalled via a TINY_ALLOC_COMPLETE signal and compaction via a
+TINY_ALLOC_COMPACT_COMPLETE signal.  All other operations complete and
+return in a single phase. Note that compaction may be triggered
+automatically from allocation; in this case a COMPACT_COMPLETE event
+is not generated.
+
+Handles are laid out in the frame as follows:
+
+   [LOCKED][SIZE][user data] 
+
+Where: 
+    LOCKED     : a single bit indicating if the handle is locked 
+    SIZE       : 7 bits representing the size of the handle 
+    user data  : user-requested number of bytes (**h) points to
+                 [user data], not [LOCKED].
+
+   Calling TOS_COMMAND(TINY_ALLOC_SIZE(h)) returns the size of [user
+data] (note that the internal function size() returns the size of the
+entire handle, including the header byte.)

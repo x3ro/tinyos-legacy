@@ -1,0 +1,248 @@
+TinyViz - The TinyOS Simulator GUI
+Nelson Lee, Matt Welsh, Phil Levis, and Dennis Chi
+
+TinyViz is an extensible GUI for TOSSIM/Nido, the TinyOS simulator. It
+allows you to visualize and debug the operation of TinyOS programs. You
+can write your own GUI "plugins" to extend the basic functionality of
+the UI. TinyViz also supports a batch mode, allowing you to set up
+parameters for your plugin, run it automatically, and log all of the
+messages and events produced by the simulation into a file.
+
+To compile TinyViz:
+
+1) Be sure that you have compiled the files in net/tinyos/message:
+     cd net/tinyos/message
+     make
+
+2) Simply type "make" in this directory:
+     cd net/tinyos/sim
+     make
+
+3) TinyViz can be compiled into an executable JAR file that contains all
+   of the classes, images, and other components required for exection.
+   Using this JAR file eliminates any worries about CLASSPATH setup; the
+   JAR file contains all of the required classes. 
+   
+   To build the JAR file, type:
+     make jarfile
+
+To run TinyViz,
+
+1) Start up your simulation with the "-gui" command line opetion. For
+   example,
+
+     cd apps/CndToLeds
+     make pc
+     ./build/pc/main.exe -gui 10
+
+   The simulation will not start until the GUI has connected to it. 
+   It will print:
+
+   SIM: Created server socket waiting for client connection on port 10840.
+
+2) In another window, start up TinyViz:
+
+     java -jar tinyviz.jar
+
+   The TinyViz window will pop up. Pressing the "play" button will start
+   the simulation; pressing the "pause" button will cause it to pause.
+   Sliding the "delay" slider will slow down the rate at which events
+   are processed from the simulation. 
+
+   Currently, the mote location in the TinyViz display is meaningless.
+   TinyViz places the motes in random locations on the screen. You can
+   move the motes around; eventually this will send feedback to TOSSIM
+   itself as to the "real" location of the motes. 
+
+   To get useful information from the GUI, you need to enable one or
+   more "plugins", by selecting them from the Plugins menu. There are
+   several plugins included with TinyViz by default:
+    
+      DebugMsgPlugin - Shows the debug messages in a window
+      RadioLinkPlugin - Visualize radio connectivity of motes
+      MotePacketPlugin - Show the radio messages sent by motes
+      BreakpointPlugin - Cause the GUI to pause when an event occurs
+
+   Enabling a plugin from the "Plugins" menu allows you to configure
+   that plugin using the controls on the right-hand window. For example,
+   with DebugMsgPlugin enabled, you can select motes from the display
+   and click the "Selected motes only" box to see debug messages only
+   from the selected motes.
+
+Note that the debug messages received by TinyViz are those selected
+using the 'DBG' environment variable when you run TOSSIM itself. So, if
+you want to see LEDS and AM debug messages in TinyViz, you need to start 
+up TOSSIM using:
+   DBG=led,am ./build/pc/main.exe -gui 10
+
+It does not matter what order you start up TOSSIM and TinyViz. Also, you 
+can restart TOSSIM without restarting TinyViz, and vice versa: when TOSSIM
+is run with the "-gui" command line option, it will not run unless
+TinyViz is connected to it. If the connection to TOSSIM is broken or 
+cannot be established, the "Play" button will show a picture of 
+a broken socket. Pressing the button will attempt to reconnect to 
+the simulator. If you restart TOSSIM, the simulator state will be
+cleared out of TinyViz, but your other settings (e.g., breakpoints) will
+remain entact.
+
+TinyViz starts up a serial forwarder automatically, so that mote
+applications that want to talk to the simulated basestation (like
+Surge) can do so. (Use the "-nosf" command line argument to TinyViz to
+suppress starting up the SerialForwarder. You can always start a
+SerialForwarder manually using the "Nido serial" data source.)
+
+For example, to run the Surge3 demo in TinyViz:
+
+1) Build the Surge application code:
+     cd broken/experimental/mdw/surge3/apps/Surge
+     make pc
+
+2) Build the Surge Java GUI:
+     cd ../../tools/java/net/tinyos/surge
+     make
+
+3) Start up the Surge TOSSIM application:
+     DBG=usr1 /build/pc/main.exe -gui 10
+
+4) In a separate window, start up TinyViz:
+     java -jar tinyviz.jar
+
+5) Finally, in yet another window, start up the Surge GUI:
+     java net.tinyos.surge.MainClass 0x11
+   (Replace '0x11' with the AM group ID used in the Surge app itself.)
+
+It's important to start the applications in this order, since TinyViz
+must connect to Surge, and the Surge GUI must connect to TinyViz (for
+the serial forwarder).
+
+6) Click the 'play' button in TinyViz. You should see the motes. Enable
+   plugins as needed.
+
+7) Click on "Start root beacon" in the Surge GUI. This will start the
+   root beacon, causing the Surge motes to "wake up" and start sending
+   packets.
+
+WRITING TINYVIZ PLUGINS
+-----------------------
+
+You can (and are encouraged to) write your own plugins to TinyViz that
+manipulate or visualize the simulation in various ways. Rather than
+placing your plugin code in the 'plugins' directory, however, consider
+co-locating the plugin code with your application. This makes plugins
+easier to maintain and avoids polluting the TinyViz code tree with lots
+of app-specific code. (Of course, if your plugin is generally useful it
+would be great to have it in the main tree.)
+
+Use the "-plugins" command line option to add directories to the plugin
+search path for TinyViz. For example,
+
+   java -jar tinyviz.jar -plugins /home/mdw/plugins:/home/nalee/plugins
+
+adds these two directories to the list that is searched for plugins. All
+Java classes that subclass net.tinyos.sim.Plugin are added to the
+plugins list available to TinyViz.
+
+To write your own plugin, use RadioLinkPlugin.java as an example.
+You can store information about motes by setting and retrieving
+attributes on the MoteSimObjects themselves; this allows multiple
+plugins to share information (rather than maintaining internal state
+about each mote). Feel free to paint all over the MotePanel, but realize
+that you don't have control over which order plugins draw in. Every
+plugin is provided a JPanel called "pluginPanel" that you can use to add
+controls, widgets, or other information specific to your plugin; the
+user can view this panel by clicking on the appropriate tab on the
+right-hand side of the window.
+
+     
+THE TOSSIM-TINYVIZ PROTOCOL 
+---------------------------
+
+Communication between TOSSIM and TinyViz is greatly simplified.
+TOSSIM listens on two ports: the "command port" (10584) and the "event
+port" (10585). Any number of clients can connect to either of these
+ports, and there is no requirement that a particular client program
+connect to both ports at once. 
+
+The event port is used to send events from TOSSIM to clients, such as
+debug messages, radio messages, ADC readings, and so forth. The command
+port is used to send commands into TOSSIM from clients, such as turning
+motes on and off, setting ADC channel values, and so forth. 
+
+The format of the messages is defined in the file tos/platform/pc/GuiMsg.h.
+The corresponding Java implementation of this protocol is in
+SimProtocol.java. In general, you should ALWAYS use SimProtocol.java to
+communicate with TOSSIM from Java applications. If you find yourself
+writing another protocol library, think twice. Invariably these things
+break or drift away from the "official" protocol implementation over
+time; it is best to use the same library as everyone else.
+
+TOSSIM waits for a single-byte ACK for every event message that it
+generates. This allows clients to throttle the speed at which TOSSIM
+runs, by delaying this ACK. Note that if multiple clients are connected
+to TOSSIM's event port, it will wait for an ACK for each one. In general
+clients should send the ACK immediately. Commands sent from clients to
+TOSSIM via the command port are not acknowledged.
+
+GuiMsg.h defines the event and command types supported by TOSSIM.
+THINK TWICE BEFORE ADDING NEW EVENT AND COMMAND TYPES. Our hope is to
+have a VERY small number of message types that cover most of the bases.
+Adding a new message type is somewhat painful, requiring changes in
+several places to ensure that everything is consistent. We use MIG to
+generate the Java wrappers for each message type but there are some
+wrinkles that 
+
+Rather than adding application-specific message types, ask whether you
+can accomplish the same thing using radio or debug messages with a
+special format. If you absolutely need a new message type in GuiMsg.h,
+talk to us (via mdw@eecs.harvard.edu) and we will discuss your needs.
+
+AUTORUN MODE
+------------
+
+The so-called "autorun" mode of TinyViz allows you to run one or more
+simulations in batch mode and log the results to a file. During the run,
+the GUI is active and you are free to watch, interact with, pause, etc.
+the simulation if you wish. You can write TinyViz plugins to gather
+statistics during the run or interact with the running simulation, for
+example, by setting sensor values. Plugins operate just as they do
+during interactive use of TinyViz.
+
+First, create an autorun configuration file - there is an example here
+called "test.autorun". Read this file carefully - the comments explain
+the format. Essentially, you set up the various parameters for the run
+(TOSSIM executable, number of motes, etc.) and specify a log file to log
+all of the received events to. For example,
+
+  logfile LOG.1
+  executable /home/apps/whatever/build/pc/main.exe
+  plugin RadioLinkPlugin
+  nummotes 16
+
+runs the given simulation with 16 motes, enables the RadioLinkPlugin, 
+and logs results to the file LOG.1. 
+
+Multiple simulation runs can be specified in the file, in which case a
+simulation needs to terminate either by:
+  (a) Specifying the total number of virtual seconds to run, using "numsec";
+  (b) Specifying a substring match on debug messages that stops the
+      simulation; or
+  (c) You pressing the "stop" button in the GUI.
+
+All options specified in the configuration file are passed to plugins
+using the OptionSetEvent event, which consists of two fields: "name" and
+"value". For example, the line:
+  radiomodel disc100
+sets the "radiomodel" option to the value "disc100". If your plugin
+understands this option it can use this information to configure itself
+for the simulation run.
+
+Since all messages are logged to the logfile, you can write scripts to
+process the results off-line, for example, to count the number of radio
+messages or gather other statistics about the run.
+
+To use autorun mode, run:
+   java -jar tinyviz.jar -autorun <autorun_config_file>
+
+where <autorun_config_file> is the config file you created, above.
+
+

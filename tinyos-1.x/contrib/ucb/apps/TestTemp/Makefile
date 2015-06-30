@@ -1,0 +1,3 @@
+COMPONENT=TestTemp
+include ../Makerules
+

@@ -1,0 +1,206 @@
+#!/usr/bin/perl -w
+use strict;
+use POSIX ":sys_wait_h";
+
+my %Tags = (
+  perl => \&perl_block,
+  shell => \&shell_block,
+  CODE => \&code_block,
+);
+my %Cmds = ();
+my @Pids = ();
+
+my $text = do{local $/;<>};
+
+my $parts = parse_text( $text, [sort keys %Tags] );
+process_parts( $parts );
+$text = join "", map { $_->{text} } @$parts;
+print "$text\n-----\n";
+eval( $text ); die $@ if $@;
+wait_subcmd();
+
+
+sub bashsub {
+  my $text = $_[0];
+  $text =~ s{ (?<!\\) \$ \{? (ARG)? (\d+) \}? }
+            { if( defined $1 ) { $ARGV[$2] || ""; }
+	      else { $_[$2] || ""; }
+	    }gex;
+  my %proc = run( sub { exec(qw(/bin/sh -x -)); } );
+  my $wh = $proc{wh};
+  print $wh $text;
+  close $wh;
+  return %proc;
+}
+
+sub run {
+  my %proc = ( forksub(@_), text => "" );
+  push( @Pids, \%proc );
+  return %proc;
+}
+
+sub wait_subcmd {
+  my $more = 1;
+  while ($more) {
+    $more = 0;
+    for my $pid (@Pids) {
+      if( !$pid->{closed} ) {
+	$more = 1;
+	my $rh = $pid->{rh};
+	my ($rout, $rin, $eout) = ('','','');
+	vec( $rin, fileno($rh), 1 ) = 1;
+	while( !$pid->{closed} && select( $rout=$rin, undef, $eout=$rin, 0 ) ) {
+	  my $ln = <$rh>;
+	  if( !defined $ln ) {
+	    close $rh;
+	    $pid->{closed} = 1;
+	    (my $text = $pid->{text}) =~ s/^/$pid->{pid}> /gm;
+	    print "$text\n";
+	  } else {
+	    $pid->{text} .= $ln;
+	  }
+	}
+      }
+    }
+  }
+
+  my $kid; do { $kid = waitpid(-1,0); } until $kid > 0;
+}
+
+sub forksub {
+  my ($cmd,@opts) = @_;
+  my ($parent_rh,$parent_wh,$child_rh,$child_wh);
+  pipe $parent_rh, $child_wh;
+  pipe $child_rh, $parent_wh;
+  my $pid = fork;
+  if( $pid == 0 ) {
+    close $parent_rh;
+    close $parent_wh;
+    open STDIN, "<&=", $child_rh or die "Could not dup STDIN, $!\n";
+    open STDOUT, ">&=", $child_wh or die "Could not dup STDOUT, $!\n";
+    open STDERR, ">&=", $child_wh or die "Could not dupe STDERR, $!\n";
+    exit $cmd->(@opts);
+  }
+  close $child_rh;
+  close $child_wh;
+  return ( pid=>$pid, rh=>$parent_rh, wh=>$parent_wh );
+}
+
+
+sub perl_block {
+  my %arg = @_;
+  die "ERROR, $arg{part}->{type} block (line $arg{part}->{linenum}) required a cmd attribute\n"
+    unless exists $arg{opts}->{cmd};
+  $Cmds{$arg{opts}->{cmd}} = 1;
+  return "sub $arg{opts}->{cmd} \{$arg{text}\}\n";
+}
+
+
+sub shell_block {
+  my %arg = @_;
+  die "ERROR, $arg{part}->{type} block (line $arg{part}->{linenum}) required a cmd attribute\n"
+    unless exists $arg{opts}->{cmd};
+  $Cmds{$arg{opts}->{cmd}} = 1;
+  return <<"EOF";
+sub $arg{opts}->{cmd} {
+  my \$bash =<<'BASH_EOF';
+$arg{text}
+BASH_EOF
+  bashsub( \$bash, \@_ );
+}
+EOF
+}
+
+
+sub code_block {
+  my %arg = @_;
+  my $cmd = join "|", sort keys %Cmds;
+  $arg{text} =~ s{^ [^\S\n]* ($cmd) \b\s* ([^\(\n]*) }{$1(qw($2));}gxm;
+  return $arg{text};
+}
+
+
+sub process_parts {
+  my ($parts) = @_;
+  my %cmds = ();
+  for my $part (@{$parts}) {
+
+    if( exists $Tags{$part->{type}} ) {
+
+      my $tag = $part->{type};
+      my $repl = undef;
+
+      if( $part->{text} =~ m{^<$tag([^>]*)>(.*)</$tag>$}s ) {
+	my ($arg,$block) = ($1,$2);
+
+	my %opts = map { m/(.*?)=(.*)/ ? ($1 => $2) : ($_ => 1) }
+		   grep { /\S/ }
+		   split /\s+/, $arg;
+
+	$repl = $Tags{$tag}->( part=>$part, opts=>\%opts, text=>$block );
+
+      } else {
+
+	$repl = $Tags{$tag}->( part=>$part, text=>$part->{text} );
+
+      }
+
+      $part->{text} = $repl if defined $repl;
+
+    }
+
+  }
+}
+
+
+sub parse_text {
+  my ($text,$special) = (@_);
+  my $kw = $special ? join( "|", @$special ) : '\w+';
+
+  my $re = qr{
+     ( \# [^\n]* )                      # $1 perl/shell comment
+    |( << (['"]?) (\w+) \3 .*? \n\4\n ) # $2 heredoc, ($3 quote, $4 eof)
+    |( (['"]) (?: \\. | [^\6] )* \6 )   # $5 quoted string, ($6 quote)
+    |( <($kw)\b[^>]*> .*? </\8> )       # $7 special block, $8 special keyword
+    |( [^#'"<]+ | . )                   # $9 everything else
+  }xs;
+
+  my $code = undef;
+  my @parts = ();
+  while( $text =~ m{$re}g ) {
+    my ($rem,$hdoc,$str,$block,$tag,$other) = ($1,$2,$5,$7,$8,$9);
+
+    push( @parts, { type => "COMMENT", text => $rem } ) if defined $rem;
+    push( @parts, { type => "HEREDOC", text => $hdoc } ) if defined $hdoc;
+    push( @parts, { type => "STRING", text => $str } ) if defined $str;
+    push( @parts, { type => lc $tag, text => $block } ) if defined $block;
+
+    if( defined $other ) {
+      if( defined $code ) {
+	${$code} .= $other;
+      } else {
+	push( @parts, { type => "CODE", text => $other } );
+	$code = \$parts[-1]->{text};
+      }
+    } else {
+      $code = undef;
+    }
+  }
+
+  linenumber_parts( \@parts );
+
+  return \@parts;
+}
+
+
+sub linenumber_parts {
+  my ($parts) = @_;
+  return unless @{$parts};
+  $parts->[0]->{lines} = ($parts->[0]->{text} =~ tr/\n//);
+  $parts->[0]->{linenum} = 1;
+  for( my $i=1; $i<@{$parts}; $i++ ) {
+    $parts->[$i]->{lines} = ($parts->[$i]->{text} =~ tr/\n//);
+    $parts->[$i]->{linenum} = $parts->[$i-1]->{linenum} + $parts->[$i-1]->{lines};
+  }
+}
+

@@ -1,0 +1,29 @@
+Description:
+
+Scheduler - simply calls getSample on PIR every 75ms
+PIRDetectorM - gets ADC sample, computes stats, writes stats to UART every 75 ms
+	         if detected signals event to Aggregator
+Aggregator - initializes everything, event handlers for detection events
+             wires to KrakenC
+
+Expt setup
+==========
+NO_xxx = TRUE for everything except SENSORS and UART in Makefile 
+NO_PROMETHEUS=TRUE as well
+On startup: trio beeps 
+
+Config 1:
+=========
+Use NO_DELUGE in Makefile
+Comment out in KrakenC.nc the 2 lines
+StdControl = GrouperC;
+StdControl = RemoteC;
+
+This eliminates all modules that can send radio msg (my app doesnt have any radio sends)
+Observation: Data rcvd on serial port at 14Hz
+
+Config 2:
+=========
+Include Deluge in Makefile
+Keep GrouperC and RemoteC commented
+Observation: Serial messages dont come through, if you reset node, may see 1-2msgs in SF

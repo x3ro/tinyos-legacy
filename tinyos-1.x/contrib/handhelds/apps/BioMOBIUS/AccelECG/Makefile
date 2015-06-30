@@ -1,0 +1,3 @@
+COMPONENT=AccelECG
+
+include ../../Makerules

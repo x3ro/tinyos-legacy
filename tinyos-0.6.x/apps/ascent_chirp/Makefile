@@ -1,0 +1,7 @@
+APP_CFLAGS:=
+				-DUSE_UART_AGGRESIVELY\
+				-DUSE_DIFFUSION\
+				-DINFINITE_CHIRPS=1
+
+include ../Makeinclude
+

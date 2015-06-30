@@ -1,0 +1,6 @@
+#Under tinyos distribution
+BASEDIR=../../../../tos/
+#Under tinyosDev/pub/apps
+#BASEDIR=../../../../tinyosDist/tinyos/tos/
+#Under tinyosDev/apps
+#BASEDIR=../../../tinyosDist/tinyos/tos/

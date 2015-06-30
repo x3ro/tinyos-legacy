@@ -1,0 +1,3 @@
+COMPONENT=BaseSync
+include ../../Makerules
+

@@ -1,0 +1,3 @@
+PFLAGS += -I$(SPAULDINGSRC)/fetch/ 
+PFLAGS += -I$(SPAULDINGSRC)/lib/ 
+PFLAGS += -I$(SPAULDINGSRC)/dataStore/

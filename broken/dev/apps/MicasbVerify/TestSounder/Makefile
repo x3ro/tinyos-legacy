@@ -1,0 +1,3 @@
+COMPONENT=TestSounder
+include ../../Makerules
+

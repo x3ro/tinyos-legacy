@@ -1,0 +1,23 @@
+MIG=mig java
+
+all: hardware_check.class
+
+hardware_check.class: hardware_check.java DiagMsg.java RxTestMsg.java
+	javac -sourcepath . $<
+
+run: all
+	#make mica install
+	@echo
+	@echo
+	@echo "Hardware check, assuming mote access via $${MOTECOM:-sf@localhost}"
+	@echo "(set MOTECOM environment variable to change this)"
+	java hardware_check
+
+DiagMsg.java:
+	$(MIG) -java-classname=DiagMsg MicaHWVerify.nc DiagMsg -o $@
+
+RxTestMsg.java:
+	$(MIG) -java-classname=RxTestMsg MicaHWVerify.nc RxTestMsg -o $@
+
+clean:
+	rm DiagMsg.java RxTestMsg.java *.class

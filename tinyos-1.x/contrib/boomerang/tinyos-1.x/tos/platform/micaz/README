@@ -1,0 +1,68 @@
+MICAZ (IEEE 802.15.4 Radio) Release Notes
+03Jun04
+
+PURPOSE
+Platform support for MICAZ mote
+
+NOTES
+
+1. PLATFORM_MICAZ
+In general this define and should be added to various applications/libraries wherever PLATFORM_MICA2
+is found (eg QueueSendM.nc).
+
+2. INT2 GPIO Line
+Mica signal INT2 (Port E Pin 6 on ATMega128/) is used internally on the MICAZ for
+CC2420 Receiver FIFO Ready interrupt. Use of INT2 for any other purpose must be
+done with care. Specifically, the Port configuration (input, active low) must be
+restored following use in other modes.
+
+Below is a list of compatibility issues and work-arounds.
+
+MICASB (Sensorboard) Temperature/Photo 
+Background
+INT2 control line is used on the MICASB (Sensorboard)for enabling the MICASB Thermistor.
+-During Temperature measurement interrupts from the MICAZ radio indicating received
+packet are inhibited. MICAZ Radio received packets are buffered in the CC2420
+RX FIFO. If	the MICASB Thermistor is enabled for too long the receiver buffer may overflow.
+
+-During Temperature measurements dropout in data reading. This is due to receipt of a radio
+packet which will strobe the INT2 and thus affect the thermistor voltage.
+
+-Following Temperature measurement, the MICASB driver must restore the INT2 port to 
+configuration used for handling interrupts from the CC2420 radio. Symptom of not restoring
+the INT2 port correctly is all that radio reception stops.
+
+Work arounds:
+
+-INT2 Control
+A modified PhotoTempM.nc module is provided in ../platform/micaz. This module restores INT2 port
+configuration for the MICAZ radio following each measurement.
+
+-Temperature data drop out
+Software can be added to exclude/discard temperature reading differentials that exceed what
+is physically possible from one sample to the next. I.e. a dropout is indicated by a change
+of >20C in 1 sample interval.
+
+Hardware can be modified to buffer/override CC2420 Radio's packet received flag during 
+temperature measurements. The following changes are suggested.
+
+MICASB Module. Remove capacitor C1 (located near RT1 thermistor)
+MICAZ Module. Change resistor R31 to 10KOhm.
+
+3. ATmega128 TIMER2 Use
+Timer2 is used for high resolution (32uSec) timing in the CC2420Radio stack. 
+The module ../platform/micaz/HPLTimer2.nc provides the Timer2 resources to AsyncTimerJiffy
+ component for this service. 
+
+Applications using Timer2 will have to be modified to avoid conflicts with its use on the
+MICAZ platform.
+
+###
+
+ 
+
+
+
+
+
+

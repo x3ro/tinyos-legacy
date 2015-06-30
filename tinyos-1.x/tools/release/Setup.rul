@@ -1,0 +1,656 @@
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            
+//  File Name:	Setup.rul                                                   
+//                                                                            
+//  Description:	InstallShield script                                        
+//                                                                            
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Include header files
+    
+#include "ifx.h"
+    
+////////////////////// string defines ////////////////////////////
+
+//////////////////// installation declarations ///////////////////
+
+     prototype RunRPMs();     
+     prototype TraverseFeatureTree(LIST);
+     prototype RunRPM(STRING); 
+     prototype CopyRPM(STRING, STRING); 
+     prototype FindCygwin();
+     prototype FindJDK();   
+     prototype InstallCygwin();  
+     prototype CheckJDKAgreement(); 
+     prototype RemoveRPM(STRING);
+     
+     export prototype RemoveRPMavarice();
+     export prototype RemoveRPMavrbinutils(); 
+     export prototype RemoveRPMavrgcc();
+     export prototype RemoveRPMavrlibc();
+     export prototype RemoveRPMavrinsight();
+     export prototype RemoveRPMnesc();
+     export prototype RemoveRPMtasktinydb();
+     export prototype RemoveRPMtinyos();
+     export prototype RemoveRPMtinyoscontrib();
+     export prototype RemoveRPMtinyostools();
+     export prototype RemoveRPMtinyosvm();
+          
+     STRING svCygpath;
+     STRING svJavaHome;    	
+	  
+//////////////////////////////////////////////////////////////////////////////
+//                                                                           
+//  FUNCTION:   OnFirstUIBefore                                            
+//                                                                           
+//  EVENT:      FirstUIBefore event is sent when installation is run for the first
+//              time on given machine. In the handler installation usually displays
+//              UI allowing end user to specify installation parameters. After this
+//              function returns, FeatureTransferData is called to perform file
+//              transfer.
+//                                                                           
+///////////////////////////////////////////////////////////////////////////////
+function OnFirstUIBefore()
+    NUMBER  nResult,nSetupType; 
+    string  szTitle, szMsg;
+    string  szTargetPath;
+    string  svDir;
+    string  szFeatures, szTargetdir;
+    number  nLevel;
+    LIST    listStartCopy;
+    LIST    featureListID;
+    number  nvSize;                  
+    STRING  svNumber;
+begin	    
+
+    // TO DO: if you want to enable background, window title, and caption bar title                                                                     
+    // SetTitle( @PRODUCT_NAME, 24, WHITE );                                        
+    // SetTitle( @PRODUCT_NAME, 0, BACKGROUNDCAPTION ); 	                   
+    // Enable( FULLWINDOWMODE );						   
+    // Enable( BACKGROUND );							  
+    // SetColor(BACKGROUND,RGB (0, 128, 128));					   
+    
+    SHELL_OBJECT_FOLDER = @PRODUCT_NAME;
+    
+    nSetupType = COMPLETE;	
+    svDir = INSTALLDIR;
+
+Dlg_Start:
+    // beginning of dialogs label
+
+Dlg_SetupType:   
+    szTitle    = "";
+    szMsg      = "";
+    nResult = SdSetupType2( szTitle , szMsg , svDir , 0 );
+    INSTALLDIR = svDir;   
+    if (nResult = BACK) then
+        goto Dlg_Start;
+    else
+        nSetupType = nResult; 
+        if (nSetupType != CUSTOM) then
+	       szTargetPath = INSTALLDIR;
+	       nvSize = 0;
+	       FeatureCompareSizeRequired(MEDIA,szTargetPath,nvSize);
+	       if (nvSize != 0) then      
+            	   MessageBox( szSdStr_NotEnoughSpace, WARNING );
+	           goto Dlg_SetupType;
+            endif;
+        endif;   
+    endif;  
+
+Dlg_SdFeatureTree: 
+    if ((nResult = BACK) && (nSetupType != CUSTOM)) goto Dlg_SetupType;
+    szTitle    = "";
+    szMsg      = "";
+    szTargetdir = INSTALLDIR;
+    szFeatures = "";
+    nLevel = 2;
+    if (nSetupType = CUSTOM) then
+		    nResult = SdFeatureTree(szTitle, szMsg, szTargetdir, szFeatures, nLevel);
+		    if (nResult = BACK) goto Dlg_SetupType;  
+    endif;
+    FindJDK();             
+    // Find Cygwin -- go back if they need to clean up cygwin or
+    // if they need to select a cygwin install. 0 = OK
+   	nResult = FindCygwin();
+   	if (nResult != 0) goto Dlg_SetupType;
+    
+ Dlg_SdStartCopy:
+    szTitle = "";
+    szMsg   = "";
+    listStartCopy = ListCreate( STRINGLIST );
+    ListAddString(listStartCopy, "Install Directory: " + INSTALLDIR, AFTER);
+    if (nSetupType = CUSTOM) then
+    	ListAddString(listStartCopy, "Setup Type: " + "CUSTOM", AFTER);
+    else  
+    	ListAddString(listStartCopy, "Setup Type: " + "COMPLETE", AFTER);
+    endif;                                                               
+    
+    
+    nResult = SdStartCopy( szTitle, szMsg, listStartCopy );	
+    ListDestroy(listStartCopy);
+    if (nResult = BACK) goto Dlg_SdFeatureTree;
+    
+    Enable(STATUSEX);
+
+    return 0;
+end;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:   OnMaintUIBefore
+//
+//  EVENT:      MaintUIBefore event is sent when end user runs installation that
+//              has already been installed on the machine. Usually this happens 
+//              through Add/Remove Programs applet. In the handler, installation 
+//              usually displays UI allowing end user to modify existing installation
+//              or uninstall application. After this function returns, 
+//              FeatureTransferData is called to perform file transfer.
+//
+///////////////////////////////////////////////////////////////////////////////
+function OnMaintUIBefore()
+    NUMBER nResult, nType;
+    STRING szTitle, szMsg, svDir, svResult, szCaption;
+begin
+    // TO DO: if you want to enable background, window title, and caption bar title   								
+    // SetTitle( @PRODUCT_NAME, 24, WHITE );					
+    // SetTitle( @PRODUCT_NAME, 0, BACKGROUNDCAPTION );  			
+    // SetColor(BACKGROUND,RGB (0, 128, 128));					
+    // Enable( FULLWINDOWMODE );						
+    // Enable( BACKGROUND );							
+	
+Dlg_Start:
+    Disable(BACKBUTTON);
+    nType = SdWelcomeMaint(szTitle, szMsg, MODIFY);
+    Enable(BACKBUTTON);
+
+    if (nType = REMOVEALL) then
+        svResult = SdLoadString(IFX_MAINTUI_MSG);
+        szCaption = SdLoadString(IFX_ONMAINTUI_CAPTION);
+        nResult = SprintfBox(MB_OKCANCEL,szCaption,"%s",svResult);
+        if (nResult = IDCANCEL) goto Dlg_Start;
+    endif;
+
+    nResult = NEXT;
+
+Dlg_SdFeatureTree:
+    if (nType = MODIFY) then
+        szTitle = "";
+        szMsg = "";
+        nResult = SdFeatureTree(szTitle, szMsg, INSTALLDIR, "", 2);
+        if (nResult = BACK) goto Dlg_Start;
+    endif;
+
+    switch(nType)
+        case REMOVEALL: FeatureRemoveAll();
+        case REPAIR:    FeatureReinstall();
+    endswitch;
+    
+    Enable(STATUSEX);
+end;
+  
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:   OnEnd
+//
+//  EVENT:      End event is the last event. It is not sent if the installation
+//              has been aborted. In this case Abort event is sent   
+//
+function OnEnd() 
+	NUMBER nResult;
+begin            
+	if (!MAINTENANCE) then  
+		nResult = FeatureIsItemSelected (MEDIA,  "cygwin");  
+    	if nResult = 1  then 
+    		InstallCygwin();    		
+    	endif; 
+    	// Any RPMs required for features you've selected will now be installed
+		RunRPMs(); 
+	else
+		MessageBox("The TinyOS setup does not uninstall cygwin automatically even \n" +
+					"if cygwin was originally installed by the setup. If \n" +
+					"you would like to  uninstall cygwin, please see the \n" +
+					"information on cygwin uninstallation at \n" +
+					"http://webs.cs.berkeley.edu/tos/tinyos-1.x/doc/install.html ", 
+					INFORMATION);
+	endif;
+	MessageBox("Installation done.", INFORMATION);
+end; 
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:   InstallCygwin()   
+//                           
+//  	Run the install.bat file in the cygwin installation files dir. This
+// 		batch file calls setup.exe with the appropriate arguments to autorun.
+//
+function InstallCygwin()        
+	STRING svPath;
+	STRING svCommand; 
+	STRING svArgs;
+begin                           
+                          
+
+	svPath = INSTALLDIR;
+                
+	ChangeDirectory(INSTALLDIR + "cygwin-installationfiles");
+	if (LongPathToShortPath (svPath) < 0) then
+        MessageBox ("LongPathToShortPath on " + svPath + " failed.", 
+        	SEVERE);
+        abort;
+    endif;	
+    
+    svCommand = ".\\setup.exe ";
+	svArgs = " -5 -q -L -R "+ svPath + "\\cygwin";
+	
+	
+	if( LaunchAppAndWait (svCommand, svArgs, WAIT ) < 0) then
+        MessageBox ("Unable to launch " + svCommand + " " + svArgs, INFORMATION);
+        abort;
+    endif; 	
+end;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:   RunRPMs()   
+// 
+// 		Run any RPMs necessary for this installation. Exactly which
+//		RPMs are determined by the user-selected feature set. All the 
+// 		real work is really done by TraverseFeatureTree() and RunRPM().
+//
+function RunRPMs()
+    LIST featureListID;
+begin
+     
+    featureListID = ListCreate(STRINGLIST); 
+
+    // If an error occurred, report it; then terminate.
+    if (featureListID = LIST_NULL) then
+        MessageBox ("Unable to create feature list.", SEVERE);
+        abort;
+    endif; 
+                                                                                                            
+    // Traverse feature tree, looking for rpms to install...
+   	FeatureListItems(MEDIA, "", featureListID);
+   	TraverseFeatureTree(featureListID);
+   
+    // Remove the list from memory.
+    ListDestroy (featureListID);         
+  
+end;
+                         
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:   TraverseFeatureTree
+// 
+// 		Traverse the feature tree, calling RunRPM() on all features.
+//                         
+function TraverseFeatureTree(featureListID)
+    LIST subFeatureListID;
+	STRING svFeature; 
+	STRING svString;
+	NUMBER nResult;
+ begin                     
+ 	nResult = ListGetFirstString(featureListID, svFeature);
+ 	while (nResult != END_OF_LIST) 
+ 		// If the feature is to be installed, call the rpm.
+    	nResult = FeatureIsItemSelected (MEDIA,  svFeature);  
+    	if nResult = 1  then 
+    		RunRPM(svFeature);    		
+    	endif;     
+		subFeatureListID = ListCreate (STRINGLIST);
+		FeatureListItems(MEDIA, svFeature, subFeatureListID);
+		TraverseFeatureTree(subFeatureListID);
+		ListDestroy(subFeatureListID);
+        nResult = ListGetNextString (featureListID, svFeature);
+    endwhile;
+	   	
+end;   
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:  	RunRPM()
+// 
+// 		If this feature has an RPM, run it.
+//  
+function RunRPM(svFeature)                     
+	STRING svBashcmd;
+	STRING svRPMName;
+	STRING svRPMCmd;
+	STRING szRPMPath;            
+	STRING svRPMDosPath;
+	STRING szArgs; 
+	STRING svSrc;
+	STRING svDst;                                   
+	STRING svResult;
+	NUMBER nvResult;
+begin     
+   
+    FeatureGetData(MEDIA, svFeature,
+    				FEATURE_FIELD_MISC, nvResult, svRPMName);  
+    
+    // If no rpm for this feature, return
+    if StrLength(svRPMName) == 0 then
+    	return 0;	
+    endif;   
+    
+    // Because the user may not have just installed cygwin, we must copy
+    // the rpm files into the /usr/src/rpm/i386 directory if they're not 
+    // already there.                                            
+    svRPMDosPath = svCygpath + "\\usr\\src\\rpm\\RPMS\\i386\\";
+    if (FindFile(svRPMDosPath, svRPMName, svResult) < 0) then
+    	// MessageBox("Didn't find " + svRPMDosPath + svRPMName, INFORMATION); 
+    	svSrc = INSTALLDIR + "cygwin\\usr\\src\\rpm\\RPMS\\i386\\" + svRPMName;
+    	svDst = svRPMDosPath + svRPMName;
+    	// MessageBox("Src: " + svSrc + "\nDst: " + svDst, INFORMATION);
+    	CopyRPM(svSrc, svDst);
+    endif;
+              
+    szRPMPath = "/usr/src/rpm/RPMS/i386/";
+    svBashcmd = svCygpath + "\\bin\\bash.exe";	   
+	svRPMCmd = "rpm -ivh --force --ignoreos " + szRPMPath + svRPMName + " | tee " + svRPMName + ".log"; 
+	szArgs = "--login -i -c \'" + svRPMCmd + "\'";
+	
+	// MessageBox ("Installing " + svRPMName, INFORMATION); 
+	if (LaunchAppAndWait (svBashcmd, szArgs, WAIT ) < 0) then
+        MessageBox ("Unable to launch " + svBashcmd + " " 
+        			+ szArgs + " to run " + svRPMName,INFORMATION);
+        abort;
+    endif; 	
+	    
+end;     
+    
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:   Find Cygwin()
+//
+// 			Cygwin must be on the machine in order to install the rpms.
+//			Either the user is installing it, in which case cygwin is in
+//			INSTALLDIR/cygwin, or cygwin is already on the machine in which
+// 			case we look in the registry to find it.                                                      
+// 		
+function FindCygwin()
+	STRING szCygwinKey;  
+	STRING szTooMany; 
+	STRING szTooFew;     
+	STRING szCygname;
+	STRING svResult;            
+	STRING svPath;
+	STRING svFilename;
+	NUMBER nvSelected;
+	NUMBER nvSize; 
+	NUMBER nvType;                           
+	NUMBER bFound;
+begin          
+	szTooFew = "Setup cannot find an existing cygwin installation and " +
+			    "you did not choose to install one. \n\nYou must either choose to" +
+		        " install cygwin" +
+			    " or have an existing cygwin installation.";
+	szTooMany = "You have elected to install cygwin but Setup has found an " +
+				 "existing cygwin installation. \n\nIf you have an existing cygwin " +
+				 " installation, please either uninstall it or deselect the cygwin " +
+				 " option in this setup. \n\nYou can find info on how to remove cygwin " +
+				 " completely at http://webs.cs.berkeley.edu/tos/tinyos-1.x/doc/install.html. ";
+	szCygwinKey = "Software\\Cygnus Solutions\\cygwin\\mounts v2\\/";  
+	szCygname = "cygwin"; 
+	svCygpath = ""; 
+	 
+	RegDBSetDefaultRoot(HKEY_LOCAL_MACHINE);
+	               
+	// Figure out if there's an existing cygwin install
+	bFound = 0;
+	if ((RegDBKeyExist(szCygwinKey) = 1) &&
+		(RegDBGetKeyValueEx (szCygwinKey, "native", nvType, svCygpath, nvSize) = 0) &&
+		(ExistsDir(svCygpath) = 0)) then
+		bFound = 1;
+	endif;
+	                                                
+	// Now figure out if the combination of 
+	// EXISTING_INSTALL and CYGWIN_SELECTED is OK  
+	FeatureGetData(MEDIA, "cygwin", FEATURE_FIELD_SELECTED, nvSelected, svResult);
+	if (nvSelected = TRUE) then
+		if (bFound = 0) then  
+	       	svCygpath = INSTALLDIR + "\\cygwin";         		                 
+	       	return 0;
+	    else
+	    	MessageBox(szTooMany, INFORMATION); // selected but existing install
+	    	return 1;    // not OK
+	    endif;
+	else 
+		if (bFound = 1) then
+			return 0;
+		else
+			MessageBox(szTooFew, INFORMATION); // not selected and not installed
+			return 1;
+		endif;
+	endif; 
+
+end;
+
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                           
+//  FUNCTION:   CheckJDKAgreement()
+//   
+#define LICENSE_PATH "javalicense.txt"
+
+function CheckJDKAgreement()
+	STRING szMsg;
+	STRING szQuestion;
+begin
+	 // Set up the variables to pass as parameters to SdLicense.
+    szMsg      = "Please read the following message.";
+    szQuestion = "Select Yes if you have read and agreed to Sun's terms and \n" +
+    			 "conditions for the 1.4 JDK and Java COMM package. \n" +
+    			 "Select No to cancel the setup.";
+               
+    Disable (BACKBUTTON);
+    SdLicense ("Java License Agreement Required", szMsg, szQuestion, LICENSE_PATH);  
+    Enable( BACKBUTTON);
+end;                              
+
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                           
+//  FUNCTION:   FindJDK()
+//            
+//		If the user hasn't elected to install the JDK, give the appropriate 
+// 		warnings.   If the user is going to install the JDK, give the license 
+// 		dialog.
+//
+function FindJDK()
+	STRING szJDKKey;        
+	STRING szBadNews;
+	STRING svResult; 
+	NUMBER nvSize;
+	NUMBER nvType;
+	NUMBER nResult;
+begin        
+
+	nResult = FeatureIsItemSelected (MEDIA,  "Tools\\Java");  
+    if nResult = 1  then   
+		CheckJDKAgreement();    	
+    	return 0;    		
+    endif;      
+    
+	szBadNews = "The TinyOS setup cannot find an installed Java Development Kit. The TinyOS tools " +
+				"MUST HAVE a 1.4.1_02 JDK in order to function properly. " +
+				" The installation will continue but, if you don't have " +
+				"a JDK, please install one."; 			    
+	szJDKKey = "Software\\JavaSoft\\Java Development Kit\\1.4";   
+		                 
+  	// Find the existing JDK installation                 
+   	RegDBSetDefaultRoot(HKEY_LOCAL_MACHINE);
+	if (RegDBKeyExist (szJDKKey) < 0) then
+		MessageBox(szBadNews + " (" + szJDKKey + " key not found)", INFORMATION);
+   	else 
+   		if (RegDBGetKeyValueEx (szJDKKey,  "JavaHome", nvType, svJavaHome, nvSize) < 0) then
+        	MessageBox (szBadNews + " (Couldn't find 'JavaHome'.)", INFORMATION);
+        endif;
+    endif; 	 
+      
+    // Now check for Javacomm installation
+    szBadNews = "The TinyOS setup cannot find a javaCOMM installation. TinyOS " +
+    		    "must have the Java COMM 2.0 package in order to function properly. " +
+    		    " The installation will continue but, if you don't have a JavaCOMM " +
+    		    "package installed, please install one. (No javax.comm.properties found.)";
+    if (FindFile(svJavaHome + "\\lib", "javax.comm.properties", svResult) < 0) then
+    	MessageBox(szBadNews, INFORMATION);
+    endif;
+    		  
+    
+end;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:   CopyRPM()
+// 
+function CopyRPM(svSrc, svDst)
+	NUMBER nResult;                                         
+	STRING szAction;
+begin
+                 
+	szAction = " when copying " + svSrc + " to " + svDst;                 
+	nResult = CopyFile(svSrc, svDst);
+    
+    switch (nResult)
+        case 0:
+            // MessageBox ("Files successfully copied.", INFORMATION);
+        case COPY_ERR_CREATEDIR:
+            MessageBox ("A target directory could not be created" + szAction, SEVERE);
+        case COPY_ERR_MEMORY:
+            MessageBox ("Insufficient memory" + szAction, SEVERE);
+        case COPY_ERR_NODISKSPACE:
+            MessageBox ("Insufficint disk space" + szAction, SEVERE);
+        case COPY_ERR_OPENINPUT:
+            MessageBox ("Unable to open the input files" + szAction, SEVERE);
+        case COPY_ERR_OPENOUTPUT:
+            MessageBox ("Unable to copy the source files" + szAction, SEVERE);
+        case COPY_ERR_TARGETREADONLY:
+            MessageBox ("A target file already exists and cannot be overwritten when copying to "
+            	+ svDst, SEVERE);
+        default:
+            MessageBox ("An error occurred" + szAction, SEVERE);
+    endswitch;   
+end;
+                              
+/////////////////////////////////////////////////////////
+// 
+// Function:	RemoveRPM()
+//           
+//
+function RemoveRPM(svFeature)   
+	STRING svBashcmd;
+	STRING szArgs;
+	STRING svRPMName;
+	STRING svRPMCmd;   
+	STRING svResult;
+	STRING szRPMPath;
+	NUMBER nvResult;
+begin
+	               
+	FindCygwin();          
+	
+	FeatureGetData(MEDIA, svFeature,
+    				FEATURE_FIELD_DISPLAYNAME, nvResult, svRPMName);  
+    
+    // If no rpm for this feature, return
+    if StrLength(svRPMName) == 0 then                  
+  		return 0;	
+    endif;   
+                 
+    svBashcmd = svCygpath + "\\bin\\bash.exe";	   
+	svRPMCmd = "rpm -e " + svRPMName + " 2>&1 | tee " + svRPMName + "Erase.log"; 
+	szArgs = "--login -i -c \'" + svRPMCmd + "\'";
+	
+	if (LaunchAppAndWait (svBashcmd, szArgs, WAIT ) < 0) then
+        MessageBox ("Unable to launch " + svBashcmd + " " 
+        			+ szArgs + " to erase " + svRPMName,INFORMATION);
+        abort;
+    endif; 	
+end;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:  	RemoveRPM<feature>()
+// 
+// 		Wrapper for RemoveRPM -- can't figure out a way to get the current
+// 		feature's name -- that would make these wrappers unnecessary.
+// 
+function RemoveRPMavarice()
+begin 
+	RemoveRPM("Tools\\AVRTools\\avarice"); 
+end;               
+
+function RemoveRPMavrbinutils()
+begin   
+	RemoveRPM("Tools\\AVRTools\\avrbinutils");
+end;
+
+function RemoveRPMavrgcc()
+begin
+	RemoveRPM("Tools\\AVRTools\\avrgcc");	
+end;
+
+function RemoveRPMavrlibc()
+begin 
+	RemoveRPM("Tools\\AVRTools\\avrlibc");
+end;
+
+function RemoveRPMavrinsight()
+begin          
+	RemoveRPM("Tools\\AVRTools\\Insight");
+end;
+
+function RemoveRPMnesc()
+begin          
+	RemoveRPM("NesC");
+end;
+
+function RemoveRPMtasktinydb()
+begin          
+	RemoveRPM("TinyOSOptionals\\tasktinydb");
+end;
+
+function RemoveRPMtinyos()
+begin                     
+	RemoveRPM("TinyOS");
+end;
+
+function RemoveRPMtinyoscontrib()
+begin          
+	RemoveRPM("TinyOSOptionals\\tinyoscontrib");
+end;
+
+function RemoveRPMtinyostools()
+begin          
+	RemoveRPM("TInyOSTools");
+end;
+
+function RemoveRPMtinyosvm()
+begin          
+	RemoveRPM("TinyOSOptionals\\tinyosvm");
+end;
+///////////////////////////////////////////////////////////////////////////////
+//
+//  FUNCTION:   OnFirstUIAfter
+//
+//  EVENT:      FirstUIAfter event is sent after file transfer, when installation 
+//              is run for the first time on given machine. In this event handler 
+//              installation usually displays UI that will inform end user that
+//              installation has been completed successfully.
+//
+///////////////////////////////////////////////////////////////////////////////
+function OnFirstUIAfter()
+	STRING szTitle, szMsg1, szMsg2, szOption1, szOption2;
+	NUMBER bOpt1, bOpt2;
+begin
+	Disable(STATUSEX);
+
+	bOpt1  = FALSE;
+	bOpt2  = FALSE;
+	szMsg1 = "Installshield has finished copying files for installation.";
+	szMsg2 = " ";
+	SdFinishEx(szTitle, szMsg1, szMsg2, szOption1, szOption2, bOpt1, bOpt2);
+end;

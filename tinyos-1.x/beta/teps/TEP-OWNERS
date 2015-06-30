@@ -1,0 +1,89 @@
+TEP Owners
+==========
+
+Notes:
+-----
+The following types of TEP exist:
+  Doc - Documentation of a practice for which at least a reference
+         implementation exists.
+  Exp - Experimental proposal.  No implenentation exists.
+  BCP - Best Common Practice.  Suggestions and requirements for writing
+        code and documents in TinyOS.
+
+TEP #s 1-99 are reserved for Best Common Practices and other procedural
+issues.
+TEPs documenting actual designs begin at 101.
+
+
+------------------------------------------------------------------------
+TEP   #: Title                     Type  Status          Authors
+-------- ------------------------- ----- --------------- ---------------
+
+Best Common Practice TEPs:
+-------------------------
+
+TEP   1: TEP Format                BCP   Draft (in CVS)  Phil Levis
+TEP   2: Hardware Abstraction      BCP   Draft (in CVS)  Vlado Handziski, 
+         Architecture                                    Joseph Polastre, 
+                                                         Jan-Hinrich Hauer, 
+                                                         Cory Sharp, 
+                                                         Adam Wolisz,
+                                                         David Culler
+                                                         Joe Polastre
+Design TEPs:
+-----------
+
+TEP 101: ADC Abstraction           Doc   Draft (in CVS)  Jan-Hinrich Hauer, 
+                                                         Vlado Handziski, 
+                                                         Joe Polastre, 
+                                                         Lama Nachman
+TEP 102: Timers                    Doc   Draft           Cory Sharp
+TEP 103: Non-volatile Storage      ?     Draft           David Gay,
+                                                         Jonathan Hui
+TEP 104: Radio Hardware            Exp   Draft           Kevin Klues
+         Abstraction
+TEP 105: CSMA Radio Link Layer     Doc   Draft           Joe Polastre
+TEP 106: Tasks & Schedulers        Doc   Draft           Phil Levis,
+                                                         Cory Sharp
+TEP 107: Boot Sequence             Doc   Draft           Phil Levis
+
+
+Possible Future TEPs:
+--------------------
+
+Requirements for Contribution      BCP    --             Ion Yannopoulos
+Coding Convention                  BCP    --             <TBD>
+Testing Framework                  BCP    --             Ion Yannopoulos
+
+
+Modules Owners by Platform
+--------------------------
+
+Owners are responsible for determining whether the TEP applies to the
+given platform.
+
+Mica:           
+  Radio:        Martin Turon (to pass on to Crossbow)
+  Sensors/ADC:  Martin Turon
+  Storage:      David Gay
+  Timers:       Martin Turon
+
+Telos:
+  Radio:        Joe Polastre
+  Sensors/ADC:  Jan-Hinrich Hauer, Vlado Handziski, Kevin Klues
+  Storage:      David Gay (Rev A), Jonathan Hui (Rev B)
+  Timers:       Cory Sharp
+
+iMote2:
+  Radio:        Phil Buonadonna
+  Sensors/ADC:  Phil Buonadonna
+  Storage:      David Gay
+  Timers:       Phil Buonadonna
+
+Eyes:
+  Radio:        Kevin Klues
+  Sensors/ADC:  Jan-Hinrich Hauer, Vlado Handziski, Kevin Klues
+  Storage:      Jonathan Hui (eyesIFX), David Gay (eyesIFXv2)
+  Timers:       Cory Sharp
+
+Others?

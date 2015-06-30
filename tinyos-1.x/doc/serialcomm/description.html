@@ -1,0 +1,132 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Serial-line communication in TinyOS-1.1</title>
+
+</head>
+
+<body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%">
+<font face="tahoma,arial,helvetica"><b><big><big>Serial-line communication in TinyOS-1.1</big></big></b>
+<p>
+Last updated 03 Sep 2003
+</font>
+</td></tr>
+</table>
+<br>
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">Description</font></b></td>
+</tr></table>
+
+<p><i>Protocol:</i></p>
+<p>The protocol used by TinyOS-1.1 is loosely based on the PPP in HDLC-like 
+framing described in RFC-1662. It uses the same framing and escape 
+sequences and a 16-bit CRC. The protocol always assumes 
+Address-and-Control field compression. The implementation understands the 
+Protocol IDs in Table 1. All other protocols are rejected.</p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber1">
+  <tr>
+    <td width="25%" align="center"><b>Id</b></td>
+    <td width="11%" align="center"><b>Value</b></td>
+    <td width="64%" align="center"><b>Description</b></td>
+  </tr>
+  <tr>
+    <td width="25%"><tt>PROTO_ACK</tt></td>
+    <td width="11%">64 (0x40)</td>
+    <td width="64%">An acknowledgement packet. Typically sent by the TinyOS 
+    device back to the host backend.&nbsp; The packet consists of a one byte 
+    payload which is the token of the corresponding packet being acknowledged.</td>
+  </tr>
+  <tr>
+    <td width="25%"><tt>PROTO_PACKET_ACK</tt></td>
+    <td width="11%">65 (0x41)</td>
+    <td width="64%">A data packet that expects a subsequent ACK packet.&nbsp; 
+    The first byte of the payload contains the token that must be returned in 
+    the ACK.</td>
+  </tr>
+  <tr>
+    <td width="25%"><tt>PROTO_PACKET_NOACK</tt></td>
+    <td width="11%">66 (0x42)</td>
+    <td width="64%">A data packet that does not require a subsequent ACK packet.</td>
+  </tr>
+  <tr>
+    <td width="25%"><tt>PROTO_UNKNOWN</tt></td>
+    <td width="11%">255 (0xFF)</td>
+    <td width="64%">A packet sent by a receiver when it receives a packet of an 
+    unknown/unsupported protocol</td>
+  </tr>
+</table>
+<p align="center"><b>Table 1: Known framer protocol types.</b></p>
+<p><i>Components:</i></p>
+<p>The following components implement the framing protocol on the TinyOS device:</p>
+<blockquote>
+  <p><b><tt>FramerM</tt>:</b> The TinyOS module that provides the core framing protocol. It 
+  provides the <tt>BareSendMsg</tt>, <tt>ReceiveMsg</tt> and <tt>TokenReceiveMsg</tt> interfaces. The 
+  <tt>TokenReceiveMsg</tt> interface is used when handling packets that require 
+  acknowledgements. The interface extends the <tt>ReceiveMsg</tt> interface by 
+  including a field for the token on the receiver and a new command, 
+  <tt>ReflectToken()</tt>, that triggers the ACK process. The use of acknowledgements 
+  is intended as a simple flow control scheme to prevent exceeding buffering 
+  capacities on a TinyOS device.</p>
+  <p><tt><b>FramerAckM:</tt></b> A generic module that implements ACK processing for inbound 
+  packets. It is intended to be used in lieu of applications that 
+  specifically handle ACKs. </p>
+  <p><b><tt>UARTFramedPacket:</tt></b> A configuration component that incorporates both <tt>FramerM</tt> 
+  and <tt>FramerAckM</tt>. It exports the same interface as <tt>UARTNoCRCPacket</tt> and can 
+  be used interchangeably with that component. The default UART communication 
+  provider for <tt>GenericComm</tt> in TinyOS-1.1 is <tt>UARTFramedPacket</tt>.</p>
+</blockquote>
+<p><i>Applications:</i></p>
+<p>The following applications are provided for simple interfacing to a TinyOS 
+network:</p>
+<blockquote>
+  <p><b><tt>TOSBase (apps/TOSBase)</tt></b>: An application that acts as a simple bridge between 
+  the serial and wireless channel. It is similar to the older <tt>GenericBase</tt>, but 
+  incorporates <tt>FramerM</tt>. TOSBase does not use <tt>FramerAckM</tt>, but implements 
+  it's own ACK handling. Specifically, TOSBase will only ACK a packet 
+  received from the serial channel once it has been transmitted over the radio. 
+  TOSBase will only bridge those packets whose group id matches the value of the <tt>TOS_AM_GROUP</tt> 
+  value compiled into the application.</p>
+  <p><b><tt>TransparentBase (apps/TransparentBase)</tt></b>: A bridge identical to <tt>TOSBase</tt>, 
+  except that it does not filter packets based on group id.</p>
+  <p><b><tt>GenericBase (apps/GenericBase)</tt></b>: The legacy bridging application that does 
+  not provide for framing or flow control. </p>
+</blockquote>
+<p><i>Host Tools:</i></p>
+<p>There are a variety of java-based tools that can be used to simplify serial 
+communication using the new protocol. They include classes and a simple 
+application, <tt>SerialForwarder</tt>. A key point with these tools is that they 
+understand how to communicate with multiple types of <i>packet sources</i>.&nbsp; 
+These include directly attached serial links, network links and simulated links 
+using either the framed or legacy protocols. See the <a href="#Usage">Usage</a> 
+section for more information on the specific types of packet sources.</p>
+<blockquote>
+  <p><b><tt>net.tinyos.packet.PacketSource</tt></b> (Interface): This class provides a series of 
+  standards methods to communicate with a TinyOS node on a per-packet basis.  It provides the basic semantics of open, close, readPacket and writePacket. 
+  Refer to <tt>tools/java/net/tinyos/packet/PacketSource.java</tt> for more information.</p>
+  <p><b><tt>net.tinyos.packet.PhoenixSource</tt></b> (Class): This class provides some 
+  additional functionality above the standard PacketSource. PhoenixSource 
+  spawns a thread that will initiate an upcall whenever a new packet arrives 
+  from a serial channel. In the case of network based links, it will 
+  attempt to reconnect to the channel if connectivity is lost.&nbsp; Refer to 
+  toos/java/net/tinyos/packet/PhoenixSource.java for more information.</p>
+  <p><b><tt>net.tinyos.sf.SerialForwarder</tt></b> (Application): The SerialForwarder acts as a 
+  relay point between any packet source and network packet source. It's 
+  intended use is to provide TCP/IP connectivity to a locally connected TinyOS 
+  device. The <tt>SerialForwarder</tt> provides the capability of multiplexing 
+  multiple network connections into a single connection. That is, multiple 
+  remote applications can connect to a TinyOS node via the <tt>SerialForwarder</tt> (no 
+  deterministic serialization is provided, however).</p>
+</blockquote>
+
+</body>
+
+</html>

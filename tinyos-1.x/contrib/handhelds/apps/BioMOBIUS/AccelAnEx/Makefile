@@ -1,0 +1,3 @@
+COMPONENT=AccelAnEx
+
+include ../../Makerules

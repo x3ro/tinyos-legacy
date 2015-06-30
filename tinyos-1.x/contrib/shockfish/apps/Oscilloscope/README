@@ -1,0 +1,88 @@
+README for the TinyNode Oscilloscope application
+
+Acknowledgement: This app is closely derived from MoteIV's Oscilloscope. [Including this very README!]
+
+
+Description:
+
+The Oscilloscope application senses all of the sensors on Moteiv
+devices and communicates the sensor values over the radio to a 
+base station running the TOSBase application. 
+
+Supported sensors 
+  On TinyNode:
+    - Voltage Supply Monitor
+    - TI MSP430 Internal Temperature Sensor
+    - TI MSP430 Internal Voltage Sensor
+
+  On Standard Extension Board:
+    - Temperature Sensor (LM20 National Semiconductor)
+    - Light Sensor (Infineon BPW34S-P1602)
+
+Please see the User Manual (http://www.tinynode.com/tinynode) for more details on the sensors.
+
+
+Oscilloscope channel assignments:
+ 0: Temperature
+ 1: Voltage Supply Monitor
+ 2: Light
+ 3: InternalTemperature
+ 4: InternalVoltage
+
+Usage:
+
+  (See below, Known bugs/limitations)
+  Make sure you have run make in tinyos-1.x/contrib/shockfish/tools/java. This dir should be before
+  the standard tinyos-1.x/tools/java in the CLASSPATH.
+  Install one mote with the Oscilloscope application.
+  Install a second mote (connected to the PC) with TOSBase.
+  Start running SerialForwarder, typically with java net.tinyos.sf.SerialForwarder -comm serial@COM1:tinynode
+  Run: java net.tinyos.oscope.oscilloscope.
+
+  If no readings can be seen:
+    - check the "scrolling" checkbox
+    - click the "zoom out y" button to see values > 1024
+
+
+Converting sensor readings to SI units:
+The ADC conversions are 12-bits. To get the effective voltage V from an ADC reading , you have:
+
+V = (value / 4096) * V_ref
+where V_ref  is (at least for the sensors used here) 1.5V.
+
+
+Channel 0-1-2: Converting external temperature voltage, voltage supply monitor, and  light 
+sensor voltage are described in the TinyNode manual.
+
+Channel 3: Converting the internal temperature voltage to degrees is described
+in the Moteiv datasheet available from moteiv.com.
+
+Channel 4: 
+To convert the raw value to its corresponding voltage, you do:
+(1)  value/4096 * Vref
+where Vref = 1.5V
+
+The internal voltage sensor monitors Vcc/2, so multiply
+the resulting voltage value by 2 to get mote's supply voltage (Vcc).
+
+
+
+Tools:
+
+tinyos-1.x/tools/java/net/tinyos/oscope/oscilloscope
+
+Run the SerialForwarder, then run:
+java net.tinyos.oscope.oscilloscope
+
+Known bugs/limitations:
+If avr-gcc is not installed on your system, mig will not generate your message classes.
+If you do not want to install avr-gcc, download this patch
+http://www.shockfish.com/tinynode/patches/tinynode-mig.patch
+and apply it from the top level directory of your TinyOS checkout.
+Then, recompile the Java Toolchain.  
+
+cd ${TOSROOT}/..
+wget http://www.shockfish.com/tinynode/patches/tinynode-mig.patch
+patch -p0 < tinynode-mig.patch
+cd tinyos-1.x/tools/java/
+make

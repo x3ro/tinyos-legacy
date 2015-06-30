@@ -1,0 +1,3 @@
+COMPONENT=SenseToLeds
+include ../Makerules
+

@@ -1,0 +1,45 @@
+Mike Chen (mikechen@cs.berkeley.edu)
+
+This is a java implementation of the smartdust basestation using javax.comm API to read from a serial link.
+
+The code has been tested under Linux 2.2.9 and the RXTX 1.5.3 package (http://www.frii.com/~jarvi/rxtx/download.html)
+
+To test your serial port, run the SerialPortReader, type
+% java SerialPortReader <serial port>
+example: java SerialPortReader /dev/ttyS0
+It prints out the packets it reads over the serial link in hex.
+
+To forward the packets using UDP, run the UdpBaseStation, type
+% java UdpBaseStation <serial_port> <host> <port>
+example: java UdpBaseStation /dev/ttyS0 ninja.cs 9999
+
+UdpListener listens on a local UDP port and prints out the data it receives.
+% java UdpListener <port>
+example: java UdpBaseStation 9999
+
+
+
+
+
+====================  Mike's notes =================
+packet format
+
+packets are 30bytes
+first byte: dest ID
+2nd: handler ID
+
+data:
+currently: 3rd byte is src ID
+
+
+sample:
+1,10,2,0,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,0, 401021b4
+
+
+
+read full: read 1, or 1 of 1
+looking for header:, 7e, 0, 0
+header found
+data: 1d
+1,10,2,0,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,
+0, 401021b4

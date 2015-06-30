@@ -1,0 +1,72 @@
+BODY, TD {
+	font-family : Verdana, Arial, sans-serif;
+	font-size : 10pt;
+	background-color : White;
+	line-height : 150%;
+}
+
+TD.menu {
+	font-size : 9pt;
+	color: black;
+	vertical-align: middle;
+	text-align : right;
+}
+
+P.caption {
+    font-size : 8pt;
+    margin-left: 20%;
+    margin-right: 20%;
+}
+
+P.comment {
+	margin-left : 5%;
+	margin-right : 5%;
+	border : 1px solid Gray;
+	background : #EEEEEE;
+	padding-left : 5pt;
+}
+
+EM.action {
+	font-style : italic;
+	font-weight:bold;
+}
+
+EM.question  {
+	font-style : italic;
+	text-decoration:underline;
+}
+
+
+hr {
+	height: 1px;
+	color: #bbbbbb;
+	width : 66%;
+	text-align : left;
+}
+
+H1 {
+	font-size : 12pt;
+	background-color : #DBFFA5;
+}
+H2 {
+	font-size: 10pt;
+	border-bottom : 1px solid #003300;
+	margin-right : 33%;
+}
+
+H3 {
+	font-size: 9pt;
+	font-weight : bold;
+}
+
+A {
+	text-decoration: underline;
+	color: #009900;
+	font-weight : bold;
+}
+
+A:Hover {
+	text-decoration: underline;
+	color: Red;
+	font-weight : bold;
+}

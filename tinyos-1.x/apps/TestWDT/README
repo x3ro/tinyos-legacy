@@ -1,0 +1,31 @@
+Testsuite for watchdog component. It currently shows three behaviors:
+
+1. watchdog being properly activated, and reset periodically.  The
+mote logically stays running.  The behavior on the leds should be as
+follows: red and green led come on, after 2 seconds green goes off.
+The red led stays on forever or until power outage or program crash
+(which should not happen). This is the default build mode.
+
+2. watchdog properly activated, but not reset by the application.
+This is done by having the application reset the Watchdog from a one
+shot timer that, you guessed it, fires only once.  The behavior should
+be as follows: red and green LEDs come on, after 2 seconds green goes
+off, and another 2.5 seconds later the mote resets. This mode is
+enabled through 
+
+WDTTEST=1 make mica2 install
+
+
+3. In principle the watchdo should get petted: the timer is repeated,
+etc. Unfortunately, there is a task that runs in an infinite loop;
+that task is prohobiting the system to execute more tasks and
+ultimately overflows the task queue.  Additionally, tasks like The
+watchdog petting timer are blocked.  Guess what : this app needs to be
+killed.  The observed behavior should be as follows: red and green led
+come on, after 2 seconds green goes off, and almost immediately
+afterwards the yellow light goes on.  2.5 seconds later the mote
+resets and the process starts all over again.  To enable this mode,
+build with
+
+WDTTEST=2 make mica2 install
+

@@ -1,0 +1,5 @@
+README for Heterogeneous Sensor Routing (HSN) TinyDBApp Application
+Contact: York Liu at york.liu@intel.com
+
+This is the clone of TinyOS TASKApp apps, but using the HSN routing layer. Please refer to hsn/apps/TASKApp/README for more detail.
+

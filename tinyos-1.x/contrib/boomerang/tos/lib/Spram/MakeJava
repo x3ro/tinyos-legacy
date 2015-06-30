@@ -1,0 +1,19 @@
+TOS=$(shell ncc -print-tosdir)
+PACKAGE= 
+MIG=mig java -target=telosb -I%T/lib/CC2420Radio -DTOSH_DATA_LENGTH=48
+
+MSGS = SpramDataMsg.java SpramRequestMsg.java
+
+all: $(MSGS) compile
+	@:
+
+%.java: Spram.h
+	$(MIG) -java-classname=$(@:%.java=%) $< $(@:%.java=%) -o $@
+
+compile: $(MSGS)
+	javac $(MSGS)
+
+clean:
+	rm -f $(MSGS) $(MSGS:%.java=%.class)
+
+

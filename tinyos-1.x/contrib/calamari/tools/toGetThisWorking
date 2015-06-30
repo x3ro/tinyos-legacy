@@ -1,0 +1,32 @@
+Add these lines or something like it to your .bash_profile:
+export TESTBEDPATH=~/projects/tinyos-1.x/contrib/testbed
+export RSCPATH=$TESTBEDPATH/rsc
+export PERL5LIB=$PERL5LIB:$TESTBEDPATH/perl
+export TOS_TESTBED_CONFIG=$TESTBEDPATH/testbed/intel-terrence-testbed.cfg
+export PATH=.:$HOME/bin:$TESTBEDPATH/scripts:$RSCPATH:$PATH
+export CLASSPATH=$CLASSPATH:/usr/local/matlab6p5/java/jar/jmi.jar
+
+Add these lines to your /usr/local/matlab/toolbox/local/classpath.txt file:
+/home/kamin/projects/tinyos-1.x/contrib/SystemC/matlab
+/home/kamin/projects/tinyos-1.x/contrib/testbed/java
+/home/kamin/projects/tinyos-1.x/contrib/ucb/tools/java
+/home/kamin/projects/tinyos-1.x/contrib/calamari/tools/java
+/home/kamin/projects/tinyos-1.x/tools/java
+
+make sure you compile all the tools in the above directories, including a 'make matlab' in the tinyos/tools/java/net/tinyos/matlab directory
+
+make sure you call tools/matlab/defineTOSEnvironment when you start matlab, either manually or by putting the tools/matlab/startup.m file in the matlab path
+
+program all the nodes by going to micaLocalizationApp and type 'make mica2dot'
+
+then, type testbed-program.pl  --testbed=/home/kamin/projects/tinyos-1.x/contrib/testbed/testbed/intel-terrence-testbed.cfg --download build/mica2dot/main.srec
+
+make sure you run these two commands to start serial forwarders to connect to the testbed and your serial port (the serial port is running a minitasks/03/ucb/GenericBase)
+java net.tinyos.sf.old.SerialForward -uart-sync -baud 57600 &
+testbed_start_sf.pl
+
+then, call the contrib/calamari/tools/matlab/pegtestbedinit function, which should connect matlab to your serial forwarder objects and wake up all the nodes.  
+
+type
+peg all ident
+

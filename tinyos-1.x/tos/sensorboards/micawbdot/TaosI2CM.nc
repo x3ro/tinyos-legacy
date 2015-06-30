@@ -1,0 +1,286 @@
+/*									tab:4
+ * "Copyright (c) 2000-2003 The Regents of the University  of California.  
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice, the following
+ * two paragraphs and the author appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Copyright (c) 2002-2003 Intel Corporation
+ * All rights reserved.
+ *
+ * This file is distributed under the terms in the attached INTEL-LICENSE     
+ * file. If you do not find these files, copies can be found by writing to
+ * Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA, 
+ * 94704.  Attention:  Intel License Inquiry.
+ */
+/*
+ *
+ * Authors:		Joe Polastre, Rob Szewczyk
+ * Date last modified:  7/18/02
+ *
+ */
+
+module TaosI2CM
+{
+  provides {
+    interface StdControl;
+    interface I2C;
+  }
+}
+implementation
+{
+  // global variables
+  char state;           	// maintain the state of the current process
+  char local_data;		// data to be read/written
+  result_t result;
+
+  // define constants for state
+  enum {IDLE=0, READ_DATA=1, WRITE_DATA, SEND_START, SEND_END};
+
+  // wait when triggering the clock
+  void wait() {
+    TOSH_uwait(5);
+//    TOSH_wait_250ns();
+  }
+
+  // hardware pin functions
+  void SET_CLOCK() { TAOS_SET_CLOCK(); }
+  void CLEAR_CLOCK() { TAOS_CLEAR_CLOCK(); }
+  void MAKE_CLOCK_OUTPUT() { TAOS_MAKE_CLOCK_OUTPUT(); }
+  void MAKE_CLOCK_INPUT() { TAOS_MAKE_CLOCK_INPUT(); }
+
+  void SET_DATA() { TAOS1_SET_DATA(); }
+  void CLEAR_DATA() { TAOS1_CLEAR_DATA(); }
+  void MAKE_DATA_OUTPUT() { TAOS1_MAKE_DATA_OUTPUT(); }
+  void MAKE_DATA_INPUT() { TAOS1_MAKE_DATA_INPUT(); }
+  char GET_DATA() { return TAOS1_GET_DATA(); }
+
+  void SET_DATA_2() { TAOS2_SET_DATA(); }
+  void CLEAR_DATA_2() { TAOS2_CLEAR_DATA(); }
+  void MAKE_DATA_OUTPUT_2() { TAOS2_MAKE_DATA_OUTPUT(); }
+  void MAKE_DATA_INPUT_2() { TAOS2_MAKE_DATA_INPUT(); }
+  char GET_DATA_2() { return TAOS2_GET_DATA(); }
+
+  void pulse_clock() {
+        MAKE_CLOCK_OUTPUT();
+	wait();
+	SET_CLOCK();
+	wait();
+	CLEAR_CLOCK();
+  }
+
+  char read_bit() {
+	uint8_t i,j;
+
+        MAKE_CLOCK_OUTPUT();	
+	MAKE_DATA_INPUT();
+        MAKE_DATA_INPUT_2();
+        wait();
+	SET_CLOCK();
+	wait();
+	i = GET_DATA();
+        j = GET_DATA_2();
+	CLEAR_CLOCK();
+	return (i | (j << 1));
+  }
+
+  short i2c_read(){
+	uint8_t data = 0;
+        uint8_t data2 = 0;
+        uint8_t bit = 0;
+	uint8_t i = 0;
+	for(i = 0; i < 8; i ++){
+		data = (data << 1) & 0xfe;
+		data2 = (data2 << 1) & 0xfe;
+                bit = read_bit();
+		if((bit & 0x01) == 1){
+			data |= 0x1;
+		}
+		if(((bit >> 1) & 0x01) == 1){
+			data2 |= 0x1;
+		}
+	}
+	return (data | ((data2 & 0xFF) << 8));
+  }
+
+  char i2c_write(char c) { 
+	uint8_t i;
+        MAKE_CLOCK_OUTPUT();
+	MAKE_DATA_OUTPUT();
+        MAKE_DATA_OUTPUT_2();
+	for(i = 0; i < 8; i ++){
+		if(c & 0x80){
+			SET_DATA();
+			SET_DATA_2();
+		}else{
+			CLEAR_DATA();
+			CLEAR_DATA_2();
+		}
+		pulse_clock();
+		c = c << 1;
+	}
+ 	i = read_bit();	
+	//return i == 0;
+ 	return SUCCESS;
+  } 
+
+  void i2c_start() {
+	SET_DATA();
+        SET_DATA_2();
+	SET_CLOCK();
+        MAKE_CLOCK_OUTPUT();
+	MAKE_DATA_OUTPUT();
+        MAKE_DATA_OUTPUT_2();
+	wait();
+	CLEAR_DATA();
+        CLEAR_DATA_2();
+	wait();
+	CLEAR_CLOCK();
+  }
+
+  void i2c_ack() {
+	MAKE_DATA_OUTPUT();
+        MAKE_DATA_OUTPUT_2();
+	CLEAR_DATA();
+        CLEAR_DATA_2();
+	pulse_clock();
+  }
+
+  void i2c_nack() {
+	MAKE_DATA_OUTPUT();
+	MAKE_DATA_OUTPUT_2();
+	SET_DATA();
+	SET_DATA_2();
+	pulse_clock();
+  }
+
+  void i2c_end() {
+        MAKE_CLOCK_OUTPUT();
+	MAKE_DATA_OUTPUT();
+	MAKE_DATA_OUTPUT_2();
+	CLEAR_DATA();
+	CLEAR_DATA_2();
+  	wait();
+	SET_CLOCK();
+	wait();
+	SET_DATA();
+	SET_DATA_2();
+  }
+
+  task void I2C_task(){
+    uint8_t current_state = state;
+    state = 0;
+    if((current_state & 0xf) == READ_DATA){
+	signal I2C.readDone(i2c_read());
+	if (current_state & 0xf0) 
+	    i2c_ack();
+	else
+	    i2c_nack();
+    }else if(current_state == WRITE_DATA){
+	    signal I2C.writeDone(i2c_write(local_data));
+    }else if(current_state == SEND_START){
+	    i2c_start();
+	    signal I2C.sendStartDone();
+    }else if(current_state == SEND_END){
+	    i2c_end();
+	    signal I2C.sendEndDone();
+    }
+  }
+
+  command result_t StdControl.init() {
+    state = 0;
+    local_data = 0;
+    return SUCCESS;
+  }
+
+  command result_t StdControl.start() {
+    state = 0;
+    SET_DATA();
+    SET_DATA_2();
+    MAKE_DATA_OUTPUT();
+    MAKE_DATA_OUTPUT_2();
+    SET_CLOCK();
+    MAKE_CLOCK_OUTPUT();
+    return SUCCESS;
+  }
+
+  command result_t StdControl.stop() {
+   state = 0; 
+   CLEAR_DATA();
+   CLEAR_DATA_2();
+   MAKE_DATA_INPUT();
+   MAKE_DATA_INPUT_2();
+   CLEAR_CLOCK();
+   MAKE_CLOCK_INPUT(); 
+   return SUCCESS;
+  }
+
+  command result_t I2C.sendStart() {
+    if (state != 0) 
+        return FAIL;
+    state = SEND_START;
+    MAKE_CLOCK_OUTPUT();
+    post I2C_task();
+    return SUCCESS;
+  }
+
+  command result_t I2C.sendEnd() {
+    if (state != 0) 
+        return FAIL;
+    MAKE_CLOCK_OUTPUT();
+    state = SEND_END;
+    post I2C_task();
+    return SUCCESS;
+  }
+
+  command result_t I2C.read(bool ack) {
+    if (state != 0) 
+        return FAIL;
+    MAKE_CLOCK_OUTPUT();
+    state = READ_DATA;
+    if (ack) 
+	state |= 0x10;
+    post I2C_task();
+    return SUCCESS;
+  }
+
+  command result_t I2C.write(char data) {
+    if(state != 0) 
+        return FAIL;
+    MAKE_CLOCK_OUTPUT();
+    state = WRITE_DATA;
+    local_data = data;
+    post I2C_task();
+    return SUCCESS;
+  }
+
+  default event result_t I2C.sendStartDone() {
+    return SUCCESS;
+  }
+
+  default event result_t I2C.sendEndDone() {
+    return SUCCESS;
+  }
+
+  default event result_t I2C.readDone(short data) {
+    return SUCCESS;
+  }
+
+  default event result_t I2C.writeDone(bool success) {
+    return SUCCESS;
+  }
+  
+}

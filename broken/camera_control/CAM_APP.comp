@@ -1,0 +1,60 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2002 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Philip Levis
+ *
+ * Component for controlling a Sony EVI-D100. A component specifies a set of
+ * lookup points in terms of coordinates. It can then provide weighted
+ * lists of lookup points; the CAMERA component weights the points
+ * and controls the camera to point at the correct point.
+ */
+
+TOS_MODULE CAM_APP;
+
+ACCEPTS{
+  char APP_INIT(void);
+  char APP_START(void);
+  char APP_POPULATE(char rows, char columns, short rowSpacing, short colSpacing);
+  char APP_SET_CONSTANTS(short offsetX, short offsetY, short offsetZ, float cameraTilt);
+  
+};
+
+HANDLES{
+  void APP_SUB_CLOCK(void);
+  TOS_MsgPtr APP_REL_MSG(TOS_MsgPtr msg);
+  char APP_SEND_DONE(TOS_MsgPtr msg);
+};
+
+USES{
+  char APP_SUB_INIT();
+  char APP_SUB_START();
+  char APP_SUB_CLOCK_INIT(char, char);
+
+  char APP_SUB_ADD_POINT(short id, short pan, short tilt, short zoom);
+  char APP_SUB_GOTO(char id1, char weight1,
+		    char id2, char weight2,
+		    char id3, char weight3,
+		    char id4, char weight4);
+  char APP_SUB_YELLOW_LED_TOGGLE();
+  short APP_SUB_RANDOM();
+};
+

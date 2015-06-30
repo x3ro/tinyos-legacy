@@ -1,0 +1,20 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: jtag.extra,v 1.5 2007/03/05 01:06:30 lnachman Exp $
+
+PROGRAM = jtag
+
+INTEL_SDT_HOME ?= c:/nordheim
+empty :=
+XFLASH_PATH := $(subst $(empty) $(empty),\ ,$(subst \,/,$(INTEL_SDT_HOME)))
+PXA27X_JTAG ?= $(XFLASH_PATH)/xflash/xflash.exe
+
+
+PXA27X_JTAG_DEV ?= "JTAG CPU"
+
+program: FORCE
+	@echo "    installing $(PLATFORM) binary using the parallel port jtag adapter"
+	$(PXA27X_JTAG) -p imote2 -tt $(PXA27X_JTAG_DEV) $(INSTALL_BIN)
+
+program_input: bin
+	@:
+

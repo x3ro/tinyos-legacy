@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# FILE:        tasksvr
+# AUTHOR:      Martin Turon
+# DATE:        July 8, 2004
+# DESCRIPTION: TASKServer startup script
+#
+# $Id: tasksvr,v 1.1 2004/07/08 17:46:55 mturon Exp $
+#
+
+echo "Starting PostgreSQL."
+ipc-daemon &
+rm /pgdata/postmaster.pid
+pg_ctl -o "-p 5432" start -D /pgdata -l /pgdata/logfile
+
+echo "Waiting for database server to start up."
+sleep 5
+
+echo "Starting TASKServer."
+cd /opt/tinyos-1.x/tools/java
+java net.tinyos.task.tasksvr.TASKServer

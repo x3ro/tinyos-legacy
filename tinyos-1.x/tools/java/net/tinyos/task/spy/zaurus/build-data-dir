@@ -1,0 +1,25 @@
+#!/bin/sh
+ZAURUS=$1
+VERSION=$2
+
+case $ZAURUS in
+  5*) javadir=Jeode ;;
+  *) javadir=Java ;;
+esac
+
+rm -rf data-dir
+mkdir data-dir
+DDIR=$PWD/data-dir
+mkdir -p $DDIR/CONTROL
+mkdir -p $DDIR/usr/local/bin
+mkdir -p $DDIR/usr/local/lib
+mkdir -p $DDIR/opt/QtPalmtop/pics
+mkdir -p $DDIR/opt/QtPalmtop/apps/$javadir
+
+sed -e "s/@ZAURUS@/$ZAURUS/g"  -e "s/@VERSION@/$VERSION/g"  control >$DDIR/CONTROL/control
+cp scythe.png $DDIR/opt/QtPalmtop/pics/spyscythe.png
+cp spy.desktop.$ZAURUS $DDIR/opt/QtPalmtop/apps/$javadir/spy.desktop
+cp runspy $DDIR/usr/local/bin
+
+cd ../../../../..
+jar cfm $DDIR/usr/local/lib/spy-tool.jar $DDIR/../spy-tool.manifest net/tinyos/task/spy/*.class net/tinyos/message/*.class net/tinyos/packet/*.class net/tinyos/util/*.class

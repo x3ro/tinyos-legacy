@@ -1,0 +1,41 @@
+This is a summary of the modifications to Timer.M
+
+<     // 4 january 2003, herman@cs.uiowa.edu
+<     // Replace the following:  
+<     // call Clock.setRate(TOS_I1PS, TOS_S1PS);
+<     call Clock.setRate(128,6); 
+
+<     // 4 january 2003, herman@cs.uiowa.edu
+<     // Replace the following:  
+<     // call Clock.setRate(TOS_I1PS, TOS_S1PS);
+<     call Clock.setRate(128,6); 
+
+<       // 4 january 2003, herman@cs.uiowa.edu
+<       // Replace the following:  
+<       // case 0: call Clock.setRate(TOS_I1PS, TOS_S1PS) ; break;
+<       // case 1: call Clock.setRate(TOS_I2PS, TOS_S2PS) ; break;
+<       // case 2: call Clock.setRate(TOS_I4PS, TOS_S4PS) ; break;
+<       // case 3: call Clock.setRate(TOS_I8PS, TOS_S8PS) ; break;
+<       // case 4: call Clock.setRate(TOS_I16PS, TOS_S16PS) ; break;
+<       // case 5: call Clock.setRate(TOS_I32PS, TOS_S32PS) ; break;
+<       // case 6: call Clock.setRate(TOS_I64PS, TOS_S64PS) ; break;
+<       // case 7: call Clock.setRate(TOS_I128PS, TOS_S128PS) ; break;
+<       // case 8: call Clock.setRate(TOS_I256PS, TOS_S256PS) ; break;
+<       // case 9: call Clock.setRate(TOS_I512PS, TOS_S512PS) ; break;
+<       // case 10: call Clock.setRate(TOS_I1024PS, TOS_S1024PS) ; break;
+<       // case 11: call Clock.setRate(TOS_I2048PS, TOS_S2048PS) ; break;
+<       // case 12: call Clock.setRate(TOS_I4096PS, TOS_S4096PS); break;
+<       // by equivalent assignments using finer clock granularity
+<       case 0: call Clock.setRate(128,6) ; break; // 128  ticks/second => 1sec
+<       case 1: call Clock.setRate(128,5) ; break; // 256  ticks/second => .5sec
+<       case 2: call Clock.setRate(128,4) ; break; // 512  ticks/second => .25sec
+<       case 3: call Clock.setRate(128,3) ; break; // 1024 ticks/second
+<       case 4: call Clock.setRate(64,3) ; break;
+<       case 5: call Clock.setRate(128,2) ; break; // 4096 ticks/second
+<       case 6: call Clock.setRate(64,2) ; break;
+<       case 7: call Clock.setRate(32,2) ; break;
+<       case 8: call Clock.setRate(128,1) ; break; // 32768 ticks/second
+<       case 9: call Clock.setRate(64,1) ; break;
+<       case 10: call Clock.setRate(32,1) ; break;
+<       case 11: call Clock.setRate(16,1) ; break;
+<       case 12: call Clock.setRate(8,1); break;

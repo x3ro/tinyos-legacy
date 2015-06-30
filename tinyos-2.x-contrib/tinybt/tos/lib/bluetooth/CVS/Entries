@@ -1,0 +1,24 @@
+/Bluetooth.nc/1.1/Fri Dec  9 19:48:58 2011//
+/BluetoothC.nc/1.1/Fri Dec  9 19:48:58 2011//
+/BluetoothStdControl.nc/1.1/Fri Dec  9 19:48:58 2011//
+/BluetoothVendor.nc/1.1/Fri Dec  9 19:48:58 2011//
+/HCICoreC.nc/1.1/Fri Dec  9 19:48:58 2011//
+/HCICoreM.nc/1.1/Fri Dec  9 19:48:58 2011//
+/HCIPacket.nc/1.1/Fri Dec  9 19:48:58 2011//
+/HCIPacketC.nc/1.1/Fri Dec  9 19:48:58 2011//
+/HCIPacketM.nc/1.1/Fri Dec  9 19:48:58 2011//
+/L2CAPC.nc/1.1/Fri Dec  9 19:48:58 2011//
+/L2CAPM.nc/1.1/Fri Dec  9 19:48:58 2011//
+/PointerQueue.nc/1.1/Fri Dec  9 19:48:58 2011//
+/PointerQueueC.nc/1.1/Fri Dec  9 19:48:58 2011//
+/additional_hci.h/1.1/Fri Dec  9 19:48:58 2011//
+/bluetooth.c/1.1/Fri Dec  9 19:48:58 2011//
+/bluetooth.h/1.1/Fri Dec  9 19:48:58 2011//
+/btpackets.h/1.1/Fri Dec  9 19:48:58 2011//
+/hci.c/1.1/Fri Dec  9 19:48:58 2011//
+/hci.h/1.1/Fri Dec  9 19:48:58 2011//
+/l2cap.h/1.1/Fri Dec  9 19:48:58 2011//
+/rfcomm.h/1.1/Fri Dec  9 19:48:58 2011//
+/sdp.c/1.1/Fri Dec  9 19:48:58 2011//
+/sdp.h/1.1/Fri Dec  9 19:48:58 2011//
+D

@@ -1,0 +1,13 @@
+This directory contains some sample code for what a network
+architecture using the OSKI methodology would look like. Four directories:
+
+interfaces:         Where all of the interfaces are
+components:         Where the underlying implementations and configurations
+                    are. Users shouldn't look at these.
+services:           Where the abstractions a user deals with are. Senders,
+                    receivers, etc.
+examples:           Some examples of what using this approach would look like
+                    to an application programmer.
+
+ -pal 10/27/04
+

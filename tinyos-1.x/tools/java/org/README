@@ -1,0 +1,9 @@
+
+The code in this subdirectory is extracted from the 2.2a distribution
+of the Jython project (http://www.jython.org). It was imported into
+the tinyos-1.x distribution and slightly modified for compatibility by
+Michael Demmer (demmer@cs.berkeley.edu).
+
+See python/LICENSE.txt and apache/LICENSE for relevant licensing
+restrictions.
+

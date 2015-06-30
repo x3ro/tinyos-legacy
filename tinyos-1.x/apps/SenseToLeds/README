@@ -1,0 +1,19 @@
+README for SenseToLeds
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+SenseToLeds is an application that periodically 
+samples the photo sensor and displays the highest 3 bits of the raw ADC
+light reading to the LEDs, with RED being the most signficant bit 
+and YELLOW being the least significant bit.  It behaves the same as 
+Sense in Lesson 2; however, it is built simply by wiring TimerC, 
+Photo, IntToLeds and SenseToInt components together.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

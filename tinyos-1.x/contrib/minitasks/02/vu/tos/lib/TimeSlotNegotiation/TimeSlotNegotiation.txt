@@ -1,0 +1,46 @@
+Author/Contact
+		janos.sallai@vanderbilt.edu (Janos Sallai, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The scope of the time slot negotiation algorithm is to schedule acoustic ranging 
+measurements of a large number of motes so that acoustic localization can be 
+accomplished within a reasonable time. In order to avoid conflicts between 
+concurrent acoustic ranging measurements, distinct time slots need to be 
+assigned to motes that are within each other’s acoustic range. Since the radio 
+range tends to be larger than the acoustic one on our hardware, two radio hops 
+is a safe upper bound on the acoustic range. Consequently, a random time slot, 
+an integer between 0 and a constant maximum, chosen randomly by each mote needs 
+to be propagated to all motes within two radio hops.
+
+Time slot negotiation is an iterative process, consisting of rounds. In all 
+rounds every mote broadcasts its time slot and the known time slot assignment of 
+motes within one hop. Motes also receive time slot information from their 
+neighbors. Each mote maintains a time slot assignment table based on the 
+incoming messages. If there is a conflict, the mote with the higher ID chooses a 
+different slot that is still available and broadcast it in the next round.
+
+Time slots assignment information is propagated via radio broadcast, however, to 
+keep radio collisions at a minimum, multiple time slot data (containing mote ID, 
+time slot and hop count) are aggregated into a single radio message.
+
+TUNABLE PARAMETERS:
+
+	ROUND_TIME      - period between rebroadcasts of time slot information 
+	TIMESLOT_COUNT  - number of time slots
+
+TEST APPLICATION
+
+TestTimeSlotNegotiation is a test application for TimeSlotNegotiation component. 
+Time slots of individual motes can be queried and set, negotiation can be 
+started and stopped by RemoteControl (a MessageCenter module).
+
+The APP ID for TimeSlotNegotiationC component is 0x15(21). It supports the 
+following IntCommands:
+				0x0000	Stop negotiation
+				0x0001	Start negotiation
+				0x0002	Return status (1=negotiating, 0=idle)
+				0x??03	Set time slot to value of the high byte
+				other	Get time slot
+
+Please see the header file TimeSlotNegotiation.h for further details.

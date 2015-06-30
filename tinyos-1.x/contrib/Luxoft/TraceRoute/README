@@ -1,0 +1,10 @@
+TraceRoute modules
+
+$Id: README,v 1.1 2003/11/04 22:39:47 smadden Exp $
+
+Module provides the route tracing from root mote to nodes. There are two 
+modules that provides different functionality. They are:
+ThaceRoute - module that traces routing using underlaying routing module;
+TraceFlood - module that tries to trace motes using packet flood.
+
+-end-

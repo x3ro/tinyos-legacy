@@ -1,0 +1,77 @@
+The hardware files in this directory correspond to the Atmel ATmega8L
+microcontroller on the motor accessory board from UC Berkeley.
+
+HPLAccelC.nc
+-- Configuration component for continuously sampling the x and y axis of
+   the ADXL202e accelerometer on the motor board.
+
+HPLAccelM.nc
+-- Implementation of above component.  Provides the accel interface.
+
+HPLADCC.nc
+-- Pretty much the same as the mica version.  Some registry names have changed.
+
+HPLEEPROM.nc
+-- Provides access to the 512 bytes off EEPROM on the ATmega8L.
+-- Address 0 contains the calibration byte required to run the internal clock
+   at 2MHz.  Unfortunately, I have noticed that if you try to set the fuse
+   bits for a higher clock rate (4MHz and 8MHz are possible) the clock is
+   so inaccurate, that you can not program the device using the Mica Programmer
+   anymore.  After a good deal of web research, it appears that if you use
+   a parallel programming technique, this will still be possible but I have
+   not actually tried this.
+-- Addresses 10-12 hold constants relating to the Servo component.
+   10: Kp constant for the PI servo control loop.
+   11: Ki constant for the PI servo control loop.
+   12: The reference value for "straight".
+   If not written to in advance, these addresses are initialized in the 
+   HPLMZServoM.nc component.
+
+HPLI2CM.nc
+-- Not yet adapted for the ATmega8L.
+
+HPLInit.nc
+-- same as mica.
+
+HPLInterrupt.nc
+-- same as mica.
+
+HPLMotor1.nc
+-- Uses PWM channel in a phase-correct, 8-bit fashion to create the PWM
+   signal to control the speed and direction of the motors.  The frequency
+   is set at approximately 500Hz and may be raised or lowered as the user
+   deems necessary.
+
+HPLMotor2.nc
+-- Uses PWM channel in a phase-correct, 8-bit fashion to create the PWM
+   signal to control the speed and direction of the motors.  The frequency
+   is set at approximately 500Hz and may be raised or lowered as the user
+   deems necessary.
+
+HPLUARTC.nc
+-- same as mica (with some register changes).
+
+HPLUARTM.nc
+-- same as mica (with some register changes).
+
+I2CC.nc
+-- Not yet implemented on ATmega8L.
+
+Main.nc
+-- same as mica.
+
+MZServo.nc
+-- Top level configuration of servo component.
+
+MZServoM.nc
+-- Uses a PI control loop to sense the current servo position, and drive the
+   servo motor to that position.
+
+RealMain.nc
+-- same as mica except it calibrates the clock at the beginning by reading
+   value out of EEPROM address 0.
+
+hardware.h
+-- Defines pins for use on motor board.  Feel free to modify names in your
+   implementation.
+

@@ -1,0 +1,10 @@
+<SEARCH PATH="../../../platform/telosb">
+<SEARCH PATH="../../../platform/msp430">
+<SEARCH PATH="../sensorboards/sensors">
+<FUNCTION NAME="thum">
+<FUNCTION NAME="ttemp">
+<FUNCTION NAME="tlightp">
+<FUNCTION NAME="tlightt">
+<FUNCTION NAME="titemp">
+<FUNCTION NAME="tivoltage">
+

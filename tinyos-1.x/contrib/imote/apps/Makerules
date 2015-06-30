@@ -1,0 +1,586 @@
+#
+# Copyright (c) 2004, Intel Corporation
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# Neither the name of the Intel Corporation nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+#                                                                      tab:4
+# "Copyright (c) 2000-2003 The Regents of the University  of California.
+# All rights reserved.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose, without fee, and without written agreement is
+# hereby granted, provided that the above copyright notice, the following
+# two paragraphs and the author appear in all copies of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+# DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+# OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+# CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+# ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+#
+# Copyright (c) 2002-2003 Intel Corporation
+# All rights reserved.
+#
+# This file is distributed under the terms in the attached INTEL-LICENSE
+# file. If you do not find these files, copies can be found by writing to
+# Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA,
+# 94704.  Attention:  Intel License Inquiry.
+#
+
+#-*-Makefile-*-
+# Base Makefile for nesC apps.
+#
+# Created: 6/2002,  Philip Levis <pal@cs.berkeley.edu>
+#
+# Updated: 6/18/2002 Rob von Behren <jrvb@cs.berkeley.edu>
+#          Multi-platform support
+#
+# Updated: 6/20/2002 David Gay <dgay@intel-research.net>
+#          Compile via gcc, make tos.th system-wide, not app-wide
+#          (still need to ponder group selection)
+#
+# Updated: 6/27/2003 Jaein Jeong <jaein@cs.berkeley.edu>
+#          In-network programming support for mica2, mica2dot platforms
+#
+######################################################################
+
+# this needs to be -dlpt=3 on thinkpads
+# PROGRAMMER_EXTRA_FLAGS :=
+# We don't actually set it here, so you can either set the 
+# PROGRAMMER_EXTRA_FLAGS environment variable (recommended) or
+# define it in ../Makelocal
+
+-include $(shell ncc -print-tosdir)/../apps/Makelocal
+
+# User configuration:
+# Specify user values in Makelocal to override the defaults here
+
+ifndef DEFAULT_LOCAL_GROUP
+DEFAULT_LOCAL_GROUP := 0x7d
+endif
+
+ifndef OPTFLAGS
+OPTFLAGS := -Os
+endif
+
+ifndef NESC_FLAGS
+NESC_FLAGS := -Wnesc-all
+endif
+
+# configure the base for the app dirs.  This is used to generate more
+# useful package names in the documentation.
+ifeq ($(BASEDIR)_x, _x)
+BASEDIR := $(shell pwd | sed 's@\(.*\)/apps.*$$@\1@' )
+endif
+
+# The output directory for generated documentation
+ifeq ($(DOCDIR)_x, _x)
+DOCDIR := $(BASEDIR)/doc/nesdoc
+endif
+
+##################################################
+#
+##################################################
+
+ifeq ($(PLATFORMS)_x, _x)
+PLATFORMS = mica mica2 mica2dot imote pc
+endif
+IMOTE_LOADER_FILES := DynamicScriptConverter.exe ZvDynamicScript.sp AppDynamicScript.sp PreV3FlashManager_115200 PreV3FlashManager_921600 UartFlashManager ZvDosFlashTool.exe
+
+
+OBJCOPY        = avr-objcopy
+SET_ID         = set-mote-id
+PROGRAMER      = uisp
+
+##################################################
+#  Begin iMote flags
+##################################################
+# this var must be pointed to the ADS tools on your system
+ADSTOOLSDIR   = /cygdrive/c/Program\ Files/ARM/ADSv1_2/bin/
+
+LD_GNU        = arm-thumb-elf-ld.exe
+OBJCOPY       = arm-thumb-elf-objcopy.exe
+TCC           = arm-thumb-elf-gcc.exe
+ARMCC         = arm-thumb-elf-gcc.exe
+AR            = arm-thumb-elf-ar.exe
+RANLIB        = arm-thumb-elf-ranlib.exe
+ASM           = $(ADSTOOLSDIR)armasm
+LD            = $(ADSTOOLSDIR)armlink
+FROMELF       = $(ADSTOOLSDIR)fromelf
+RM            = /usr/bin/rm
+
+# Files required by the arm loader.  These are copied into the build directory
+# during install/ reinstall and then removed
+ARM_LOADER_FILES := DynamicScriptConverter.exe ZvDynamicScript.sp AppDynamicScript.sp PreV3FlashManager_115200 PreV3FlashManager_921600 UartFlashManager ZvDosFlashTool.exe
+
+TOS_ROOT = /opt/tinyos-1.x
+TOS_DIR = $(TOS_ROOT)/beta
+ZEEVO_DIR = $(TOS_DIR)/platform/imote/zeevo1.2
+IMOTE_LIB_DIR = $(TOS_DIR)/platform/imote/imotelib
+IMOTE_LIB_DIR_ADS = C:/tinyos/cygwin/$(IMOTE_LIB_DIR)
+LIBGCC_DIR = C:/tinyos/cygwin/$(TOS_DIR)/platform/imote/libgcc
+CFLAGS := -DTINY_OS -I$(ZEEVO_DIR)/\ChipBase/\BlueOS -I$(ZEEVO_DIR)/\ChipBase/\Common -I$(ZEEVO_DIR)/\ChipBase/\StartUp -I$(ZEEVO_DIR)/\ChipBase/\TargetManager -I$(ZEEVO_DIR)/\ChipBase/\TargetSupervisor -I$(ZEEVO_DIR)/\ChipBase/\Utilities -I$(ZEEVO_DIR)/\BTLLStack/\LinkManager -I$(ZEEVO_DIR)/\BTLLStack/\LinkManager -I$(ZEEVO_DIR)/\LMU -I$(ZEEVO_DIR)/\ULS -I$(ZEEVO_DIR)/\HCI -I$(ZEEVO_DIR)/\CountLED 
+
+# new libs
+# These should be the same as in .../zeevo/Makefile
+SYMBOL_TABLES = $(IMOTE_LIB_DIR)/Dfu_JumpTbl.sym $(IMOTE_LIB_DIR)/RM_Rom1.sym $(IMOTE_LIB_DIR)/RM_Rom2.sym $(IMOTE_LIB_DIR)/SU_PatchVects.sym
+SYMBOL_ASSIGNMENTS = $(IMOTE_LIB_DIR)/Dfu_JumpTbl.symbol $(IMOTE_LIB_DIR)/RM_Rom1.symbol $(IMOTE_LIB_DIR)/RM_Rom2.symbol $(IMOTE_LIB_DIR)/SU_PatchVects.symbol
+REQUIRED_OBJS = $(IMOTE_LIB_DIR)/SU_FlashBoot.o
+ADS_ARMLIBS =  $(SYMBOL_TABLES) $(REQUIRED_OBJS) $(IMOTE_LIB_DIR)/motelib.a 
+#
+#if using gnu ld
+GNU_ARMLIBS =  $(SYMBOL_ASSIGNMENTS) $(REQUIRED_OBJS) $(IMOTE_LIB_DIR)/ArmStub.o $(IMOTE_LIB_DIR)/motelib.a $(IMOTE_LIB_DIR)/ArmStublib.a 
+
+
+##################################################
+#  End iMote flags
+##################################################
+
+ifdef MSG_SIZE
+PFLAGS := -DTOSH_DATA_LENGTH=$(MSG_SIZE) $(PFLAGS)
+endif
+
+#ifdef APP_DIR
+#PFLAGS := -I$(APP_DIR) $(PFLAGS)
+#endif
+
+# This is for network reprogramming
+# If XNP is defined, add the network reprogramming related files
+# to the search path and generate a timestamp to make each build unique.
+XNP_DIR := ../../tos/lib/Xnp
+ifdef XNP
+PFLAGS := -I$(TOSDIR)/beta/platform/imote -I$(XNP_DIR) $(shell $(XNP_DIR)/ident.pl .ident_install_id $(COMPONENT)) $(PFLAGS)
+endif
+
+PFLAGS         := $(PFLAGS) -Wall -Wshadow -DDEF_TOS_AM_GROUP=$(DEFAULT_LOCAL_GROUP) $(NESC_FLAGS)
+# Added to include beta components
+
+PFLAGS         := $(PFLAGS) -I/opt/tinyos-1.x/beta/platform/imote -I$(IMOTE_LIB_DIR) -I/usr/local/include/
+
+NCC            = ncc
+LIBS	       = -lm
+
+######################################################################
+# Choose platform options, based on MAKECMDGOALS
+######################################################################
+
+
+# be quieter....
+#ifeq ($(VERBOSE_MAKE)_x, _x)
+#MAKEFLAGS += -s
+#endif
+#export VERBOSE_MAKE
+
+define USAGE
+
+
+Usage:   make <platform>
+         make all
+         make clean
+         make install[.n] <platform>
+         make reinstall[.n] <platform> # no rebuild of target
+         make docs <platform>
+
+         Valid platforms are: $(PLATFORMS)
+
+
+endef
+
+
+PLATAUX=$(PLATFORMS) all
+PLATFORM := $(filter $(PLATAUX), $(MAKECMDGOALS))
+PFLAGS := -target=$(PLATFORM) $(PFLAGS)
+MAKECMDGOALS := $(filter-out $(PLATAUX), $(MAKECMDGOALS))
+
+#########################################################################
+# TinySec processing
+#########################################################################
+ifndef TINYSEC
+TINYSEC        := false # default: disable tinysec
+endif
+# The tinysec keyfile to use and the default key name (this re matches the
+# first key. you can explicitly list keys by: make mica KEYNAME=mykeyname
+KEYFILE        := $(HOME)/.tinyos_keyfile
+KEYNAME        := '\w+'
+
+ifeq ($(TINYSEC),true)
+TINYSEC_KEY    := $(shell mote-key -kf $(KEYFILE) -kn $(KEYNAME))
+ifeq ($(TINYSEC_KEY),)
+$(error tinysec key has not been properly set. It is needed for tinysec. \
+	Check to make sure that the script exists)
+endif
+PFLAGS         := $(PFLAGS) -I%T/lib/TinySec -I%T/platform/%p/TinySec -DTINYSEC_KEY="$(TINYSEC_KEY)" -DTINYSEC_KEYSIZE=8
+ifeq ($(PLATFORM),mica2dot)
+PFLAGS         := $(PFLAGS) -I%T/platform/mica2/TinySec
+endif
+endif
+
+#########################################################################
+# Programming Boards : flags
+#########################################################################
+PROGRAMMER_FLAGS=-dprog=dapa $(PROGRAMMER_PART) $(PROGRAMMER_EXTRA_FLAGS)
+PROGRAMMER := DAPA
+
+#########################################################################
+# Programming Boards : command line input
+# Command line input for programmers: 
+#   none	 : default to parallel programming board
+#   MIB510=<dev> : use mib510 serial port programming board at port <dev>
+#   EPRB=<host>	 : use eprb at hostname <host>
+#   AVRISP=<dev> : use AVRISP serial programmer at port <dev>
+#########################################################################
+
+### If MIB510 then
+MIB5100 := $(subst MIB510=,,$(filter MIB510=%,$(MAKECMDGOALS)))
+ifneq ($(MIB510_),)
+  MIB510 := $(MIB5100)
+endif
+MAKECMDGOALS := $(filter-out MIB510=%,$(MAKECMDGOALS))
+
+### If STK is a set environment variable or if STK=xxx appears on the command
+### line, then take it to be a network address and program assuming an stk500
+### module.
+EPRB0 := $(subst EPRB=,,$(filter EPRB=%,$(MAKECMDGOALS)))
+ifneq ($(EPRB_),)
+  EPRB := $(EPRB0)
+endif
+MAKECMDGOALS := $(filter-out EPRB=%,$(MAKECMDGOALS))
+
+ifneq (x$(MIB510),x)
+   PROGRAMMER := STK
+   PROGRAMMER_FLAGS=-dprog=mib510 -dserial=$(MIB510) $(PROGRAMMER_PART) $(PROGRAMMER_EXTRA_FLAGS_MIB)
+endif
+ifneq (x$(EPRB),x)
+  PROGRAMMER := STK
+  PROGRAMMER_FLAGS=-dprog=stk500 -dhost=$(EPRB) $(PROGRAMMER_PART) $(PROGRAMMER_EXTRA_FLAGS_STK)
+endif
+ifdef AVRISP
+  PROGRAMMER := STK
+  PROGRAMMER_FLAGS=-dprog=stk500 -dserial=$(AVRISP) $(PROGRAMMER_PART) $(PROGRAMMER_EXTRA_FLAGS_AVRISP)
+endif
+
+#Sensor Board Defaults
+ifeq ($(SENSORBOARD),)
+	ifeq ($(PLATFORM),mica)
+		SENSORBOARD = micasb
+	endif
+	ifeq ($(PLATFORM),mica2)
+		SENSORBOARD = micasb
+	endif
+	ifeq ($(PLATFORM),mica128)
+		SENSORBOARD = micasb
+	endif
+	ifeq ($(PLATFORM),rene2)
+		SENSORBOARD = basicsb
+	endif
+	ifeq ($(PLATFORM),pc)
+		SENSORBOARD = micasb
+	endif
+	ifeq ($(PLATFORM),mica2dot)
+		SENSORBOARD = basicsb
+	endif
+	ifeq ($(PLATFORM),imote)
+		SENSORBOARD = imotesb
+	endif
+endif
+
+BUILDDIR = build/$(PLATFORM)
+MAIN_EXE = $(BUILDDIR)/main.exe
+MAIN_SREC = $(BUILDDIR)/main.srec
+
+ifeq ($(PLATFORM), pc)
+OPTFLAGS := -g -O0
+PFLAGS := -pthread $(PFLAGS) -fnesc-nido-tosnodes=1000 -fnesc-cfile=$(BUILDDIR)/app.c
+MAIN_TARGET = $(MAIN_EXE)
+else
+PFLAGS := $(PFLAGS) -finline-limit=100000 -fnesc-cfile=$(BUILDDIR)/app.c
+MAIN_TARGET = $(MAIN_SREC)
+endif
+
+PFLAGS := -board=$(SENSORBOARD) $(PFLAGS)
+
+# added options to support network reprogramming. This sets the correct bootloader
+# for mica2 and mica2dot platforms. And this also sets the programmer flag for
+# native ATmega128.
+ifeq ($(PLATFORM), mica) 
+PROGRAMMER_PART=-dpart=ATmega103 --wr_fuse_e=fd
+PROGRAMMER_FLAGS_INP=-dprog=dapa $(PROGRAMMER_EXTRA_FLAGS)
+ifdef AVRISP
+  PROGRAMMER_FLAGS_INP=-dprog=stk500 -dserial=$(AVRISP_DEV) -dpart=ATmega103
+endif
+endif
+ifeq ($(PLATFORM), mica128) 
+PROGRAMMER_PART=-dpart=ATmega128 --wr_fuse_e=ff
+PROGRAMMER_FLAGS_INP=-dprog=dapa $(PROGRAMMER_EXTRA_FLAGS)
+ifdef AVRISP
+  PROGRAMMER_FLAGS_INP=-dprog=stk500 -dserial=$(AVRISP_DEV) -dpart=ATmega128
+endif
+endif
+ifeq ($(PLATFORM), mica2)
+BOOTLOADER=$(XNP_DIR)/inpispm2.srec
+PROGRAMMER_PART=-dpart=ATmega128 --wr_fuse_e=ff
+PROGRAMMER_FLAGS_INP=-dprog=dapa $(PROGRAMMER_EXTRA_FLAGS)
+ifdef AVRISP
+  PROGRAMMER_FLAGS_INP=-dprog=stk500 -dserial=$(AVRISP_DEV) -dpart=ATmega128
+endif
+endif
+ifeq ($(PLATFORM), mica2dot)
+BOOTLOADER =$(XNP_DIR)/inpispm2d.srec
+PROGRAMMER_PART=-dpart=ATmega128 --wr_fuse_e=ff
+PROGRAMMER_FLAGS_INP=-dprog=dapa $(PROGRAMMER_EXTRA_FLAGS)
+ifdef AVRISP
+  PROGRAMMER_FLAGS_INP=-dprog=stk500 -dserial=$(AVRISP_DEV) -dpart=ATmega128
+endif
+endif
+
+######################################################################
+# Rules for documentation generation
+######################################################################
+
+# add documentation flags to ncc, if requested
+DOCS := $(filter docs, $(MAKECMDGOALS))
+MAKECMDGOALS := $(filter-out docs, $(MAKECMDGOALS))
+ifeq ($(DOCS)_x, docs_x)
+build: FORCE
+	@echo "    Making documentation for $(COMPONENT) on $(PLATFORM)"
+	nesdoc $(DOCDIR)/$(PLATFORM) -fnesc-is-app $(PFLAGS) $(CFLAGS) $(COMPONENT).nc
+endif
+
+# dummy rule for 'docs' target - so make won't complain about it
+docs:
+	@true
+
+
+
+######################################################################
+# Rules for debugging
+######################################################################
+
+# add documentation flags to ncc, if requested
+DBG := $(filter debug, $(MAKECMDGOALS))
+MAKECMDGOALS := $(filter-out debug, $(MAKECMDGOALS))
+ifeq ($(DBG)_x, debug_x)
+OPTFLAGS := -O1 -g -fnesc-no-inline 
+endif
+
+# dummy rule for 'debug' target - so make won't complain about it
+debug:
+	@true
+
+
+# For those who like debugging optimised code, there's debugopt
+DBGOPT := $(filter debugopt, $(MAKECMDGOALS))
+MAKECMDGOALS := $(filter-out debugopt, $(MAKECMDGOALS))
+ifeq ($(DBGOPT)_x, debugopt_x)
+OPTFLAGS := $(OPTFLAGS) -g
+endif
+
+# dummy rule for 'debug' target - so make won't complain about it
+debugopt:
+	@true
+
+
+
+######################################################################
+# top-level rules.  switch based on MAKECMDGOALS
+######################################################################
+
+#
+# rules for make clean
+#
+ifeq ($(MAKECMDGOALS)_x, clean_x)
+
+PLATFORM=
+
+$(PLATAUX):
+	@echo ""
+
+else
+
+ifeq ($(PLATFORM)_x,_x)
+$(error $(PLATAUX) $(MAKECMDGOALS) $(USAGE))
+endif
+
+MAKECMDGOALS := $(patsubst install.%,install,$(MAKECMDGOALS))
+MAKECMDGOALS := $(patsubst reinstall.%,reinstall,$(MAKECMDGOALS))
+
+#
+# rules for make install <platform>
+#
+ifeq ($(MAKECMDGOALS)_x, install_x)
+
+$(PLATAUX):
+	@true
+
+else
+ifeq ($(MAKECMDGOALS)_x, reinstall_x)
+
+$(PLATAUX):
+	@true
+
+else
+ifeq ($(MAKECMDGOALS)_x, inp_x)
+
+$(PLATAUX):
+	@true
+
+else
+ifeq ($(MAKECMDGOALS)_x, reset_x)
+
+$(PLATAUX):
+	@true
+
+else
+ifneq ($(filter $(BUILDLESS_DEPS),$(MAKECMDGOALS)), )
+
+$(PLATAUX):
+	@true
+
+else
+all:
+	for platform in $(PLATFORMS); do \
+		$(MAKE) $$platform $(DOCS) || exit 1; \
+	done
+
+$(PLATFORMS): build
+
+endif
+endif
+endif
+endif
+endif
+endif
+
+######################################################################
+######################################################################
+##                                                                  ##
+##                      Begin main rules                            ##
+##                                                                  ##
+######################################################################
+######################################################################
+
+ifneq ($(DOCS)_x, docs_x)
+build: $(MAIN_TARGET)
+endif
+
+install: $(MAIN_SREC) FORCE
+	@$(MAKE) $(PLATFORM) re$@ PROGRAMMER="$(PROGRAMMER)" PROGRAMMER_FLAGS="$(PROGRAMMER_FLAGS)"
+
+install.%: $(MAIN_SREC) FORCE
+	$(MAKE) $(PLATFORM) re$@ PROGRAMMER="$(PROGRAMMER)" PROGRAMMER_FLAGS="$(PROGRAMMER_FLAGS)"
+
+ifeq ($(PROGRAMMER),DAPA)  ### program via parallel port
+
+reinstall: FORCE
+ifeq ($(PLATFORM),imote)
+	@echo "    installing $(PLATFORM) binary"
+	@$(FROMELF) -c -output $(BUILDDIR)/RawFlashCode.bin -bin $(MAIN_EXE)
+	@for f in $(IMOTE_LOADER_FILES); do \
+		cp $(IMOTE_LIB_DIR)/$$f $(BUILDDIR);\
+	done
+	cd $(BUILDDIR); ./DynamicScriptConverter.exe; ./ZvDosFlashTool.exe -p2 -f -a -c -h;
+
+	@for f in $(IMOTE_LOADER_FILES); do \
+		rm -f $(BUILDDIR)/$$f;\
+	done
+else
+	@echo "    installing $(PLATFORM) binary"
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase 
+	sleep 1	     
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=$(MAIN_SREC)
+	sleep 1	     
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --verify if=$(MAIN_SREC)
+endif
+reinstall.%: FORCE
+	@echo "    installing $(PLATFORM) binary"
+	$(SET_ID) $(MAIN_SREC) $(MAIN_SREC).out `echo $@ |perl -pe 's/^reinstall.//; $$_=hex if /^0x/i;'`
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase 
+	sleep 1	     
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=$(MAIN_SREC).out
+	sleep 1	     
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --verify if=$(MAIN_SREC).out
+
+reset: FORCE
+	@echo "    resetting $(PLATFORM)"
+	$(PROGRAMER) $(PROGRAMMER_FLAGS)
+
+else  ### Otherwise, program via the stk500 where STK specifies a network address
+
+reinstall: FORCE
+	@echo "    installing $(PLATFORM) binary"
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase --upload  if=$(MAIN_SREC)
+
+reinstall.%: FORCE
+	@echo "    installing $(PLATFORM) binary"
+	$(SET_ID) $(MAIN_SREC) $(MAIN_SREC).$*.out `echo $@ |perl -pe 's/^reinstall.//; $$_=hex if /^0x/i;'`
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase --upload  if=$(MAIN_SREC).$*.out
+
+reset: FORCE
+	@echo "    resetting $(PLATFORM)"
+	$(PROGRAMER) $(PROGRAMMER_FLAGS)
+
+endif  ### Done programming
+
+
+$(MAIN_EXE): $(BUILDDIR) $(BUILD_EXTRA_DEPS) FORCE
+	@echo "    compiling $(COMPONENT) to a $(PLATFORM) binary"
+ifeq ($(PLATFORM),imote)
+	$(NCC) -c -fshort-enums -mstructure-size-boundary=8 -mthumb-interwork -mcpu=arm7tdmi -o $(MAIN_EXE).o $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc $(LIBS) $(LDFLAGS)
+# This works
+	$(LD) -symdefs tmp.o -o $(MAIN_EXE) -remove "(zi/dbg)" -armlib -scatter $(IMOTE_LIB_DIR_ADS)/ScatterFile.txt -map -list fred.txt $(IMOTE_LIB_DIR_ADS)/Dfu_JumpTbl.sym $(IMOTE_LIB_DIR_ADS)/RM_Rom1.sym $(IMOTE_LIB_DIR_ADS)/RM_Rom2.sym $(IMOTE_LIB_DIR_ADS)/SU_PatchVects.sym $(IMOTE_LIB_DIR_ADS)/SU_FlashBoot.o $(IMOTE_LIB_DIR_ADS)/motelib.a $(IMOTE_LIB_DIR_ADS)/GCCStub.o $(MAIN_EXE).o $(LIBGCC_DIR)/libgcc.a
+
+else
+	$(NCC) -o $(MAIN_EXE) $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc $(LIBS) $(LDFLAGS)
+endif
+	@echo "    compiled $(COMPONENT) to $@"
+	@objdump -h $(MAIN_EXE) | perl -ne '$$b{$$1}=hex $$2 if /^\s*\d+\s*\.(text|data|bss)\s+(\S+)/; END { printf("%16d bytes in ROM\n%16d bytes in RAM\n",$$b{text}+$$b{data},$$b{bss}); }'
+
+$(MAIN_SREC): $(MAIN_EXE)
+	$(OBJCOPY) --output-target=srec $(MAIN_EXE) $(MAIN_SREC)
+
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
+
+clean: FORCE
+	rm -rf $(BUILDDIR) 
+	rm -f core.*
+	rm -f *~
+
+# uploading boot loader for network reprogramming. Do this after loading app srec file.
+# using either 'make install' or 'make reinstall'
+inp: FORCE
+	$(PROGRAMER) $(PROGRAMMER_FLAGS_INP) --upload if=$(BOOTLOADER)
+
+FORCE:
+
+.phony: FORCE

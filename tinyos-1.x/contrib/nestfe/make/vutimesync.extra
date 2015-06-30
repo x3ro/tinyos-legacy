@@ -1,0 +1,17 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: vutimesync.extra,v 1.2 2005/06/19 01:55:31 cssharp Exp $
+
+# vanderbilt time sync
+VUTOS ?= $(TOSDIR)/../contrib/vu/tos
+
+CFLAGS += -I$(TOSDIR)/../contrib/nestfe/nesc/lib/timesync
+CFLAGS += -I$(VUTOS)/lib/CC2420
+CFLAGS += -I$(VUTOS)/lib/TimeSync
+CFLAGS += -I$(VUTOS)/platform/telos
+CFLAGS += -I$(VUTOS)/system
+CFLAGS += -I$(VUTOS)/interfaces
+
+# temporary hack for contrib/vu/tos/lib/TimeSync/TimeSyncC.nc until we have our
+# own version of TimeSyncC
+PFLAGS += -DPLATFORM_TELOS
+

@@ -1,0 +1,387 @@
+char I2C_PACKET_DISPATCH(char length, char* data)
+{
+
+char state = VAR(addr) & 0x7f;
+if (state == 1) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_1_READ_PACKET_DONE)(length, data);
+}
+if (state == 2) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_2_READ_PACKET_DONE)(length, data);
+}
+if (state == 3) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_3_READ_PACKET_DONE)(length, data);
+}
+if (state == 4) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_4_READ_PACKET_DONE)(length, data);
+}
+if (state == 5) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_5_READ_PACKET_DONE)(length, data);
+}
+if (state == 6) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_6_READ_PACKET_DONE)(length, data);
+}
+if (state == 7) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_7_READ_PACKET_DONE)(length, data);
+}
+if (state == 8) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_8_READ_PACKET_DONE)(length, data);
+}
+if (state == 9) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_9_READ_PACKET_DONE)(length, data);
+}
+if (state == 10) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_10_READ_PACKET_DONE)(length, data);
+}
+if (state == 11) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_11_READ_PACKET_DONE)(length, data);
+}
+if (state == 12) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_12_READ_PACKET_DONE)(length, data);
+}
+if (state == 13) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_13_READ_PACKET_DONE)(length, data);
+}
+if (state == 14) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_14_READ_PACKET_DONE)(length, data);
+}
+if (state == 15) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_15_READ_PACKET_DONE)(length, data);
+}
+if (state == 16) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_16_READ_PACKET_DONE)(length, data);
+}
+if (state == 17) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_17_READ_PACKET_DONE)(length, data);
+}
+if (state == 18) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_18_READ_PACKET_DONE)(length, data);
+}
+if (state == 19) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_19_READ_PACKET_DONE)(length, data);
+}
+if (state == 20) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_20_READ_PACKET_DONE)(length, data);
+}
+if (state == 21) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_21_READ_PACKET_DONE)(length, data);
+}
+if (state == 22) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_22_READ_PACKET_DONE)(length, data);
+}
+if (state == 23) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_23_READ_PACKET_DONE)(length, data);
+}
+if (state == 24) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_24_READ_PACKET_DONE)(length, data);
+}
+if (state == 25) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_25_READ_PACKET_DONE)(length, data);
+}
+if (state == 26) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_26_READ_PACKET_DONE)(length, data);
+}
+if (state == 27) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_27_READ_PACKET_DONE)(length, data);
+}
+if (state == 28) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_28_READ_PACKET_DONE)(length, data);
+}
+if (state == 29) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_29_READ_PACKET_DONE)(length, data);
+}
+if (state == 30) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_30_READ_PACKET_DONE)(length, data);
+}
+if (state == 31) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_31_READ_PACKET_DONE)(length, data);
+}
+if (state == 32) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_32_READ_PACKET_DONE)(length, data);
+}
+if (state == 33) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_33_READ_PACKET_DONE)(length, data);
+}
+if (state == 34) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_34_READ_PACKET_DONE)(length, data);
+}
+if (state == 35) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_35_READ_PACKET_DONE)(length, data);
+}
+if (state == 36) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_36_READ_PACKET_DONE)(length, data);
+}
+if (state == 37) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_37_READ_PACKET_DONE)(length, data);
+}
+if (state == 38) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_38_READ_PACKET_DONE)(length, data);
+}
+if (state == 39) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_39_READ_PACKET_DONE)(length, data);
+}
+if (state == 40) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_40_READ_PACKET_DONE)(length, data);
+}
+if (state == 41) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_41_READ_PACKET_DONE)(length, data);
+}
+if (state == 42) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_42_READ_PACKET_DONE)(length, data);
+}
+if (state == 43) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_43_READ_PACKET_DONE)(length, data);
+}
+if (state == 44) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_44_READ_PACKET_DONE)(length, data);
+}
+if (state == 45) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_45_READ_PACKET_DONE)(length, data);
+}
+if (state == 46) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_46_READ_PACKET_DONE)(length, data);
+}
+if (state == 47) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_47_READ_PACKET_DONE)(length, data);
+}
+if (state == 48) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_48_READ_PACKET_DONE)(length, data);
+}
+if (state == 49) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_49_READ_PACKET_DONE)(length, data);
+}
+if (state == 50) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_50_READ_PACKET_DONE)(length, data);
+}
+if (state == 51) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_51_READ_PACKET_DONE)(length, data);
+}
+if (state == 52) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_52_READ_PACKET_DONE)(length, data);
+}
+if (state == 53) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_53_READ_PACKET_DONE)(length, data);
+}
+if (state == 54) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_54_READ_PACKET_DONE)(length, data);
+}
+if (state == 55) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_55_READ_PACKET_DONE)(length, data);
+}
+if (state == 56) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_56_READ_PACKET_DONE)(length, data);
+}
+if (state == 57) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_57_READ_PACKET_DONE)(length, data);
+}
+if (state == 58) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_58_READ_PACKET_DONE)(length, data);
+}
+if (state == 59) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_59_READ_PACKET_DONE)(length, data);
+}
+if (state == 60) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_60_READ_PACKET_DONE)(length, data);
+}
+if (state == 61) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_61_READ_PACKET_DONE)(length, data);
+}
+if (state == 62) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_62_READ_PACKET_DONE)(length, data);
+}
+if (state == 63) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_63_READ_PACKET_DONE)(length, data);
+}
+if (state == 64) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_64_READ_PACKET_DONE)(length, data);
+}
+if (state == 65) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_65_READ_PACKET_DONE)(length, data);
+}
+if (state == 66) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_66_READ_PACKET_DONE)(length, data);
+}
+if (state == 67) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_67_READ_PACKET_DONE)(length, data);
+}
+if (state == 68) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_68_READ_PACKET_DONE)(length, data);
+}
+if (state == 69) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_69_READ_PACKET_DONE)(length, data);
+}
+if (state == 70) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_70_READ_PACKET_DONE)(length, data);
+}
+if (state == 71) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_71_READ_PACKET_DONE)(length, data);
+}
+if (state == 72) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_72_READ_PACKET_DONE)(length, data);
+}
+if (state == 73) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_73_READ_PACKET_DONE)(length, data);
+}
+if (state == 74) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_74_READ_PACKET_DONE)(length, data);
+}
+if (state == 75) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_75_READ_PACKET_DONE)(length, data);
+}
+if (state == 76) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_76_READ_PACKET_DONE)(length, data);
+}
+if (state == 77) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_77_READ_PACKET_DONE)(length, data);
+}
+if (state == 78) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_78_READ_PACKET_DONE)(length, data);
+}
+if (state == 79) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_79_READ_PACKET_DONE)(length, data);
+}
+if (state == 80) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_80_READ_PACKET_DONE)(length, data);
+}
+if (state == 81) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_81_READ_PACKET_DONE)(length, data);
+}
+if (state == 82) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_82_READ_PACKET_DONE)(length, data);
+}
+if (state == 83) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_83_READ_PACKET_DONE)(length, data);
+}
+if (state == 84) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_84_READ_PACKET_DONE)(length, data);
+}
+if (state == 85) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_85_READ_PACKET_DONE)(length, data);
+}
+if (state == 86) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_86_READ_PACKET_DONE)(length, data);
+}
+if (state == 87) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_87_READ_PACKET_DONE)(length, data);
+}
+if (state == 88) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_88_READ_PACKET_DONE)(length, data);
+}
+if (state == 89) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_89_READ_PACKET_DONE)(length, data);
+}
+if (state == 90) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_90_READ_PACKET_DONE)(length, data);
+}
+if (state == 91) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_91_READ_PACKET_DONE)(length, data);
+}
+if (state == 92) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_92_READ_PACKET_DONE)(length, data);
+}
+if (state == 93) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_93_READ_PACKET_DONE)(length, data);
+}
+if (state == 94) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_94_READ_PACKET_DONE)(length, data);
+}
+if (state == 95) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_95_READ_PACKET_DONE)(length, data);
+}
+if (state == 96) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_96_READ_PACKET_DONE)(length, data);
+}
+if (state == 97) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_97_READ_PACKET_DONE)(length, data);
+}
+if (state == 98) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_98_READ_PACKET_DONE)(length, data);
+}
+if (state == 99) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_99_READ_PACKET_DONE)(length, data);
+}
+if (state == 100) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_100_READ_PACKET_DONE)(length, data);
+}
+if (state == 101) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_101_READ_PACKET_DONE)(length, data);
+}
+if (state == 102) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_102_READ_PACKET_DONE)(length, data);
+}
+if (state == 103) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_103_READ_PACKET_DONE)(length, data);
+}
+if (state == 104) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_104_READ_PACKET_DONE)(length, data);
+}
+if (state == 105) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_105_READ_PACKET_DONE)(length, data);
+}
+if (state == 106) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_106_READ_PACKET_DONE)(length, data);
+}
+if (state == 107) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_107_READ_PACKET_DONE)(length, data);
+}
+if (state == 108) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_108_READ_PACKET_DONE)(length, data);
+}
+if (state == 109) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_109_READ_PACKET_DONE)(length, data);
+}
+if (state == 110) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_110_READ_PACKET_DONE)(length, data);
+}
+if (state == 111) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_111_READ_PACKET_DONE)(length, data);
+}
+if (state == 112) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_112_READ_PACKET_DONE)(length, data);
+}
+if (state == 113) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_113_READ_PACKET_DONE)(length, data);
+}
+if (state == 114) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_114_READ_PACKET_DONE)(length, data);
+}
+if (state == 115) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_115_READ_PACKET_DONE)(length, data);
+}
+if (state == 116) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_116_READ_PACKET_DONE)(length, data);
+}
+if (state == 117) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_117_READ_PACKET_DONE)(length, data);
+}
+if (state == 118) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_118_READ_PACKET_DONE)(length, data);
+}
+if (state == 119) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_119_READ_PACKET_DONE)(length, data);
+}
+if (state == 120) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_120_READ_PACKET_DONE)(length, data);
+}
+if (state == 121) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_121_READ_PACKET_DONE)(length, data);
+}
+if (state == 122) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_122_READ_PACKET_DONE)(length, data);
+}
+if (state == 123) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_123_READ_PACKET_DONE)(length, data);
+}
+if (state == 124) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_124_READ_PACKET_DONE)(length, data);
+}
+if (state == 125) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_125_READ_PACKET_DONE)(length, data);
+}
+if (state == 126) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_126_READ_PACKET_DONE)(length, data);
+}
+if (state == 127) {
+	return TOS_SIGNAL_EVENT(I2C_PACKET_127_READ_PACKET_DONE)(length, data);
+}
+return 0;
+}

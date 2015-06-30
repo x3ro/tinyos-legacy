@@ -1,0 +1,25 @@
+# Thu Jul 21 16:25:35 PDT 2005
+
+- Currently, there are two versions of the UVA PIR filtering and detection code.
+  * nestfe/lib/PIRDetect/PIRDetectC.nc
+  * nestfe/lib/detectionevent/EventGenerator/PirDetectEvent/PIRDetectFilterC.nc
+
+- We may want to merge the two versions in the future, probably using
+  PIRDetectFilterC as the basis.
+
+- Important differences in PIRDetect and PIRDetectFilter
+  * The default sample period has been removed in PIRDetectFilter... it
+    waits for it to be set over the network.
+  * PIRDetectFilter uses PIRRawDriver, which actually communicates with the
+    filter through the registry while PIRDetect manages the PIR sensor
+    itself.
+    ~ The strip_registry.pl script currently in TestPIRDetectNoReg
+      does not accomodate this properly. 
+  * The names are different (PIRDetectM vs PIRDetectFilterM) and the
+    debug messages have been changed accordingly and also are
+    different
+    ~ the simulation scripts (ex. simPIRDetect.py) for PIRDetectM will
+      not work recognize debug messages properly from PIRDetectFilterM
+  * PIRDetectFilter naturally does not set PirRawValue in task filtering()
+    if it did, we would have an infinite loop and the mote would no longer respond
+

@@ -1,0 +1,61 @@
+# $Id: sim-db.extra,v 1.1 2010/06/27 22:51:24 pineapple_liu Exp $
+
+#
+# Copyright (c) 2010 Data & Knowledge Engineering Research Center,
+#                    Harbin Institute of Technology, P. R. China.
+# All rights reserved.
+#
+
+## 
+# @author: LIU Yu <pineapple.liu@gmail.com>
+# @date:   Jun 22, 2010
+#
+
+SENSORBOARD ?= synsb
+DATASOURCE ?= $(HITDKEDIR)/tos/lib/tossim/synsb/data/IntelLab/tossim-db.xml
+
+.PHONY: sim-synsb-deps
+.PHONY: sim-synsb-module hitdke-sds-library
+.PHONY: sim-synsb-wrongsb
+
+BUILD_DEPS = sim-synsb-deps
+
+##
+# the "sim-exe" target is defined in "$TOSROOT/support/make/sim.extra"
+# 
+sim-exe: sim-synsb-deps
+
+CFLAGS += -DSIM_SYNSB_DSD=\"$(DATASOURCE)\"
+CFLAGS += -I. # make "./sim" the first directory to look for components
+CFLAGS += -I$(HITDKEDIR)/tos/sensorboards/synsb
+CFLAGS += -I$(HITDKEDIR)/tos/lib/tossim/synsb
+CFLAGS += -I$(SDSINCDIR)
+
+DBILIBFILE ?= /usr/lib/libdbi.a
+
+SDSINCDIR ?= $(HITDKEDIR)/support/sdk/c/synsb/
+SDSLIBFILE ?= $(HITDKEDIR)/support/sdk/c/synsb/libsds.a
+
+SYNSBFILE ?= $(HITDKEDIR)/tos/lib/tossim/synsb/sim_synsb.c
+SYNSBOBJFILE ?= $(BUILDDIR)/sim_synsb.o
+
+ifeq ($(SENSORBOARD),synsb)
+sim-synsb-deps: sim-synsb-module hitdke-sds-library
+PLATFORM_LIB_FLAGS += $(SYNSBOBJFILE) $(SDSLIBFILE) $(DBILIBFILE)
+else
+sim-synsb-deps: sim-synsb-wrongsb
+endif
+
+sim-synsb-module: $(SYNSBFILE)
+	@echo "  compiling the TOSSIM DB extension into $(SYNSBOBJFILE)"
+	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(SYNSBOBJFILE) $(OPTFLAGS) $(CFLAGS) $(SIM_CFLAGS) $(SF_FLAGS) $(SYNSBFILE) -I$(PYDIR) -I$(SIMDIR) -I$(SDSINCDIR)
+
+hitdke-sds-library: $(SDSLIBFILE)
+
+$(SDSLIBFILE):
+	@echo "  building the Synthetic DataSource (SDS) library"
+	make -C $(SDSINCDIR)
+
+sim-synsb-wrongsb:
+	@echo "  WARNING: invalid SENSORBOARD type '$(SENSORBOARD)', change to 'synsb' to enable TOSSIM DB features"
+

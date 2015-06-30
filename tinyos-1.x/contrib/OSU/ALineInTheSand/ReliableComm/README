@@ -1,0 +1,231 @@
+Author/Contact:
+==============
+	Hongwei Zhang
+	Dept. of Computer and Information Science
+	The Ohio State University
+	Tel: 614-292-1932
+	E-mail: zhangho@cis.ohio-state.edu
+	WWW: www.cis.ohio-state.edu/~zhangho
+
+
+How to use ReliableComm
+==========
+* Add 
+    "includes ReliableSendMsg;" 
+  in configuration file for an application, so that application can use parameters 
+  such as "SEND_QUEUE_SIZE" (defining the size of application-layer buffer).
+
+* Fine tune parameters "Timer_Interval, Retransmit_Timer (20 milliseconds are enough),
+  MAX_RETRANSMIT_COUNT, SEND_QUEUE_SIZE" to application needs. And other parameters
+  defined in ReliableSendMsg.h. 
+
+* The handler-id used for ReliableComm must be between HANDLER_ID_LOWER_BOUND and
+  HANDLER_ID_UPPER_BOUND which are defined in ReliableCommMsg.h. And no other 
+  module is using any handler-id between HANDLER_ID_LOWER_BOUND and
+  HANDLER_ID_UPPER_BOUND.
+
+* The length of data packets should be no more than 17 byptes. 
+
+
+
+REMARKS
+=======
+* Base station should use GenericComm instead of UARTComm.
+
+* When receiving a message, forward as soon as possible (to avoid unnecessary
+  retransmission at the sender).
+
+* Duplicate messages may exist due to unnecessary retransmission which is due to delayed
+  or lost ack. But it won't propagate. 
+
+* Only support one-to-one reliable unicast communication with implicit acknowledgement.
+
+* For higher performance, it is better for BASE STATION not to use RelibleComm to send message to UART 
+  interface, since BASE STATION does not require reliable transmission across UART interface. 
+
+
+
+FINDINGS
+=========
+* when too many messages are received at base station, it tries to ack and write to UART, then "sendDone"
+  event can get lost, which can results in "pending" not setting back to FALSE. Therefore, I use a
+  detection logic to detect this and reset "pending" if necessary. 
+
+* Same thing for non-base-station mote that uses ReliableComm
+
+* Self-stabilization of critical variables is important: due to event or message loss/corruption
+
+
+CVS server
+==========
+nest/ReliableComm
+
+
+Miscl. (optional modules for ReliableComm)
+==========================================
+
+  /* empty the send buffer */
+  /*
+  command result_t ReliableSendMsg.sendFlush(uint8_t len)
+  {
+   int i;
+   uint8_t pos1, pos2, bitTest, impNum;
+   uint8_t aggAckP1, aggAckP2; 
+
+   for (i = 0; i < len && ((dequeue_next + 1) % SEND_QUEUE_SIZE) <= enqueue_next; i++) {
+      if (msgqueue[dequeue_next].length != 0) {
+        msgqueue[dequeue_next].length = 0; 
+
+         pos1 = msgqueue[dequeue_next].fromQueuePos/8;
+         pos2 = msgqueue[dequeue_next].fromQueuePos%8; 
+         bitTest = 0xff ^ (0x1 << pos2); 
+         for (impNum=0; importNgh[impNum] != msgqueue[dequeue_next].fromAddr && impNum < numImNghs; impNum++) 
+               ;
+         inQueue[impNum][pos1] &= bitTest; 
+
+         aggAckP1 = msgqueue[dequeue_next].seq/8;     // CLEAR bit for aggregated ACK 
+         aggAckP2 = msgqueue[dequeue_next].seq%8; 
+         bitTest = 0xff ^ (0x1 << aggAckP2); 
+         aggregatedACK[aggAckP1] &= bitTest;
+         alreadyDelayed = FALSE;
+      }
+      dequeue_next++; dequeue_next %= SEND_QUEUE_SIZE; 
+      queueDeadPeriod = 0;
+    }
+    pending = FALSE;
+    pendingDeadPeriod = 0; 
+    isWaiting = FALSE; 
+    retransmitTimer = 0;
+    // call Timer.stop(); 
+
+    return SUCCESS; 
+  } //end of sendFlush()
+  */
+
+  /*
+  result_t bufferFlush(uint8_t len)
+  {
+   int i;
+   uint8_t pos1, pos2, bitTest, impNum;
+
+   for (i = 0; i < len && ((dequeue_next + 1) % SEND_QUEUE_SIZE) <= enqueue_next; i++) {
+      if (msgqueue[dequeue_next].length != 0) {
+         msgqueue[dequeue_next].length = 0;
+
+         pos1 = msgqueue[dequeue_next].fromQueuePos/8;
+         pos2 = msgqueue[dequeue_next].fromQueuePos%8; 
+         bitTest = 0xff ^ (0x1 << pos2); 
+         for (impNum=0; importNgh[impNum] != msgqueue[dequeue_next].fromAddr && impNum < numImNghs; impNum++) 
+               ;
+         inQueue[impNum][pos1] &= bitTest; 
+      }
+      dequeue_next++; dequeue_next %= SEND_QUEUE_SIZE; 
+      queueDeadPeriod = 0;
+    }
+
+    pending = FALSE;
+    pendingDeadPeriod = 0; 
+    isWaiting = FALSE; 
+    //call Timer.stop(); 
+
+    return SUCCESS; 
+  } //end of bufferFlush()
+
+
+  //command result_t ReliableSendMsg.baseAck(TOS_MsgPtr msg, uint16_t fromAddr, uint8_t   fromQueuePos)
+ 
+  result_t baseAck(TOS_MsgPtr msg, uint16_t fromAddr, uint8_t   fromQueuePos)
+  {
+
+    uint8_t j;
+
+    uint8_t numEntry;
+
+    if (enqueue_next >= dequeue_next)
+      numEntry = enqueue_next-dequeue_next;
+    else
+      numEntry = SEND_QUEUE_SIZE-dequeue_next+enqueue_next;
+
+    if (numEntry > (SEND_QUEUE_SIZE*5/6))
+      bufferFlush(numEntry/2);
+
+    //call Leds.yellowToggle(); 
+
+    
+    //if (((enqueue_next + 1) % SEND_QUEUE_SIZE) == dequeue_next) {       // Fail if queue is full
+    //  return FAIL;
+    //}
+    
+
+    msgqueue[enqueue_next].address = BASE_ACK_DEST_ID; 
+    
+    msgqueue[enqueue_next].length = RELIABLE_COMM_LENGTH; 
+    msgqueue[enqueue_next].id = RELIABLE_MSG_HANDLER;
+
+    //copy message
+    msgqueue[enqueue_next].message.addr = msg->addr;
+    msgqueue[enqueue_next].message.type = msg->type;
+    msgqueue[enqueue_next].message.group = msg->group;
+    msgqueue[enqueue_next].message.length = msg->length;
+    for (j=0; j < RELIABLE_COMM_LENGTH; j++)
+      msgqueue[enqueue_next].message.data[j] = msg->data[j];
+    msgqueue[enqueue_next].message.crc = msg->crc;
+    msgqueue[enqueue_next].message.strength = msg->strength;
+    msgqueue[enqueue_next].message.ack = msg->ack;
+    msgqueue[enqueue_next].message.time = msg->time; 
+    //end of copy message
+
+    msgqueue[enqueue_next].xmit_count = 0;
+    msgqueue[enqueue_next].message.ack = 0;
+
+    msgqueue[enqueue_next].myAddr = TOS_LOCAL_ADDRESS;
+    msgqueue[enqueue_next].myQueuePos = enqueue_next; 
+    msgqueue[enqueue_next].fromAddr = fromAddr; 
+    if (fromAddr == TOS_LOCAL_ADDRESS) 
+      msgqueue[enqueue_next].fromQueuePos = enqueue_next;
+    else
+      msgqueue[enqueue_next].fromQueuePos = fromQueuePos;
+
+     msgqueue[enqueue_next].message.data[MyAddrPos] = TOS_LOCAL_ADDRESS >> 8; 
+     msgqueue[enqueue_next].message.data[MyAddrPos+1] = TOS_LOCAL_ADDRESS & 0x00ff;
+     msgqueue[enqueue_next].message.data[MyQueuePos] = enqueue_next;
+     msgqueue[enqueue_next].message.data[FromAddrPos] = fromAddr >> 8;
+     msgqueue[enqueue_next].message.data[FromAddrPos+1] = fromAddr & 0x00ff;
+     msgqueue[enqueue_next].message.data[FromQueuePos] = msgqueue[enqueue_next].fromQueuePos; 
+
+    enqueue_next++; enqueue_next %= SEND_QUEUE_SIZE;
+    
+    // Try to send next message (ignore xmit_count)
+
+    if (msgqueue[dequeue_next].length != 0 && !pending &&!isWaiting) { 
+        
+          dbg(DBG_USR1, "ReliableSend: sending msg (0x%x)\n", dequeue_next);
+          retransmitTimer = 0;
+          isWaiting = FALSE;    
+          pending = TRUE;
+          msgqueue[dequeue_next].xmit_count += 1;
+
+          msgqueue[dequeue_next].message.data[randomSeqAck] = aggregatedACK[0];   //for aggregated ACK
+          msgqueue[dequeue_next].message.data[randomSeqAck+1] = aggregatedACK[1]; 
+          msgqueue[dequeue_next].message.data[randomSeqAck+2] = aggregatedACK[2]; 
+          msgqueue[dequeue_next].message.data[randomSeqAck+3] = aggregatedACK[3]; 
+
+          if (!(call BareSendMsg.send(&(msgqueue[dequeue_next].message)))) {
+                     dbg(DBG_USR1, "ReliableSend: send request failed. stuck in queue\n"); 
+                     pending = FALSE; 
+		     pendingDeadPeriod = 0;
+          }
+          //else
+                  //call Leds.greenToggle();
+	  //post QueueServiceTask();
+    }
+
+    return SUCCESS;
+  } //end of baskACK
+  */
+
+
+Acknowledgement
+===============
+Special thanks to Ted Herman, Vineet Mittal, and other team members for their comments 
+and support in the development process. 

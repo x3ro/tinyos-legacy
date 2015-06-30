@@ -1,0 +1,10 @@
+HTTP/1.0 414 Request Entity Too Large
+Content-Type: text/html
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>414 Request Entity Too Large</title>
+</head><body>
+<h1>Request Entity Too Large</h1>
+<p>The request URI was too long to process.</p>
+</body></html>

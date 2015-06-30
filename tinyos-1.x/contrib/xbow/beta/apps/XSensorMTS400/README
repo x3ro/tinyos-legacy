@@ -1,0 +1,94 @@
+README
+
+
+Description:
+-Read temperature, humidity, light, accel,pressure sensor readings
+-Read GPS data(MTS420CA only)
+-Output message to uart port
+-Output message to radio port
+
+
+State-Machine of mts400: (not #define MTS420)
+START ----> BUSY  ----->BATT_DONE ---> BUSY  -----> HUMIDITY_DONE ---> BUSY  
+-----> PRESSURE_DONE ----> BUSY  -----> LIGHT_DONE ----> BUSY  -----> ACCEL_DONE -> START
+
+State-Machine of mts420: (#define MTS420)
+
+START ----> BUSY  ----->BATT_DONE ---> BUSY  -----> HUMIDITY_DONE ---> BUSY  
+-----> PRESSURE_DONE ----> BUSY  -----> LIGHT_DONE ----> BUSY  -----> ACCEL_DONE
+----> BUSY  -----> GPS_BUSY -----> GPS_DONE -> START
+
+If a user wants only gps output, simply change the state-machine to:
+START -> GPS_BUSY ----> GPS_DONE -> START
+by comment the non-GPS part in Timer.fired():
+  e.g.:
+  switch(l_state) {
+	  case START:
+ /* 	      atomic{
+		  state = BUSY;
+		  sensor_state = SENSOR_BATT_START;
+	      }
+	      call Leds.greenToggle();
+	      return call ADCBATT.getData();           //get vref data;
+	      
+	  case BATT_DONE:
+	      atomic{
+		  state = BUSY;
+		  sensor_state = SENSOR_HUMIDITY_START;
+	      }
+	      return call TempHumControl.start();
+	      
+	  case HUMIDITY_DONE:
+	      atomic {
+		  state = BUSY;
+		  sensor_state  = SENSOR_PRESSURE_START;
+	      }
+	      return call PressureControl.start();
+	      
+	  case PRESSURE_DONE:
+	      atomic {
+		  state = BUSY;
+		  sensor_state = SENSOR_LIGHT_START;
+	      }
+	      return call TaosControl.start();
+	      
+	  case LIGHT_DONE:
+	      atomic {
+		  state = BUSY;
+		  sensor_state = SENSOR_ACCEL_START;
+	      }
+	      return call AccelCmd.PowerSwitch(1);  //power on
+
+	  case ACCEL_DONE: 
+*/	      
+	  call Leds.greenOff();
+#ifdef MTS420
+	      atomic state = GPS_BUSY;
+	      return call GpsCmd.TxRxSwitch(1);  //enable gps tx/rx
+#else
+	      atomic state = START;
+	      return SUCCESS;
+#endif
+		break;
+
+#ifdef MTS420		      
+	  case GPS_BUSY:
+	      if (gps_wait_cnt >= GPS_MAX_WAIT) 
+	      {      // gps rcvd pkt before time out?             
+		  call GpsCmd.TxRxSwitch(0);   // no,disable gps tx/rx switches
+		  atomic state = START;
+		  return SUCCESS;
+	      }
+	      else {
+		  gps_wait_cnt++;              //keep waiting for gps pkt
+		  return SUCCESS;
+	      }
+	      break;
+	      
+	  case GPS_DONE:
+      	atomic state = START;
+      	return SUCCESS;
+     	break;  
+#endif
+      }
+

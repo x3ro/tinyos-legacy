@@ -1,0 +1,5 @@
+MULEPacket:
+
+This directory contains the real meaty code. To use this, you need to add
+-I/path/to/MULELib to PFLAGS in the makefile for the application you're
+compiling.

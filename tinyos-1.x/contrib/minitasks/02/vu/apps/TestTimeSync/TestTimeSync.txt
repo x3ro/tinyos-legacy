@@ -1,0 +1,99 @@
+Author/Contact: 
+	branislav.kusy@vanderbilt.edu (Branislav Kusy, ISIS, Vanderbilt)
+	miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The TestTimeSync and TestTimeSyncSusp components are test applications for our global time 
+multi-hop synchronization (tos/lib/TimeSync). The TestTimeSyncPoller is a dedicated beacon
+who triggers sending of the debug messages from each client to the base station(GenericBase).
+
+We propose the following test scenario:
+	
+	- dedicated beacon (TestTimeSyncPollerC) is periodically broadcasting TimeSyncPoll msgs
+	- clients (TestTimeSyncC) which contain just TimeSyncC and TimeSyncDebuggerC components
+		wired together are responding to the TimeSyncPoll msgs by sending back the global
+		time of arrival of TimeSyncPoll msg. Supposedly the beacon radio msg should trigger
+		all the clients at the same time, so we can measure the time difference between the
+		global times sent by different clients. Clients send the DiagMsg (our form of debug 
+		msgs - tos/lib/DiagMsg) to the GenericBase (ID of the generic base can be set in the 
+		TestTimeSyncPollerMsg.h). Easy way to decode the DiagMsg is to use our java application 
+		in minitasks/02/vu cvs dir:	tools/java/isis/nest/printmsgs/PrintDiagMsgs.java).
+	- the second version of client (TestTimeSyncSuspC) has basically the same functionality as
+		TestTimeSync client, it only suspends and resumes radio for a certain amounts of time
+	
+	- we needed to use the Timer component to send the DiagMsgs from the TestTimeSyncSuspC 
+		asynchronously because of the problems of current (1.7) radio stack with random delay
+		in collision avoidance in CC10000RadioIntM component, this way the collisions between
+		messages are not so frequent, you may want to implement the same with TestTimeSyncC
+		component to try it out
+	- NOTE: you need one more flag in Makefile (-DVANDY_TIME_SYNC_POLLER), the CC1000RadioIntM.nc
+		file is different from the one in tos/platform/mica2
+	- you can add any other components to TestTimeSyncC and test time sync with your application
+
+
+RADIO MSGS SENT:
+ - TimeSyncPollerMsg:
+	Used to trigger each client (the application using time sync) to send the data to the base
+	station.
+
+ - DiagMsg
+	Is sent by the TimeSyncDebugger component: it contains the debug information which we want to 
+	send from the client to the generic base station. Feel free to change any type of information 
+	sent from the TimeSyncDebugger, you might want to check tos/lib/DiagMsg docs to find out how 
+	to use the DiagMsg component.
+
+REQUIRED SYSTEM FILES:
+
+  update the following files from minitasks/02/vu cvs:
+	both MICA&MICA2:
+	 tos/system/LocalTime.nc
+	 tos/system/Timer.h
+	 tos/system/Timer.nc
+	 tos/system/TimerC.nc
+	 tos/system/TimerM.nc
+	 tos/system/ClockC.nc
+	 
+	MICA:
+	 tos/platform/mica/Clock.h
+	 tos/platform/mica/ClockM.nc
+	 tos/platform/mica/MicaHighSpeedRadioM.nc
+	 tos/platform/mica/RadioCRCPacket.nc
+
+	MICA2:
+	 tos/platform/mica2/Clock.h
+	 tos/platform/mica2/ClockM.nc
+	 tos/platform/mica2/CC1000RadioC.nc
+	 apps/TestTimeSync/CC1000RadioIntM.nc !!! this is different from tos/platform/mica2/CC1000RadioIntM.nc
+
+DETAILS HOW TO RUN THE TEST:
+
+ - get all the required system files from the CVS repository
+ - get all the files from TestTimeSync directory
+ - add the following lines to the component file of your application:
+
+	Main.StdControl -> TimeSyncC;
+	Main.StdControl -> TimerC;
+	Main.StdControl -> GenericComm;
+ 
+ - add these components to your application (if not already included):
+
+	TimeSyncC, Main, TimerC, GenericComm, TimeSyncDebuggerC
+
+ - add the following flags to the Makefile:
+
+	PFLAGS=-DVANDY_TIME_SYNC -DVANDY_TIME_SYNC_POLLER 
+
+ - compile and upload n motes with your updated application (or TestTimeSyncC or TestTimeSyncSuspC)
+	use unique moteids.
+ - compile and upload 1 mote with GenericBase application from the TINYOS package
+	use moteid 0 (you can change this in TestTimeSyncPollerMsg.h)
+ - compile and upload 1 mote with TestTimeSyncPollerC application
+ - switch on all the motes
+
+ you'll need the corresponding java part to show the DiagMsgs coming from the serial port:
+
+ get all the files from tools/java/isis/nest/printmsgs directory of minitasks/02/vu
+ cvs repository and compile the sources. you'll need PrintDiagMsgs.java in particular.
+ It has a command line -help parameter which provides some help. if you run it and
+ all the motes are running you should start getting msgs on your screen. 

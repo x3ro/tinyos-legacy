@@ -1,0 +1,62 @@
+#-*-Makefile-*- vim:syntax=make
+# $Id: MakeHCS08,v 1.2 2005/03/11 11:20:01 janflora Exp $
+# @author Cory Sharp <cssharp@eecs.berkeley.edu>
+# Adapted by Mads Bondo Dydensborg <madsdyd@diku.dk>
+
+# The purpose of this Makefile is to compile the app.c file (which
+# must be in CW format) into the binary file that can be uploaded to a
+# node. Additionally, map files are generated, and various targets for
+# programming/uploading are supported.
+
+# INTERFACE/EXTERNAL ENVIRONMENT VARIABLES USED:
+
+# CYGWIN             : REQUIRED : This makefile must run under Cygwin
+# CWPATH             : REQUIRED : The base path for CodeWarrior
+# TINYOS_EVB13192DIR : REQUIRED : The path to the diku/contrib/evb13192 dir 
+# ENVIROMENT         : REQUIRED : Defines which environment (SimpleMac, FFD, etc) to link with
+# FREESCALE_LIBDIR   : REQUIRED : The path to the libraries from Freescale
+
+# The reason this Makefile needs to know where the tinyos stuff is, is
+# because of the linker scripts, and interrupt include file.
+
+################################################################################
+#
+# Sanity and parameter checking
+
+ifndef TINYOS_EVB13192DIR
+$(error Toolchain error: TINYOS_EVB13192DIR is not set)
+endif
+
+################################################################################
+#
+# Setting up paths, etc.
+
+
+#SDCCPATH = ~/Desktop/sdcc/bin
+SDCCPATH = /usr/local/bin
+# Progs used for compilation.
+SDCC   = $(SDCCPATH)/sdcc
+
+# Setup options for compilation.
+SDCC_OPTS := -mhc08 $(SDCC_OPTS) 
+
+# The PFLAGS is only used to let the compiler locate the interrupts file
+PFLAGS = $(TINYOS_EVB13192DIR)/tos/platform/hcs08_sdcc/
+PFLAGS:= -I$(PFLAGS)
+
+LFLAGS = /Volumes/Data/Desktop/freescale/smac
+LFLAGS := -L$(LFLAGS) -lsmac.lib
+
+################################################################################
+#
+# Actual targets
+
+%.s19: %.c
+	$(SDCC) $(SDCC_OPTS) $(PFLAGS) --out-fmt-s19 --stack-loc 0x107F --data-loc 0x80 --iram-size 0x0DFF --code-loc 0x182c --code-size 0xE793 $<
+
+	# --out-fmt-s19
+	# --out-fmt-elf
+	# --opt-code-speed
+	# --opt-code-size
+clean: FORCE
+	@a=`for a in *.c; do b=$${a%.c}; for c in $$b.asm $$b.S19 $$b.elf $$b.lnk $$b.lst $$b.map $$b.mem $$b.rel $$b.rst $$b.sym; do [ -f $$c ] && echo -n "$$c "; done; done`; [ -n "$$a" ] && echo "rm -f $$a" && rm -f $$a; true

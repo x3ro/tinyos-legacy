@@ -1,0 +1,17 @@
+1) put your jave driver for postgre on classpath
+2) edit Receiver.java from Administrator to the user name
+
+
+All this does is log all incoming packet to postgresql database
+
+step a1: makedb - to initialise the database
+  notice what user it is being created
+step a2: createdb rsc - postgresql command to create database rsc
+step a3: createtable <experiment name> - create table. subsitute experiment name
+step a4: startlogging COM2 - log the packets
+
+To do a new experiment:
+step b1: startdb - turn on postmaster
+step b2: step a3 - create a new table
+step b3: step a4 - start logging
+

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="&apos;edu/wustl/mobilab/native/*&apos;|&apos;edu/wustl/mobilab/nativebenchmark/*&apos;" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/cygwin/opt/tinyos-1.x/tools/java/TinyOS.jar"/>
+	<classpathentry kind="lib" path="C:/liang/workspace-sf/Agimone/jars/agimone.jar"/>
+	<classpathentry kind="lib" path="C:/liang/workspace-sf/Agimone/jars/serviceLimone.jar"/>
+	<classpathentry kind="lib" path="/Agimone/jars/bcprov-jdk14-124.jar"/>
+	<classpathentry kind="lib" path="/Agimone/jars/mucode.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>

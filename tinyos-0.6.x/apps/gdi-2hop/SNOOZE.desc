@@ -1,0 +1,6 @@
+include modules{
+    GENERIC_COMM;
+};
+
+SNOOZE:SNOOZE_COMM_RESET GENERIC_COMM:COMM_INIT
+

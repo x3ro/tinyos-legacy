@@ -1,0 +1,40 @@
+TOS_MODULE IDENT;
+
+ACCEPTS{
+	char INIT(void);
+	char START(void);
+};
+
+HANDLES{
+	char SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr CLEAR_ID(TOS_MsgPtr val);
+	TOS_MsgPtr SET_ID(TOS_MsgPtr val);
+	TOS_MsgPtr SEND_ID(TOS_MsgPtr val);
+	void CLOCK_EVENT(void);
+	char WRITE_EEPROM_DONE(char success);
+	char READ_EEPROM_DONE(char* packet, char success);
+};
+
+USES{
+        char LEDy_toggle(void);
+        char LEDy_on(void);
+        char LEDy_off(void);
+        char LEDr_toggle(void);
+        char LEDr_on(void);
+        char LEDr_off(void);
+        char LEDg_toggle(void);
+        char LEDg_on(void);
+        char LEDg_off(void);
+
+	char SUB_INIT(void);
+	char SUB_START_CLOCK(char interval, char scale);
+	void SUB_POT_SET(char val);
+
+	char SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+
+	char WRITE_EEPROM(short line, char* data);
+	char READ_EEPROM(short line, char* dest);
+};
+
+SIGNALS{
+};

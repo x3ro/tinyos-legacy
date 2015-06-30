@@ -1,0 +1,49 @@
+$Id: README.RemoteControl,v 1.1.1.1 2007/11/05 19:08:58 jpolastre Exp $
+
+README for RemoteControl
+Author/Contact: support@moteiv.com
+@author Joe Polastre <info@moteiv.com>
+
+Description:
+
+RemoteControl is a simple mote and host application to use a Tmote Sky or
+Tmote Invent unit as a remote control for Microsoft PowerPoint presentations.
+The user button is used as the input, and the number of presses of the
+user button determines whether an emulated PageUp or PageDown signal should
+be sent to the active application.
+
+To use RemoteControl:
+
+  Install RemoteControl on a Tmote Invent unit with:
+
+    make tmoteinvent install
+
+  Using a second node, install TOSBase with
+
+    cd /opt/moteiv/apps/TOSBase
+    make tmoteinvent install
+
+  When you press the user button on Tmote Invent, the green light on
+  the TOSBase node should light up.
+
+  On the host side, compile the java tools with:
+
+    make -f Makefile.makejava
+
+  Then run the application with:
+
+    MOTECOM=serial@COMXX:tmote java RemoteControl
+
+  Switch to your Microsoft PowerPoint presentation.  A single press of
+  the user button will advance to the next slide.  Double clicking the
+  user button will retreat to the previous slide.
+
+
+Tools:
+
+RemoteControl.java and sendKeys.vbs for controlling other applications.
+
+Known bugs/limitations:
+
+None.
+

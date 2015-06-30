@@ -1,0 +1,50 @@
+
+
+/*                                                                      tab{4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ *
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Alec Woo
+ *
+*/
+
+TOS_MODULE MAC_ADAPT;
+
+ACCEPTS{
+	char MAC_ADAPT_INIT(void);
+	char MAC_ADAPT_POWER(char mode);
+	char MAC_ADAPT_SEND_MSG(short addr, char type, TOS_MsgPtr data);
+	char MAC_ADAPT_SEND_ROUTETHRU_MSG(short addr, char type, TOS_MsgPtr data);
+	char MAC_ADAPT_SET_NUM_CHILDREN(char children);
+	char MAC_ADAPT_SET_MSG_ACK_RECV(void);
+	char MAC_ADAPT_SET_ROUTEMSG_ACK_RECV(void);
+};
+
+SIGNALS{
+	char MAC_ADAPT_CHANGE_PHASE(TOS_MsgPtr msg, unsigned int); 
+};
+
+USES{
+	char MAC_ADAPT_SUB_INIT(void);
+	char MAC_ADAPT_SUB_POWER(char mode);
+	char MAC_ADAPT_SUB_SEND_MSG(short addr, char type, TOS_MsgPtr data);
+	short MAC_ADAPT_SUB_NEXT_RAND(void);
+};

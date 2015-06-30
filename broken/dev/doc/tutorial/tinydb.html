@@ -1,0 +1,251 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+  <head>
+    <title>Lesson A: TinyDB</title>
+  </head>
+  <body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+    
+    <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+      <tr bgcolor="#e0e0ff">
+	<td width="100%">
+	  <font face="tahoma,arial,helvetica"><b><big><big>
+		  TinyDB</big><br>
+		  <b>A Declarative Query System for Motes</b></big></b>
+	    <p>
+	      Last updated 03 Sep. 2002
+	  </font>
+	</td></tr>
+    </table>
+    
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">Introduction</font>
+	      </b></td> </tr>
+      </table>
+    </p>
+In this lesson, you will learn to use the TinyDB query processing system for 
+extracting data from motes through a declarative query interface that is similar
+to the SQL interface of a relational database system.  This lesson assumes you have a 
+familiarity with the TinyOS toolset (have completed through lesson 7), but
+will not require you to write (or even look at!) any C code.
+
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">About TinyDB</font>
+	      </b></td> </tr>
+      </table>
+    </p>
+
+TinyDB is a query processing system for extracting
+information from a network of
+motes. Unlike other
+solutions for data processing in TinyOS,
+TinyDB does not require you to write embedded C
+code for sensors.
+Instead, TinyDB provides a
+simple, SQL-like interface to specify the data you want to
+extract, along with additional parameters, like the rate at which data
+should be refreshed -- much as you would pose queries against a
+traditional database.  
+Given a query specifying your data interests,
+TinyDB collects that data from motes in the
+environment, filters it, aggregates it together, and routes it out to
+a PC.  TinyDB does this via power-efficient in-network
+processing algorithms.<p>
+
+To use TinyDB, you install its TinyOS components onto
+each mote in your sensor network. 
+TinyDB provides a simple
+Java API for writing PC applications that query and extract data from
+the network; it also comes with a simple graphical query-builder and
+result display that uses the API.<p>
+
+The primary goal of TinyDB is to make your life as a programmer
+significantly easier, and allow data-driven applications to be
+developed and deployed <i>much</i> more quickly than what is currently
+possible.  TinyDB frees you from the burden of writing low-level code
+for sensor devices, including the (very tricky) sensor network
+interfaces.  
+	
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Installing TinyDB and Running A Simple Query</font> </b></td> </tr> </table></p>
+
+For this lesson, you will need three motes.  Program all three with the <code>TinyDBApp</code> application, setting their id's to 0, 1, and 2.  Turn on all three and connect the mote you programmed with id 0 to the PC serial port.
+<p>
+You will interact with these motes using the <code>TinyDBMain</code> class in
+<code>tools/java/net/tinyos/tinydb</code>.  First, you need to build the
+java classes -- to do this, you need to insure that several packages are in your <code>CLASSPATH</code>. The packages you need are <code>JLex.jar</code>, <code>cup.jar</code>, and <code>plot.jar</code>;  all three are available in 
+<code>tools/java/jars</code>. You'll need to set your <code>CLASSPATH</code>
+variable in your shell -- under bash, this would look like:
+
+<blockquote>
+<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+<tr bgcolor="#e0e0e0">
+<td width="100%"><pre>
+export CLASSPATH=$CLASSPATH:<i>/path/to/tinyos</i>/tools/java/jars/plot.jar:\
+    <i>/path/to/tinyos</i>/tools/java/jars/JLex.jar:\
+    <i>/path/to/tinyos</i>/tools/java/jars/cup.jar
+</pre></td></tr></table>
+</blockquote>
+
+Under <code>sh</code> or <code>csh</code> you would write "<code>setenv CLASSPATH $CLASSPATH:...</code>"  instead of "<code>export CLASSPATH=$CLASSPATH:...</code>".
+<p>
+Now, build the java classes by typing <code>make</code> in the <code>tools/java/net/tinyos/tinydb</code> directory. This may take several minutes and will output lots of text as the TinyDB query parser is compiled.
+<p>
+Finally, you're ready to start up the GUI!  Type <code>java net.tinyos.tinydb.TinyDBMain</code> from the <code>tools/java</code> directory.  The TinyDB GUI should appear:<p>
+
+<img src="imgs/tinydb-main.jpg"></img>
+<p>
+To specify a query in this GUI, you move the fields you want to extract from the
+sensors from the list of available attributes on the left to the list of
+projected attributes on the right. Let's add the light attribute:  first, click
+on "light" in the left column, then click the ">>>" button.  You display
+should now look like:
+<p>
+<img src="imgs/tinydb-light.jpg"></img>
+<p>
+Notice that the text of the query below the attribute list updates as
+you modify the query.  The <code>SAMPLE PERIOD</code> clause in the query
+specifies that a new light reading will be delivered once every 1024 milliseconds.
+You can change the sample period using the pop-up menu at the top of
+the window.
+<p>
+Now let's add the nodeid attribute:  click on "nodeid" in the left column, and then
+click the ">>>" button again.  Your display should now look like:
+<p>
+<img src="imgs/tinydb-light_and_id.jpg"></img>
+<p>
+
+Unlike light, nodeid does not specify a 
+physical sensor reading, but instead is the id that was programmed into the
+mote using the <code>make mica install.nodeid</code> command.  You'll learn
+later how to extend TinyDB with other attributes of your own creation.
+
+Now, we're ready to run a query.  Click the "Send Query" button;  a result
+window will appear:
+<p>
+<img src="imgs/tinydb-result1.jpg"></img>
+<p>
+As this window appears, 
+the red LED on mote id 0 (the <i>basestation</i>) should blink a few
+times, and shortly thereafter the red LEDS on motes 1 and 2 should
+turn on.  After a few seconds, the yellow LEDS on all three motes
+should blink about once a second -- this indicates the query is
+running properly.  If the LEDs don't start blinking in a few seconds,
+try clicking "Resend Query" to reissue the query.
+<p>
+Results should now be streaming into the GUI, showing the light reading
+at motes 1 and 2.  Try covering mote 2;  you should see the
+line representing its value on the graph fall off:
+<p>
+<img src="imgs/tinydb-result2.jpg"></img>
+<p>
+That's it for this simple introduction to TinyDB.  In the next section, we will 
+discuss the more sophisticated features of TinyDB that make it useful in a 
+broad range of data collection applications.
+
+
+
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Neat, But What Else Is It Good For?</font> </b></td>
+	</tr> </table></p>
+
+TinyDB includes a number of other features.  See the "Where To Look For More Information"
+section for a link to the complete TinyDB reference manual.  In this section, we'll briefly
+describe other features of the query language.
+<p>
+<b> The WHERE clause </b>:
+
+TinyDB queries can contain a <code>WHERE</code> clause that filters out particular readings that
+are not of interest.  For example, a query that finds the light and temperature readings and id's
+of all motes whose light reading is
+above 400 would look like:
+
+<blockquote>
+<table border=0 hspace=4 cellspacing=2 width="50%" cellpadding=3>
+<tr bgcolor="#e0e0e0">
+<td width="100%"><pre>
+SELECT nodeid,light,temp 
+FROM sensors
+WHERE light > 400
+SAMPLE PERIOD 1024
+</pre></td></tr></table>
+</blockquote>
+
+To create such a query, use the "New Predicate" button to add a predicate, select "light" from
+the predicate attribute menu, select ">" from the menu of comparative operators, and type 400 
+into the value field:
+<p>
+<img src="imgs/tinydb-where.jpg"></img>
+<p>
+Note that you can use a <code>WHERE</code> clause over nodeid to send queries
+to only a subset of the network.  
+<p>
+<b> Aggregation Predicates </b>:
+TinyDB also allows you to compute <i>aggregates</i> over readings being reported by
+several nodes in a query.  For example, to compute the average temperature reading of all
+the sensors where the light is above 400, you would issue the query:
+<blockquote>
+<table border=0 hspace=4 cellspacing=2 width="50%" cellpadding=3>
+<tr bgcolor="#e0e0e0">
+<td width="100%"><pre>
+SELECT AVG(temp)
+FROM sensors
+WHERE light > 400
+SAMPLE PERIOD 1024
+</pre></td></tr></table>
+</blockquote>
+<p>
+To specify this query, select "AVG" in the aggregation operator menu before moving
+temp into the projected attributes list:
+<p>
+<img src="imgs/tinydb-aggr.jpg"></img>
+<p>
+TinyDB computes this query via an efficient <i>in-network</i> approach, where sensors
+aggregate their own readings with readings from their neighbors and forward those
+aggregate values towards to basestation.
+<p>
+You've now seen how to pose a simple query with filtration and aggregation predicates.
+In the next section, you'll learn how to extend TinyDB with new attributes that can be queried
+via the same standardized interface.
+
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Adding an Attribute</font> </b></td>
+	</tr> </table></p>
+
+
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Where To Look For More Information</font> </b></td>
+	</tr> </table></p>
+
+	There are a number of TinyDB related resources available to users of the system:
+<ul>
+<li> <a href="http://telegraph.cs.berkeley.edu/tinydb">The TinyDB Website</a>:  Look here for information about the latest release of TinyDB, as well as links to media, source code, and standalone images that can be programmed into a mote.
+<li> <a href="../tinydb.pdf">The TinyDB User Manual</a>:  A much more thorough guide to installing, using, and modifying TinyDB.
+<li> <a href="../tinyschema.pdf">The TinySchema Manual</a>:  A guide to using attributes and commands (with or without TinyDB.
+
+</ul>
+
+    
+      
+    
+<b><a href="index.html"> Lesson index</a></b>
+
+</body>
+</html>

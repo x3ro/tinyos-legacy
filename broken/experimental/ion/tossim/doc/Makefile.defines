@@ -1,0 +1,10 @@
+# -*- makefile -*-
+#
+# Any variable beginning with "LOCAL_" is defined in the
+# per-subdirectory Makefile.
+
+DOCUMENTS   = $(NAMES:%=%.doc)
+
+# Doxygen
+DOXYGEN     = /usr/bin/doxygen
+DOCCONF     = $(ROOT)/doc/doxygen.conf

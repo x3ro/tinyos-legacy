@@ -1,0 +1,21 @@
+# Makefile for Java components
+GEN= ReadRequestMsg.java ReadDataMsg.java SampleRequestMsg.java \
+     SampleDoneMsg.java HFS.java
+
+all: $(GEN)
+	javac *.java
+
+ReadRequestMsg.java: HFS.h
+	mig -java-classname=ReadRequestMsg java HFS.h ReadRequestMsg -o $@
+
+ReadDataMsg.java: HFS.h
+	mig -java-classname=ReadDataMsg java HFS.h ReadDataMsg -o $@
+
+SampleRequestMsg.java: HFS.h
+	mig -java-classname=SampleRequestMsg java HFS.h SampleRequestMsg -o $@
+
+SampleDoneMsg.java: HFS.h
+	mig -java-classname=SampleDoneMsg java HFS.h SampleDoneMsg -o $@
+
+HFS.java: HFS.h
+	ncg -java-classname=HFS java HFS.h HFS.h -o $@

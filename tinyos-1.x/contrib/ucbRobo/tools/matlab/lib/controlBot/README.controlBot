@@ -1,0 +1,71 @@
+README for tinyos-1.x/contrib/ucbRobo/tools/matlab/lib/controlBot Directory
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+Description:
+************
+This directory contains the matlab tools for driving the COTSBOTS.
+The files here are commands, message display, and supporting functions.
+
+
+
+Useful Command Cheat Sheet
+**************************
+(this list may not be up to date, but should get you started)
+
+Commands:
+---------
+controlBotInit		Initialization before you can use any of the tools
+
+* Requires Navigation component on the COTSBOT 
+nav			Pt to Pt navigation.
+
+* For TestMotorBoard on COTSBOT
+fwdRaw			basic cmd to drive forward
+revRaw			basic cmd to drive backward
+turnRaw			basic cmd to drive forward with wheels turned
+  ~ testing/config commands from RobotCmdGUI
+getKi
+getKp
+getStraight
+setKi
+setKp
+setStriaight
+micaLedToggle
+motorLedToggle
+startMotorTest
+stopMotorTest
+
+
+Message Display:
+----------------
+printRobotCmdMsg	used for displaying getKp, getKi, getStraight
+
+
+Scripts:
+--------
+sampleNavScript		sample script to navigate one robot pt to pt
+weaveRawScript		sample script to drive two robots with raw
+                        commands such that they weave in an S curve
+crossTrackScript	sample script used for basic crossing tracks
+			target tracking
+
+
+*_helper* files are not meant to be called directly by the user.
+
+
+
+For Further Information:
+************************
+tinyos-1.x/contrib/ucbRobo/matlab/README.matlab
+
+Sastry NEST Page
+http://www.eecs.berkeley.edu/~phoebusc/330NEST/welcome.html
+
+
+
+Known bugs/limitations:
+***********************
+LIMITATIONS: 
+In the future, will require the COTSBOT to be running
+ucbRobo/apps/cotsbots/BasicBot, which will have a built in timer for
+navigation purposes.

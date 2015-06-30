@@ -1,0 +1,5 @@
+$Id: README,v 1.1 2005/05/16 09:43:41 neturner Exp $
+
+This is a TelosB application.
+
+Move this application directory to your TinyOS cvs tree and compile it there.

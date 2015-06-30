@@ -1,0 +1,92 @@
+README for Moteiv's Oscilloscope application on Tmote Sky modules
+Author/Contact: support@moteiv.com
+
+Description:
+
+The OscilloscopeTmoteSky application senses all of the sensors on
+Moteiv's Tmote Sky modules and communicates the sensor values over the
+radio to a base station running the TOSBase application.
+
+Supported sensors:
+  Sensirion Relative Humidity Sensor
+  Sensirion Temperature Sensor
+  Hamamatsu Photosynthetically Active Radiation Light Sensor
+  Hamamatsu Total Solar Radiation Light Sensor
+  TI MSP430 Internal Temperature Sensor
+  TI MSP430 Internal Voltage Sensor
+
+Oscilloscope channel assignments:
+ 0: Humidity
+ 1: Temperature
+ 2: TSR
+ 3: PAR
+ 4: InternalTemperature
+ 5: InternalVoltage
+
+Usage:
+
+  Install one mote with the Oscilloscope application.
+	Type: make tmote install,#
+	Where # is the address of the mote
+  Install a second mote (connected to the PC) with TOSBase.
+	Go to directory apps/TOSBase
+	Type: make tmote install
+  Run: java net.tinyos.oscope.oscilloscope.
+	If TOSBase is connected to COM3 (check using the motelist command)
+	then run:
+		MOTECOM=serial@COM3:tmote java com.moteiv.oscope.oscilloscope
+
+  If no readings can be seen:
+    - check the "scrolling" checkbox
+    - click the "zoom out y" button to see values > 1024
+
+Converting Tmote Sky sensor readings to SI units:
+
+Lets start with channels 4 and 5 because they use the internal ADC.
+
+The Internal ADC is 12-bits, so to convert the raw value to its
+corresponding voltage, you do:
+(1)  value/4096 * Vref
+where Vref = 1.5V
+
+Converting the internal temperature voltage to degrees is described
+in the Moteiv datasheet available from moteiv.com.
+
+The internal voltage is reported in millivolts (mV), so no
+conversion is necessary.
+
+The TSR and PAR sensors are also measured using the microcontrollers
+12-bit ADC with Vref=1.5V.  The photodiodes create a current through 
+a 100kOhm resistor.  By calculating the raw voltage using equation (1) above,
+convert the voltage into a current using V=IR:
+(2)  I = Vsensor / 100,000
+where Vsensor is the voltage calculated with the raw value and converted
+using equation (1).  The Moteiv datasheet includes curves for converting
+the photodiode's current into light values (Lux).
+
+Humidity and Temperature sensors are located in the external Sensirion
+sensor.  Their readings can be converted to SI units as follows:
+
+For Temperature, Oscilloscope returns a 14-bit value that can be 
+converted to degrees Celsius (oC):
+(3)  temperature = -39.60 + 0.01*SOt
+where SOt is the raw output of the sensor.
+
+Humidity is a 12-bit value that is not temperature compensated.
+(4)  humidity = -4 + 0.0405*SOrh + (-2.8 * 10^-6)*(SOrh^2)
+where SOrh is the raw output of the relative humidity sensor
+
+Using this calculation and the temperature measurement, you can correct
+the humidity measurement with temperature compensation:
+(5)  humidity_true = (Tc - 25) * (0.01 + 0.00008*SOrh) + humidity
+where Tc is the temperature measured in oC from equation (3), 
+SOrh is the raw output of the relative humidity sensor,
+and humidity is the uncompensated value calculated in equation (4).
+
+Tools:
+
+moteiv/tools/java/com/moteiv/oscope
+
+Known bugs/limitations:
+
+None

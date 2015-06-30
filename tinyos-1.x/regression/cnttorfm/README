@@ -1,0 +1,5 @@
+Test the CntToRfm application:
+
+cnt.tst: read two messages from the base station, and check that they look
+like 2 near-contiguous CntToRfm messages (message loss may lead to non
+contiguous counts in the messages).

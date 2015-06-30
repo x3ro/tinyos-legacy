@@ -1,0 +1,72 @@
+RadioCollision:
+
+Authors/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+This component exercises the collision avoidance capability of the radio stack.
+One group of motes continuously send messages containing the node id and a sequence 
+number to the base station. The base station computes the number of received and 
+dropped bytes per second from each mote and calculates some statistics. The number 
+of dropped bytes (messages) is calculated using the sequence number of the received 
+messages. The sent message is full, and it counts as 29 bytes.
+
+There are two separate test cases. In the first one, the senders (RadioCollisionJammer)
+continuously, but asynchronously, send messages to the base station (RadioCollisionBase). 
+In the second case, the sender nodes (RadioCollisionRelay) are syncronized and send messages
+at the same time when they receive a message from a special mote (RadioCollisionBeacon).
+
+IMPORTANT: If you want to compile this application outside the Vanderbilt tree,
+you have to copy the following additional files to the TestRadioCollision directory:
+
+	minitask/02/vu/tos/lib/DiagMsg/*
+
+TEST CASE 1:
+
+- Program several motes with the RadioCollisionJammer application (you have to
+modify the Makefile to select this). Use unique node ids!
+
+- Program one mote with the RadioCollisionBase application.
+
+TEST CASE 2:
+
+- Program one mote with the RadioCollisionBeacon application.
+
+- Program several motes with the RadioCollisionRelay application.
+
+- Program one mote with the RadioCollisionBase application.
+
+TEST ANALYSIS:
+
+- Select one of the test cases, program the motes and turn them on.
+
+- Connect the RadioCollisionBase mote to the PC, and run the following program
+
+	java isis.nest.printmsgs.PrintDiagMsgs
+
+  If you are using MICA2 motes, then you have to run
+
+	java isis.nest.printmsgs.PrintDiagMsgs -baud 57600
+
+- This program will display the statistics in the following format:
+
+"RCA" <count> <totalReceived> <totalMissing> <minReceived> <minMissing> <maxReceived> <maxMissing>
+
+  The meaning of the fields:
+
+	<count>		: the number of motes we heard messaged from in the last 7 seconds
+	<totalReceived>	: the total number of bytes we received motes per second from all motes
+	<totalMissing>	: the total number of bytes we did not received per second
+	<minReceived>	: the minimum number of bytes per second received from a mote
+	<minMissing>	: the minimum number of bytes per second we did not receive from a mote
+	<maxReceived>	: the maximum number of bytes per second received from a mote
+	<maxMissing>	: the maximum number of bytes per second we did not receive from a mote
+
+LEDS:
+
+The RadioCollisionJammer, RadioCollisionBeacon and RadioCollisionRelay applications blink 
+the green LED when it successfully sent a packet. It blinks the red LED when sendDone() 
+returned FAIL, and blinks the yellow LED when send() returned FAIL.
+
+The RadioCollisionBase blinks the yellow LED when receiving a message. It blinks the green
+LED once every 7 seconds when it reports and zeros the statistics.

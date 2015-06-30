@@ -1,0 +1,39 @@
+AC_INIT(motlle, 0.1)
+AC_CONFIG_AUX_DIR(../config-aux)
+AC_CONFIG_SRCDIR(mudlle.h)
+AM_CONFIG_HEADER(autoconf.h)
+AM_INIT_AUTOMAKE(motlle, 0.1)
+
+if test -z "$TARGET"; then
+  TARGET=motlle
+fi
+
+AC_MSG_CHECKING(target)
+case $TARGET in
+  motlle)
+    AC_CHECK_LIB(readline, readline, [LIBS="-lreadline -lcurses $LIBS";AC_DEFINE(HAVE_READLINE, 1, "use readline")], , -lcurses)
+    AC_MSG_RESULT(motlle)
+    ;;
+  smotlle)
+    TARGET_FLAGS="-DSTANDALONE"
+    AC_MSG_RESULT(smotlle)
+    ;;
+  tmotlle)
+    TARGET_FLAGS="-DSTANDALONE -DTINY -DNDEBUG -Os -mmcu=atmega103 -DNO_ASSERT"
+    TARGETLIB=libmotlle.a
+    CC="avr-gcc"
+    AC_MSG_RESULT(tmotlle)
+    ;;
+  *)
+     AC_MSG_ERROR(Unknown target $TARGET)
+esac
+
+AC_SUBST(TARGET)
+AC_SUBST(TARGETLIB)
+AC_SUBST(TARGET_FLAGS)
+AC_SUBST(READLINE_LIBS)
+
+AC_PROG_CC
+AC_PROG_RANLIB
+
+AC_OUTPUT(Makefile)

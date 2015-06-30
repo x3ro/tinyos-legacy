@@ -1,0 +1,39 @@
+WebMote v0.2
+Gilman Tolle <get@eecs.berkeley.edu>
+
+WebMote is a bridge between the mote world and the HTTP-based web
+services world. 
+
+Compile the java classes, set up a mote to emit packets over its
+serial connection (i.e. a TOSBase and CntToLedsAndRfm) then run:
+
+  java WebMote
+
+This launches a webserver on local port 80.
+
+Load the following URL in your browser:
+
+  http://localhost/webmote/
+
+This will show you a list of motes you can access. To add another
+mote, you can edit the "motes.txt" file in the local directory. Each
+line of the file has the following format:
+
+"<name of the mote> <MOTECOM required to connect to it>"
+
+If you are a Telos user, run the "moteupdate.pl" script and leave it
+running in the background. It will periodically call "motelist" and
+dump the results to afile called "motelist.txt", that WebMote will
+periodically load. This means that Telos motes will be auto-detected
+and added to the list as you plug them in.
+
+Click on a mote to start receiving packets from it. The packets will
+keep coming until you close the connection, and will start coming
+again when you reload the URL.
+
+The 'curl' tool, run as:
+
+  curl http://localhost/webmote/bridge?mote=<some mote name>
+
+will act like the java Listen tool, dumping raw packets to stdout.
+

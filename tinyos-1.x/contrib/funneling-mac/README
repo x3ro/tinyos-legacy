@@ -1,0 +1,75 @@
+################################################################# 
+#                                                               #
+#  README for the funneling-MAC tinyos-1.x source code package  #
+#                                                               #
+#################################################################
+
+Authors: Gahng-Seop Ahn   <ahngang@ee.columbia.edu>
+         Emiliano Miluzzo <miluzzo@cs.dartmouth.edu>
+
+Description:
+
+The funneling-MAC is built as a component between a routing component 
+(Route or MintRoute) and link layer components (genericComm, CC1000, 
+Queue, and BMAC). The funneling-MAC runs only on MICA2 platforms at the moment. 
+The funneling-MAC components are in the ./tos/lib/FunnelingMAC directory. 
+The routing components (Route and MintRoute) are modified (into RouteFMAC 
+and MintRouteFMAC) to be connected with the funneling-MAC.
+
+Instruction to use:
+
+In order to run the funneling-MAC for tinyos, tinyos-1.x version 1.3 or later 
+should be installed. Latest version of tinyos-1.x on CVS as of August 2006 
+works fine with the funneling-MAC code. The funneling-MAC package does not 
+include the whole source tree. The funneling-MAC code relies on the tinyos 
+source tree that is originally built so it is necessary to keep the settings 
+and environment variables that are working with the default tinyos source 
+tree unless instructed otherwise below.
+
+For testing the funneling-MAC, the Surge application is modified (into SurgeFMAC) 
+and included in this package. To run this application, please follow the 
+instructions sequence bellow.
+
+1. change directory to ./apps/SurgeFMAC
+> cd apps/SurgeFMAC
+
+2. compile and install the application to MICA2 motes with id 1 or greater. 
+These motes work as sensor nodes.
+> make mica2 install,1
+> make mica2 install,2
+...
+
+Note that the command to compile and install the code may vary depending on the 
+type of the programming device. For more information, please refer to the 
+following tutorial web link.
+http://www.tinyos.net/tinyos-1.x/doc/tutorial/programmers.html
+
+3. compile and install the application to a MICA2 mote with id 0. This device 
+works as the sink.
+> make mica2 install,0
+
+Every time you want to restart the application without reprogramming the 
+sensors make sure that the sink is the last node to be turned on.
+
+By running the application, every sensor node will generate a data packet 
+periodically and send it to the sink. The data packet generation interval 
+can be adjusted by setting the value of INITIAL_TIMER_RATE in Surge.h in 
+the ./apps/SurgeFMAC directory.
+
+The power level for every node can be adjusted by setting the value of 
+POWER_LEVEL_NODE in FunnelingMACM.nc in the ./tos/lib/FunnelingMAC directory.
+
+The funneling-MAC can be disabled by setting the value of "enableFunnelingMAC" 
+to FALSE in FunnelingMACM.nc in ./tos/lib/FunnelingMAC directory. When the 
+funnelingMAC is disabled, the system operates the same as BMAC.
+
+The funneling-MAC can operate with either RouteFMAC or MintRouteFMAC. 
+By default, this code operates with RouteFMAC. To use MintRouteFMAC, switch 
+the configuration from RouteFMAC to MintRouteFMAC in the Makefile and Surge.nc 
+inside the ./apps/SurgeFMAC directory.
+
+To observe the data packets that are delivered to the sink, one easy way is to 
+use the 'listen' tool (the 'listen' tool is not included in the funneling-MAC 
+package but it is included in original tinyos-1.x distribution). 
+Please refer to the tutorial about the use of 'listen' on the following web link.
+http://www.tinyos.net/tinyos-1.x/doc/tutorial/lesson6.html

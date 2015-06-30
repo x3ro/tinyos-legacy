@@ -1,0 +1,3 @@
+at 25ms/pkt, the loss rate is high (almost 50%)
+at 45ms/pkt, the loss rate is low (almost 0)
+16 bytes / pkt

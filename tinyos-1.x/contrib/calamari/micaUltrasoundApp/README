@@ -1,0 +1,8 @@
+This directory holds a test app which should be installed on the mica2dot if it has an ultrasound ranging sensorboard with ultrasoundBoardApp installed on it.  The app transmits a chirp message about twice a second.  Whenever a chirp is received, it transmits a EstReportMsg radio packet that indicates its own address, the address of the node whose chirp it heard, and the distance that it estimates that node to be at.  The app in this directory is contained in TransmitterAppM, but is incorrectly named.  It should really be called TransceiverApp.
+
+The other files in this directory are copies of what is in micaRangingApp.  
+TransceiverAppM seems to be a dead app that did almost the same thing as transmitterAppM, except that instead of transmitting twice a second it transmitted whenever it received a PulseMsg.  it is broken.
+
+ReceiverAppM also seems to be a dead app that only receives chirps, and send out a message indicating the distance estimate.  It is broken.
+
+To find a TransmitterApp and ReceiverApp that only transmits and receives, look in ../micaRangingApp.

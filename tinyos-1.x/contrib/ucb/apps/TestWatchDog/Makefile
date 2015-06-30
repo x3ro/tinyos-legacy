@@ -1,0 +1,3 @@
+COMPONENT=TestWatchDog
+include ../Makerules
+

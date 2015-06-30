@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>TinyOS Contribution Guidelines</title>
+  </head>
+
+  <body>
+    <h1>TinyOS Contribution Guidelines</h1>
+
+    <p>The purpose of this document is to describe the two different ways of
+    contributing code to the TinyOS code repository.</p>
+
+    <h2>How do I contribute code, bug fixes, etc.?</h2>
+
+    <p>Contributions take two forms: <i><b>core</b></i> and
+      <i><b>extensions</i></b>. The core refers to the set of standard
+      services and components distributed in a TinyOS release. For example,
+      AM-level network stacks, timers, and drivers for several common sensor
+      boards are part of the TinyOS core. TinyOS extensions are software
+      developed outside of the core. These range from complete
+      application/tool-chains, such as TinyDB, to alternative MAC protocols,
+      such as S-MAC. The TinyOS developers are responsible for the core while
+      extensions have their own developers and maintainers.
+      
+      Read the descriptions below to decide which category your contribution
+      falls into and follow the corresponding instructions.</p>
+
+    <h3>Core Contributions</h3>
+
+    <p>The core contains only essential code that all TinyOS
+    applications require.  The core is supported by core developers,
+    works on all supported platforms and is backward compatible.
+    </p>
+
+    <p> All bug-fixes and feature additions are documented in
+    the bug tracker.  Core developers will not change a file unless there is an
+    outstanding item in the bug tracker that references that file. 
+    This has the dual purpose of creating
+    a record of every change to core system components as well as allowing
+    developers to review, comment,and edit pending changes before they happen. 
+    </p>
+
+    <p> If you would like to submit a bug report or feature request to the core
+    you can do so at <a
+    href=none>http://cvs.sourceforge.net/projects/tinyos/bugtracker</a>.  Bug
+    reports should contain a clear, reproducible bug description and feature
+    requests should provide a functional test of the new feature.
+    Submitting a patch with a change request will probably expedite its
+    incorporation, and you may also <a href=non>contact</a> the core developer
+    responsible for incorporating this type of change request.</p>
+
+    <h3>Extensions</h3>
+      
+    <p>A TinyOS extension is essentially anything that is not
+    supported by the core developers.  The term "extensions" covers a
+    wide range of projects, from personal efforts to heavily
+    engineered and tested functionality.  The TinyOS tree divides them
+    into two categories: modules and contributions, each with its own
+    level of support. Anyone can -- and is encouraged to -- write a
+    TinyOS extension. In general, support is provided by the
+    extension's authors instead of the core
+    developers. Correspondingly, it is possible for extensions to fall
+    into an unsupported state.
+ 
+    <p><b>Module:</b> A module should be compatible with the main
+      tree, and can be added with a single change to the compiler's include 
+      path. Modules are usually system-level services like multi-hop routing
+      algorithms, specialized mac protocols, time-sync, etc.  TinyOS modules
+      exist in <tt>tos/lib</tt>; each module has its own sub directory. If
+      possible, the code should all be in this top-level directory, but very
+      large modules can be broken into subdirectories (e.g., lib/VM/opcodes,
+      lib/VM/contexts).
+      Module maintainers are responsible for ensuring that their extension
+      meets the above requirements. If a module doesn't, the core developers
+      may reclassify it as a contribution.</p>
+    </p>
+
+    <p><b>Contribution:</b> A TinyOS contribution is not guaranteed to be
+      compatible with the main tree nor can it be used with a simple change to
+      the include path. TinyOS contributions exist in <tt>contrib</tt>.
+      Contributions can include significant changes to core services. For
+      example, a routing protocol that prohibits the use of Active Messages
+      would be a contribution.  Other examples include Tiny Diffusion, which is
+      complete code that people are welcome to use, tinker with, and extend, but
+      is not a system-level service like a module.</p>
+
+    <p>If you would like to add a module, send a request
+      to <A
+      HREF="mailto:cvs-access@mail.millennium.berkeley.edu">cvs-access@mail.millennium.berkeley.edu</A>,
+      giving a brief description of the code and that it's a module.
+      All TinyOS developers should have open access to <tt>contrib/</tt> 
+      by default,
+      and are free to check in contributions there.
+      The top-level directory of each extension must have a status.txt file
+      explaining the name of the extension, what it does, contact info of the
+      authors, and its current status (eg. beta, v.2.1, being incorporated into
+      core, etc).
+</p>
+
+    <hr>
+    <address><a href="mailto:pal@cs.berkeley.edu">Philip Levis</a></address>
+<!-- Created: Thu Feb 12 07:05:53 PST 2004 -->
+<!-- hhmts start -->
+Last modified: Fri Feb 20 13:06:12 EST 2004
+<!-- hhmts end -->
+  </body>
+</html>

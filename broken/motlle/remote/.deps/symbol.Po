@@ -1,0 +1,147 @@
+symbol.o symbol.o: ../src/runtime/symbol.c /usr/include/string.h \
+  /usr/include/features.h /usr/include/sys/cdefs.h \
+  /usr/include/gnu/stubs.h \
+  /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h \
+  ../src/runtime/runtime.h ../src/mudlle.h /usr/include/assert.h \
+  /usr/include/stdlib.h /usr/include/sys/types.h \
+  /usr/include/bits/types.h /usr/include/bits/pthreadtypes.h \
+  /usr/include/bits/sched.h /usr/include/time.h /usr/include/endian.h \
+  /usr/include/bits/endian.h /usr/include/sys/select.h \
+  /usr/include/bits/select.h /usr/include/bits/sigset.h \
+  /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
+  /usr/include/alloca.h /usr/include/inttypes.h /usr/include/stdint.h \
+  /usr/include/bits/wchar.h /usr/include/bits/wordsize.h ../src/options.h \
+  ../src/mvalues.h \
+  /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h \
+  /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h \
+  /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+  /usr/include/bits/posix2_lim.h ../src/code.h ../src/memory.h \
+  ../src/context.h /usr/include/setjmp.h /usr/include/bits/setjmp.h \
+  ../src/types.h ../src/mudio.h ../src/print.h ../src/ports.h \
+  /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h \
+  /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
+  /usr/include/wchar.h /usr/include/gconv.h /usr/include/bits/stdio_lim.h \
+  ../src/alloc.h ../src/valuelist.h ../src/calloc.h ../src/error.h \
+  ../src/motlle-interface.h ../src/global.h ../src/machine.h \
+  ../src/primitives.h ../src/table.h
+
+/usr/include/string.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h:
+
+../src/runtime/runtime.h:
+
+../src/mudlle.h:
+
+/usr/include/assert.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/bits/sched.h:
+
+/usr/include/time.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/sys/sysmacros.h:
+
+/usr/include/alloca.h:
+
+/usr/include/inttypes.h:
+
+/usr/include/stdint.h:
+
+/usr/include/bits/wchar.h:
+
+/usr/include/bits/wordsize.h:
+
+../src/options.h:
+
+../src/mvalues.h:
+
+/usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h:
+
+/usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/bits/posix2_lim.h:
+
+../src/code.h:
+
+../src/memory.h:
+
+../src/context.h:
+
+/usr/include/setjmp.h:
+
+/usr/include/bits/setjmp.h:
+
+../src/types.h:
+
+../src/mudio.h:
+
+../src/print.h:
+
+../src/ports.h:
+
+/usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h:
+
+/usr/include/stdio.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/usr/include/gconv.h:
+
+/usr/include/bits/stdio_lim.h:
+
+../src/alloc.h:
+
+../src/valuelist.h:
+
+../src/calloc.h:
+
+../src/error.h:
+
+../src/motlle-interface.h:
+
+../src/global.h:
+
+../src/machine.h:
+
+../src/primitives.h:
+
+../src/table.h:

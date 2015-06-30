@@ -1,0 +1,9 @@
+COMPONENT=PEGSensorC
+ifeq ($(filter mica2dot pc,$(MAKECMDGOALS)),)
+SENSORBOARDS=micasb
+else
+SENSORBOARDS=honeydot
+endif
+USER_INCLUDES=-I../croute -I../routetest2 -I../UltrasonicRanging -I$(TOSDIR)/lib/UltrasonicRanging  -I../position -I../../../02/vu/tos/lib/DiagMsg -I../System
+include ../Makerules
+

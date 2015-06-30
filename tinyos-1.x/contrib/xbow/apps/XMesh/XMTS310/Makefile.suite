@@ -1,0 +1,42 @@
+# $Id: Makefile.suite,v 1.4 2005/01/13 06:06:10 mturon Exp $
+
+include Makefile.component
+
+all: mica2 micaz
+
+mica2: 915_hp 915_lp 433_hp 433_lp 315_hp 315_lp 
+
+micaz: 2420_hp 2420_lp
+
+315_hp:
+	make XFREQ=315 XMESH=HP mica2 
+	cp build/mica2/main.exe build/mica2/$(COMPONENT)_$@.exe
+
+315_lp:
+	make XFREQ=315 XMESH=LP mica2 
+	cp build/mica2/main.exe build/mica2/$(COMPONENT)_$@.exe
+
+433_hp:
+	make XFREQ=433 XMESH=HP mica2 
+	cp build/mica2/main.exe build/mica2/$(COMPONENT)_$@.exe
+
+433_lp:
+	make XFREQ=433 XMESH=LP mica2 
+	cp build/mica2/main.exe build/mica2/$(COMPONENT)_$@.exe
+
+915_hp:
+	make XFREQ=915 XMESH=HP mica2 
+	cp build/mica2/main.exe build/mica2/$(COMPONENT)_$@.exe
+
+915_lp:
+	make XFREQ=915 XMESH=LP mica2 
+	cp build/mica2/main.exe build/mica2/$(COMPONENT)_$@.exe
+
+2420_hp: 
+	make XFREQ=2420 XMESH=HPZ micaz 
+	cp build/micaz/main.exe build/micaz/$(COMPONENT)_$@.exe
+
+2420_lp: 
+	make XFREQ=2420 XMESH=LPZ micaz 
+	cp build/micaz/main.exe build/micaz/$(COMPONENT)_$@.exe
+

@@ -1,0 +1,33 @@
+README for SimpleCmd and SenseLightToLog
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+SimpleCmd module demonstrates a simple command interpreter for TinyOS tutorial 
+(Lesson 8 in particular).  It receives a command message from its RF interface,
+which triggers a command interpreter task to execute the command.
+When the command is finished executing, the component signals the upper 
+layers with the received message and the status indicating whether the message
+should be further processed. 
+
+As a simple version,  it can only interpret the follwoing commands:
+Led_on (1), Led_off(2), radio_quieter(3), radio_louder(4), 
+start_sensing(5), and read_log(6). Start sensing commands will trigger 
+the Sensing.start interface while read log will read the EEPROM with 
+a specific log line and broadcast the line over the radio when read is done.
+
+SenseLightToLog module is used in Lesson 8 of our tutorial and it 
+implements the Sensing and StdControl interface.  When a command to 
+start sensing is received, it periodically samples the light sensor 
+for N samples and also store it in the EEPROM.  Once N samples have 
+been collected, the timer is turned off and the sense done event is
+signalled.
+
+Tools:
+
+net.tinyos.sf.SerialForward
+net.tinyos.tools.BcastInject
+
+Known bugs/limitations:
+
+None

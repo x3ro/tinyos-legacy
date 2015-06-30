@@ -1,0 +1,248 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="David Culler">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>TinyOS Lesson 1 - Basics</title>
+</head>
+<body>
+
+<h1>
+Lesson 1: Introduction to TinyOS</h1>
+<h3>Components, Composition, and Basic Use of
+Commands and Events.</h3>
+<p>
+<h2> Introduction </h2>
+
+We introduce the basic TOS concepts through a very simple example
+that periodically blinks the LEDs.&nbsp; The application can be found at
+<tt><a href="../../apps/blink">nest/apps/blink</a></tt>.&nbsp;
+We will work on understanding this application from the inside out. 
+The heart of this application is provided by a single component, <tt>blink</tt>.
+
+<h2> Components </h2>
+<a NAME="tos_component"></a>A <i><FONT COLOR=#FF0000>TOS component</FONT></i>
+consists of an <i>implementation</i> and an <i>interface</i>, described
+by a <tt>.c</tt> file and a <tt>.comp</tt> file, respectively, here&nbsp; <tt><a href="../../apps/blink/blink.c">nest/apps/blink/blink.c</a></tt>
+and&nbsp; <tt><a href="../../apps/blink/blink.comp">nest/apps/blink/blink.comp</a>.</tt>
+
+<p><a NAME="tos_component_implementation"></a>
+A <i><font color="#FF0000">TOS component implementation</font></i> 
+may contain a frame, a set of event handlers,
+a set of commands, a set of tasks, and local procedures.&nbsp; The commands
+must match the commands it claims to accept in the interface and similarly
+the events must match the events it claims to handle.&nbsp; The external
+namespace of the implementation is the commands it uses and events it signals.&nbsp;
+The implementation must include <tt>tos.h</tt> and <tt>NAME.h</tt>, where
+<tt>NAME</tt>
+is the name of the component.
+
+<p><a NAME="tos_component_interface"></a> A
+<i><font color="#FF0000">TOS
+component interface</font></i> specifies the name of the component module, describes
+the set of commands the component accepts, the commands that it uses, the
+events that it handles, and the events it signals.&nbsp; The implementation
+is written in terms of the interface namespace.&nbsp; The syntax of the
+interface file is
+<blockquote><tt><font color="#FF0000">TOS_MODULE <i>name</i>;</font></tt>
+<br><tt><font color="#FF0000">ACCEPTS{</font></tt>
+<br><tt><font color="#FF0000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i>command_signatures</i></font></tt>
+<br><tt><font color="#FF0000">};</font></tt>
+<p><tt><font color="#FF0000">HANDLES{</font></tt>
+<br><tt><font color="#FF0000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i>event_signatures</i></font></tt>
+<br><tt><font color="#FF0000">};</font></tt>
+<p><tt><font color="#FF0000">USES{</font></tt>
+<br><tt><font color="#FF0000">&nbsp;&nbsp;&nbsp;&nbsp; <i>command_signatures</i></font></tt>
+<br><tt><font color="#FF0000">};</font></tt>
+<p><tt><font color="#FF0000">SIGNALS{</font></tt>
+<br><tt><font color="#FF0000">&nbsp;&nbsp;&nbsp;&nbsp; <i>event_signatures</i></font></tt>
+<br><tt><font color="#FF0000">};</font></tt></blockquote>
+
+
+<h3>Frames</h3>
+<a NAME="tos_frame"></a>
+A <i><font color="#FF0000">TOS frame</font></i> contains
+all static variables available to the implementation of the component.
+Variables within the frame are referenced using the <tt>VAR</tt> macro.
+<p>Looking at the implementation itself,&nbsp; <tt><a href="../../apps/blink/blink.c">nest/apps/blink/blink.c</a></tt>
+consists of a frame, two commands and one event handler.&nbsp; The frame
+contains a single static variable, <tt>state</tt>.&nbsp; The two commands
+support a simple initialization protocol.&nbsp; By convention, we provide
+a <tt>MAIN</tt> component which starts up on hardware reset and invokes an <tt>INIT</tt>
+command followed by a <tt>START</tt> command.&nbsp; This allows the collection of
+components forming an application to come up cleanly.
+
+<h3>Commands</h3>
+<a NAME="tos_command"></a>
+A <i><font color="#FF0000">TOS command</font></i>
+is declared as <tt>char TOS_COMMAND(cmd_name)(cmd_param_list)</tt>. The
+return value is the status of the request: 0 = failure.&nbsp; A command
+may call commands, or post tasks, but may not signal events.&nbsp; It must
+complete in a bounded, but not necessarily short, amount of time.&nbsp;
+It cannot block or spin waiting for state changes.
+
+<p>A TOS command is called using <tt><font color=#ff0000>TOS_CALL_COMMAND</font></tt><tt>(cmd_name)(cmd_args_list)</tt></font>
+
+<p>The <tt>BLINK_INIT</tt> command turns off all the LEDs and initializes its frame.
+It then initializes subcomponents, passing an argument that indicates it
+should receive a clock event at 1 hz.&nbsp; The mapping from simple clock
+period to hardware specific values is provided by <tt><a href="../../tos/platform/mica/include/hardware.h">nest/tos/platform/NAME/include/hardware.h</a></tt>.
+
+<p>The <tt>BLINK_START</tt> command does nothing more in this case.After the initialization
+phase, this component is merely asleep until events occur.
+
+<h3>Events</h3>
+
+<p><a NAME="tos_event"></a>
+A <i><font color="#FF0000">TOS event</font></i> is
+declared as <tt>char TOS_EVENT(evnt_name)(evnt_arg_list)</tt>.&nbsp; Lowest level
+events are connect directly to hardware interrupts by the system hardware
+abstraction layer.&nbsp; It does key work before reenabling interrupts.&nbsp;
+An event may signal events, call commands, or post tasks.&nbsp; It must
+complete in a short amount of time, bounded by the jitter requirements
+of the overall application.
+
+<p>A TOS event is signalled using <tt><font color=#ff0000>TOS_SIGNAL_EVENT</font>(evnt_name)(evnt_arg_list)</tt>
+
+<p>The <tt>BLINK_CLOCK_EVENT</tt> is intended to handle clock events on a periodic
+basis.&nbsp; It utilizes an internal state variable to keep track of the
+state of the red LED and toggles the LED on each clock tick.
+<p>
+Looking at the interface definition,&nbsp; <tt><a href="../../apps/blink/blink.comp">nest/apps/blink/blink.comp</a></tt>,
+we see that it state the module name <tt>BLINK</tt>, declares the two commands
+it accepts and the one event it handles.&nbsp; These declarations match
+the signatures of the associated procedures in the implementation.&nbsp;
+It also declares that it uses a <tt>SUB_INIT</tt> command and a family of LED commands.&nbsp;
+It signals no events.
+
+<h2> TinyOS Applications </h2>
+<a NAME="tos_application"></a>
+A <i><font color="#FF0000">TOS application</font></i>
+consists of a graph of components.&nbsp; A textual representation of this
+graph is contained in the description file for the applicaiton, here 
+<tt><a href="../../apps/blink/blink.desc">nest/apps/blink/blink.desc</a></tt>.
+
+<p>The TinyOS component approach separates creation
+of the components from their composition.&nbsp; It makes it very easy to
+swap components in and out and interpose components.&nbsp; It also limits
+the interactions between components to very narrow channels.
+
+<p><a NAME="tos_description"></a>
+A <i><font color="#FF0000">TOS description
+file</font></i> specifies the set of component modules used in the application
+and the wiring of commands and events across component interfaces.&nbsp;
+The component module name should match the root of the interface and the
+implementation file, case sensitive, as well as the module name in the
+.comp file.&nbsp; The wiring must be a subset of the interface elements
+associated with the components.&nbsp; There is a search path associated
+with resolution of module, typically consisting of "., tos/system, tos/platform,
+tos/shared".&nbsp; The syntax is as follows.</font>
+<blockquote><font color="#FF0000">i<tt>nclude modules{</tt></font>
+<br><tt><font color="#FF0000">&nbsp;&nbsp;&nbsp; <i>module list</i></font></tt>
+<br><tt><font color="#FF0000">};</font></tt>
+<p><i><tt><font color="#FF0000">connection list</font></tt></i></blockquote>
+
+<h2> The <tt>BLINK</tt> Example</h2>
+In our example we have four components: <tt>MAIN, BLINK,CLOCK, LEDS</tt>.&nbsp;
+<tt>MAIN</tt> is a platform-dependent startup component used for initialization.&nbsp;
+It is located at&nbsp; <tt><a href="../../tos/platform/mica/MAIN.comp">nest/tos/platform/NAME/MAIN.comp</a></tt>.&nbsp;
+Looking at that interface reveals that it is richer than what is used here.&nbsp;
+<tt>CLOCK</tt> is a platform-dependent component that provides an abstraction of
+the clock device and handles the associated hardware interrupts.&nbsp;
+It is located at&nbsp; <tt><a href="../../tos/platform/mica/CLOCK.comp">nest/tos/platform/NAME/CLOCK.comp</a></tt>.
+In addition to initializing the clock period and signalling clock event,
+the clock value can be queried and set.&nbsp; LED is a system component
+that provides basic low-level commands to actuate the LEDs.&nbsp; It is
+located at&nbsp; <tt><a href="../../tos/system/LEDS.comp">nest/tos/system/LEDS.comp</a></tt>.
+
+<p><i>To build this application, cd into the <tt><a href="../../apps/blink">nest/apps/blink</a></tt>
+and type <tt>make</tt>.</i>&nbsp; (On windows, you should do this within
+a CygWin command window.&nbsp; The gcc tools may behave strangely in a
+DOS command window.)&nbsp; By default, it will make an executible for each
+platform.&nbsp; To build for only the mica platform, type <tt>make mica</tt>.&nbsp;
+All objects, generated includes, and executibles are place in the bin directory
+for the specific platform, eg, <tt>binmica/</tt>.&nbsp; You should, of course, observe
+errors and warnings that arise in building your application.&nbsp; This
+example should not have any. At the very end, the Make shows you a piece
+of the load map that tells you whether your application fits.
+
+<p>To download your program into the Mica wireless sensor node, <i>place
+the Mica board (or board and sensor stack) into the bay on the programming
+board</i>, as shown below.&nbsp; You can either supply a 3 volt supply
+to the connector on the programming board or power the node directly.&nbsp;
+The red LED labeled D2 on the programming board will be on when power is
+supplied.&nbsp; <i>Plug the 32-pin connector into the parallel port of
+a laptop</i> configured with the TOS tools, or connect use a standard mail-female
+DB32 parallel port cable.&nbsp; Make sure that the switch on the side of
+the programming board is on BIG_GUY.
+
+<p>
+
+<table border=0 cellspacing=2 cellpadding=0>
+<tr>
+<td><img src="imgs/rene-offboard.jpg"></td>
+<td><img src="imgs/rene-onboard.jpg"></td>
+</tr>
+<tr>
+<td align=center valign=top><b>Rene</b> mote next to the programming board</td>
+<td align=center valign=top><b>Rene</b> mote connected to the programming board</td>
+</tr>
+</table>
+<p>
+<table border=0 cellspacing=2 cellpadding=0>
+<tr>
+<td><img src="imgs/mica-offboard.jpg"></td>
+<td><img src="imgs/mica-onboard.jpg"></td>
+</tr>
+<tr>
+<td align=center valign=top><b>Mica</b> mote next to the programming board</td>
+<td align=center valign=top><b>Mica</b> mote connected to the programming board</td>
+</tr>
+</table>
+
+<br>&nbsp;
+<p>Type <tt>make install mica</tt>.
+<p>If you get:
+<blockquote>uisp -dprog=dapa -dno-poll --erase
+<br>Probably the AVR MCU is not in the RESET state.
+<br>Check it out and run me again.
+<br>make: *** [install] Error 2</blockquote>
+check first whether the power is on.&nbsp; If you are using an IBM ThinkPad,
+it may be necessary to tell the tools to use lpt3.&nbsp; You can do this
+by adding a line
+<br>HOST = THINKPAD
+<br>before the include statement in <i><a href="../../apps/blink/Makefile">nest/apps/blink/Makefile</a></i>
+<p>It should look something like the following:
+<blockquote><i><tt>$ make install mica</tt></i>
+<br><i><tt>avr-objcopy --output-target=srec binr</tt></i>
+<br><i><tt>uisp -dprog=dapa -dno-poll -dlpt=3 --</tt></i>
+<br><i><tt>Atmel AVR AT90S8535 is found.</tt></i>
+<br><i><tt>Erasing device ...</tt></i>
+<br><i><tt>Reinitializing device</tt></i>
+<br><i><tt>Atmel AVR AT90S8535 is found.</tt></i>
+<br><i><tt>sleep 1</tt></i>
+<br><i><tt>uisp -dprog=dapa -dlpt=3 --upload if=</tt></i>
+<br><i><tt>Atmel AVR AT90S8535 is found.</tt></i>
+<br><i><tt>Uploading: flash</tt></i>
+<br><i><tt>sleep 1</tt></i>
+<br><i><tt>uisp -dprog=dapa -dlpt=3 -dno-poll --</tt></i>
+<br><i><tt>Atmel AVR AT90S8535 is found.</tt></i>
+<br><i><tt>Verifying: flash</tt></i>
+<br><i><tt>make: Nothing to be done for `mica'.</tt></i></blockquote>
+The red LED should blink on and off and 0.5 Hz.
+<p><b>Exercise:</b> Modify <tt>blink.c</tt> to display the low three bits of a counter
+on the LEDs.
+<p><i>To peek at the answer, you can look in <tt>apps/count</tt>.</i>
+<p><i>An even more useful example appears in <tt>apps/cnt_to_leds</tt>.&nbsp;
+It abstracts the display capability into a component called <tt>INT_TO_LEDS</tt>.&nbsp;
+By just changing the <tt>desc</tt> file, the output device can be switched to the
+network.&nbsp; That is done in <tt>apps/cnt_to_rfm.</tt></i>
+<br>&nbsp;
+<p><b>Note:</b> <tt>make clean</tt> will clean up all generated files.&nbsp; If your directory
+seems cluttered , it is often a good idea to run <tt>make clean</tt>.
+<br>&nbsp;
+<hr>
+<b><font size=4><a href="lesson2.html">Next Lesson &gt;</a></font></b>
+</body>
+</html>

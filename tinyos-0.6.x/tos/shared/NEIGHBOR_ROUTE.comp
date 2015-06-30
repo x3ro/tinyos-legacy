@@ -1,0 +1,61 @@
+/*
+ *
+ *
+ * "Copyright (c) 2002 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Alec Woo
+ * Date:     April 23, 2000
+ *
+ *
+ *  This is a generic base station module that listens at the PACKET level
+ *  and forwards any packet that arrives on the radio to the UART of the host
+ *  that it is connected to.  It does not look at the address or handler number.
+ *  However, it does modify the address to be TOS_UART_ADDR before sending 
+ *  it to the host. This component does look at the group id field of 
+ *  the packet.
+ *
+ *
+ */
+
+TOS_MODULE NEIGHBOR_ROUTE;
+JOINTLY IMPLEMENTED_BY NEIGHBOR_ROUTE;
+
+ACCEPTS{
+	char NEIGHBOR_ROUTE_INIT(void);
+	char NEIGHBOR_ROUTE_DELIVER_MSG(TOS_MsgPtr data);
+};
+
+SIGNALS{
+	char NEIGHBOR_ROUTE_DELIVER_MSG_DONE(TOS_MsgPtr data);
+};
+
+HANDLES{
+	TOS_MsgPtr NEIGHBOR_ROUTE_RX_PACKET(TOS_MsgPtr data);
+	char NEIGHBOR_ROUTE_TX_PACKET_DONE(TOS_MsgPtr data);
+	void NEIGHBOR_ROUTE_CLOCK_EVENT(void);
+};
+
+USES{
+	char NEIGHBOR_ROUTE_SUB_INIT();
+	char NEIGHBOR_ROUTE_SET_HOP(char hop, char allow_new_enteries);
+	char NEIGHBOR_ROUTE_DISPLAY_HOP(short hop);
+	char NEIGHBOR_ROUTE_SEND_MSG(short id, char handler, TOS_MsgPtr msg);
+	int NEIGHBOR_ROUTE_GET_TABLE();
+};

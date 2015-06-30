@@ -1,0 +1,23 @@
+/Classifier.nc/1.1/Fri Dec  5 21:18:00 2003//
+/ClassifierM.nc/1.1/Fri Dec  5 21:18:00 2003//
+/EnergyEstimator.nc/1.1/Fri Dec  5 21:18:00 2003//
+/EnergyEstimatorM.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagAutoBiasM.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagAxesSpecific.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagBiasActuator.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagC.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagClassifier.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagConstants.h/1.1/Fri Dec  5 21:18:00 2003//
+/MagFuseBiasM.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagSampler.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagSamplerM.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagSensor.h/1.1/Fri Dec  5 21:18:00 2003//
+/MagSensor.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MagSensorM.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MovingStatistics.nc/1.1/Fri Dec  5 21:18:00 2003//
+/MovingStatisticsM.nc/1.1/Fri Dec  5 21:18:00 2003//
+/ReporterM.nc/1.1/Fri Dec  5 21:18:00 2003//
+/SignalDetector.nc/1.1/Fri Dec  5 21:18:00 2003//
+/SignalDetectorM.nc/1.1/Fri Dec  5 21:18:00 2003//
+/common_structs.h/1.1/Fri Dec  5 21:18:00 2003//
+D

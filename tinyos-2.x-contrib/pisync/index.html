@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<title>PISync - Proportional-Integral Clock Synchronization In Wireless Sensor Networks</title>
+</head>
+<body>
+<div id="layout-content">
+<div id="toptitle">
+<h1>PISync - Proportional-Integral Clock Synchronization In Wireless Sensor Networks</h1>
+</div>
+<h2>Authors</h2>
+<p><a href="http://das.ege.edu.tr/~sinanyil/">Kasım Sinan YILDIRIM - Ege University, Izmir, Turkey</a> <br />
+<a href="http://automatica.dei.unipd.it/people/carli.html">Ruggero CARLI - University of Padova,  Italy</a>  <br />
+<a href="http://automatica.dei.unipd.it/people/schenato.html">Luca SCHENATO - University of Padova, Italy</a>  <br /></p>
+<p>PISync is a novel control theoretic time synchronization protocol for synchronizing
+sensor nodes in Wireless Sensor Networks (WSNs). It is based on a Proportional-Integral (PI) controller. It applies a proportional feedback (P) and an integral feedback (I) on the local measured synchronization errors to compensate the differences between the clock offsets and clock speeds. It has better or comparable performance over existing protocols in the WSN literature in terms of rate of convergence and steady-state error with the additional advantages of requiring minimal CPU overhead, memory allocation and code footprint independent of network size and topology, and of employing blind communication. </p>
+<p>We developed two protocols namely FloodPISync and AvgPISync. FloodPISync requires a dynamically elected reference node, as in FTSP, and it disseminates the time information of this reference via flooding. AvgPISync does not require a reference node and all nodes in the network syncronize to their direct neighbors.</p>
+<p><a href="http://tinyos.cvs.sourceforge.net/viewvc/tinyos/tinyos-2.x-contrib/pisync/"><b><tt>Click for the source code from repository.</tt></b></a></p>
+<p>The video below shows a real demo execution of AvgPISync on a testbed of MICAZ sensor nodes.<br /> </p>
+<p><iframe width="560" height="315" src="http://www.youtube.com/embed/AOH-1_eehQ0" frameborder="0" allowfullscreen></iframe> </p>
+<div class="infoblock">
+<div class="blocktitle">Highlights from the article &ldquo;Proportional-Integral Synchronization In Wireless Sensor Networks&rdquo;</div>
+<div class="blockcontent">
+<p>You can reach PISync article from Arxiv <a href="http://arxiv.org/abs/1410.8176">[here]</a>. </p>
+<p>The figures below presents maximum and average maximum instantaneous synchronization errors of <a href="http://dl.acm.org/citation.cfm?id=1031501">FTSP</a> (left) and FloodPISync (right) on a line topology of 20 MICAz sensor nodes. </p>
+<p><img src="ftsp_line_global.png" alt="alt text" width="450px" height="250px" /> <img src="pi_line_global.png" alt="alt text" width="450px" height="250px" /></p>
+<ul>
+<li><p>As compared to FTSP, FloodPISync is scalable in terms of steady state global synchronization error, which grows with the square root of the network diameter, unlike exponential growth with FTSP.</p>
+</li>
+</ul>
+<p>The following table presents a comparison of the existing time synchronization protocols in the literature with PISync in terms of resource requirements.</p>
+<p><img src="resource.png" alt="alt text" width="430px" height="180px" /></p>
+<ul>
+<li><p>PISync does not store distinct time information and it allocates very little amount of RAM space, a factor 3 to 10 smaller than existing protocols, even in very dense networks.</p>
+</li>
+</ul>
+<ul>
+<li><p>The code size of PISync is compact with an improvement between 15 − 30% as compared to alternative protocols, which provides remarkable gain for sensor nodes where flash memory is a scarce resource.</p>
+</li>
+</ul>
+<ul>
+<li><p>PISync is lightweight in terms of CPU usage since it requires more than an order of magnitude fewer operations as compared to the available protocols.</p>
+</li>
+</ul>
+</div></div>
+<div id="footer">
+<div id="footer-text">
+Page generated 2014-11-24 21:13:02 EET, by <a href="http://jemdoc.jaboc.net/">jemdoc</a>.
+</div>
+</div>
+</div>
+</body>
+</html>

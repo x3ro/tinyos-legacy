@@ -1,0 +1,69 @@
+GradientPolicy:
+
+Author/Contact: Miklos Maroti, ISIS, Vanderbilt
+		Brano Kusy, kusy@isis.vanderbilt.edu	
+
+
+DESCRIPTION:
+
+The GradientPolicy component is used to convergecast messages to a stationary
+base station. This policy has to be used together with the FloodRouting component.
+The GradientPolicy first calculates the hop count distance from the root,
+then based on this information forwards packets. Tha basic idea is that if the 
+same packet is heard from a node closer to the root than the currect node, 
+then the packet is not sent from this node. Otherwise, we send each packet up to
+three times (with 2 and 1 sec delays in between). 
+
+HOP COUNT:
+
+The hop count measurement (gradient calculation) is initiated by calling the 
+GradientPolicy.setRoot() method on the root node. The hop count distance from the 
+root is measured 16 times, and the final hop count distance is the average of the 
+measured hop counts. 
+
+ONE POSSIBLE USAGE:
+
+Include the RemoteControl component to your application. Program all motes with 
+this application, and program one mote with the GenericBase application. Turn all 
+motes on, and select the one of your application mote that is relatively close 
+(or the closest) to the base station. This mote will be the root of the convergecast.
+The base station will overhear the communication (either the ones that are sent
+towards to base station, or the ones that are sent by the base station as 
+acknowledgments) and can forward these packets to the PC. First, you have to tell
+the selected mote that it is the root. You can do this with the RemoteControl
+java panel of the MessageCenter application and with the following configuration:
+
+	configuration:	"set gradient root"
+	usage:	"type the node id of a mote close to TOSBase mote into 
+		the target field"
+	command target:
+	command appID:	0x81
+	integer parameter:	2
+
+After this, you can display the remote control acknowledgments, as well 
+as your routed messages at the base station using the MessageTable application 
+with the following configuration:
+
+	configuration: "remote control acknowledgments"
+	msg type:	130
+	check first unique only
+	format:
+		const hex8 appId = 0x5E
+		omit uint16 gradient
+		unique uint16 nodeId
+		uint8 seqNum
+		uint8 retVal
+
+The GradientPolicy supports the following remote commands, as well:
+		
+	configuration:	"query the gradient root"
+	usage:	"returns the root of the gradient field of each nodes"
+	command target:	0xFFFF
+	command appID:	0x81
+	integer parameter:	0
+
+	configuratgion:	"query the hop count of the gradient field"
+	command target:	0xFFFF
+	command appID:	0x81
+	integer parameter:	1
+

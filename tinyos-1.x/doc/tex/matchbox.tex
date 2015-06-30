@@ -1,0 +1,228 @@
+\documentclass[10pt]{article}
+
+\usepackage{fullpage}
+\usepackage{verbatim}
+
+\parindent 0em
+\parskip 0.2cm
+
+\newcommand{\kw}[1]{\mbox{\tt #1}}
+\newcommand{\code}[1]{\mbox{\tt #1}}
+\newcommand{\file}[1]{\mbox{\tt #1}}
+
+\title{Matchbox: A simple filing system for motes}
+\author{David Gay \\
+Version 1.0}
+
+\begin{document}
+  
+\maketitle
+
+\section{Overview}
+
+\emph{Matchbox}, the mote filing system is designed to provide a simple
+filing system for mote-based applications. The design has the following
+goals:
+\begin{itemize}
+\item Reliability, specifically:
+  \begin{itemize}
+  \item data corruption should be detected
+  \item catastrophic failure (e.g., power off) should never lead to meta-data
+    corruption, data loss should be limited to files being written at the
+    time of failure. This implies that file renaming and deletion are 
+    atomic operations.
+  \end{itemize}
+\item Low resource consumption (especially RAM)
+\item Consider typical restrictions on flash memories (there are limitations
+on the number of times a block can be erased, on the minimum erasure size,
+and on multiple writes within a block - these vary depending on flash
+technology)
+\end{itemize}
+
+Most of the design is based on what is not necessary. We do not need:
+\begin{itemize}
+\item Security in any form
+\item A hierarchical filing system
+\item Random file access
+\item Multiple readers or writers of the same file
+\item Many files open simultaneously, however we do wish to support (at
+  least) having two different files open, one for reading and one for
+  writing (this supports file copy/edit operations)
+\end{itemize}
+
+Expected clients of this filing system are TinyDB (and the Generic Sensor
+Kit), for logging data sets to permanent storage and for storing metadata,
+and the virtual machine for storing programs.
+
+Matchbox is currently implemented for mica family motes (these motes use
+the Atmel AT45DB041B flash chip).
+
+\section{Matchbox}
+
+Matchbox is a flat filing system that supports only sequential reads and
+appending writes. Files are unstructured (simply a sequence of
+bytes). Space can optionally be preallocated for a file (ensuring both that
+space exists in permanent storage, and potentially reducing write
+overhead).
+
+The same file cannot be opened for both reading and writing. Files (that
+are not open) may be renamed or deleted. In Unix style, renaming a file A
+as an existing file B also deletes B (the rename will fail if B is open).
+
+\section{Matchbox API}
+
+The Matchbox component (\kw{Matchbox}) has the following specification:
+
+\begin{verbatim}
+  provides {
+    interface StdControl;
+    interface FileDir;
+    interface FileRename;
+    interface FileDelete;
+    interface FileRead[uint8_t fd];
+    interface FileWrite[uint8_t fd];
+  }
+  uses {
+    event result_t ready();
+  }
+\end{verbatim}
+
+This interface is covered in three parts: initialisation, directory
+operations and file operations. The detailed interface specifications are
+in Appendix~\ref{sec:interfaces}.
+
+\subsection{General Operation}
+
+Nearly all file system operations are split-phase, and fail (with result
+\kw{FAIL}) at initiation if another operation is already in progress. Also,
+the filing system will be extremely unhappy (i.e., fail) if another
+component uses the external flash during a file system operation.
+
+The \kw{fileresult\_t} type is used in most split-phase completion events
+to report the success or failure of the requested operations. The
+following results are defined:
+\begin{itemize}
+\item \kw{FS\_OK}: operation succeeded.
+\item \kw{FS\_NO\_MORE\_FILES}: end of directory reached.
+\item \kw{FS\_ERROR\_NOSPACE}: filing system is full (there may be a
+little space left, but not enough to guarantee completion of the requested
+operation while preserving the filing system from corruption in case of
+failure).
+\item \kw{FS\_ERROR\_FILE\_OPEN}: the requested file is already open for
+reading or writing.
+\item \kw{FS\_ERROR\_NOT\_FOUND}: the requested file is not found.
+\item \kw{FS\_ERROR\_BAD\_DATA}: corrupt data was found (should only occur
+for file operations).
+\item \kw{FS\_ERROR\_HW}: a problem occurred when accessing the flash chip.
+\end{itemize}
+
+The Matchbox files are in the \file{tos/lib/FS} directory, and depend
+on files in \file{tos/lib/Util}. Matchbox programs must therefore be
+compiled with \kw{-I\%T/lib/FS -I\%T/lib/Util} options.
+
+\subsection{Initialisation}
+
+Matchbox is initialised via the usual \kw{StdControl} interface, however it
+is not immediately ready for use. File system operations can only be 
+initiated after the \kw{ready} event is signaled.
+
+\subsection{Directory Operations}
+
+Directory contents are listed by calling the \kw{start} command in
+\kw{FileDir} (not split-phase), then calling \kw{readNext} to get each
+subsequent file. The files are returned in the \kw{nextFile} event. The
+file system is considered busy from the call to \kw{start} until
+\kw{nextFile} signals an error (normally the \kw{FS\_NO\_MORE\_FILES}
+error).
+
+The number of free bytes in the filing system is returned by the
+\kw{freeBytes} command.
+
+Files can be renamed and deleted via the split-phase \kw{FileDelete} and
+\kw{FileRename} interfaces. Open files can not be renamed or deleted. Renaming
+a file $X$ over an existing file $Y$ will delete $Y$ (but will fail if $Y$
+is currently open).
+
+\subsection{File Operations}
+
+The \kw{FileRead} and \kw{FileWrite} interfaces are parameterised. Each
+interface instance corresponds to a separate \emph{file descriptor} and
+allows a separate file to be opened. File descriptors for reading and
+writing are separate; file descriptors for reading are obtained with
+\code{unique("FileRead")}, file descriptors for writing are obtained with
+\code{unique("FileWrite")}. For instance, an application that
+simultaneously needs two files open for reading and one for writing might
+have the following configuration:
+
+\begin{verbatim}
+   configuration MyApp { }
+   implementation {
+     components Matchbox, MyCode, ...;
+
+     MyCode.FileRead1 -> Matchbox.FileRead[unique("FileRead")];
+     MyCode.FileRead2 -> Matchbox.FileRead[unique("FileRead")];
+     MyCode.FileWrite -> Matchbox.FileWrite[unique("FileWrite")];
+     ...
+   }
+\end{verbatim}
+
+The \kw{FileRead} interface defines the operations for opening (\kw{open}
+command, \kw{opened} event), closing (\kw{close} command, which is not
+split-phase), reading (\kw{read} command, \kw{readDone} event) and finding
+the remaining bytes in a file (\kw{getRemaining} command, \kw{remaining}
+event).
+
+The \kw{FileWrite} interface defines the operations for opening (\kw{open}
+command and \kw{opened} event), closing (\kw{close} command and \kw{closed}
+event), appending (\kw{append} command and \kw{appended} event),
+synchronising (\kw{sync} command and \kw{synced} event) and reserving space
+for a file (\kw{reserve} command and \kw{reserved} event). The \kw{opened}
+event reports the current size of the file. Appends are only guaranteed to
+be flushed after a \kw{closed} or a \kw{synced} event. Space can be
+pre-reserved for a file using the \kw{reserve} command, this guarantees
+that subsequent appends up to the requested size will not fail due to lack
+of space, and leads to somewhat faster appends.
+
+\section{Remote Matchbox Access}
+
+The \kw{Remote} component provides for remote Matchbox access, assuming a
+reliable communications channel. It is thus easiest to use it via the UART
+(e.g., when debugging), though it can be used via the radio if some other
+component is used to provide reliable, bi-directional packet transmission.
+
+The \kw{Remote} component gives access to all file system operations. The
+java \code{net.tinyos.matchbox} package provides some low-level
+infrastructure to talk to the \kw{Remote} component, while the
+\code{net.tinyos.matchbox.tools} package provides some simple java programs
+to list the directory (\code{Dir.java}), delete or rename a file
+(\code{Delete.java} and \code{Rename.java}), and copy files in and out of
+Matchbox (\code{CopyIn.java} and \code{CopyOut.java}).
+
+\section{Acknowledgments}
+
+Timothy Roscoe came up with the Matchbox name and Wei Hong helped define
+the filing system requirements.
+
+\newpage
+\appendix
+
+\section{Interfaces}
+\label{sec:interfaces}
+
+\small
+\verbatiminput{../../tos/lib/FS/FileDir.nc}
+\newpage
+\verbatiminput{../../tos/lib/FS/FileDelete.nc}
+\newpage
+\verbatiminput{../../tos/lib/FS/FileRename.nc}
+\newpage
+\verbatiminput{../../tos/lib/FS/FileRead.nc}
+\newpage
+\verbatiminput{../../tos/lib/FS/FileWrite.nc}
+
+\end{document}
+
+% LocalWords:  TinyDB metadata Atmel API initialisation fileresult FS NOSPACE
+% LocalWords:  HW tos initialised StdControl FileDir readNext nextFile FileRead
+% LocalWords:  freeBytes FileDelete FileRename FileWrite parameterised readDone
+% LocalWords:  getRemaining synchronising pre CopyIn CopyOut

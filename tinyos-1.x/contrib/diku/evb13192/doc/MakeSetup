@@ -1,0 +1,39 @@
+# Script to setup environment variables to allow evb13192 compilation
+#$Id: MakeSetup,v 1.2 2005/03/11 11:20:01 janflora Exp $
+
+# The path to the basic CodeWarrior installation. 
+# On Linux, set it to nothing...
+if test `uname` = "Linux" ; then 
+    CWPATH=""
+    # On linux we will always have to use a compile host
+    COMPILEHOST=${COMPILEHOST:-http://www.distlab.dk/testbed/compile_gateway_test2.pl}
+elif test `uname` = "Darwin" ; then
+    CWPATH=""
+    # On darwin we will always have to use a compile host
+    COMPILEHOST=${COMPILEHOST:-http://www.distlab.dk/testbed/compile_gateway.pl}
+else
+    # This is simply the default path for CW08, V3.1
+    CWPATH=${CWPATH:-c\:/Program\ Files/Metrowerks/CW08\ V3.1/}
+    FREESCALE_LIBDIR=${FREESCALE_LIBDIR:-C:/cygwin/home/ADMINI~1/SMAC/SMAC4_~1/CW_IDE~2/smac/bin/}
+    # If the chc08.exe file is not present, use a compile host
+    if test ! -x $CWPATH/prog/chc08.exe ; then
+	COMPILEHOST=${COMPILEHOST:-http://www.distlab.dk/testbed/compile_gateway.pl}
+    fi
+fi
+export CWPATH FREESCALE_LIBDIR
+export COMPILEHOST
+
+# You should not have to change anything below this line
+################################################################################
+
+# Setup TOSDIR if not provided by user
+TOSDIR=${TOSDIR:-$(ncc -print-tosdir)}
+export TOSDIR
+
+# Basic makerules
+MAKERULES=${MAKERULES:-$TOSDIR/../tools/make/Makerules}
+export MAKERULES
+
+# Our makerules for evb13192
+TOSMAKE_PATH=${TOSMAKE_PATH:-$TOSDIR/../contrib/diku/evb13192/tools/make}
+export TOSMAKE_PATH

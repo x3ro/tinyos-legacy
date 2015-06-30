@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+foreach $NAME (@ARGV) {
+  $NAMEOLD = $NAME."test";
+  rename($NAME,$NAMEOLD);
+  open(FILE,$NAMEOLD);
+  open(NEWFILE,"> ".$NAME);
+#  open(FILE,$NAME);
+  
+  while(<FILE>) {
+    if (($rval,$space,$name,$rest) = (/(\w*)(\s*)(TOS_EVENT\(\w*\)\([^\)\{]*\))(.*)/g)) {
+      $str = $rval . $space . $name . " \$aevent " . $rest . "\n";
+      print NEWFILE $str;
+    }
+    elsif (($rval,$space,$name,$rest) = (/(\w*)(\s*)(TOS_COMMAND\(\w*\)\([^\)\{]*\))(.*)/g)) {
+      $str = $rval . $space . $name . " \$command " . $rest . "\n";
+      print NEWFILE $str;
+    }
+    else {
+      print NEWFILE;
+    }
+  }
+#  unlink($NAMEOLD);
+}

@@ -1,0 +1,38 @@
+README for the voltage tester application:
+
+Author/Contact: gabor.pap@vanderbilt.edu (Gabor Pap, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+Low batteries usually cause mystical behavior (RF problems, freezing, etc.).
+This application uses the Voltage module (shipped with TinyOS 1.x) to measure
+battery voltage. The results are then sent through the serial port, and 
+displayed on the PC by a Java GUI. During the measurement, the mote runs a 
+busy-wait loop to ensure consistent power consumption.
+
+FILES:
+
+VoltageAppC.nc VoltageAppM.nc implement the sampling and data forward to the 
+UART.
+
+VoltageAppMsg.h contains the sampling rate plus the message structure for this 
+application. 
+
+THE JAVA PROGRAM:
+
+The java program (MeasureVoltage.java) displays the voltage level in a graphical
+way. The program connects to the serialport using SerialStub. It is configurable
+in many ways, use: "java isis.nest.util.MeasureVoltage -help" for more info! 
+The CircularBuffer.java is also necessary! 
+
+TUNABLE PARAMETERS:
+
+The VoltageApp component can be configured by changing the following value in 
+VoltageAppMsg.h:
+
+SAMPLERATE: This determines the ACD sampling rate.
+
+TESTING:
+
+The RED led is on when the application is running, the GREEN blinks when
+sampling.

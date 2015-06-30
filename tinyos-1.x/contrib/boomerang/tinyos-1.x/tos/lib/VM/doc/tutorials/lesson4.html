@@ -1,0 +1,431 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Mat&eacute; Tutorial: Lesson 4</title>
+    <LINK HREF="../mate.css" REL="stylesheet" TYPE="text/css">
+  </head>
+  
+  <BODY>
+    <CENTER>
+      <TABLE BGCOLOR=BLACK CELLPADDING=1>
+	<TR>
+	  <TD>
+	    <TABLE BGCOLOR=WHITE WIDTH=700 CELLPADDING=6>
+	      <TR>
+		<TD BGCOLOR=#BEBEBE>
+		  <IMG SRC="../img/banner.gif">
+		</TD>
+	      </TR>
+	      <TR>
+		<TD>
+		  <CENTER>
+		    <TABLE>
+		      <TR>
+			<TD>[<a href="index.html">Tutorial Home</A>]</TD>
+			<TD>[<a href="lesson1.html">Lesson 1</A>]</TD>
+			<TD>[<a href="lesson2.html">Lesson 2</A>]</TD>
+			<TD>[<a href="lesson3.html">Lesson 3</A>]</TD>
+			<TD>[Lesson 4]</TD>
+			<TD>[<a href="lesson5.html">Lesson 5</A>]</TD>
+			<TD>[<a href="lesson6.html">Lesson 6</A>]</TD>
+		      </TR>
+		      
+		    </TABLE>
+		    <HR>
+		  </CENTER>
+		</TD>
+	      </TR>
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <h3>Lesson 4: Building a VM</h3>
+		  <!-- Created: Wed Jun 16 16:09:01 PDT 2004 -->
+		    <!-- hhmts start -->
+Last modified: Thu Aug 26 18:44:56 PDT 2004
+<!-- hhmts end -->
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  <p>In prior lessons, you used the standard VM that
+		  the Mat&eacute; release provides, Bombilla. In this
+		  lesson, you will learn how to build a new VM with
+		  handlers and functions that meet the needs of a
+		  particular application.</p>
+		</TD>
+	      </TR>
+
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Introduction</b>
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  <p>So far, you have been using Bombilla, a stock VM
+		  that the Mat&eacute; release includes. The
+		  Mat&eacute; framework allows you to customize VMs by
+		  selecting the set of functions and handlers they
+		  support.  By default, Bombilla includes all of the
+		  functions and handlers that are part of the standard
+		  release . In lesson 2, you may have had to change
+		  what sensor board Bombilla supported; this required
+		  changing the VM in a very limited way. Knowing how
+		  to build VMs will allow you to incorporate additonal
+		  handlers or functions that you or someone else
+		  writes. The lesson after this one, lesson 5, shows
+		  how to write new functions and handlers.</p>
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>The VM Specification File</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>In lesson 1, you build Bombilla by running the
+		  <tt>VMBuilder</tt> application from the directory
+		  <tt>tos/liv/VM/samples</tt>:</p>
+
+		  <quote>
+		    <tt>java net.tinyos.script.VMBuilder bombilla.vmsf</tt>
+		  </quote>
+		    
+		  <p><tt>bombilla.vmsf</tt> is a VM specification file
+		  (vmsf). It tells VMBuilder what handlers, functions,
+		  sensorboards and other options to include in the
+		  VM. Open <tt>tos/lib/VM/samples/bombilla.vmsf</tt>
+		  in an editor. The first line of the file should
+		  read:</p>
+		  
+		  <quote>
+		    <pre>
+&lt;VM NAME="BombillaVM"
+ DESC="A simple VM that includes a range of triggering events and functions."
+ DIR="../../../../apps/Bombilla"&gt;</pre>
+		  </quote>
+
+		  <p>This is an example of an <b>element</b>; all
+		  Mat&eacute; files (barring nesC code) are sequences
+		  of these XML-like elements. The name of an element
+		  is the first word after the opening &lt;: the above
+		  example is a VM element. Elements have tags, which
+		  are key value pairs. The above VM element has three
+		  tags, NAME, DESC, and DIR. Element and tag names are
+		  case-insensitive; the above could alternatively be
+		  written as:</p>
+
+		  <quote>
+		    <pre>&lt;vm name="BombillaVM"
+ DESC="A simple VM that includes a range of triggering events and functions."
+ dir="../../../../apps/Bombilla"&gt;</pre>
+		  </quote>
+
+		  <p>with no change to its meaning. The Mat&eacute;
+		  toolchain only recognizes certain elements and
+		  tags. Unrecognized tags and elements are
+		  ignored. Although the names of the tags are case
+		  insensitive, often the values of the tags are case
+		  sensitive. For example, changing the case of
+		  directory names in the <tt>dir</tt> tag is
+		  significant.</p>
+
+		  <p>Every VMSF must have a VM element with a NAME,
+		  DESC, and DIR tag. This is so VMBuilder knows what
+		  to name files associated with the VM and what
+		  directory in which to put them. The Bombilla DIR tag
+		  puts the VM in
+		  <tt>tinyos-1.x/tos/lib/VM/samples/../../../../apps/Bombilla</tt>,
+		  which is <tt>tinyos-1.x/apps/Bombilla</tt>.</p>
+
+		  <p>After the VM element come four SEARCH elements:</p>
+
+		  
+		  <quote>
+		    <pre>&lt;SEARCH PATH="../opcodes"&gt;
+&lt;SEARCH PATH="../contexts"&gt;
+&lt;SEARCH PATH="../languages"&gt;</pre>
+		  </quote>
+
+		  <p>SEARCH elements tell VMBuilder where to look for
+		  files. VMBuilder will search them in the order the
+		  file specifies them. PATH tags that have a relative
+		  path (like those above) are resolved from <b>where
+		  VMBuilder is run</b>, that is,
+		  <tt>tos/lib/VM/samples</tt>. PATH tags can also be
+		  absolute paths. Every VMSF should have the first
+		  three SEARCH elements (opcodes, contexts,
+		  languages), which is where all of the standard
+		  Mat&eacute; files are.</p>
+
+		  <p>The two lines of the file specify a sensorboard
+		  and what language to use (TinyScript). If you're
+		  using a Telos mote, it uses MicroScript instead
+		  (<tt>microscript</tt>):</p>
+
+		  <quote>
+		    <pre>&lt;LOAD FILE="../sensorboards/micasb.vmsf"&gt;
+&lt;LANGUAGE NAME="tinyscript"&gt;</pre>
+		  </quote>
+
+		  <p>The LOAD element tells VMBuilder to load the file
+		  specified by the FILE tag and process the elements
+		  contained in it. In the above example,
+		  <tt>micasb.vmsf</tt> contains elements specifying
+		  what functions to support, and where to find the
+		  underlying TinyOS components. Using the LOAD
+		  element, you can write files containing libraries of
+		  functions, for example, which a VM can then include
+		  with a single element.</p>
+
+		  <p>The LANGUAGE element tells VMBuilder what
+		  language to support. Currently, Mat&eacute; only
+		  supports TinyScript, but we're currently working on
+		  also suppoting motlle, a scheme-like language. Every
+		  VM should have this element, if you want to be able
+		  to program with it.</p>
+
+		  <p>A set of FUNCTION elements follows. These
+		  describe the set of functions the VM should include
+		  and provide to the programmer. For example, Bombilla
+		  has several functions for clearing, querying, and
+		  sorting buffers:</p>
+
+		
+		  <quote>
+		    <pre>&lt;FUNCTION NAME="bclear"&gt;
+&lt;FUNCTION NAME="bfull"&gt;
+&lt;FUNCTION NAME="bsize"&gt;
+&lt;FUNCTION NAME="bufsorta"&gt;
+&lt;FUNCTION NAME="bufsortd"&gt; 
+		    </pre>
+		  </quote>
+		  
+		  <p>The NAME tag is the name of the function; it
+		  refers to an opcode description file
+		  (<tt>.odf</tt>). The ODF file contains information
+		  on how many parameters the function takes and their
+		  types, whether it has a return value, and a brief
+		  description. Lesson 5 details how to introduce new
+		  functions by writing ODF files.</p>
+
+		  <p>Finally, after the FUNCTION elements are the
+		  CONTEXT elements. These elements specify what
+		  software handlers the VM provides: each has its own
+		  execution context. Similar to FUNCTION elements,
+		  they have a single tag, NAME, which specifies a
+		  context description file (<tt>.cdf</tt>) that
+		  contains information on the handler. Bombilla
+		  includes six handlers:</p>
+		  <quote>
+		    <pre>&lt;CONTEXT NAME="Trigger"&gt;
+&lt;CONTEXT NAME="Timer0"&gt;
+&lt;CONTEXT NAME="Timer1"&gt;
+&lt;CONTEXT NAME="Once"&gt;
+&lt;CONTEXT NAME="Reboot"&gt;
+&lt;CONTEXT NAME="Broadcast"&gt;
+		    </pre>
+		  </quote>
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Building a New VM</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>Now that you've seen the Bombilla specification
+		  file file, you'll write a description file for a new
+		  VM, named SimpleVM. First, open a file named
+		  <tt>simple.vmsf</tt> in the <tt>samples</tt>
+		  directory. The first line should be a VM
+		  element; write the following in the file:</p>
+
+		  <quote>
+		    <pre>&lt;VM NAME="SimpleVM"
+    DESC="A bare bones VM from tutorial 4."
+    DIR="../../../../apps/SimpleVM"&gt;
+		    </pre>
+		  </quote>	  
+
+		  <p>Next, include the standard Mat&eacute; library
+		  directories with SEARCH elements, and TinyScript
+		  with a LANGUAGE element. If you want to support a
+		  sensor board, then also add an appropriate LOAD
+		  element. </p>
+
+		  <quote>
+		    <pre>&lt;SEARCH PATH="../opcodes"&gt;
+&lt;SEARCH PATH="../contexts"&gt;
+&lt;SEARCH PATH="../languages"&gt;
+&lt;LANGUAGE NAME="tinyscript"&gt;</pre>
+		  </quote>
+
+		  <p>If you're using Telos motes, use MicroScript
+		  instead of TinyScript. SimpleVM has two handlers,
+		  Once and Timer0. Write the following in the
+		  file:</p>
+
+		  <quote>
+		    <pre>&lt;CONTEXT NAME="Once"&gt;
+&lt;CONTEXT NAME="Timer0"&gt;</pre>
+		  </quote>
+
+		  <p>Finally, it supports only a few functions:</p>
+
+		  <quote>
+		    <pre>&lt;FUNCTION NAME="rand"&gt;
+&lt;FUNCTION NAME="int"&gt;
+&lt;FUNCTION NAME="sleep"&gt;
+&lt;FUNCTION NAME="led"&gt;</pre>
+		  </quote>
+
+		  <p>Save and close the file. In the <tt>samples</tt>
+		  directory, run VMBuilder:</p>
+
+		  <quote>
+		    <pre>
+java net.tinyos.script.VMBuilder simple.vmsf
+		    </pre>
+		  </quote>    
+
+		  <p>Barring any typos in the specification file, this
+		  will generate all of the needed VM files in
+		  <tt>tinyos-1.x/apps/SimpleVM</tt>. Go to that
+		  directory and build the VM for your desired
+		  platform. You can install the VM and use the
+		  Scripter as you did before with Bombilla. If you use
+		  the GUI scripter, you'll see that SimpleVM, in
+		  addition to the functions you specified, has
+		  <tt>settimer0</tt> as a function. Including Timer0
+		  as a context automatically includes
+		  <tt>settimer0</tt> as a function.</p>
+
+		  <p>In a VM specification file, the LANGUAGE,
+		  CONTEXT, and FUNCTION elements all have a single
+		  tag, NAME. All of them tell VMBuilder to look for a
+		  description file in the search path. LANGUAGE looks
+		  for a language description file (<tt>.ldf</tt>),
+		  FUNCTION looks for an operation description file
+		  (<tt>.odf</tt>), and CONTEXT looks for a context
+		  description file (<tt>.cdf</tt>). VMBuilder reads
+		  the file, which contains information on the
+		  particular function, context, or language. The file
+		  naming is as follows:</p>
+
+		  <br></br>
+		  <table>
+		    <tr>
+		      <td><b>Element</b></td>
+                      <td width=20></td>
+		      <td><b>Format</b></td>
+                      <td width=20></td>
+		      <td><b>File Name</b></td>
+		    </tr>
+		    <tr>
+		      <td>Context</td>
+                      <td width=20></td>
+		      <td>&lt;CONTEXT NAME=<i>event</i>&gt;</td>
+                      <td width=20></td>
+		      <td><i>event</i>Context.cdf</td>
+		    </tr>
+		    <tr>
+		      <td>Function</td>
+                      <td width=20></td>
+		      <td>&lt;FUNCTION NAME=<i>func</i>&gt;</td>
+                      <td width=20></td>
+		      <td>OP<i>func</i>.odf</td>
+		    </tr>
+		    <tr>
+		      <td>Language</td>
+                      <td width=20></td>
+		      <td>&lt;LANGUAGE NAME=<i>lang</i>&gt;</td>
+                      <td width=20></td>
+		      <td><i>lang</i>.ldf</td>
+		    </tr>
+		  </table>
+
+		  <p>The next two lessons describe how to write new
+	      functions and contexts, including their description
+	      files. Currently, Mat&eacute; only supports TinyScript
+	      and its stripped down variant, MicroScript as languages.</p>
+		  
+		</TD>
+	      </TR>
+
+
+
+		<TR BGCOLOR=#80bf80>
+		<TD>
+		  <b>The VMBuilder GUI</b>
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  <p>
+		    There is also a VMBuilder GUI, which you can use
+		    to browse available functions and contexts:</p>
+
+		  <quote>
+		    <pre>
+java net.tinyos.script.VMBuilder -gui -t=&lt;lib/VM directory&gt;
+		    </pre>
+		  </quote>
+
+		  <p>
+		    In the above command, the lib/VM directory refers
+		    to the path to tinyos-1.x/tos/lib/VM. Specifying
+		    this at the command line allows the tool to
+		    automatically find ODFs and CDFs. The VMBuilder
+		    GUI cannot build VMs; it is only useful as a
+		    browsing tool. You should see a GUI like this:</p>
+
+		  <p>
+		    <CENTER>
+		      <IMG SRC="fig/vmbuilder.gif">
+		    </CENTER>
+
+		  </p>
+
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Conclusion</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>This tutorial showed you how to create a new VM
+		  from existing functions and context. The next and
+		  final tutorial will show you how to write new
+		  functions and contexts.</p>
+
+		  <hr></hr>
+		  <CENTER>
+		    <b><a href="lesson3.html">&lt; Previous Lesson</a></b> |
+		    <b><a href="lesson5.html">Next Lesson ></a></b> |
+		    <b><a href="index.html">Top</a></b>
+		  </CENTER>
+		</TD>
+	      </TR>
+	    </TABLE>
+	  </TD>
+	</TR>
+      </TABLE>
+    </CENTER>
+  </body>
+</html>

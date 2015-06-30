@@ -1,0 +1,151 @@
+<!-- $Id: powermanagement.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="Power management component proposed by CMU">
+
+<p> We propose the following tentative module for power management in NEST
+challenge application on Berkeley OEP. The module provides interfaces for
+implementing both centralized and decentralized power state control algorithms
+of wireless sensors.  </p>
+
+<p> The centralized version contains [[TurnOn]] and [[TurnOff]] interfaces for
+a sentry to control the power states of each individual sensor in its group. If
+a sentry needs to turn a particular sensor off, it broadcasts a
+[[remote_turn_off]] message with the sensor ID and the period in which the
+sensor wakes up and checks for [[remote_turn_on]] messages; If such a message
+is detected, that sensor stays on, otherwise, goes back off. The sentry knows
+when to send out [[remote_turn_on]] or new [[remote_turn_off]] messages to a
+sensor because it knows when that sensor wakes up to check for messages. </p>
+
+<p> In the decentralized version, each non-sentry sensor decides locally on the
+power state transitions. This approach uses PowerMangementAlgorithm interface
+to control the power state transitions. The algorithm interface, based on
+current length of idle time, decides whether the sensor turns off or stays on,
+and when is the next control epoch. Before the sensor turns off, it sends out a
+[[off_notification]] message to notify the sentry that it is going to wake up
+and check for messages at the next control epoch; The sentry can then use
+[[remote_turn_on]] message to wake up the sensor if it needs to do that at that
+time. </p>
+
+<section name="Modules">
+ 
+<code>
+module PowerManagement {
+      // module Sentry;
+      // module NonSentry;
+      provides {
+            interface TurnOff;
+            interface TurnOn;
+}
+      uses {
+            interface PowerMangementAlgorithm;
+}
+}
+</code>
+
+<code>
+module Sentry {
+      provides {
+            interface TurnOff;
+            interface TurnOn;
+            interface OffNotified;
+            }
+      uses {
+            command remoteTurnOff;
+            command remoteTurnOn;
+            }
+}
+</code>
+
+<code>
+module NonSentry {
+      provides {
+            interface LocalTurnOff;
+            interface LocalTurnOn;
+            }
+      uses {
+            interface OffNotifying;
+            interface PowerManagementAlgorithm;
+            }
+}
+</code>
+
+</section>
+ 
+<section name="Interfaces">
+
+<code>
+interface TurnOff {
+      command result_t remoteTurnOff (remote_turn_off* msg); 
+}
+</code>
+
+ 
+<code>
+interface TurnOn {
+      command result_t remoteTurnOn (remote_turn_on* msg);
+}
+</code>
+
+<code>
+interface OffNotified {
+      event result_t offNotification (off_notification* msg);
+}
+</code>
+
+<code>
+interface LocalTurnOff {
+      event result_t localTurnOff (boolean remote_or_local, remote_turn_off* msg, power_state_control* action); }
+</code>
+
+<code>
+Interface LocalTurnOn {
+      event result_t localTurnOn (boolean remote_or_local, remote_turn_on* msg, power_state-control* action); }
+</code>
+
+<code>
+interface OffNotifying {
+      command result_t offNotifying (off_notification* msg);
+}
+</code>
+ 
+<code>
+interface PowerManagementAlgorithm {
+      command result_t powerMangementAlgorithm (unsigned int idle_time_length, power_state_control* action); }
+</code>
+
+</section>
+ 
+<section name="Types">
+
+<code>
+typedef struct {
+      unsigned int moteID;
+      unsigned int waking_up_period;
+} remote_turn_off;
+</code>
+
+<code>
+typedef struct {
+      unsigned int moteID;
+      unsigned int current_time;
+} remote_turn_on;
+</code>
+
+<code>
+typedef struct {
+      unsigned int moteID;
+      unsigned int expected_wake_up_time;
+} off_notification;
+</code>
+
+<code>
+typedef struct {
+      boolean on_or_off;
+      unsigned int next_control_epoch;
+} power_state_control;
+</code>
+
+</section>
+
+</section>
+ 

@@ -1,0 +1,35 @@
+README for QueuedASend 
+Author/Contact: hohltb@cs.berkeley.edu 
+
+Description:
+QueuedASend is a TinyOS fowarding queue component that supports 
+Buffer Management as well as multiple scheduling policies. The 
+default scheduling policy is store-and-forward. 
+
+To write your own policy create your own component that uses the 
+interface QueuePolicy. See templates for an example.
+
+SendQueue is the forwarding queue created from a CircleQueue FIFOQueue template.
+It allocates the queue space and implements the List interface. The SendQueue
+is shared by both FreeAList and SwapList of the BufferPool.
+
+ASendM provides the buffer management. It implements the interfaces AllocASend 
+and SendMsg. AllocASend allocates free buffers for the applicaiton component.
+ASendM places messages from both the routing and application components on the 
+SendQueue and returns the buffers to their respective free lists after 
+the messages have been sent. 
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:
+/templates
+../CircleQueue
+../CircleQueue/templates
+../BufferPool
+../../../../apps/TestQASend

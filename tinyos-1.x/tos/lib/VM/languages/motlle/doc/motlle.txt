@@ -1,0 +1,465 @@
+		      An Introduction to MOTLLE
+		      =========================
+			     November 2004
+
+
+0) Preface
+==========
+
+motlle (MOTe Language for Litlle Extensions) is a scripting language for 
+motes built in the Mate virtual-machine framework. It's syntax draws
+heavily from C, though under this the language is more like Scheme...
+This document assumes you are already familiar with sensor networks
+and the Mate framework, but detailed knowledge of TinyOS is not required
+(you only need to be able to compile and install existing TinyOS programs).
+It also assumes you are somewhat familiar with some C-family language
+(C, C++, java, etc).
+
+Compared to TinyScript, motlle supports more advanced data structures
+(arrays, lists, etc), but in counterpart it is a little less efficient
+and does not support concurrent handler execution.
+
+If you don't want to learn a new language, you might want to check the
+documentation for TinyScheme, which should be available from the same
+directory/web page as this document. TinyScheme is an implementation of the
+Scheme programming language, with a missing features. Except for a few
+library routine changes, VMs for motlle and TinyScheme are identical.
+
+The classic "Count the LEDs" example in motlle is:
+  any i = 0;     // declare i
+  settimer0(10); // start timer
+  any timer0()   // timer handler: increment i, set the LEDs
+  {
+    led(++i & 7);
+  }
+Two things should be obvious from this example:
+- motlle uses the standard Mate handlers and function libraries
+  (in this case, the timer0 handler and settimer0, led functions)
+- declarations look like C, but the most common type is "any", not "int" :-)
+  (motlle is dynamically typed: variables can hold any value, function
+  arguments can be of any type, etc)
+
+The current version of motlle only supports the pc (tossim), mica2 and
+mica2dot platforms. The PC-side support tools have only been tested on
+x86-based machines.
+
+1) Building a MOTLLE VM
+=======================
+
+Note: to use motlle, you need to have installed the VM's tools. If you
+get a prepackaged distribution, this is done for you. Otherwise follow
+the directions in the INSTALL file at tinyos-1.x/tos/lib/VM.
+
+The tinyos-1.x/tos/lib/VM/languages/motlle/examples directory contains a
+file called motlle.vmsf which defines a simple motlle VM. We reproduce it
+here with comments explaining its contents. Currently, motlle does not
+support the GUI-based VM builder, so to create your own VM you must create
+your own .vmsf file similar to base.vmsf (we suggest using base.vmsf as
+your starting point).
+
+  // Declare the VM. You will want to specify a separate name (NAME)
+  // and directory (DIR) for each VM.
+  <VM NAME="MotlleVM" DESC="A basic motlle VM with single-hop communication." DIR="../../../../../../apps/MotlleVM">
+  // 1024 is the amount of RAM available for motlle programs. You can
+  // increase while there is RAM available... On telosb motes, you should
+  // probably set this to something larger.
+  <OPTION CAPSULE_SIZE=1024>
+  // The following lines should always be present (the paths are
+  // relative to the .vmsf file, so you may need to adjust them
+  // depending on where your file is)
+  <SEARCH PATH="../../../opcodes">
+  <SEARCH PATH="../../../contexts">
+  <SEARCH PATH="../mate">
+  <SEARCH PATH="../mate/rep-16">
+  <SEARCH PATH="../mate/runtime">
+  <SEARCH PATH="../mate/runtime/gen">
+  <SEARCH PATH="../matelib">
+  <SEARCH PATH="../matelib/gen">
+  <SEARCH PATH="../../../../Util">
+
+  <LANGUAGE NAME="motlle"> // Use the motlle language
+  <LOAD FILE="../mate/runtime/gen/intfns.vmsf"> // Load basic motlle functions
+
+  // Here is where you add VM-specific contexts and functions, either
+  // from Mate's library (led, id, the mica sensorboard) or from motlle's
+  // (the commfns.vmsf file, which contains single-hop communication
+  // primitives)
+  <FUNCTION NAME="led">
+  <FUNCTION name="id">
+  <FUNCTION name="sleep">
+  <CONTEXT NAME="Timer0">
+  <LOAD FILE="../matelib/gen/commfns.vmsf">
+  // This VM does not have any sensor board access. You should add a line like
+  //   <LOAD FILE="../../../sensorboards/micasb.vmsf"> // micasb sensor board
+  // or
+  //   <LOAD FILE="../../../sensorboards/telosb.vmsf"> // built-in telosb sensors
+  // to get access to sensors from your favourite sensorboard.
+
+Once you have a .vmsf file, you build a motlle VM by executing the
+motlle-vmbuild command, passing the .vmsf file as its argument (you
+will typically need to be in the directory containing the .vmsf file
+when doing this). This will generate a VM in the directory specified
+by the DIR= directive. You build and install the generated VM like a
+usual TinyOS program.
+
+Note that motlle library functions are found in directonies named gen,
+while TinyScheme library functions are found in directonies named sgen.
+
+1.1 Building a VM with floating-point support
+---------------------------------------------
+
+The default motlle.vmsf configuration given above has 15-bit integers only.
+If you replace
+  <SEARCH PATH="../mate/rep-16">
+by
+  <SEARCH PATH="../mate/rep-float">
+and 
+  <LOAD FILE="../mate/runtime/gen/intfns.vmsf">
+by
+  <LOAD FILE="../mate/runtime/gen/floatfns.vmsf">
+in your .vmsf file, you get 16-bit integers and 32-bit floating-point
+numbers, at the cost of approximately double RAM usage for your
+data structures.
+
+Finally, by default, transcendental (sin, cos, tan, etc) and other 
+miscellaneous (sqrt, expt) procedures are not included. If you want all of
+these, add
+  <LOAD FILE="../mate/runtime/gen/transcendentalfns.vmsf">
+to your .vmsf file. Or you can include these procedures individually by
+adding
+  <FUNCTION name=mXXX>
+lines to your .vmsf file, where XXX=sin, cos, etc.
+
+2) Running MOTLLE programs
+==========================
+
+The motlle-load utility is used to install motlle programs on motes with
+motlle VMs. This utility expects to find the conf.mt file that
+motlle-vmbuild generated in the current directory. motlle-vmbuild places
+this file in the VM's directory (the one specified by DIR=), so you have
+two main choices for how to run motlle-load:
+- run it from the VM's directory
+- create a symbolic link to conf.mt in the current directory before
+  executing motlle-load (`ln -s <path to VM dir>/conf.mt').
+
+Using motlle-load is straightforward:
+  motlle-load <file containing motlle source>: compiles and loads the file
+  motlle-load -e "<motlle expression>": run a 1-line motlle program
+    (motlle-load -e "led(4)") is a good test that your VM is working...)
+
+The examples directory contains two simple motlle applications:
+  - cnttoleds.mt: seen above
+  - oscilloscope.mt: a motlle version of the TinyOS OscilloscopeRF 
+    application. You should build a VM with functions to access some
+    sensorboard, and edit oscilloscope.ts to replace the call to light()
+    by some appropriate sensor function if you want to try this
+    application.
+
+3) MOTLLE, The Language
+=======================
+
+motlle's syntax is designed to be as close to C as reasonable. We assume
+familiarity with C, and present motlle by example, highlighting the
+differences from C.
+
+3.1 The basics
+--------------
+
+The body of a motlle file is a list of declarations and statements which
+are executed when motlle code is installed (it effectively forms the body
+of the Mate "Once" handler). Thus, in the count-to-leds example above,
+`i' is declared and initialised to 0, setitimer is called, and a function
+called timer0 is defined.
+
+Mate functions are simply invoked by name (led, settimer0 in the
+count-to-leds example). Mate handlers are defined by simply defining a
+global function with the name of the handler and no arguments (timer0 in
+this example).
+
+Motlle is a dynamically-typed language with garbage collection. Types
+are thus the biggest difference from C. Most variables are declared with
+type any:
+   any samples = 10, current = 0;
+This includes arrays:
+   any myarray;
+   ...
+   myarray[5] = myarray[4] + 2;
+You have to explicitly create arrays (called vectors in motlle), rather 
+than declaring them statically as in C:
+  myarray = make_vector(10); // create 10 element array indexed from 0 ... 9
+or:
+  myarray = vector(1, 2, "fun"); // create initialised 3 element array
+
+One small difference from C: $, ! and ? are allowed in identifiers.
+
+Likewise, functions are declared as in C, but arguments and result are
+generally of type any:
+  any add1(any x) {
+    return x + 1;
+  }
+Because `any' is the comment type of arguments, you can also simply say:
+  any add1(x) {
+    return x + 1;
+  }
+
+Functions are values like any other in motlle, and can be declared inside
+other functions:
+
+  any average_sensor(sensor) {
+    any sense() {
+      // sample sensor twice and average the value
+      return (sensor() + sensor()) / 2;
+    }
+    return sense; // return the averaging function
+  }
+
+You can then, e.g., create an averaging light sensor:
+  any avg_light = average_sensor(light);
+and call it like any other function:
+  any light_reading = avg_light();
+
+
+A final note: you can use other types than any when declaring variables,
+e.g.,
+  int i = 0;
+This will add runtime checks to all subsequent assignments to i, so
+  i = "fun";
+will cause a runtime error. However, this increases code size...
+
+3.2 motlle types
+----------------
+
+The basic types known to motlle are:
+- int
+- float (32-bit, optional, must be included at VM generation time)
+- list
+- vector (1-dimensional array)
+- string (1-dimensional array of 8-bit data)
+- function
+
+Each type comes with a number of standard functions (present in all
+motlle VMs) for manipulating them. These are given at the end of
+each type's section along with a short description. This description
+includes a function signature of the form "X1 X2 X3 ... -> Y.",
+where the Xi's describe the number and type of arguments, and Y
+the type of the result, using the following conventions:
+  x, y, x1, y1, x2, y2, ... : a value of any type
+  n, n1, n2, ... : a number (int or float)
+  i, i1, i2, ... : an integer
+  r, r1, r2, ... : a float (real number)
+  b, b1, b2, ... : a boolean value (0 = FALSE, everything else = TRUE)
+  s, s1, s2, ... : a string
+  fn, fn1,   ... : a function (or closure as it is sometimes known)
+  l, l1, l2, ... : a list
+  v, v1, v2, ... : a vector
+
+If Y is absent, the function has no (useful) result.
+
+
+3.2.1 int
+---------
+
+The int's support all the usual C operators (+, -, *, /, %, <<, >>, |, &, ^),
+however their range is only -16384..16383 (except if floats are included
+in which case they have the more usual -32768..32767 range).
+
+Functions:
+  integer?: x -> b. TRUE if x is an integer
+  max: n1 n2 -> n. n = max(n1, n2)
+  min: n1 n2 -> n. n = min(n1, n2)
+  abs: n1 -> n2. n2 = |n1|
+
+3.2.2 float
+-----------
+
+The float support is preliminary in this release (it may change a litlle
+in the future): to use it, replace the
+  <SEARCH PATH="../mate/rep-16">
+line by
+  <SEARCH PATH="../mate/rep-float">
+and 
+  <LOAD FILE="../mate/runtime/gen/intfns.vmsf">
+by
+  <LOAD FILE="../mate/runtime/gen/floatfns.vmsf">
+in your .vmsf file before building a VM. You should then be able to use
+floating point numbers, e.g.,
+  any x = 1 + 2.0; // x is now 3.0
+Note however that using floats doubles the size of all vectors and lists,
+and will also slightly increase code size. Also, most mate functions 
+expect an integer argument so you might need to use truncate.
+
+The examples directory contains a base-float.vmsf VM specification, 
+and an example counting to leds using floats (cnttoleds-float.mt).
+
+Functions (see also max, min, abs from int):
+  floor: r -> i. Return greatest int <= r
+  ceiling: r -> i. Return smallest int >= r
+  truncate: r -> i. Return greatest int (in absolute value) <= r
+  number?: x -> b. TRUE if x is a number
+  float?: x -> b. TRUE if x is a float
+
+3.2.3 list
+----------
+
+Lists are modeled on Scheme and Lisp's lists, and provide essentially
+the same basic functions (cons, car, cdr). The syntax for declaring
+a list constant is also the same:
+
+   any mylist = '(1 2 54); // a 3 element list
+   any nlist = cons(33, mylist); // nlist is now (33 1 2 54)
+   any second = car(cdr(nlist)); // access second element, second is now 1
+
+The src/utils.mt file contains a number of utility functions for lists
+(and vectors and strings) which might be useful in some mote programs
+(you do not want to include all of utils.mt in a mote program as it
+is way too large, though).
+
+Functions:
+  cons: x1 x2 -> l. Make a new pair from elements x1 & x2
+  car: l -> x. Returns first element of pair l
+  cdr: l -> x. Returns first element of pair l
+  pair?: x -> b. TRUE if x is a pair
+  list?: x -> b. TRUE if x is a pair or null
+  set_car!: l x ->. Sets the first element of pair l to x
+  set_cdr!: l x ->. Sets the first element of pair l to x
+  list: x1 ... -> l. Returns a list of the arguments
+
+3.2.4 vector
+------------
+
+Vectors are, again, like Scheme's vectors, except that reading and writing
+elements uses C syntax:
+
+  {
+    any v = make_vector(5);
+    v[0] = 22;
+    v[1] += v[0];
+    v[2] = "yeah";
+  }
+
+Functions:
+  vector?: x -> b. TRUE if x is a vector
+  make_vector: i -> v. Create an empty vector of length i
+  vector_length: v -> i. Return length of vector
+  vector_fill!: v x -> . Set all elements of v to x
+  vector: x1 ... -> v. Returns a vector of the arguments
+
+3.2.5 strings
+-------------
+
+Strings are included in motlle mostly to support messaging. See the 
+communication functions below for more details on this.
+
+Like vectors, strings can be indexed as in C:
+
+  {
+    any s = make_string(3), t = "fun";
+    s[0] = t[1];
+    s[1] = t[0];
+    s[2] = t[2]; // s is now "ufn"
+  }
+
+Functions:
+  string?: x -> b. TRUE if x is a string
+  make_string: i -> s. Create an empty string of length i
+  string_length: s -> i. Return length of string
+  string_fill!: s i -> . Set all characters of s to i
+
+3.2.6 Miscellaneous
+-------------------
+
+A number of miscellaneous functions are also available:
+  function?: x -> b. TRUE if x is a function
+  apply: fn v -> x. Excutes fn with arguments v, returns its result
+  error: i -> . Causes error i
+  garbage_collect: -> . Does a forced garbage collection
+
+
+4) Mote library
+===============
+
+As mentioned above, motlle can use standard Mate librarires such as sensor
+access. It also currently comes with its own set of mote-specific functions
+(some of these will be merged with the standard Mate libraries in future
+releases). The only documented library at this point is the communications
+library.
+
+4.1 Using Mate libraries
+------------------------
+
+To use a Mate function or context, you can just include it in your .vmsf
+file with
+  <FUNCTION NAME=...>
+and
+  <CONTEXT NAME=...>
+
+At this point, only functions take integer arguments, and those returning
+integer or sensor values will work with motlle (in particular, functions
+relating to Mate buffers cannot be used).
+
+4.2 Communication functions
+---------------------------
+
+To include the communications library in a VM, add 
+  <LOAD FILE="../matelib/gen/commfns.vmsf">
+to your .vmsf file (base.vmsf already contains this library).
+
+This library supports single-hop, broadcast and serial port communication.
+It includes three functions and one context:
+
+  send: i s -> b. Send packet s to address i, returning success/failure.
+    if i is uart_addr, sends to the serial port
+    if i is bcast_addr, broadcasts the message
+
+  encode: v -> s. Encode a vector as a string. Produces a string which
+   is the concatenation of the elements of v, each encoded as follows:
+    i: encode as 2 little-endian bytes
+    f: encode as 4-byte float
+    s: encode n-char string as n identical bytes
+    i . x: encode x as usual, pad (w/ 0s) or truncate to n bytes
+           ignored for floats (always encoded as 4 bytes)
+
+
+  decode: s v -> v. Decode string s into v, based on the decoding rules
+   specified in v. Elements of v should be:
+    i: 1->1-byte unsigned, 2->2-byte unsigned, 
+       -1->1-byte signed, -2->2-byte signed
+    f: decode a 4-byte float
+    s2: overwrite s2 with chars from s
+
+The context is called receive, and is executed when a message sent via
+'send' from another mote is received. To access the message, you use the
+  received_msg: -> s. Return received message
+function.
+
+The messages sent and received by this library use active message id 42.
+
+For example, in the oscillosope application, mote 0 forwards all received
+messages to the serial port:
+  any receive() {
+    if (id() == 0)
+      send(uart_addr, received_msg());
+  }
+
+Messages are typically sent using encode:
+  // send a 4-byte message with the values of x and y
+  send(bcast_addr, encode(vector(x, y)));
+
+This message could be decoded like this:
+  any receive() {
+    any decoded = decode(received_msg(), vector(2, 2));
+    // decoded[0] is now the x value sent, and decode[1] the y value
+  }
+
+The oscilloscope.mt example contains a more complex use:
+  any readings = make_vector(10);
+  ...
+  send(bcast_addr, encode(vector(id(), current, 0, encode(readings))));
+
+This creates a 26 byte message whose format is:
+  bytes 0, 1: the sender's node id
+  bytes 2, 3: the value of current
+  bytes 4, 5: 0
+  bytes 6-25: the 10 elements of readings, encoded with 2 bytes per number
+This is the format expected by the net.tinyos.oscope.oscilloscope application.
+

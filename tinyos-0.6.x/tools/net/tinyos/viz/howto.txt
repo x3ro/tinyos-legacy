@@ -1,0 +1,96 @@
+/****************** INSTALL DIRECTIONS ********************/
+
+add java/social.jar, java/jazz.jar and java/gwe.jar to your CLASSPATH
+
+/************** END INSTALL DIRECTIONS ********************/
+
+/**************** MOTE SETUP ********************/
+
+to run the static mote configuration program
+java net.tinyos.viz.setup
+From the menu, choose configuration, then new
+Enter a configuration name, and then EITHER enter a width and height of
+        a blank image (in pixels) and hit "OK", OR hit "Select" to pick
+        an image from your filesystem
+A new window pops up with a blank image of the given size or the image you
+        provided. Here you're supposed to provide calibration information.
+        Quick info to get through this screen: select the top left corner
+          of the image (get a green dot) and enter 0 and 0 in the two
+          textfields next to MIN. Select the MAX button, select the bottom
+          right corner of the image (get a red dot) and enter 400 and 400
+          in the textfields next to MAX, hit OK
+
+        Only read this next bit if you want more details
+        Pick a minimum point for the image (click anywhere on the image)
+          and assign it an x,y coord. (integers only)
+        Click on the MAX radio button, pick a maximum point for the image
+          and assign it an x,y coord (integers only)
+        This is intended to let you set up a new coordinate system if you
+          so desire.
+        If you click the right mouse button on the image and drag, you can
+          zoom in and out.
+        If you select the "Pan" button, the left mouse button lets you drag
+          the image around. Select the "Set" button to pick min and max
+          points.
+        Sample data might be: select the top left hand point and assign it
+          0 0; select the bottom right hand point and assign it 400 400;
+        Select "OK" to continue
+
+Last window: here's where you populate the space with motes
+        click on the image, a box will pop up where you give it an integer id
+        repeat until you don't want any more motes
+        If you want to delete a mote, click on the R button and then click on
+        the mote you want to delete.
+        Click on A to go back to adding motes
+
+Once you're done, click on configuration and then click save. This saves the
+information to the database.
+
+/**************** END MOTE SETUP ********************/
+
+/**************** ENV/ROUTING VIZ ********************/
+
+to run the environment/routing visualization
+cd into viz\sensor (only because the figure it loads needs to be in the
+        current directory
+to run with fake data: java net.tinyos.viz.sensor.Environment
+to run with real data: edit Environment.java and set HAVE_DB flag to TRUE,
+        compile it, and then run: java net.tinyos.viz.sensor.Environment
+
+/**************** END ENV/ROUTING VIZ ********************/
+
+/**************** PERSON TRACKER VIZ ********************/
+
+to run with fake data: java net.tinyos.viz.PersonTracker
+from the menu, select configuration, then load
+Load the configuration you've previously set up - takes a little time
+        (30s on my laptop, 3 seconds on my desktop) to get ready
+
+to run with real data: edit viz\PersonTracker.java and set HAVE_DB to TRUE,
+        compile it, and then run: java net.tinyos.viz.PersonTracker
+This assumes you have entered mobile motes with David's tool or populated
+the mobilemote table manually with id/name info.
+
+For PersonTracker, the right mouse button zooms (press it down and drag to
+        the right to zoom in and to the left to zoom out) If you select the
+        P icon from the toolbar, then the left mouse button pans the image.
+
+/**************** END PERSON TRACKER VIZ ********************/
+
+/**************** SOCIAL NETWORK VIZ ********************/
+
+to run with fake data: java net.tinyos.viz.SocialNetwork
+from the menu, select configuration, then load
+Load the configuration you've previously set up - takes a little time
+        (30s on my laptop, 3 seconds on my desktop) to get ready
+
+to run with real data: edit viz\PersonTracker.java and set HAVE_DB to TRUE,
+        compile it, and then run: java viz.SocialNetwork
+This assumes you have entered mobile motes with David's tool or populated
+the mobilemote table manually with id/name info.
+
+For SocialNetwork, the right mouse button zooms (press it down and drag to
+        the right to zoom in and to the left to zoom out) If you select the
+        P icon from the toolbar, then the left mouse button pans the image.
+
+/**************** END SOCIAL NETWORK VIZ ********************/

@@ -1,0 +1,34 @@
+#!/bin/sh
+export CLASSPATH=$PWD:$CLASSPATH
+echo **Expect nothing
+java tools.Dir
+java tools.CopyIn test <<!
+a test
+!
+echo **Expect test
+java tools.Dir
+echo **Expect a test
+java tools.CopyOut test
+
+java tools.CopyIn biffer <IFileBlock.nc
+echo **Expect test, biffer
+java tools.Dir
+
+java tools.Rename biffer bigger
+echo **Expect test, bigger
+java tools.Dir
+
+java tools.CopyOut bigger
+java tools.CopyOut bigger | diff -s - IFileBlock.nc
+
+echo **Expect test, bigger after reset
+mreset
+sleep 3
+java tools.Dir
+
+echo **Expect deltest to appear, first delete to fail, 2nd to succeed
+java tools.CopyIn deltest </dev/null
+java tools.Dir
+java tools.Delete deltest1
+java tools.Delete deltest
+java tools.Dir -f

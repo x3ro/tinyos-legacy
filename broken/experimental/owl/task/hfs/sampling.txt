@@ -1,0 +1,69 @@
+David Gay presented the architecture and interface of the 
+HighFrequencySampling demo application, which will probably serve as the
+basis for the sampling part of the high-frequency sampling extension to 
+Task.
+
+The architecture is shown in the attached html file, it includes the
+following components:
+
+- Sample: main sampling component: collects and logs n samples at a 
+specified interval, to storage. Sample provides the Sampling interface
+described in the attached Sampling.nc file, collects samples via an
+ADC interface and logs data via the LogData interface and a special-purpose
+fastAppend command.
+
+- MicroTimer: high-precision timer (support intervals <1ms)
+
+- ByteEEPROM: shared access to the flash via AllocationReq, WriteData,
+ReadData and LogData interfaces. The flash is divided into fixed-size
+chunks, allocated at boot time via the AllocationReq interface. Each chunk
+is identified by an id which is used to parameterise ByteEEPROM's
+interfaces. The LogData interface  (see the attached LogData.nc file)
+is designed for maximum write performance.
+
+- BufferedLog: ByteEEPROM's LogData interface is not optimised for
+small writes. BufferedLog remedies this problem by providing a LogData
+interface, along with a fastAppend command optimised for small writes.
+
+Sample's flow is as follows:
+- when a prepare command is received, it erases the storage via the 
+LogData interface.
+- when start is called, it first calls ExternalShutdown.stop to stop any
+services that should not run during sampling, then starts sampling.
+- when sampling is complete, it calls LogData.sync to ensure all data
+is in the flash, and ExternalShutdown.start to restart the stopped services
+
+
+
+The core of the sampling process is essentially the Sample, MicroTimer
+and BufferedLog components. These provide a Sampling interface, and
+depend on the following:
+- an ADC interface to get samples
+- a LogData interface to store sampled data
+- an ExternalShutdown (StdControl) interface to start/stop other services
+during sampling
+
+The user of this sampling core is responsible for:
+- connecting the ADC interface to the appropriate sensor
+- allocating a correctly-sized area of storage, and connecting the LogData
+interface to that storage
+- connecting ExternalShutdown to appropriate services (most obviuously
+the radio and Timer)
+
+Error checking (for storage overflow, inappropriate sampling rates, 
+incorrect interface usage, etc) is currently either absent or performed
+at runtime. This will not change.
+
+
+We discussed several possible changes to this model:
+- replace the ADC interface with some more general GetSample interface which
+can return arbitrary size samples
+- add a stop command (with an option to either destroy or save the
+data sampled so far) to the Sampling interface to support "sample until
+external event" applications
+- add a "storage id" to the Sampling interface to select which portion
+of storage should be used - we decided against this change (it can be
+supported by the sampling code's user by appropriate wiring of the
+LogData interface)
+
+

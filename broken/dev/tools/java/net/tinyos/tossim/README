@@ -1,0 +1,70 @@
+Package: net.tinyos.tossim
+Description: GUIs for TOSSIM network traffic visualization/interaction
+Author: Philip Levis <pal@cs.berkeley.edu>
+
+This package contains applications for interacting with a TOSSIM
+(TinyOSS SIMulator) execution. It provides a GUI for visualizing
+network traffic as well as injecting packets into the network at
+startup (static injection). For more information on TOSSIM and its
+capabilities, read nest/doc/tossim.pdf.
+
+Executables: net.tinyos.tossim.TossimGUI
+
+net.tinyos.packet.TossimGUI
+        usage: java net.tinyos.packet.TossimGUI [-r <filename]
+		    -r allows packets for static injection to be specified.
+		    Refer to tossim.pdf for details.
+
+        descr: Visualized TOSSIM network traffic. The time specified
+        is when the transmit function is called, not when transmission
+        begins; in a congested network, there can be a significant
+        amount of backoff between the two. The checkboxes on the left
+        allow for the visible messages to be filtered; only packets
+        sent by motes with checked IDs will be visualized. Packets can
+        be clicked on to see the full data in the packet.
+	NOTE: The GUI must be started BEFORE the simulation begins.
+
+
+Classes:
+
+TossimGUI.java:
+
+The main GUI class.
+
+ButtonPanel.java, MotePanel.java, PacketDialog.java, PacketPanel.java:
+
+The parts of the GUI.
+
+BitListener.java:
+
+Interface that listens for TOSSIM bit data and transforms it into a useful
+structure. Currently unimplemented.
+
+CommReader.java:
+
+Class that spawns Threads to listen for messages and issue callbacks
+on listeners when they arrive. Currently only responds to RFM packet events.
+
+PacketListener.java:
+
+Interface that listens for TOSSIM packets beign received and processes
+them (a simple callback mechanism). Currently implemented by PacketPanel.
+
+PacketSender.java:
+
+Class that reads in a file of packets, waits for a connection from the
+simulator, then transmits those packets in the format expected by the
+simulator.
+
+RFMPacket.java:
+
+Structure that represents an RFM packet to the simulator: 8 byte time,
+2 byte moteID, and 36 byte packet.
+
+UARTListener.java:
+
+Listener interface for UART events.
+
+
+
+

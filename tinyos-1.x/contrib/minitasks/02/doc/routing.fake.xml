@@ -1,0 +1,439 @@
+<!-- $Id: routing.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="Interface for the Routing Component of TinyOS">
+
+<p> We consider routing as passing a message of arbitrary size (with some upper
+limit defined by length type) from a source to one or a set of destinations
+anywhere in the entire network. There are two functions for the routing
+components: one is to segment data into packets at the source and reassemble at
+the destinations, and the other is to choose one or a set of next hops for
+passing the packets to their destinations. </p>
+
+<p> There are various ways to specify message destinations and preferable
+routes. In this architecture, we present some commonly used ones, although it
+is subject to extensions. We intend to only make common routing interfaces,
+rather than common routing algorithms and component implementations.
+Applications should be able to switch between different routing components that
+provide the same set of interfaces. In addition to message sending interfaces,
+there is a routing interface that signals the message arrival event, which can
+be wired to upper-layer components.  Each routing component will be required to
+implement this capability.  </p>
+
+<p> The following diagram shows how the routing components will be composed in
+the context of TinyOS. Routing components, e.g. ROUTE-1 or ROUTE-2, will be on
+top of AM_STANDARD component. AM_STANDARD demultiplexes incoming requests to
+the appropriate routing component.  Each routing component will be used by one
+or more high-level application components. In the following diagram, ROUTE-1 is
+used by COM-11 and COM-12, and ROUTE-2 by COM-21 and COM-22. </p>
+
+<image src="routing_fig1.png"/>
+
+<p> All communication goes through AM_STANDARD, which defines the top of the
+shared network stack. The routing components implement the same generic
+interface. That is, the interface between COM-11 and ROUTE-1, the interface
+COM-21 and ROUTE-2 is the same regardless of the routing algorithm.  This makes
+it easier to .wire together. components in TinyOS.   </p>
+
+<p> By sharing the same interface, we can easily add new components in the
+communication stack whenever necessary. For example, we can add the
+SECURITY_COM component, which can be used by more than one routing components
+like the following. Here, ROUTE-1 and ROUTE-2 use the SECURITY_COM whereas
+ROUTE-3 does not. </p>
+
+<image src="routing_fig2.png"/>
+
+<section name="Proposed Interfaces">
+
+<section name="Receiving Routing Message Interface">
+
+<code>
+interface ReceiveRoutingMsg
+{
+    /**
+   Receive message done signal <p>
+ 
+   @param length The length of the message
+   @param msg The message just sent out
+   
+  */
+
+    event result_t receive(uint8_t length, char* msg);
+}
+</code>
+
+<p> This interface provides a message arrival signal, indicating a message
+arrived to one of its destinations. In addition to the message itself, the
+length of the message is provided. All routing modules have to provide the
+above interface. In addition, routing modules may also provide some of the
+following interfaces. </p>
+
+<code>
+interface GetRoutingMsgSource
+{
+   /**
+   Get the source of the last message received <p>
+   
+   */
+
+    command uint16_t get();
+}
+</code>
+
+<code>
+interface GetRoutingMsgHopCount
+{
+   /**
+   Get the hop count of the last message received <p>
+   
+   */
+
+    command uint8_t get();
+}
+</code>
+
+<code>
+interface GetRoutingMsgTimeStamp
+{
+   /**
+   Get the time stamp of last message received <p>
+   
+   */
+
+    command uint8_t get();
+}
+</code>
+
+</section>
+
+<section name="Generic Routing Sending Message Interface">
+
+<code>
+interface SendRoutingMsg
+{ 
+  /**  
+   Send a message out to one or more remote motes <p>
+
+   @param dest The destination(s)
+   @param length The length of the message
+   @param msg The array of bytes need to send out
+
+   @return SUCCESS if successful
+  */
+  command result_t send(destination_t dest, uint8_t length, char* msg);
+  
+  /**
+   Send message done signal <p>
+ 
+   @param msg The message just sent out
+   @param success If the send is done successfully
+   */
+  event result_t sendDone(char* msg, result_t success);
+}
+</code>
+
+<p> This is a general interface for all routing components. We have identified
+a number of specific routing techniques that can be implemented using this
+interface.  Here the destination is a union of all the types used for these
+techniques. This is a parameterized interface where the type of destinations
+shall be associated with send when the actual wire takes place. The union type
+is defined now as: </p>
+
+<code>
+typedef union {
+  uint8_t hops;
+  uint16_t address;
+  location_t *location;
+  CBR_t *dest;
+} destination_t;
+</code>
+
+<p> where CBR_t is </p>
+
+<code>
+typedef struct {
+  routing_t type;
+  constraints_t *dest;
+  constraints_t *rout;
+  objectives_t *objs;
+} CBR_t;
+</code>
+
+<p> In the following sections, we specify separate interfaces that may be used
+to wrap the generic interface for specific routing techniques.  </p>
+
+</section>
+
+<section name="Local Broadcast Interface">
+
+<code>
+interface SendMsgByBct
+{ 
+  /**  
+   Send a message out <p>
+
+   @param hops The number of hops to the source
+   @param length The length of the message
+   @param msg The array of bytes need to send out
+
+   @return SUCCESS if successful
+  */
+  command result_t send(uint8_t hops, uint8_t length, char* msg);
+
+  /**  
+   Send message done signal <p>
+
+   @param msg The message just sent out
+   @param success If the send is done successfully
+  */
+  event result_t sendDone(char* msg, result_t success);
+}
+</code>
+
+<p> This interface specifies a local broadcast function of routing, i.e., send
+the given message to all nodes within the number of hops. </p>
+
+</section>
+
+<section name="Send Message By ID Interface">
+
+<code>
+interface SendMsgByID
+{ 
+  /**  
+   Send a message out <p>
+
+   @param address The ID of a remote mote
+   @param length The length of the message
+   @param msg The array of bytes need to send out
+
+   @return SUCCESS if successful
+  */
+  command result_t send(uint16_t address, uint8_t length, char* msg);
+
+  /**
+   Send message done signal <p>
+ 
+   @param msg The message just sent out
+   @param success If the send is done successfully
+  */
+  event result_t sendDone(char* msg, result_t success);
+}
+</code>
+
+<p> This is the simplest interface where node ID/address is specified for
+destination. </p>
+
+</section>
+
+
+<section name="Send Message By Geographical Location Interface">
+
+<code>
+interface SendMsgByGeo
+{ 
+  /**  
+   Send a message out to location(s) <p>
+
+   @param location The pointer to a location structure representing 
+          a remote mote or motes
+   @param length The length of the message
+   @param msg The array of bytes need to send out
+
+   @return SUCCESS if successful
+  */
+  command result_t send(location_t *location, uint8_t length, char* msg);
+
+  /**  
+   Send message done signal <p>
+
+   @param msg The message just sent out
+   @param success If the send is done successfully
+  */
+  event result_t sendDone(char* msg, result_t success);
+}
+</code>
+
+<p> This interface is for sending an array of bytes to one or all nodes defined
+by geographical locations. Locations are described by </p>
+
+<code>
+   typedef struct {
+              	routing_t type; //one or all
+              	int16_t xCenter;
+              	int16_t yCenter;
+              	uint16_t range;
+           } location_t;
+	   </code>
+
+<p> The same interface can be used for position-based as well as
+direction-based locations. For direction-based routing, x and y are interpreted
+as directions. </p>
+
+</section>
+
+<section name="Send Message By Constraints Interface">
+
+<code>
+interface SendMsgByCBR
+{ 
+  /**  
+   Send a message out to a remote motes satisfying a set of constraints
+   while choosing a route that is optimal and satisfying route constraints <p>
+
+   @param type one or all
+   @param dest destination constraints
+   @param rout route constraints
+   @param objs objectives
+   @param length message length
+   @param msg array of bytes need to send out
+
+   @return SUCCESS if successful
+   
+  */
+  command result_t send(routing_t type, constraints_t *dest, constraints_t *rout, objectives_t *objs, uint8_t length, char* msg);
+  
+  /**
+   Send message done signal <p>
+ 
+   @param msg The message just sent out
+   @param success If the send is done successfully
+  */
+  event result_t sendDone(char* msg, result_t success);
+}
+</code>
+
+<p> In this interface, destinations are specified by constraints, each of which
+is a range of attribute values. Attributes can be constant (ID, energy cost,
+etc.) or be variables (sensor readings, battery level, time, etc). </p>
+
+<p> The attribute interface in TinyOS-1.x will be used. In addition to
+destinations, this interface can also specify route constraints and objectives,
+where objectives are represented as minimizing or maximizing some attribute
+values over the overall routing path. The types of constraints and objectives
+are defined as follows. </p>
+
+<code>
+typedef struct {
+  uint8_t id; //attribute id
+  int16_t lower;
+  int16_t upper;
+} constraint_t;
+</code>
+
+<code>
+typedef struct {
+  uint8_t id; //attribute id
+  uint8_t type; //maximize or minimize
+} objective_t;
+</code>
+
+<code>
+typedef struct {
+  constraint_t *cons;
+  uint8_t num;
+} constraints_t;
+</code>
+
+<code>
+typedef struct {
+  objective_t *objs;
+  uint8_t num;
+} objectives_t;
+</code>
+
+</section>
+
+<section name="Local Lookup Interface">
+
+<code>
+interface LocalLookup
+{ 
+  /**
+   lookup remote attributes by name<p>
+ 
+   @param address The ID of the remote mote
+   @param name The name of the attribute
+   @param result The result of the lookup
+
+   @return SUCCESS if attribute exist otherwise FAIL
+  */
+  command result_t lookupByName(uint16_t address, char *name, char *result);
+  
+  /**
+   lookup remote attributes by attribute ID<p>
+ 
+   @param address The ID of the remote mote
+   @param id The id of the attribute
+   @param result The result of the lookup
+
+   @return SUCCESS if attribute exist otherwise FAIL
+  */
+  command result_t lookupByID(uint16_t address, uint8_t id, char *result);
+}
+</code>
+
+<p> Some routing components may be able to provide some local information for
+remote nodes, such as the estimated number of hops, etc. This interface
+provides a generic way of accessing such information, and assuming such
+information would be stored in the form of attributes (provided by the
+attribute interface in TinyOS-1.x) </p>
+
+</section>
+
+</section>
+
+<section name="Component Implementation and Usage of the Above Interface">
+
+<p> Given the above set of interfaces, there will be the component
+implementations by various groups participating in routing. One can implement a
+single module that provides /all/ the interfaces, or implement a set of
+modules, each of which provide a subset of interfaces. Applications should be
+able to switch from one set of implementations to another set of
+implementations.  Implementations from different groups are not required to be
+compatible to be compiled and linked into one application, beyond the
+compatibility of the common interface. Here we just gave one example of the
+skeleton of the implementation. Note that [[SendRoutingMsg]] is a parameterized
+interface with [[type]] specified as: </p>
+
+<code>
+typedef enum {
+  tSEND_BY_BROADCAST = 0,
+  tSEND_BY_ID = 1,
+  tSEND_BY_LOCATION = 2,
+  tSEND_BY_DIRECTION = 3,
+  tSEND_BY_CBR = 4
+} routing_service_t;
+</code>
+
+
+<code>
+module ParcRoutingM {
+  provides {
+    interface SendMsgByID;
+    interface SendMsgByGeo as SendMsgByLoc;
+    interface SendMsgByGeo as SendMsgByDir;
+    interface SendMsgByBct;
+    interface SendMsgByCBR;
+    interface SendRoutingMsg[uint8_t type];
+    interface ReceiveRoutingMsg;
+    interface GetRoutingMsgSource;
+    interface LocalLookup;
+    interface StdControl;
+  }
+
+  uses {
+    
+    interface Leds;
+    interface SendMsg as SendMsgGenericComm;
+    interface ReceiveMsg as ReceiveMsgGenericComm;
+    interface StdControl as StdControlGenericComm;    
+  }
+
+
+}
+</code>
+
+</section>
+
+</section>
+

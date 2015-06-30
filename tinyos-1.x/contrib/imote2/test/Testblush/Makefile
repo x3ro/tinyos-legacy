@@ -1,0 +1,3 @@
+COMPONENT=Testblush
+include ../Makerules
+

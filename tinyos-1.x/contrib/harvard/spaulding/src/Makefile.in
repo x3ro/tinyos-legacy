@@ -1,0 +1,14 @@
+# WARNING: If you change TOSH_DATA_LENGTH, make sure you also update
+#  (1) - FETCH_SEGMENT_SIZE
+PFLAGS += -DTOSH_DATA_LENGTH=74 # DO NOT change this without reading above
+
+DEFAULT_LOCAL_GROUP=0x99
+PFLAGS += -DCC2420_DEF_CHANNEL=25  # Good chans: 15, 20, 25, 26
+
+CFLAGS += -DTOSH_MAX_TASKS_LOG2=8
+
+# MAC retransmits
+#PFLAGS += -DTOSMSG_MACACK_ENABLED
+
+# DataStore related
+TINYOS_NP=X  # Disable Deluge

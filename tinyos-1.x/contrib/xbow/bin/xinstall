@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# FILE:        xinstall
+# AUTHOR:      Martin Turon
+# DATE:        5/27/2004
+# DESCRIPTION: Script to install xbow tools into user's path
+#
+# $Id: xinstall,v 1.10 2005/03/07 22:32:12 mturon Exp $
+
+echo
+echo "Adding scripts to path: fuses, settos, xinstall"
+ln -s /opt/tinyos-1.x/contrib/xbow/bin/fuses    /usr/local/bin/fuses
+ln -s /opt/tinyos-1.x/contrib/xbow/bin/flash    /usr/local/bin/flash
+ln -s /opt/tinyos-1.x/contrib/xbow/bin/settos   /usr/local/bin/settos
+ln -s /opt/tinyos-1.x/contrib/xbow/bin/gettos   /usr/local/bin/gettos
+ln -s /opt/tinyos-1.x/contrib/xbow/bin/xinstall /usr/local/bin/xinstall
+
+echo
+echo "Adding database scripts to path: startdb, tasksvr"
+ln -s /opt/tinyos-1.x/contrib/xbow/bin/tasksvr /usr/local/bin/tasksvr
+ln -s /opt/tinyos-1.x/contrib/xbow/bin/startdb /usr/local/bin/startdb
+
+echo
+echo "Adding executables to path: surge"
+ln -s /opt/tinyos-1.x/contrib/xbow/tools/java/net/tinyos/surge/Surge.exe /usr/local/bin/surge
+
+echo
+echo "Rebuilding and adding tools to path: sf, xlisten, xcommand"
+# Build the xlisten for the user's platform
+cd /opt/tinyos-1.x/contrib/xbow/tools/src/xlisten
+make
+ln -s /opt/tinyos-1.x/contrib/xbow/tools/src/xlisten/xlisten /usr/local/bin/xlisten
+
+# Build the xcommand for the user's platform
+cd /opt/tinyos-1.x/contrib/xbow/beta/tools/src/xcmd
+make
+ln -s /opt/tinyos-1.x/contrib/xbow/beta/tools/src/xcmd/xcmd /usr/local/bin/xcmd
+ln -s /opt/tinyos-1.x/contrib/xbow/beta/tools/src/xcmd/xcmd /usr/local/bin/xtalk
+ln -s /opt/tinyos-1.x/contrib/xbow/beta/tools/src/xcmd/xcmd /usr/local/bin/xcommand
+ln -s /opt/tinyos-1.x/contrib/xbow/beta/tools/src/xcmd/xcmd /usr/local/bin/xinject
+
+# Build the C serial forwarder for the user's platform
+cd /opt/tinyos-1.x/tools/src/sf
+make
+ln -s /opt/tinyos-1.x/tools/src/sf/sf.exe /usr/local/bin/sf
+
+echo
+echo "xinstall completed."

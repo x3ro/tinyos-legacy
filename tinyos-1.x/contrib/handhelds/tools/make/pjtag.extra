@@ -1,0 +1,13 @@
+#-*-Makefile-*- vim:syntax=make
+# Parallel port JTAG
+
+PROGRAM = pjtag
+
+ifndef MSP_JTAG
+MSP_JTAG = msp430-jtag
+endif
+
+program: FORCE
+	@echo "    installing $(PLATFORM) binary using the parallel port jtag adapter"
+	$(MSP_JTAG) $(MSP_JTAG_FLAGS) -eE -p $(MAIN_EXE)
+

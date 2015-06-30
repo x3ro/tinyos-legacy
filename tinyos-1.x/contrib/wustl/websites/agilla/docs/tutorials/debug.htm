@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+<table width="95%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><p>&nbsp;</p>
+      <table width="100%" border="1" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80%">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><!-- InstanceBeginEditable name="MainText" -->
+
+          <h2><font face="Verdana, Arial, Helvetica, sans-serif">Lesson 9: Debugging</font></h2>
+
+          <p><em>Last Updated on 
+            <!-- #BeginDate format:Am1a -->October 24, 2005 3:23 PM<!-- #EndDate -->
+            .</em></p>
+          <p>Agilla programs can be debugged using <a href="http://www.cs.berkeley.edu/%7Epal/pubs/nido.pdf" target="_top">TOSSIM</a>.
+              There are two ways to do this: 1) using a <a href="#default">default
+              agent</a>,
+  
+            or 2) via <a href="#injection">injection</a>. When simulating an
+              agent, the agent's execution trace is printed
+            to the screen. </p>
+          <h3><font face="Arial, Helvetica, sans-serif">Default Agent<a name="default"></a></font></h3>
+
+          <p>A default agent simulation involves modifying &lt;agilla&gt;/components/AgentMgrM.nc
+
+            to automatically load an agent upon boot. The advantage of this method
+
+            is it does not use the agent migration components, allowing you to
+
+            debug an agent even if the interface between the AgentInjector and
+            Agilla is broken. The
+
+            disadvantage, however, is that you can only simulate one type of
+            agent in the network at a time (unless you make further modifications
+            to
+            AgentMgrM).
+
+            To simulate Agilla using a default agent, first launch the agent
+            injector in &quot;no
+            connect&quot;
+
+            mode
+
+            using the following command:</p>
+          <p><code>java -Djava.security.policy=java.policy edu.wustl.mobilab.agilla.AgentInjector
+            -nc</code></p>
+          <p>The Agent Injector GUI will appear. Open the agent
+    
+            you want to simulate. In the picture below, 3Blink is loaded. </p>
+          <p align="center"><img src="debug-injector.jpg" width="471" height="509"></p>
+
+          <p>Go to the <em>Debug</em> menu and select <em>Print Debug
+
+            Code</em>. This will print some NesC code to the shell as shown below.            </p>
+
+          <p align="center"><img src="3blink_debug.jpg" width="668" height="487"></p>
+
+          <p align="left">Copy the
+            code and open &lt;agilla&gt;/components/AgentMgrM.nc.
+
+            Search for &quot;<em>event result_t SimTimer.fired()</em>&quot;.
+            Paste
+
+            the code within this method body. Then search for &quot;<em>#define
+
+            </em>INCLUDE_DEFAULT_AGENT&quot;
+
+            and make sure it is defined to be 1. </p>
+
+          <p align="left">Compile Agilla by typing <code>make pc</code>. Then run the simulation: <code>build/pc/main.exe -b=0 1</code>. You should see the following output:</p>
+
+          <p align="center"><img src="3blink_debug_running.jpg" width="668" height="703"></p>
+
+          <p align="left">This shows the initialization and execution of the
+
+             3Blink agent. Each line starts with <font face="Courier New, Courier, mono">&quot;0:
+
+             VM (0:0):&quot;</font>. The first integer is the mote ID, the second
+
+             is the agent ID, and the third is the agent's program counter.</p>
+
+          <h3><font face="Arial, Helvetica, sans-serif">Injection<a name="injection"></a></font></h3>
+
+          <p>The Agent Injector can be used to inject agents into an Agilla network
+            being simulated by TOSSIM. First open &lt;agilla&gt;/components/AgentMgrM.nc
+and find the line containing <code>#define INCLUDE_DEFAULT_AGENT</code>.
+            Make sure it is defined to be 0. This will prevent the default agent
+from
+being
+executed.</p>
+          <p>Compile Agilla for TOSSIM by typing <code>make pc</code>.</p>
+          <p>TOSSIM uses a different byte packing, requiring that the Java classes
+            encapsulating TOS active message be re-generated using <a href="http://www.tinyos.net/tinyos-1.x/doc/nesc/mig.html">mig</a>.
+            Open &lt;java&gt;/edu/wustl/mobilab/agilla/Makefile and <code>set
+            MIG = -target=pc java</code>. Then recompile the AgentInjector using <code>make</code>.</p>
+
+          <p>This will take some time as it needs to re-generate all of the Java
+            message
+
+		  files.  Once done, open two shells.  In one shell, start TOSSIM:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       </p>
+
+			<blockquote>
+
+			  <p><code>cd $TOSROOT/contrib/wustl/apps/Agilla<br>
+
+		        build/pc/main.exe -b=0 26</code>			</p>
+		    </blockquote>
+
+			<p>where 26 is the number of nodes to simulate. In the other prompt, execute
+			  the following commands:</p>
+
+			<blockquote>
+
+			  <p><code>cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder -comm
+			      tossim-serial &amp;<br>
+  java -Djava.security.policy=java.policy edu.wustl.mobilab.agilla.AgentInjector
+              -comm tossim-serial -d &amp; </code></p>
+
+		    </blockquote>
+
+			<p>The first command starts the Serial Forwarder running. The second command
+			  launches the AgentInjector application in simulation mode. The
+			  serial forwarder is necessary because it connects the
+			  AgentInjector with TOSSIM. The AgentInjector should look like:</p>
+			<p align="center"><img src="injector_sim.jpg" width="461" height="535"></p>
+
+			<p>Notice that the upper-right status bar indicates that it is connected to
+
+			  &quot;tossim-serial&quot;. Now you can open and inject agents into the sensor
+
+			  network being simulated.</p>
+
+			<p><strong><font color="#FF0000">Note: After simulating,
+
+		      be sure to revert the AgentInjector's makefile to define <code>MIG
+		      = mig java</code>!</font></strong></p>
+
+			<p>&nbsp;</p>
+
+        <!-- InstanceEndEditable --></td>
+        </tr>
+        <tr>
+          <td width="80%" cellpadding="2" cellspacing="2" bgcolor="#990000">&nbsp;           </td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

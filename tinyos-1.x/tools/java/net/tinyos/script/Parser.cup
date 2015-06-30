@@ -1,0 +1,263 @@
+/*									tab:4
+ * "Copyright (c) 2000-2003 The Regents of the University  of California.  
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice, the following
+ * two paragraphs and the author appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Copyright (c) 2002-2003 Intel Corporation
+ * All rights reserved.
+ *
+ * This file is distributed under the terms in the attached INTEL-LICENSE     
+ * file. If you do not find these files, copies can be found by writing to
+ * Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA, 
+ * 94704.  Attention:  Intel License Inquiry.
+ */
+package net.tinyos.script;
+
+// CUP specification for TScript parser
+
+import java_cup.runtime.*;
+
+import java.util.*;
+import java.io.*;
+import javax.swing.*;
+import net.tinyos.script.tree.*;
+
+action code {:
+    Vector declarations = new Vector();
+    Vector statements = new Vector();
+
+    private Program p;
+	:};
+
+parser code {:
+    private static Program prog;
+
+    public static void setProgram(Program p) {prog = p;}
+    public static Program getProgram() {return prog;}
+
+    public static java_cup.runtime.Symbol lastSym;
+    static int lineNumber = 0;
+    private int errorLineNumber = 0;
+    private String errorMsg = null;
+
+    public String errorMessage() {return errorMsg;}
+    public java_cup.runtime.Symbol scan() {
+	try {
+	    java_cup.runtime.Symbol s = getScanner().next_token();
+	    if (s.value instanceof TokenValue) {
+	       TokenValue val = (TokenValue)s.value;
+               if (val.lineBegin > lineNumber) {
+                  lineNumber = val.lineBegin;
+               }
+            }
+            lastSym = s;
+	    return s;
+	}
+	catch (Exception e) {
+	    return null;
+	}
+    }
+
+
+    public static int lineNumber() {
+         return lineNumber;
+    }
+
+    public int errorLineNumber() {
+      return errorLineNumber;
+    }
+    
+    public void report_error(String message, Object info) {
+	Symbol cur_token = (Symbol) info;
+	TokenValue val = (TokenValue)cur_token.value;
+	String errorMsg = "";
+	//System.out.println("errorMsg = " + errorMsg);
+	//System.out.println("cur_token.sym = " + cur_token.sym);
+	
+	
+	if (message.equals("Syntax error")) {
+	    if (cur_token.sym == 0)
+		errorMsg = "Bad Syntax - Possibly missing clause.";
+	    else
+		errorMsg = "Syntax error at " + val.lineNum() + " " + val.text();
+	}
+	else {
+	  errorMsg = "Can't parse program at line " + val.lineNum() + ":   "+ val.text() + "  ";
+	}
+	this.errorMsg = errorMsg;
+	this.errorLineNumber = val.lineNum();
+	//System.out.println(errorMsg);
+    }
+    
+    
+    :};
+
+/* Terminals (tokens returned by the scanner).  */
+
+terminal TokenValue     NAME, FILETEXT;
+terminal		RPAREN, LPAREN, COMMA, SEMICOLON;
+terminal		AND, OR, XOR, IMP;
+terminal		GREATER_THAN, LESS_THAN, EQUAL, GREATER_EQUAL, LESS_EQUAL, NOT_EQUAL;
+terminal		IF, THEN, ELSE, END, FOR, NEXT, STEP, WHILE, UNTIL, TO;
+terminal TokenValue	CONSTANT;
+terminal                SUBTRACT, MINUS, PLUS, DIVIDE, STAR, EXPONENT, MOD;
+terminal                BUFFER, PRIVATE, SHARED, CONST, LOAD;
+terminal                LBRACKET, RBRACKET, DOUBLE_QUOTE, SINGLE_QUOTE;
+terminal                LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT, LOGICAL_XOR, EQV, NOT;
+
+non terminal Program             program;
+non terminal                     decl_list;
+non terminal Declaration         decl;
+non terminal PrivateDeclaration  private_decl;
+non terminal SharedDeclaration   shared_decl;
+non terminal BufferDeclaration   buffer_decl;
+non terminal ConstantDeclaration const_decl;
+non terminal LoadDeclaration     load_decl;
+non terminal StatementList       statement_list;
+non terminal Statement           statement;
+non terminal LeftValue           lValue;
+non terminal RightValue          rValue;
+non terminal Expression          expression;
+non terminal AssignmentStatement assignment;
+non terminal CallStatement       call_statement;
+non terminal SingleReference     var_ref;
+non terminal BufferReference     buffer_ref;
+non terminal UnaryExpression     unary_expr;
+non terminal BinaryExpression    binary_expr;
+non terminal ConstantExpression  constant_expr;
+non terminal ParenExpression     paren_expr;
+non terminal SingleAccess        single_access;
+non terminal BufferAccess        buffer_access;
+non terminal Expression          access;
+non terminal Call                call;
+non terminal Expression          param;
+non terminal ParameterList       param_list;
+non terminal ParameterList       params;
+non terminal Statement           control;
+non terminal IfThenClause        if_exec;
+non terminal Expression          conditional;
+non terminal ConstantExpression  step;
+non terminal ForCondition        for_condition;
+
+precedence left EQV;
+precedence left IMP;
+precedence left OR, XOR;
+precedence left AND;
+precedence left NOT;
+precedence left EQUAL, LESS_THAN, GREATER_THAN, LESS_EQUAL, GREATER_EQUAL, NOT_EQUAL;
+precedence left LOGICAL_OR, LOGICAL_XOR;
+precedence left LOGICAL_AND;
+precedence left LOGICAL_NOT;
+precedence left PLUS, SUBTRACT;
+precedence left STAR, DIVIDE, MOD;
+precedence left EXPONENT;
+start with program;
+
+
+program ::= {: p = new Program(); :} decl_list statement_list:s {: p.addStatements(s); RESULT = p; Parser.setProgram(p); :};
+
+decl_list ::= decl:d {: p.addVariable(d); :} decl_list | ;
+
+decl ::= private_decl:d  {: RESULT = d; :} |
+         shared_decl:d   {: RESULT = d; :} |
+	 buffer_decl:d   {: RESULT = d; :} |
+         const_decl:d    {: RESULT = d; :};
+
+
+private_decl ::= PRIVATE NAME:n {: RESULT = new PrivateDeclaration(n.text);:} SEMICOLON;
+shared_decl ::= SHARED NAME:n {: RESULT = new SharedDeclaration(n.text);:} SEMICOLON;
+buffer_decl ::= BUFFER NAME:n{: RESULT = new BufferDeclaration(n.text);:} SEMICOLON;
+const_decl  ::= CONST NAME:n EQUAL CONSTANT:c {:RESULT = new ConstantDeclaration(n.text, new Integer(c.text), Parser.lineNumber(), Parser.lastSym); :} SEMICOLON;
+
+statement_list ::= statement:s statement_list:l {: l.addStatement(s); RESULT=l;:} | {: RESULT = new StatementList(); :};
+
+statement ::= assignment:s {: RESULT=s; :} | control:s {: RESULT=s; :} | call_statement:s {: RESULT=s; :};
+
+control ::= IF expression:c THEN if_exec:e END IF {: RESULT = new IfStatement(Parser.lineNumber(), c, e); :} |
+            FOR var_ref:v1 EQUAL expression:e1 TO constant_expr:e2 step:s  statement_list:l NEXT single_access:v2 {: RESULT = new ForUnconditionalStatement(Parser.lineNumber(), v1, e1, e2, s, l, v2); :} |
+            FOR var_ref:v1 EQUAL constant_expr:e1 step:s for_condition:c statement_list:l NEXT single_access:v2 {: RESULT = new ForConditionalStatement(Parser.lineNumber(), v1, e1, s, c, l, v2); :};
+
+step ::= STEP constant_expr:c {: RESULT = c; :} | {: RESULT = new ConstantExpression(Parser.lineNumber(), new Integer(1), Parser.lastSym); :};
+
+for_condition ::= UNTIL expression:e {: RESULT = new ForUntilCondition(Parser.lineNumber(), e); :} |
+    WHILE expression:e {: RESULT = new ForWhileCondition(Parser.lineNumber(), e); :};
+
+if_exec ::= statement_list:s {: RESULT = new IfThenClause(Parser.lineNumber(), s);:} | statement_list:s1 ELSE statement_list:s2 {: RESULT = new IfThenElseClause(Parser.lineNumber(), s1, s2); :} ;
+
+
+assignment ::= lValue:l EQUAL rValue:r SEMICOLON {:RESULT= new AssignmentStatement(Parser.lineNumber(), l, r);:};
+
+lValue ::= var_ref:r {: RESULT=r; :} | buffer_ref:r {: RESULT=r; :};
+
+var_ref ::= NAME:n {: RESULT = new SingleReference(Parser.lineNumber(), n.text, Parser.lastSym); :};
+
+// Currently removed the ability to assign to a buffer index
+// there are some issues with this when dealing with sensor readings,
+// etc. Seems to difficult to get right for now. You can only append. -pal
+buffer_ref ::= NAME:n LBRACKET RBRACKET {: RESULT = new BufferReference(Parser.lineNumber(), n.text, Parser.lastSym); :} | NAME:n LBRACKET expression:e RBRACKET {: RESULT= new BufferReference(Parser.lineNumber(), n.text, parser.lastSym, e); :};
+
+rValue ::= expression:e {: RESULT = e; :}; // | call:c {: RESULT = c; :} ;
+
+expression ::= unary_expr:e {:RESULT=e;:} | binary_expr:e {:RESULT=e;:} | paren_expr:e {:RESULT=e;:} | constant_expr:e {:RESULT=e;:} | access:e {:RESULT=e;:} | call:e {:RESULT=e;:} | conditional:e {:RESULT=e;:};
+
+access ::= buffer_access:a {: RESULT=a;:} | single_access:a {: RESULT=a; :};
+
+single_access ::= NAME:n {: RESULT = new SingleAccess(Parser.lineNumber(), n.text, Parser.lastSym); :};
+
+buffer_access ::= NAME:n LBRACKET RBRACKET {: RESULT = new BufferAccess(Parser.lineNumber(), n.text, parser.lastSym); :} | NAME:n LBRACKET expression:e RBRACKET {: RESULT= new BufferAccess(Parser.lineNumber(), n.text, parser.lastSym, e); :};
+
+constant_expr ::= CONSTANT:c {: RESULT = new ConstantExpression(Parser.lineNumber(), new Integer(c.text), Parser.lastSym); :} ;
+
+paren_expr ::= LPAREN expression:e RPAREN {: RESULT = new ParenExpression(Parser.lineNumber(), e); :};
+
+binary_expr ::= expression:e1 PLUS        expression:e2 {: RESULT = new BinaryAddExpression(Parser.lineNumber(), e1, e2); :} |
+                expression:e1 SUBTRACT    expression:e2 {: RESULT = new BinarySubExpression(Parser.lineNumber(), e1, e2);:} |
+		  expression:e1 STAR        expression:e2 {: RESULT = new BinaryMulExpression(Parser.lineNumber(), e1, e2);:} |
+		  expression:e1 DIVIDE      expression:e2 {: RESULT = new BinaryDivExpression(Parser.lineNumber(), e1, e2);:} |
+		    expression:e1 MOD      expression:e2 {: RESULT = new BinaryModExpression(Parser.lineNumber(), e1, e2);:} |
+                expression:e1 EXPONENT    expression:e2 {: RESULT = new BinaryExponentExpression(Parser.lineNumber(), e1, e2);:} |
+                expression:e1 LOGICAL_AND expression:e2 {: RESULT = new BinaryLogicalAndExpression(Parser.lineNumber(), e1, e2);:} |
+                expression:e1 LOGICAL_OR  expression:e2 {: RESULT = new BinaryLogicalOrExpression(Parser.lineNumber(), e1, e2);:} |
+                expression:e1 LOGICAL_XOR expression:e2 {: RESULT = new BinaryLogicalXorExpression(Parser.lineNumber(), e1, e2);:} |		    
+                expression:e1 AND         expression:e2 {: RESULT = new BinaryAndExpression(Parser.lineNumber(), e1, e2);:} |
+                expression:e1 XOR         expression:e2 {: RESULT = new BinaryXorExpression(Parser.lineNumber(), e1, e2);:} |
+                expression:e1 OR          expression:e2 {: RESULT = new BinaryOrExpression(Parser.lineNumber(), e1, e2);:} |		    
+                expression:e1 EQV         expression:e2 {: RESULT = new BinaryEqvExpression(Parser.lineNumber(), e1, e2);:} |
+		expression:e1 IMP         expression:e2 {: RESULT = new BinaryImpExpression(Parser.lineNumber(), e1, e2);:};
+
+
+unary_expr ::= MINUS expression:e {: RESULT = new UnaryMinusExpression(Parser.lineNumber(), e); :} |
+               NOT expression:e {: RESULT = new UnaryNotExpression(Parser.lineNumber(), e); :} |
+               LOGICAL_NOT expression:e {: RESULT = new UnaryLogicalNotExpression(Parser.lineNumber(), e); :};
+
+call_statement ::= call:c SEMICOLON {: RESULT = new CallStatement(Parser.lineNumber(), c); :};
+
+call ::= NAME:n LPAREN params:p RPAREN {: RESULT = new Call(Parser.lineNumber(), n.text, p, Parser.lastSym); :};
+
+params ::=  param:p param_list:l {: RESULT =l; l.addParam(p); :} | {: RESULT = new ParameterList(); :};
+
+param_list ::= COMMA param:p param_list:l {: RESULT=l;  l.addParam(p); :} | {: RESULT = new ParameterList(); :}; 
+
+param ::=  expression:e {: RESULT = e;:};
+
+conditional ::= expression:e1 EQUAL expression:e2 {: RESULT = new ConditionalEqualExpression(Parser.lineNumber(), e1, e2); :} |
+                expression:e1 NOT_EQUAL expression:e2 {: RESULT = new ConditionalNotEqualExpression(Parser.lineNumber(), e1, e2); :}  |
+		expression:e1 GREATER_EQUAL expression:e2 {: RESULT = new ConditionalGreaterEqualExpression(Parser.lineNumber(), e1, e2); :} |
+		expression:e1 LESS_EQUAL expression:e2 {: RESULT = new ConditionalLessEqualExpression(Parser.lineNumber(), e1, e2); :} |
+                expression:e1 GREATER_THAN expression:e2 {: RESULT = new ConditionalGreaterExpression(Parser.lineNumber(), e1, e2); :} |
+		expression:e1 LESS_THAN expression:e2 {: RESULT = new ConditionalLessExpression(Parser.lineNumber(), e1, e2); :};

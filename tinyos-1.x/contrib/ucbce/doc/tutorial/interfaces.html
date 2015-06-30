@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+
+<html>
+  <head>
+
+    <link type="text/css" rel="stylesheet" href="main.css" />
+      <link type="text/css" rel="stylesheet" href="tutorial.css" />
+	<script language="JavaScript1.2" src="/main.js" type="text/javascript"></script>
+	<link rel="SHORTCUT ICON" href="./images/favicon.ico" />
+
+	  <title>TinyOS Tutorial: Handling events with interfaces</title>
+
+  </head>
+
+  <body>
+
+
+    <h1>nesC Interfaces: abstracting definition from implementation</h1>
+
+
+    <p>
+      This lesson discusses the basic concept of interfaces in
+      the nesC programming language. It includes an easy to
+      understand example using the Blink application introduced
+      in the TinyOS Lesson 1 Tutorial.
+    </p>
+
+
+    
+    <h1>Introduction</h1>
+
+      <p>Bug-free, maintainable software is rarely written
+      first try.  As code evolves, pieces are rewritten,
+      refactored and improved.  One large component may
+      turn into several smaller components.  Given
+      enough common functionality between components,
+      the behavior of a set of components may be defined
+      independently of any particular implementation.
+      <code>nesC</code> encourages such abstraction by
+      the use of <em>interfaces</em>.  In this tutorial,
+      we will define an interface (<code>BlinkHandler.nc</code>)
+      for handling blinks, and wrap the Blink application
+      with a program that implements the BlinkHandler
+      interface.
+      </p>
+
+
+
+    <h2>Interfaces</h2>
+
+    <p>
+      Let's start with a quote from the nesC reference manual:
+      </p>
+    <blockquote>
+      Interfaces in nesC are bidirectional: they specify
+      a multi-function interaction channel between two
+      components, the provider and the user. The interface
+      specifies a set of named functions, called commands,
+      to be implemented by the interface's provider and a
+      set of named functions, called events, to be implemented
+      by the interface's user.
+      </blockquote>
+
+     <p>
+      For our application, <code>Blink</code> will be the
+      interface provider, and <code>Blinker</code> will be
+      the interface user.
+      </p>
+
+    <h1>Componentizing Blink</h1>
+
+    <p>
+      To provide independence between the component that
+      wants to blink an LED and the program that provides
+      the actual blinking behavior, the <code>Blink</code>
+      configuration needs to be slightly modified to
+      remove Main:
+    </p>
+
+	  <center>
+	    <table class="code">
+	      <tbody>
+		<tr>
+		  <td width="100%">
+                    <b>Blink.nc</b>
+		    <pre> 
+configuration Blink {
+
+   provides {
+      interface StdControl;
+      interface BlinkHandler;
+   }
+}
+
+implementation {
+
+   components BlinkM, 
+              TimerC, 
+              LedsC;
+
+   BlinkM.StdControl   = StdControl;
+   StdControl          = TimerC;
+
+   BlinkM.Timer        -> TimerC.Timer[unique("Timer")];
+   BlinkM.Leds         -> LedsC;
+
+   BlinkM.BlinkHandler = BlinkHandler;
+}
+		    </pre>
+		  </td>
+		</tr>
+	      </tbody>
+	    </table>
+	  </center>
+
+    <p>
+      In addition to removing the Main, we also specify
+      that the BlinkHandler interface is implemented.
+      Since this tutorial is being written during the
+      holiday season, the Leds interface is retained
+      so that Blink can fire a red LED while the
+      BlinkHandler implementation fires a green LED.
+      </p>
+
+    <p>
+      In the Blink module file (BlinkM.nc) we need to add
+      a few lines of code:
+      </p>
+	  <center>
+	    <table class="code">
+	      <tbody>
+		<tr>
+		  <td width="100%">
+                    <b>BlinkM.nc</b>
+		    <pre> 
+
+module BlinkM {
+
+   provides {
+      interface StdControl;
+      interface BlinkHandler;
+   }
+
+   uses {
+      interface Timer;
+      interface Leds;
+   }
+}
+
+implementation {
+
+   ...
+
+   event result_t Timer.fired() {
+
+      signal BlinkHandler.Blink();
+      call Leds.redToggle();
+      return SUCCESS;
+   }
+
+   ...
+
+   default event result_t BlinkHandler.Blink() {
+      return SUCCESS;
+   }
+
+   ...
+}
+		    </pre>
+		  </td>
+		</tr>
+	      </tbody>
+	    </table>
+	  </center>
+
+
+    <p>
+      Now when the timer fires, the BlinkHandler is
+      signaled as well as toggling the red LED.
+      Since the BlinkHandler interface is provided,
+      a default Blink event is implemented.
+      </p>
+
+	  <h2>The BlinkHandler interface</h2>
+
+The interface is really simple.  The entire BlinkHandler.nc file 
+consists of 3 lines of code:
+	  <center>
+	    <table class="code">
+	      <tbody>
+		<tr>
+		  <td width="100%">
+                    <b>BlinkHandler.nc</b>
+		    <pre> 
+          interface BlinkHandler {
+             event result_t Blink ();
+          }
+		    </pre>
+		  </td>
+		</tr>
+	      </tbody>
+	    </table>
+	  </center>
+
+
+     <h2>The Blinker program</h2>
+    
+        <p>
+      Since Blink is a component, not a program,
+      it can't run by itself:
+      something, somewhere with a Main needs to wire to it.
+      The Blinker program fits the bill:
+      </p>
+	  <center>
+	    <table class="code">
+	      <tbody>
+		<tr>
+		  <td width="100%">
+                    <b>Blinker.nc</b>
+		    <pre> 
+
+configuration Blinker {
+
+}
+
+implementation {
+
+   components  Main,
+               Blink, 
+               LedsC,
+               BlinkerM;
+
+
+   Main.StdControl       -> BlinkerM.StdControl;
+   Main.StdControl       -> Blink.StdControl;
+
+   BlinkerM.Leds         -> LedsC;
+   BlinkerM.BlinkHandler -> Blink.BlinkHandler;
+}
+		    </pre>
+		  </td>
+		</tr>
+	      </tbody>
+	    </table>
+	  </center>
+
+
+
+    <h2>Catching the BlinkHandler.Blink event</h2>
+
+
+    <p>
+      The final bit is to provide an overriding event for
+      for catching the BlinkHandler.Blink signal.  This is
+      implemented like so:
+      </p>
+	  <center>
+	    <table class="code">
+	      <tbody>
+		<tr>
+		  <td width="100%">
+                    <b>BlinkerM.nc</b>
+		    <pre> 
+module BlinkerM {
+
+   provides {
+      interface StdControl;
+   }
+
+   uses {
+     interface BlinkHandler;
+     interface StdControl as Blink;
+     interface Leds;
+   }
+}
+
+implementation {
+
+   // StdControl implementation.
+
+   ...
+
+   event result_t BlinkHandler.Blink() {
+      call Leds.greenToggle();
+      return SUCCESS;
+   }
+}
+		    </pre>
+		  </td>
+		</tr>
+	      </tbody>
+	    </table>
+	  </center>
+
+    
+
+   <h1>Summary</h1>
+
+
+    <p>
+      nesC interfaces are indispenable for rapidly and
+      accurately implementing reusable components.
+      This tutorial and accompanying code is intended
+      to help clarify some of the implementation details
+      for creating and implementing interfaces.
+    </p>
+
+
+    <h2>Exercise</h2>
+
+    <p>
+      Use a parameterized interface to make the yellow LED
+      blink. Hint: Remember to parameterize the default
+      implementation of the Blink event:
+      </p>
+
+	  <center>
+	    <table class="code">
+	      <tbody>
+		<tr>
+		  <td width="100%">
+                    <b>BlinkerM.nc</b>
+		    <pre> 
+   ...
+
+   default event result_t BlinkHandler.Blink[uint8_t id]() {
+      return SUCCESS;
+   }
+
+   ...
+		    </pre>
+		  </td>
+		</tr>
+	      </tbody>
+	    </table>
+	  </center>
+    
+
+    <p>
+      Comments and corrections to: doolin at ce dot berkeley dot edu.
+      </p>
+
+      <hr />
+
+
+  </body>
+</html>
+

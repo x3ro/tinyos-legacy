@@ -1,0 +1,30 @@
+#<SYMDEFS>#
+;
+;  Symbols for refrencing patch vectors in DFU Flash
+
+0x0120 A DFU_Start                 ; 0
+0x0124 A DFU_B_RcvBlockData        ; 1
+0x0128 A DFU_B_SendBlockData       ; 2 
+0x012C A DFU_B_SendBlockDataBusy   ; 3
+
+0x0130 A DFU_UsbDriver_Init        ; 4             
+0x0134 A DFU_UsbDriver_Detach      ; 5
+0x0138 A DFU_Usb_Configure         ; 6
+0x013C A DFU_Usb_ChangeCallbacks   ; 7
+
+0x0140 A DFU_UsbControl_RxInit     ; 8             
+0x0144 A DFU_UsbControl_RxGet      ; 9
+0x0148 A DFU_UsbControl_RxAbort    ; 10
+0x014C A DFU_UsbControl_RejectReq  ; 11
+
+0x0150 A DFU_UsbInt_TxInit         ; 12             
+0x0154 A DFU_UsbInt_TxSend         ; 13
+0x0158 A DFU_UsbInt_TxAbort        ; 14
+0x015C A DFU_UsbBulk0_RxInit       ; 15
+
+0x0150 A DFU_UsbBulk0_RxGet        ; 16
+0x0154 A DFU_UsbBulk0_RxAbort      ; 17
+0x0158 A DFU_UsbBulk0_TxInit       ; 18
+0x015C A DFU_UsbBulk0_TxSend       ; 19
+
+0x0160 A DFU_UsbBulk0_TxAbort      ; 20

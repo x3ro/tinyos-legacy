@@ -1,0 +1,10 @@
+check for:
+  overflow of stkdepth (255 max)
+  too many args, local or closure vars (128 max)
+
+remove op_return (it's always the last byte of a function)
+  (or at least make it implicit if you run over the end of a fn)
+
+in dump:
+  check for excessive size, object length overflow
+  mybe check for int overflow ?

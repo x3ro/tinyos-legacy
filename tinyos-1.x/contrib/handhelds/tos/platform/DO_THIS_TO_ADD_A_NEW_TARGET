@@ -1,0 +1,34 @@
+To add platform FOO_EX
+
+1) add FOO_EX into the file: XXX/tinyos-1.x/tools/make/all.target in
+   the PLATFORMS ?= line
+
+2) make a file FOO_EX.target  at teh top have PLATFORM = FOO_EX and at
+   the bottom FOO_EX: $(BUILD_DEPS)
+		   @:
+
+  -- this is where you define cflags, add platform libraries, etc.
+
+  mwclipboardC is an example of a fullish one:
+
+--- mwclipboardC example start ---
+PLATFORM = mwclipboardC
+
+ifdef CC2420_CHANNEL
+PFLAGS += -DCC2420_DEF_CHANNEL=$(CC2420_CHANNEL)
+endif
+
+CFLAGS += \
+-I$(TOSDIR)/lib/CC2420Radio
+
+$(call TOSMake_include_platform,msp)
+
+# for any platform specific libraries
+PLATFORM_LIBS = 
+PLATFORM_LDFLAGS = 
+
+mwclipboardC: $(BUILD_DEPS)
+	@:
+
+
+--- mwclipboardC example end ---

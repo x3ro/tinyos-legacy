@@ -1,0 +1,24 @@
+$Id: README,v 1.1 2004/05/03 23:09:41 prabal Exp $
+README for PirToLeds
+Author/Contact: Prabal Dutta 
+
+Description:
+
+PirToLeds is an application that periodically samples the PIR sensor
+and displays the highest 3 bits of the raw PIR ADC reading to the 
+LEDs, with YELLOW being the most signficant bit and RED being the 
+least significant bit.  If you stand very, very still, you should see
+either the YELLOW LED only (4) or the RED AND GREEN together (3) 
+turning on, or you might see oscillations between these two states.
+Thereafter, when you move around, you should see the other LED 
+combinations turning on and off, indicating your motion is causing 
+the PIR sensor to change its output, which is then reflected in the 
+LEDs.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

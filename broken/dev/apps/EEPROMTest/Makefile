@@ -1,0 +1,3 @@
+COMPONENT=EEPROMTest
+include ../Makerules
+

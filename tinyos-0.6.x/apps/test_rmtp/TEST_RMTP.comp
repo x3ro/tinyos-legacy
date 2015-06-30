@@ -1,0 +1,57 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2002 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Phil Levis <pal@cs.berkeley.edu>
+ * Date:                5/30/02
+ *
+ * Description: Test application component to drive RMTP (Reliable
+ * Mote Transport Protocol).
+ *
+ */     
+
+TOS_MODULE TEST_RMTP;
+
+ACCEPTS{
+  char TEST_INIT();
+  char TEST_START();
+};
+
+HANDLES{
+  void TEST_TIMER(void);
+  char TEST_SEND_ACKED(char* data);
+  char TEST_SEND_FAILED(char* data);
+  char TEST_FORWARD_PACKET(TOS_MsgPtr packet);
+};
+
+USES{
+  char TEST_SUB_SEND(char* data, char len);
+  char TEST_SUB_SEND_CANCEL(void);
+  char TEST_SUB_DISCOVER(void);
+  char TEST_SUB_HAS_PARENT(void);
+
+  char TEST_SUB_TIMER_START(UINT8 id, char type, UINT32 interval);
+  char TEST_SUB_TIMER_STOP(UINT8 id);
+  char TEST_SUB_INIT(void);
+  char TEST_SUB_START(void);
+  short TEST_SUB_RANDOM(void);
+
+};

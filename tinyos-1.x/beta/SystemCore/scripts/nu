@@ -1,0 +1,47 @@
+#!/usr/bin/perl -w
+use strict;
+#$Id: nu,v 1.5 2004/08/26 02:04:56 gtolle Exp $
+
+my $G_id = '$Id: nu,v 1.5 2004/08/26 02:04:56 gtolle Exp $';
+my ($G_ver,$G_date) = ($G_id =~ /Id: \S+ (\S+) (\S+)/) ? ($1,$2) : (0,0);
+
+
+my %Progs = (
+  ev => 'net.tinyos.eventlogger.EventLoggerControl',
+  he => 'net.tinyos.hello.HelloPing',
+  mq => 'net.tinyos.mgmtquery.MgmtQueryCommander',
+  pm => 'net.tinyos.powermgmt.PowerMgmt',
+  tb => 'net.tinyos.multihop.MultihopTreeBuilder',
+  li => 'net.tinyos.tools.Listen',
+  de => 'net.tinyos.tools.Deluge',
+  np => 'net.tinyos.deluge.DelugeControl',
+  sf => 'net.tinyos.sf.SerialForwarder',
+);
+
+if( @ARGV == 0 ) {
+  print <<"EOF";
+Nucleus/SNMS Shortcut Script, version $G_ver, date $G_date
+
+usage: nu [alias] [args]
+
+EOF
+
+  my $fmt = '%6s  %s'."\n";
+
+  printf( $fmt, "Alias", "Java Application" );
+  printf( $fmt, "-----", "-" x 60 );
+  for my $prog (sort keys %Progs) {
+    printf( $fmt, $prog, $Progs{$prog} );
+  }
+  print "\n";
+
+  exit 0;
+}
+
+my $prog = shift @ARGV;
+if( !exists $Progs{$prog} ) {
+  die "ERROR, unknown program $prog\n";
+}
+
+exec( "java", $Progs{$prog}, @ARGV );
+

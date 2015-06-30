@@ -1,0 +1,17 @@
+#ifndef TESTS_TOSSIM_UTIL_HEAP_TEST_II          // -*- c++ -*-
+#define TESTS_TOSSIM_UTIL_HEAP_TEST_II
+ 
+namespace tinyos {
+namespace tos {
+namespace sim {
+namespace test {
+ 
+// ---------------------------------------------------------------------
+// Heap_Test
+
+} // namespace test
+} // namespace sim
+} // namespace tos
+} // namespace tinyos
+
+#endif // TESTS_TOSSIM_UTIL_HEAP_TEST_II

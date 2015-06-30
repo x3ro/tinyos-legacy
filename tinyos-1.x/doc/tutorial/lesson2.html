@@ -1,0 +1,320 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.78 [en] (X11; U; Linux 2.4.7-10 i686) [Netscape]">
+   <title>Lesson 2: Event-Driven Sensor Acquisition</title>
+<!-- mdw@eecs.harvard.edu - modified to fix StdControl references in
+     Sounder -->
+</head>
+<body bgcolor="#F8F8FF" link="#005BB7" vlink="#005BB7">
+&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><font face="tahoma,arial,helvetica"><font size=-1>Lesson
+2: Event-Driven Sensor Acquisition</font></font></b>
+<p><font face="tahoma,arial,helvetica">Last updated 9 September&nbsp; 2003</font></td>
+</tr>
+</table>
+
+<p>This lesson demonstrates a simple sensor application that takes light
+intensity readings (from the sensor board's photo sensor on Mica motes or
+from the onboard temperature sensor on Telos) and displays
+those readings on the LEDs. This is based on the <tt>Sense</tt> application,
+found in <tt><a href="../../apps/Sense">apps/Sense</a></tt>. This is a
+very simple application that reads a value from the light sensor and displays
+the lower 3 bits of the value on the LEDs. The application configuration
+is found in
+<tt>Sense.nc</tt> and the implementation module in <tt>SenseM.nc</tt>.
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">The SenseM.nc component</font></nobr></b></td>
+</tr>
+</table>
+
+<p>Let's first look at the top portion of <tt>SenseM.nc</tt>:
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%"><b>SenseM.nc</b>
+<pre>module SenseM {
+&nbsp; provides {
+&nbsp;&nbsp;&nbsp; interface StdControl;
+&nbsp; }
+&nbsp; uses {
+&nbsp;&nbsp;&nbsp; interface Timer;
+&nbsp;&nbsp;&nbsp; interface ADC;
+&nbsp;&nbsp;&nbsp; interface StdControl as ADCControl;
+&nbsp;&nbsp;&nbsp; interface Leds;
+&nbsp; }
+}
+// Implementation not shown ...</pre>
+</td>
+</tr>
+</table></center>
+
+<p>Like <tt>BlinkM</tt>, this component provides the <tt>StdControl</tt>
+interface and uses <tt>Timer</tt> and <tt>Leds</tt>. It also uses two more
+interfaces: <tt>ADC</tt>, which is used to access data from the analogue-to-digital
+converter, and <tt>StdControl</tt>, which is used to initialize the ADC
+component.
+<p>This application uses a new component, <tt>TimerC</tt>, in place of
+<tt>SingleTimer</tt>.
+The reason is that <tt>TimerC</tt> allows multiple instance of timers,
+while <tt>SingleTimer</tt> only provides a single one that only one component
+can use. We'll discuss more on <tt>Timer</tt> a bit later.
+<p>Note the line
+<pre>&nbsp; interface StdControl as ADCControl;</pre>
+This is saying that this component uses the <tt>StdControl</tt> interface
+but gives the <b>interface instance</b> the name
+<tt>ADCControl</tt>. In
+this way a component can require multiple instances of the same interface,
+but give them different names. For example, a component might need to use
+the <tt>StdControl</tt> interface to control both the ADC and the sounder
+components. In this case we might say:
+<pre>&nbsp; interface StdControl as ADCControl;
+&nbsp; interface StdControl as SounderControl;</pre>
+The configuration that uses this module will be responsible for wiring
+each interface instance to some actual implementation.
+<p>One related note: if you don't provide an interface instance name then
+the instance is named the same as the interface. That is, the line
+<pre>&nbsp; interface ADC;</pre>
+is just shorthand for
+<pre>&nbsp; interface ADC as ADC;</pre>
+Take a look at the <tt>StdControl</tt> and <tt>ADC</tt> interfaces (both
+in tos/interfaces). You'll see that
+<tt><a href="../../tos/interfaces/StdControl.nc">StdControl</a></tt>
+is used to initialize and power a component (usually a piece of physical
+hardware) and <tt><a href="../../tos/interfaces/ADC.nc">ADC</a></tt> is
+used to get data from an ADC channel. <tt>ADC</tt> signals an event, <tt>dataReady()</tt>,
+when data is ready on the channel. Notice the <b>async</b> keyword is used
+in the ADC interface. This is declaring the commands and events as asynchronous
+code, i.e., code which can run in response to a hardware interrupt.
+<p>Open the file <tt><a href="../../apps/Sense/SenseM.nc">apps/Sense/SenseM.nc</a></tt>.&nbsp;
+You'll see the code simply calls
+<tt>ADC.getData()</tt> each time
+<tt>Timer.fired()</tt>
+is signaled. Likewise, when <tt>ADC.dataReady()</tt> is signaled, the
+internal function <tt>display()</tt> is invoked, which sets the LEDs to
+the low-order bits of the ADC value.
+<p>Notice the use of the function <tt>rcombine()</tt> in the implementation
+of <tt>StdControl.init()</tt>.
+<pre>&nbsp; return rcombine(call ADCControl.init(), call Leds.init());</pre>
+The function <tt>rcombine()</tt> is a special nesC combining function which
+returns the logical-and of two commands who result type is result_t.
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">The Sense.nc configuration</font></nobr></b></td>
+</tr>
+</table>
+
+<p>At this point you should be wondering, "how does the <tt>Sense</tt>
+application know that the ADC channel should access the light sensor?"
+This is exactly what the <tt>Sense.nc</tt> configuration wires up for us.
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%"><b>Sense.nc</b>
+<pre>configuration Sense {
+&nbsp; // this module does not provide any interface
+}
+implementation
+{
+&nbsp; components Main, SenseM, LedsC, TimerC, DemoSensorC as Sensor;
+
+&nbsp; Main.StdControl -> TimerC;
+&nbsp; Main.StdControl -> DemoSensorC;
+&nbsp; Main.StdControl -> SenseM;
+
+&nbsp; SenseM.ADC -> Sensor;
+&nbsp; SenseM.ADCControl -> Sensor;
+&nbsp; SenseM.Leds -> LedsC;
+&nbsp; SenseM.Timer -> TimerC.Timer[unique("Timer")];
+}</pre>
+</td>
+</tr>
+</table></center>
+
+<p>Most of this should be familiar from <tt>Blink</tt>. We're wiring up
+the
+<tt>Main.StdControl</tt> to <tt>SenseM.StdControl</tt>, as before.
+The
+<tt>Leds</tt> wirings is also similar to <tt>Blink</tt>, and we'll
+discuss
+<tt>Timer</tt> in a minute. The wiring for the ADC is:
+<pre>&nbsp; SenseM.ADC -> Sensor;
+&nbsp; SenseM.ADCControl -> Sensor;</pre>
+All we're doing is wiring up the <tt>ADC</tt> interface (used by
+<tt>SenseM</tt>)
+to a new component called <tt>DemoSensorC</tt>. Same goes for the <tt>ADCControl</tt>
+interface, which you'll recall is an instance of the <tt>StdControl</tt>
+interface used by
+<tt>SenseM</tt>.
+<p>Remember that
+<pre>&nbsp; SenseM.ADC -> Sensor;</pre>
+is just shorthand for
+<pre>&nbsp; SenseM.ADC -> Sensor.ADC;</pre>
+On the other hand,
+<pre>&nbsp; SenseM.ADControl -> Sensor;</pre>
+is <b>not shorthand</b> for
+<pre>&nbsp; SenseM.ADC -> Sensor.ADCControl;</pre>
+What's going on here? If you look at the <tt>DemoSensorC.nc</tt> component (found
+in
+<tt>tos/sensorboards/micasb</tt>), you'll see that it provides both
+the <tt>ADC</tt> and <tt>StdControl</tt> interfaces -- it doesn't have
+an interface called <tt>ADCControl</tt>. (<tt>ADCControl</tt> was just
+the name that we gave to the instance of
+<tt>StdControl</tt> in the <tt>SenseM</tt>
+component.) Rather, the nesC compiler is smart enough to figure out that
+because <tt>SenseM.ADCControl</tt> is <i>an instance of</i> the <tt>StdControl</tt>
+interface, that it needs to be wired up to
+<i>an instance of</i> the <tt>StdControl</tt>
+interface provided by <tt>DemoSensorC</tt>. (If <tt>DemoSensorC</tt> were to provide
+two instances of
+<tt>StdControl</tt>, this would be an error because the
+wiring would be ambiguous.) In other words,
+<pre>&nbsp; SenseM.ADControl -> Sensor;</pre>
+is shorthand for
+<pre>&nbsp; SenseM.ADControl -> Sensor.StdControl;</pre>
+Whew!
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Timer and parameterized
+interfaces</font></nobr></b></td>
+</tr>
+</table>
+
+<p>Let's look at the line
+<pre>&nbsp; SenseM.Timer -> TimerC.Timer[unique("Timer")];</pre>
+This is introducing a new bit of syntax, called a <b>parameterized interface</b>.
+<p>A parameterized interface allows a component to provide
+<i>multiple
+instances</i> of an interface that are parameterized by a runtime or compile-time
+value. Recall that it's possible for a component to provide multiple instances
+of an interface and to give them different names, e.g.,
+<pre>&nbsp; provides {
+&nbsp;&nbsp;&nbsp; interface StdControl as fooControl;
+&nbsp;&nbsp;&nbsp; interface StdControl as barControl;
+&nbsp; }</pre>
+This is just a generalization of the same idea. The <tt>TimerC</tt> component
+declares:
+<pre>&nbsp; provides interface Timer[uint8_t id];</pre>
+In other words, it provides 256 different instances of the
+<tt>Timer</tt>
+interface, one for each <tt>uint8_t</tt> value!
+<p>In this case, we want TinyOS applications to create and use multiple
+timers, each of which can be managed independently. For example, an application
+component might need one timer to fire at a certain rate (say, once per
+second) to gather sensor readings, while another component might need the
+a timer to fire at a different rate to manage radio transmission. By wiring
+the <tt>Timer</tt> interface in each of these components to a separate
+instance of the <tt>Timer</tt> interface provided by <tt>TimerC</tt>, each
+component can effectively get its own "private" timer.
+<p>When we say <tt>TimerC.Timer[someval]</tt>, we are specifying that
+<tt>BlinkM.Timer</tt>
+should be wired to the instance of the
+<tt>Timer</tt> interface specified
+by the value (<tt>someval</tt>) in the square brackets. This can be any
+8-bit positive number. If we were to specify a particular value here, such
+as 38 or 42, we might accidentally conflict with the timer being used by
+another component (if that component used the same value in the brackets).
+So, we use the compile-time constant function <tt>unique()</tt>, which
+generates a unique 8-bit identifier from the string given as an argument.
+Here,
+<pre>&nbsp; unique("Timer")</pre>
+generates a unique 8-bit number from a set corresponding to the string
+<tt>"Timer"</tt>.
+Therefore, Every component that uses <tt>unique("Timer")</tt> is guaranteed
+to get a <i>different</i> 8-bit value as long as the string used in the
+argument is the same. Note that if one component uses <tt>unique("Timer")</tt>
+and another uses
+<tt>unique("MyTimer")</tt>, they might get the <i>same</i>
+8-bit value. Therefore it's good practice to use the name of the parameterized
+interface as an argument to the <tt>unique()</tt> function. The compile-time
+constant function<tt></tt>
+<p><tt>&nbsp; uniqueCount("Timer")</tt>
+<p>will count the number of uses of <tt>unique("Timer"</tt>).
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Running the Sense
+application</font></nobr></b></td>
+</tr>
+</table>
+
+<p>As before, just do a <tt>make mica install</tt> in the <tt>Sense</tt>
+directory to compile and install the application on your mote. 
+For Mica motes, you'll need
+a sensor board attached to the mote with a photo sensor. The Mica sensor
+board, for example, snaps into place via the 51 pin connector. The type
+of sensorboard is selected by the <tt>-board</tt> command line option to
+<tt>ncc</tt>.
+On the Mica mote, the default sensor board type is <tt>micasb</tt>. However,
+if you have an older ("basic") sensor board, you might need to pass in
+the <tt>-board basicsb</tt> option to <tt>ncc</tt>. To do this, edit the
+<tt><a href="../../apps/Sense/Makefile">Makefile</a></tt>
+in the
+<tt>Sense</tt> directory and add the line
+<tt>SENSORBOARD=basicsb
+</tt>before
+the line that includes <tt>Makerules</tt>. The sensor boards supported
+by TinyOS are represented by the directory names in <a href="../../tos/sensorboards">tos/sensorboards</a>.
+If you are using Telos motes, the temperature sensor is built into the
+microcontroller and doesn't require a sensorboard or the <tt>-board</tt>
+command line option.  
+
+<p>The operation of the sensor is a bit unusual. The ADC yields a
+10-bit digitized sample of the photo sensor. What we would like is for
+the LEDs to be off when the node is in the light, and on when the node
+is in the dark. Here, we are looking at the upper three bits of this data
+coming from the ADC, and inverting the value. Note the line:
+<pre>&nbsp; display(7 - ((data >> 7) &amp; 0x7));</pre>
+in the <tt>ADC.dataReady()</tt> function of <tt>SenseM</tt>.
+<p>Note that when running the application you may really have to cover
+up the photo sensor pretty well to get it to respond - we'll admit that
+this is not the best application to really see the photo sensor at work!
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Exercises</font></nobr></b></td>
+</tr>
+</table>
+
+<p>
+<b>For Mica motes:</b>
+Extend the capability of the application by chirping the sensor board's
+sounder when it is dark! The TinyOS component for the Sounder is located
+in <tt>tos/sensorboards/micasb/Sounder.nc</tt> and provides the
+<tt>StdControl</tt>
+interface. Modify <tt>SenseM.nc</tt> to add a
+<tt>StdControl</tt> as <tt>SounderControl</tt>,
+wiring it as appropriate in <tt>Sense.nc</tt>.&nbsp; Remember to call init()
+to initialize the Sounder component. To make the sounder turn on from SenseM.nc,
+call
+<tt>SounderControl.start()</tt>. To turn off the sounder, call
+<tt>SounderControl.stop()</tt>.
+Be sure to test this new application many times to annoy everyone sitting
+around you.
+<p>
+<hr><b><a href="lesson1.html">&lt; Previous Lesson</a></b> |
+<b><a href="lesson3.html">Next
+Lesson ></a></b> |&nbsp; <b><a href="index.html">Top</a></b>
+</body>
+</html>
+
+<!--  LocalWords:  TinyOS nesC nc async norace BlinkM FooM ncc SingleTimer Leds
+ -->
+<!--  LocalWords:  LedsC StdControl tos init TimerC redOn redOff uint redToggle
+ -->
+<!--  LocalWords:  metadata html nesdoc gcc exe avr objcopy srec uisp mib dprog
+ -->
+<!--  LocalWords:  towards dapa xff ThinkPad dlpt Makelocal micasb Wshadow DDEF
+ -->
+<!--  LocalWords:  finline fnesc cfile lm Atmel ATmega nesC's nesc SenseM
+ -->
+<!--  LocalWords:  ADCControl SounderControl dataReady getData rcombine someval
+ -->
+<!--  LocalWords:  ADControl fooControl barControl MyTimer uniqueCount basicsb
+ -->
+<!--  LocalWords:  sensorboard Makerules sensorboards
+ -->

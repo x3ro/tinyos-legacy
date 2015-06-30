@@ -1,0 +1,8 @@
+/.cvsignore/1.1/Sun Oct 30 18:23:49 2005//
+/Makefile.am/1.1/Sun Oct 30 18:23:49 2005//
+/lex.mll/1.2/Tue Nov  1 02:28:11 2005//
+/parse.mly/1.2/Tue Nov  1 02:28:11 2005//
+/sql.mli/1.2/Tue Nov  1 02:28:11 2005//
+/sqlgen.ml/1.2/Tue Nov  1 02:28:11 2005//
+/tinysql.in/1.4/Fri Nov 18 00:04:45 2005//
+D

@@ -1,0 +1,113 @@
+body {
+	margin: 5px 5px 5px 5px;
+	padding: 0;
+	background-color: #FFFFFF;
+	font-family: Verdana, Bitstream Vera Sans, Arial, Helvetica, sans-serif;
+	font-size: small;
+	text-align: left;
+}
+
+a {
+	background: none;
+	text-decoration: none;
+	font-weight: bold;
+	color: #000099;
+}
+
+a:link {
+	color: #000099;
+}
+
+a:visited {
+	color: #003366;
+}
+
+a:active {
+	color: #CC0000;
+}
+
+a:hover {
+	background: none;
+	color: #23105A;
+	text-decoration: underline;
+}
+
+a img {
+	border: none;
+}
+
+h1, h2 {
+	margin: 0px;
+	padding: 0px;
+	font-weight: normal;
+	}
+
+h3 {
+	margin: 0px;
+	padding: 0px;
+	font-weight: bold;
+}
+
+code {
+	font-family: monospace;
+	font-size: medium;
+	display: inline;
+}	
+	
+code.screen, pre.screen {
+	font-family: monospace;
+	font-size: medium;
+	display: block;
+	padding: 5pt;
+	width: 750px;
+	background-color: #CCCCCC;
+	border: 1px dashed gray;
+	margin: 5px 5px;
+}
+
+pre.caption {
+	font-family: Verdana, Bitstream Vera Sans, Arial, Helvetica, sans-serif;
+	font-size: x-small;
+	display: block;
+	padding: 5pt;
+	width: 750px;
+	margin: 0em 2em;
+	font-weight: bold;
+}
+
+div.note {
+	font-size:small;
+	width: 90%;
+	background-color: transparent;
+	border: 1px dashed gray;
+	margin: 0.5em 2em;
+	font-style : italic;
+}
+
+ul {
+	margin: 0.5em 0 0.5em 0;
+	padding-left: 1.0em;
+}
+
+.norm ul {
+	margin: 0 0 0 0;
+	padding-left: 4.0em;
+}
+
+.norm li {
+	padding: 0 0 0 0;
+}
+
+li {
+	padding: 0.5em 0 0.5em 0;
+}
+
+.toc {
+	margin-top: 0;
+        padding: 0 0 0 0;	
+}
+
+.toc ul {
+	margin: 0 0 0 0;
+	padding-left: 1.0em;
+}

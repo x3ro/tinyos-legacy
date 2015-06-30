@@ -1,0 +1,27 @@
+
+TOS_MODULE WAKEUP;
+
+ACCEPTS{
+	char WAKEUP_INIT(void);
+	char WAKEUP_START(void);
+	void WAKEUP_SET_WATCHDOG(void);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	void WAKEUP_CLOCK_EVENT(void);
+	char WAKEUP_SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr WAKEUP_MSG(TOS_MsgPtr data);
+	TOS_MsgPtr SHUTDOWN_MSG(TOS_MsgPtr data);
+	TOS_MsgPtr PROMISCUOUS_MODE_MSG(TOS_MsgPtr data);
+};
+
+USES{
+	char WAKEUP_SUB_INIT(void);
+	char WAKEUP_CLOCK_INIT(char interval, char scale);
+	char WAKEUP_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	char WAKEUP_SUB_PWR(char pwr);
+};
+

@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.3.9: http://docutils.sourceforge.net/" />
+<title>Radio Link Layer</title>
+<meta name="author" content="Joe Polastre" />
+<style type="text/css">
+
+/*
+:Author: David Goodger
+:Contact: goodger@users.sourceforge.net
+:date: $Date: 2005/09/20 16:30:23 $
+:version: $Revision: 1.6 $
+:copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+*/
+body {
+  font-family: Times;
+  font-size: 16px;
+}
+
+.first {
+  margin-top: 0 ! important }
+
+.last {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dd {
+  margin-bottom: 0.5em }
+
+/* Uncomment (& remove this text!) to get bold-faced definition list terms
+dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.attention, div.caution, div.danger, div.error, div.hint,
+div.important, div.note, div.tip, div.warning, div.admonition {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.hint p.admonition-title, div.important p.admonition-title,
+div.note p.admonition-title, div.tip p.admonition-title,
+div.admonition p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em }
+
+div.footer, div.header {
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin-left: 1em ;
+  border: medium outset ;
+  padding: 0em 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1 {
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+}
+
+h1.title {
+ text-align: center;
+ font-size: 32px;
+}
+
+h2 {
+ font-size: 16px;
+ font-family: Arial, sans-serif;
+}
+
+h2.subtitle {
+  text-align: center }
+
+h3 {
+ font-size: 12px;
+ font-family: Arial, sans-serif;
+}
+
+hr {
+  width: 75% }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font-family: serif ;
+  font-size: 100% }
+
+pre.line-block {
+  font-family: serif ;
+  font-size: 100% }
+
+pre.literal-block, pre.doctest-block {
+  margin-left: 2em ;
+  margin-right: 2em ;
+  background-color: #eeeeee }
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.option-argument {
+  font-style: italic }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+table {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.citation {
+  border-left: solid thin gray ;
+  padding-left: 0.5ex }
+
+table.docinfo {
+  margin: 2em 4em;
+}
+
+table.footnote {
+  border-left: solid thin black ;
+  padding-left: 0.5ex }
+
+td, th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+th.docinfo-name, th.field-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap;
+  }
+
+h1 tt, h2 tt, h3 tt, h4 tt, h5 tt, h6 tt {
+  font-size: 100% }
+
+tt {
+  background-color: #eeeeee }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="radio-link-layer">
+<h1 class="title">Radio Link Layer</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr class="field"><th class="docinfo-name">TEP:</th><td class="field-body">105</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Group:</th><td class="field-body">Core Working Group</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Type:</th><td class="field-body">Documentary</td>
+</tr>
+<tr><th class="docinfo-name">Status:</th>
+<td>Draft</td></tr>
+<tr class="field"><th class="docinfo-name">TinyOS-Version:</th><td class="field-body">2.x</td>
+</tr>
+<tr><th class="docinfo-name">Author:</th>
+<td>Joe Polastre</td></tr>
+<tr class="field"><th class="docinfo-name">Draft-Created:</th><td class="field-body">13-Oct-2004</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Draft-Version:</th><td class="field-body">1.5</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Draft-Modified:</th><td class="field-body">2005-02-14</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Draft-Discuss:</th><td class="field-body">TinyOS Developer List &lt;tinyos-devel at mail.millennium.berkeley.edu&gt;</td>
+</tr>
+</tbody>
+</table>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">This memo documents a part of TinyOS for the TinyOS Community, and
+requests discussion and suggestions for improvements.  Distribution
+of this memo is unlimited. This memo is in full compliance with
+TEP 1.</p>
+</div>
+<div class="section" id="abstract">
+<h1><a name="abstract">Abstract</a></h1>
+<p>This TEP covers the primitives addressed by the link layer
+and the architecture for composing services at the link layer</p>
+</div>
+<div class="section" id="overview">
+<h1><a name="overview">Overview</a></h1>
+<p>TinyOS now has platforms with bit/byte/packet level interfaces.
+Link layers must be written to expose a common interface to the radio,
+provide feedback from the physical layer to services, but still expose
+critical information (data, timing, power) in an independent manner.
+This TEP proposes the HPL and HIL components of the link protocol stack.
+While a description of the HAL is provided, its implementation 
+and composition will vary widely from radio to radio.</p>
+</div>
+<div class="section" id="hardware-presentation-layer-hpl">
+<h1><a name="hardware-presentation-layer-hpl">Hardware Presentation Layer (HPL)</a></h1>
+<blockquote>
+<ol class="loweralpha">
+<li><p class="first">Implementation: platform dependent</p>
+</li>
+<li><p class="first">Presentation: radio dependent (common HPL for same radio)</p>
+</li>
+<li><p class="first">Mostly stateless, but may need to include some state to address race
+conditions in event-driven operations and buffer swapping</p>
+</li>
+<li><dl class="first docutils">
+<dt>HPL for control:</dt>
+<dd><ul class="first last simple">
+<li>Chipcon CC1000 register-based radios:
+- read/write registers
+- interrupts and timer capture events (general I/O)</li>
+<li>Chipcon CC2420 buffer-based radios:
+- read/write registers
+- read/write RAM
+- interrupts and timer capture events (general I/O)</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+<blockquote>
+<pre class="literal-block">
+interface HPLCC2420
+{
+  async command uint8_t cmd(uint8_t addr);
+  async command uint8_t write(uint8_t addr, uint16_t data);
+  async command uint16_t read(uint8_t addr);
+}
+
+// a subset of the capture provided by the hardware
+interface HPLCC2420Capture
+{
+  async command result_t enableCapture(bool low_to_high);
+  async event result_t captured(uint16_t val);
+  async command result_t disable();
+}
+</pre>
+</blockquote>
+<ol class="loweralpha" start="5">
+<li><dl class="first docutils">
+<dt>HPL for data</dt>
+<dd><ul class="first last simple">
+<li>Chipcon CC1000 register-based radios:
+- read/write byte</li>
+<li>Chipcon CC2420 buffer-based radios:
+- read/write 128-byte FIFO</li>
+</ul>
+</dd>
+</dl>
+<pre class="literal-block">
+interface HPLCC2420FIFO
+{
+  async command cc2420_result_t readRXFIFO(uint8_t length, uint8_t *data);
+  async command cc2420_result_t writeTXFIFO(uint8_t length, uint8_t *data);
+  async event result_t RXFIFODone(uint8_t length, uint8_t *data, cc2420_result_t success);
+  async event result_t TXFIFODone(uint8_t length, uint8_t *data, cc2420_result_t success);
+}
+</pre>
+</li>
+<li><p class="first">The HPL interfaces reside in the radio's &quot;chips&quot; directory while
+the underlying HPL implementations (*C, *M) reside in 
+a microcontroller or platform directory.</p>
+</li>
+</ol>
+</blockquote>
+</div>
+<div class="section" id="hardware-adaptation-layer-hal">
+<h1><a name="hardware-adaptation-layer-hal">Hardware Adaptation Layer (HAL)</a></h1>
+<blockquote>
+<ol class="loweralpha">
+<li><p class="first">Implementation: microcontroller independent, radio dependent</p>
+</li>
+<li><p class="first">Presentation: radio dependent</p>
+</li>
+<li><p class="first">The HAL may be broken into a number of parts that communicate with
+each other.  As we approach the radio's interface 
+(whether it be bit, byte, or packet), translations may occur
+on the data--coding, cryptography etc.
+(see Figure 2 of RadioActive networks paper)</p>
+<p>This PHY/MAC split currently exists in TinyOS with 
+portions of the Mica high speed radio stack. (see tinyos-1.x/doc)
+Note that the Mica high speed radio stack provides a horizontal
+component as well for CSMA.  The same may exist for security
+(ie: perform a translation on this packet for encryption).</p>
+<p>The &quot;MAC&quot; is a separate configurable component that includes the
+interfaces exposed to the AM/Comm layers.  The PHY/MAC do not do
+any packet filtering (including CRC).</p>
+</li>
+</ol>
+</blockquote>
+</div>
+<div class="section" id="hardware-independent-layer-hil">
+<h1><a name="hardware-independent-layer-hil">Hardware Independent Layer (HIL)</a></h1>
+<blockquote>
+<p>The &quot;MAC&quot; provides the typical send and receive packet interfaces.
+Additionally, the MAC provides control interfaces similar to B-MAC,
+including the ability to turn on or off CSMA, acks, and low power
+listening:</p>
+<pre class="literal-block">
+interface CSMAControl
+{
+  async command result_t enableCCA();
+  async command result_t disableCCA();
+  async command result_t enableAck();
+  async command result_t disableAck();
+  async command TOSMsg* HaltTx();
+}
+</pre>
+<p>The units of the CSMA Backoff are <em>SYMBOL PERIODS</em> of the radio.
+See the RadioControl interface below to convert symbol periods into
+normal time units:</p>
+<pre class="literal-block">
+interface CSMABackoff
+{
+  async event int16_t initial(TOSMsg* m);
+  async event int16_t congestion(TOSMsg* m);
+}
+</pre>
+<p>Low Power Listening provides additional challenges as the notation
+used for LPL changes from radio to radio.  On an RFM, bit based
+radio, LPL has no notion of long preambles.  On the CC1000, a long
+preamble is used for LPL.  On the CC2420, cyclical packets must be
+used for LPL (due to the HW constraints, long preambles are not an
+option).  A proposal:</p>
+<pre class="literal-block">
+interface LowPowerListening
+{
+  async command result_t SetMode(lpl_mode_t mode);
+  async command lpl_mode_t GetMode();
+  async command result_t SetListeningMode(lpl_mode_t mode);
+  async command lpl_mode_t GetListeningMode();
+  async command result_t SetTransmitMode(lpl_mode_t mode);
+  async command lpl_mode_t GetTransmitMode();
+}
+</pre>
+<p>The lpl_mode_t values are mapped by the specific radio implementation
+to identical idle listening cost across platforms (cost when there
+is no traffic on the channel).  The TX cost may be higher, and must
+be documented as to its value on each radio.</p>
+<p>Additional HAL-level interface for Low Power Listening in a radio
+dependent manner:</p>
+<pre class="literal-block">
+interface CC1000LowPowerListening
+{
+  async command result_t SetPreambleLength(uint16_t bytes);
+  async command uint16_t GetPreambleLength();
+  async command result_t SetCheckInterval(uint16_t ms);
+  async command uint16_t GetCheckInterval();
+}
+</pre>
+<p>The &quot;mode&quot; options provide a level of abstraction above the 
+CC1000 specific preamble-length and check-interface functions.
+A generic mode setting interface may be provided separately from the
+radio specific parameters that may be set.</p>
+<p>Support for Time Synchronization services
+Currently we have RadioCoordinator, put in place by UCLA and Kamin
+Whitehouse.  RadioCoordinator is renamed into an HIL interface
+called RadioTimeStamping.  It provides the time that an event occurred
+and the message buffer being received at that start of frame
+delimiter.  The time value is always a 32768Hz 16-bit value .
+CC1000RadioTimeStamping is an example of an expanded time HAL interface
+specific to the CC1000 radio:</p>
+<pre class="literal-block">
+interface RadioTimeStamping
+{
+  async event void SFD(uint16_t time, TOSMsg* msgBuff);
+}
+</pre>
+<p>Each platform may be able to provide more information than just the
+SFD timestamp.  These platforms will have their own HAL interfaces
+with additional time information:</p>
+<pre class="literal-block">
+interface CC1000RadioTimeStamping
+{
+  async event void startSymbol(uint8_t bitsPerBlock, uint8_t offset, TOSMsg* msgBuff);
+  async event void byte(TOSMsg* msg, uint8_t byteCount);
+  async event void blockTimer();
+}
+</pre>
+<p>The 16-bit &quot;time&quot; field of TOSMsg is the 16-bit 32768Hz timer value
+corresponding to the SFD event.  Upper layers are responsible for 
+expanding the 16-bit 32768Hz value into a larger 32-bit or 64-bit
+value for higher level services.</p>
+<p>Being able to control the radio independent of the underlying hardware
+is extremely important for cross-platform applications.  In the
+RadioControl interface, we export a new notion of &quot;TinyOS channels&quot;.
+Each &quot;TinyOS channel&quot; is non-overlapping and the maximum number of
+available channels on a platform are available through a command.
+Likewise, output RF power is determined by a virtual scale from
+0 to 255, where 0 is the radio's minimum output power and 255 is the
+radio's maximum output power.  Simple conversion functions allow
+the user to convert dB values into the virtual scale and vice versa.
+Radio timing information, such as bit, byte, and symbol times are
+provided through the RadioControl interface.  See the RadioControl
+interface defintion in tinyos-2.x/tos/interfaces:</p>
+<pre class="literal-block">
+interface RadioControl
+{
+  command result_t SetRFChannel(uint8_t channel);
+  command uint8_t GetRFChannel();
+  command uint8_t GetMaxChannels();
+
+  command result_t SetRFPower(uint8_t power);
+  command uint8_t GetRFPower();
+
+  command uint8_t RFtoDB(uint8_t power);
+  command uint8_t DBtoRF(int8_t dbm);
+
+  command uint16_t getTimeBit();
+  command uint16_t getTimeByte();
+  command uint16_t getTimeSymbol();
+}
+</pre>
+<p>The TOSMsg structure is created such that each radio implementation
+may define its own header, footer, and metadata.  Since each
+radio's layout will be distinct, common fields must be exposed
+through a unified interface, known as RadioPacket.  
+Platform indpendent services use RadioPacket to access common
+message fields; whereas platform dependent services directly
+access the TOSMsg fields as defined by that radio implementation:</p>
+<pre class="literal-block">
+interface RadioPacket
+{
+  command uint8_t getLength(TOSMsg* msg);
+  command result_t setLength(TOSMsg* msg, uint8_t length);
+
+  command uint8_t* getData(TOSMsg* msg);
+
+  command uint16_t getAddress(TOSMsg* msg);
+  command result_t setAddress(TOSMsg* msg, uint16_t addr);
+
+  command uint16_t getGroup(TOSMsg* msg);
+  command result_t setGroup(TOSMsg* msg, uint16_t group);
+
+  command uint16_t getTime(TOSMsg* msg);
+
+  command bool isAck(TOSMsg* msg);
+}
+</pre>
+<p>The radio interfaces come together in the new RadioC module.
+The interfaces described below are required by every RadioC module.
+RadioC, for CSMA radios, is built above another configuration called
+CSMARadioC to differentiate it from non-CSMA radios.  For most operations,
+users will wire to CSMARadioC; however RadioC provides a more general
+fallback for cross-platform application development.
+The configurations look like the following, such as
+in tos/chips/CC2420:</p>
+<pre class="literal-block">
+configuration RadioC 
+{
+  provides 
+  {
+    // split phase startup and shutdown of the radio
+    interface SplitControl;
+    // change frequency, power, etc.
+    interface RadioControl;
+    // send a message
+    interface Send;
+    // receive a message
+    interface Receive;
+  }
+}
+implementation
+{
+  components CSMARadioC as CC2420RadioC;
+
+  SplitControl = CC2420RadioC;
+  RadioControl = CC2420RadioC;
+  Send = CC2420RadioC;
+  Receive = CC2420RadioC;
+}
+</pre>
+<p>Then, if the radio supports CSMA, it also provides a
+CSMARadioC configuration.  Services wire to RadioC to be
+radio-agnostic, and CSMARadioC if they wish to use the CSMA
+control functionality but restrict their service's portability
+to CSMA radios:</p>
+<pre class="literal-block">
+configuration CSMARadioC
+{
+  provides 
+  {
+    // split phase startup and shutdown of the radio
+    interface SplitControl;
+    // change frequency, power, etc.
+    interface RadioControl;
+    // send a message
+    interface Send;
+    // receive a message
+    interface ReceiveMsg as Receive;
+
+    // enable/disable csma, acks
+    interface CSMAControl;
+    // change the backoff on a per-packet basis
+    interface CSMABackoff;
+    // duty cycle the radio with preamble sampling
+    interface LowPowerListening;
+  }
+}
+implementation {
+  components CC2420RadioM ...
+}
+</pre>
+</blockquote>
+</div>
+<div class="section" id="future-work">
+<h1><a name="future-work">FUTURE WORK:</a></h1>
+<p>Address interrupts and timer captures in a hardware-independent manner.
+Allows elimination of HPLCC2420Capture and HPLCC2420Interrupt interfaces.</p>
+</div>
+<div class="section" id="author-s-address">
+<h1><a name="author-s-address">6. Author's Address</a></h1>
+<div class="line-block">
+<div class="line">Joe Polastre</div>
+<div class="line">467 Soda Hall</div>
+<div class="line">UC Berkeley</div>
+<div class="line">Berkeley, CA 94720</div>
+<div class="line"><br /></div>
+<div class="line">email - polastre AT cs.berkeley.edu</div>
+</div>
+</div>
+</div>
+</body>
+</html>

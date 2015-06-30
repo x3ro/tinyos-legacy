@@ -1,0 +1,3 @@
+COMPONENT=MultiCharMonibus
+include ../Makerules
+

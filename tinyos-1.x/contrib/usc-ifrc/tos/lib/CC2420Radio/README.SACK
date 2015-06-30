@@ -1,0 +1,13 @@
+In order to use Software ACK add CFLAGS += -DSACK in your
+Makefile 
+
+Software ACK may be required if both promiscuous mode and
+ACK are required. CC2420 does not support hardware ACK with
+promiscuous mode.
+
+
+
+Sumit Rangwala 
+srangwal@usc.edu 
+
+# vim: set ts=4 tw=60:

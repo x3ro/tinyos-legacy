@@ -1,0 +1,210 @@
+
+/* 
+ * Copyright (c)  2004 Hewlett-Packard Laboratories.  
+ * All rights reserved.
+ *
+ * $Source: /cvsroot/tinyos/tinyos-1.x/contrib/handhelds/tos/platform/zap/zap.tcf,v $
+ * $Revision: 1.1 $           $Author: adchristian $
+ * $State: Exp $      $Locker:  $
+ * $Date: 2005/07/29 18:29:30 $
+ */
+/*
+ * BEGIN_DESC
+ *
+ *  File:
+ *      ZZ.c
+ *
+ *  Purpose:
+ *    ZZ
+ *
+ *  Interface:
+ *    ZZ
+ *
+ *  Theory:
+ *    ZZ
+ *
+ * END_DESC
+ */
+
+utils.loadedFiles = {};
+config = new Config("config_0");
+config.create("zap");
+config.board("zap").create("cpu_0", utils.loadArch("5509"));
+config.board("zap").mem = [];
+/* the following addresses/lengths are in 16-bit _words_ ... */
+config.board("zap").mem[0] = { comment: "dummy 16 bit async", /* CE0 */
+    name: "SPARE", space: "code/data", base: 0x080000, len:  0x0100 };
+config.board("zap").mem[1] = { comment: "Flash ROM 16 bit async", /* CE1 */
+    name: "FLASH", space: "code/data", base: 0x200000, len:  0x200000 };
+config.board("zap").mem[2] = { comment: "LAN 16 bit async", /* CE2 */
+    name: "LAN",   space: "code/data", base: 0x400000, len:  0x200000 };
+config.board("zap").mem[3] = { comment: "LCD 16 bit async", /* CE3 */
+    name: "LCD",   space: "code/data", base: 0x600000, len:  0x1f8000 };
+config.board("zap").cpu("cpu_0").clockOscillator = 16.0000;
+config.board("zap").pllIndex = 0;
+utils.importFile("bios.tci");
+prog = config.boards()[0].cpus()[0].create(utils.getProgName());
+utils.setBuildOptions(prog);
+bios.init("zap", prog);
+prog.module("GBL").MODIFYCLKMD = 1;
+prog.module("GBL").CLKMD = 0x2cb0; /* PLL is x25/2 from crystal */
+prog.module("GBL").CLKOUT = 200.0000;
+utils.global[prog.module("EMIF").name] = prog.module("EMIF");
+utils.global[prog.module("HEMIF").instance("hEMIF0").name] =
+    prog.module("HEMIF").instance("hEMIF0");
+emifCfg0 = EMIF.create("emifCfg0");
+emifCfg0.emifManualConfigure = 1;
+/* all spaces 16-bit, max delays, timeout enabled */
+emifCfg0.emifGcr = 0x0220;  /* EMIF Global Control Register */
+emifCfg0.emifGrr = 0x0fff;  /* EMIF Global Reset Register */
+emifCfg0.emifCe0scr1 = 0x1fff;  /* EMIF CE0 Space Control Register 1 */
+emifCfg0.emifCe0scr2 = 0x5fff;  /* EMIF CE0 Space Control Register 2 */
+emifCfg0.emifCe0scr3 = 0x00ff;  /* EMIF CE0 Space Control Register 3 */
+emifCfg0.emifCe1scr1 = 0x1fff;  /* EMIF CE1 Space Control Register 1 */
+emifCfg0.emifCe1scr2 = 0x5fff;  /* EMIF CE1 Space Control Register 2 */
+emifCfg0.emifCe1scr3 = 0x00ff;  /* EMIF CE1 Space Control Register 3 */
+emifCfg0.emifCe2scr1 = 0x1fff;  /* EMIF CE2 Space Control Register 1 */
+emifCfg0.emifCe2scr2 = 0x5fff;  /* EMIF CE2 Space Control Register 2 */
+emifCfg0.emifCe2scr3 = 0x00ff;  /* EMIF CE2 Space Control Register 3 */
+emifCfg0.emifCe3scr1 = 0x1fff;  /* EMIF CE3 Space Control Register 1 */
+emifCfg0.emifCe3scr2 = 0x5fff;  /* EMIF CE3 Space Control Register 2 */
+emifCfg0.emifCe3scr3 = 0x00ff;  /* EMIF CE3 Space Control Register 3 */
+emifCfg0.emifManualConfigure = 0;
+hEMIF0.emifEnablePreInit = 1;
+hEMIF0.emifPreInit = prog.get("emifCfg0");
+utils.getProgObjs(prog);
+bios.enableMemoryHeaps(prog);
+/*bios.enableRealTimeAnalysis(prog);
+ *bios.enableRtdx(prog);  */
+bios.enableTskManager(prog);
+GBL.MEMORYMODEL = "LARGE";
+
+var mcbspCfg0 = MCBSP.create("mcbspCfg0");
+mcbspCfg0.mcbspManualSet = 1;
+/* 11.clkstp = 2 */
+mcbspCfg0.mcbspSpcr1 = 0x1000;  /* Serial Port Control Register 1 */
+mcbspCfg0.mcbspSpcr2 = 0x0100;  /* Serial Port Control Register 2 */
+mcbspCfg0.mcbspRcr1 = 0x0000;   /* Receive Control Register 1 */
+/* 0.rdatdly=1 */
+mcbspCfg0.mcbspRcr2 = 0x0001;   /* Receive Control Register 2 */
+mcbspCfg0.mcbspXcr1 = 0x0000;   /* Transmit Control Register 1 */
+/* 0.xdatdly=1 */
+mcbspCfg0.mcbspXcr2 = 0x0001;   /* Transmit Control Register 2 */
+mcbspCfg0.mcbspSrgr1 = 0x0063;  /* Sample Rate Generator Register 1 */
+/* 13.clksm=1, 12.fsgm=0 */
+mcbspCfg0.mcbspSrgr2 = 0x2013;  /* Sample Rate Generate Register 2 */
+mcbspCfg0.mcbspMcr1 = 0x0000;   /* MultiChannel Control Register 1 */
+mcbspCfg0.mcbspMcr2 = 0x0000;   /* MultiChannel Control Register 2 */
+/* 11.fsxm=1, 9.clkxm=1, 7.sclkme=0, 3.fsxp=1, 1.clkxp=1, 0.clkrp=0 */
+mcbspCfg0.mcbspPcr = 0x0a0c;    /* Pin Control Register */
+mcbspCfg0.mcbspManualSet = 0;
+hMCBSP0.mcbspHandleEnable = 1;
+hMCBSP0.mcbspHandleName = "C55XX_SPI_hMcbsp";
+hMCBSP0.mcbspEnablePreInit = 1;
+hMCBSP0.mcbspPreInit = prog.get("mcbspCfg0");
+
+var mcbspCfg1 = MCBSP.create("mcbspCfg1");
+mcbspCfg1.mcbspManualSet = 1;
+mcbspCfg1.mcbspSpcr1 = 0;  /* Serial Port Control Register 1 */
+mcbspCfg1.mcbspSpcr2 = 0x0100;  /* Serial Port Control Register 2 */
+mcbspCfg1.mcbspRcr1 = 0x0140;   /* Receive Control Register 1 */
+mcbspCfg1.mcbspRcr2 = 0x8026;   /* Receive Control Register 2 */
+mcbspCfg1.mcbspXcr1 = 0x00a0;   /* Transmit Control Register 1 */
+mcbspCfg1.mcbspXcr2 = 0x0004;   /* Transmit Control Register 2 */
+mcbspCfg1.mcbspSrgr1 = 0x00ad;  /* Sample Rate Generator Register 1 */
+
+mcbspCfg1.mcbspSrgr2 = 0x2000;  /* Sample Rate Generate Register 2 */
+mcbspCfg1.mcbspMcr1 = 0x0000;   /* MultiChannel Control Register 1 */
+mcbspCfg1.mcbspMcr2 = 0x0000;   /* MultiChannel Control Register 2 */
+mcbspCfg1.mcbspPcr = 0x0b0c;    /* Pin Control Register */
+mcbspCfg1.mcbspManualSet = 0;
+hMCBSP1.mcbspHandleEnable = 1;
+hMCBSP1.mcbspHandleName = "C55XX_UART_hMcbsp";
+hMCBSP1.mcbspEnablePreInit = 1;
+hMCBSP1.mcbspPreInit = prog.get("mcbspCfg1");
+var dmaTxCfg = DMA.create("dmaTxCfg");
+dmaTxCfg.dmaSetManually = 1;
+dmaTxCfg.dmaCsdp = 0x0606;
+dmaTxCfg.dmaCcr = 0x1340;
+dmaTxCfg.dmaCicr = 0x0000;
+dmaTxCfg.dmaCfiAdv = 0;
+dmaTxCfg.dmaCeiAdv = 0;
+dmaTxCfg.dmaCenAdv = 4;
+dmaTxCfg.dmaCfnAdv = 1; 
+dmaTxCfg.dmaSetManually = 0;
+DMA5.dmaHandleEnable = 1;
+DMA5.dmaHandleName = "hDmaTx";
+DMA5.dmaEnablePreInit = 1;
+DMA5.dmaPreInit = prog.get("dmaTxCfg");
+var dmaRxCfg = DMA.create("dmaRxCfg");
+dmaRxCfg.dmaSetManually = 1;
+dmaRxCfg.dmaCsdp = 0x020d;
+dmaRxCfg.dmaCcr = 0x4340;
+dmaRxCfg.dmaCicr = 0x000c/*0x0008*/; /* interrupt when full 0x000c */
+dmaRxCfg.dmaCfiAdv = 0;
+dmaRxCfg.dmaCeiAdv = 0;
+dmaRxCfg.dmaCenAdv = 30/*2000*/; /* UART_BUFFER_LENGTH */
+dmaRxCfg.dmaCfnAdv = 1; 
+dmaRxCfg.dmaSetManually = 0;
+DMA4.dmaHandleEnable = 1;
+DMA4.dmaHandleName = "hDmaRx";
+DMA4.dmaEnablePreInit = 1;
+DMA4.dmaPreInit = prog.get("dmaRxCfg");
+
+var mcbspCfg2 = MCBSP.create("mcbspCfg2");
+mcbspCfg2.mcbspManualSet = 1;
+mcbspCfg2.mcbspSpcr1 = 0x0000;  /* Serial Port Control Register 1 */
+mcbspCfg2.mcbspSpcr2 = 0x0100;  /* Serial Port Control Register 2 */
+mcbspCfg2.mcbspRcr1 = 0x0140;   /* Receive Control Register 1 */
+mcbspCfg2.mcbspRcr2 = 0x0000;   /* Receive Control Register 2 */
+mcbspCfg2.mcbspXcr1 = 0x0140;   /* Transmit Control Register 1 */
+mcbspCfg2.mcbspXcr2 = 0x0000;   /* Transmit Control Register 2 */
+mcbspCfg2.mcbspSrgr1 = 0x0000;  /* Sample Rate Generator Register 1 */
+mcbspCfg2.mcbspSrgr2 = 0x0000;  /* Sample Rate Generate Register 2 */
+mcbspCfg2.mcbspMcr1 = 0x0000;   /* MultiChannel Control Register 1 */
+mcbspCfg2.mcbspMcr2 = 0x0000;   /* MultiChannel Control Register 2 */
+mcbspCfg2.mcbspPcr = 0x0003;    /* Pin Control Register */
+mcbspCfg2.mcbspManualSet = 0;
+hMCBSP2.mcbspHandleEnable = 1;
+hMCBSP2.mcbspHandleName = "C55XX_CODEC_hMcbsp";
+hMCBSP2.mcbspEnablePreInit = 1;
+hMCBSP2.mcbspPreInit = prog.get("mcbspCfg2");
+
+var taskFxx = TSK.create("task");
+/*taskFxx.comment = "high"; */
+taskFxx.stackSize = 1024;
+taskFxx.priority = 1;
+taskFxx.fxn = prog.extern("taskFxn");
+taskFxx.arg0 = 1000;
+taskFxx.order = 2;
+
+prog.module("HWI").instance("HWI_INT16").fxn = prog.extern("HWI_eth");
+prog.module("HWI").instance("HWI_INT16").useDispatcher = true;
+prog.module("HWI").instance("HWI_INT16").interruptMask1 = "bitmask";
+prog.module("HWI").instance("HWI_INT16").interruptBitMask1 = 1;
+
+prog.module("HWI").instance("HWI_INT11").fxn = prog.extern("HWI_fifop");
+prog.module("HWI").instance("HWI_INT11").useDispatcher = true;
+prog.module("HWI").instance("HWI_INT11").interruptMask1 = "bitmask";
+prog.module("HWI").instance("HWI_INT11").interruptBitMask1 = 1;
+
+prog.module("HWI").instance("HWI_INT3").fxn = prog.extern("HWI_cca");
+prog.module("HWI").instance("HWI_INT3").useDispatcher = true;
+prog.module("HWI").instance("HWI_INT3").interruptMask1 = "bitmask";
+prog.module("HWI").instance("HWI_INT3").interruptBitMask1 = 1;
+
+prog.module("HWI").instance("HWI_INT19").fxn = prog.extern("HWI_rtc_sfd");
+prog.module("HWI").instance("HWI_INT19").useDispatcher = true;
+prog.module("HWI").instance("HWI_INT19").interruptMask1 = "bitmask";
+prog.module("HWI").instance("HWI_INT19").interruptBitMask1 = 1;
+
+prog.module("SWI").instance("PRD_swi").order = 1;
+prog.module("SWI").instance("KNL_swi").order = 2;
+prog.module("CLK").instance("PRD_clock").order = 1;
+prog.module("IDL").instance("LNK_dataPump").order = 1;
+prog.module("TSK").instance("TSK_idle").order = 1;
+prog.module("IDL").instance("IDL_cpuLoad").order = 3;
+prog.module("IDL").instance("RTA_dispatcher").order = 2;
+
+/* Generate .cdb file */
+prog.gen("zap");

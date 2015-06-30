@@ -1,0 +1,69 @@
+README for SenseAndNavigate
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+
+
+Description:
+
+SenseAndNavigate is based off of the application
+tinyos-1.x/contrib/cotsbots/apps/TestNavigation.  This application
+behaves as a dummy robot and performs two functions.  It accepts radio
+messages from the sensor network and relays it to the basestation for
+processing/control decisions.  By relay, this means unicasting at
+high transmission power.  It then accepts a radio message from
+the basestation that tells the robot where to move.
+
+
+
+Usage:
+
+This robot application (actuator) is compatible with various sensor
+network (observer) and basestation (control) applications for running
+single robot experiments.  The basic structure for a full application
+is as follows:
+	SensorNetwork -> Robot -> Basestation -> Robot
+where each -> represents a communication link.
+
+To see all sensor network applications that use this, run a grep for
+SenseAndNavigate on the README files in the applications directory.
+One such application is MagDirectBot.
+
+The types of messages from the sensor network recognized by
+SenseAndNavigate may change as more sensor network applications are
+added, so check the SenseAndNavigate.nc file for details.
+
+The basestation gives navigation instructions to the robot via a COTSBOT
+NavigationMsg.
+
+Note that as a dummy application, the Robot effectively maintains no
+state (heading, position), relying entirely upon the basestation and
+sensor network for navigation.
+
+
+
+Tools/Other Application components :
+The sensor network applications all reside in
+	tinyos-1.x/contrib/ucbRobo/apps/sensornet
+
+The matlab control applications on the basestation all reside in
+	tinyos-1.x/contrib/ucbRobo/tools/matlab/apps
+
+The java tools for communication reside in
+	tinyos-1.x/contrib/ucbRobo/tools/java/net/tinyos/RobotTB/MagDirectBot
+
+To drive the COTSBOT directly, look under
+	tinyos-1.x/contrib/ucbRobo/tools/matlab/lib/controlBot
+
+To send coordinates to the SenseAndNavigate application, use
+	tinyos-1.x/contrib/cotsbots/tools/RobotCmd/RobotCmdGUI
+
+
+
+Known bugs/limitations:
+
+Needs to be implemented (currently, it's just a mirror of
+TestNavigation), and Documentation in SensAndNavigate(M).nc needs to be update.
+
+Navigation is an open-loop component in its current implementation.  The speed
+needs to be set so that it corresponds to approximately 40cm/sec on whatever
+surface is being used at whatever battery voltage you are currently at.

@@ -1,0 +1,83 @@
+TinyOS Programming Manual
+
+))) Introduction
+
+- TinyOS is
+	- operating system and component library for networked sensors
+	- research platform
+	- multi-platform 
+		- note about platform documents (describe 
+                platform specifics and components available 
+                only on certain platforms)
+
+- Note about this manual: 
+	- basic understanding of shell scripts, cvs, etc. are assumed. 
+          If there are terms used that you do not understand, 
+          google on it.  See Appendix References.
+
+- nesc -- described in the context of the section. 
+          Recommend reading the entire nesc manual for 
+          thorough understanding of nesc. Many optimizations 
+          that you can make that aren't covered here.
+	  - why nesc came to be, that is, why the 
+          old "decorated c" code of tos 0.x was not 
+          sufficient (dave d.)
+
+- other documentation (tutorial, nesdoc)
+
+)))Core TinyOS concepts
+- execution model
+        - call/command
+        - post/task
+        - signal/event
+	- nesc support for execution model
+- component model
+	- interfaces
+	- modules
+	- configurations
+	- nesc support for component model
+
+))) Understanding the tinyos-1.x directory structure
+- TOSDIR explained
+- Makefiles
+- platforms
+- tos directory
+	- system
+	- lib
+- .nc files
+	- reference to naming conventions document
+
+))) Timers
+	- Absolute Timer
+
+
+))) Memory Management
+	- AllocationReq
+
+))) Power Management
+	- Radio
+	- Chip
+	- Sensors
+
+))) Sensors
+	- ADC
+		- ADC 
+		- ADCControl
+
+))) Miscellaneous
+	- BitSPI
+	- CheckpointRead	
+
+))) Communication
+	- Flash
+		- ByteComm 
+	- Radio
+		- AM
+	        - UART model
+
+))) Subsystems
+	- TinyDB
+	- TinySEC
+
+))) Appendix A: References
+	- ORA Programming Bash>>>>>>> 1.1.2.1

@@ -1,0 +1,18 @@
+README for CotsBots Platform
+Author/Contact: cotsbots-help@millennium.berkeley.edu
+
+As I am only one person, and not a very computer science-oriented one at that,
+I am counting on the users of the CotsBots robots to help debug and expand
+the current interfaces and components.
+
+If you run into any problems, please email the above address.  It doesn't
+matter how small they may seem to you -- if nothing else, it will help
+me clarify the included documentation.  If you have any suggestions, please
+email those as well.
+
+In addition, I will refer you to the ReadThisFirst.htm file in the 
+contrib/cotsbots/doc directory for some changes since the CotsBots were 
+handed out at the January 2003 PI Meeting.
+
+Have fun!
+

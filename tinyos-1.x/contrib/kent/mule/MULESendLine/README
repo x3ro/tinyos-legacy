@@ -1,0 +1,14 @@
+This is an app I wrote to test tiling. Basically, it's a hacked up version of
+MULETest. It's designed for a linear topology: nodes 0 and N start out 
+broadcasting packets. 0 has its red LED on and N has its yellow LED on.
+When a node gets a message from its lower neighbor, it turns on its red LED
+and starts sending. From its upper neighbor, turns on yellow LED, starts 
+sending. This lets you see as the messages travel up and down the line.
+
+To use tiling, set the HYBRIDTILE environment variable to 'y'. Suppose we have
+our hybrid.conf set up for 5 motes in a linear config, and we want to simulate
+20 motes. You might do it like this:
+$ make pc
+	a bunch of output from make......
+$ HYBRIDTILE=y HYBRIDCONF=$TOSDIR/hybrid.conf ./build/pc/main.exe 20
+

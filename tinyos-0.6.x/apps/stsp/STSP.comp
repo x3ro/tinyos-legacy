@@ -1,0 +1,77 @@
+/*                                                                      tab:4
+ *  ===================================================================================
+ *
+ *  IMPORTANT:  READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.  
+ *  By downloading, copying, installing or using the software you agree to this license.
+ *  If you do not agree to this license, do not download, install, copy or use the software.
+ *
+ *  Intel Open Source License 
+ *
+ *  Copyright (c) 1996-2000 Intel Corporation 
+ *  All rights reserved. 
+ *  Redistribution and use in source and binary forms, with or without modification,
+ *  are permitted provided that the following conditions are met: 
+ * 
+ *	Redistributions of source code must retain the above copyright notice, this 
+ *  list of conditions and the following disclaimer. 
+ *	Redistributions in binary form must reproduce the above copyright notice, this
+ *  list of conditions and the following disclaimer in the documentation and/or other 
+ *  materials provided with the distribution. 
+ *	Neither the name of the Intel Corporation nor the names of its contributors may 
+ *  be used to endorse or promote products derived from this software without specific 
+ *  prior written permission.
+ *  
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' 
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ *  IN NO EVENT SHALL THE INTEL OR ITS  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ *  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+ *  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ *  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *  POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * ====================================================================================
+ *
+ * Authors:		Su Ping <su.ping@intel.com
+ *				Intel Research Berkeley Lab
+ * Date:        5/30/2002
+ *
+ * The time sync module handles STSP request and response, adjust 
+ * locol clock to synchronize with a STSP server upon the reception
+ * of a STSP response. Round_trip time estimation is also implemented
+ * uing STSP ECHO REQUEST and RESPONSE  Upon receiving the expected 
+ * STSP ECHO RESPONSE, a mote immediately obtains an arrival time stamp.
+ * Round trip time is calculated by comparing the 
+ * arrival time stamp of a STSP ECHO RESPONSE msg with the original
+ * time stamp. 
+ * 
+ * Clock over flow interrupt is used as a timer.
+ * Every 3.9 min a STSP response is broascasted from root time server.
+ * This implementation is not meant for multihop network 
+ *
+ */
+
+
+TOS_MODULE STSP;
+
+ACCEPTS{
+	char STSP_INIT();
+	char STSP_START();
+};
+
+HANDLES{
+	TOS_MsgPtr STSP_MSG(TOS_MsgPtr data);
+	char STSP_SEND_DONE(TOS_MsgPtr data);
+	void STSP_CLOCK_OVERFLOW();
+};
+
+USES{
+	char STSP_SUB_SEND(short addr,char type, TOS_MsgPtr data);
+	char STSP_CLOCK_INIT(char scale, char interval);	
+	char STSP_SUB_INIT();
+	char STSP_RED_TOGGLE();
+	char STSP_GREEN_TOGGLE();
+	char STSP_YELLOW_TOGGLE();
+};

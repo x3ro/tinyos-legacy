@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+
+print  "CUST_OBJS = ";
+open(FOO, "grep component $ARGV[0] | grep -v end | sed 's/component//'|");
+while(<FOO>){
+	s/.$//;
+	chop($_);
+	print $_;
+	print ".o";
+}
+        print "\n";
+        print "\n";

@@ -1,0 +1,28 @@
+/*****
+* README file for TestSensorboard application
+*
+* Written by Robbie Adler
+* Last Updated: 1/2/2007
+******
+
+Application Purpose:
+--------------------
+Test application for imote2 sensorboard drivers based on the sensorboard driver framework.  
+
+Compilation instructions:
+-------------------------
+1.) identify the name of the sensorboard that you want to test.  The name of the sensorboard corresponds to the directory names 
+    in contrib/imote/tos/sensorboards.  As of this writing, 2 boards exist:  GenericSensorboard and BasicSensorboard.
+2.) Compile this application by running "make imote2 {debug} SENSORBOARD=<name of the board you want to test>.
+    ex:  make imote2 debug SENSORBOARD=GenericSensorboard will compile this app to test the GenericSensorboard
+    Note:  if you do not properly specify SENSORBOARD, the application will not compile.
+
+Features:
+---------
+-option to send captured data over USB
+-complete control of acquisition parameters via GetData Command
+-acquisition start and stop control via StartCollection and StopCollection commands
+-complete control over trigger parameters via AddTrigger and ClearTrigger
+-to get command usage type command name without any arguments
+-to get a list of all commands installed in the system type "ls<enter>"
+

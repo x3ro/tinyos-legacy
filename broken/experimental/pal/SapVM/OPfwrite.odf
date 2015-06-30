@@ -1,0 +1,1 @@
+<FUNCTION name=fwrite opcode=fwrite numParams=1 param1=buffer returnVal=TRUE desc="Writes a buffer to flash memory. Returns 1 if successful, 0 otherwise.">

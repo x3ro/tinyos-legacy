@@ -1,0 +1,22 @@
+ifndef CONTRIBDIR
+CONTRIBDIR := $(shell ncc -print-tosdir)/../contrib
+endif
+
+ifndef MAKESYSTEMC
+MAKESYSTEMC := $(CONTRIBDIR)/SystemC/MakeSystemC
+endif
+
+
+CFLAGS := $(CFLAGS) \
+-I$(CONTRIBDIR)/PEGSensor/PEGSensor \
+-I$(CONTRIBDIR)/PEGSensor/TickSensor \
+-I$(CONTRIBDIR)/PEGSensor/croute \
+-I$(CONTRIBDIR)/PEGSensor/magsensor \
+-I$(CONTRIBDIR)/PEGSensor/position \
+-I$(CONTRIBDIR)/PEGSensor/pursuer \
+-I$(CONTRIBDIR)/PEGSensor/routetest2 \
+-I$(CONTRIBDIR)/calamari/localization \
+-I$(CONTRIBDIR)/ucb/tos/sensorboards/honeydot
+
+include $(MAKESYSTEMC)
+

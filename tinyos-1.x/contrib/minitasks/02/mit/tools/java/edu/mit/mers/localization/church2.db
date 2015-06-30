@@ -1,0 +1,16 @@
+motefield ID=0 BackgroundFile=script.jpg Screen1X= Screen1Y= World1X= World1Y= Screen2X= Screen2Y= World2X= World2Y= MoteSize=
+mote ID=0 X=0.0 Y=0.0 pot=9 edge=1 MoteType=1
+mote ID=1 X=12.5 Y=0.0 pot=9 edge=1 MoteType=1
+mote ID=2 X=25.0 Y=0.0 pot=9 edge=1 MoteType=1
+mote ID=3 X=37.5 Y=0.0 pot=9 edge=1 MoteType=1
+mote ID=4 X=50.0 Y=0.0 pot=9 edge=1 MoteType=1
+mote ID=5 X=0.0 Y=15.0 pot=9 edge=1 MoteType=1
+mote ID=6 X=12.5 Y=15.0 pot=9 edge=0 MoteType=1
+mote ID=7 X=25.0 Y=15.0 pot=9 edge=0 MoteType=1
+mote ID=8 X=37.5 Y=15.0 pot=9 edge=0 MoteType=1
+mote ID=9 X=50.0 Y=15.0 pot=9 edge=1 MoteType=1
+mote ID=10 X=0.0 Y=30.0 pot=9 edge=1 MoteType=1
+mote ID=11 X=12.5 Y=30.0 pot=9 edge=1 MoteType=1
+mote ID=12 X=25.0 Y=30.0 pot=9 edge=1 MoteType=1
+mote ID=13 X=37.5 Y=30.0 pot=9 edge=1 MoteType=1
+mote ID=14 X=50.0 Y=30.0 pot=9 edge=1 MoteType=1

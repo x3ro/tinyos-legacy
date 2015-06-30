@@ -1,0 +1,150 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=FrontPage.Editor.Document>
+<meta name=Generator content="Microsoft FrontPage 5.0">
+<meta name=Originator content="Microsoft Word 10">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->
+<style>
+<!--
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman"; margin-left:0in; margin-right:0in; margin-top:0in}
+h1
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	mso-font-kerning:16.0pt;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman"}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h1>Setting <span class=GramE>Up</span> <span class=SpellE>Matlab</span></h1>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>Setting up <span class=SpellE>matlab</span> is pretty
+straightforward. Make sure that you install the help files; you’ll be sorry if
+you don’t.<span style='mso-spacerun:yes'>  </span>You also probably want to
+install most of the signal processing, math, and statistics toolboxes.</p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>In order to have the <span class=SpellE>matlab</span> serial
+port interface, you need to have at least <span class=SpellE>Matlab</span>
+Release 12.0.<span style='mso-spacerun:yes'>  Currently, matTos is compatible 
+with matlab R12, R12.1 and R12.5.&nbsp; If you use the old commStack in MatTos 
+you will have compatibility issues with 12.1, but see the 6.1 commStack for more 
+details.</span></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><b>To use the new commStack, you must type &quot;edit 
+classpath.txt&quot; in your matlab command window and add the line &quot;C:/nest/tools&quot; or 
+whatever the path to your nest/tools/ directory is.&nbsp; Then, restart matlab.</b></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>If you are running <span class=SpellE>winXP</span>, matlab Release 12.0 
+will require some fixes.<span
+style='mso-spacerun:yes'>  </span>(If you have a Pentium 4 processor, <span
+class=SpellE>Matlab</span> R12.0 might not start up at al.&nbsp; The following 
+will fix that as well.<span
+style='mso-spacerun:yes'>)  The fix is the following:</span></p>
+
+<p class=MsoNormal>&nbsp;&nbsp;&nbsp; 1.&nbsp; go to the “matlabR12\sys\java\jre\win32\”
+directory and copy the old “<span class=SpellE>jre</span>” directory to “<span
+class=SpellE>jreOld</span>”.<span style='mso-spacerun:yes'>  </span><span
+style='mso-spacerun:yes'> </span></p>
+
+<p class=MsoNormal>&nbsp;&nbsp;&nbsp; 2.&nbsp; copy the “<span class=SpellE>jre</span>”
+directory from a java <span class=SpellE>jdk</span> (I used jdk1.3.1_01, which
+comes with the <span class=SpellE>tinyOS</span> distribution CD) in that
+directory.<span style='mso-spacerun:yes'>  </span></p>
+
+<p class=MsoNormal>&nbsp;&nbsp;&nbsp; 3.&nbsp; Copy the “<span class=SpellE>swingall.jar</span>”
+file from the “<span class=SpellE>jreOld</span>/lib” to “<span class=SpellE>jre</span>/lib”.<span
+style='mso-spacerun:yes'>  </span></p>
+
+<p class=MsoNormal>&nbsp;&nbsp;&nbsp; 4.&nbsp; Now it should work.<span
+style='mso-spacerun:yes'>  </span>You might get funny java exceptions about
+your clipboard when you open <span class=SpellE>matlab</span>, but just copy
+and paste something and the exceptions stop.<span style='mso-spacerun:yes'>  </span></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>If
+you are using windows2000 you may have problems using the COMM port <span class=SpellE>
+redirector</span>, which is used to connect to sockets via the matlab serial 
+port interface.<span style='mso-spacerun:yes'>  This is only important if you 
+are trying to access serial ports remotely.</span></p>
+
+</div>
+
+</body>
+
+</html>

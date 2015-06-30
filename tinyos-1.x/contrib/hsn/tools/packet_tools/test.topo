@@ -1,0 +1,9 @@
+
+soigui_draw_node_at	0	3	2
+
+soigui_draw_node_at	2	2	3
+soigui_draw_node_at	3	2	4
+soigui_draw_node_at	4	4	3
+soigui_draw_node_at	5	4	4
+
+soigui_register_adjuvant 0 $SoiVar(color,sink) 1

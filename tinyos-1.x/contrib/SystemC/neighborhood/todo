@@ -1,0 +1,17 @@
+
+maybe some time:
+- error on double definitions
+- error on malformed definitions
+- The neighborhor Manager and neighborComm need to be able to use $(NEIGHBORHOOD) and $(NEIGHOBORCOMM) if they are to be composable
+- put a lock on the neighborhood list?? or should I copy all locations and ranging estimates while doing calculations?  What about deadlock?
+
+
+issues:
+-change names of get functions
+- tossim actually has mote 0
+- initialize generic comm inside neighbor comm
+- reflection doesn't use postPushTask() on .push()
+- neighborhood doesn't compile without a command being declared
+- header files from files that declare reflections should be included in the neighborhood they are using
+- can we have a manager manage two neighborhoods?  Ie. a hood and a hood of candidates?  this would be useful for properties like link quality and rssi that need multiple readings to be estimated.  Otherwise we will need managers that are using each other (which works out fine, too)
+- maybe we want a "valid" bit on reflections?

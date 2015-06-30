@@ -1,0 +1,13 @@
+This tool will collect RSSI data from a bunch on Mica2 or Dot3 nodes.
+
+To do this, first install tinyos-1.x/apps/chipconRSSI application on several nodes, which should be numbered 1-n in sequential order.
+
+Then, make sure you have a generic base on your serial port.
+
+finally, run the startCollectingRSSI.m file in matlab and then the initalizeChipconRSSI.m file.  For example, if your nodes are numbered 1-16, type
+
+startCollectingRSSI;
+initializeChipconRSSI(1:16, 1:16, mIF);
+
+
+and you should start seeing matlab try to make each node chirp in turn and then collect the sampled RSSI values from each receiver.

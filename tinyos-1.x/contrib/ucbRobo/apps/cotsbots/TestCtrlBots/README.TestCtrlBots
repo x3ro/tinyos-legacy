@@ -1,0 +1,27 @@
+README for TestCtrlBots
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+Compiles For:
+mica2 - not part of a sensor network
+
+Description:
+
+TestCtrlBots is used for testing the radio communication to a COTSBOT.
+The mote sends a repeating sequence of radio packets to drive the
+robot back and forth at different speeds (thereby replacing the role
+of RobotCmdGUI).  This application requires you to program the mote on
+the COTSBOT with the TestMotorBoard application.
+
+LED Debugging:
+YELLOW_LED -- Toggles when a full cycle of
+                1) Forward 
+                2) Reverse
+                3) Stop
+              is completed.
+
+Tools: None.  All modifications must be done to the code directly.
+
+Known bugs/limitations:
+
+The forward and reverse speeds are not matched, so the robot is likely
+to stray from it's position over time.

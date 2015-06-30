@@ -1,0 +1,60 @@
+README for a Logical Grid Routing 
+
+* Author/Contact:
+	Young-ri Choi
+	Department of Computer Sciences
+	The University of Texas at Austin
+	1 University Station C0500
+	Austin, TX 78712-0233 USA
+
+	E-mail: yrchoi@cs.utexas.edu
+
+* This implementation is based on the design by 
+  Mohamed G. Gouda, Young-ri Choi, Anish Arora and Vinayak Naik.
+  For the details of this routing protocol, please read lgrp.ps. 
+
+* The Logical Grid Routing provides routing interfaces in Routing.nc
+
+  interface Routing {
+  command result_t send(TOS_MsgPtr msg);
+  event result_t sendDone(TOS_MsgPtr msg, result_t success);
+  event TOS_MsgPtr receive(TOS_MsgPtr msg);
+  }
+
+* Description of the protocol: 
+  Motes form a logical grid, build a spanning tree whose root
+  is (0,0). Then motes use the spanning tree to forward a 
+  message to a base station, (0,0). In this protocol, motes 
+  only communicate with their logical neighbors that are
+  computed by a tree hop.
+
+* In this implementation, the coordinates of a mote are 
+  determined by TOS_LOCAL_ADDRESS of the mote and grid size 
+  N as follows.
+
+   id.x = TOS_LOCAL_ADDRESS % N;
+   id.y = TOS_LOCAL_ADDRESS / N;
+
+  ex) for 4x4 grid
+      12--- 13--- 14--- 15 
+	  |     |     |     |
+      8 --- 9 --- 10--- 11 
+	  |     |     |     |
+      4 --- 5 --- 6 --- 7
+	  |     |     |     |
+      0 --- 1 --- 2 --- 3
+      
+
+* This routing protocol consists of two modules
+  - GridRouting.nc : This is a module for each mote to route messages 
+    to (0,0) in a logical grid.  When a mote receives a message and 
+    the mote is the destination, the mote uses GridInfo interfaces to 
+    check if it has a parent. If it does, it forwards the message to 
+    its parent, else it discards the message. This module uses ReliableComm
+	to send and receive messages and provides Routing interfaces
+    in Routing.nc.
+
+  - GridTree.nc : This is a module for each mote to compute its parent 
+    in a spanning tree by exchanging "connected" messages. This 
+    module provides GridInfo interfaces in GridInfo.nc.
+

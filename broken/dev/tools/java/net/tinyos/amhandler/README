@@ -1,0 +1,44 @@
+Package: net.tinyos.amhandler
+Description: Classes to export an AM-like interface up to java
+Author: Sam Madden (madden@cs.berkeley.edu)
+
+These classes export an AM-like interface into java.  By extending AMHandler,
+a java program can receive notification amout messages received over the
+UART via a generic base mote.  AMInterface allows active-messages to be
+sent over the UART via a generic base.  CRC is supported.
+
+These classes are utility classes used by the schema and calibrate packages,
+and in the IDF demo and are (yet another) way to access the serial port
+independently of SerialForwarder.
+
+Executables: none
+
+Test Programs: AMTest
+
+net.tinyos.amhandler.AMTest
+        usage: java net.tinyos.amhandler.AMTest
+        descr: Test the AMInterface by repeatedly sending out
+		requests for database motes to report their
+	        schemas, and printing those schemas out when they 
+	        arrive.
+
+Classes:
+
+AMInterface.java
+
+The core class.  Receives messages from the UART, multiplexes them
+to the java classes which have called registerHandler for that 
+particular AM id.  Allows motes to send active messages via the
+sendAM method.  Will compute CRCs for outgoing messages if the "crc"
+flag is set to true in the constructor. 
+
+Uses javax.comm to interface to the serial port (not SerialForwarder!)
+
+AMHandler.java
+
+Interface which classes must implement iof they wish to use the
+registerHandler mechanism for accepting messages.
+
+
+
+

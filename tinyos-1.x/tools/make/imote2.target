@@ -1,0 +1,29 @@
+PLATFORM = imote2
+
+PFLAGS += \
+-I$(TOSDIR)/lib/CC2420Radio \
+-I$(TOSDIR)/lib/Flash \
+-I$(TOSDIR)/platform/imote2/devices/USB/ \
+-I$(TOSDIR)/platform/imote2/devices/USB/lib \
+
+ifdef CC2420_CHANNEL
+	PFLAGS += -DCC2420_DEF_CHANNEL=$(CC2420_CHANNEL)
+endif
+
+ifdef TIMESYNC_ROOT_ID
+	PFLAGS += -DTIMESYNC_ROOT_ID=$(TIMESYNC_ROOT_ID)
+endif
+
+ifdef AUTO_BATTERY_MONITORING
+	PFLAGS += -DAUTO_BATTERY_MONITORING=$(AUTO_BATTERY_MONITORING)
+else
+	PFLAGS += -DAUTO_BATTERY_MONITORING=1
+endif	
+
+ASSEMBLY_FILES += $(PLATFORM_DIR)/../imote2/flash.s $(PLATFORM_DIR)/../imote2/binarymover.s
+
+$(call TOSMake_include_platform,pxa27x)
+
+imote2: $(BUILD_DEPS)
+	@:
+

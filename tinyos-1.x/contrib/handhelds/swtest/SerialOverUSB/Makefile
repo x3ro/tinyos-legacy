@@ -1,0 +1,3 @@
+COMPONENT=BTControlledApp
+
+include ../Makerules

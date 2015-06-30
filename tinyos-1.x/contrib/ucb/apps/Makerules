@@ -1,0 +1,2 @@
+MMTOSDIR=$(shell ncc -print-tosdir)/..
+include $(MMTOSDIR)/apps/Makerules

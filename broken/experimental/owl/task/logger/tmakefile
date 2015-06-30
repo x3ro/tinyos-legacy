@@ -1,0 +1,17 @@
+# Makefile for Java components
+GEN= LReadRequestMsg.java LReadDataMsg.java Log.java OffsetReplyMsg.java
+
+all: $(GEN)
+	javac *.java
+
+LReadRequestMsg.java: TinyDBLogger.h
+	mig -java-classname=LReadRequestMsg java TinyDBLogger.h LReadRequestMsg -o $@
+
+OffsetReplyMsg.java: TinyDBLogger.h
+	mig -java-classname=OffsetReplyMsg java TinyDBLogger.h OffsetReplyMsg -o $@
+
+LReadDataMsg.java: TinyDBLogger.h
+	mig -java-classname=LReadDataMsg java TinyDBLogger.h LReadDataMsg -o $@
+
+Log.java: TinyDBLogger.h
+	ncg -java-classname=Log java TinyDBLogger.h TinyDBLogger.h -o $@

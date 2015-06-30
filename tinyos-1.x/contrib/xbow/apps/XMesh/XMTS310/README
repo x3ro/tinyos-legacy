@@ -1,0 +1,51 @@
+XMesh Release Notes 
+-------------------
+SENSORBOARD: MTS310, MTS300
+
+DESCRIPTION
+-----------
+- Read mic, temperature and light sensor readings
+- Read Accel, Mag sensor readings (MTS310 only)
+- Output message via multihop radio protocol
+  Supported networking stacks:
+	MintRoute, ReliableRoute, Reliable_LowPower, Reliable_TimeSync
+
+FEATURES
+--------
+- Debug LEDs 	(FEATURE_LEDS)
+- Sounder Test 	(FEATURE_SOUNDER)
+
+DATA PACKET FORMAT
+------------------
+struct TOS_Msg_Header {
+  uint16_t addr;
+  uint8_t type;		    	// XMULTIHOPMSG_ID = 51
+  uint8_t group;
+  uint8_t length;
+}
+struct Multihop_Header {
+  uint16_t sourceaddr;
+  uint16_t originaddr;
+  int16_t seqno;
+  uint8_t hopcount;
+}
+struct XSensor_Header{
+  uint8_t  board_id;	 	// SENSOR_BOARD_ID = 0x83(mts310), 0x84(mts300)
+  uint8_t  packet_id;
+  uint8_t  node_id;
+  uint8_t  parent;       
+}
+struct Data_Payload {
+  uint16_t vref;
+  uint16_t thermistor;
+  uint16_t light;
+  uint16_t mic;
+  uint16_t accelX;
+  uint16_t accelY;
+  uint16_t magX;
+  uint16_t magY;
+}
+
+-------------------
+$Id: README,v 1.1 2004/08/23 10:05:41 mturon Exp $
+

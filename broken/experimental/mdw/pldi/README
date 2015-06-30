@@ -1,0 +1,156 @@
+PLDI Demo app
+Matt Welsh, 3 Nov 2002
+
+This is an updated version of the Surge3 demo for the PLDI paper on
+NesC. It has essentially the same functionality as Surge3, except that
+multihop routing has been moved into its own component, found in the
+'multihop' directory. Some of the Surge3 demo functionality has been
+removed, such as chirping a mote, sleep/wakeup, and changing the sample
+rate. 
+
+The basic app is in PLDIDemoM.nc and is very simple. Most of the
+complexity is found in multihop/MultihopM.nc. 
+
+Right now this version uses the standard Timer and AM implementations
+(that is, not making use of abstract components). I will check in a new
+version soon.
+
+I have not yet tested this version on motes, but since it is largely the
+same as the Surge3 demo, I expect it to work fine.
+
+DESCRIPTION:
+
+This is a demonstration of multihop routing in a sensor network. Each
+mote periodically takes a light sensor reading and transmits it to its
+"parent", a node which it believes is closer to the base station (the
+parent may be the base station itself). When a mote receives a messages
+from one of its children, it forwards the message to its parent. 
+
+When initialized, each mote starts with no parent, and does not transmit
+sensor readings until it has established one. The GUI periodically
+broadcasts a "root beacon" that seeds the formation of the multihop
+routing tree; the beacon merely indicates that the root node (node 0) is
+available and has a hopcount of 0. If a mote with no parent hears the
+root beacon, it will set its parent to the root.
+
+A mote continues to use the same parent until the "link quality" to the
+parent falls below some threshold. The link quality is defined as the
+fraction of messages that did not require retransmission -- that is, 
+the fraction of transmissions from a child to a parent that were
+successful. When the parent link quality falls below a threshold (20% by
+default), the node chooses a new parent from its neighbors, which is the
+set of nodes that the mote has overhead messages from recently. Roughly,
+the mote chooses a new parent that is (a) not a child of the current
+node, (b) has the lowest hopcount of all known neighbors, and (c) has
+the highest "goodness" of all known neighbors. "Goodness" is defined as
+the fraction of messages overheard from this neighbor.
+
+Note that the root beacon will tend to cause motes to choose the root
+as a parent. A mote that hears the root beacon will choose the root as
+its parent if its current parent link quality is below 50% (rather than
+20%, as above). If you disable the root beacon (from the GUI) before 
+powering on some motes, they will necessarily have to choose a parent 
+that is *not* the root. This is a good way to induce multihop paths for
+demo purposes.
+
+MEANING OF THE LEDS:
+
+Yellow LED: The mote has received a message.
+Green LED: The mote has sent a message.
+Red LED: The mote did not receive an ACK for a sent message, and is
+retransmitting.
+
+RUNNING THE DEMO:
+
+  1) Set up your environment. You need to add
+       $PWD/pldi/tools/java
+     to your CLASSPATH. Also, edit 
+       $PWD/pldi/Makerules
+     and set DEFAULT_LOCAL_GROUP to the same value that you are using in
+     your tinyos-1.x/apps/Makerules file. It is very important that the
+     DEFAULT_LOCAL_GROUP is the same in both places.
+
+  2) Install GenericBase on one mote with ID 0:
+       cd tinyos-1.x/apps/GenericBase
+       make mica install.0
+     It is important that the base is node 0.
+
+  3) On other motes, install the Surge app:
+       cd experimental/mdw/pldi
+       make mica install.<ID>  
+     where <ID> is distinct for each mote (1 through 10).
+   
+  4) Plug the GenericBase into your programming board and make sure 
+     SerialForward is running:
+       java net.tinyos.sf.SerialForward
+
+  5) Compile the Java GUI:
+       cd pldi/tools/java/net/tinyos/surge; make
+
+  6) Run the Java GUI:
+       java net.tinyos.surge.MainClass <GROUP ID>
+     where <GROUP ID> is the DEFAULT_LOCAL_GROUP that you have specified
+     in Step (1), above. This can be specified in hex or decimal.
+     For example,
+       java net.tinyos.surge.MainClass 125
+     is equivalant to
+       java net.tinyos.surge.MainClass 0x7d
+
+  7) Turn on the Surge motes. The motes will not blink initially, since
+     they are not receiving or sending messages.
+  
+  8) To get the Surge motes to start transmitting data, you need to seed
+     the creation of the spanning tree by clicking on "Start root beacon"
+     on the Java GUI. This starts a periodic root beacon (once per
+     second), and soon you should see motes start to connect to the
+     root in the GUI.
+
+DESCRIPTION OF THE GUI:
+
+Each mote "blinks" with a red circle when the GUI has heard a sensor
+sample from that mote. Below each mote the total number of received
+sensor messages is given, as well as the average message rate taken over
+a 2-second sample. (Note that this does NOT include messages that this 
+mote has forwarded -- only those sample messages that it originated!)
+
+The color bar labelled "Quality" gives the mote's current parent link
+quality, as described above, with 100% being perfect quality (no
+retransmissions). The color of the bar (from green to red) represents
+this value. The color of the edge from the mote to its parent is the
+same as the color of the "Quality" bar -- this is intentionally redundant.
+
+The color bar labelled "Yield" represents the rate of sensor messages
+heard from this mote as a fraction of the expected number of sensor
+messages. For example, if each mote is generating a sample at 1 message
+a second, and the GUI is hearing a message every 2 seconds, the "Yield"
+is 0.5. Note that yield can be greater than 1 if the GUI hears more
+messages from the mote than it should be generating -- this can be
+caused by forwarding backlog as well as a lag in the update rate of the
+GUI itself.
+
+You can click on each mote and drag it to a new position. Clicking on
+"Fit to Screen" will fit all of the motes in the current window, since
+the initial random placement of motes might put some of them off the
+screen. Clicking on "Status" will turn off the display of the detailed 
+statistics for each mote, but otherwise unaffects the operation of the
+application. Clicking on "Debug" will cause each sent and received
+message to be printed to stderr (the console window).
+
+Clicking on "Start root beacon" will start sending the root beacon at a
+specified rate (once per second by default). Clicking on "Stop root
+beacon" stops sending the root beacon, which is useful if you want to
+force motes to connect to their neighbors instead of the root.
+
+"Control Panel" brings up a window that allows you to set two
+parameters: The root beacon rate and the rate at which motes transmit
+light sensor readings. Moving the "Beacon rate" slider sets the time
+between beacons between 1 and 10 sec, and takes effect immediately
+(assuming that "Start root beacon" has been clicked previously).
+Moving the "Sample rate" slider does nothing in this demo.
+
+The "Send sleep" and "Cancel focus" buttons are unimplemented in this demo.
+
+If things appear to get wedged during the demo, it is perfectly safe to
+restart the GUI - just be sure to click on "Start root beacon" again.
+
+

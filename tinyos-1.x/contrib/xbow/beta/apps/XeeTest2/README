@@ -1,0 +1,8 @@
+README 
+
+
+Description:
+-Read mic, temperature and light sensor readings, turn sounder on/off
+-Read Accel, Mag sensor readings (MTS310 only)
+-Output message to uart port
+-Output message to radio port

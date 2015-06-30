@@ -1,0 +1,13 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: pemicro.extra,v 1.1 2005/01/31 21:05:16 freefrag Exp $
+
+#ifeq ($(PEMICRO),)
+#$(error PEMICRO must be defined, try "make $(TARGETS) help")
+#endif
+
+PROGRAM = pemicro
+
+program: FORCE
+	@echo "    installing $(PLATFORM) binary using pemicro"
+	cd $(BUILDDIR) && make -f $(TINYOS_EVB13192DIR)/tools/make/hcs08/MakeHCS08 main.install
+

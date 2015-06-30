@@ -1,0 +1,782 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.3.9: http://docutils.sourceforge.net/" />
+<title>Radio Physical Layer</title>
+<meta name="author" content="Kevin Klues" />
+<style type="text/css">
+
+/*
+:Author: David Goodger
+:Contact: goodger@users.sourceforge.net
+:date: $Date: 2005/09/20 16:30:23 $
+:version: $Revision: 1.6 $
+:copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+*/
+body {
+  font-family: Times;
+  font-size: 16px;
+}
+
+.first {
+  margin-top: 0 ! important }
+
+.last {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dd {
+  margin-bottom: 0.5em }
+
+/* Uncomment (& remove this text!) to get bold-faced definition list terms
+dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.attention, div.caution, div.danger, div.error, div.hint,
+div.important, div.note, div.tip, div.warning, div.admonition {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.hint p.admonition-title, div.important p.admonition-title,
+div.note p.admonition-title, div.tip p.admonition-title,
+div.admonition p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em }
+
+div.footer, div.header {
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin-left: 1em ;
+  border: medium outset ;
+  padding: 0em 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1 {
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+}
+
+h1.title {
+ text-align: center;
+ font-size: 32px;
+}
+
+h2 {
+ font-size: 16px;
+ font-family: Arial, sans-serif;
+}
+
+h2.subtitle {
+  text-align: center }
+
+h3 {
+ font-size: 12px;
+ font-family: Arial, sans-serif;
+}
+
+hr {
+  width: 75% }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font-family: serif ;
+  font-size: 100% }
+
+pre.line-block {
+  font-family: serif ;
+  font-size: 100% }
+
+pre.literal-block, pre.doctest-block {
+  margin-left: 2em ;
+  margin-right: 2em ;
+  background-color: #eeeeee }
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.option-argument {
+  font-style: italic }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+table {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.citation {
+  border-left: solid thin gray ;
+  padding-left: 0.5ex }
+
+table.docinfo {
+  margin: 2em 4em;
+}
+
+table.footnote {
+  border-left: solid thin black ;
+  padding-left: 0.5ex }
+
+td, th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+th.docinfo-name, th.field-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap;
+  }
+
+h1 tt, h2 tt, h3 tt, h4 tt, h5 tt, h6 tt {
+  font-size: 100% }
+
+tt {
+  background-color: #eeeeee }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="radio-physical-layer">
+<h1 class="title">Radio Physical Layer</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr class="field"><th class="docinfo-name">TEP:</th><td class="field-body">104</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Group:</th><td class="field-body">Core Working Group</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Type:</th><td class="field-body">Experimental</td>
+</tr>
+<tr><th class="docinfo-name">Status:</th>
+<td>Draft</td></tr>
+<tr><th class="docinfo-name">Author:</th>
+<td>Kevin Klues</td></tr>
+<tr class="field"><th class="docinfo-name">Draft-Created:</th><td class="field-body">12-Oct-2004</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Draft-Version:</th><td class="field-body">1.3</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Draft-Modified:</th><td class="field-body">2005-02-14</td>
+</tr>
+<tr class="field"><th class="docinfo-name">Draft-Discuss:</th><td class="field-body">TinyOS Developer List &lt;tinyos-devel at mail.millennium.berkeley.edu&gt;</td>
+</tr>
+</tbody>
+</table>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">This memo documents a part of TinyOS for the TinyOS Community, and
+requests discussion and suggestions for improvements.  Distribution
+of this memo is unlimited.  This memo is in full compliance with 
+TEP 1.</p>
+</div>
+<div class="section" id="abstract">
+<h1><a name="abstract">Abstract</a></h1>
+<p>This TEP proposes a hardware abstraction architecture for Radio 
+Components used in TinyOS.  The ideas introduced in this document 
+borrow from those introduced in TEP 2 regarding the three-layer 
+Hardware Abstraction Architecture (HAA).</p>
+</div>
+<div class="section" id="introduction">
+<h1><a name="introduction">1. Introduction</a></h1>
+<p>The hardware abstraction of a radio component can be divided into 
+three separate layers.  Following the tradition of the three-layer 
+Hardware Abstraction Architecture (HAA) these layers are labeled as 
+the Hardware Physical Layer (HPL), Hardware Adaptation Layer (HAL), 
+and the Hardware Interface Layer (HIL).</p>
+<p>The block diagram of the proposed architecture, including example 
+interfaces provided by each layer, can be seen in the diagram below:</p>
+<pre class="literal-block">
+                          |              |
+                RadioData |              | RadioControl 
+                          |              |
+              ----------------------------------------
+              |              HILXXXRadio             |
+              ----------------------------------------
+                          |              |
+          HALXXXRadioData |              | HALXXXRadioControl 
+                          |              |
+              ----------------------------------------
+              |              HALXXXRadio             |------- BusInterface
+              ----------------------------------------
+                |                 |                | 
+HPLXXXRadioData |           HPLXXXBusComm          | HPLXXXRadioControl 
+                |                 |                |
+              ----------------------------------------
+              |              HPLXXXRadio             |
+              ---------------------------------------- 
+</pre>
+<p>In the following sections, each layer will be discussed in detail, 
+and the details of the interfaces required/provided by each will 
+be examined.</p>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">The naming convention for the different interfaces provided by the 
+various layers in the architecture, as well as the names of the 
+components themselves will be used throughout this document as 
+shown in the diagram above.</p>
+</div>
+</div>
+<div class="section" id="architecture-layers">
+<h1><a name="architecture-layers">2. Architecture Layers</a></h1>
+<p>The three Layers are divided in such a way that the HPL and HIL layers
+are kept solely radio dependent, while the HAL is not just radio 
+dependent, but also microcontroller dependent.</p>
+<p>With this in mind, the HPL and HIL layers can be thought of as platform 
+independent, in that they do not rely on a specific microcontroller for 
+their implementation.  They only need to be implemented once, and stored
+somewhere for use.  These files, however, cannot be used until
+they are wired to another file which implements the interfaces they 
+require.  This file IS microcontroller dependent, and takes the form of 
+the HAL layer in the radio abstraction heirarchy.</p>
+<p>The next few subsections describe how each of these layers fit together, 
+and how one might go about implementing them.</p>
+<div class="section" id="hpl-layer">
+<h2><a name="hpl-layer">HPL Layer</a></h2>
+<p>At the bottom most layer, the implementation of the radio HPL is 
+highly radio dependent.  At this layer, all functionality offered
+by the radio in terms of configuring it or controlling its various modes
+of operation SHOULD be somehow provided.  A means in which to send 
+data over the radio MUST also be provided.  In order to accomplish this, 
+the radio HPL MUST connect directly to the TinyOS bus component that is 
+used to physically communicate with the radio hardware.  To keep the radio 
+HPL separated from how this communication is actually performed, a radio 
+specific BusComm interface is introduced that is used to encapsulate the 
+commands necessary to perform reads and writes to the radio hardware over 
+the physical bus. The radio HPL MUST use this interface to perform all 
+reads and writes to the actual radio hardware.</p>
+<p>An example of such an interface for a non-register-based, byte interface
+radio is given below:</p>
+<pre class="literal-block">
+interface HPLXXXBusComm {
+  async command result_t tx(uint8_t byte);
+  async command result_t rxDone(uint8_t byte);
+}
+</pre>
+<p>An example of such a BusComm interface for a register-based,
+byte interface radio is given below:</p>
+<pre class="literal-block">
+interface HPLXXXBusComm {
+  async command result_t writeRegByte(uint8_t address, uint8_t byte);
+  async command result_t writeRegWord(uint8_t address, uint16_t word);
+  async command result_t readRegByte(uint8_t address, uint8_t byte);
+  async command result_t readRegWord(uint8_t address, uint16_t word);
+  
+  async command result_t tx(uint8_t byte);
+  async command result_t rxDone(uint8_t byte);  
+}
+</pre>
+<p>No other interfaces other than the BusComm interface SHOULD need to be 
+used by the HPL implementation, but the HPL implementation is not
+necessarily restricted to just this single interface.  Which interfaces it
+needs to use will be dictated by the hardware specifications of the chip
+and need to be accomodated for as necessary.</p>
+<p>A control interface and a data interface MUST also be provided by the radio 
+HPL layer.  These interfaces MUST provide a path for configuration/control 
+information and data information to flow to and from the radio.  The actual 
+definitions of these interfaces are completely hardware dependent, and need 
+only be defined so as to reliably communicate with the HAL layer.  Because of 
+this fact, these interfaces may not necessarily be just single interfaces, 
+but rather multiple interfaces that are divided into whatever may be logical 
+for a given radio chip.</p>
+<p>An example of the control interface for a register-based, byte interface radio 
+is given below:</p>
+<pre class="literal-block">
+interface HPLXXXRadioControl {
+  command void init();
+  command void HighLNAGain();
+  command void LowLNAGain();
+  async command result_t setTxMode();
+  async command result_t setRxMode();
+  async command result_t setSleepMode();
+  ...
+  ...
+  ...
+  command void PowerDown();
+  command void PowerUp();
+}
+</pre>
+<p>The data interface for the same type of radio would look like:</p>
+<pre class="literal-block">
+interface HPLXXXRadioData {
+  async command result_t tx(uint8_t byte);
+  async command result_t rxDone(uint8_t byte);
+}
+</pre>
+<p>For a packet based radio, multiple data and control 
+interfaces may exist.</p>
+<p>[These example interfaces were taken directly from the TEP covering 
+Link Layer Primitives in TinyOS (TEP 105)]:</p>
+<pre class="literal-block">
+interface HPLXXXCmd {
+  async command uint8_t cmd(uint8_t addr);
+  async command uint8_t write(uint8_t addr, uint16_t data);
+  async command uint16_t read(uint8_t addr);
+}
+
+interface HPLXXXCapture {
+  async command result_t enableCapture(bool low_to_high);
+  async event result_t captured(uint16_t val);
+  async command result_t disable();
+}
+
+interface HPLXXXFIFO {
+  async command cc2420_result_t readRXFIFO(uint8_t length, uint8_t *data);
+  async command cc2420_result_t writeTXFIFO(uint8_t length, uint8_t *data);
+  async event result_t RXFIFODone(uint8_t length, uint8_t *data, cc2420_result_t success);
+  async event result_t TXFIFODone(uint8_t length, uint8_t *data, cc2420_result_t success);
+}
+</pre>
+<p>The implementation of these interfaces in the HPL MUST use the commands 
+provided by the BusComm interface, and will therefore be kept independent
+of which platform they are running on.  As will be seen in the next section, 
+the implementation of the BusComm interface in the HAL layer of the radio
+will provide the required access for getting the processor to run on a 
+specific platform. Because of this fact, applications SHOULD never directly
+wire themselves to the HPL layer of the radio, unless they are also prepared 
+to define the protocol used for sending data through the BusComm interface.</p>
+<p>A portion of the HPL implementation file for the example register-based, byte 
+interface radio is shown below:</p>
+<pre class="literal-block">
+module HPLXXXRadioM {
+  provides {
+    interface HPLXXXRadioControl;  //Control/Config Communication
+    interface HPLXXXRadioData;     //Data Communication
+  }
+  uses {
+    interface HPLXXXBusComm;
+  }
+}
+implementation {  
+
+  uint16_t currentConfigReg;
+  
+  command result_t HPLXXXRadioControl.init() {
+     TOSH_SEL_RADIO_EN_IOFUNC();
+     TOSH_SEL_RADIO_TXRX_IOFUNC();
+     TOSH_SET_RADIO_TXRX_PIN();
+     TOSH_SET_RADIO_EN_PIN();
+     
+     ...
+     
+     currentConfigReg = DEFAULT_CONFIG_VALUE;
+  }
+  
+  ...
+  
+  command void HPLXXXRadioControl.HighLNAGain() {
+    currentConfigReg |= HIGH_LNA_MASK;
+    TOSH_CLR_RADIO_EN_PIN();
+    TOSH_uwait(1);
+    HPLXXXBusComm.writeRegWord(CONFIG_ADDRESS, currentConfigReg);
+    TOSH_SET_RADIO_EN_PIN();
+    TOSH_uwait(1);
+  }
+    
+  ...
+    
+  command result_t HPLXXXRadioData.tx(uint8_t byte) {
+    call HPLXXXBusComm.tx(byte);
+  }
+  async event result_t HPLXXXRadioData.rxDone(uint8_t byte) {
+    signal HPLXXXBusComm.rxDone(byte);
+  }
+}
+</pre>
+<p>Unlike the HAA specification (which requires that all HPL implementations
+be stateless), the implementation of the radio HPL layer MAY be stateless,
+but is not required to be.  This is due to the fact that the radio is an
+off-chip component and it may be necessary to store some information about
+the state of the radio that would otherwise be accessible by the internal
+registers of on-chip components.  In the example file above, the 
+&quot;currentConfigReg&quot; variable is used to keep state about the current 
+configuration of the radio.</p>
+<p>The HPL implementation is, however, REQUIRED to have exclusive access to 
+the pins that are used for configuring the radio.  It is responsible for 
+setting pin directions as well as setting or clearing these pins via
+MACROs that will be later defined by a given platform.</p>
+<p>By looking at the definitions of the various commands in the example file 
+above, it can be seen how the HPLXXXBusComm commands are used to actually
+write data to the radio.  Calling the commands in such a way provides the 
+flexibility to allow the radio HPL layer to prepare itself as necessary
+both before and after a read or a write, while keeping the implementation
+independent of the actual protocol being used for performing the read or
+write.</p>
+<p>With the organizational structure described above, the HPL implementation
+of any given radio is able to be completely self contained.  Because of this,
+all interfaces defined for the HPL layer of a radio as well as the 
+implementation itself should be kept in the radio's local &quot;chips&quot; directory.</p>
+</div>
+<div class="section" id="hal-layer">
+<h2><a name="hal-layer">HAL Layer</a></h2>
+<p>The HAL layer of the radio hardware abstraction is responsible for
+actually connecting the radio to the microcontroller used on a given 
+platform.  It is the only layer in the radio heirarchy that is platform
+DEPENDENT, and will therefore be stored in the given &quot;platform&quot; directory
+rather than the &quot;chips&quot; directory.</p>
+<p>This layer is used to implement the HPLXXXBusComm interface, set 
+up platform specific settings for the radio, and provide any control
+and data interfaces specific to the given radio.  Any required bus 
+arbitration is also performed at this layer, along with any timing
+issues being resolved for delayed responses to commands issued
+for the radio.</p>
+<p>For most platforms, the bus component used will be designed around a 
+standard communication protocol (such as SPI or I2C) that many 
+processors and radios will be able to natively support.</p>
+<p>An example of the HAL implementation file for a register-based,
+byte interface radio is shown below:</p>
+<pre class="literal-block">
+module HPLXXXRadioM {
+  provides {
+    interface SplitControl;
+    interface HALXXXRadioControl;  //HAL Control/Config Communication
+    interface HALXXXRadioData;     //HAL Data Communication
+    interface HPLXXXBusComm;       //BusComm for the HPL layer
+  }
+  uses {
+    interface HPLXXXRadioControl;  //HPL Control/Config Communication
+    interface HPLXXXRadioData;     //HPL Data Communication
+    interface BusInterface;        //Could be SPI or I2C
+    interface BusArbiration;
+    interface TimerJiffy;
+  }
+}
+implementation {  
+
+  ...
+
+}
+</pre>
+<p>Since this layer has intimate knowledge of exactly what process is being
+used to communicate with the radio, it has alot of flexibility in how it
+chooses to implement things. The actual implementation and definition of 
+the interfaces provided by this layer is completely arbitrary and must 
+only be made to match those expected by the HIL and HPL layers that it 
+connects to.</p>
+<p>In order to hide these implementation details, and only expose those 
+interfaces that the HPL, HIL, or an application would be interested in,
+a configuration file for the HAL layer MUST be created that does this.</p>
+<p>An example configuration file for the HAL implementation file given
+given above is shown below:</p>
+<pre class="literal-block">
+configuration HALXXXRadioC {
+  provides {
+    interface SplitControl;
+    interface HALXXXRadioControl;
+    interface HALXXXRadioData;
+    interface HPLXXXBusComm;
+  } 
+}
+implementation {
+  components BusArbitrationC, BusInterfaceC, TimerC, 
+             HALXXXRadioM, HPLXXXRadioM;  
+  
+  SplitControl = HALXXXRadioC;
+  
+  HALXXXRadioControl = HALXXXRadioM;
+  HALXXXRadioControl = HALXXXRadioM;
+  HPLXXXBusComm = HALXXXRadioM;
+  
+  HALXXXRadioM.HALRadioData    -&gt; HPLXXXRadioC;
+  HALXXXRadioM.HALRadioControl -&gt; HPLXXXRadioC;    
+  HALXXXRadioM.BusInterface    -&gt; BusInterfaceC;
+  HALXXXRadioM.BusArbitration  -&gt; BusArbitration;
+  HALXXXRadioM.TimerJiffy      -&gt; TimerC.TimerJiffy[unique(&quot;TimerJiffy&quot;)];
+}
+</pre>
+<p>As stated before, the interfaces provided by the HAL layer for use by
+the HIL layer or other applications is highly radio dependent and the
+files shown above are only examples of how such a layer could be built.</p>
+<p>It is important to remember though, that only this layer is allowed to
+connect to any interfaces that are microcontroller (or platform) specific.
+This layer should be able to simply connect to the HIL and HPL layers
+after it has been implemented, and all three layers should spring to action
+for a given platform.</p>
+<p>This layer lives in the platform directory of the platform wishing to 
+interface with the given radio.</p>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">In principle all microcontroller specific implementations should also be 
+kept in their own &quot;chips&quot; directory just like the radio implementations.
+If this is done correctly, then files similar to this HAL file for the 
+radio will be the only ones that exist in a platform directory (Other 
+than files such as hardware.h, AM.h, etc..) Their purpose will be to 
+simply provide the code that allows communication between the various 
+hardware chips on a given platform's sensor node to take place.</p>
+</div>
+</div>
+<div class="section" id="hil-layer">
+<h2><a name="hil-layer">HIL Layer</a></h2>
+<p>This layer is used to provide a platform independent interface to 
+the radio hardware.  Such an interface does not yet exist, but it 
+is plausible that one could be conceived of in the future.  This layer
+will use the platform DEPENDENT interfaces implemented by the HAL layer
+to implement the functionality required for providing the platform
+INDEPENDENT ones.  Certain functionality is provided by ALL radios and
+these functions should be defined in an interface somewhere.</p>
+<p>It is not worth speculating which commands and events would be present
+in these interfaces, but it is worth mentioning showing how such an 
+implementation would be constructed.</p>
+<p>Below is an example of what the HIL implmentation file might look like:</p>
+<pre class="literal-block">
+ module HILXXXRadioM {
+  provides {
+    interface SplitControl;
+    interface RadioControl;  //Control/Config Communication
+    interface RadioData;     //Data Communication
+  }
+  uses {
+    interface HALXXXRadioControl;  //HPL Control/Config Communication
+    interface HALXXXRadioData;     //HPL Data Communication
+  }
+}
+implementation {  
+
+  ...
+
+}
+</pre>
+<p>The RadioControl and RadioData interfaces are just examples of what 
+the platform independent interfaces COULD be called.  They do not imply
+that any sort of final decision on HIL interfaces will look anything like this.</p>
+<p>Just as with the HPL layer, however, this layer should be only radio 
+dependent and not microcontroller dependent.  This means that this file
+will exist in the radios &quot;chips&quot; directory and will only be implemented
+once for any given radio.</p>
+</div>
+</div>
+<div class="section" id="using-the-different-radio-interfaces">
+<h1><a name="using-the-different-radio-interfaces">3. Using the Different Radio Interfaces</a></h1>
+<p>The radio can be used with either its platform independent interfaces
+or its platform dependent ones.  Applications must decide which
+interfaces are suitable for their purposes, and simply wire to one set
+of interfaces or the other through the configuration files described
+below.</p>
+<div class="section" id="platform-independent">
+<h2><a name="platform-independent">Platform Independent</a></h2>
+<p>For applications that wish to use the platform INDEPENDENT interfaces 
+of the radio, the configuration file will look something like this:</p>
+<pre class="literal-block">
+configuration XXXRadioC {
+  provides {
+    interface SplitControl;
+    interface RadioControl;
+    interface RadioData;
+}
+implementation {
+  components HILXXXRadioM, HALXXXRadioC;  
+  
+  SplitControl = HILXXXRadioM;
+  SplitControl = HALXXXRadioC;
+  
+  RadioData    = HILXXXRadioM.RadioData;
+  RadioControl = HILXXXRadioM.RadioControl;
+  
+  HILXXXRadioM.HALRadioData    -&gt; HALXXXRadioC;
+  HILXXXRadioM.HALRadioControl -&gt; HALXXXRadioC;    
+}
+</pre>
+<p>The names and number of the intermediary interfaces connecting 
+the HAL to the HPL and HIL files will vary from radio to radio, 
+but the basic structure for any such configuration file will be 
+the same.</p>
+<p>Since the intermediary interfaces are completely radio dependent 
+and not microcontroller dependent, this file can be created once, 
+and placed in the radio's &quot;chips&quot; directory along with all of the
+interface files and the HPL/HIL implementation files.</p>
+</div>
+<div class="section" id="platform-dependent">
+<h2><a name="platform-dependent">Platform Dependent</a></h2>
+<p>For applications that wish to use the platform DEPENDENT interfaces 
+of the radio, the configuration file created for the HAL layer of the
+radio in the platform directory can be used directly.</p>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">As of now, all applications will need to link to the HAL 
+(platform dependent) configuration, because the HIL interfaces 
+do not yet exist for radio abstraction.</p>
+</div>
+</div>
+</div>
+<div class="section" id="summary">
+<h1><a name="summary">4. Summary</a></h1>
+<p>Radios in TinyOS can be divided into three layers of abstraction. The 
+lowest layer and highest layers can be made to be solely radio depenedent 
+and not microcontroller dependent, while the middle layer is made to be both 
+radio dependent and microcontroller dependent.</p>
+<p>Having such a configuration allows radio implementations to be done for the
+HPL and HIL layers once, and simply recreating the HAL layer each time 
+a new micrcontroller (platform) is introduced.</p>
+<p>With such a configuration, applications have the freedom to choose whether
+they would like to connect to radio specific interfaces or platform independent
+interfaces of the radio.  While these platform independent ones do not exist
+yet, work is being done to define them.</p>
+</div>
+<div class="section" id="references">
+<h1><a name="references">5. References</a></h1>
+<p>The reference use of this document is TEP 1, TEP 2, and TEP 105</p>
+</div>
+<div class="section" id="author-s-address">
+<h1><a name="author-s-address">6. Author's Address</a></h1>
+<div class="line-block">
+<div class="line">Kevin Klues</div>
+<div class="line">Sekr FT5</div>
+<div class="line">Einsteinufer 25</div>
+<div class="line">10587 Berlin</div>
+<div class="line">GERMANY</div>
+<div class="line"><br /></div>
+<div class="line">phone - +49-30-314-23813</div>
+<div class="line"><br /></div>
+<div class="line">email - <a class="reference" href="mailto:klues&#64;tkn.tu-berlin.de">klues&#64;tkn.tu-berlin.de</a></div>
+</div>
+</div>
+<div class="section" id="citations">
+<h1><a name="citations">7. Citations</a></h1>
+<p>NONE</p>
+</div>
+</div>
+</body>
+</html>

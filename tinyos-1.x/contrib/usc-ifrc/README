@@ -1,0 +1,22 @@
+This module contains code for IFRC (Interference-Aware Fair
+Rate Control). IFRC is a rate control/congestion control
+scheme for wireless sensor network to assign fair and
+efficient rate to all the flows in the network (assuming a
+many-to-one traffic pattern). For further details please
+refer to http://enl.usc.edu/~srangwal/projects/ifrc.html
+
+To compile the code (to see how IFRC module can be used)
+(i)  cd to apps/RateControl 
+(ii) set IFRCROOT to the directory containing the checkout code.
+     Your TOSDIR should point to the default tinyos tree you are
+     currently using. 
+(iii) Set other parametes (like base station id etc) in the
+Makefile and do a make tmote 
+
+Currently the code is supported for Tmote Sky. 
+
+For any further information please contact Sumit Rangwala at
+srangwal@usc.edu 
+
+
+# vim: set ts=4 tw=60:

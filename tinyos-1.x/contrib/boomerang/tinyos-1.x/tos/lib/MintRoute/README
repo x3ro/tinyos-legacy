@@ -1,0 +1,43 @@
+# Please contact tinyos-help@millennium.berkeley.edu for 
+# questions or bug reports.  Any other suggestions or feedback 
+# can be sent to us: 
+# Philip Buonadonna (pbuonado@intel-research.net) or 
+# Alec Woo (awoo@cs.berkeley.edu) 
+#                               November 20th, 2003.
+
+Important parameters to tune in MultihopWMEWMA.nc
+
+    BASE_STATION_ADDRESS        = 0,
+    ROUTE_TABLE_SIZE            = 16,
+    ESTIMATE_TO_ROUTE_RATIO     = 10,
+    DATA_TO_ROUTE_RATIO         = 2,
+    DATA_FREQ                   = 10000,
+    SWITCH_THRESHOLD     	= 192,
+    MAX_DESCENDANT		= 5
+
+In this protocol, the minimum message rate is defined by route message
+rate, which is a ratio of the data rate defined by
+DATA_TO_ROUTE_RATIO.  For example, if DATA_FREQ is 10000 (~ 1
+packet/10 sec) and DATA_TO_ROUTE_RATIO is 2, the route message
+is will be 20000 (~ 1 msg/20sec).  This rate is tunable and
+will affect network load and rate of adaptation to changes.
+
+ESTIMATE_TO_ROUTE is a parameter that defines the time window
+T for WMEWMA estimator.  If it is set to 10, it means that
+an estimation will be performed every ten route message time.
+
+SWITCH_THRESHOLD is a parameter to define a noise margin for
+switching to a better parent.  It is a scaled value. To convert
+it to the number of transmission, simply divide it by 256.  
+In this case, 192/256 = 0.75.  That is, we only switch to a 
+new parent if its cost is 0.75 lower than our current parent.
+
+MAX_DESCENDADNT_LIVE is used as a paremter to time out children
+in the neighbor table. 5 means a child 
+
+Notice that chooseParent() is called on a periodic basis as
+a route damping mechanism.  The period is the same as the
+route message rate.  
+
+The current route table managment is a simple filtering
+mechanism based on send (outbound) link estimations.

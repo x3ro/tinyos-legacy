@@ -1,0 +1,3 @@
+COMPONENT=MyId
+include ../Makerules
+

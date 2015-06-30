@@ -1,0 +1,11 @@
+TDB is a visual debugger for TOS apps. For more info and usage instructions,
+look at the TDB website:
+http://deneb.cs.kent.edu/mule/tdb.
+
+It's still sort-of under development, so don't be surprised if things break.
+If you have problems, you might want to send me an email - I may be able
+to help you.
+
+------
+David G. Watson
+dgwatson@kent.edu

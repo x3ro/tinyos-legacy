@@ -1,0 +1,3 @@
+COMPONENT=MonibusToRadio
+include ../Makerules
+

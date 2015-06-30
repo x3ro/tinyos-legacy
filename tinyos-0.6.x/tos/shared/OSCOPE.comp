@@ -1,0 +1,69 @@
+/*									tab{4
+ *  MAGS.comp
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Jason Hill
+ * Date:     Oct. 3, 2000
+ *
+ *
+ *
+ */
+
+TOS_MODULE OSCOPE;
+JOINTLY IMPLEMENTED_BY OSCOPE;
+
+ACCEPTS{
+	char OSCOPE_INIT(void);
+	char OSCOPE_START(void);
+	char OSCOPE_ACTIVATE(void);
+	char OSCOPE_DEACTIVATE(void);
+	char OSCOPE_RESET_SAMPLE_COUNT(void);
+	char OSCOPE_SET_MAX_SAMPLES(char max_samples);
+	char OSCOPE_SET_DATA_CHANNEL(char channel);
+	char OSCOPE_SET_BYTES_PER_SAMPLE(char numBytes);
+	char OSCOPE_SET_SEND_TYPE(char sendType);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	void OSCOPE_CLOCK_EVENT(void);
+	char OSCOPE_DATA_RXD(short data);
+	char OSCOPE_SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+	char OSCOPE_SUB_UART_MSG_SEND_DONE(TOS_MsgPtr bytes);
+	TOS_MsgPtr mags_msg(TOS_MsgPtr data);
+};
+
+USES{
+	char OSCOPE_UART_TX_BYTES(char* bytes, char num_bytes);
+	char OSCOPE_CLOCK_INIT(char interval, char scale);
+	char OSCOPE_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	char OSCOPE_SUB_PWR(char pwr);
+	char OSCOPE_GET_DATA(char port);
+	char OSCOPE_LEDy_on();
+	char OSCOPE_LEDy_off();
+	char OSCOPE_LEDr_on();
+	char OSCOPE_LEDr_off();
+	char OSCOPE_LEDg_on();
+	char OSCOPE_LEDg_off();
+};
+

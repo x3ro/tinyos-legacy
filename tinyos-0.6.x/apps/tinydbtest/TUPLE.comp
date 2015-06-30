@@ -1,0 +1,24 @@
+TOS_MODULE TUPLE;
+#include "SchemaAPI.h"
+#include "TinyDB.h"
+
+ACCEPTS{
+	short TUPLE_SIZE(ParsedQuery *q);
+	short TUPLE_FIELD_SIZE(ParsedQuery *q, char fieldIdx);
+	void TUPLE_SET_FIELD(ParsedQuery *q, Tuple *t, char fieldNo, char *data);
+	CharPointer TUPLE_GET_FIELD(ParsedQuery *q, Tuple *t, char fieldNo);
+	CharPointer TUPLE_GET_FIELD_PTR(ParsedQuery *q, Tuple *t, char fieldNo);
+	void TUPLE_INIT(ParsedQuery *q, Tuple *t);
+	bool IS_TUPLE_COMPLETE(ParsedQuery *q, Tuple *t);
+	AttrDescPtr GET_NEXT_QUERY_FIELD(ParsedQuery *q, Tuple *t);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+};
+
+USES{
+	AttrDescPtr TUPLE_GET_ATTR(int1 idx);
+};

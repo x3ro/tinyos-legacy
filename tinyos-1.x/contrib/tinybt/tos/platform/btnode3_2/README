@@ -1,0 +1,15 @@
+This is the platform specific stuff for the BTnode rev3.20. It includes port 
+mappings and hw settings that are specific to this hw revision only.
+
+To compile for this platform set the following environment variables:
+
+TOSDIR=../../tos
+
+MAKERULES=../../contrib/tinybt/apps/Makerules
+
+
+Please refer to the documentation for specific information and support.
+
+http://www.btnode.ethz.ch
+
+

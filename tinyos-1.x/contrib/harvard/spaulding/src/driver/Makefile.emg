@@ -1,0 +1,12 @@
+include Makefile.common.in
+
+# Enable EMG platform
+PFLAGS += -DSAMPLING_PLATFORM_EMG
+
+# MultiChanSampling
+#PFLAGS += -DMULTICHANSAMPLING_FAKE
+
+# RealTimeSamples
+PFLAGS += -DREALTIMESAMPLES_ENABLED
+
+include $(MAKERULES)

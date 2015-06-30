@@ -1,0 +1,11 @@
+MULE is a hybrid simulator written by David Watson at Kent State.
+It is still very much under development.
+For docs and such look at the other files in the docs directory, or online
+at http://deneb.cs.kent.edu/mule.
+
+If you try it out, we can probably give you some help, but we can't promise
+anything.
+
+-----
+David G. Watson
+dgwatson@kent.edu

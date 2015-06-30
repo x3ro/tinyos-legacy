@@ -1,0 +1,3 @@
+COMPONENT=TSeqSample
+include ../MakeEyes
+

@@ -1,0 +1,49 @@
+# This is an example of a TinyViz autorun configuration file.
+# Lines are of the form: <key> <value>
+# Keys may not have embedded whitespace.
+#
+# The file contains one or more stanzas, where each stanza is separated
+# by a blank line. Each stanza defines parameters for a single
+# simulation run. Stanzas inherit settings from the previous stanza.
+#
+# Possible keys are:
+#   executable  - Full pathname of TOSSIM executable         (REQUIRED)
+#   nummotes    - Number of motes                            (REQUIRED)
+#   dbg         - Setting for DBG environment variable
+#   logfile     - File to log all events for later processing
+#   numsec      - Number of virtual seconds to simulate
+#   stopstring  - If a debug message contains this string, stop simulation
+#   stopmode    - What to do when the simulation finishes. 
+#                 Valid settings are "exit" (kill simulation and
+#                 continue with next run) or "pause" (pause simulation
+#                 and quit when user resumes manually).
+#   plugin      - Give class name of plugin to register during run
+#     All plugins containing this name will be registered. Plugins
+#     operate normally during the run and can visualize, collect data, 
+#     and actuate the simulation.
+#
+#   All other lines on the file are interpreted as "name value" pairs
+#   that are set as plugin options inside of TinyViz. Plugins receive
+#   these options as a series of OptionSetEvent events. Options can also
+#   be queried using TinyViz.getOption(). Essentially this allows
+#   plugins to "hook into" this configuration file by receiving
+
+logfile LOG.1
+executable /home/mdw/src/tinyos/mdw/collective/apps/contour/build/pc/main.exe
+nummotes 16
+numsec 10
+dbg usr1,usr2
+plugin DebugMsgPlugin
+plugin RadioLinkPlugin
+plugin LocationPlugin
+plugin NeighborhoodPlugin
+plugin RadioModelPlugin
+# This option is interpreted by MotePlugin to set the mote layout policy
+layout gridrandom
+radiomodel disc100
+# These are intepreted by RadioModelPlugin
+radioscaling 3
+
+logfile LOG.2
+executable /home/mdw/src/tinyos/mdw/collective/apps/contour/build/pc/main.exe
+nummotes 9

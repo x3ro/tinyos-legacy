@@ -1,0 +1,18 @@
+#!/bin/bash
+## Written by Terence Tong
+## To Start database
+
+IPC_RUNNING=`ps | grep 'ipc-daemon2'`
+if [ -z "$IPC_RUNNING" ]; then
+  ipc-daemon2 &
+fi
+
+PGDATA_PATH=$HOME/pgdata
+/usr/bin/rm -rf $PGDATA_PATH/postmaster.pid
+
+PGSQL_RUNNING=`ps | grep 'postgres'`
+if [ -z "$PGSQL_RUNNING" ]; then
+  /usr/bin/postmaster -i -D $PGDATA_PATH &
+fi
+
+

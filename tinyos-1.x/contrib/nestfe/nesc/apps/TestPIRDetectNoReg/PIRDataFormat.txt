@@ -1,0 +1,97 @@
+# Data format for files in robotics_svn
+
+Raw Data from experiments
+*************************
+- OscopeMsg listed below is dumped from Listen.java
+
+OscopeMsg from XSM is in same format as mica2 motes
+/opt/tinyos/tinyos-1.x/tos/types/AM.h
+Tutorial Lesson #6
+
+OscopeMsg from Telos
+/opt/tinyos/tinyos-1.x/tos/platform/telos/AM.h
+
+GGB output
+output 8 bytes, indexing from 0 (byte 7 = last byte)
+- byte 7: sequence number from clicker, range 0-255
+- bytes 5,6: data (6 is MSB)
+
+
+
+Output from TOSSIM tests
+************************
+- See simulation script, such as simPIRDetect.py
+- Old Version of injectADCData.py (no longer in CVS HEAD):
+  Default Oscope Messages, modified so sequence number of
+  detection packets match that of raw data packets
+
+
+
+Quick Reference
+***************
+/////Default TinyOS packets/////
+#define TOSH_DATA_LENGTH 29
+typedef struct TOS_Msg
+{
+  /* The following fields are transmitted/received on the radio. */
+  uint16_t addr;
+  uint8_t type;
+  uint8_t group;
+  uint8_t length;
+  int8_t data[TOSH_DATA_LENGTH];
+  uint16_t crc;
+
+  /* The following fields are not actually transmitted or received 
+   * on the radio! They are used for internal accounting only.
+   * The reason they are in this structure is that the AM interface
+   * requires them to be part of the TOS_Msg that is passed to
+   * send/receive operations.
+   */
+  uint16_t strength;
+  uint8_t ack;
+  uint16_t time;
+  uint8_t sendSecurityMode;
+  uint8_t receiveSecurityMode;  
+} TOS_Msg;
+
+
+
+/////Telos packets/////
+// TOSH_DATA_LENGTH *must* be an even number for the structure to be
+// correctly word aligned!
+#define TOSH_DATA_LENGTH 28
+typedef struct TOS_Msg
+{
+  /* The following fields are transmitted/received on the radio. */
+  uint8_t length;
+  uint8_t fcfhi;
+  uint8_t fcflo;
+  uint8_t dsn;
+  uint16_t destpan;
+  uint16_t addr;
+  uint8_t type;
+  uint8_t group;
+  int8_t data[TOSH_DATA_LENGTH];
+
+  /* The following fields are not actually transmitted or received 
+   * on the radio! They are used for internal accounting only.
+   * The reason they are in this structure is that the AM interface
+   * requires them to be part of the TOS_Msg that is passed to
+   * send/receive operations.
+   */
+  uint8_t strength;
+  uint8_t lqi;
+  bool crc;
+  bool ack;
+  uint16_t time;
+} __attribute((packed)) TOS_Msg;
+
+
+
+/////Sample Default TinyOS packet/////
+//For this line:
+// FF FF 0A 7D 1C 08 00 C7 00 00 00 4F 02 22 02 5A 02 0E 02 2B 02 E9 01 1D 02 F9 01 12 02 F5 01 1E 02
+// Node ID = 08 00, (00 is the MSB)
+// sequence number = C7 00 (00 is the MSB) is the sequence number of the last reading in the message
+// skip the next two bytes, which will be zeros for all packets
+// then the readings are each 2 bytes with 10 samples per message and they're LSB MSB

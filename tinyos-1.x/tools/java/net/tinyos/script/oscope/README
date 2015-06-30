@@ -1,0 +1,19 @@
+Package: net.tinyos.script.oscope
+Description: Very hacked version of oscope to display Mate' data.
+Authors: Philip Levis
+
+Executables: oscilloscope.class
+
+Requires a serial forwarder.
+
+Assumes that it receives Mate' data buffers (that is, TinyScript
+buffers) with three fields:
+ o id
+ o seqno
+ o value
+
+
+Classes: 
+
+oscilloscope.java: main application frame
+GraphPanel.java: Actual data display panel.  

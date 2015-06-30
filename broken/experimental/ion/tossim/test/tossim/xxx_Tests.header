@@ -1,0 +1,44 @@
+/**
+ *  @file Xxx_Tests.hh
+ *
+ *  @author Ion Yannopoulos
+ */
+
+#ifndef TESTS_TOSSIM_XXX_TESTS_HH
+#define TESTS_TOSSIM_XXX_TESTS_HH
+
+#include <tossim_test/public.hh>
+#include <cppunit/TestSuite.h>
+
+namespace tests {
+namespace tos {
+namespace sim {
+
+using CppUnit::TestSuite;
+
+/** 
+ */
+
+class Xxx_Tests : public TestSuite
+{
+public:                         // Types
+
+public:                         // Constructors
+  Xxx_Tests();
+ ~Xxx_Tests();
+
+public:                         // TestSuite methods
+  virtual void setUp();
+  virtual void tearDown();
+  virtual void runTest();
+
+private:                        // Fields
+  
+}; // class Xxx_Tests
+
+} // namespace sim
+} // namespace tos
+} // namespace tests
+
+#endif // TESTS_TOSSIM_XXX_TESTS_HH
+

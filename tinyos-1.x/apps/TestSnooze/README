@@ -1,0 +1,57 @@
+README for TestSnooze and OnOffApp
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+OnOffApp is an application the utilizes low power radio sampling
+in order to turn the node "off" or "on".  The application is an
+example of how to use the OnOff component, OnOff.nc, to have the
+ability to switch the power consumption of the node remotely. When the
+node is on, the Red LED will be on and vice versa.
+This application will only run on the Mica2 and Mica2Dot platforms
+with Chipcon CC1000 Radios.
+
+TestSnooze is a basic application that illustrates the use of
+the Snooze component to put the mote into a low power state
+for a user-defined period.  The mote will be on, wait for
+three Clock.fire() events, and then enter the low power state.
+The soft state (variables, etc) of the application are preserved
+in SRAM on the microprocessor.  One can notice the internal
+private sleep() function causes the mote to sleep for 
+4 seconds.  This application will only run on the Mica platform
+with RFM radio.
+
+Requirements:
+
+OnOffApp has no additional requirements for Mica2/Mica2Dot.
+
+Mica motes must be physically modified in order to Snooze.  Information
+about the modification is available at:
+http://webs.cs.berkeley.edu/tos/hardware/diode_html.html
+
+Platforms:
+
+OnOffApp demonstrates power management on Mica2/Mica2Dot
+
+TestSnooze demonstrates power management on Mica
+
+Tools:
+
+Use "MessageInjector" in the MessageCenter java application to inject
+an "on" or "off" message.  See package:
+  net.tinyos.mcenter
+in tools/java and
+  onoff.h 
+for OnOffMsg
+
+Known bugs/limitations:
+
+None
+
+  OnOffApp: When the mote is in the 'Off' mode, the radio stack is put
+  into the lowest possible duty cycle (< 1%).  If the node used to
+  transmit the wakeup message (i.e. a TOSBase) is not in the same duty
+  cycle mode, it make take a few transmissions for the target to
+  'hear' the wakeup message.
+
+

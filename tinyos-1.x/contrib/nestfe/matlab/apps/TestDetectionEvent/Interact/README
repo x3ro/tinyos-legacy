@@ -1,0 +1,58 @@
+# --------------------------------------------------
+# Install
+# --------------------------------------------------
+  * add this directory to your MATLAB path
+  * copy the map image of RFS into this directory and name it rfs.jpg
+  * to use the 'render tracks' service, you need to run a web server that exposes
+    the 'public_html' directory
+
+
+# --------------------------------------------------
+# Running Apache in win32
+# --------------------------------------------------
+  * get/install the win32 apache binary
+  * use "junction" to make a win32 hard link, like:
+     C:\apps\Junction>junction.exe C:\public_html C:\home\tinyos-1.x\contrib\nestfe\matlab\apps\TestDetectionEvent\Interact\public_html
+  * edit the apache config file and change DocumentRoot to C:\public_hmtl
+  * restart apache
+  * change the permissions on/in C:\public_html
+
+
+# --------------------------------------------------
+# Service syntax
+# --------------------------------------------------
+  service_SERVICENAME( state , test , debug ) where state in [ 'start' , 'stop' ] and test,debug in [ true , false ]
+
+
+
+# --------------------------------------------------
+# Render Tracks Service (MATLAB Server)
+# --------------------------------------------------
+
+Hooking into the service :
+  (1) pull in the global variable G_renderTracks
+  (2) when G_renderTracks.renderTracks is true, then do (3)
+  (3) call renderAxes( axHand , filename )
+  (4) serve out the jpeg 'filename' using a web server
+
+
+# --------------------------------------------------
+# Send Tracks Service (MATLAB Server)
+# --------------------------------------------------
+
+Hooking into the service :
+  (1) pull in the global variable G_sendTracks
+  (2) when G_sendTracks.sendTracks is true, then do (3)
+  (3) if your track data is called track, send it with this command:
+      G_sendTracks.conn = send( G_sendTracks.conn , track )
+
+
+# --------------------------------------------------
+# Display Tracks Service (MATLAB Client)
+# --------------------------------------------------
+...use the display tracks service
+
+# --------------------------------------------------
+# Displaying Tracks (Web Client)
+# --------------------------------------------------
+ (1) Open a browser to the ip of the MATLAB server running the render tracks service

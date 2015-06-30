@@ -1,0 +1,2 @@
+COMPONENT=Sense
+include ../Makerules

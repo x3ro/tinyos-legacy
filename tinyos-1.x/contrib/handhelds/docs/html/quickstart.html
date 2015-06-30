@@ -1,0 +1,499 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Getting started quickly</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The User's Manual for HP TinyOS Software Development"
+HREF="index.html"><LINK
+REL="PREVIOUS"
+TITLE="About this Document"
+HREF="about.html"><LINK
+REL="NEXT"
+TITLE="Running with Wires"
+HREF="x98.html"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The User's Manual for HP TinyOS Software Development</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="about.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="x98.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="quickstart"
+></A
+>Chapter 2. Getting started quickly</H1
+><P
+>&#13;    The goal of this chapter is to get you up and running as quickly
+    as possible.  For our purposes, we will assume that you have
+    already checked out a copy of the TinyOS source tree, have a Linux
+    development machine running a 2.6 kernel, and have three Telos
+    revision B motes available.
+  </P
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="AEN37"
+>2.1. Setting up your environment</A
+></H1
+><P
+>&#13;      You'll need copies of the MSP430 tool chain, the bootstrap
+      loader, and the TinyOS source tree.
+    </P
+><P
+>&#13;      Set up your environment variables in your
+      <TT
+CLASS="filename"
+>.bash_profile</TT
+> or other appropriate
+      location.  My version looks like: <DIV
+CLASS="informalexample"
+><P
+></P
+><A
+NAME="AEN42"
+></A
+><PRE
+CLASS="programlisting"
+># Tiny OS settings
+PATH=$PATH:/usr/local/msp430/bin:/usr/local/tinyos/bin
+TINYOSDIR=/home/andyc/repository/tinyos-1.x
+TOSDIR=$TINYOSDIR/tos
+MAKERULES=$TINYOSDIR/tools/make/Makerules
+	</PRE
+><P
+></P
+></DIV
+>
+    </P
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="AEN44"
+>2.1.1. Running the Sniffer</A
+></H2
+><P
+>&#13;	First, let's run an 802.15.4 scanner software.  This can be
+	found in <TT
+CLASS="filename"
+>contrib/handhelds/apps/ZSniff</TT
+>.  Assuming
+	that you have a Telos B mote attached to
+	<TT
+CLASS="filename"
+>/dev/ttyUSB0</TT
+>, type:<DIV
+CLASS="informalexample"
+><P
+></P
+><A
+NAME="AEN49"
+></A
+><PRE
+CLASS="programlisting"
+>make telosb install bsl,/dev/ttyUSB0
+python zdump.py sniff -d /dev/ttyUSB0</PRE
+><P
+></P
+></DIV
+>
+	By default, the <B
+CLASS="command"
+>zdump</B
+> program uses 802.15.4
+	channel 11 and displays output on a single line.  Here's some
+	sample output:
+<PRE
+CLASS="screen"
+>9.53     BEACON beacon_order=15 superframe_order=0 final_cap_slot=0 PANCOORD fcf=8000 [BEACON] dsn= 83 src=00:6e/00:00 4a:61:6d:65:79:27:73:20:4f:66:66:69:63:65:00 rssi=-9 lqi=107 crc=True
+9.53     DATA_REQUEST fcf=8023 [COMMAND ACKREQUEST] dsn= 42 src=be:ef/00:01 rssi=18 lqi=106 crc=True
+9.53     ACK fcf=0012 [ACK FRAMEPEND] dsn= 42 rssi=-10 lqi=107 crc=True
+9.55     BEACON beacon_order=15 superframe_order=0 final_cap_slot=0 PANCOORD fcf=8000 [BEACON] dsn=229 src=00:67/00:00 54:65:61:6d:41:72:65:61:00 rssi=-10 lqi=106 crc=True
+9.60     BEACON beacon_order=15 superframe_order=0 final_cap_slot=0 PANCOORD fcf=8000 [BEACON] dsn= 23 src=00:6f/00:00 4a:61:6d:65:79:27:73:20:4f:66:66:69:63:65:00 rssi=3 lqi=107 crc=True
+9.61     BEACON_REQUEST fcf=0803 [COMMAND] dsn=247 dest=ff:ff/ff:ff rssi=-44 lqi=105 crc=True
+9.61     BEACON beacon_order=15 superframe_order=0 final_cap_slot=0 PANCOORD ASSOC_OK fcf=8000 [BEACON] dsn= 38 src=be:ef/00:0c 43:52:4c:2d:4d:65:64:69:63:61:6c:00 rssi=-9 lqi=107 crc=True</PRE
+>
+	There are options to the <B
+CLASS="command"
+>zdump</B
+> program to
+	decode TCP/IP traffic, display multiple lines per packet, set
+	and hop channels, and filter packets by type.  (* Add link to
+	zdump reference here *)
+      </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="AEN54"
+>2.1.2. Setting up an Access Point</A
+></H2
+><P
+>&#13;	The HP TinyOS tree provides clients that can communicate
+	using TCP/UDP over IP over 802.15.4.  An access point is
+	needed to connect the wireless 802.15.4 client back to the
+	wired Ethernet.  We have a hardware project to build a small
+	embedded Linux computer with wired Ethernet and 802.15.4
+	radios (* add link here *).  For people without the hardware, the
+	<TT
+CLASS="filename"
+>contrib/handhelds/apps/AccessPoint</TT
+> software
+	configures a Telos Mote to act as basic access point.  Wired
+	Ethernet traffic from the Mote is sent over the USB cable to a
+	host PC running a custom Linux kernel module.
+      </P
+><P
+>&#13;	We'll assume that you have a Linux development machine running
+	kernel version 2.6 and a Telos Mote connected to
+	<TT
+CLASS="filename"
+>/dev/ttyUSB1</TT
+>.
+	The first step is to build and install the kernel module that
+	routes IP traffic:<DIV
+CLASS="informalexample"
+><P
+></P
+><A
+NAME="AEN60"
+></A
+><PRE
+CLASS="programlisting"
+>cd contrib/handhelds/apps/AccessPoint/kernel
+make
+insmod ./telos_ap.ko</PRE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;	Now we install the access point software on the
+	Mote.<DIV
+CLASS="informalexample"
+><P
+></P
+><A
+NAME="AEN63"
+></A
+><PRE
+CLASS="programlisting"
+>cd contrib/handhelds/apps/AccessPoint
+make telos IP=10.0.1.1 LONG_ADDRESS=1 install bsl,/dev/ttyUSB1</PRE
+><P
+></P
+></DIV
+>
+	A few things to note here:  First, you had to specify
+	an <CODE
+CLASS="envar"
+>IP</CODE
+> address for the access point.  The Telos Mote will be
+	acting as a network interface card for your Linux computer,
+	and as such, it needs to have a network address.  Some day we
+	will try to remove this restriction so you can assign the
+	address using <B
+CLASS="command"
+>ifconfig</B
+> or equivalent.
+	Second, you had to specify a <CODE
+CLASS="envar"
+>LONG_ADDRESS</CODE
+>.
+	This two byte value is used to create a unique network MAC
+	address for the CC2420 radio.  The <CODE
+CLASS="envar"
+>LONG_ADDRESS</CODE
+>
+	is not needed for devices that have a DS2411 identification
+	chip (such as the Telos revision B or TMote Sky motes).
+      </P
+><P
+>&#13;	The third step is to running the access point user-space
+	daemon.  The daemon sets up the kernel module and updates
+	routing tables.<DIV
+CLASS="informalexample"
+><P
+></P
+><A
+NAME="AEN70"
+></A
+><PRE
+CLASS="programlisting"
+>cd contrib/handhelds/apps/AccessPoint/daemon
+make
+zattach -n -v /dev/ttyUSB1</PRE
+><P
+></P
+></DIV
+>
+	If the daemon is running correctly, you should see something
+	like:
+	<PRE
+CLASS="screen"
+>Device name telos0
+
+Event: Reset
+IP:    10.0.1.1
+Addr:  a0:a0:00:00:00:00:00:01
+PanID: 0xbeef
+Freq:  2405 (channel 11)
+SSID:  CRL-Medical
+setting host ip address
+</PRE
+>
+	The <B
+CLASS="command"
+>zattach</B
+> program handles updating the
+	routing tables as clients join and leave the access point.
+	However, you won't be able to connect to those clients outside
+	of your local Linux machine unless you turn on IP forwarding:
+	<DIV
+CLASS="informalexample"
+><P
+></P
+><A
+NAME="AEN74"
+></A
+><PRE
+CLASS="programlisting"
+>echo "1" &#62; /proc/sys/net/ipv4/ip_forward</PRE
+><P
+></P
+></DIV
+>
+	Remember, if you are going to forward packets off of your
+	local computer, you need to supply routable IP addresses.
+      </P
+><P
+>&#13;	Notice that the output of the <B
+CLASS="command"
+>zattach</B
+>
+	program contains the device name <TT
+CLASS="filename"
+>telos0</TT
+>.
+	This is an actual Linux network device.  Try
+	<B
+CLASS="command"
+>ifconfig</B
+> to see its settings or running
+	<B
+CLASS="command"
+>ethereal</B
+> and watching the network traffic
+	on the device.
+      </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="AEN81"
+>2.1.3. Running a Simple Telnet Client</A
+></H2
+><P
+>&#13;	Now we'll install and test a simple Telnet client that runs
+	over 802.15.4.  We'll assume that you have a Telos revision B
+	mote plugged into <TT
+CLASS="filename"
+>/dev/ttyUSB2</TT
+>.
+	<DIV
+CLASS="informalexample"
+><P
+></P
+><A
+NAME="AEN85"
+></A
+><PRE
+CLASS="programlisting"
+>cd contrib/handhelds/swtest/TelnetServer
+make telosb IP=10.0.1.2 install bsl,/dev/ttyUSB2</PRE
+><P
+></P
+></DIV
+>
+	As with the access point, if you are running a client device
+	that doesn't have a DS2411 identification chip, you must
+	specify a unique <CODE
+CLASS="envar"
+>LONG_ADDRESS</CODE
+> value.
+      </P
+><P
+>&#13;	The client will scan all of the local 802.15.4 channels,
+	locate available access points (by sending <TT
+CLASS="literal"
+>BEACON
+	REQUEST</TT
+> packets), select the best access point, and
+	associate with it.  If everything goes well, you should see
+	the output of the <B
+CLASS="command"
+>zattach</B
+> program
+	displaying:<PRE
+CLASS="screen"
+>Event: Associate
+IP:    0.0.0.0
+Addr:  a0:a0:00:00:0c:59:f8:53
+SAddr: 0
+Flags: 0x81
+
+Event: ARP
+IP:    10.0.1.2
+Addr:  a0:a0:00:00:0c:59:f8:53
+SAddr: 0
+Flags: 0x81
+adding client route
+</PRE
+>
+	Now you should be able to run <B
+CLASS="command"
+>ping 10.0.1.2</B
+> and
+	<B
+CLASS="command"
+>telnet</B
+>.  You can watch packets fly back and
+	forth both from the <B
+CLASS="command"
+>zdump</B
+> software that
+	shows you what is going over the air and from
+	<B
+CLASS="command"
+>tcpdump</B
+> or <B
+CLASS="command"
+>ethereal</B
+>
+	running on the <TT
+CLASS="literal"
+>telos0</TT
+> interface.
+      </P
+></DIV
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="about.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="x98.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>About this Document</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+>&nbsp;</TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Running with Wires</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

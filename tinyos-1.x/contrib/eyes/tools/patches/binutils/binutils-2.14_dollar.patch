@@ -1,0 +1,15 @@
+diff -uNr binutils-2.14_vanilla/gas/config/tc-msp430.h binutils-2.14/gas/config/tc-msp430.h
+--- binutils-2.14_vanilla/gas/config/tc-msp430.h	Mon Dec 30 20:25:07 2002
++++ binutils-2.14/gas/config/tc-msp430.h	Mon Jan 26 12:24:30 2004
+@@ -101,8 +101,10 @@
+      example, a value of 2 might print `1234 5678' where a value of 1
+      would print `12 34 56 78'.  The default value is 4.  */
+ 
+-#define LEX_DOLLAR 0
++#undef LEX_DOLLAR 0 
++/* nesC uses `$' in the labels */
+ /* MSP430 port does not use `$' as a logical line separator */
++
+ 
+ #define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR) (P2VAR) = 0
+ /*   An `.lcomm' directive with no explicit alignment parameter will

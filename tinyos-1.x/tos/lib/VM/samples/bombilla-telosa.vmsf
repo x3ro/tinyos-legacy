@@ -1,0 +1,27 @@
+<VM NAME="BombillaTelosAVM" DESC="A stripped-down version of the Bombilla virtual machine, runs on Telos revA and Telos revB." DIR="../../../../apps/BombillaTelosA">
+<SEARCH PATH="../opcodes">
+<SEARCH PATH="../contexts">
+<SEARCH PATH="../languages">
+<OPTION CAPSULE_SIZE=50 OPDEPTH=6>
+
+<LOAD FILE="../sensorboards/telos.vmsf">
+<LANGUAGE NAME="microscript">
+
+<FUNCTION NAME="bclear">
+<FUNCTION NAME="bfull">
+<FUNCTION NAME="bsize">
+<FUNCTION NAME="bufsorta">
+<FUNCTION NAME="bufsortd">
+<FUNCTION NAME="eqtype">
+<FUNCTION NAME="err">
+<FUNCTION NAME="id">
+<FUNCTION NAME="int">
+<FUNCTION NAME="led">
+<FUNCTION NAME="rand">
+<FUNCTION NAME="sleep">
+<FUNCTION NAME="uart">
+
+<CONTEXT NAME="Trigger">
+<CONTEXT NAME="Timer0">
+<CONTEXT NAME="Reboot">
+<CONTEXT NAME="Broadcast">

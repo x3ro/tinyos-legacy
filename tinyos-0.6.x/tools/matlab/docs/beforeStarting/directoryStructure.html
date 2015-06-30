@@ -1,0 +1,144 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>directory structure</title>
+<style>
+<!--
+h2
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:18.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold}
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	}
+ li.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	margin-left:0in; margin-right:0in; margin-top:0in}
+-->
+</style>
+</head>
+
+<body>
+
+<h1>directory structure</h1>
+
+<p>All matlab code is held in the &quot;nest/tools/matlab&quot; directory.&nbsp; 
+Inside are a few directories.&nbsp; Things in green have not been implemented 
+yet.&nbsp; The heart of matTOS is the <i>commStack</i> and the <i>packet</i> 
+object.&nbsp; The <i>apps</i> and <i>shared</i> directories are for commands 
+that directly correspond to things in the /nest/apps and /nest/tos/shared 
+directories.&nbsp; The <i>tools</i> directory holds things that are general 
+enough to be used by everybody but have to do only with matlab and have nothing 
+to do with TOS.&nbsp; The contrib directory holds things that have to do only 
+with matlab and have nothing to do with TOS, but are also not general enough for 
+everybody to use.&nbsp; Every individual should start off by making themselves a 
+contrib directory.&nbsp; Then, as their work becomes generalizable, they should 
+move it into the tools directory.</p>
+
+<ol start=1 type=1 style="margin-bottom: 0in">
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l4 level1 lfo9;tab-stops:list .5in'><b>@packet</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+     style='mso-tab-count:2'>                    </span>The packet object and
+     related functions.</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l4 level1 lfo9;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>commStack</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+     style='mso-tab-count:2'>                   </span>The PC-side
+     communications stack</li>
+ <ol start=1 type=1 style="margin-bottom: 0in">
+  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+      auto;mso-list:l4 level2 lfo9;tab-stops:list 1.0in'><b style='mso-bidi-font-weight:
+      normal'>dataLayer</b>:&nbsp;&nbsp;&nbsp; <span style='mso-tab-count:2'>              </span>The
+      data interface on the communications stack</li>
+  <ol start=1 type=1 style="margin-bottom: 0in">
+   <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+       auto;mso-list:l4 level3 lfo9;tab-stops:list 1.5in'><b style='mso-bidi-font-weight:
+       normal'>Serial</b>: <span style='mso-tab-count:2'>             </span>The
+       interface to physical serial ports</li>
+   <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+       auto;mso-list:l4 level3 lfo9;tab-stops:list 1.5in'><b style='mso-bidi-font-weight:
+       normal'><span style='background:lime;mso-highlight:lime'>Socket</span></b><span
+       style='background:lime;mso-highlight:lime'>: <span style='mso-tab-count:
+       1'>           </span>The interface to network sockets<o:p></o:p></span></li>
+   <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+       auto;mso-list:l4 level3 lfo9;tab-stops:list 1.5in'><b style='mso-bidi-font-weight:
+       normal'><span style='background:lime;mso-highlight:lime'>USB:</span></b><span
+       style='background:lime;mso-highlight:lime'><span style='mso-tab-count:
+       2'>               </span>The interface to physical USB ports<o:p></o:p></span></li>
+  </ol>
+  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+      auto;mso-list:l4 level2 lfo9;tab-stops:list 1.0in'><b style='mso-bidi-font-weight:
+      normal'>packetLayer</b>&nbsp;&nbsp;&nbsp;<span style='mso-tab-count:1'>            </span>the
+      packet interface on the communications stack</li>
+  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+      auto;mso-list:l4 level2 lfo9;tab-stops:list 1.0in'><b style='mso-bidi-font-weight:
+      normal'><span style='background:lime;mso-highlight:lime'>AMlayer</span></b><span
+      style='background:lime;mso-highlight:lime'>:<span style='mso-tab-count:
+      2'>                    </span>the active message interface on the comm.
+      Stack<o:p></o:p></span></li>
+  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+      auto;mso-list:l4 level2 lfo9;tab-stops:list 1.0in'><b style='mso-bidi-font-weight:
+      normal'>
+  <span style='background-position: 0% 0%; mso-highlight:lime; background-image:url(&#039;../none&#039;); background-repeat:repeat; background-attachment:scroll'>routingLayer</span></b><span
+      style='background-position: 0% 0%; mso-highlight:lime; background-image:url(&#039;../none&#039;); background-repeat:repeat; background-attachment:scroll'><span style='mso-tab-count:
+      2'>              </span>the routing interface on the comm. Stack</span></li>
+ </ol>
+ <li><span style="background-position: 0% 0%"><b>contrib:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ work by one person that is not necessarily general enough to be used by others</span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l4 level1 lfo9;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>apps</b>:<span style='mso-tab-count:4'>                                        </span>Tools
+     for the components in the “tos/apps” directory</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l4 level1 lfo9;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>shared</b>:<span style='mso-tab-count:3'>                                    </span>Tools
+     for the components in the “tos/shared” directory</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l4 level1 lfo9;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>tools</b>:<b style='mso-bidi-font-weight:normal'><span
+     style='mso-tab-count:4'>                                       </span></b>General
+     user-interface tools that should be shared</li>
+ <ol start=1 type=1 style="margin-bottom: 0in">
+  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+      auto;mso-list:l4 level2 lfo9;tab-stops:list 1.0in'><b style='mso-bidi-font-weight:
+      normal'>listen</b>:<span style='mso-tab-count:3'>                          </span>Prints
+      streaming packets on a packetPort</li>
+  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+      auto;mso-list:l4 level2 lfo9;tab-stops:list 1.0in'><b style='mso-bidi-font-weight:
+      normal'>watch</b>:<span style='mso-tab-count:3'>                          </span>Graphically
+      displays streaming data on a packetPort.</li>
+  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+      auto;mso-list:l4 level2 lfo9;tab-stops:list 1.0in'><b>watchSurface:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </b>Graphically displays a surface plot of streaming data on a packetPort</li>
+ </ol>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l4 level1 lfo9;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>util</b>:<span style='mso-tab-count:4'>                                          </span>common
+     utilities such as hex-dec conversion</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l4 level1 lfo9;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>docs</b>:<b style='mso-bidi-font-weight:normal'><span
+     style='mso-tab-count:4'>                                        </span></b>documentation.<span
+     style='mso-spacerun:yes'>  </span>Specific apps might have their own docs
+     in their own directories. </li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l4 level1 lfo9;tab-stops:list .5in'><b style='mso-bidi-font-weight:
+     normal'>demos</b><span style='mso-tab-count:4'>                                     </span>Matlab
+     tool demos</li>
+</ol>
+
+</body>
+
+</html>

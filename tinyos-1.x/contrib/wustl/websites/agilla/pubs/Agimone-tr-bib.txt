@@ -1,0 +1,8 @@
+@TechReport{hackmann05:agimone_tr,
+  author        = "Gregory Hackmann and Chien-Liang Fok and Gruia-Catalin Roman and Chenyang Lu",
+  title         = "Agimone: Middleware Support for Seamless Integration of Sensor and IP Networks",
+  institution   = "Washington University in St. Louis Department of Computer Science and Engineering",
+  year          = "2005",
+  number        = "WUCSE-05-56",
+  url = "mobilab.wustl.edu/projects/agilla"
+}

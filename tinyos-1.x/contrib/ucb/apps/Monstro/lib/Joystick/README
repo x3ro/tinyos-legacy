@@ -1,0 +1,15 @@
+Building the Joystick.py module for windows
+
+    * Get python (install in C:\apps\python.2.4)
+    * Get libjsw for windows (install in C:\tmp\libjsw)
+    * Get swig (install in C:\apps\swig)
+    * Get Microsoft Visual C++ Toolkit 2003 (install in C:\Program Files\Microsoft Visual C++ Toolkit 2003)
+    * Get Microsoft Platform SDK (install C:\Program Files\Microsoft Platform SDK)
+    * Get my Joystick cpp and swig files; it wraps up libjsw as a really basic class (install in C:\tmp\libjsw\python)
+    * Start the command prompt with the "Visual C++ Toolkit 2003 Command Prompt" batch file
+    * Then from the C:\tmp\libjsw\python directory, make it with the following commands 
+
+swig.exe -c++ -python Joystick.i
+
+cl.exe Joystick_wrap.cxx Joystick.cpp /I"..\include" /I"." /I"C:\apps\python.2.4\include" /I"C:\Program Files\Microsoft Platform SDK\Include" /ML libjsw.lib User32.lib /EHsc /LD /Fe"_Joystick.dll" /link /libpath:"..\lib" /libpath:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /libpath:"C:\Program Files\Microsoft Platform SDK\Lib" /libpath:"C:\apps\python.2.4\libs"
+

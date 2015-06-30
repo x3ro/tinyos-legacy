@@ -1,0 +1,14 @@
+This directory hold a test app that tests both the UART and the I2C
+communication between the atmega8 on the ultrasound board and the
+atmega128 on the mica.  This app should be programmed onto the
+mica2dot.  Change the destination address between TOS_UART_ADDRESS and
+0xFF01 to send to either the UART or I2C.  make sure the mica is
+programmed with address 0x01 and the ultrasound board is programmed
+with address 0xFF01.
+
+Whenever a message is received on the mica2dot from the ultrasound
+board, the red led toggles. Beware that when the led toggles on the
+mica, it indicates that whatever the atmega8 board is programmed with
+is actually being received, and vice versa
+
+

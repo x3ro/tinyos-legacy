@@ -1,0 +1,25 @@
+About the Tuple Router
+---------------------
+
+The tuple router receives queries and tuples.  When a query arrives, it
+converts it to a ParsedQuery.  When a tuple arrives, it routes it, along with
+an expression and some expression state, to the appropriate operators.
+
+When a operator outputs a tuple, it routes it to the next operator in the
+expression list, or sends it up the routing tree to be output.
+
+About Queries
+--------------
+
+Queries consist of a named list of fields and a set of expressions over those
+fields.  Queries are parsed into ParsedQueries, consist of a list of local 
+schema fields corresponding to the named fields into the original query, as well
+as the same set of expressions.  Named fields that do not exist in the local
+schema are marked as null in the parsed query data structure.
+
+About Operators
+---------------
+
+
+
+

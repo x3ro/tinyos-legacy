@@ -1,0 +1,13 @@
+logfile LOG
+executable build/pc/main.exe
+nummotes 25
+#numsec 10
+dbg usr1,usr2
+plugin DebugMsgPlugin
+plugin RadioLinkPlugin
+plugin LocationPlugin
+plugin NeighborhoodPlugin
+plugin RadioModelPlugin
+layout gridrandom
+radiomodel disc100
+radioscaling 4

@@ -1,0 +1,3 @@
+COMPONENT=DelugeBasic
+PFLAGS += -DDELUGE_LEDS
+include $(MAKERULES)

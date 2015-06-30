@@ -1,0 +1,21 @@
+#<SYMDEFS>#
+;
+; RM_Rom1.sym
+;
+;       Symbols for refrencing function in ROM version 1
+
+0x00210030 A RM1_ResetHandler
+0x00210270 A RM1_UT_NextCRC
+0x002102a0 A RM1_UT_CRCBuffer
+0x002103ec A RM1_FlshPollAlg1
+
+0x00210430 A RM1_FlshPollAlg2
+0x0021049c A RM1_FlshToglAlg1
+0x002104e4 A RM1_FlshToglAlg2
+0x00210570 A RM1_FlshSetComnd
+
+0x002106f0 A RM1_FlshWrRecWrdByWrd
+0x002105d8 A RM1_FlshWrRecByPass
+0x0021079c A RM1_FlshEraseSector
+0x002107f4 A RM1_FlshCopyCmdData
+

@@ -1,0 +1,99 @@
+#!/usr/bin/perl -w
+
+use strict;
+my %names;
+
+
+
+#
+# Handle command line
+#
+my $start_file = shift(@ARGV);
+my @SEARCH_PATH = (".", @ARGV);
+
+
+#
+# find all of the modules
+#
+getModuleNames($start_file);
+
+
+#
+# output make vars
+#
+print "PARSED_OBJS = "; 
+my $comp;
+foreach $comp (sort keys %names){
+    next if not $comp;
+    print $comp . ".o ";
+}	
+print "\n";
+
+
+
+
+
+##################################################
+# recursively read module names out of .desc and .comp files
+##################################################
+my %already_seen = ();
+sub getModuleNames{
+    my $file_name = shift;
+    #print STDERR "***** val: " . $file_name . "\n";
+
+    # prevent loops
+    return if($already_seen{$file_name});
+    $already_seen{$file_name} = 1;
+
+    open(FFILE, "$file_name") or die "can't open file '$file_name'";
+    while(<FFILE>){
+        if(/^include modules\{/){
+            last;
+        }
+    }
+    my @lines;
+    while(<FFILE>){
+        if(/\};/){
+            last;
+        }
+    	/(\w+);/; 
+    	#if($1 . ".desc" ne $file_name){
+        #    print "'$1'\n";
+            push @lines, $_;
+	#}
+    }
+    #print @lines;
+    for (@lines){
+	#print "$_";
+        
+        /(\w+);/; 
+        my $mod_name = $1;
+
+        my $found = 0;
+        foreach my $dir (@SEARCH_PATH) {
+            if( open(MOD_FILE, "$dir/${mod_name}.comp") ) {
+                $mod_name = "$dir/${mod_name}";
+                $found = 1;
+                last;
+            }
+        }
+        die "$0: could not open ${mod_name}.comp\n" unless $found;
+        
+        #print "looking for " . $mod_name . "\n";
+        while(<MOD_FILE>){
+            if(/^IMPLEMENTED_BY (\w+);/){
+		#print "found " . $mod_name . "\n";
+		getModuleNames($mod_name. ".desc");
+		$mod_name = "";
+            }elsif(/JOINTLY IMPLEMENTED_BY (\w+);/){
+                #print "found " . $mod_name . "\n";
+                getModuleNames($mod_name. ".desc");
+            }
+        }
+        $names{$mod_name} = "";
+    }
+}
+
+
+
+

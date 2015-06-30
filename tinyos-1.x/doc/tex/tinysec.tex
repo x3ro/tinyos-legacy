@@ -1,0 +1,234 @@
+\documentclass[11pt]{article}
+
+\usepackage{geometry, graphicx, color, url}
+\title{TinySec: User Manual}
+\author{Chris Karlof \hspace{1cm} Naveen Sastry \hspace{1cm} David Wagner\\ \{ckarlof, nks,
+  daw\}@cs.berkeley.edu}
+
+\begin{document}
+\maketitle
+\section{Introduction}
+
+We introduce TinySec, a link layer encryption mechanism which is meant to be
+the first part in a suite of security solutions for tiny devices.  The core of
+TinySec is an efficient block cipher and keying mechanism that is tightly
+coupled with the Berkeley TinyOS radio stack.  TinySec currently utilizes a
+single, symmetric key that is shared among a collection of sensor network
+nodes.  Before transmitting a packet, each node first encrypts the data and
+applies a Message Authentication Code (MAC), a cryptographically strong
+unforgeable hash to protect data integrity.  The receiver verifies that the
+packet was not modified in transit using the MAC and then deciphers the
+message.
+
+There are four main aims of TinySec:
+\begin{itemize}
+\item Access control. Only authorized nodes should be able to participate in
+  the network.  Authorized nodes are designated as those nodes that possess
+  the shared group key.
+\item Integrity.  A message should only be accepted if it was not altered in
+  transit. This prevents, for example, man-in-the-middle attacks where an
+  adversary overhears, alters, and re-broadcasts messages.
+\item Confidentiality. Unauthorized parties should not be able to infer the
+  content of messages.
+\item Ease of use. Finally, taking into account the diversity of sensor
+  networks users, TinySec should not be difficult to use. We hope to provide a
+  communication stack that provides the above three goals which is no more
+  difficult to use than the traditional, non-security aware communication
+  stack.
+\end{itemize}
+
+TinySec works both in the TOSSIM simulator as well as on the Mica and Mica2
+motes.
+
+\section{Installation}
+TinySec is now included with the standard TinyOS distribution. 
+Building TinySec enabled applications uses the {\tt mote-key} script. 
+Make sure this script is in your {\tt PATH}. 
+
+\subsection{Testing Your Installation}
+The TestTinySec application can be used to check your TinySec installation. It
+periodically sends a data packet using TinySec.  SecureTOSBase is the
+TinySec-aware analogue to TOSBase and will toggle red when it receives
+a valid packet. 
+
+You should program two motes, one with TestTinySec and one
+SecureTOSBase
+\begin{verbatim}
+     $
+     $ cd nest/tinyos-1.x/apps/TestTinySec
+     $ make mica2 install
+     $ # Now install the second mote
+     $ cd nest/tinyos-1.x/apps/SecureTOSBase
+     $ make mica2 install
+\end{verbatim}
+
+TinySec is properly working if the SecureTOSBase mote toggles its red
+LED periodically. This indicates that the packet was transmitted with
+authentication enabled. 
+
+If either application fails to build, then check that the ``mote-key'' script
+is in your {\tt PATH}.  
+
+
+\subsection{Writing Applications}
+\label{sec:writing}
+Enabling TinySec for your applications should be a straightforward process.  In
+general, application code does not need to change\footnote{Except for
+  applications using the group field. See Section \ref{sec:groups} about
+  deprecation of the group field in the packet header.}.  If your Makefile
+includes Makerules from the {\tt tinyos-1.x/apps} directory, you only need to
+add {\tt TINYSEC=true} to your application's Makefile in order to enable
+TinySec. This can also be be done from the command line when invoking make:
+e.g., {\tt
+  make mica2 TINYSEC=true}.
+
+By default, TinySec will authenticate all messages, but encryption is turned
+off. TinySec allows you to dynamically alter the combination of security
+mechanisms for
+your application with the {\tt TinySecMode} interface. The {\tt TinySecC}
+component exports this interface. There are two commands in the {\tt
+  TinySecMode} interface for setting the
+transmit and receive mode:
+
+\begin{verbatim}
+     command result_t setTransmitMode(uint8_t mode); 
+     command result_t setReceiveMode(uint8_t mode);  
+\end{verbatim} 
+{\tt setTransmitMode} takes one of three values as its argument: 
+\begin{verbatim}
+     TINYSEC_AUTH_ONLY 
+     TINYSEC_ENCRYPT_AND_AUTH
+     TINYSEC_DISABLED
+\end{verbatim} 
+Similarly, {\tt setReceiveMode} takes one of three values as its argument: 
+\begin{verbatim}
+     TINYSEC_RECEIVE_AUTHENTICATED
+     TINYSEC_RECEIVE_CRC
+     TINYSEC_RECEIVE_ANY
+\end{verbatim}
+The default is {\tt TINYSEC\_AUTH\_ONLY} for sending and {\tt
+  TINYSEC\_RECEIVE\_AUTHENTICATED} for receiving. {\tt
+  TINYSEC\_ENCRYPT\_AND\_AUTH} sends encrypted and authenticated messages, and
+  {\tt TINYSEC\_DISABLED} sends messages with the standard TinyOS radio stack
+  (CRC only, with no encryption or authentication). 
+
+When the receiver is in 
+ {\tt TINYSEC\_RECEIVE\_AUTHENTICATED} mode, it will only accept messages from a
+ sender in {\tt TINYSEC\_AUTH\_ONLY} mode or {\tt TINYSEC\_ENCRYPT\_AND\_AUTH}
+ mode. A receiver in 
+ {\tt TINYSEC\_RECEIVE\_CRC} mode will only accept messages from a
+ sender in {\tt TINYSEC\_DISABLED} mode, and a receiver in  \\ {\tt
+ TINYSEC\_RECEIVE\_ANY} mode will accept messages from senders in any mode. 
+The application layer can check which mode a message was received in by
+inspecting the {\tt receiveSecurityMode} in the corresponding {\tt
+ TOS\_Msg}. This interface is subject to race conditions.
+
+\subsection{SecureTOSBase}
+
+Use
+the {\tt SecureTOSBase} application to interface your PC with a network of
+motes enabled with TinySec. 
+
+{\tt SecureTOSBase} will only accept messages that that have been sent
+with a MAC; thus it will \emph{not} receive messages sent with the old radio
+stack or with TinySec disabled.  You will need to modify the
+{\tt SecureTOSBase} application if you would like to receive both
+authenticated and unauthenticated messages.
+
+\subsection{Key Management}        
+\label{sec:key}
+
+When using TinySec, you must be aware of keys and the key-file.  Each Mica mote
+can only communicate with other motes that have been programmed with the same
+key. The key is currently set in a given program at build time. Without any
+extra arguments to the normal build process, the default key-file and default
+key will be used. A default key-file will be created for you the first time
+TinySec is used and stored in the file at {\tt  \~\//.tinyos\_keyfile}. 
+It looks like:
+
+\begin{verbatim}
+     # TinySec Keyfile. By default, the first key will be used.
+     # You can import other keys by appending them to the file.
+
+     default 6D524D67F24F178B0A69933FDD6C6F7B
+\end{verbatim}
+
+Note that the your key value will not be the same as listed above. Each line
+lists a key name and the key value. When you invoke {\tt make mica2}, the first
+key in the default key-file will be installed. 
+
+This means that by default, if you install a program onto one mote from your
+laptop, and install a program onto another mote from your desktop, they will
+not be able to interoperate. This is because they will be using different
+keys. Thus, you'll need to perform one of the following:
+\begin{itemize}
+   \item Use the same key-file on both computers
+   \item Copy the key-file from your laptop to the desktop, renaming the file
+     to ``laptop-keyfile''. Then, when building on the desktop, use the new
+     keyfile whenever you wish to create motes that interoperate with motes
+     programmed from the laptop:
+     \begin{verbatim} make mica2 KEYFILE=laptop-keyfile \end{verbatim}
+  \item Copy the line from the keyfile which reads ``default 6D524\ldots'' from the laptop to the desktop
+     keyfile (.keyfile). In addition, rename the key label from ``default'' to
+    ``laptop''.  Then, when building on the desktop, use the new keyfile
+     whenever you wish to create motes that interoperate with motes programmed
+     from the laptop:
+     \begin{verbatim} make mica2 KEYNAME=laptop \end{verbatim}
+\end{itemize}
+
+\subsection{Updating Keys}
+The {\tt TinySecControl} interface exported by the {\tt TinySecC} component
+enables you update TinySec keys and query and reset the initialization vector
+(IV). The {\tt TinySecControl} interface has six commands:
+
+\begin{verbatim}
+    command result_t updateMACKey(uint8_t * MACKey);
+    command result_t getMACKey(uint8_t * result);
+    command result_t updateEncryptionKey(uint8_t * encryptionKey);
+    command result_t getEncryptionKey(uint8_t * result);
+    command result_t resetIV();
+    command result_t getIV(uint8_t * result)
+\end{verbatim}
+
+{\tt updateMACKey()} and {\tt updateEncryptionKey()} update the corresponding
+key, and take a pointer to an array of {\tt TINYSEC\_KEYSIZE} bytes. These
+commands return {\tt SUCCESS} if the key update is successful. These commands
+will return {\tt FAIL} if the key update is attempted while any crypto operation
+is executing in TinySec. This is the simplest solution to ensure atomicity of
+crypto operations with respect to the TinySec keys. The caller of these commands
+must check their return values, and try again if they return {\tt FAIL}.
+
+{\tt
+  getMACKey()} and {\tt getEncryptionKey()} return the corresponding key into
+the array referenced by the input parameter {\tt result}. {\tt result} must
+reference a buffer of size at least {\tt TINYSEC\_KEYSIZE} bytes. 
+
+{\tt resetIV()} resets the counter portion of the IV to 0. This will most likely
+be used in conjunction with updating the encryption key. As in the key
+update commands, {\tt resetIV()} will return {\tt FAIL} if it is called while
+any crypto operation is executing in TinySec. {\tt getIV()} returns
+the current value of the IV into the array referenced by the input parameter {\tt
+  result}. {\tt result} must
+reference a buffer of size at least {\tt TINYSEC\_IV\_LENGTH} bytes.
+ 
+\subsection{Groups}
+\label{sec:groups}
+The concept of ``groups'' does not exist under TinySec. Groups are a
+means to provide namespaces for destination addresses when sending
+packets.  Each mote belongs to one of 255 different groups. The group byte is
+transmitted as a part of every packet. A packet is accepted only if the sender
+and receiver are in the same group.
+
+This functionality is subsumed by using keys under TinySec. Using TinySec, a
+message will only be accepted if the sender and receiver use the same
+key. This is enforced cryptographically. However, if a received message passes
+the MAC, the {\tt TOS\_Msg} received at the application layer will show the group
+that the receiving mote was programmed with.  
+
+\section{Under the Covers}
+We've created replacements for the TinyOS radio stacks that incorporate
+TinySec. These files are located in {\tt
+  tinyos-1.x/tos/platform/\{mica2,mica,pc\}/TinySec}. The remaining TinySec
+components are located in {\tt tinyos-1.x/tos/lib/TinySec}.
+See \url{http://www.cs.berkeley.edu/~nks/tinysec} for more information.
+\end{document}

@@ -1,0 +1,36 @@
+/* 
+ * Sarah Bergbreiter
+ * 6/21/2001
+ * COTS-BOTS Project
+ *
+ * This component provides instructions for a continuous stream of
+ * forward figure-8's and reverse figure-8's.
+ *
+ * History:
+ * 6/21/2001 - created.
+ * 11/24/2001 - modified to use with radio component.
+ *
+ */
+
+TOS_MODULE FIGURE8;
+
+ACCEPTS{
+	char FIGURE8_INIT(void);
+	char FIGURE8_START(void);
+};
+HANDLES{
+	void FIGURE8_CLOCK_EVENT(void);
+	void FIGURE8_SERVO_EVENT(int servo, unsigned char control);
+	char FIGURE8_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr FIGURE8_SERVO(TOS_MsgPtr val);
+};
+USES{
+	char FIGURE8_SUB_CLOCK_INIT(unsigned char interval);
+	char FIGURE8_SUB_INIT();
+	char FIGURE8_SETSPEED(unsigned char speed);
+	char FIGURE8_SETDIR(char direction);
+	char FIGURE8_TURN(char turn);
+	char FIGURE8_SEND_MSG(short addr, char type,TOS_MsgPtr data);
+};
+SIGNALS{
+};

@@ -1,0 +1,9 @@
+- Mutually crossing edges, e.g.
+   YaoNeighborhoodM: Edge 4 -> 5 crosses 7 -> 3
+   YaoNeighborhoodM: Edge 7 -> 3 crosses 4 -> 5
+
+- Add packet counts to send msgs plugin
+  - add pkt received event
+  - count bcast msg as sent to all potential neighbors (how to correlate
+    with radio model?)
+  - do we need an auto-run plugin?

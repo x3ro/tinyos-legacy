@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>TinyOS Build Environment</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big><big>
+Tailoring the TinyOS Build Environment</big></big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Last updated 08 Aug 2005 </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> When building TinyOS applications, it is useful to define certain
+build parameters that are specific to your needs.&nbsp; Such parameters
+include     the operating frequency (mica2/mica2dot), the Group ID,
+different component     libraries, etc. This section describes how to
+tailor your TinyOS build     environment to suit your needs.</p>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><font face="arial,helvetica">The Makelocal
+file</font></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p> The Makerules file in the tools/make directory manages many aspects of the
+build process for TinyOS applications. While it is possible to edit this
+file to     make changes, such practice is not advisable since 1) the
+Makerules file is     not intuitive, 2) changing this file may break
+the build process, 3) the     changes may not portable to other
+users.&nbsp; </p>
+<p> To allow for tailoring the build environment, the Makerules file
+looks for a     Makelocal file located in the tools/make directory and
+includes it in the build     process. Changes made to the Makelocal file
+can be easily reversed (just     delete/rename the file) and can be
+distributed to other users. </p>
+<p> To use this feature, create a Makelocal file in the tools/make directory
+which contains your custom definitions using standard makefile
+syntax.&nbsp; For     example:&nbsp; <br>
+</p>
+<p> <tt># Makelocal File<br>
+<br>
+PFLAGS += -I%T/../beta/MyBetaCode<br>
+<br>
+DEFAULT_LOCAL_GROUP = 0x33<br>
+<br>
+PFLAGS += -DCC1K_DEF_FREQ=916700000<br>
+<br>
+EPRB=myprogrammer.foo.com</tt></p>
+<p> The above Makelocal file adds a search path for code in
+../../beta/MyCode, defines the default Group ID (0x33) and manual
+frequency setting (916.7 MHz)     for the mica2 series motes, and sets
+the default programmer as an EPRB with     hostname
+'myprogrammer.foo.com'</p>
+<p> </p>
+<hr> <b><a href="index.html"> Tutorial Index </a></b>
+</body>
+</html>

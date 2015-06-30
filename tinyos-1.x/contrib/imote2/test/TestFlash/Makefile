@@ -1,0 +1,3 @@
+COMPONENT=TestFlash
+include ../Makerules
+

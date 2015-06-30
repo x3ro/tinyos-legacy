@@ -1,0 +1,82 @@
+README for Mesh Routing application
+Contact: Mark Yarvis at mark.yarvis@intel.com
+
+1. Introduction
+
+   The Sensor Mesh application tests the basic functionality of
+   mesh routing, traceroute, DSDV routing, and setting modules.
+
+2. Functionality
+
+   In the default configuration, each mote sends back a traceroute packet
+   to the sink node every 5 seconds along with 1 byte of piggyback information.
+   As a packet multi-hops back to the sink node, each intermediate
+   node along the path adds its node ID (one byte) into the traceroute
+   payload. The sink node receives the complete traceroute message, adds
+   the framing header, and sends to the UART. If the sink node receives a
+   packet from the UART, it forwards the packet to the radio.
+   
+   This program allows integration of the trace route application with a
+   high-speed adhoc overlay network (802.11). When motes are connected to the
+   high-speed overlay network, the sensor nodes route packets through the
+   ovelay network instead of routing through other sensor nodes. This is done
+   in a transparent manner, as the sensor nodes themselves do not know
+   if they are connected to the overlay network. The Mesh component used
+   transparently multiplexes between sending it over UART Vs and sending
+   it over the radio.
+
+   Refer to the tools/SensorBridge README document for more details to
+   run the whole package application.
+
+   You can configure parameters through the Settings GUI, or retrieve the
+   current parameter settings from traceroute piggyback. Please see
+   tos/lib/README and tools/packet_tools/README for details.
+
+   A toggle of the green LED indicates the mote attempted to send a
+   packet, the red LED shows the mote received a packet, and the yellow LED 
+   toggles when a mote received a setting message. All three LEDs flash when
+   switching on the mote.
+
+3. How to Use
+
+   Suppose you are using four motes: A, B, C, and D. Suppose there are two
+   802.11 nodes, one of which is a gateway. Assume both of these nodes are 
+   participating in the adhoc 802.11 mesh communication.
+
+   1) Compile and install ./ProgramMeshNodes on nodes A,B,C, and D with node
+      IDs greater than 0.
+   2) Compile a simulator by running the ./ProgramPC script. This installs
+      the simulator in ./build/pc/main.exe.
+   3) Attach node A to the gateway node by hooking up node A to the gateway's
+      serial port.
+   4) Run the simulator on the gateway node by "export DBG=sim" and
+      "./build/pc/main.exe l 1 1"
+   5) Run the uart server by "./uartserver COMx 9000" on the gateway node.
+   6) Run the bridge program "./bridge -s -serial SOCK" on the gateway node.
+   7) Run the SoI GUI program "wish soi_gui.tcl". Depending on the node IDs
+      that are programmed, the options that are passed to soi_gui may have
+      to be modified. Refer to packet_tools/README for more details. You
+      should see a multi-hop network and see that all packets are getting
+      routed through node A.
+   9) Now attach node C to the 802.11 node by hooking up node C to the serial
+      port of the 802.11 node.
+   10)Run the UART server on the 802.11 node by "./uartserver COMx 9000"
+   11)Run the Bridge code on the 802.11 node by
+      "./bridge -c -serial SOCK -beacon NONE <Gateway IP address>"
+   12)After a couple of minutes you should see node C communicating
+      directly with the gateway.
+   13)After a couple of minutes, you should see other nodes near to C
+      start routing packets through node C.
+   14)You can run the Settings GUI by 'wish settings_gui_nesc.tcl' to
+      disable MESH routing.
+
+4. Notes
+
+   Please refer to the following supplement documents:
+   1) packet_tools/README
+   2) SensorBridge/README.pdf
+   3) The Sensor mesh when compiled in simulator mode stops to run after 1-2
+      hours of continues operation. The exact cause is not known at this
+      point.
+
+

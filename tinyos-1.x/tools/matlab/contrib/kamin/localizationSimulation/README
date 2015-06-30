@@ -1,0 +1,7 @@
+This code is used for simulation of localization algorithms.
+
+First, generate some test cases using the testCases code.
+Then, run the algorithms in algorithms/ on these test cases.
+then, evaluate the results using the evaluate/ code.
+
+email kamin@cs.berkeley.edu for questions.

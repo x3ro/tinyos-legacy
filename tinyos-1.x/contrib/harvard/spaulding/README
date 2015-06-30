@@ -1,0 +1,148 @@
+==================================================
+Instructions for Running the Spaulding Application
+==================================================
+Konrad Lorincz
+August 25, 2006
+
+
+The following instructions explain how to program the motes and run
+the Spaulding applications.
+
+Requirements
+============
+  (1) Define the environment variable SPAULDINGSRC and have it point
+      to the spaulding/src directory.  You should probably put it in
+      your statup script.  For example, I have it defined in my .bashrc
+      like this:
+
+      export SPAULDINGSRC=/opt/klApps/spaulding/src
+
+  (2) Install the SHIMMER platform (make, SD driver, etc.)
+    
+      $ cd $SPAULDINGSRC/misc
+      $ ./makeShimmerPlatform.pl
+  
+  (3) Make sure you have at least the following versions:
+
+          - TinyOS 1.1.15  (NOTE: The MSP430 sampling interface changed
+                            quite a bit from, which is the main reasons 
+                            for version incompatibility)
+          - NesC 1.2.x
+          - Java 1.5.x (otherwise known as 5.x)
+
+
+(1) Program the Motes
+=====================
+  (a) Install TOSBase
+  -------------------
+  - Install TOSBase from the Spauling tree on one mote.  This mote
+    will be attached to the laptop and will act as the gateway between
+    the motes and the laptop.
+    NOTE: X is the windows COM port minus 1. Type "motelist" to see
+    the com port    
+
+    $ motelist
+    $ cd $SPAULDINGSRC/lib/tosBase
+    $ make telosb install.0 bsl,X  
+
+  (b) Install the Sensor motes
+  ----------------------------
+  - Install the sensor motes.  IMPORTANT, the first mote should be
+    installed with the ID of the time synchronization root.  By
+    default it is 10.  However, it changed by editing
+    FTSP_STATIC_ROOT_ID in the file $SPAULDINGSRC/driver/Makefile.common.in
+
+    $ cd $SPAULDINGSRC/driver
+    $ make telosb install.10 bsl,X
+
+  - Install the rest of the sensor motes in a similar way.
+
+  (c) Install the ViconSync mote (optional)
+  ------------------------------
+  - Program and install the ViconSync mote (optional)
+
+    $ cd $SPAULDINGSRC/viconSync
+    $ make telosb install.100 bsl,X  - Start the java logger
+
+ 
+
+(2) Run the Spaulding Application (Java side)
+=============================================
+  (a) The Main SpauldingApp java GUI
+  ----------------------------------
+  - Complie the Java GUI.  This needs to be done only once
+   
+    $ cd $SPAULDINGSRC/gui
+    $ make cleanall
+    $ make
+
+  - Start Serial Forwarder.  NOTE: COMX is now the value shown by
+    motelist without the minus 1!
+  
+    $ java net.tinyos.sf.SerialForwarder -comm serial@COMX:telos
+
+  - Run the GUI
+
+    $ cd $SPAULDINGSRC/gui
+    $ make run
+
+  - Additionl note:
+    Wait until all motes show up and they all have the "Time synched"
+    checkbox checked (this indicates that they are synchronized to the
+    root node).  At this point you can run a SamplinsSession by
+    adjusting the "Duration" and then clicking "Start".  For each
+    SamplingSession, the gui issues a start sampling command to all
+    motes, and after the set duration it reliably downloads the
+    samples.  The data for SamplinSession is stored in the following,
+    where <SAMPLINSESSIONDATE> is the directory created for a
+    particular sampling session.
+
+    $SPAULDINGSRC/gui/samplingSession/<SAMPLINSESSIONDATE>
+
+
+  (b) The ViconSync logger and command sender
+  -------------------------------------------
+    - Start a new SerialForwarder.  IMPORTANT, change the "Server
+      port" number to something different than the default
+      (e.g. PORTX=9002).  COMX points to your ViconSync mote.
+
+      $ java net.tinyos.sf.SerialForwarder -comm serial@COMX:telos
+
+    - Start the ViconSyncLogger
+
+      $ cd $SPAULDINGSRC/viconSync/viconSyncLogger
+      $ make
+      $ MOTECOM=sf@localhost:PORTX make run
+      
+    - Send commands to the ViconMote through the ViconSync
+      SerialForwarder!
+
+      $ cd $SPAULDINGSRC/viconSync/viconSyncLogger
+      $ MOTECOM=sf@localhost:PORTX java ViconSyncCmd
+      
+     
+  
+(3) View Collected Data
+=======================
+
+  - To view the samples for the last sampling session, run the command
+    below.  <nodeID> is the ID of the mote you want to plot. This
+    script will grab the last sampling session directory, plot and
+    display the samples for the specified mote.  For example, to view
+    the samples for node 10, do the following:
+
+    $ cd $SPAULDINGSRC/gui/samplingSession
+    $ $ ./plotLastDir.pl 10
+
+
+LEDs Meaning
+============
+  - Mote turned on:       blinks green x 3
+  - Data collection:      blinks orange infrequently (100 ms every 10 sec)
+  - Stop data collection: blinks orange x 3
+  - Error:                togles red LED 1 sec. or turns on all leds
+
+    
+
+
+

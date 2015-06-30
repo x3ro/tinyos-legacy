@@ -1,0 +1,36 @@
+smotlle.o: ../src/smotlle.c /usr/local/avr/include/string.h \
+  /usr/local/avr/include/stdlib.h ../src/mudlle.h \
+  /usr/local/avr/include/inttypes.h ../src/options.h ../src/mvalues.h \
+  ../src/code.h ../src/memory.h ../src/context.h \
+  /usr/local/avr/include/setjmp.h ../src/types.h ../src/alloc.h \
+  ../src/error.h ../src/motlle-interface.h ../src/call.h
+
+/usr/local/avr/include/string.h:
+
+/usr/local/avr/include/stdlib.h:
+
+../src/mudlle.h:
+
+/usr/local/avr/include/inttypes.h:
+
+../src/options.h:
+
+../src/mvalues.h:
+
+../src/code.h:
+
+../src/memory.h:
+
+../src/context.h:
+
+/usr/local/avr/include/setjmp.h:
+
+../src/types.h:
+
+../src/alloc.h:
+
+../src/error.h:
+
+../src/motlle-interface.h:
+
+../src/call.h:

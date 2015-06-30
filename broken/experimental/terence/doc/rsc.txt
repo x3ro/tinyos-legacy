@@ -1,0 +1,68 @@
+total number of packet send by mote
+total number of packet received by that mote
+route tree
+how many packet actually is lost/dropped
+connectivity
+show neighbor list
+numnber of retransmistion for packets
+stability
+how many neighbors
+dump data same format
+time, number of packets receive
+sbaility over time how many nodes switch parent
+link quality to parent
+change color grey red, gone
+drage the nodes around
+where is the network load
+append the forwader source
+
++ Introduction
+  - Goal: to minimize changes when format changes  
+  - modular! easy to switch data packet, easy to bind analysis in and out
+  - provides some features of people who do not use matlab
+
++ Statistic Collector Component
+  - Written in nesc
+  - sniff in MHDispatcher
+  - regularly send out different kind of statistic packet
+  - send throught the route tree
+
++ Collector Layer / DB Interface (Java)
+  - Listen Comm - Extract bytes to feed Collect Packet
+  - Collect Packet
+    * create table in sql
+    * packets is stored as raw byte? 0x hex?
+
+  - Sql interface
+    * provide interface for matlab to use sql to query those view
+
++ Analyzer Layer (Matlab)
+  - Packet Format / Query
+    * put all specific sql query for this type of packets here
+
+  - Event queue
+    * call analysis to see how often certain analysis should be evaluated
+    * schedule evaluation every x for analisis y
+
+  - Analysis
+    * call such and such query from packet format
+    * specific gui function for displaying the result of the analysis
+    * Analsiss
+      # route tree visualizing
+      # stabilty plot
+      # number of packet received over time
+      # link quality to parents
+      # cumulative hop count
+      # hop count over distance
+      # distance vs path estimation
+      # number of packets sent over time
+      # time elapse
+      # overall success rate
+      # success rate in respect to a mote
+    * initalise, type in external data like distance
+
+  - Gui
+    * provides button, library to draw lines, move motes
+    * initialize event queue, what type of analysis we want
+
+

@@ -1,0 +1,38 @@
+Hardware resource usage:
+
+Pins
+----
+
+The LCD consumes ports A, C, D, and pins PG0-4
+
+The temperature sensor is on ADC0 (PF0)
+The (external) voltage sensor is on ADC1 (PF1)
+The photo sensor is on ADC2 (PF2)
+The ADC voltage reference comes from PF3
+
+The JTAG interface uses PF4-7. Available via a connector when JTAG is not used
+
+The serial (RS232) port uses PE0, PE1
+
+The dataflash uses PB0-3 and PE7. PB1-3 are also available on the board edge
+(for ISP)
+
+The joystick uses PB4, PB6, PB7, PE2 and PE3
+
+The sounder uses PB5
+
+The USI interface uses pins PE4-6. Available via a connector (for any purpose).
+
+Timers
+------
+
+Timer 2 is used by the Timer/Clock component. It is clocked from the external
+32kHz crystal.
+
+Timer 1 is used by the sounder.
+
+The joystick assumes it is the only source of external interrupts. This would
+need changing if one wanted external interrupts via PE4-6.
+
+Timers 1 & 2 are used at boot time to calibrate the internal oscillator
+(should not cause any problems).

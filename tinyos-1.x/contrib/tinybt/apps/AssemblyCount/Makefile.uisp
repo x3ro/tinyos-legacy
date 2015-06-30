@@ -1,0 +1,9 @@
+# Makefile to program with one or two stk500's
+
+all: a b
+
+a:   
+	uisp -v=3 -dprog=stk500 -dserial=/dev/ttyS0 -mode=s -dpart=ATmega128 --erase --upload if=build/btnode2_2/main.srec
+
+b:	
+	uisp -v=3 -dprog=stk500 -dserial=/dev/ttyUSB0 -mode=s -dpart=ATmega128 --erase --upload if=build/btnode2_2/main.srec

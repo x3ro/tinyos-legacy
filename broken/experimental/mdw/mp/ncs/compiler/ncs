@@ -1,0 +1,3 @@
+#!/bin/sh
+
+java ncs.compiler.Main $*

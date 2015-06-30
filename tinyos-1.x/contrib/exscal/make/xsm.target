@@ -1,0 +1,23 @@
+#-*-Makefile-*- vim:syntax=make
+
+#$Id: xsm.target,v 1.2 2005/08/05 18:56:24 jwhui Exp $
+
+PLATFORM = xsm
+SENSORBOARD ?= xsm
+PROGRAMMER_PART ?= -dpart=ATmega128 --wr_fuse_e=ff
+PFLAGS += -finline-limit=100000 \
+  -I$(EXSCALDIR)/platform/xsm \
+  -I$(EXSCALDIR)/sensorboard/$(SENSORBOARD)
+
+ifeq ($(TINYOS_NP),BNP)
+  PFLAGS += -I%T/lib/Deluge
+  BOOTLOADER ?= -I%T/../contrib/exscal/tosboot/main.ihex
+  AVR_FUSE_H ?= 0xd8
+endif
+
+AVR_FUSE_H ?= 0xd9
+
+$(call TOSMake_include_platform,avr)
+
+xsm: $(BUILD_DEPS)
+    @:

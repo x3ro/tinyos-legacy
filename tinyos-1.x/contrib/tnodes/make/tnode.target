@@ -1,0 +1,41 @@
+#-*-Makefile-*- vim:syntax=make
+
+PLATFORM = tnode
+SENSORBOARD ?= none
+AVR_FUSE_H ?= 0x59
+DEFAULT_PROGRAM ?= ftdi
+PROGRAMMER_PART ?= -dpart=ATmega128 --wr_fuse_e=ff
+PFLAGS += -finline-limit=100000
+BOOTLOADER ?= $(XNP_DIR)/inpispm2.srec
+TNODE_SPEED ?= 8
+CFLAGS+= -DTNODE_SPEED=$(TNODE_SPEED)
+TNODEDIR=$(TOSDIR)/../contrib/tnodes/tos
+OPTFLAGS += -I$(TNODEDIR)/platform/tnode 
+OPTFLAGS += -I$(TNODEDIR)/interfaces
+
+ifdef TINYOS_NP
+  ifeq ($(TINYOS_NP),BNP)
+    PFLAGS += -I%T/lib/Deluge
+    PFLAGS += -I%T/lib/Deluge/TOSBoot/include
+    BOOTLOADER = $(TOSDIR)/lib/Deluge/TOSBoot/bl_tnode.srec
+    AVR_FUSE_H = 0xd8 # Is this correct?
+  endif
+  ifeq ($(TINYOS_NP),XNP)
+    BOOTLOADER = $(XNP_DIR)/inpispm2.srec
+  endif
+endif
+
+# AVR_FUSE_H ?= 0xd9 # Do I need this?
+
+ifneq ($(SENSORBOARD),)
+	OPTFLAGS+=-I$(TNODEDIR)/sensorboards/$(SENSORBOARD)
+endif
+
+PFILE=$(wildcard $(TNODEDIR)/../make/$(DEFAULT_PROGRAM).extra)
+$(if $(PFILE),$(if $(PROGRAM),,$(call TOSMake_include,$(DEFAULT_PROGRAM).extra)),)
+
+$(call TOSMake_include_platform,avr)
+
+tnode: $(BUILD_DEPS)
+	@:
+

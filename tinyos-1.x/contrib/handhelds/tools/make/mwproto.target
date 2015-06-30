@@ -1,0 +1,10 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: mwproto.target,v 1.1 2005/07/29 18:29:24 adchristian Exp $
+
+PLATFORM = mwproto
+
+$(call TOSMake_include_platform,msp)
+
+mwproto: $(BUILD_DEPS)
+	@:
+

@@ -1,0 +1,9 @@
+aclocal
+if type autoconf-2.53; then
+  autoconf-2.53
+else
+  autoconf
+fi
+autoheader
+[ -d ../config-aux ] || mkdir ../config-aux
+automake -a -c

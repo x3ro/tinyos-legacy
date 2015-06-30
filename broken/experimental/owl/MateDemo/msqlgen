@@ -1,0 +1,3 @@
+#!/bin/sh
+langs=`ncc -print-tosdir`/lib/VM/languages
+cat query | $langs/tinysql/sqlgen >mquery 2>&1

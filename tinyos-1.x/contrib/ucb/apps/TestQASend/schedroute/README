@@ -1,0 +1,75 @@
+README for SchedRoute 
+Author/Contact: hohltb@cs.berkeley.edu 
+
+NOTE:
+SchedulePolicyC/M is placeholder code for modules like the FPS PowerScheduler.
+RouteSelectDummy is placeholder code for modules like MultiHopLEPSM or 
+MultiHopWMEWMA.
+
+
+Description:
+To integrate with FPS, multihop routing components must be power-aware. We 
+have identified three requirements for this:
+	1. Separate queuing policy from mechanism
+	2. Buffer management
+	3. Parent selection interface in the route selector module.
+
+The main difference between a power-aware architecture such as FPS and 
+existing approaches is the separation of queuing policy and mechanism of 
+the forwarding queues. We will refer to the new power-aware multihop routing 
+architecture as lib/SchedRoute for scheduled routing. 
+
+SchedulePolicyC provides the policy for the forwarding queues. In its simplest 
+form it uses store-and-forward. For power scheduling, it uses FPS. QueuedASend 
+(queued alloc send) provides buffer management and is capable of managing 
+multiple forwarding queues. It replaces lib/QueuedSend, which manages one queue
+and implements store-and-forward. An interface between the route selector, 
+RouteSelectDummy, and SchedulePolicyM alllows the two modules to collaborate 
+on parent selection.  Currently, FPS adds the interface Neighborhood to the 
+route selector component that includes the method compareQuality(). This 
+method gives a measure of goodness compared to the current parent or current 
+potential parent seen so far. FPS calls this method during the joining protocol
+to help it choose the best parent.
+
+	MultiHpEngineM:
+	Receives route-thru messages and uses the BufferManager/QueuedASend
+	and BufferPool. 
+
+	RouteSelectDummy: 
+	Placeholder code which enforces the network neighborhood and 
+	topology in software. It assumes a network of 10 motes with 
+	ids 0-9 where mote 0 is the base station. 
+
+				0
+			/		\
+			1		2
+		/		\		\
+		3		4		5
+	  /		\		/		\
+	 6		7		8		9
+
+
+	SchedulePolicy (optional):
+
+	The SchedulPolicyC and SchedulePolicyM can be omitted
+	entirely and QueuedASend will simply do a store-and-forward.
+	Implementation of a naive store-and-forward queuing policy that
+	additionally notfifies the application when to send messages.
+	Modify this component to implement your own queuing policies. 
+
+	Flexible Power Scheduling, for example, implements its own
+	policy (power scheduling) to manage the SendQueue and control 
+	radio wakeup and sleep times. 
+
+
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:
+../../BufferManager

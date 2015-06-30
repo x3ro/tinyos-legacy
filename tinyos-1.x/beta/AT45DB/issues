@@ -1,0 +1,26 @@
+- unmount/remount
+
+- block storage needs to track max addr written. should read check this
+  (my answer no: it's a very partial check as you can still read lots of
+  data that was never written)
+
+- notes for block storage: if any write fails, the whole block must be
+  considered invalid (do not commit, cannot retry. not enforced)
+  reason: failure may corrupt data from earlier write
+
+- 0 byte r/w/etc ops? allow or fail?
+
+
+- config storage:
+  - when does a "transaction" start? first write, presumably.
+    do we want an explict start op?
+  - what does a read after some writes but before a commit do?
+    o return the new data (but no guarantee of validity?)
+    o return the old data
+  - behaviour on corrupt data found? (assume "empty"?)
+
+  - is the common model an update to part of the config data, or a complete
+    rewrite? or both? (if the latter, maybe a start w/ a "new" vs "copy"
+    argument would be useful?)
+
+

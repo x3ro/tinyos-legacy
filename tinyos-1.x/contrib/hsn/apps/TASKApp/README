@@ -1,0 +1,113 @@
+README for Heterogeneous Sensor Routing (HSN) TASK Application
+Contact: York Liu at york.liu@intel.com
+
+1. Introduction
+
+   This TASK application applies the HSN routing layer on TinyOS TASKApp.
+
+2. Functionality
+
+   This is the clone of TinyOS TASKApp apps, but using the HSN routing layer
+   to replace the standard MultiHop routing layer TinyOS provided. Every
+   file under TASKApp is copied from tinyos/apps/TASKApp except the modified
+   Makefile. The tos_patch and Java* directory contain the patch files to
+   TinyOS.
+
+   In the default configuration, each mote participates equally in the
+   TinyDB network. A Query message is flooded into the network, and the Data 
+   message multi-hops back to the sink node. The route decision is made based
+   on DSDV routing algorithm. No in-network processing (i.e. aggregation) 
+   happens since none of the node has high-end feature turns on, hence the 
+   TinyDB doesn't process the packets on the intermediate nodes along the path.
+
+   You can configure parameters through the Settings GUI to turn on the
+   adjuvant feature on a node, making it the special node to attract
+   the packet and deliver it to TinyDB to perform in-network processing. The
+   adjuvant node is acting as the high-end node in HSN routing, and the
+   adjuvant value can be adjusted manually or decided by TinyDB based on its
+   internal value function. Please see tools/packet_tools/README for details.
+
+   You can also compile the TASKApp without the HSN routing (remove
+   -DHSN_ROUTING in Makefile). This makes the TASKApp utilize the regular
+   DSDV routing and turn every node into a high-end node. Every node can
+   perform the in-network processing, and the aggregation occurs if packets
+   just happen to go through the same node (opposed to the high-end node
+   attracting packets promptly).
+
+   You can also compile the TraceRoute features in the application (default
+   option) to receive the traceroute packet, which can tell you the current
+   route path, or retrieve the current parameter settings from the traceroute
+   piggyback. The trace route settings can be set at compile time or changed
+   through the Settings GUI. Please see README, apps/TraceRouteTest/README
+   and tools/packet_tools/README for details.
+   
+   A toggle of the green LED indicates the mote attempted to send a
+   packet, the red LED shows the mote received a packet, and the yellow LED
+   shows the mote received a setting message. All three LEDs flash when
+   switching on the mote.
+
+3. How to Use
+
+   Before you start:
+
+   1) nesc 1.1beta (http://sourceforge.net/projects/nescc) and avr-gcc are
+      required.
+   2) Follow the installation instructions in TinyOS-1.x/doc/tinydb.pdf to
+      install and set up the JAVA/JAVACOMM environment. Usually you can set
+      it by: cd tinyos-1.x/tools/java; export CLASSPATH=`./javapath`
+      
+   For example, suppose you are using 3 motes:
+
+   1) Modify the Makefile based on your requirement.
+      Set environment variable MICA2_900MHZ=1 if using mica2 mote
+   2) Compile and install one sink node by 'make SINK_NODE=1 mica install.0'
+   3) Compile and install the other 2 motes by 'make mica install.x' where x
+      is the node ID (must be unique and other than 0). 
+   4) cd java; export CLASSPATH=`./classpath`; cd net/tinyos/tinydb;
+      make clean all
+   5) Attach the sink node on the programming board and connect it to the PC.
+   6) Run TinyDB Java GUI by 'cd java; java net.tinyos.tinydb.TinyDBMain'
+
+   If compiled with TraceRoute (-DTRACE_ROUTE is defined in Makefile):
+
+   1) vi java/net/tinyos/tinydb/tinydb.conf; set "start-sf:false"
+   2) Compile the uartserver by 'make' in tools/packet_tools on the same PC.
+   3) Run uartserver by './uartserver -1 COMx 9001 -r49 9000' where x is the
+      serial port number and the number followed by -r is MSG_SIZE + 7.
+      Put -2 instead of -1 if using MICA2 mote.
+   4) Run TinyDB Java GUI by 'cd java; java net.tinyos.tinydb.TinyDBMain'
+   5) You can run the Settings GUI by 'wish settings_gui_nesc.tcl' under
+      tools/packet_toools to adjust the TraceRoute settings.
+   6) Wait for a few seconds for route update message to sync up and see the
+      traceroute raw packets printed by the uartserver.
+   7) You can run the packet parser by 'tclsh parse_and_print_packets.tcl'
+      in tools/packet_tools.
+
+   To setup adjuvant feature:
+
+   1) Follow the same steps under "If compiled with TraceRoute ..." above.
+   2) Refer to tools/packet_tools/README for the details.
+
+4. Notes
+
+   Sourceforge.net CVS tip is not fully migrated with HSN routing yet. Some
+   patches are put in tos_patch and java directory and will be removed as
+   soon as the migration is done.
+   
+   The default MSG_SIZE is 49, and can be adjusted in Makefile and
+   java/net/tinyos/tinydb/Makefile. Remember to run uartserver with
+   -r(MSG_SIZE+7) and modify DATA_SIZE in java/net/tinyos/tinydb/TinyDBMain.java
+
+   A Settings message (Settings GUI) can be sent from sink node ONLY if the HSN
+   routing is enabled (i.e. -DHSN_ROUTING is defined in Makefile). It does not
+   work against the regular DSDV routing.
+
+   You can configure the mote to send back multiple settings within
+   piggyback by the Settings GUI, but you must add 'TR_PIGGYBACK_LEN=x'
+   in Makefile, where x is the total length of the maximal settings
+   you might want.  However, the parse_and_print tool does not interpret
+   them, since it was hard-coded to only interpret 1-byte piggyback settings.
+   Refer to doc/hsn_arch.pdf for the format of the Settings message
+   and tools/packet_tools/README for how to use the Settings GUI.
+
+

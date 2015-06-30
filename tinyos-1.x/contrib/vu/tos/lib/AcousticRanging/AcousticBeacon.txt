@@ -1,0 +1,13 @@
+AcousticBeacon:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The AcousticBeacon component is used to send out a radio signal followed by one or more
+acoustic signals. Since precision timing is required in most acoustic ranging applications
+we disable the radio right after transmitting the radio signal. The length of the buzzes
+and the delays between them can be programmend by the setTiming command.
+
+The receiving of the acoustic signal is done in AcousticSampler and AcousticMultiSampler.
+

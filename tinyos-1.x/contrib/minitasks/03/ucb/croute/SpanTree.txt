@@ -1,0 +1,104 @@
+
+------------------------------------------------------------------------
+  Packets to send
+------------------------------------------------------------------------
+
+***  Build tree
+***  msg type 200
+***  length 6
+
+uint8 command = 1  //"build" command
+uint8 action = 0
+
+uint16 source = xxx  //some address, say 1
+uint8 seq = xxx  //unique number
+uint8 protocol = 50
+
+
+***  Crumb from mobile agent
+***  msg type 200
+***  length 6
+
+uint8 command = 2  //"crumb" command
+uint8 dest = xxx  //mobile agent: 2=ma1, 3=ma2, 16=maall
+
+uint16 source = xxx  //some address, say 1
+uint8 seq = xxx  //unique number
+uint8 protocol = 50
+
+
+***  Route to mobile agent
+***  msg type 200
+***  length 8
+
+uint8 command = 3  //"route" command
+uint8 dest = xxx  //mobile agent: 2=ma1, 3=ma2, 16=maall
+uint8 action = 1  //action: 1=set leds
+uint8 value = xxx  //int value to set leds
+
+uint16 source = xxx  //some address, say 1
+uint8 seq = xxx  //unique number
+uint8 protocol = 50
+
+
+------------------------------------------------------------------------
+  Packets to receive
+------------------------------------------------------------------------
+
+***  Route Test 2 Hops
+***  msg type 100
+***  length 11
+
+uint16 bcseq
+uint8 type
+uint8 tree
+uint8 hops
+uint16 parent
+uint16 src
+uint8 seq
+const uint8 proto = 53
+
+
+***  Route Test 2 Crumb
+***  msg type 102
+***  length 11
+
+const uint8 type = 2
+uint8 tree
+uint8 mobag
+uint16 crumb
+uint16 parent
+uint16 src
+uint8 seq
+const uint8 proto = 54
+
+
+***  Route Test 2 Route to Base
+***  msg type 102
+***  length 10
+
+const uint8 type = 4
+uint8 tree
+uint8 dest
+uint8 len
+uint8 data_action
+uint8 data_value
+uint16 src
+uint8 seq
+const uint8 proto = 54
+
+
+***  Route Test 2 Base to Mobile Agent
+***  msg type 102
+***  length 11
+
+const uint8 type = 5
+uint8 dest
+uint16 crumb
+uint8 len
+uint8 data_action
+uint8 data_value
+uint16 src
+uint8 seq
+const uint8 proto = 54
+

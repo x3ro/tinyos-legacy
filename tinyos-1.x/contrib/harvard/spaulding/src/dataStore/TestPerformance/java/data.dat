@@ -1,0 +1,11 @@
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2690  timeGet_ms= 3190  sizeofBlock= 248  BLOCK_DATA_SIZE= 240  DS_NBR_BLOCKS_PER_VOLUME= 264  DS_NBR_VOLUMES= 3
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2690  timeGet_ms= 3192  sizeofBlock= 248  BLOCK_DATA_SIZE= 240  DS_NBR_BLOCKS_PER_VOLUME= 264  DS_NBR_VOLUMES= 3
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2691  timeGet_ms= 3193  sizeofBlock= 248  BLOCK_DATA_SIZE= 240  DS_NBR_BLOCKS_PER_VOLUME= 264  DS_NBR_VOLUMES= 3
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2697  timeGet_ms= 3193  sizeofBlock= 248  BLOCK_DATA_SIZE= 240  DS_NBR_BLOCKS_PER_VOLUME= 264  DS_NBR_VOLUMES= 3
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2694  timeGet_ms= 3194  sizeofBlock= 248  BLOCK_DATA_SIZE= 240  DS_NBR_BLOCKS_PER_VOLUME= 264  DS_NBR_VOLUMES= 3
+
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2491  timeGet_ms= 3248  sizeofBlock= 256  BLOCK_DATA_SIZE= 248  DS_NBR_BLOCKS_PER_VOLUME= 256  DS_NBR_VOLUMES= 3
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2491  timeGet_ms= 3244  sizeofBlock= 256  BLOCK_DATA_SIZE= 248  DS_NBR_BLOCKS_PER_VOLUME= 256  DS_NBR_VOLUMES= 3
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2499  timeGet_ms= 3246  sizeofBlock= 256  BLOCK_DATA_SIZE= 248  DS_NBR_BLOCKS_PER_VOLUME= 256  DS_NBR_VOLUMES= 3
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2497  timeGet_ms= 3247  sizeofBlock= 256  BLOCK_DATA_SIZE= 248  DS_NBR_BLOCKS_PER_VOLUME= 256  DS_NBR_VOLUMES= 3
+srcAddr= 1  sqnNbr= 0  nbrReq= 256  timeAdd_ms= 2500  timeGet_ms= 3248  sizeofBlock= 256  BLOCK_DATA_SIZE= 248  DS_NBR_BLOCKS_PER_VOLUME= 256  DS_NBR_VOLUMES= 3

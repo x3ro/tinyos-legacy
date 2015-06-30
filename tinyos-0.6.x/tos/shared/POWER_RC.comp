@@ -1,0 +1,29 @@
+TOS_MODULE POWER_RC;
+JOINTLY IMPLEMENTED_BY POWER_RC;
+
+ACCEPTS{
+	char POWER_RC_INIT(void);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	TOS_MsgPtr POWER_RC_RX_POT_MSG(TOS_MsgPtr msg);
+};
+
+USES{
+	char POWER_RC_TX_MSG(TOS_MsgPtr msg);
+
+	char POWER_RC_POT_INIT(char pwr);
+	void POWER_RC_POT_SET(char pwr);
+
+	void POWER_RC_OCEEPROM_READ(int addr, int size, char* buf);
+	void POWER_RC_OCEEPROM_WRITE(int addr, int size, char* buf);
+
+};
+
+
+
+
+

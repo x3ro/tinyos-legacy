@@ -1,0 +1,2 @@
+These are dummy versions of the VM-specific structures. They are needed
+so the script/ classes can compile correctly.

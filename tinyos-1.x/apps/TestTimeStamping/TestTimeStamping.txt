@@ -1,0 +1,76 @@
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+This module is used to calibrate and verify the SysTimeStamping component
+on the MICA2 and MICA2DOT platforms. To verify that time stamping is working 
+as expected do the following:
+
+1.	Compile this application with the "make mica2" command.
+2.	Program a few (2-4) motes with this application.
+3.	Compile the TOSBase application, program a separate mote
+	and connect it to a PC.
+4.	Turn all motes on, wait for a minute.
+5.	On the PC run the following application:
+	
+		java net.tinyos.tools.TestTimeStamping -entries 200
+
+6.	This application will collect all data and display the average
+	and maximal error. Try the "-help" option to learn about
+	other options.
+
+CALIBRATION:
+
+The SysTimeStamping module was calibration with the following procedure.
+
+1.	Compile this application with the "CALIBRATE=yes make mica2" command.
+2-4.	The same as above.
+5.	On the PC run
+
+		java net.tinyos.tools.TestTimeStamping -entries 400 -calibrate
+
+6.	The program will write out a lot of statistical values. Please read
+	the doc strings in the java program to get the precise meaning of 
+	the values. You should watch out for the BIT_CORRECTION and
+	BYTE_TIME values. These should be the same or very close to the values
+	in the SysTimeStampingM.nc module.
+
+TIMESTAMPING:
+
+The TimeStamping component implements message time stamping on the MICA2 motes 
+with 1.2 microsecond average error using a single radio message. The maximum 
+observed error between 4 motes is around 4 microsecond. The accuracy is limited by 
+the stability of the CPU clock, which is used to measure the local time on each 
+mote. If one holds her finger on the microcontroller while the measurement is in 
+progress, the average error jumps to 2 microseconds.
+
+The clock used for mesasuring the local time is Timer/Counter3 of the AtMega128 
+using 1/8 prescaler. This provides 1.1 microsecond time resolution. We have 
+tried this algorithm with no prescaler and with a little more sophisticated time 
+stamping algorithm. Under laboratory (cubicle) conditions we were able to 
+achieve average 0.7 microsecond accuracy and maximum 2 microsecond error. 
+However, this version did not significatly improved the accuracy, and put extra 
+overhead on the motes, and therefore not recommended.
+
+Time stamping is performed both at the sender and receiver side. At the sender 
+side the time stamp is included in the message at the time of transmission. At 
+the receiver side the time stamp, which is the local time at the time of 
+reception, is recorded. The experimental verification and calibration of this 
+algorithm involved 4 motes. Each mote sent 1 message per second. The node id of 
+the sender, the local time of the sender at the time of transmission, the node 
+id of the receiver, and the local time of the receiver at the time of reception 
+is recorded and reported to a base station. The base station collected 500 such 
+data points and using linear regression calculated the skew and offset of the 
+clocks of the motes. Then the absolute error is calculated for each data point 
+between the predicted receive time (based on the local clock of the sender at 
+transmission time, using the skews and offsets of the sender and receiver) and 
+the measured receive time. The average of these absoulte errors was below 1.2 
+microseconds.
+
+TIMESTAMPING USAGE:
+
+The local time of the mote can be obtained using the SysTime interface of the 
+SysTimeC component. This clock has nominal 921.6 KHz frequency. Time stamping of 
+individual messages can be performed using the TimeStamping interface provided 
+by the SysTimeStampingC component. Please read the documentation in this 
+interface file.

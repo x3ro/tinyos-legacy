@@ -1,0 +1,30 @@
+includes Beacon;
+
+configuration TsyncC {
+  provides interface Time;
+  provides interface StdControl;
+  }
+
+implementation
+{
+  components TsyncM, AlarmC, ClockC, CC1000RadioIntM, TimerC;
+  components GenericComm;
+  components LedsC;
+
+  StdControl = TsyncM;
+  Time = TsyncM;
+  TsyncM.CommControl -> GenericComm;
+  TsyncM.Alarm -> AlarmC.Alarm[unique("Alarm")];
+  TsyncM.AlarmControl -> AlarmC.StdControl;
+  TsyncM.ReadClock -> ClockC;
+  CC1000RadioIntM.ReadClock -> ClockC;
+  TsyncM.BeaconSendMsg -> GenericComm.SendMsg[AM_BEACON];
+  TsyncM.BeaconReceiveMsg -> GenericComm.ReceiveMsg[AM_BEACON];
+  TsyncM.UARTSend -> GenericComm.UARTSendRawBytes;
+  TsyncM.Leds -> LedsC;
+  TsyncM.Timer0 -> TimerC.Timer[unique("Timer")];
+  TsyncM.Timer1 -> TimerC.Timer[unique("Timer")];
+  TsyncM.TimerControl -> TimerC.StdControl;
+  TsyncM.Sounder -> Sounder.StdControl;
+}
+

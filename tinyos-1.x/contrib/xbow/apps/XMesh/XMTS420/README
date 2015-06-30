@@ -1,0 +1,8 @@
+README
+
+
+Description:
+-Read temperature, humidity, light, accel,pressure sensor readings
+-Read GPS data(MTS420CA only)
+-Output message to uart port
+-Output message to radio port

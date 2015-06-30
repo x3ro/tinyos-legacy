@@ -1,0 +1,16 @@
+README for TestAD
+Author/Contact: bavery@hp.com
+
+Description:
+
+TestSPIFlash runs some read write tests on the spi flash and 
+outputs the results to the LCD
+
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

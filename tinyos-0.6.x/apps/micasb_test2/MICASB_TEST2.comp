@@ -1,0 +1,75 @@
+/*									tab:4
+ *  tone_detect.h - Main component for simple application that blinks LED
+ *                  when sounder's tone is detected.
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Alec Woo
+ *
+ * This application simply blinks the leds with each clock interrupt.  It
+ * outputs the value of a three bit counter onto the LEDS.
+ *
+ */
+
+TOS_MODULE MICASB_TEST2;
+
+ACCEPTS{
+	char MICASB_TEST2_INIT(void);
+	char MICASB_TEST2_START(void);
+};
+
+HANDLES{
+	void MICASB_TEST2_CLOCK_EVENT(void);
+	char MICASB_TEST2_DATA_EVENT(short data);
+	char MICASB_TEST2_MIC_TONE_DETECTED(void);
+	char MICASB_TEST2_DATA_SEND_DONE(char success);
+	char MICASB_TEST2_DATA_RECV_DONE(char data, char success);
+};
+
+USES{
+	char MICASB_TEST2_SUB_INIT(char interval, char scale);
+	char MICASB_TEST2_UART_INIT();
+	char MICASB_TEST2_SOUNDER_INIT();
+	char MICASB_TEST2_PHOTO_INIT();
+	char MICASB_TEST2_MIC_INIT();
+	char MICASB_TEST2_MIC_TONE_INTR(char enable);
+	char MICASB_TEST2_MIC_PWR(char mode);
+	char MICASB_TEST2_MIC_MUX_SEL(char select);
+	char MICASB_TEST2_POT_ADJUST(char data);
+	char MICASB_TEST2_GET_CONTINUOUS_DATA(void);
+	char MICASB_TEST2_GET_PHOTO_DATA(void);
+	char MICASB_TEST2_SET_SAMPLING_RATE(char rate);
+	char MICASB_TEST2_SEND_DATA(char data);
+	char MICASB_TEST2_SET_SAMPLING(char rate);
+	char MICASB_TEST2_SOUNDER_ON();
+	char MICASB_TEST2_SOUNDER_OFF();
+        char MICASB_TEST2_LEDy_on();
+        char MICASB_TEST2_LEDy_off();
+	char MICASB_TEST2_LEDy_TOGGLE();
+        char MICASB_TEST2_LEDr_on();
+        char MICASB_TEST2_LEDr_off();
+        char MICASB_TEST2_LEDg_on();
+        char MICASB_TEST2_LEDg_off();
+	char MICASB_TEST2_READ_TONE_DETECTOR();
+};
+
+SIGNALS{
+};
+

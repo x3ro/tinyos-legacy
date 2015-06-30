@@ -1,0 +1,447 @@
+options {
+    STATIC = false;
+}
+
+PARSER_BEGIN(CompParser)
+package net.tinyos.compparser;
+
+import java.util.*;
+
+public class CompParser {
+    public static class FunctionArgument {
+        private String name;
+        private String type;
+
+        public FunctionArgument(String type, String name) {
+            this.type = type.trim();
+            this.name = name;
+        }
+
+        public boolean isTypeCompatible(FunctionArgument fa) {
+            return type.equals(fa.type);
+        }
+
+        public String toString() {
+            return type + " " + name;
+        }
+    }
+    
+    public static class FunctionSignature {
+        private String rType;
+        private String name;
+        private Vector args;
+        
+        public FunctionSignature(String rType, String name, Vector args) {
+            this.rType = rType;
+            this.name = name;
+            this.args = args;
+        }
+
+        public String getRType() {
+            return rType;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Vector getArgs() {
+            return args;
+        }
+
+        public boolean isTypeCompatible(FunctionSignature fs) {
+            if (!rType.equals(fs.rType)) {
+                System.out.println("wrong return types '" + rType + "', '" + fs.rType + "'");
+                return false;
+            }
+
+            if (args == null && fs.args == null)
+                return true;
+
+            if (args == null) {
+                if (fs.args.size() == 1) {
+                    FunctionArgument a = (FunctionArgument)fs.args.elementAt(0);
+                    if (a.isTypeCompatible(new FunctionArgument("void", "")))
+                        return true;
+                }
+            }
+
+            if (args == null || fs.args == null) {
+                System.out.println("args = " + args + ", fs.args = " + fs.args);
+                return false;
+            }
+
+            if (args.size() != fs.args.size())
+                return false;
+
+            Iterator iter = args.iterator();
+            Iterator fsIter = fs.args.iterator();
+            while (iter.hasNext()) {
+                FunctionArgument arg = (FunctionArgument)iter.next();
+                FunctionArgument fsArg = (FunctionArgument)fsIter.next();
+
+                if (!arg.isTypeCompatible(fsArg))
+                    return false;
+            }
+
+            return true;
+        }
+    }
+    
+    public static class CompFile {
+        private String name;
+        private Vector accepts, handles, internal, uses, signals;
+
+        public CompFile(String name) {
+            this.name = name;
+            accepts = new Vector();
+            handles = new Vector();
+            internal = new Vector();
+            uses = new Vector();
+            signals = new Vector();
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Vector getAccepts() {
+            return accepts;
+        }
+
+        public Vector getHandles() {
+            return handles;
+        }
+
+        public Vector getUses() {
+            return uses;
+        }
+
+        public Vector getInternal() {
+            return internal;
+        }
+
+        public Vector getSignals() {
+            return signals;
+        }
+
+        public void addAccepts(Vector v) {
+            accepts.addAll(v);
+        }
+
+        public void addHandles(Vector v) {
+            handles.addAll(v);
+        }
+
+        public void addInternal(Vector v) {
+            internal.addAll(v);
+        }
+
+        public void addUses(Vector v) {
+            uses.addAll(v);
+        }
+
+        public void addSignals(Vector v) {
+            signals.addAll(v);
+        }
+    }
+    
+    public static void main(String args[]) {
+	CompParser parser;
+
+	if(args.length == 0){
+	    System.out.println("Comp Parser Version 0.1Alpha:  Reading from standard input . . .");
+	    parser = new CompParser(System.in);
+	}
+	else if(args.length == 1){
+	    System.out.println("Comp Parser Version 0.1Alpha:  Reading from file " + args[0] + " . . ." );
+        try {
+            parser = new CompParser(new java.io.FileInputStream(args[0]));
+	    }
+	    catch(java.io.FileNotFoundException e){
+		System.out.println("Comp Parser Version 0.1:  File " + args[0] + " not found.");
+		return ;
+	    }
+	}
+	else {
+	    System.out.println("Comp Parser Version 0.1Alpha:  Usage is one of:");
+	    System.out.println("         java CompParser < inputfile");
+	    System.out.println("OR");
+	    System.out.println("         java CompParser inputfile");
+	    return ;
+	}
+	try {
+	    parser.File();
+	    System.out.println("Comp Parser Version 0.1Alpha:  Java program parsed successfully.");
+	}
+	catch(Exception e){
+	    System.out.println("Comp Parser Version 0.1Alpha:  Encountered errors during parse.");
+	    e.printStackTrace();
+	}
+    }      
+}
+
+
+PARSER_END(CompParser)
+
+SKIP : {
+" "
+| "\t"
+| "\r"
+| "\n"
+| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+| <"#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+| <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+TOKEN: {
+     <MODULE: "TOS_MODULE"> |
+     <ACCEPTS: "ACCEPTS"> |
+     <HANDLES: "HANDLES"> |
+     <USES: "USES"> |
+     <SIGNALS: "SIGNALS"> |
+     <INTERNAL: "INTERNAL"> |
+     <JOINTLY: "JOINTLY"> |
+     <IMPL: "IMPLEMENTED_BY">
+}
+
+TOKEN: {
+    <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+|      <#LETTER: ["$","A"-"Z","_","a"-"z"]>
+|      <#DIGIT: ["0"-"9"]>
+}
+
+TOKEN: {
+    <TYPE: <IDENTIFIER>((([" ","\n", "\t", "\r", "\f"])*("*"))*)>
+}
+
+CompFile File() : 
+{
+    String name;
+    CompFile comp;
+    Vector section;
+}
+{
+    name=Header() 
+    {
+        comp = new CompFile(name);
+    }
+    
+    ( section=Accepts() 
+        {
+            comp.addAccepts(section); 
+        }
+    | section=Signals() 
+        {
+            comp.addSignals(section); 
+        }
+    | section=Handles() 
+        {
+            comp.addHandles(section); 
+        }
+    | section=Uses() 
+        {
+            comp.addUses(section); 
+        }
+    | section=Internal()
+        {
+            comp.addInternal(section); 
+        }
+    )* 
+
+    {
+        return comp;
+    }
+}
+
+
+String Header() : 
+{
+    String moduleName;
+}
+{
+    moduleName=ModuleNameDecl() (ModuleImpl())?
+    {
+        return moduleName;
+    }
+}
+    
+
+String ModuleNameDecl() :
+{
+    Token tok;
+} 
+{
+    <MODULE> tok=<IDENTIFIER> [ ";" ]
+	{
+        return tok.image;
+    }
+}
+
+void  ModuleImpl() :
+{
+    Token tok;
+} 
+{
+    (JointImpl() | Impl()) tok=<IDENTIFIER> ";"
+	{
+        // XXX: Fixme
+    }
+}
+
+void JointImpl() : {} 
+{
+    <JOINTLY> <IMPL>
+	{
+        // XXX: Fixme
+    }
+}
+
+void Impl() : {}
+{
+    <IMPL>
+	{
+        // XXX: Fixme
+    }
+}
+
+Vector Accepts() : 
+{
+    Vector funcList = null;
+}
+{
+    <ACCEPTS> "{" funcList=FunctionList() "};"
+    {
+        return funcList;
+    }
+}
+
+Vector Signals() :
+{
+    Vector funcList = null;
+}
+{
+    <SIGNALS> "{" funcList=FunctionList() "};"
+    {
+        return funcList;
+    }
+}
+
+Vector Handles() : 
+{
+    Vector funcList = null;
+}
+{
+    <HANDLES> "{" funcList=FunctionList() "};"
+    {
+        return funcList;
+    }
+}
+
+Vector Internal() : 
+{
+    Vector funcList = null;
+} 
+{
+    <INTERNAL> "{" funcList=FunctionList() "};"
+    {
+        return funcList;
+    }
+}
+
+Vector Uses() :
+{
+    Vector funcList = null;
+} 
+{
+    <USES> "{" funcList=FunctionList() "};"
+    {
+        return funcList;
+    }
+}
+
+
+Vector FunctionList() : 
+{
+    FunctionSignature sig;
+    Vector funcList;
+}
+{
+    {
+        funcList = new Vector();
+    }
+    (sig=Function() 
+        {
+            funcList.add(sig);
+        }
+    )*
+    {
+        return funcList;
+    }
+}
+
+FunctionSignature Function() : 
+{
+    String rType;
+    Token name;
+    Vector args = null;
+}
+{
+    (rType = Type()) (name = <IDENTIFIER>) "(" [args = ArgumentList()] ");"
+    {
+        return new FunctionSignature(rType, name.image, args);
+    }
+}
+
+Vector ArgumentList() :
+{
+    Vector argList = null;
+    FunctionArgument funcArg;
+}
+{
+    ( LOOKAHEAD(ArgumentEntry())funcArg=ArgumentEntry() argList=ArgumentList()
+        {
+            argList.add(funcArg);
+            return argList;
+        }
+    | funcArg=ArgumentEnd() 
+        {
+            argList = new Vector();
+            argList.add(funcArg);
+            return argList;
+        }
+    )
+}
+
+FunctionArgument ArgumentEntry() : 
+{
+    Token name = null;
+    String type;
+}
+{
+    (type=Type()) [name=<IDENTIFIER>] ","
+    {
+        return new FunctionArgument(type, name == null ? null : name.image);
+    }
+}
+
+FunctionArgument ArgumentEnd() : 
+{
+    Token name = null;
+    String type;
+}
+{
+    (type=Type()) [name=<IDENTIFIER>]
+    {
+        return new FunctionArgument(type, name == null ? null : name.image);
+    }
+}
+
+String Type() :
+{
+    Token type;
+}
+{
+    (type=<TYPE>) {return type.image;} | 
+    (type=<IDENTIFIER>) {return type.image;}
+}

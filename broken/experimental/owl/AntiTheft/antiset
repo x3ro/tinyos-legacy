@@ -1,0 +1,60 @@
+#!/usr/bin/perl
+$ALERT_LEDS = 1;
+$ALERT_SOUND = 2;
+$ALERT_RADIO = 4;
+$ALERT_ROOT = 8;
+$DETECT_DARK = 1;
+$DETECT_ACCEL = 2;
+$AM_SETTINGS = 54;
+$DIS_SETTINGS = 42;
+
+$checkInterval = 0;
+$alert = 0;
+$detect = 0;
+
+while ($#ARGV >= 0)
+{
+    $_ = shift @ARGV;
+    if (/^--dark$/) {
+	$detect |= $DETECT_DARK;
+    }
+    elsif (/^--accel$/) {
+	$detect |= $DETECT_ACCEL;
+    }
+    elsif (/^--beep$/) {
+	$alert |= $ALERT_SOUND;
+    }
+    elsif (/^--blink$/) {
+	$alert |= $ALERT_LEDS;
+    }
+    elsif (/^--radio$/) {
+	$alert |= $ALERT_RADIO;
+    }
+    elsif (/^--report$/) {
+	$alert |= $ALERT_ROOT;
+    }
+    elsif (/^[0-9]+$/) {
+	$checkInterval = int $_;
+    }
+    else {
+	print STDERR "Unknown option $_\n";
+	$usage = 1;
+    }
+}
+
+if ($usage || ($checkInterval == 0 && $alert == 0 && $detect == 0)) {
+    print STDERR "Usage: antiset [--dark] [--accel] [--blink] [--beep] [--radio] [--report] [<interval>]\n";
+    exit 2;
+}
+
+$detect = $DETECT_DARK unless $detect;
+$alert = $ALERT_LEDS unless $alert;
+$checkInterval = 1000 unless $checkInterval;
+
+$settings = pack "CCn", $alert, $detect, $checkInterval;
+# protocol8 dest16 source16 len8 group8 am8 <data>
+$msg = (pack "CnnCCC", 0, 0xffff, 0, length $settings, 0, $AM_SETTINGS) . $settings;
+
+$hexmsg = join(" ", map { sprintf "%02X", $_ } unpack("C*", $msg));
+
+system "java net.tinyos.tools.Send $hexmsg";

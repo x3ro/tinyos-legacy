@@ -1,0 +1,3 @@
+COMPONENT=BlinkTask
+include ../MakeEyes
+

@@ -1,0 +1,113 @@
+Real Time Measurements (in microseconds) of Erase, Write, Sync and Read operations per bytes in the at45db flash chip.
+- BlockStorage Interface has been employed, varying the size of the same data to be written/read.
+- Sequence of Operarations:
+	- 1 ERASE
+	- 4 consecutive WRITE operations in consecutive pages
+	- 1 SYNC (write) operaration
+	- 4 consecutive READ operations on the previous pages 
+- Size of the page by default is 256 bytes (that's the reason of the two time values "(,)" when 
+   writing/reading data larger than 256)
+- Hex values have been retrived in a serial packet.
+- MicroTimers were placed at /tos/chips/at45db/at45dbP.nc to capture the command call and when the
+  event was fired indicating the single operation has been done (erase,write,sync,read).
+- By doing some data analysis on the data collected, the algorithm to calculate the delay time the
+  at45db takes for every operation vs. bytes can be computed as (times in us):
+  Unfortunately TOSSIM does not incorporate a timer with MicroSecond precission (can be implemented).
+  Therefore operation times are rounded to ms precission. In addition maximum times have been considered.
+
+
+    if (write){
+	  delay = 0;
+	  if (eraseJustDone){
+		delay=5470 + bytes * 12.6;
+		eraseJustDone = FALSE;
+	  }else{
+		delay=8975 + bytes * 12.6;
+	  }
+	
+	  //Round and convert to ms
+	  if (delay%1024 > 300){
+			delay = delay/1024 + 1;
+	  }else{
+	    	delay = delay/1024;
+	  }
+    }
+
+    if (read){
+	   delay = 0;
+	   delay=362 + bytes * 12.12;
+
+	   //Round and convert to ms
+	   if (delay%1024 > 300){
+			delay = delay/1024 + 1;
+	   }else{
+			delay = delay/1024;
+	   }		
+    }
+
+     if (erase){
+		eraseJustDone=TRUE;
+     }
+
+     if (sync){
+		delay = 18;  //ms	
+     }
+
+-------------------------------------------------------------------------------
+                             DATA COLLECTED (HEx us)
+-------------------------------------------------------------------------------
+Bytes= Bytes to write
+ReadI/WriteI = Reading/Writing Time (for first time)
+Read/Write = Reading/Writing (all the rest)
+Read1/Read2 = For multipage write, i.e. more than 256 bytes requires 2 pages writing/readint time
+Sync = Time to syncronise
+
+
+Bytes	ReadI	Read	WriteI	Write	Sync
+---------------------------------------------
+256		0d7a	0d8a	21f6	2faf	4474
+128		762		077a	1ba6	2957	4473
+64		045a	472		1880	2630	4471
+32		02d6	02ee	16ee	249f	4473
+16		214		022c	1626	23d8	4479
+8		01b3	01cb	15c4	2377	4477
+1		015f	177		156b	231d	4470
+
+Bytes	ReadI1	ReadI2	Read1	Read2 	WriteI1	WriteI2	Write1	Write2	Sync
+-----------------------------------------------------------------------------
+512		0d72	0da1	0d8a	0d74	21f8	0de1	2faa	2f94	4479
+320		0d72	045b	0d8a	045b	21f7	046b	2faa	261d	4479
+288		0d72	02d8	0d8a	02d7	21f7	02d9	2faa	248c	4479
+257		0d72	160		0d8a	160		21f8	0155	2faa	2309	447b
+
+
+-------------------------------------------------------------------------------
+                             DATA COLLECTED (DEC us)
+-------------------------------------------------------------------------------
+
+Bytes	ReadI	Read	WriteI	Write	Sync
+---------------------------------------------
+256		3450	3466	8694	12207	17524
+128		1890	1914	7078	10583	17523
+64		1114	1138	6272	9776	17521
+32		726		750		5870	9375	17523
+16		532		556		5670	9176	17529
+8		435		459		5572	9079	17527
+1		351		375		5483	8989	17520
+
+Bytes	ReadI1	ReadI2	Read1	Read2 	WriteI1	WriteI2	Write1	Write2	Sync
+-----------------------------------------------------------------------------
+512		3442	3489	3466	3444	8696	3553	12202	12180	17529
+320		3442	1115	3466	1115	8695	1131	12202	9757	17529
+288		3442	728		3466	727		8695	729		12202	9356	17529
+257		3442	352		3466	352		8696	341		12202	8969	17531
+
+
+NOTE: ERASE operations time always 0xC1 us
+
+
+
+
+
+
+

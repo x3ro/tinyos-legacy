@@ -1,0 +1,138 @@
+<!-- $Id: timesync.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="TimeSync">
+
+<p> Prepared 17 October 2002 by Ted Herman, University of Iowa (OSU group).
+</p>
+
+<p> The pursuer-evader scenarios for the NEST Challenge, including near-term
+experiments, the midterm demo, and later demonstrations, require that motes
+have a synchronized time-base. Time synchronization is needed for mote location
+determination (localization), position and velocity estimation of evaders, and
+real-time calculations for pursuer strategies. These several needs for time
+synchronization have slightly different requirements for accuracy and tolerate
+differing interfaces for how the time bases of distinct motes can be compared.
+Accordingly, we suggest an API with various time services.  </p>
+
+<p> Accurate localization may require time synchronization within about 10
+microseconds; evader velocity estimation could be calculated to sufficient
+accuracy with time synchronized to within about 300 microseconds.  For
+localization, it may be that differential calculations between pairs of motes
+separated by a few meters is sufficient; for the planning of multiple pursuers,
+a real-time calculation involving distant motes (tens of meters) may be needed.
+</p>
+
+<p> Time synchronization requires communication; localization requires time
+synchronization; the speci- fication of communication services proposed by UVA
+(Routing, Estimation, and Group Management APIs) depends on localization. These
+dependencies need not be circular, since one of the communication services
+([[SendLocal]]) is little more than a TOS local broadcast. Nevertheless, we prefer
+to use some "communication services" outside of the current set of proposed
+interfaces; these are documented below (they could well be implemented within
+the TimeSync component, but we have a hunch that they may be useful elsewhere).
+</p>
+
+<p> Note: UVA looked at these communication services and is agreeable to
+considering some support for them in the routing component; we'll wait until
+specifications are finalized and we also have more precise ideas about
+implementation to nail down these communication service specifications. </p>
+
+<section name="NesC Prototype for TimeSync">
+
+<code>
+module PrototypeTimeSyncM {
+provides {
+interface Time;
+}
+uses {
+interface bdNeighbors;
+interface receiveMsg as ReceiveStampedMsg;
+interface sendLocal as sendNeighbors;
+interface sendByID;
+}
+}
+</code>
+
+<section name="Interface: Time">
+
+<p> Perhaps not the best choice, we bundle the commands into one interface (we
+could change this later). </p>
+
+<code>
+interface Time {
+command result_t getLocalTime( time_t* time );
+command result_t getGlobalTime( time_t* time );
+command result_t xlatTime(
+time_t* ourtime, mote_id m, time_t* othertime );
+}
+</code>
+
+<p> [[getLocalTime]] is used to obtain the high-accuracy form of time, which has a
+local time-base.  Think of it intuitively as every mote having its own "time
+zone". Such time is consistent for local real-time calculations. We imagine
+that this command fails if the clocks have not yet been synchronized (eg, the
+[[getLocalTime]] command is invoked too early in the initialization phase of system
+startup). </p>
+
+<p> [[xlatTime]] is used to convert local time to the time-base of some other mote
+in the near vicinity (as mentioned above, this has to do with having a beacon
+in common to the two motes). There are two failure modes for this command: it
+fails if invoked before TimeSync initialization is completed; and it fails if
+attempting a conversion outside of common beacon vicinity (these should be
+distinct failure indications). Should applications need high-accuracy
+conversion between /arbitrary/ motes -- not residing in a common beacon area --
+we can also imagine adding another command for such a conversion. However, this
+would be a more expensive call, and it would be asynchronous (only later
+delivering the result via an event). </p>
+
+<p> [[getGlobalTime]] obtains the lower accuracy form of time, which is common
+(plus or minus an error tolerance) to all motes in the system. Again, this
+command fails if invoked too early in system startup. </p>
+
+<p> Robert Szewczyk suggest that we should use 48 bit counters (at the
+granularity of 32 KHz, or 31.25 microsec) for planning beyond the challenge to
+other applications. </p>
+
+<code>
+typedef uint48_t time_t;
+</code>
+
+<p> We don't yet have a spec for the message format(s), frame definitions and
+other things internal. </p>
+
+</section>
+
+<section name="Notes on Interfaces Used">
+
+<ul>
+
+<li> The command [[bdNeighbors]] returns a pointer to a list of up to /k/ mote
+identifiers, where /k/ is the assumed upper bound on a "neighborhood" size
+(more about this shortly). Each item in the list is the identifier of a mote to
+which the invoker has a direct, bidirectional link (that is, if /i/ invokes and
+/j/ is in the resulting list, then /i/ and /j/ can both use [[sendLocal]] to
+transmit to each other). </li>
+
+<li> The event [[receiveMsg]], documented in the routing component description,
+carries a pointer to a message with "TimeSync" as its type. Presumably, the
+routing component also supplies a "register" command interface that the
+TimeSync component invokes as part of initialization (so that the routing
+component has knowledge of the TimeSync message type -- or was it intended to
+resolve this at compile/link time?). </li>
+
+<li> The command [[sendLocal]] is documented in the routing component. </li>
+
+<li> The command [[sendByID]] is needed so that motes in the local neighborhood
+of a beacon (a concept internal to the TimeSync component) can address each
+other, in a message send primitive, by identifier -- in view of the basic need
+for TimeSync before locations are determined, we need some such primitive. For
+the type of synchronization algorithm developed by UCLA, this [[sendByID]] only
+transmits messages that travel two hops: from a mote, to a beacon, and then to
+another mote within the beacon's neighborhood.</li>
+
+</section>
+
+</section>
+
+</section>
+

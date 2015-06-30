@@ -1,0 +1,451 @@
+1) Introduction
+===============
+
+Mate includes an implementation of the TinySQL query language, pioneered
+by TinyDB [1], for collecting data from a sensor network.
+
+TinySQL allows you to view a sensor network as a database, where the
+sensors present on each mote are treated as the columns ("attributes")
+of the database. Additionally, a few other important mote
+characteristics, such as mote id, are also attributes. This database
+is then queriable using a SQL-like language, whose major difference
+from SQL is that queries include a "sample period". This sample period
+is an interval at which the query is evaluated and results
+returned. The query is thus "continuous", returning a stream of data
+to the sensor network's base station until stopped.
+
+2) A simple example
+===================
+
+This example uses sample TinySQL VM specifications adapted for
+the mica2 and micaz platforms with the micasb sensorboard, and
+telosb with built-in sensors. Please see Section 6 for instructions
+on creating a VM specification for other sensor boards.
+
+First, because Mate's TinySQL implementation is based on compiling TinySQL
+queries to motlle code, you need to build and install an appropriately 
+configured motlle VM on your motes. Do this as follows (where PLATFORM
+is one of mica2, micaz or telosb depending on your motes):
+  cd $(TOSDIR)/lib/VM/languages/tinysql
+  motlle-vmbuild tsql-PLATFORM.vmsf # create TinySQL VM 
+  cd $(TOSDIR)/../apps/TSQLVM
+  make mica2
+
+Then, install this program on a collection of motes, using separate ids. One
+mote, which will serve as the TinySQL base station must have id 0. E.g.,
+  make mica2 reinstall.0 # base station mote
+  make mica2 reinstall.1 # first data gathering mote
+  make mica2 reinstall.2 # second data gathering mote
+You may of course need different arguments to make if you are not using
+the parallel-port programming board.
+
+Next, you need to set up your sensor network, using mote 0 as a base
+station connected to your PC (no sensor board needed), and giving all
+other motes a micasb sensor board. Also, you need to run a serial
+forwarder on your PC, setup to talk to mote 0.
+
+To check that your motes have been correctly programmed, etc, you should
+execute the following command in the TSQLVM directory:
+  motlle-load -e "led(1)"
+This should turn on the red LED on your base station, and shortly thereafter
+on all other motes. If this doesn't happen, check that your serial forwarder
+is setup correctly and that your motes are programmed correctly.
+
+You are now ready to run your first query. Try:
+  tinysql start "select id, light interval 10"
+This should collect mote identity and light readings from all motes in the
+network every 10s. The results will be printed by tsqlrun until you interrupt
+it.
+
+Interrupting tsqlrun does not stop the query. You can resume collecting
+results by executing:
+  tinysql log
+which will resume printing results until you interrupt tsqlrun.
+
+You can terminate data collection by executing
+  tinysql stop
+
+If you start a new query with tinysql, the old query will be automatically
+terminated.
+
+3) The TinySQL language
+=======================
+
+This implementation of TinySQL supports two kinds of queries:
+- Local queries, which collect independent data ("attributes") from each mote.
+- Global queries, which compute some aggregate over the whole sensor network.
+  Note that the syntax for global queries departs from that of TinyDB.
+
+Both kinds of queries include:
+- An interval (in seconds), at which sensors are sampled and the query
+  evaluated. Each interval is called an epoch; epochs are numbered
+  consecutively starting at 1 when the query is installed.
+- An optional condition, evaluated on each mote at each epoch - if the
+  condition is false, that mote does not take part in the query
+  computation for the current epoch.
+
+TinySQL can be extended by writing attributes and aggregates in motlle
+code. See Section 5 for a detailed description.
+
+3.1 Local queries
+-----------------
+
+The syntax of a local query is:
+  select VALUE1, VALUE2, ... [where CONDITION] interval N
+
+where each VALUE is 
+- the name of an attribute
+  examples: id, light
+- the name of a local aggregate, with a list of values as parameters
+  example: expdecay(light, 3)
+- an integer constant (useful in aggregate arguments and conditions)
+
+and CONDITIONs are expressions built from VALUEs using 
+  and, or, not, < , <=, >, >=, =, <>
+and parentheses
+examples: id >= 10, (expdecay(light, 3) <= 5) and (id < 20)
+
+Example local queries:
+  select id, light, temp interval 5
+  select id, light where temp > 20 interval 30
+  select id, light where expdecay(temp, 3) > 20 interval 30
+
+
+An attribute is something which can be computed or measured on a mote
+at any time. Examples include a mote's identity, or the reading of
+one of its sensors. The set of attributes available is:
+- id: the mote's identity
+- the sensors made available by the sensor board you configured in
+  your TinySQL VM (see Section 6)
+- the attributes defined in motlle code (see Section 5)
+
+A local aggregate is a function which computes a result based on its
+arguments and some internal state. For instance, at each call,
+expdecay(X, N) returns the exponentially decayed average of all values
+of X it received since the start of the query. The decay factor is
+1-1/2**N. The standard TinySQL VM does not include any predefined
+local aggregates; all such aggregates are defined in motlle code (see
+Section 5).
+
+3.2 Global queries
+------------------
+
+The syntax of a global query is:
+  select GLOBAL1[VALUE11, VALUE12, ...],
+         GLOBAL2[VALUE21, VALUE22, ...],
+	 ...
+         [where CONDITION] interval N
+
+where GLOBAL is the name of a global aggregate (e.g., avg, max).
+
+Example global queries:
+  select avg[light] interval 10
+  select max[temp], avg[light] where light > 15 interval 30
+
+A global aggregate is a function which is computed at each epoch over
+the value of its arguments on all motes where the CONDITION is true.
+Values of global aggregates are computed in the sensor network as
+results are collected and forwarded through the network's routing
+tree.  Computing an aggregate thus causes signifcantly less network
+traffic than collecting all the data at the root and computing the
+aggregate there. However, to support this, results from aggregates
+are delayed by a number of epochs (to allow time for parents to 
+aggregate the results of their descendants within the network).
+
+The set of global aggregates available is:
+- min, max and avg
+- the global aggregates defined in motlle code (see Section 5)
+
+A single global aggregate becomes multiple attributes in a query's schema
+(see the "tinysql log" command below). The exact set of attributes
+is up to each aggregate implementation, but will typically include 
+the actual epoch this aggregate result is for (necessary because of the
+delay in global aggregates mentioned above). For the three predefined
+global aggregates, these attributes are:
+- avg: epoch, count and sum. The actual average is sum/count.
+- min: epoch and value. The minimum is value,
+- max: epoch and value. The maximum is value,
+
+
+4) The tinysql command
+======================
+
+The tinysql command is used to compile TinySQL queries, install them
+in the network and collect their results. tinysql must always be run
+from the directory containing your VM (e.g., apps/TSQLVM in the
+example above). The usage for tinysql is:
+
+  tinysql [-I dir1 -I dir2...] COMMAND QUERY
+  where COMMAND is one of:
+    start        install QUERY followed by log
+    install      install QUERY in the sensor network
+    reinstall    reinstall current query in the sensor network
+    log          display continuous results from current query
+    stop         stop current query in sensor network
+    display      display current query
+    compile      just compile QUERY and print resulting motlle code
+
+    QUERY is a TinySQL query (not needed for reinstall, log, stop, display)
+
+    The -I directives specify directories in which user-defined aggregates
+    and attributes can be found.
+
+    start, install, reinstall, log and stop require that a serial forwarder,
+    talking to TinySQL mote 0 be running on the local host.
+
+    Examples:
+      tinysql start "select id, light interval 10"
+      tinysql compile "oops"
+      tinysql stop
+
+A few comments:
+- The motlle code which results from compiling a query is stored in
+  ~/.tinysql_query. The reinstall, log and display commands use
+  this file, so will fail if it is removed.
+- If you wish, you can modify ~/.tinysql_query and execute 
+    tinysql reinstall
+  to install your patched code in the sensor network. However, if you
+  change the message layout, "tinysql log" will likely fail.
+- tinysql log displays the query's schema, which consists of the current
+  epoch and the value of each aggregate. See the discussion under global
+  queries above for more information on the representation of global
+  aggregates in the schema.
+
+5) Extending TinySQL: User-specified attributes, aggregates
+===========================================================
+
+Any time you use an attribute, local or global aggregate named X, the
+TinySQL compiler will search for a file named X.mt in:
+- the current directory
+- any directories specified by -I options to tinysql
+- tinyos-1.x/tos/lib/VM/languages/tinysql/lib
+If it finds such a file, it will include it verbatim in the compiled
+query output file (~/.tinysql_query).
+
+This file should include motlle function definitions which implement
+attribute, local or global aggregate X, as described below. If you
+haven't done so already, you might want to check the motlle documentation
+in tinyos-1.x/tos/lib/VM/languages/motlle/doc/motlle.txt.
+
+Depending on the vmsf file you used to generate your TinySQL VM, you may
+or may not be able to use floating-point computations in your motlle
+functions. For the provided VM specifications:
+- tsql-mica2.vmsf, tsql-micaz.vmsf: includes floating-point support
+- tsql-telosb.vmsf: no floating-point support
+- tsql-telosb-float.vmsf: includes floating-point support (but very few
+  built-in motlle functions, and no agg, min, max global aggregates)
+
+5.1 Adding attributes
+---------------------
+
+If X is an attribute, then X.mt should define a function called X with
+no parameters which returns the current value of X.  Example: the
+(rather weird) light_plus_temp attribute is the sum of light and temperature:
+  any light_and_temp () {
+    return light() + temp();
+  }
+
+5.2 Adding local aggregates
+---------------------------
+
+TinySQL assume that local aggregates have two kinds of arguments:
+- numeric constants
+- attributes and other local aggregates
+
+For local aggregate X, X.mt should define two functions:
+- X_make: this receives the numeric constant arguments and returns
+  a value Y. This function is called once when the query starts.
+- X_get: at each epoch, this receives Y and the value of X's other
+  arguments. It returns X's value at this epoch. It may update Y.
+
+Examples: 
+
+A simple add aggregate which sums its arguments:
+  any add_make() 0; // has no useful state
+  any add_get(a, b) a + b; // just sum the two arguments
+
+The code for expdecay, found in the tinysql/lib directory is:
+  // Build a two element array to remember expdecay's state.
+  //   The first element is the decay factor
+  //   The second element is the current decaying average
+  any expdecay_make(N) vector(N, 0);
+
+  // Update and return the decaying average
+  // the magic-looking expression computes 
+  //   sum = (sum * 1-1/2**N) + val
+  //   avg = sum / 2**N
+  //   but without keeping sum explicitly around
+  any expdecay_get(Y, val)
+    Y[1] = Y[1] - (Y[1] >> Y[0]) + (val >> Y[0]);
+
+5.3 Adding global aggregates
+----------------------------
+
+Like local aggregates, TinySQL assume that global aggregates have two kinds 
+of arguments:
+- numeric constants
+- attributes and local aggregates
+
+However, global aggregates are a lot more complex to implement as they
+have to collect results from other motes, and merge that with local
+data.  Additionally, as communication takes time, these results may be
+from different epochs, so global aggregates must maintain partial
+results for many epochs.
+
+For global aggregate X, X.mt should define six functions:
+- X_make: this receives the numeric constant arguments and returns
+  a value Y. This function is called once when the query starts.
+- X_newepoch: this function is called with Y as an argument when the
+  epoch changes.
+- X_update: at each epoch, this receives Y and the value of X's other
+  arguments. 
+- X_get: this function should return the value of X that should be
+  sent to our parent at this epoch. It receives Y as an argument and
+  should return a string of the same length as X_buffer.
+- X_buffer: this function takes no arguments and must return a new string
+  whose size equals the size of the strings returned by X_get.
+- X_intercept: this function is called when a partial result for 
+  aggregate X is received from a child of this mote. It's arguments are
+  Y and the result of X_get sent by the child mote.
+
+You must also include information on the global aggregate's internal
+attributes, so that "tinysql log" can generate the correct schema. This
+information takes the form of a comment
+  // <X>_SCHEMA: <internal attributes for X, separated by spaces>
+Note that this information must match the encoding used by X_get.
+"tinysql log" assumes that each internal attribute is encoded as a 2-byte
+little-endian integer.
+
+As you can probably tell, all of this is somewhat tricky to implement. Here
+is some code that could be used to implement the avg[] global aggregate in
+motlle (untested, but converted from the built-in average aggregate):
+
+  // The schema for avg
+  //   AVG_SCHEMA: epoch count sum
+  // where epoch is chosen so that our descendant's results have
+  // reached us before we try and send them on. The result of the
+  // average is sum/count.
+  any maxdepth = 5; // max routing tree depth supported
+  any window = 2 * maxdepth;
+
+  // The state of an average aggregate is an array containing, in this order:
+  //   counts for 'window' epochs
+  //   sums for 'window' epochs
+  //   the number of the oldest epoch in the window
+  any avg_make() {
+    any Y = make_vector(1 + 2 * window);
+    vector_fill!(Y, 0);
+    return Y;
+  }
+
+  // The epoch changed. Ensure epoch + 1 is inside the window.
+  any avg_newepoch(Y) {
+    any start = Y[2 * window];
+
+    if (epoch() + 1 >= start + window)
+      {
+	// figure out new start and how much to shift values
+	// from old epoch for the new start
+        any shift = epoch() + 2 - window - start, i;
+
+	start = epoch() + 2 - window, i;
+	Y[2 * window] = start;
+
+	if (shift > window)
+	  shift = window;
+	else
+	  {
+	    for (i = shift; i < window; i++)
+	      {
+	        Y[i - shift] = Y[i];
+		Y[i - shift + window] = Y[i + window];
+	      }
+	  }
+	// clear new values
+	for (i = window - shift; i < window; i++)
+	  {
+	    Y[i] = 0;
+	    Y[i + window] = 0;
+	  }
+      }
+  }
+
+  // Update the state for epoch 'when' with a count of 'n' and a sum of 'sum'
+  any add_avg(Y, when, n, sum) {
+    any start = Y[2 * window];
+    if (when >= start && when < start + window)
+      {
+	Y[when - start] += n;           // update count
+	Y[when - start + window] += n;  // update sum
+      }
+  }
+
+  // Add local result for current epoch
+  any avg_update(Y, val) add_avg(Y, epoch(), 1, val);
+
+  // avg_get returns a six-byte string containg the encoded values of
+  //   epoch, count, sum (2 bytes each)
+  any avg_get(Y) {
+    any start = Y[2 * window];
+    any when = epoch() - 2 * (maxdepth - 1 - depth());
+    any tosend = vector(when, 0, 0);
+
+    // encode the result for epoch 'when', but avoid problems if we don't 
+    // know it or if we're too deep in the tree
+    if (depth() >= maxdepth)
+      tosend[0] = epoch() - 256;
+    else if (when >= start)
+      {
+        tosend[1] = Y[when - start];          // count
+	tosend[2] = Y[when - start + window]; // sum
+      }
+    return encode(tosend);
+  }
+
+  any avg_buffer() make_string(6);
+
+  // Add some results from our descendants to our state
+  any avg_intercept(Y, intercepted) {
+    any decoded = decode(vector(2, 2, 2));
+    add_avg(Y, vector[0], vector[1], vector[2]);
+  }
+
+6) Configuring a TinySQL VM
+===========================
+
+A TinySQL VM configuration file (.vmsf) typically looks like the following:
+# Pick a name and a directory for your TinySQL VM
+<VM NAME="TSQLVM" DESC="A TinySQL VM with micasb sensor board support." DIR="../../../../../../apps/TSQLVM">
+# The amount of RAM available for TinySQL queries
+<OPTION CAPSULE_SIZE=1024>
+<SEARCH PATH="../../../opcodes">
+<SEARCH PATH="../../../contexts">
+<SEARCH PATH="../mate">
+<SEARCH PATH="../mate/rep-float">
+<SEARCH PATH="../mate/runtime">
+<SEARCH PATH="../mate/runtime/gen">
+<SEARCH PATH="../matelib">
+<SEARCH PATH="../matelib/gen">
+<SEARCH PATH="../../../../Util">
+<SEARCH PATH="../../../../MintRoute">
+
+<LANGUAGE NAME="motlle">
+<LOAD FILE="../mate/runtime/gen/floatfns.vmsf">
+
+<FUNCTION NAME="led">
+<FUNCTION name="id">
+<FUNCTION name="sleep">
+<CONTEXT NAME="Timer0">
+<LOAD FILE="../matelib/gen/commfns.vmsf">
+<LOAD FILE="../matelib/gen/mhopfns.vmsf">
+<LOAD FILE="../matelib/gen/queryfns.vmsf">
+# Load Mate support for your sensor board
+<LOAD FILE="../../../sensorboards/micasb.vmsf">
+
+
+Normally, you should only need to change the first (VM name and directory)
+and last (sensor board support) lines. Note however that, because of a lack
+of code space, the telosb vmsf files are more complicated (they exclude
+some of the motlle built-in functions to make code space available). It is
+probably easiest to use an existing telosb vmsf file (tsql-telosb-int.vmsf
+and tsql-telosb-float.vmsf) as a starting point.

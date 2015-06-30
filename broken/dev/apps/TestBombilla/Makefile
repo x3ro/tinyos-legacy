@@ -1,0 +1,3 @@
+COMPONENT=TestBombilla
+include ../Makerules
+

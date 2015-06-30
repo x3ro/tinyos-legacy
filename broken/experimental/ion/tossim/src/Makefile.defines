@@ -1,0 +1,38 @@
+# -*- makefile -*-
+#
+# Any variable beginning with "LOCAL_" is defined in the
+# per-subdirectory Makefile.
+
+SOURCES     = $(NAMES:%=%.cc)
+OBJECTS     = $(NAMES:%=%.o)
+DOCUMENTS   = $(NAMES:%=%.doc)
+EXECUTABLE  = $(MODULE)
+ARCHIVE     = lib$(MODULE).a
+LIBRARY     = lib$(MODULE).so
+MAIN        = $(EXECUTABLE:%=%.o)
+
+# Compiling
+CXX         = /usr/bin/g++
+CXXFLAGS    = $(LOCAL_CXXFLAGS) -pthread -Wall
+CXXFLAGS_DLL = -fPIC
+
+# Linking
+AR          = /usr/bin/ar cru
+LINKFLAGS   = $(LOCAL_LINKFLAGS) $(CXXFLAGS)
+LINKFLAGS_DLL = -shared
+
+# #include
+INCLUDEPATH_CXX = /usr/include/c++/3.3.3
+INCLUDEPATH = $(LOCAL_INCLUDEPATH) $(ROOT)/include/src /usr/local/include/boost $(INCLUDEPATH_CXX)
+IPATH       = $(INCLUDEPATH:%=-I%)
+
+# Libraries
+LIBRARYPATH = $(LOCAL_LIBRARYPATH) $(ROOT)/lib
+LPATH       = $(LIBRARYPATH:%=-L%)
+LIBRARIES   = $(LOCAL_LIBRARIES) pthread
+LIBS        = $(LIBRARIES:%=-l%)
+
+# makedepend
+DEPEND_FILE = Makefile.depend
+INCLUDEPATH_DEPEND = $(INCLUDEPATH) /usr/include/c++/3.3.3/i386-redhat-linux
+IPATH_DEPEND = $(INCLUDEPATH_DEPEND:%=-I%) -Y

@@ -1,0 +1,122 @@
+#
+# FILE:    xmesh.extra
+# AUTHOR:  Martin Turon
+# DATE:    January 12, 2004
+#
+# Simplifies the compilation of XMesh application binaries in various
+# configurations.  By passing flags to the make tool, features can be
+# compiled into the final image.
+#
+# Usage:
+# 	make mica2 XMESH=LP XFREQ=433 	// makes a low-power 433MHz image
+#
+# 	XMESH=<stack>	where stack is one of:
+#		HP	Reliable High Power	[default]
+#		LP	Low Power Time Sync
+#		LPL	Low Power Listening
+#		LPZ	MicaZ Low Power	(Time Sync)
+#		HPZ	MicaZ High Power (Reliable)
+#		MINT	Mint Route
+#
+# Copyright (c) 2004-2005 Crossbow Technology, Inc.  All Rights Reserved.
+#
+# $Id: route.extra,v 1.1.1.1 2006/05/04 23:08:21 ucsbsensornet Exp $
+#
+
+ifndef $(XBOWROOT)
+XBOWROOT=%T/../contrib/xbow/tos
+endif
+ifndef $(XBOWBETAROOT)
+XBOWBETAROOT=%T/../contrib/xbow/beta/tos
+endif
+
+ifeq ($(ROUTE),)
+ROUTE=hp
+endif
+
+ifeq ($(ROUTE), hp)
+# ** Reliable Route [Default] High Power, always on
+# make mica2
+PFLAGS = -I$(XBOWROOT)/platform/$(PLATFORM)
+PFLAGS += -I$(XBOWROOT)/CC1000RadioAck
+PFLAGS += -I$(XBOWROOT)/lib/ReliableRoute
+PFLAGS += -I%T/lib/Queue
+PFLAGS += -DTEN_X
+endif
+
+ifeq ($(ROUTE), mint)
+# use AWoo's MintRoute as routing layer
+# make mica2 ROUTE=mint
+PFLAGS = -I$(XBOWROOT)/platform/$(PLATFORM)
+PFLAGS += -I%T/lib/MintRoute -DMULTIHOPROUTER=WMEWMAMultiHopRouter
+PFLAGS += -I%T/lib/Queue
+PFLAGS += -DTEN_X
+endif
+
+ifeq ($(ROUTE), lpl)
+# ** Reliable Low Power Listening 
+# make mica2 ROUTE=lpl
+PFLAGS = -I$(XBOWROOT)/platform/$(PLATFORM)
+PFLAGS += -I$(XBOWROOT)/CC1000RadioPulse
+PFLAGS += -I$(XBOWROOT)/lib/ReliableRoute_Low_Power
+PFLAGS += -I%T/lib/Queue
+PFLAGS += -I%T/lib/Broadcast
+endif
+
+ifeq ($(ROUTE), lp)
+# ** Reliable Route Time Sync
+# make mica2 ROUTE=LP
+#include ../Makefile.lp
+#$(error mesh is LP")
+PFLAGS =  -I$(XBOWROOT)/platform/$(PLATFORM)
+PFLAGS += -I$(XBOWROOT)/CC1000RadioSync
+PFLAGS += -I$(XBOWROOT)/lib/ReliableRoute_Sync
+PFLAGS += -I%T/lib/Queue
+PFLAGS += -I$(XBOWROOT)/lib/TimeSync
+endif
+
+ifeq ($(ROUTE), hpz)
+#  ** Reliable Route for micaz
+# make mica2 ROUTE=hpz
+PFLAGS = -I$(XBOWBETAROOT)/lib/CC2420RadioAck
+PFLAGS += -I$(XBOWBETAROOT)/platform/micazack
+PFLAGS += -I$(XBOWROOT)/lib/ReliableRoute
+PFLAGS += -I%T/lib/Queue 
+PFLAGS += -DTEN_X
+endif
+
+#
+# FILE:    Makefile.xlib
+# AUTHOR:  Martin Turon
+# DATE:    January 12, 2004
+#
+# Simplifies the compilation of XMesh application binaries in various
+# configurations.  By passing flags to the make tool, features can be
+# compiled into the final image.
+#
+# Usage:
+# 	make mica2 route,lp freq,433 	// makes a low-power 433MHz image
+#
+#	DELUGE=1	enables Deluge over-the-air programming
+#	XEE=1		enables XEE mote configuration
+#
+# Copyright (c) 2004-2005 Crossbow Technology, Inc.  All Rights Reserved.
+#
+# $Id: route.extra,v 1.1.1.1 2006/05/04 23:08:21 ucsbsensornet Exp $
+#
+
+# ******* Standard includes ************
+PFLAGS += -I$(XBOWROOT)/interfaces -I$(XBOWROOT)/system -I$(XBOWROOT)/lib
+PFLAGS += -I$(XBOWROOT)/sensorboards/$(SENSORBOARD) 
+
+# ======= XLib application framework ====
+PFLAGS += -I%T/lib/Broadcast -I$(XBOWROOT)/lib/XLib 
+
+# ======= XEE RecoverParams support ====
+ifeq ($(XEE), 1)
+PFLAGS += -I$(XBOWBETAROOT)/lib/Xee -DFEATURE_XEE_PARAMS=1
+endif
+
+# Add extra modules from Makefile.component
+PFLAGS += $(INCLUDES)
+

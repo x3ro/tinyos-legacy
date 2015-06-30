@@ -1,0 +1,16 @@
+MULETest:
+This is a combination of CntToRfm and RfmToInt, with a little twist. Each
+mote sends out packets at intervals of 50 + 20*NODE_ID milliseconds, counting
+up from zero. It keeps track of how many packets it has received from each of
+its neighbors, so you can get a feel for how many packets have been lost.
+It's only really intended to be used under TOSSIM, because it prints out lots
+of debug messages (on channel USR2), and takes up a lot of RAM, since it has
+several arrays size 1000. Probably won't even compile for any platform other
+than PC.
+
+This is used to test for packet collisions and interference - the timing of 
+the messages is such that the motes should try to send at the same time 
+fairly often - that's why the times are offset.
+
+If you have your TOSDIR environment variable set properly, you should be 
+able to just run 'make pc', otherwise you'll need to hack the makefile.

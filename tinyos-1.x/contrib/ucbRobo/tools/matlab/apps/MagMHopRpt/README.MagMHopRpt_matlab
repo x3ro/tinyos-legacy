@@ -1,0 +1,50 @@
+README for tinyos-1.x/contrib/ucbRobo/tools/matlab/apps/MagMHopRpt
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+
+
+Description:
+	MATLAB Tools for interacting with MagMHopRpt application in
+tinyos-1.x/contrib/ucbRobo/apps/MagMHopRpt
+
+	Also includes files that work with the hmttsn_testbed online
+multi-target tracking package provided by Songhwai Oh.
+
+
+
+Usage:
+Commands Quick Reference
+------------------------
+magMHopRptInit		run this to initialize communications and state
+queryMote		queries the configuration parameters on the motes
+configMote		configures multiple parameters on the mote
+
+hmttsn_testbed package commands:
+startOnlineTracking
+stopOnlineTracking
+
+
+Event Handlers
+--------------
+printMagReportMsg_MagMHopRpt
+			prints the reported magnetic readings which exceed the
+			report threshold.  Can turn off reporting using
+			MAGMHOPRPT.rptMsgFlag
+printQueryReportMsg_MagMHopRpt
+			prints the results of a configuration query
+
+
+Important Variables
+-------------------
+global APPS.MAGMHOPRPT	stores configuration parameters, among them 
+			MAGMHOPRPT.rptMsgFlag
+
+hmttsn_testbed related variables:
+global MTT		stores parameters configuring interaction with
+			 hmttsn_testbed
+
+
+
+Known bugs/limitations:
+
+Needs to integrate with data logging and plotting tools (once they are written)

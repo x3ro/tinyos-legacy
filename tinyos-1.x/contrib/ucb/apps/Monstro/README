@@ -1,0 +1,28 @@
+= HOWTO =
+
+cd $MONSTROROOT/lib/libGps/src
+make && make install
+
+cd $MONSTROROOT/lib
+make
+
+cd $MONSTROROOT/util
+make
+
+cd $MONSTROROOT/RoboMote
+./buildAndInstall ROBOT_HOST_NAME
+
+
+
+= TODO =
+$MONSTROROOT/lib/libGps/src/make : install/uninstall to lib/
+$MONSTROROOT/include/packets.h : get rid of the sense/control notation
+$MONSTROROOT/robots.cfg :
+$MONSTROROOT/Makefile : high-level Makefile to do most of the above
+$MONSTROROOT/util/SetTrim.java : write this -- takes four ints on the command line
+$MONSTROROOT/util/SetTrimByHost.py : use the SetTrim.java program and the config file to set the trim
+$MONSTROROOT/
+$MONSTROROOT/
+$MONSTROROOT/
+
+mv libGps to lib/libGps

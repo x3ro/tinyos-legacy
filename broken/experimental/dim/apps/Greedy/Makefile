@@ -1,0 +1,2 @@
+COMPONENT=GreedyApp
+include ../Makerules

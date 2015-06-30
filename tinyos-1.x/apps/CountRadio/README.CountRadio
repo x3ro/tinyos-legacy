@@ -1,0 +1,43 @@
+$Id: README.CountRadio,v 1.1 2004/05/01 04:22:10 cssharp Exp $
+
+README for CountRadio
+Author/Contact: tinyos-help@millennium.berkeley.edu
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+Description:
+
+CountRadio is a simple led/radio count program.  The default application
+built from this directory is CountDual.
+
+    CountDual either sends a count over the radio if the node address is
+    equal to 1, or displays a count received over the radio otherwise.
+    Compile CountDual with
+
+      make <platform>
+
+    CountSend only sends a count over the radio regardless of the node
+    address.  Compile CountSend with
+    
+      COMP=Send make <platform>
+
+    CountReceive only displays a count received over the radio
+    regardless of the node address.  Compile CountReceive with
+    
+      COMP=Receive make <platform>
+
+These applications exhibit real, typical, simple TinyOS programs.  They
+at most use the interfaces Timer, SendMsg, ReceiveMsg, and Leds; they do
+not depend on lib/Counters/.  This makes them a good teaching tool, easy
+to understand, useful, and reusable.
+
+The author has already found these applications useful as a template to
+quickly generate other simple counter programs.  Enjoy.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+None.
+

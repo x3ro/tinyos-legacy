@@ -1,0 +1,21 @@
+README for OscilloscopeRF
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+XnpOscope is an extension of OscilloscopeRF that can take network
+reprogramming request.
+
+XnpOscope stops Clock component when it receives network
+reprogramming request to make the application not compete
+for radio resources with network programming. XnpOscope starts 
+Clock again after it is notified of successful network 
+reprogramming termination.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+None.

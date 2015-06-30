@@ -1,0 +1,10 @@
+#ifndef __SCHEMEA_ERROR_H__
+#define __SCHEMA_ERROR_H__
+typedef enum {
+	SCHEMA_SUCCESS = 0,
+	SCHEMA_ERROR,
+	SCHEMA_RESULT_READY,
+	SCHEMA_RESULT_NULL,
+	SCHEMA_RESULT_PENDING
+} SchemaErrorNo;
+#endif

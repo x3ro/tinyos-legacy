@@ -1,0 +1,573 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<title>Beacon Vector Routing</title>
+	<link rel="stylesheet" href="style.css">
+ </head>
+
+<body bgcolor="#FFFFFF" >
+<h1>Beacon Vector Routing User's Guide</h1>
+<!--#echo var="DATE_LOCAL" --><br>
+Rodrigo Fonseca, May 2005
+$Id: bvr.html,v 1.1.1.1 2005/06/19 04:34:38 rfonseca76 Exp $
+
+<p class=license>
+The fine print
+<br><br>
+  "Copyright (c) 2003-2005 The Regents of the University  of California.  
+  All rights reserved.             
+<br><br>                                   
+  Permission to use, copy, modify, and distribute this software and its
+  documentation for any purpose, without fee, and without written agreement is
+  hereby granted, provided that the above copyright notice, the following
+  two paragraphs and the author appear in all copies of this software.
+                                   
+<br><br>                                   
+  IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+  DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+  OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+  CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+                                   
+<br><br>                                   
+  THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+  AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+  ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+  PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+                                   
+<br><br>                                   
+  Copyright (c) 2003-2005 Intel Corporation
+  All rights reserved.             
+                                   
+<br><br>                                   
+  This file is distributed under the terms in the attached INTEL-LICENSE     
+  file. If you do not find these files, copies can be found by writing to
+  Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA, 
+  94704.  Attention:  Intel License Inquiry.
+                                  
+<br><br>                                   
+                                   
+  Author:  Rodrigo Fonseca        
+  Date Last Modified: 2005/06/07
+ 
+</p>
+
+
+If you got here you probably already know what BVR is, but I'll say anyway.
+Beacon Vector Routing is an any-to-any routing scheme, suited for wireless
+sensor networks. It borrows from the scalability of geographic routing by
+using a greedy mode of forwarding based on coordinates. These coordinates
+however are not geographic in nature, but are rather derived only from the
+topology of the network. In a nutshell, a node's coordinates are the set of
+hop distances to a number of reference nodes which we call beacons. 
+<p> This document is a guide to a BVR implementation that runs TinyOS. It is
+therefore developed in the nesC language. I hope this text can help you read
+the BVR code, run the BVR code, and use it on your own applications. To learn
+more about the algorithm, and our evaluation of it, I suggest you read our NSDI paper. 
+[put link here]
+
+<h2> People </h2>
+BVR was developed at Intel Research, Berkeley, the University of California, Berkeley, and the International Computer Science Institute, in ... , right, Berkeley. The authors are
+
+<ul>
+<li> Rodrigo Fonseca
+<li> Sylvia Ratnasamy
+<li> Jerry Zhao
+<li> David Culler
+<li> Scott Shenker
+<li> Ion Stoica
+</ul>
+
+We would also like to thank Cheng Tien Ee for invaluable help in testing the code in the Soda Hall testbed.
+
+<h2> Intro </h2>
+	
+This version of BVR is tested to run on TinyOS v1.1. The PC simulations used
+the TOSSIM-packet simulator, found in the /beta subtree of the tinyos tree.
+
+BVR as released provides a "route to coordinates" interface to applications.
+It only supports application messages on one AM channel, AM_BVR_APP_MSG, but
+that should be easy to change in case there is a need for it.
+
+We are writing a location database that will support a route to id interface.
+
+<h2>Using BVR </h2>
+
+The "point of entry" for applications into the BVR code is BVRRouterC, which
+provides the interfaces BVRSend, and BVRReceive (not yet BVRIntercept), to
+send and receive unicast messages. These interfaces follow the model in
+MultihopRoute, i.e., the sender has a buffer, and requests a pointer into the
+payload area into that buffer.
+
+<p>TestBVRSimple is a (simple) application that wires to BVRRouterC and sends
+messages back and forth between nodes. If you just want to try something with
+the code, you can start from this one. It is driven externally through the
+BVRCommand interface, and logging is done using the Logger interface.
+
+<h2>The structure of the BVR code</h2>
+
+The code is divided in support modules, and BVR itself. The main BVR modules
+are:
+
+<ul>
+   <li><tt>BVRRouter</tt>
+   <li><tt>BVRState</tt>
+   <li><tt>CoordinateTable</tt>
+</ul>
+
+These modules use two core support modules, LinkEstimator and BVRCommStack.
+There are also important peripheral modules that are used in interacting with
+nodes: the Logger and Command modules.
+
+<h3>2.1 BVRCommStack</h3>
+Starting from the bottom, <tt>BVRCommStack</tt> is literally a stack of modules that
+implement parametrized <tt>SendMsg</tt> and <tt>ReceiveMsg</tt>, just like <tt>GenericCommM</tt>. The
+diagram below shows how <tt>BVRCommStack</tt> is decomposed, and which modules use it
+to send and receive packets. It does two main things. First, it takes care of the
+parts of the LinkEstimator that have to be in the data path (see the
+description of the link estimator). Second, it integrates the send queue for
+packets, which includes retransmissions as well. 
+
+<tt>GenericCommReallyPromiscuous</tt> just turns on the promiscuous mode of
+AMPromiscuous upon initialization. On the PC side we divert all UART packets
+to the debug output with <tt>UARTInterceptComm</tt>, which is not wired when
+compiling to the motes.
+
+
+<pre>  
+  Application
+  (route to coords)    
+         \                  
+           BVRRouterC   BVRStateC   UARTLoggerM   BVRCommand
+
+               \           \          /              /
+
+               --------------------------------------
+                         | BVRCommStack | 
+                          -------------- 
+                                |       
+                         FilterLocalComm
+                                |
+                         LinkEstimatorComm
+                                |
+                         BVRQueuedSendComm 
+                                |
+                     LinkEstimatorTaggerComm
+                                |
+                       [ UARTInterceptComm ] (PC only)
+                                |
+                     GenericCommReallyPromiscuous
+                                |                 BVR specific
+               ---------------------------------------
+                      GenericCommPromiscuous       TinyOS standard 
+                      AMPromiscuous
+</pre>
+The <tt>LinkEstimatorTaggerComm</tt> tags all packets with a per source unique (16
+bits) sequence number. This info goes in the LEHeader structure. All messages
+sent through BVRCommStack should follow the BVRRawMessage format, which is to
+say they should have space for LEHeader as the first 4 bytes of the AM
+payload. LinkEstimatorComm collects statistics on the receive side, for the
+different neighbors. It integrates directly with the LinkEstimator module, and
+drives all changes to that module. LinkEstimatorComm also sends its own
+periodic packets for reverse link quality estimation. These two components are
+ split because of the queue component: the reverse link estimation packets are
+also enqueued and retransmitted, while all packets that leave the radio
+(including multiple retransmissions of the same higher layer packets) receive
+a unique id.
+
+<p><tt>BVRQueuedSendComm</tt> is basically the standard TinyOS QueuedSend,
+with a few additions for logging queue state and retransmission statistics. It
+is the module responsible for the "link level"  retransmissions when we send
+unicast packets. It implements a queue of pointers to message buffers, so that
+the buffers have to belong to the different modules that originate messages.
+The number of retransmissions is controlled by <tt>MAX_RETRANSMIT_COUNT</tt>,
+and is currently set to 5. This module takes no action on incoming packets.
+
+<p>Lastly in the CommStack is <tt>FilterLocalComm</tt>, which reverts the effect of the
+promiscuous mode of the lower parts of the stack. It is here so that
+components that use the stack and assume that they will only receive packets
+destined for the node.
+
+<h3>2.2 Link Estimator</h3>
+
+BVR uses a passive link estimator that works counting packets received and
+packets sent by each neighbor, 
+loosely based on the work by Alec Woo. 
+ As mentioned above, all packets that are sent
+over the radio by a node receive a unique increasing sequence number. A node P
+in range of a sending node Q can then determine if it has missed any packets
+from Q by looking at the current and last received sequence numbers. 
+Periodically the LinkEstimator updates
+the statistics, and keeps an exponentially weighted moving average of the
+quality estimates. The updates are not performed at every packet received, but
+rather in discreet windows of time, when the <tt>LinkUpdateTimer</tt> fires. 
+<tt>I_UPDATE_LINK_INTERVAL</tt> controls this timer. Basically at each window the estimate is
+#packets received / (total sent packets). Total sent packets is the maximum
+between #sent + #received and an expected minimum number of packets sent
+(LINK_ESTIMATOR_MIN_PACKETS). This number depends on what is known about the
+traffic pattern of whatever is going on on the motes, and should be set
+accordingly. In the case of BVR, we know that nodes will send packets at every
+<tt>I_BEACON_INTERVAL</tt> interval.
+The number of received and missed packets is actually computed over possibly
+more than one such window, to allow for better estimates. This is set by
+<tt>LINK_ESTIMATOR_RECEIVE_WINDOW</tt>, currently with the value of 3.
+Look at the code for more comments. 
+At this time the window is advanced also, and new packets are counted in a
+fresh window, and the oldest window is discarded.
+
+<p> Eviction is handled separately from quality: after
+<tt>AGE_THRESHOLD</tt> periods without hearing any packets from a node, we
+evict it from the cache. The quality also drops, so it might be replaced
+before that.
+
+<p> When a new node is added to the cache, it enters a <em>probation
+period</em> during which it cannot be replaced.  This is set by
+<tt>LINK_ESTIMATOR_PROBATION</tt>, and was set as the number of link
+estimation periods one would need to get to within 10% of the true value
+(assuming 0 as an initial value, and successive inputs of value 1). It thus
+shold vary with different values of <em>alpha</em>, the weight of the history
+in the moving average.
+
+<p> Replacement is done if we hear about a new neighbor. What we currently do
+is that every node that has quality below
+<tt>LINK_ESTIMATOR_REPLACE_THRESH</tt> and has past the probation period
+(meaning it has a sensible estimate of the quality), is up for being replaced,
+and we pick the one with the lowest quality. The result of this is that there
+are nodes with quality above the threshold, they will remain in the cache.
+
+
+<p><em>To do</em>: change the link estimator replacement strategy such that we keep the k
+best neighbors, and have n-k slots for probation.
+
+<h3>2.3 CoordinateTable</h3>
+
+The CoordinateTable maintains the coordinates of (a subset of) the neighbors
+that are in the LinkEstimator table. Insertions occur when we receive a
+<tt>BVRBeaconMsg</tt> from a neighbor AND that neighbor is in the LinkEstimator table.
+Evictions occur when a neighbor is evicted from the <tt>LinkEstimator</tt> table. These
+two are kept in sync by means of the <tt>LinkEstimatorSynch</tt> interface, wired
+through BVRStateC. It is only accessed from <tt>BVRStateC</tt>.
+
+<p>The CoordinateTable module also provides the very important command
+<tt>getNextHops</tt>, which returns a list of neighbors that are good next hops for a
+given packet and destination, ordered by progress weighted by bidirectional
+quality to the neighbor.
+
+<p><em>To do</em>: the CoordinateTable interface passes pointers to the
+entries in the table. Change this to have methods that modify these entries
+based on the address as the key, similar to what the link estimator does.
+
+<h3>2.4 BVRStateC</h3>
+This is the main module responsible for keeping the BVR state information, as
+well as the control traffic. This means that it knows who the beacons are, and
+handles the local neighbor message exchanges that allow nodes to <ul>
+<li> learn their own coordinates
+<li> learn their neighbors' coordinates
+</ul>
+
+<p>All is done by sending and receiving <tt>BVRBeaconMsg</tt>'s, which contain
+primarily a node's own coordinates (distances to each beacon). They also
+contain information to allow a node to use such information relative to each
+beacon in computing its own coordinates: a sequence number for each beacon,
+and the cumulative quality of the reverse path to each beacon. 
+
+<p>This is how we ensure that we have reasonable trees: each node has a
+parent, and we make sure that when we say we are X hops from the beacon this
+is along a good quality path. Otherwise we might be considering very poor
+quality and long links to be 'hops'. It is still an open question what is the
+best way to count hops when we have 'links' which are not physical wires but
+this shared, changing wireless medium. We found though that the trees produced
+by this method are pretty good.
+
+<p>The basic idea then is that if you receive a message from a neighbor saying
+they are 3 hops from beacon 5, you consider yourself to be 4 hops from beacon
+5. Each beacon starts this process by stating distance 0 from themselves, and
+update a sequence number for each such broadcast they do. A node will update
+its distance only once per sequence number, this avoids count-to-infinity
+problems, and loops. A node maintains a parent in each beacon tree, and will
+occasionally change parents if another parent offers a better quality path to
+the root. The quality of a path is measured in <em>ETX - expected number of
+transmissions</em> to get to the root, taking into account the quality of each
+link along that path and assuming you would do hop-by-hop retransmissions.
+
+<p>There are also details involving when to choose a new parent, in order to
+avoid instability and flapping, while still reacting to significant changes in
+connectivity. I encourage you to look into the code as the authoritative
+source on how that is done, and ask any questions you may have to me.
+
+<p>Lastly, how do we get to know who are the beacons? We have code that
+assigns beacons at compile time, by node id, and also experimental code, which
+is not yet released, that performs a beacon election process and does not need
+to be preconfigured. The static method defines beacons in the
+<tt>contrib/bvr/bvr/topology.h</tt> file, specifying an array with whether a
+node is a beacon, and the beacon id of the node.
+
+
+<h3>Beacon distance estimation</h3>
+
+<p>In the BVR algorithm, each node has to know how many hops away from each beacon it is.
+This turns out to be not as simply done as said when we are dealing with the wireless medium of these low power radios.
+Nodes don't have a binary link to other nodes, in the sense of always being connected or not. Each node will hear a message from
+another node with a certain probability, and we try to estimate this probability for each pair using the link estimator. 
+One of the consequences is that is not simple to define what a hop is.
+
+<p>One naive way of forming trees is to have the root broadcast messages, and whoever hears these is considered to be
+one hop away. Whoever hears messages relayed by any of these nodes is then considered to be 2 hops away, and so forth.
+This does not work well in practice, as you end up using long and very unreliable links because they happened to transmit a message
+once. The trees that result may not be representative of the topology, and may be poor for routing.
+
+<p>The approach we take in the implementation of BVR is to consider links that are parts of good paths to the root. To this effect
+we use the ETX metric accumulated along the paths. ETX is the expected numter of transmissions along a link and also along a path, 
+and is given by 1/(p_f*p_r), where p_f is the probability of transmissions success in the forward direction and p_r in the reverse direction. A node can efficiently compute the ETX to the root through a potential parent with
+with only the parent's own ETX to the root and the ETX on the link to the parent. 
+
+We use a 1 byte field to express the ETX, which we deemed would have enough
+precision for networks with diameters around 25 or so hops. When we receive an
+update from a beacon, through one neighbor, we get how many hops away from the
+beacon we are, and the ETX estimate in the <tt>quality</tt> field. When
+computing the <tt>quality</tt> to send, we subtract 1, since this transmission
+is always required for a hop. The quality field only encodes the extra
+transmissions you would need on the links. We also define <tt>ETX_SCALE</tt>
+to work as a fixed precision "shift". For details, look in <tt>BVRStateM</tt>, 
+functions <tt>scaledEtxFromQuality</tt> and <tt>updateRootBeacon</tt>.
+
+<h3>2.5 BVRRouterC</h3>
+
+This is the module that has most of the forwarding logic in BVR. It depends on
+<tt>BVRStateC</tt> to have access to the CoordinateTable and choose the next
+hops. The applications wire to this module.
+
+<p>It implements the greedy forwarding, fallback forwarding, and scoped flood
+in the end, if the other modes fail. It does not implement the selective
+dropping of beacons described in the paper; rather, it always uses the same
+set of beacons to route on. 
+
+<p>The interface to BVRRouterC assumes you know the coordinates of the node
+you want to talk to, and we have experimental code for a lookup database, that
+will be released shortly.
+
+<p>Forwarding takes place by calling <tt>BVRState.getNextHops</tt>, which
+returns two lists: one of greedy next hops, and another with fallback next
+hops. The latter currently always contains a single element, the node's parent
+in the tree of the closest beacon to the destination. The greedy nextHops list
+is ordered by expected progress: the progress a neighbor makes in the
+coordinate space, weighted by the quality of the "link" to that neighbor. A
+similar technique has been shown to be optimal in the case of geographic
+forwarding, and we experimentally verified that indeed it improves the total
+number of messages sent when routing. The idea is basically to avoid long,
+poor quality links.
+
+<p>The scoped flood in the end maintains a cache of messages seen, and a node
+stops sending messages when it is as far as the ttl of the message. There is a
+randomized timer to avoid synchronization. The timer hasn't been throroughly
+studied, and it may be improved upon. We can't do a lot of suppression at
+first, because we don't know which path will lead to the destination when
+doing the flood. One idea for making the flood more robust to different
+densities is to use the same scheme used in the Berkeley PEG demo: a timer
+that is reset by a random value every time the node hears a neighbor transmit
+the same message.
+
+<h3>2.6 Logger Interface and UARTLogger</h3>
+
+
+<h3>2.7 BVRCommand</h3>
+
+<h3>2.8 Code Size</h3>
+As of version 0.5, the code size is distributed as follows (not including
+comments, blank lines, and preprocessor directives)
+
+ bvr
+ commstack
+ linkestimator
+ command
+ util (includes UARTlogger)
+
+ total
+
+<h2>3. Parameters</h2>
+
+There are several parameters that tune the operations of BVR, the amount of memory required, the bandwidth of the control traffic, and the speed of convergence of link estimation and coordinate propagation. 
+
+Before nodes can route properly, two pieces of information need to be
+acquired: the estimation of the bidirectional link qualities between a node
+and its neighbors, and the coordinate system. The latter involes each node
+knowing the distance between itself and each of the beacons, and also knowing
+the coordinates of its neighbors.
+
+<h3>3.1 Memory</h3>
+There are different parameters in BVR that affect how much memory the code
+will require. These are mainly the size of the packets and the sizes of the
+different tables and buffers. In TinyOS all memory is allocated statically,
+and while there is a file called BufferPool in BVR, the memory is not shared
+among different modules.
+
+<dl>
+<dt>Message size (m). 
+  <dd><em>Defined</em> through compiler flag <tt>-DTOSH_DATA_LENGTH=(m)</tt>. <br>
+      <em>Affects</em> the memory taken by packet buffers, as well as the maximum size of packets sent. Must be even for Telos! The size of the buffers will depend on the platform, look in AM.h for the specific platform. The <em>minimum size</em> depends on the number of coordinates, since these have to go in the packet headers.
+<dt>Number of coordinates (c).   
+  <dd><em>Defined</em> through compiler flag <tt>-DMAX_ROOT_BEACONS=(c)</tt>, default 8 in <tt>contrib/bvr/coordinates.h</tt>. <br>
+      <em>Affects</em> the size of the <tt>Coordinates</tt> structure, and thus the size of the following types. Just make sure the size of <tt>TOS_Msg</tt> accomodates the largest of these message types.
+<ul>
+ <li><tt>contrib/bvr/coordinate_table_entry.h:CoordinateTableEntry</tt> = 9 + c (and the memory occupied by the CoordinateTable)
+ <li><tt>contrib/bvr/BVR.h:BVRAppMsg</tt> = (12 + c + App data size)
+ <li><tt>contrib/bvr/BVR.h:BVRBeaconMsg</tt> = 7 + c*3
+ <li><tt>contrib/util/Logging.h:BVRLogMsgWrapper</tt>. Big union of structs, some of them have 2 fields with type <tt>Coordinates</tt>.
+ <li><tt>contrib/command/BVRCommand.h:BVRCommandMsg</tt>. 
+</ul>
+<div align=center><table border=1><tr><td><tt>MAX_ROOT_BEACONS(c)</tt></td><td>Min. TOSH_DATA_LENGTH(m)</td><td><tt>BVR_APP_DATA_LENGTH</tt></tr>
+       <tr><td> &lt;8 </td><td> 29  </td><td> m-(c+12) </td></tr>
+       <tr><td> 8     </td><td> 30  </td><td> 10  </td></tr>
+       <tr><td> 12    </td><td> 42  </td><td> 18 </td></tr>
+       <tr><td> 16    </td><td> 54  </td><td> 26 </td></tr>
+</table></div>
+
+<dt><tt>contrib/commstack/BVRQueuedSendM:SEND_QUEUE_SIZE</tt>
+<dd><em>Affects</em> memory occupied by the packet queue,
+6bytes*<tt>SEND_QUEUE_SIZE</tt> Doesn't need to be more than the total number
+of TOS_Msg buffers allocated across the application.
+<dt>UARTLogger buffer pool
+<dd><em>Defined</em> in <tt>contrib/util/BufferPool.nc: BUFFER_POOL_SIZE</tt><br>
+    <em>Affects</em> memory used by the buffer pool = 3 + (3 +
+sizeof(TOS_Msg))*BUFFER_POOL_SIZE. Tradeoff: too few buffers and enough event
+types enabled for logging in <tt>UARTLoggerM.nc</tt> will cause logging
+messages to be lost.
+
+<dt>Size of neighbor table                                          
+<dd><em>Defined</em> by compiler flag <tt>-DLE_CACHE_SIZE</tt>.<br>
+    <em>Affects</em> memory. Each entry occupies (12 +
+2*LINK_ESTIMATOR_RECEIVE_WINDOW) bytes
+<dt>Size of coordinate table
+<dd><em>Defined</em> to be the same as <tt>LE_CACHE_SIZE</tt>.<br>
+    <em>Affects</em> memory. Each entry occupies (9+MAX_ROOT_BEACONS) bytes.
+                                                                  
+</dl>
+<h3>3.2 Time and Bandwidth</h3>
+
+Several parameters control how long BVR takes to disseminate information and
+converge, as well as the bandwidth spent.
+
+<dl>
+<dt>Periodic beacon timer
+<dd><em>Defined</em> in <tt>contrib/bvr/bvr/BVR.h:I_BEACON_INTERVAL</tt> to be
+10 seconds. Every (expected) <tt>I_BEACON_INTERVAL</tt> a
+<tt>BVRBeaconMsg</tt> is sent to neighbors. <br>
+<em>Affects</em> <ul><li>how long it takes for coordinate information to reach all
+nodes (this * the diameter of the network); <li>how long it takes for the link
+estimator to get a reasonable estimate of qualities (together with the link
+estimator parameters), since it dictates the minimum rate at which nodes send
+packets; 
+<li>how much of the channel is occupied with control traffic. For example, if
+the density is 12 neighbors, and each node sends 1 message every 10 seconds,
+and the channel capacity is 30 msgs per second, the channel will be 12*0.1/30
+= 4% occupied by this traffic.</ul>
+
+<dt>Periodic reverse link estimation message
+<dd><em>Defined</em> in
+<tt>contrib/bvr/linkestimator/LinkEstimator.h:I_REVERSE_LINK_PERIOD</tt>.<br>
+<em>Affects</em> the other source of traffic in BVR, for informing neighbors
+of the reverse quality information. This allows nodes to get bidirectional
+link quality information. Set to 17.5 seconds. Since not all neighbors fit in
+a single message, the entries in the LinkEstimator table are sent in batches
+and in round-robin fashion.
+
+<dt>Link estimator periodic update
+<dd><em>Defined</em> in <tt>contrib/bvr/linkestimator/LinkEstimator.h:I_UPDATE_LINK_INTERVAL</tt> <br>
+<em>Affects</em> how often the link estimator is updated. Set to once every 30
+seconds. This has to be related to the beaconing interval, since you need to
+be receiving packets in order to estimate quality. So, if you are to send
+packets slowly, not to kill your bandwidth with control traffic, then your
+passive link estimation will be slow. Sorry :) <br>
+</dl>
+<h2>4. Running BVR</h2>
+<h3>4.1 Mica2 Testbed</h3>
+ 
+Here we assume access to a testbed with an ethernet backchannel to the motes.
+This assumption has two implications: first, from a central PC it is possible
+to issue commands through the backchannel to all motes. Second, the motes can
+log all the events to the UART, and these packets are received by a central
+machine through the backchannel. Alternative configurations are possible, such
+as sending commands over the air from a base station, and logging to the
+EEPROM, but we don't discuss this, and haven't implemented such EEPROM logging
+modules.
+
+<p>For running the experiments, we use a couple of Java tools to interact with
+the motes. We collect a log of the packets sent to the UART by the motes using
+the class net.tinyos.testbed.TestBedPacketLogger, and send commands to the
+motes using either a standalone tool, net.tinyos.bvr.BVRCommandInject, or a
+scripted driver, net.tinyos.bvr.ThroughputTestDriver. So that these tools can
+simultaneously talk to the motes, we connect all motes to SerialForwarders,
+and have the tools talk to the SerialForwarders. The tools assume that a mote
+of id X will be connected to a SerialForwarder that listens on port B+X. We
+generally use B=9100, such that mote id 85 will be connected to a
+SerialForwarder at port 9185. The SerialForwarder multiplexes connections to
+the motes, making it really convenient and flexible to run experiments.
+
+<p>Steps:<ol type=a>
+<li>program the motes<br>
+   <tt>tools/run/program_all_motes.pl</tt>
+<li>start the serial forwarders<br>
+   <tt>tools/run/testbed_start_sf.pl</tt> will start the serial forwarders.
+<li>verify that the motes are alive and programmed and talking<br>
+   <tt>tools/run/get_id_all_motes.pl</tt>
+   * See troubleshooting below. Possibly go back to a.
+<li>start the packet logger<br>
+   <tt>java net.tinyos.testbed.TestBedPacketLogger <testbed config file> <time></tt>
+<li>start the traffic driver<br>
+   <tt>java net.tinyos.bvr.ThroughputTestDriver </tt>
+<li>process the logs...
+   The logs are written as <br>
+   <tt>&lt;time(ms)&gt; &lt;id(decimal)&gt; &lt;hex dump of packet&gt;</tt>
+</ol>
+
+<p>For the last step I wrote some perl scripts that parse the logs, but you may
+want to write a java class that reads the textual format of the logs and
+converts them to the java message classes created by mig, which would make it
+easy to get access to all fields from within your program. Shouldn't be hard
+to do. Other people have taken different approaches for d, e, and f above. For
+example, you can connect your motes to a database, and then process everything
+with some java program that understands the messages, or with MatLab.
+
+<p>If you don't have access to a testbed with ethernet or usb connected motes,
+you can implement a module that implements the <tt>Logger</tt> interface, but
+writes the info to the EEPROM, and then can have each mote dump its
+information from the EEPROM. The difficulty here would be to correlate the
+logs in time, since each one would be in its own timescale. Maybe if the motes
+are timesync'd, or you can alternatively extract causal relationships between
+events from one mote to the other. We don't have code to do this in BVR,
+though.
+
+<p>*Troubleshooting (some)
+ There are several reasons motes fail to program, or respond. I generally have
+15% of them not working for one reason or another.
+ Check that the cables are connected. Try powercycling the mote and the
+ethernet adapter. Telnet into the EPRB and verify its settings. Reset
+everything. Try again. 
+  If you don't get some mote working, go back and adjust your testbed config
+file, and repeat, until you get a set of working motes...
+
+<h3>4.2 TOSSIM</h3>
+
+We developed a couple of tools to allow different network topologies to be
+generated and tested using TOSSIM, including topologies with lossy
+characteristics. The simulation described here is done using the packet level
+radio simulator in TOSSIM. We also do not use the sockets interface to
+interact with TOSSIM, because of serious speed concerns. Instead, we use a
+hook to the event loop in TOSSIM that allows us to insert and process specific
+events in TOSSIM's event queue.
+
+<h3>4.1 Generating topologies</h3>
+Requirements: perl, java net.tinyos.LossyBuilder, optionally graphviz
+
+<h3>4.2 internal_interrupt.c</h3>
+Requirements: patched tossim code
+
+
+
+
+
+
+
+
+<!--#include virtual="/~rfonseca/bvr/footer.html" -->
+</body>

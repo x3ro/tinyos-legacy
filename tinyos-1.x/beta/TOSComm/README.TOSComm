@@ -1,0 +1,111 @@
+$Id: README.TOSComm,v 1.3 2005/09/22 04:01:02 kaminw Exp $
+
+README for TOSComm
+Author/Contact: tinyos-help@millennium.berkeley.edu
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+
+DESCRIPTION:
+
+TOSComm provides serial port access to Java through a native JNI shared
+library.  TOSComm has been designed as a lighter weight replacement for
+javax.comm, and its interfaces are similar.  
+
+
+
+INSTALLATION:
+
+From this TOSComm directory:
+
+  make             # compile and install TOSComm
+  make reinstall   # install TOSComm (without compiling)
+  make uninstall   # uninstall TOSComm (warning: it tries to recompile the java tools w/ your javax.comm library)
+  make clean       # remove compiled binaries 
+
+TOSComm has been built using the following system:
+
+  Gentoo Linux 2002.2 and later
+  Debian Linux 3.1
+    Sun's j2se
+  Cygwin updated on 4 Dec 2004
+    SWIG 1.3.19
+    gcc (GCC) 3.3.3 (cygwin special), using mingw (-mno-cygwin)
+    JDK for Windows, java version "1.4.2_05"
+
+
+TOSComm requires SWIG and GCC to build.  As soon as it stabilizes a little
+more, I'll CVS commit comm/build_{win32,linux} to circumvent those
+dependencies for people seeking a quick install.
+
+
+
+IMPLEMENTATION SUMMARY and STATUS
+
+A new net.tinyos.comm library has been created to replace the
+javax.comm library.  This library is in the ./comm directory.  In
+order to make the rest of the tinyos Java tools to compile, we need to
+replace any files that use javax.comm with new ones that use
+net.tinyos.comm.  Currently, the only such file is
+net.tinyos.packet.SerialByteSource.java.  When TOSComm is installed,
+the comm directory is first compiled and copied into the
+tinyos-1.x/tools/java/net/tinyos/comm location. Then, the
+SerialByteSource.java file is compiled, and the .class file is copied
+into the tinyos-1.x/tools/java/net/tinyos/packet location.
+
+Two othe files are currently known to use the javax.comm library:
+tools/ListenRaw.java and util/SerialPortStub.java.  All 3 files should
+probably be made to use SerialPortStub.java, and no other files should
+use javax.comm.  That way, when TOSComm is installed, only a single
+fle (SerialPortStub.java) needs to be replaced.
+
+
+
+
+KNOWN BUGS/LIMITATIONS:
+
+Works so far.
+
+
+
+MOTIVATION AND PLAN
+
+My email to TinyOS-Devel summarizes the motivation and plan for writing this library:
+
+    On Mon 20 Dec 2004 Cory Sharp wrote:
+
+    I'm in the process of writing net.tinyos.comm java classes and native
+    shared libraries to potentially replace our use of rxtx and
+    javax.comm.  The net.tinyos.comm interfaces are a subset of
+    javax.comm, but everything else I've written from scratch.  I
+    currently have it fully functional for Win32 with a Linux port to
+    quickly follow.
+
+    Why?  I've written a test box to verify Telos mote functionality which
+    requires detaching and reattaching hundreds of devices in one session.
+    This usage pattern exposes flaws in the javax.comm design -- the part
+    that scans the system for "valid" devices, refusing access to anything
+    it doesn't recognize.  This doesn't fit well at all with hotplug
+    devices (e.g. USB on Telos), because the scan occurs once during
+    library initialization.
+
+    I've also found that the comm port scan procedure itself is so
+    aggressive in Linux that it disrupts all the comm devices -- so trying
+    to hack rxtx to rescan the system will only break it more.  For all
+    this trouble, I see no legitimate reason why the Java interfaces
+    should so aggressively manage the operating system resources:
+    iterating valid devices should be done by some other tool (such as
+    motelist for Telos), and refusing to open invalid devices should
+    remain the exclusive role of the operating system.
+
+    A side benefit is that the javax.comm community is a mess with no
+    signs of becoming more cohesive.  This gives us a central point for
+    bug fixes for java serial support and extensions (and retractions and
+    deprecations).  I doubt fixes to the javax.comm design would or could
+    ever be accepted by the existing library maintainers.
+
+    I'd like to commit primarily to tools/java/net/tinyos/comm/.  I'd also
+    like to augment packet.SerialByteSource to understand javaserial@ and
+    tosserial@, with an environment variable defining/overriding the
+    behavior of serial@ (the default can remain javaserial).
+
+

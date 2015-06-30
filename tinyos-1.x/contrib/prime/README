@@ -1,0 +1,90 @@
+			    PRIME Protocol
+
+
+
+
+Introduction
+============
+
+PRIME, Period  Reservation and Inter-Master Estimation, is a collision-free MAC protocol. It automatically detects interfering nodes in a network and uses TDMA to coordinate network transmission, so as to avoid collision.
+
+SPRIME is a simplified version which supports static time-slot (super-slot, in PRIME terminology) assignment. Though not as flexible as PRIME, it still achieves good performance -- in a test with "Chirp" program on 4 motes, the packet delivery success rate is 95%, compared with a success rate of 26.5% with CSMA (using original AMStandard and CC100RadioInt components) MAC.
+
+
+Files
+=====
+
+To facilitate interested developpers to try and test, a working version including all the supporting files is included in this directory. The following files and directories are main part of the SPRIME implementation.
+
+README				This file
+tos/system/GenericCommPRIME	GenericComm configuraiton file that uses
+				SPRIME
+tos/system/SPRIME.nc		SPRIME component
+tos/system/MsgPool.nc		Message pool (memory mangement)
+apps/Benchmark/Chrip.SPRIME	Chirp applicaiton, using SPRIME protocol
+apps/Benchmark/Chirp		Chirp application, using the originial
+				CSMA MAC that comes with TinyOS
+
+More documentation will be added as soon as I can.
+
+Configuration
+=============
+
+Right now the default configuration of SPRIME is a 4-mote, consecutive ID configuration. The parameters are defined as macros in SPRIME.nc. (TODO: a configuraiton file will be used instead of macros in the program).
+
+Install
+=======
+
+Copy the 'prime' directory (usually tinyos-1.x/contrib/prime) and set the 'TOSDIR' environment variable to the 'tos' directory in the 'prime' directory. (TODO: a setup program will be provided later to configure the existing TinyOS to switch between using SPRIME and the original CSMA MAC protocol)
+
+Test configuration and results
+==============================
+
+A simple test has been done to assess the performance of SPRIME. Four motes, mote 0-3, are uploaded with Chirp application and put close to each other.
+
+To run the tests, cd to apps/Benchmark/Chirp or apps/Benchmark/Chirp.SPRIME and use the usual TinyOS build method
+
+	make mica2 install.<mote id>
+
+to build and upload program.
+
+To compute the packet delivery rate, use a 'GenericBase' program to listen to the packets (you may want to modify the GenericBaseM.nc file to tally the packets received).
+
+Right now, the Chirp programs send 160 packets at the rate of 1 packet/400ms.
+The reference result is as follows
+
+		CSMA MAC			SPRIME
+		--------			------
+success rate    26.5%				95%
+
+So the success rate is increased by 258%.
+
+History
+=======
+To improve the network performance on the MAC layer, we originally seek to apply piggybacked acknowledgement to improve reliability. It develops to "AMConform", which is a reliable one-hop communication protocol supporting most of the functionality in traditional data-link level communication -- sliding window control, duplicate removal, queuing, piggybacked acknowledgement, and re-transmission for unicast communication. The platform is TinyOS 0.6 on Mica mote.
+
+In our experiment and development for tracking demo, the reliable data-link level component does improve the performance dramatically (But at least half of the enhancement seems to come from the buffering functionality). The retransmission introduces delay and impose a burden on the network when the bandwidth is in shortage. It still does not handle the wireless communication well because it does not consider hidden-terminal, asymmetric channel, wide interference range, and so on... Retransmission also consumes energy.
+
+As a result, in 2002, PRIME protocol is designed to provide predictable bahavior without incurring much computation, bandwidth and energy cost. It's main features include hidden-terminal and interference detection and TDMA scheduling. The development is based on TinyOS 0.6 on Mica motes.
+
+To make the PRIME protocol work with TinyOS-1.x and NesC, the code is modified early this year (2003) and the functionality is trimmed to make it easier to be ported to programs where AMStandard is used, hence the SPRIME protocol.
+
+
+Acknoledgements
+===============
+
+The current PRIME/SPRIME implementation is based on TinyOS. Thanks to all the people from Berkeley and other groups for helping me in various development issues.
+
+Support and bug report
+======================
+
+Please feel free to contact me for questions, bug reports, suggestions, or just talking.
+
+Lin Gu
+Computer Science Department
+Univ. of Virginia
+lingu@cs.virginia.edu
+Tel: 434-249-3158
+
+********************************************************************
+			Sept 10, 2003

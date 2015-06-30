@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+<table width="95%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><p>&nbsp;</p>
+      <table width="100%" border="1" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80%">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><!-- InstanceBeginEditable name="MainText" -->
+
+          <h2><font face="Verdana, Arial, Helvetica, sans-serif">Lesson 6: Migrating
+
+            an Agent Across a Multi-hop Network</font></h2>
+
+          <p align="center"><img src="migration.jpg" width="733" height="194"></p>
+          <p>Agilla allows agents to seamlessly migrate across a multihop network.
+            Since all addressing is done based on location, the agent specifies
+            a location to which it moves or clones. Agilla handles all of the
+            multihop geographic routing. The programmer only needs to specify
+            the destination location and the type of migration. This greatly
+            simplifies programming and enables more efficient programming.</p>
+          <p>The migration instructions are <strong>wmove</strong>, <strong>smove</strong>, <strong>wclone</strong>, <strong>sclone</strong>.
+                Note: the term &quot;migration&quot; encompases both &quot;move&quot; and &quot;clone&quot;
+            instructions. The first letter indicates whether the migration will
+            be <em>strong</em> or <em>weak</em>.
+            Strong migrations preserve execution state, weak migrations do not.
+            In other
+            words,
+                when an
+                agent executes a strong migration, its program counter, heap,
+                opstack, and reactions are all transferred to the destination
+                location. When
+                an agent executes a weak migration, only its code is transferred,
+                everything else is reset and the agent resumes executing from
+                the beginning. Move instructions move an agent to another node,
+                while
+                clone instructions produce a
+                copy
+                of
+                the agent on the destination node (both agents continue executing
+                independently afterwards). All migration insructions
+            take a destination location as a parameter. </p>
+          <h2>Example </h2>
+          <p>Consider the example agent Bounce0to1 located in &lt;agilla/Examples/Bounce0to1.ma:</p>
+          <p align="center"><img src="Bounce0to1.jpg" width="722" height="387"></p>
+          <p>This is an agent that jumps between nodes (0,0) and (1,1). It blinks
+            the red LED once at each node upon arrival. Lines 1-6 blink the
+            red led for a second. Lines 7-9 checks whether the
+            agent
+            is currently
+            at
+            (0,0).
+            On line
+            10, the
+            agent
+            jumps
+            to GOTO11
+            if it is currently as (0,0), otherwise, the agent continues executing
+            at line 11. Lines 11-12 and 15-16 perform the migration. In both
+            cases, a wmove is used, meaning an agent resumes executing at the
+            beginning when it arrives at the destination. The instructions immediately
+            following the wmove (on lines 13-14 and 17-18) implement the contingency
+            plan when the wmoves fails and is described below.</p>
+          <h2>Determining who is the clone</h2>
+          <p>After an agent performs an sclone, it is often important for the
+            agents to determine who is the original agent and who is the cloned
+            agent so they can behave in different ways. To support this, Agilla
+            sets the condition code of the original agent to 1, and the clone
+            to 2. The agent can then check this to determine who is the clone.
+            Consider the following agent VisitAll_ZigZag located in &lt;agilla/Examples/VisitAll_ZigZag.ma:</p>
+          <p align="center"><img src="VisitAll_ZigZag.jpg" width="738" height="1091"></p>
+          <p>This agent clones itself onto every node in the network by traversing
+              each row in a zig-zag fashion. The agent utilizes sclone because
+              it must remember which direction is is travelling (going left or
+              right along a row). Upon arrival, it clones itself on the
+              next node depending on
+              its direction
+              of travel, and then blinks the green LED. Consider line 27 where
+              the agent performs an sclone. Immediately after this instruction,
+              lines 28-33, display the code that checks whether the the agent is
+              the original or the clone. Here, the original agent jumps to BLINKGREEN,
+              while the clone jumps to MAINLOOP.</p>
+          <h2>Dealing with failure</h2>
+          <p>Wireless sensor networks utilize radios that are notoriously unreliable.
+             Since agents are migrated using multiple messages, there is a chance
+            that the migration operation will fail. The agent learns about the
+            failure in different ways based on the type of migration:</p>
+          <ul>
+            <li>wmove and wclone - If wmove
+                  or wclone fails, the agent is
+                  resumed running
+                  at the
+                  local
+                  host at the instruction immediately after the migration instruction.
+              Since the agent would normally resume execution at the beginning,
+              if
+              the
+              instruction immediately after wmove or wclone is executed, the
+              agent implicitly failed
+              to migrate.
+              Thus,
+              the
+              code
+              immediately
+                  after a wmove or wclone should always implement the contingency
+              plan for a failed migration operation. </li>
+            <li>smove and sclone - smove and sclone differ from wmove and wclone
+              in that in both success and failure, they will resume running at
+              the
+              instruction
+              immediately
+              after the migration instruction. To distinguish success from failure,
+              the condition code is set to 1 for success, and 0 for failure.
+              Note that if sclone is a sucess, the original condition code is
+              1, and the clone's condition code is 2. The only time the conditioncode
+              is set to 0 is to indicate migration failure.</li>
+            </ul>
+          <p>&nbsp;</p>
+        <!-- InstanceEndEditable --></td>
+        </tr>
+        <tr>
+          <td width="80%" cellpadding="2" cellspacing="2" bgcolor="#990000">&nbsp;           </td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+
+if ($#ARGV < 2 || $#ARGV > 3) {
+    print STDERR "Usage: runtests PLATFORM COM-PORT-FOR-APP COM-PORT-FOR-TOSBASE [test-regexp]\n";
+    exit 2;
+}
+
+$platform = $ARGV[0];
+$comapp = $ARGV[1];
+$combase = $ARGV[2];
+
+$tests = ".*";
+$tests = $ARGV[3] if $#ARGV == 3;
+
+$dontconnect = 1;
+do "./tools.pm";
+
+$ENV{PLATFORM} = $platform;
+$ENV{MOTECOM} = "sf\@localhost:$APP_PORT";
+$ENV{MOTEBASE} = "sf\@localhost:$BASE_PORT";
+
+# start serial forwarders
+
+$pidapp = sf_start($APP_PORT, "serial\@$comapp:$platform");
+$pidbase = sf_start($BASE_PORT, "serial\@$combase:$platform");
+
+system("/bin/rm -rf output");
+die "Can't create output directory" unless mkdir("output");
+
+sf_wait("localhost", $APP_PORT);
+sf_wait("localhost", $BASE_PORT);
+
+# The first packet sent sometimes has problems. Send something hopefully harmless
+r_connect(APP, BASE);
+send_base(message(65534, 254, 0));
+send_app(message(65534, 254, 0));
+r_close;
+

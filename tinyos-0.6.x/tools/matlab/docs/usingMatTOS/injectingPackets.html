@@ -1,0 +1,54 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Injecting Packets</title>
+</head>
+
+<body>
+
+<h1>Injecting Packets</h1>
+<p>It is quite simple to inject packets in matTOS.&nbsp; We simply create a 
+function that returns the desired packet and use either the injectPackets or 
+routePackets command.&nbsp; (The only difference between the two commands is 
+whether we &quot;inject&quot; the packet into a port or &quot;route&quot; the packet to a mote, 
+using the portMapping level of indirection.).&nbsp; First, let us go through a 
+function that creates a packet.&nbsp; The following code is very simple and can 
+be found in nest/tools/matlab/contrib/template/myPacket.m</p>
+<p>&nbsp;</p>
+<p>First, declare this file to hold a function which takes a variable number of 
+arguments and returns a packet object</p>
+<p><font face="Courier New">function p=myPacket(varargin)<br>
+&nbsp;</font></p>
+<p>Then, declare the global variables that you might be using.&nbsp; In this 
+case, the broadcast address, our AM type, and our group ID</p>
+<p><font face="Courier New">global TOS_BCAST_ADDR<br>
+global MY_AM_HANDLER<br>
+global GROUP_ID<br>
+<br>
+&nbsp;</font></p>
+<p>Then, create our packet using the default packet headers.&nbsp; Remember that 
+these are: address, AM, groupID, data (the payload), and CRC.</p>
+<p><font face="Courier New">p = packet(getDefaultPacketHeaders); </font></p>
+<p>&nbsp;</p>
+<p>Then, set the values of our fields using our global variables<font face="Courier New">. 
+We won't set the CRC<br>
+<br>
+p = set(p,'address', TOS_BCAST_ADDR); <br>
+p = set(p,'AM', MY_AM_HANDLER);<br>
+p = set(p,'groupID', GROUP_ID);<br>
+&nbsp;</font></p>
+<p>Finally, let's set the value of our own fields.&nbsp; These fields are 
+automatically inserted at the beginning of the payload. We set the fields with 
+values that the user passed as arguments, using matlab's variable argument 
+keyword &quot;varargin&quot;<font face="Courier New"><br>
+&nbsp;</font></p>
+<p><font face="Courier New">p = set(p,'command', varargin{1});<br>
+&nbsp;</font></p>
+
+</body>
+
+</html>

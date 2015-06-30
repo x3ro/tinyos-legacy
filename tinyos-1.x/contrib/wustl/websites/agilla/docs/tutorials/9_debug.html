@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>Lesson 9: Debugging and Simulating</h1>
+
+          <p><em>Last Updated on 
+            <!-- #BeginDate format:Am1a -->September 21, 2006 0:56 AM<!-- #EndDate -->
+            .</em></p>
+          <p>Agilla programs can be debugged and simulated using <a href="http://www.cs.berkeley.edu/%7Epal/pubs/nido.pdf" target="_top">TOSSIM</a>.
+              There are two ways to do this: 1) using a <a href="#default">default
+              agent</a>,
+  
+            or 2) via <a href="#injection">agent injection</a>. When simulating
+            an agent, the agent's execution trace is printed
+            to the screen. This trace can be piped to a file for off-line analysis.</p>
+          <p>Agilla itself can be debugged by <a href="#remove_subsystem">removing</a> various subsystems. </p>
+          <h2><font face="Arial, Helvetica, sans-serif">Default Agent<a name="default"></a></font></h2>
+
+          <p>A default agent simulation involves modifying <code>$TOSROOT/contrib/wustl/apps/Agilla/components/AgentMgrM.nc</code>            to
+            automatically load an agent when the mote is turned on. The advantage
+            of this method
+
+            is it does not use the agent migration components, allowing you to
+
+            debug an agent even if the interface between the AgentInjector and
+            Agilla is broken. The
+
+            disadvantage is that you can only simulate one type of
+            agent  at a time (unless you make further modifications
+            to
+            AgentMgrM).
+
+            To simulate Agilla using a default agent, first launch the agent
+            injector in &quot;no
+            connect&quot;
+
+            mode
+
+            using the following command:</p>
+<pre class="screen">$ java -Djava.security.policy=java.policy edu.wustl.mobilab.agilla.AgentInjector -nc</pre>
+          <p>The Agent Injector GUI will appear. Open the agent
+    
+            you want to simulate. In the picture below, 3Blink is loaded. </p>
+          <p align="center"><img src="debug-injector.jpg" width="471" height="509"></p>
+
+          <p>Go to the <em>Debug</em> menu and select <em>Print Debug
+
+            Code</em>. This will print some NesC code to the shell as shown below.            </p>
+
+          <p align="center"><img src="3blink_debug.jpg" width="668" height="487"></p>
+
+          <p align="left">Copy the
+            code and open <code>$TOSROOT/contrib/wustl/apps/Agilla/components/AgentMgrM.nc</code>.
+
+            Search for &quot;<em><code>command result_t StdControl.start()</code></em>&quot;.
+            Look for the line containing &quot;<code>if (TOS_LOCAL_ADDRESS ==
+            0)</code>&quot;             and paste
+
+            the code within this <code>if</code> block. Then open <code>$TOSROOT/contrib/wustl/apps/Agilla/Makefile.Agilla</code>            and set <code>-DINCLUDE_DEFAULT_AGENT=1</code>. </p>
+
+          <p align="left">Compile Agilla by typing <code>make pc</code>. Then run the simulation: </p>
+          <pre class="screen">$ build/pc/main.exe -b=0 -l=0 1</pre>
+          <p align="left">You should see the following output:</p>
+          <p align="center"><img src="3blink_debug_running.jpg" width="668" height="703"></p>
+
+          <p align="left">This shows the initialization and execution of the
+
+             3Blink agent. Each line starts with <font face="Courier New, Courier, mono">&quot;0:
+
+             VM (0:0):&quot;</font>. The first integer is the mote ID, the second
+
+             is the agent ID, and the third is the agent's program counter.</p>
+
+          <h2><font face="Arial, Helvetica, sans-serif">Injection<a name="injection"></a></font></h2>
+
+          <p>The Agent Injector can be used to inject agents into an Agilla network
+            being simulated by TOSSIM. First open <code>$TOSROOT/contrib/wustl/apps/Agilla/components/AgentMgrM.nc </code>and
+            find the line containing <code>#define INCLUDE_DEFAULT_AGENT</code>.
+            Make sure it is defined to be <code>0</code>. This will prevent the
+            default agent
+from
+being
+executed.</p>
+          <p>Compile Agilla for TOSSIM:</p>
+<pre class="screen">$ make pc</pre>
+          <p>TOSSIM uses a different byte packing, requiring that the Java classes
+            encapsulating TOS active message be re-generated using <a href="http://www.tinyos.net/tinyos-1.x/doc/nesc/mig.html">mig</a>.
+            Open <code>$TOSROOT/contrib/wustl/tools/java/edu/wustl/mobilab/agilla/Makefile.Agilla</code>
+            and <code>add the following line within it:</code></p>
+<pre class="screen">MIG = -target=pc java</pre>
+ Then recompile the AgentInjector using <code>make</code>.</p>
+          <p>This will take some time as it needs to re-generate all of the Java
+            message
+
+		  files.  Once done, open two shells.  In one shell, start TOSSIM:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       </p>
+
+
+
+	<pre class="screen">$ $TOSROOT/contrib/wustl/apps/Agilla/build/pc/main.exe -b=0 ###</pre>
+	
+			<p>where ### is the number of nodes to simulate. In the other prompt, execute
+			  the following commands:</p>
+
+<pre class="screen">$ cd $TOSROOT/tools/java; java net.tinyos.sf.SerialForwarder -comm tossim-serial &
+$ java -Djava.security.policy=java.policy edu.wustl.mobilab.agilla.AgentInjector \
+-comm sf@localhost:9001 -d</pre>
+
+			<p>The first command starts the Serial Forwarder running. The second command
+			  launches the AgentInjector application in simulation mode. The
+			  serial forwarder is necessary because it connects the
+			  AgentInjector with TOSSIM. The AgentInjector should look like:</p>
+			<p align="center"><img src="injector_sim.jpg" width="461" height="535"></p>
+
+			<p>Notice that the upper-right status bar indicates that it is connected to
+
+			  &quot;tossim-serial&quot;. Now you can open and inject agents into the sensor
+
+			  network being simulated.</p>
+
+			<p><strong><font color="#FF0000">Note: After simulating,
+
+		      be sure to revert Makefile.Agilla to define <code>MIG
+		      = mig java</code>!</font></strong></p>
+			<h2>Removing Agilla Subsystems<a name="remove_subsystem"></a></h2>
+			<p>When debugging Agilla, sometimes it is helpful to isolate the problem by
+			  removing certain subsystems. Agilla exploits TinyOS's component-based
+			  architecture to make this simple. The Agilla subsystems that can
+			  be removed are the AgentSender, AgentReceiver, and context discovery
+			  component. When you enable
+			  a <a href="#default">default agent</a>, you can remove the agent migration
+			  subsystem and still execute an agent. Removing the
+			  context discovery subsystem saves memory and stops the periodic
+			  beaconing process. The subsystem is replaced by a dummy that assumes
+			  a network consists of two nodes with address 1 and 0, when 0 being
+			  the base station.</p>
+			<p>To remove an Agilla subsystem, customize <code>$TOSROOT/contrib/wustl/apps/Agilla/Makefile.Agilla.</code>
+			  If you don't have this file, create one as described in <a href="1_installation.html#makefile_agilla">Tutorial
+			  1</a>. Within this file, you will see a list of PFLAGS including the following
+			  lines:</p>
+            <pre class="screen">-DOMIT_AGENT_SENDER=0 \<br>-DOMIT_AGENT_RECEIVER=0 \
+-DOMIT_CONTEXT_DISCOVERY=0 \</pre>
+To omit a subsystem, simply change the value to 1 and recompile.<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

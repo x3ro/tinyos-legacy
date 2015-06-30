@@ -1,0 +1,15 @@
+A D/BaseStation////
+A D/Blink////
+A D/Blink_DynamicThreads////
+A D/Bounce////
+A D/RadioStress////
+A D/SerialCompress////
+A D/TestBasicsbSensors////
+A D/TestBlockStorage////
+A D/TestCollection////
+A D/TestJoin////
+A D/TestLogStorage////
+A D/TestPrintf////
+A D/TestSineSensor////
+R D/TestLogStorage////
+R D/SerialCompress////

@@ -1,0 +1,3 @@
+COMPONENT=Accelerometer
+include ../Makerules
+

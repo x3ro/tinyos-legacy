@@ -1,0 +1,25 @@
+#-*-Makefile-*- vim:syntax=make
+
+PROGRAM = ftdi
+PROGRAMMER_FLAGS = -dprog=ftdi $(PROGRAMMER_PART) $(PROGRAMMER_EXTRA_FLAGS) -dinvert=mosi,miso,sck
+# id of the node to program. Either index from the --list or an actual id
+FTDI_ID ?=0
+
+program: FORCE
+	@echo "    installing $(PLATFORM) binary with usb"
+	$(PROGRAMMER) $(PROGRAMMER_FLAGS) --erase --upload if=$(INSTALL_SREC) -dserial=$(FTDI_ID)
+
+program_bl: FORCE
+	@echo "    installing $(PLATFORM) bootloader with usb"
+	$(PROGRAMMER) $(PROGRAMMER_FLAGS) --upload if=$(BOOTLOADER) -dserial=$(FTDI_ID)
+
+testbed_program: FORCE
+	@echo "    installing $(PLATFORM) binary to testbed"
+	rackRunner -l $(NODE_LIST) $(MAIN_EXE)
+
+NODE_COUNT = $(LISTNODES)
+
+testbed_list:
+	rackRunner -o -c $(NODE_COUNT) > $(NODE_LIST)
+
+

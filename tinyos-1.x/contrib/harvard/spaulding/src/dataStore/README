@@ -1,0 +1,90 @@
+*************************
+***  DataStore README ***
+*************************
+Author: Konrad Lorincz
+Date: May 15, 2005
+
+
+DataStore
+=========
+
+The DataStore module implements a logger like interface for the Flash
+in "Block" sizes.  Its built against the STM25P Flash Chip interface
+currently in /tinyos-1.x/beta/STM25P/STM25P.  This interface is
+currently only implemented for TelosB and therefore DataStore can only
+be used with TelosB.  (The AT45DB flash chip (i.e. MicaZ/TelosA
+implementation has yet to be written. David Gay is in charge of its
+implementation.)
+
+Usage
+-----
+ - To use the DataStore, you must first format the Flash according to
+   your application's needs.  This must be done only once offline 
+   (see /src/DataStore/FormatDataStore).  
+   - To make things simpler, by default DataStore.init() formats
+     the flash.  This can be turned off by enabling the compile time
+     variable DS_FORMAT_DISABLED.
+
+ - Before using the DataStore, the user must call init() and wait for 
+   an initDone().  The DataStore.init() depending on the compile time
+   variables, will either (a) format the flash and mount the required
+   volumes, or (b) mount the required volumes and erases the flash.  
+   This may take a while!
+
+Debugging
+---------
+ - To debug the DataStore, make sure that in your Makefile, both
+   "DATASTORE_DEBUG_PRINT_ENABLED" and "PRINTFUART_ENABLED" are
+   defined.  This allows the entire DataStore to be printed on the
+   screen.  IMPORTANT: In debug mode, make sure you define the size of
+   the Flash to be smaller than your RAM; (see
+   "debugDSBlocks[DS_NBR_VOLUMES][DS_NBR_BLOCKS_PER_VOLUME]" in
+   DataStoreM.nc). The Flash size can be adjusted via the constants
+   "DS_NBR_VOLUMES" and "DS_NBR_BLOCKS_PER_VOLUME" located in
+   DataStore.h.
+ 
+
+STM25P Flash Interface (currently for TelosB only)
+==================================================
+
+Usage Overview
+--------------
+ - The STM25P storage stack is built on the TinyOS 2.x interface
+   specifiction of TEP103 
+ - To use the STMP25P chip interface you must first "format" the flash
+   once offline.  This process takes a couple of minutes.  After the
+   flash is formated specifically for your application's needs, it can
+   be used.  
+ - The format simply maps volume ids to a physical address.  It stores
+   a partition table in external flash.
+
+Things to Watch Out For
+-----------------------
+ - Be aware that if your main program has a bug and it overwrites the
+   Flash partition table, you will need to reformat the flash.
+
+Limitations and Bugs
+--------------------
+ - you MUST first erase a sector/volume before a write
+   If the sector/volume is not erased and you try to write,
+   BlockWrite.writeDone() will return SUCCESS, but it won't actually
+   write the value to flash.  It should really return FAIL.  Probably a
+   bug!?
+
+   - The way that flash technology works is that an erase is used to turn
+     a 0-bit into a 1-bit. Writing a byte can turn any 1-bit into a 0-bit.
+
+ - The interface of Format.allocate() states that requested size must
+   be a multiple of STORAGE_BLOCK_SIZE.  However, there is a bug; If
+   you allocate a size other than STORAGE_BLOCK_SIZE, it might not
+   work.  Therefore, you should only allocate a size of
+   STORAGE_BLOCK_SIZE!
+
+ - BlockStorage: nearly complete except commit()/verify()
+
+ - Logger is not implemented!
+
+ - In Storage.h, STORAGE_OK and STORAGE_FAIL are defined as
+   STORAGE_OK=0 and STORAGE_FAIL=1!  (I spent several hours debugging
+   because I was assuming that STORAGE_OK is defined as 1.)
+   Note: Jonathan Hui said he will change this at some point!

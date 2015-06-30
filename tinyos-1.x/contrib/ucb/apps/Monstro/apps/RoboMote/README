@@ -1,0 +1,3 @@
+Trim values are stored in the flash and are saved across reboots, but
+not reinstalls.  If you re-install, you will need to send a
+motorTrimMsg message to set the values.

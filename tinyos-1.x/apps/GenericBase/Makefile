@@ -1,0 +1,3 @@
+COMPONENT=GenericBase
+include ../Makerules
+

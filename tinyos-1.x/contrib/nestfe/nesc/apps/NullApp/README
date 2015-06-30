@@ -1,0 +1,14 @@
+README for NullApp 
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+Puts a mote to sleep in the sense that it does not use any components except Main.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+None.

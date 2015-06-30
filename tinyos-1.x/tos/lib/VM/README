@@ -1,0 +1,44 @@
+README for Mate' source tree
+==================================
+:Author: Philip Levis <pal@cs.berkeley.edu>
+:Last Modified: November 30, 2004
+
+
+Mate' is an architecture for application-level programming
+environments running TinyOS. Instead of using nesC and the TinyOS
+component model, users can program applications in application-level
+languages, such as sensor network friendly variants of SQL, LISP, or
+BASIC. Mate' provides this functionality by building a customized
+virtual machine; user programs compile to the VM instruction
+set. Customizing the VM allows Mate's to minimize the overhead the
+VM imposes over standard TinyOS code.
+
+In short, you can program a sensor network with short, user-level
+codes without harming network performance.
+
+This directory contains all TinyOS/nesC sources for Mate' virtual
+machines. This directory has several subdirectories:
+
+  o components:   VM building blocks: scheduler, loading/linking
+  o contexts:     Threads (contexts) for some system events
+  o doc:          Documentation/tutorials
+  o interfaces:   nesC interfaces for the TinyOS components
+  o languages:    Language-level support 
+  o opcodes:      Components implementing VM opcodes/instructions
+  o samples:      Example VMs
+  o sensorboards: Sensorboard support
+  o types:        Header files for VM type declarations
+
+Supporting Java tools live in the standard TinyOS tools hierarchy,
+in net/tinyos/tools/script.
+
+If you're new to Mate', you should probably start with the
+tutorials. There are six, ranging in complexity from programming a
+network with Mate' to designing and implementing new VM
+functionality. Open doc/tutorials/index.html in your web browser to
+get started. You can also go to http://www.cs.berkeley.edu/~pal/mate-web.
+
+Version 2.2 of Mate' introduces a second language, motlle. Motlle
+has its own documentation and instructions, which can be found
+in languages/motlle.
+

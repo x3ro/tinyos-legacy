@@ -1,0 +1,23 @@
+README for MicaSBVerify
+Author/Contact: tinyos-help@millennium.berkeley.edu
+ 
+Description:
+ 
+MicaSBVerify contains several applications to test out the mica sensor board.
+Each test is self-contained and store in each subdirectory.
+Please refer to the READMEs in each subdirectory for details.
+
+MicaSBTest1:  test out magnetometer, accelerometer, and temperature sensor.
+
+MicaSBTest2:  test out light, microphone, and sounder
+
+TestSounder:  test out sounder alone
+ 
+
+Tools:
+ 
+None
+ 
+Known bugs/limitations:
+ 
+None              

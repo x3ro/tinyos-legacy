@@ -1,0 +1,22 @@
+README for Bombilla
+Author/Contact: Philip Levis <pal@cs.berkeley.edu>
+
+Description:
+
+Bombilla is a test application for Mate, a system for programming
+sensor networks in high-level application specific scripts.
+Installing this application on a mote will install Bombilla,
+which has two event handlers. A more detailed presentation of Mate can
+be found in the manual contained in tinyos-1.x/doc.
+
+Tools:
+
+net.tinyos.script.Scripter
+
+This class, *when executed from this directory*, will load a scripting
+interface to the Bombilla VM.
+
+Known bugs/limitations:
+
+
+

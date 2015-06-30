@@ -1,0 +1,27 @@
+README for TestSnooze
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+TestSnooze is a basic application that illustrates the use of
+the Snooze component to put the mote into a low power state
+for a user-defined period.  The mote will be on, wait for
+three Clock.fire() events, and then enter the low power state.
+The soft state (variables, etc) of the application are preserved
+in SRAM on the microprocessor.  One can notice the internal
+private sleep() function causes the mote to sleep for 
+4 seconds.
+
+Requirements:
+
+Platforms:
+
+This application will only work on the Mica and Mica128 platforms.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

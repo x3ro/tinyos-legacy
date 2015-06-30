@@ -1,0 +1,2 @@
+If you want to use the ucb-specific python tools, be sure to add tinyos-1.x/contrib/ucb/tools/python to your PYTHONPATH,
+and tinyos-1.x/contrib/ucb/tools/python/apps to your PATH.

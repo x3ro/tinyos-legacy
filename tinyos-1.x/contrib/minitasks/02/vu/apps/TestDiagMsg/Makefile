@@ -1,0 +1,2 @@
+COMPONENT=TestDiagMsgC
+include ../Makerules

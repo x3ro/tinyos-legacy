@@ -1,0 +1,4 @@
+COMPONENT=TestLeds
+
+include ../Makerules
+

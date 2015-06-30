@@ -1,0 +1,3 @@
+COMPONENT=testServiceControl
+include ../Makerules
+

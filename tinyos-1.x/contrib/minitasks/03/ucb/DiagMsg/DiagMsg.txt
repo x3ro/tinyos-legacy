@@ -1,0 +1,42 @@
+DiagMsg:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The DiagMsg component allows messages to be sent back to the base station 
+containing several diagnostic or debugging values together with their type 
+information. The base station must run the GenericBase application which
+forwards all messages to a PC connected to the base station. A java programm 
+(PrintDiagMsgs) displays the messages on the screen according to the formating 
+rules contained in the message.
+
+The following data types are supported: 1,2, 4 and 8 byte long signed, unsigned and 
+hexadecimal integers, characters, floating point numbers, tokens (frequently 
+used strings encoded as a single byte), strings and arrays of the previous types 
+(of length up to 15). Each field requires an additional 4 bit type descriptor.
+
+THE JAVA PROGRAM:
+
+The java program (PrintDiagMsgs) displays each DiagMsg in a line. The program 
+can connect to a SerialForward application, or can use the serial port directly.
+
+TUNABLE PARAMETERS:
+
+The DiagMsg component can be configured by changing the following values in 
+DiagMsg.h:
+
+DIAGMSG_ACTIVE_MESSAGE: The active message id used. Do not forget to change the 
+same value in the PrintDiagMsgs.java file too.
+
+DIAGMSG_BASE_STATION: The node id of the mote running the GenericBase 
+application. This CANNOT be the broadcast address, because then no 
+acknowledgements are received.
+
+DIAGMSG_RETRY_COUNT: The DiagMsg component will retry messages this many times 
+before dropping them. The base station must acknowledge them (this is done 
+automatically).
+
+DIAGMSG_RECORDED_MSGS: The DiagMsg component keeps an internal buffer of this 
+many messages. This allows sending several small messages without waiting for 
+their completion.

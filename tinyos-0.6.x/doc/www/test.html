@@ -1,0 +1,153 @@
+<PRE>
+This is the standard procedure for testing TinyOS on Windows. The tests are
+designed to ferret both installation problems and TinyOS bugs. If you 
+have problems with any of these steps, please consult the TinyOS FAQ at
+</PRE>
+<A HREF="http://webs.cs.berkeley.edu/tos/support.html">http://webs.cs.berkeley.edu/tos/support.html</A>
+<PRE>
+for further help.
+
+TOSROOT is defined to be the parent directory of the tos source
+tree. That is, if nest were in c:\nest, then c: would be TOSROOT. On
+Unix, if the src were in /usr/local/src/nest, then TOSROOT would be
+/usr/local/src.
+
+Any '$' prompt in examples below symbolizes a cygwin shell prompt.
+
+1.  toscheck. 
+toscheck is a perl script distributed with the TinyOS source and is found
+in TOSROOT/nest/tools. After a successful installation, toscheck
+should complete with no errors or warnings.  
+
+Run toscheck like this:
+
+   $ cd nest/tools
+   $ toscheck
+
+You should see no errors or warnings.  
+
+2. cnt_to_leds. 
+Connect the mote to a programming board. Connect the programming board's 
+parallel port to your machine's parallel port. Ensure that the
+switch is toward the 'Big Guy' label. Turn the mote's power on.
+
+In your nest src tree, do this:
+
+$ cd nest/apps/cnt_to_leds
+$ make mica
+$ make mica install
+
+Ensure that all three leds are blinking in such a manner that they
+count to 7 in binary.
+
+The values corresponding to the leds are: 
+
+Yellow: 2^0
+Green:  2^1
+Red:    2^2
+
+Accordingly, they turn on in this order:
+
+(1) Yellow 
+(2) Green 
+(3) Yellow AND Green 
+(4) Red    
+(5) Yellow AND Red 
+(6) Green AND Red 
+(7) Yellow AND Green AND Red 
+
+If you watch a couple cycles, the pattern becomes clearer. 
+
+3. listen.java
+In your nest src tree, do this:
+
+   $ cd nest/tools
+   $ javac listen.java
+   $ java listen COM1
+
+You should see this output:
+listen started
+printing all ports...
+-  COM3
+-  COM1
+-  LPT1
+-  LPT2
+done.
+
+If you do not see the specific ports listed (COM*, LPT*, etc.), there
+is likely something wrong with the javax.comm installation.
+
+4. oscilloscope application 
+Connect the mote's parallel port to your machine. Ensure that the
+switch is toward the 'Big Guy' label. Turn the mote's power on.
+
+In your nest src tree, do this:
+
+   $ cd nest/apps/oscilloscope
+   $ make mica
+   $ make mica install
+
+The red and yellow leds should be lit. The yellow light blinks, the
+red light is steady.
+
+Remove the mote from the parallel port and place it in your serial port.
+
+Run the 'listen' tool (see step 3).
+
+You should see output like this:
+
+listen started
+printing all ports...
+-  COM3
+-  COM1
+-  LPT1
+-  LPT2
+done.
+baud rate: 9600
+.
+.
+.
+7e 0 a 7d 1 0 68 1 1 0 .....
+7e 0 a 7d 1 0 68 1 1 0 .....
+.
+.
+
+
+5. java SerialForwarder
+Install the oscilloscope app on your mote if it isn't installed
+already (see the first part of step 3 above).  Seat the mote it in
+your serial port.
+
+Make the SerialForward gui app:
+
+   $ cd nest/tools
+   $ make
+   $ java net/tinyos/SerialForwarder/SerialForward
+ 
+A gui pops up. In the lower right-hand corner, you should see the
+'Pckts Read' count steadily increasing.
+
+
+6. Java Oscilloscope GUI
+With the applications started in step 4 running, start a second Cygwin
+shell and do the following:
+
+   $ cd nest/tools
+   $ java net/tinyos/oscilloscope/oscilloscope
+
+You will also see lines of numbers streaming in the shell window. A
+gui will pop up. There should be a green line graphing data read from
+the Mote.
+
+Place your hand over the light sensor on the sensor board. You should
+see the green line dip and then recover when you remove your hand.
+
+7.
+generic_base
+cnt_to_leds_and_rfm
+
+</PRE>
+
+<!-- note: setup.exe / download from internet (select package dir c:\cygwin_pkg) select mirror -->
+<!-- - after downloading setup.ini -->
+<!-- - cygwin.com -->

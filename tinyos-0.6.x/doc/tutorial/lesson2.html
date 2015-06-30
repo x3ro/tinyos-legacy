@@ -1,0 +1,88 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="David Culler">
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+   <title>lesson2: Event-driven Sensor Processing</title>
+</head>
+<body>
+
+<h1>
+Lesson 2: Event-driven Sensor Acquisition</h1>
+
+<p><br>This lesson illustrates the basic TOS pattern of event-driven processing.&nbsp;
+We extend the COUNT example from Lesson 1 to display values obtained from
+the photo sensor on the LEDs.&nbsp; This is located in <a href="../../apps/test_sense_broken">nest/apps/test_sense_broken</a>.&nbsp;
+The desc file has been augmented to include a PHOTO component.&nbsp; It
+can be found at&nbsp; <a href="../../tos/system/PHOTO.comp">nest/tos/system/PHOTO.comp</a>.
+Take a look at that component.&nbsp; It provides an INIT command, typical
+of all components, a GET_DATA command, and a DATA_READY event.&nbsp; (We'll
+ignore the PWR command for now).&nbsp; The idea is that sensor data acquisition
+takes time and we want to free up the processor for other work, or shut
+it down, while this take place.&nbsp; The GET_DATA command initiates data
+acquisition from the sensor; when the data is ready the sensor component
+will signal the data ready event.
+<p>A typical use of this is shown in&nbsp; <a href="../../apps/test_sense_broken/sense.c">nest/apps/test_sense_broken/SENSE.c</a>.
+To obtain a periodic sampling of sensor data, the clock event issues a
+command to request data acquisition, as follows:
+<p><tt>void TOS_EVENT(SENSE_CLOCK_EVENT)(){</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; TOS_CALL_COMMAND(SENSE_GET_DATA)();</tt>
+<br><tt>}</tt>
+<p>A event handler is provided to catch the data when it is ready.&nbsp;
+It renders the data to the LEDs such that they will be off when the node
+is in the light and on when it is in the dark.&nbsp; The mica sensor yields
+a 10-bit digitized sample of the photo cell.&nbsp; Here we take the upper
+three bits.
+<p><tt>char TOS_EVENT(SENSE_DATA_READY)(int data){</tt>
+<br><tt>&nbsp; display(7 - ((data >> 7) &amp; 0x7));</tt>
+<br><tt>&nbsp; return 1;</tt>
+<br><tt>}</tt>
+<p>In this example, we have broken apart the INIT and START protocol, such
+that INIT wakes up all subcomponents besides the clock and START wakes
+up the clock component.&nbsp; Check the interface provided in <a href="../../apps/test_sense_broken/SENSE.comp">nest/apps/test_sense_broken/SENSE.comp</a>.
+to see the new elements of the interface and <a href="../../apps/test_sense_broken/sense.desc">nest/apps/test_sense_broken/sense.desc</a>
+to see the new components and wiring.
+<p>Since we have provided the complete solution, we have put a bug in it
+so that you can get a chance to experience debugging event-driven code
+from the LEDS.&nbsp; The basic technique for this is to insert statements
+into the code so that you can perceive the flow of events.&nbsp; We have
+provided a reasonable set of these in commented lines.
+<p>To see that it does not work, type <tt>make install mica</tt>.&nbsp;
+This compiles and downloads the final image.&nbsp; Cover the photo sensor
+- no LEDs go on.
+<p>Uncomment the LED debugging statements and rebuild it.&nbsp; Now can
+you see where you get stuck?&nbsp; Can you see the bug?&nbsp; Hint: there
+are two aspects to a TinyOS application, the components and their composition.
+<p>When you have fixed this and are ready to explore, take another look
+at&nbsp;&nbsp; <a href="../../tos/system/PHOTO.comp">nest/tos/system/PHOTO.comp</a>.
+Notice that the module is 'jointly implemented' by PHOTO.&nbsp; Descriptions
+are hierarchical and a component can be the root of additional components.&nbsp;
+This is described by&nbsp; <a href="../../tos/system/PHOTO.desc">nest/tos/system/PHOTO.desc</a>.
+The PHOTO component is built on top of the ADC component.&nbsp; In fact,
+all sensors on the platform share the same ADC resource.&nbsp; The ADC
+component dispatches the data event to the appropriate sensor component.
+<p>The remaining command in the PHOTO component powers the sensor ON or
+OFF.&nbsp; The photo cell is essentially a variable resistor, so it draws
+power.&nbsp; If it is not being used, it should be powered off.
+<h2>
+Extra Credit:</h2>
+<p>1.)&nbsp; Extend the capability of the application by making sound using the
+sensor board's sounder when it is dark!&nbsp; The TOS component of the sounder
+is located at <a href="../../tos/system/SOUNDER.comp">/nest./tos/system/SOUNDER.comp</a>.&nbsp;
+The sounder component provides simple command to power on or off the device like
+the LEDs.<p>2.)&nbsp; Now, you can make sound.&nbsp; The next thing to explore
+is to detect the sound through the microphone.&nbsp; You need two nodes for this
+exercise: one is to generate sound and the other is to detect it.&nbsp; We have
+provided you an application <a href="../../apps/tone_detect">/nest/apps/tone_detect</a>
+that will filter out the tone detector's output and blink the yellow LED should
+it detects the sounder's signal.&nbsp; To generate sound, you can either use
+part 1 or use <a href="../../apps/test_sounder">/nest/apps/test_sounder</a> that
+will periodically chirp the sounder.<p>&nbsp;
+<hr>
+<b><font size=4><a href="lesson1.html">&lt; Previous Lesson</a></font></b> |
+<b><font size=4><a href="lesson3.html">Next Lesson &gt;</a></font></b>
+
+
+</body>
+</html>

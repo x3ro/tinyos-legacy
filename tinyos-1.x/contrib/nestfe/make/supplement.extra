@@ -1,0 +1,46 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: supplement.extra,v 1.4 2005/07/15 22:56:58 kaminw Exp $
+
+ifndef NO_FILESET
+SUPPLEMENT_DEFAULT_FILES += fileset.txt
+endif
+ifndef NO_NUCLEUS
+SUPPLEMENT_DEFAULT_FILES += nucleusSchema.xml 
+SUPPLEMENT_DEPS += nucleus_schema
+endif
+ifndef NO_PYTHON
+SUPPLEMENT_DEFAULT_FILES += nescDecls.xml
+SUPPLEMENT_DEPS += build_nescDecls
+endif
+ifndef NO_RPC
+SUPPLEMENT_DEFAULT_FILES += rpcSchema.xml
+endif
+SUPPLEMENT_FILES += $(SUPPLEMENT_DEFAULT_FILES)
+SUPPLEMENT_REAL_FILES = $(shell cd $(BUILDDIR) && perl -e 'print join " ", grep { $$n{$$_}++ == 0 and -f } @ARGV' $(SUPPLEMENT_FILES))
+
+
+SUPPLEMENT ?= tar.bz2
+ifdef SUPPLEMENT_DEFAULT_FILES
+POST_BUILD_EXTRA_DEPS += build_supplement
+TOS_IMAGE_DEPS += build_supplement
+TOS_IMAGE_FLAGS += --supplement=$(BUILDDIR)/supplement.$(SUPPLEMENT)
+endif
+
+build_supplement: $(SUPPLEMENT_DEPS) supplement.$(SUPPLEMENT) FORCE
+
+supplement_banner: FORCE
+	@echo
+	@echo -e "***  Building supplement.$(SUPPLEMENT)"
+
+supplement.zip: supplement_banner FORCE
+	cd $(BUILDDIR) && rm -f $@ && zip -9 $@ $(SUPPLEMENT_REAL_FILES)
+
+supplement.tar: supplement_banner FORCE
+	cd $(BUILDDIR) && tar cf supplement.tar $(SUPPLEMENT_REAL_FILES)
+
+supplement.tar.gz: supplement.tar FORCE
+	gzip -f -9 $(BUILDDIR)/supplement.tar
+
+supplement.tar.bz2: supplement.tar FORCE
+	bzip2 -f -9 $(BUILDDIR)/supplement.tar
+

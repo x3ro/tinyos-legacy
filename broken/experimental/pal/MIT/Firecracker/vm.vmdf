@@ -1,0 +1,9 @@
+<VM name="FirecrackerVM" desc="Two timers and link quality estimator information, for examining how traffic affects estimators." className="FirecrackerVMConstants">
+<PRIMITIVE name="LED" opcode="putled" desc="Actuates the mote LEDs. Takes a five bit value; the two highest bits specify the action, and the bottom three bits specify which LEDs to actuate. The action bits are: 00 is set, 01 is on, 10 is off, and 11 is off. For the LEDs, the lowest bit is red, the middle bit is green, and the highest is yellow. For example, 01010 (10) will turn on the green LED and leave the others alone, while 00011 (7) will set the LEDs to be yellow off, green on, red on." returnval="FALSE" param1="1" numparams="1" >
+<PRIMITIVE name="BCLEAR" opcode="bclear" desc="Clear a buffer so it is empty and has no type." returnval="FALSE" param1="4" numparams="1" >
+<PRIMITIVE name="CAST" opcode="cast" desc="Transforms a sensor reading into a value. Sensor readings are immutable, so this is a necessary operation before any processing." returnval="TRUE" numparams="1" >
+<PRIMITIVE name="ID" opcode="id" desc="Returns the mote's ID." returnval="TRUE" numparams="0" >
+<PRIMITIVE name="UART" opcode="uart" desc="Send a buffer to the mote UART." returnval="FALSE" param1="4" numparams="1" >
+<PRIMITIVE name="RAND" opcode="rand" desc="Returns a random value in the range of [0,65535]." returnval="TRUE" numparams="0" >
+<PRIMITIVE name="route" opcode="route" desc="Takes a single parameter, a mote address. Passes the once context capsule to a grid-based ad-hoc routing subsystem, which routes it to the specified address." returnval="TRUE" numparams="1" >
+<PRIMITIVE name="SETTIMER1" opcode="settimer1" desc="Takes a single parameter, the interval (in tenths of a second) between timer firings for the Timer 1 context. Calling with a time of zero stops the timer." returnval="FALSE" param1="1" numparams="1" >

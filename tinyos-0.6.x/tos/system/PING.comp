@@ -1,0 +1,76 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Phil Levis <pal@cs.berkeley.edu>
+ * Date:                1/17/02
+ *
+ * This component implements a simple ping utility for TinyOS. When a mote
+ * receives a PING message, it immediately responds with an echo ping.
+ * This can be used to check for communication ability, symmetry of links,
+ * and packet reliability.
+ *
+ * PING_SEND pings another mote; if the network broadcast address is
+ * specified, a local broadcast ping is sent.
+ *
+ * PING_RESPONSE is called when a mote receives a response to a PING
+ * it previously sent. PING_RECEIVE is called when a mote receives a
+ * PING from another mote. The PING component automatically responds
+ * to a PING before it signals PING_RECEIVE.
+ *
+ * This flow diagram shows the steps:
+ *
+ *   Mote 11                                 Mote 2
+ *     |                                       |
+ *  PING_SEND(2, 12)                           |
+ *     |                                  PING_RECEIVE(11, 12)
+ *  PING_RESPOND(2, 12)                        |
+ *     |                                       |
+ *    \_/                                     \_/
+ */     
+
+TOS_MODULE PING;
+JOINTLY IMPLEMENTED_BY PING;
+
+ACCEPTS{
+	char PING_INIT();
+	char PING_START();
+	char PING_SEND(short moteID, char sequence);
+	char PING_POWER(char mode);
+};
+
+HANDLES{
+	TOS_MsgPtr PING_MSG(TOS_MsgPtr data);
+	char PING_SEND_DONE(TOS_MsgPtr data);
+};
+
+SIGNALS{
+	char PING_RESPONSE(short moteID, char sequence);
+	char PING_RECEIVE(short moteID, char sequence);
+};
+
+USES{
+	char PING_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	char PING_SUB_POWER(char mode);
+	char PING_SUB_INIT();
+	char PING_SUB_START();
+};
+

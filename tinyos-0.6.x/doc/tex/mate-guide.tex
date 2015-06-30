@@ -1,0 +1,467 @@
+\documentclass[10pt]{article}
+
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{multicol}
+\usepackage{epsfig,amsmath,amsfonts}
+
+\makeatletter                                   % Make '@' accessible. 
+\oddsidemargin=0in                              % Left margin minus 1 inch.
+\evensidemargin=0in                             % Same for even-numbered pages.
+\marginparsep=0pt                               % Space between margin & text
+
+\renewcommand{\baselinestretch}{1}              % Double spacing
+
+\textwidth=6.5in                                % Text width (8.5in - margins).
+\textheight=9in                                 % Body height (incl. footnotes)
+
+\topmargin=0in                                  % Top margin minus 1 inch.
+\headsep=0.0in                                  % Distance from header to body.
+\skip\footins=4ex                               % Space above first footnote.
+\hbadness=10000                                 % No "underfull hbox" messages.
+\makeatother                                    % Make '@' special again.
+
+\def\Mate{{Mat\'{e} }}
+\def\mate{{Mat\'{e}}}
+
+\newenvironment{instr}[6]{\subsubsection*{#1}\begin{tabular}{p{5in}}Effect: #2\\Class: #3\\ Operands: #4\\ Results: #5\\Bytecode: #6\\Description: }{\\\end{tabular}}
+
+
+
+\begin{document}
+
+\fontfamily{cmss}                               % Make text sans serif.
+\fontseries{m}                                  % Medium spacing.
+\fontshape{n}                                   % Normal: not bold, etc.
+\fontsize{10}{10}                               % 10pt font, 10pt line spacing 
+
+\title{A Quick User's Guide to \Mate}
+\author{Philip Levis}
+\maketitle
+
+\fontfamily{cmr}                                % Make text Roman (serif).
+\fontseries{m}                                  % Medium spacing.
+\fontshape{n}                                   % Normal: not bold, etc.
+\fontsize{10}{10}                               % 10pt font, 10pt line spacing
+
+\section*{Introduction}
+
+This document is a simple overview of the \Mate virtual machine for
+TinyOS. It is intended for people who want to write simple
+clock-driven \Mate applications. Writing ad-hoc routing algorithms in
+\Mate is beyond the scope of this document. This document explains how
+to put \Mate on a mote, how to write \Mate programs, how to upload
+those programs onto a \Mate mote, and gives a brief description of
+some basic \Mate instructions.
+
+\section*{\Mate Overview}
+
+\Mate is a bytecode interpreter that runs on TinyOS. It presents a
+virtual stack-based architecture to programs. Code is contained in
+capsules, which are at most 24 instructions and fit in a single TinyOS
+packet. There are capsules that are run in response to an event
+(e.g. the clock timer) and capsules that can be called from other
+capsules (subroutines).
+
+The complete \Mate instruction set can be found in {\tt
+nest/tos/include/tos-vm2.h}. The complete \Mate source can be found in
+{\tt nest/tos/system/VM2.\{c,comp\}}. \Mate has functionality beyond
+what is described in this document. A Java \Mate assembler is included
+in the current TinyOS release: {\tt net.tinyos.asm.Assembler.java}. It
+also has a GUI interface that sends capsules out over the serial port:
+{\tt net.tinyos.vmGUI.MainWindow}. {\tt MainWindow} uses COM2 by
+default -- changing this requires changing the source file. By
+connecting a {\tt generic\_base} mote to the serial port, you can send
+\Mate capsules.
+
+\section*{\Mate Architecture and Execution Model}
+
+\Mate is a two-stack architecture: each execution context has an
+operand and a return address stack. The former is used for data
+operations, while the latter is used to keep track of subroutine
+invocations. The operand stack has a maximum depth of 16, while the
+return address stack as a maximum depth of 8. There is also a single
+variable heap that persists across all executions. There are three
+types of variables: values, sensor readings, and messages.
+
+All \Mate code exists in capsules, which hold up to 24
+instructions. Every instruction is a single byte long. Every capsule
+has a numeric ID; capsules 0-3 are the four subroutine capsules, while
+capsule 4 is the clock capsule that is called in response to a clock
+event. Every capsule also has a version number, which \Mate uses to
+determine whether it should install the capsule or not.
+
+\Mate processes data by pushing operands onto its operand stack then
+executing instructions which consume them. For example, the program
+
+\begin{verbatim}
+pushc 1
+pushc 2
+add
+halt
+\end{verbatim}
+
+will result in a 3 being on the top of the operand stack. Besides
+pushing constants with {\tt pushc}, sensor readings can be read with
+{\tt sense} and the message buffer can be pushed onto the stack with
+{\tt pushm}.
+
+The clock context's operand stack persists across invocations. For
+example, if the above program were the clock capsule, then each
+invocation would push 3 onto the operand stack until it reached its
+maximum depth of 16, after which pushed values would be ignored. When
+a new clock capsule is installed by \mate, the clock operand stack is
+cleared and a single value variable of zero is pushed onto it -- this
+provides an easy way to keep track of a counter. The clock context is
+also reset in this manner whenever a new subroutine capsule is
+installed.
+
+If a clock event goes off while the context is still executing, then
+\Mate clears the return address stack and forces the context to jump
+to the first instruction of the clock capsule. This prevents a context
+from entering an infinite loop. The rate at which clock events arrive
+can be manipulated with the {\tt clockc} and {\tt clockf}
+instructions.
+
+Subroutine capsules are invoked with the {\tt call} instruction, and
+should return with the {\tt return} instruction. Call consumes a
+single value operand, which indicates which subroutine to call. If a
+subroutine issues the halt instruction the context running it halts.
+
+Branches are made with the {\tt blez} instruction, which branches if
+the operand on top of the stack (which is consumed) is less than or
+equal to zero. A message operand will always cause {\tt blez} to
+branch. Like {\tt pushc}, blez has an embedded operand stating which
+instruction (absolute, not relative) to jump to. For example
+
+\begin{verbatim}
+pushc 0
+blez 3
+pushc 1
+halt
+\end{verbatim}
+
+will never push 1 on the operand stack.
+
+All capsules must have an explicit halt at their end.
+
+\section*{\Mate Capsules and Capsule Propagation}
+
+\Mate capsules can be written with the {\tt MainWindow} program. On
+the right is a small assembler window where programs can be
+entered. Pressing ``Create'' will generate a capsule with that
+program. Each capsule written is placed in the payload of a new
+AMPacket -- one can flip through the generated capsules with the
+tabbed pane. The first two byes of the AM payload are the capsule's
+meta-information -- it's capsule type (byte 0) and version (byte
+1). Types 0-3 are the four subroutines, while type 4 is the clock
+capsule.
+
+\Mate will only install capsules that have a more recent version
+number than the capsule currently running. More recent is defined to
+either have a version number which is up to 64 greater or more than
+128 less (for 8 bit wrap-around).
+
+For example, if a \Mate mote is running a clock capsule with version
+23, then after writing a program and clicking the create button, one
+would have to type 4 in the first byte of the packet then 24 in the
+second before sending it -- otherwise it will possibly be installed as
+the wrong type of capsule or ignored because of its version.
+
+Sending capsules from a generic base is not very useful when there's a
+very wide area sensor network. Therefore, capsules can forward
+themselves. When a capsule issues the {\tt forw} instruction, it
+broadcasts a packet containing itself; motes that hear it may then
+install the capsule. Capsules can also issue the {\tt forwo}
+instruction to forward an arbitrary capsule -- {\tt forwo} consumes a
+value single operand off the stack to determine which capsule to
+forward (0-4). For example,
+
+\begin{verbatim}
+pushc 2
+forwo
+\end{verbatim}
+
+will forward subroutine capsule 2.
+
+\section*{\Mate Message Buffers}
+
+\Mate assumes that an ad-hoc routing algorithm will use eight bytes of
+header in a 30-byte AM payload. Therefore, the message data buffer is
+22 bytes long. One byte of this is used to store how many values are
+in the payload, and a second byte is used to give the lower 8 bits of
+the sender's ID (it would have been padding otherwise). The remaining
+20 bytes contain up to 5 variables, each of which takes up 4
+bytes. One byte specifies what kind of variable it is (value or sensor
+reading); if it's a sensor reading, the second byte indicates which
+type. The third and fourth bytes store a 16-bit data value.
+
+\vspace{0.2cm}
+
+\begin{tabular}{|p{1in}|p{1in}|p{1in}|p{1in}|}\hline 
+Header0 & Header1 & Header2 & Header3 \\ \hline
+Header4 & Header5 & Header6 & Header7 \\ \hline
+Num    &  ID    & Type0   & Sensor Type0? \\ \hline
+\multicolumn{2}{|c|}{Data Value0} & Type1 & Sensor Type1? \\ \hline
+\multicolumn{2}{|c|}{Data Value1} & Type2 & Sensor Type2? \\ \hline
+\multicolumn{2}{|c|}{Data Value2} & Type3 & Sensor Type3? \\ \hline
+\multicolumn{2}{|c|}{Data Value3} & Type4 & Sensor Type4? \\ \hline
+\multicolumn{2}{|c|}{Data Value4} & \multicolumn{2}{|c|}{}\\\hline
+\end{tabular}
+\section*{\Mate Instructions}
+
+The \Mate instruction set has three classes of instructions: basic,
+s-class, and x-class. The s-class instructions are beyond the scope of
+this document -- they only apply to ad-hoc networking. Basic
+instructions and x-class differ only in that x-class instructions
+({\tt blez} and {\tt pushc}) have embedded operands. Basic
+instructions obtain all of their operands from the operand stack.
+
+\begin{instr}{Sample Instruction}{Brief description of instruction}{instruction class (basic or x-class)}{Input operands -- first operand is top of stack, next is 2nd on stack, etc. Type (value, sense, msg, any) is specified.}{Output operands -- first operand is top of stack, etc. Type is specified.}{Hexidecimal opcode}
+Detailed description.
+\end{instr}
+
+\subsection*{Production Instructions}
+
+\begin{instr}{pushc}{Push a constant on the operand stack}{basic}{none}{value}{0xC0-0xff}
+When this instruction is issued, its embedded six bit operand is
+pushed onto the operand stack as an unsigned value variable.
+\end{instr}
+
+\begin{instr}{sense}{Read a sensor}{basic}{value}{sensor}{0x0D}
+The operand specifies which sensor. Currently, only two are supported:
+sensor 1 is light and sensor 2 is temperature.
+\end{instr}
+
+\begin{instr}{id}{Push mote's ID on the operand stack}{basic}{none}{value}{0x09}
+\end{instr}
+
+\begin{instr}{rand}{Push a 16-bit random value on the operand stack}{basic}{none}{value}{0x1c}
+\end{instr}
+
+\begin{instr}{pushm}{Push context's message buffer}{basic}{none}{msg}{0x11}
+The context has a single message buffer, which is placed on the
+operand stack with this instruction. Issuing this instruction multiple
+times will place the same buffer on the operand stack multiple times.
+\end{instr}
+
+\subsection*{Data Instructions}
+\begin{instr}{and}{Binary and}{basic}{value1,value2,...}{value}{0x02}
+Push (value1 \& value2).
+\end{instr}
+
+\begin{instr}{or}{Binary or}{basic}{value1,value2,...}{value}{0x03}
+Push (value1 $\mid$ value2).
+\end{instr}
+
+\begin{instr}{shiftr}{Bitshift variable right}{basic}{value1,value2,...}{value}{0x04}
+Shift the second operand right a number of bits specified by the first
+operand and push the result on the stack.
+\end{instr}
+
+\begin{instr}{shiftl}{Bitshift variable left}{basic}{value1,value2,...}{value}{0x05}
+Shift the second operand left a number of bits specified by the first
+operand and push the result on the stack.
+\end{instr}
+
+\begin{instr}{add}{Add two variables (polymorphic)}{basic}{any,any,...}{any}{0x06}
+The add instruction operates on all three types. Two values added will
+result in a value. A value added to a sensor will result in a sensor
+reading adjusted by the value. Two sensor readings of the same type
+can be added, but different types (e.g. light, temperature)
+cannot. Adding a value or a sensor reading to a message buffer will
+append the variable if there is space, do nothing if there is not, and
+result in a buffer. Adding two message buffers will append the
+variables of the second onto the first and result in a buffer.
+\end{instr}
+
+\begin{instr}{inv}{Invert top of operand stack}{basic}{value}{value}{0x0a}
+Push the operand multiplied by -1.
+\end{instr}
+
+\begin{instr}{not}{Binary not}{basic}{value1,value2,...}{value}{0x16}
+Push \verb;~;(value1).
+\end{instr}
+
+\subsection*{Control Instructions}
+
+\begin{instr}{call}{Call subroutine}{basic}{value}{none}{0x1f}
+Call subroutine specified by operand. Must be 0-4.
+\end{instr}
+
+\begin{instr}{return}{Return from subroutine}{basic}{none}{none}{0x3f}
+Return from subroutine to execute instruction after call.
+\end{instr}
+
+\begin{instr}{halt}{Halt execution}{basic}{none}{none}{0x00}
+Halt execution of the context.
+\end{instr}
+
+\begin{instr}{blez}{Branch if less than or equal to zero}{x-class}{value}{none}{0x80-0xBF}
+Branch to absolute instruction address specified by embedded operand
+if value on top of operand stack is less then or equal to zero.
+\end{instr}
+
+\subsection*{Code Propagation Instructions}
+
+\begin{instr}{forw}{Forward current capsule}{basic}{none}{none}{0x00}
+Broadcast the current capsule for others to possibly install.
+\end{instr}
+
+\begin{instr}{forwo}{Forward other capsule}{basic}{value}{none}{0x00}
+Broadcast capsule specified by operand for others to possibly
+install. Value operand must be 0-4.
+\end{instr}
+
+\subsection*{Other Instructions}
+
+\begin{instr}{putled}{Control LEDs}{basic}{value}{none}{0x09}
+{\tt putled} takes a five bit operand. The bottom three bits specify
+the LEDS: red, yellow, and green. The fourth and fifth bits specify
+the operation to perform. 0 sets the LEDs; 1 turns the specified LEDs
+on (leaving the others alone); 2 turns the specified LEDS off (leaving
+the others alone); 3 toggles the specified LEDS. For example, 0x02
+will turn on off the red and green LEDS and turn on the yellow, 0x19
+will toggle the red led, and 0x13 will turn off the yellow and red
+leds while leaving the green one alone.
+\end{instr}
+
+\begin{instr}{send}{Send packet}{basic}{msg}{none}{0x09}
+Send the data contained in the message buffer with \mate's built-in
+ad-hoc routing component. By default, this is BLESS. You must
+therefore have a BLESS base station for packets to be sent (otherwise
+BLESS will not be able to find a route). You can redefine the ad-hoc
+routing algorithm used by changing the corresponding application {\tt
+.desc} file.
+\end{instr}
+
+\begin{instr}{clear}{Clear variable}{basic}{any}{operand}{0x13}
+Clear the variable on top of the operand stack, leaving it there. This
+is especially useful for the message buffer, as you want to clear out
+variables that have been previously put in it, as it persists across
+invocations. Issuing clear on a sensor reading or a value will set it
+to be zero.
+\end{instr}
+
+\begin{instr}{log}{Write variable to non-volatile storage}{basic}{any}{none}{0x09}
+If the operand is a message buffer with 5 variables in it, only the
+first four are written. \Mate buffers variables until it has enough
+for a full log line (4 variables), then writes it to EEPROM. Therefore, if a program logs three sensor values, they will not be written to EEPROM until a fourth variable is logged.
+\end{instr}
+
+\begin{instr}{logr}{Read log line into buffer}{basic}{msg,value1,...}{msg}{0x09}
+Read log line specified by value1 into the message buffer.
+\end{instr}
+
+\begin{instr}{sets}{Set shared variable}{basic}{any}{none}{0x09}
+\end{instr}
+
+\begin{instr}{gets}{Get shared variable}{basic}{none}{any}{0x09}
+\end{instr}
+
+\begin{instr}{swap}{Swap top two operands on stack}{basic}{any1,any2,...}{any2,any1,...}{0x09}
+\end{instr}
+
+\begin{instr}{clockc}{Set clock counter for capsule invocation}{basic}{value}{none}{0x3f}
+{\tt clockc} sets how many clock ticks must occur before the clock
+context is triggered. For example, if the clock tick frequency is once
+per second and the clock counter is 4, the clock capsule will run
+every 4 seconds. If the clock tick frequency were changed to eight per
+second (with {\tt clockf}), the capsule would start running twice per
+second.
+\end{instr}
+
+\begin{instr}{clockf}{Set clock tick frequency in $\frac{1}{32}$s of seconds}{basic}{value}{none}{0x3e}
+{\tt clockf} sets how often the \Mate clock ticks. The number of ticks
+that must occur for the clock context to run is specified by {\tt
+clockc}. The operand for {\tt clockf} must be within the range 1-255,
+and represents the frequency of the clock ticks in thirty-seconds of a
+second. For example, {\tt clockf} with a parameter of 160 will make
+the \Mate clock tick once every five seconds.
+\end{instr}
+
+\section*{Sample \Mate Programs}
+
+\subsection*{{\tt cnt_to_leds}}
+Clock capsule:
+\begin{verbatim}
+pushc 1
+add      # Add 1 to counter on top of stack
+copy
+pushc 7
+and      # Take bottom 3 bits of copy
+putled   # Set LEDs to bits
+halt
+\end{verbatim}
+
+\subsection*{{\tt cnt_to_leds}, where increment is in a subroutine}
+Clock capsule:
+\begin{verbatim}
+pushc 0
+call
+copy
+pushc 7
+and      # Take bottom 3 bits of copy
+putled   # Set LEDs to bits
+halt
+\end{verbatim}
+
+Subroutine 0:
+\begin{verbatim}
+pushc 1
+add
+copy
+\end{verbatim}
+
+\subsection*{{\tt sens_to_leds}}
+Clock capsule:
+\begin{verbatim}
+pushc 1
+sense          # Read light value
+push 7
+shiftr         # Only want top 3 bits of reading
+putled
+halt
+\end{verbatim}
+
+\subsection*{Sending a Sensor Reading in a Packet}
+Clock capsule:
+\begin{verbatim}
+pushc 1
+sense
+pushm
+clear        # Clear out the message buffer
+add          # Put reading in message buffer
+send         # Send buffer
+halt
+\end{verbatim}
+
+\subsection*{Saving 4 readings on operand stack, averaging them, sending}
+Clock capsule:
+\begin{verbatim}
+pushc 1
+sense       # Push a light reading on top of operand stack
+swap        # Keep counter on top of operand stack
+pushc 1
+add         # Increment counter
+copy
+inv
+pushc 4
+add
+blez 11     # If counter >= 4, jump past halt
+halt
+pop         # Jump-to point; pop counter
+add
+add
+add         # Add up 4 readings
+pushc 2
+shiftr      # Divide by 4 (bitshift 2 right
+pushm
+clear       # Clear out a message buffer
+add         # Put averaged reading in buffer
+send        # Send packet
+pushc 0     # Reset counter to 0
+halt
+\end{verbatim}
+
+\end{document}

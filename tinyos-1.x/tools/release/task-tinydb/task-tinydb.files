@@ -1,0 +1,33 @@
+NAME=task-tinydb
+VERSION=1.1.3July2004cvs
+
+cd ../..
+rm -rf $NAME-$VERSION
+tools/release/extractor $NAME-$VERSION <<'EOF' | gzip >../$NAME-$VERSION.tar.gz
+!.*
+tools/java/net/tinyos/task
+tools/java/net/tinyos/tinydb
+tools/java/net/tinyos/util/DTNStubImp.c
+tools/java/net/tinyos/util/DTNStub.java
+tools/java/net/tinyos/util/libdtnstub.so
+tools/java/net/tinyos/util/dtn
+tos/lib/TinyDB
+apps/TinyDBApp
+apps/TASKApp
+tools/java/jars/cup.jar
+tools/java/jars/JLex.jar
+tools/java/jars/xercesImpl.jar
+tools/java/jars/xmlParserAPIs.jar
+tools/java/jars/junit.jar
+tools/java/jars/jazz.jar
+tools/java/jars/plot.jar
+tools/java/jars/pgjdbc2.jar
+doc/tinydb.pdf
+doc/tinydbagg.pdf
+doc/task.pdf
+doc/TASKVisualizer.pdf
+doc/TASKFieldTool.pdf
+doc/tinydbdocsrc
+!CVS
+EOF
+rm -rf $NAME-$VERSION

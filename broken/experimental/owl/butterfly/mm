@@ -1,0 +1,4 @@
+BF=~/motes/owl/butterfly/butterfly
+I2C=~/motes/tinyos-1.x/beta/I2C
+ncc -I$I2C/interfaces -I$I2C/system -O1 -g -fnesc-no-inline -I$BF -target=butterfly -board=butterfly -Wall -Wnesc-all -fnesc-cfile=app.c TinyOS.nc && ice-install a.out
+#ncc -O2 -g -I$BF -target=butterfly -board=butterfly -Wall -Wnesc-all -fnesc-cfile=app.c TinyOS.nc && ice-install a.out

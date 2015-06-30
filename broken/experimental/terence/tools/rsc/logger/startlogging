@@ -1,0 +1,5 @@
+#!/bin/bash
+# this is going to record those packet to the databaser
+echo ">> Archiving Packets"
+java Receiver archive $1 COM1 $2
+

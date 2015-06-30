@@ -1,0 +1,3 @@
+COMPONENT=SenseLightToSounder
+include ../Makerules
+

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences>
+  <node name="net">
+    <node name="tinyos">
+      <node name="mcenter">
+        <node name="RemoteController">
+          <node name="config">
+            <node name="FloodSync Cmd">
+              <entry key="appId" value="0x36" />
+              <entry key="target" value="8" />
+              <entry key="intParam" value="0xffff" />
+              <entry key="dataParam" value="40" />
+              <entry key="usage" value="param == 0xffff for all, param == 0xdXY if within d from XY" />
+              <entry key="type" value="0" />
+              <entry key="command" value="1" />
+            </node>
+          </node>
+        </node>
+      </node>
+    </node>
+  </node>
+</preferences>
+

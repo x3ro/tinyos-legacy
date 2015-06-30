@@ -1,0 +1,1360 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>TinyOS 1.1.x Significant Changes</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big><big>
+TinyOS 1.1.x Significant Changes </big></big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">&nbsp;
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> This document outlines the changes that have occured in TinyOS
+in the minor releases since the last major release (1.1.0). The changes 
+are listed by release number. A change made in release 1.1.(n) is not also 
+listed under release 1.1.(n+1).</p>
+<p>
+You can view the cvs commit log for the core tree at 
+<a href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/">
+http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/</a>. You can
+join the tinyos-commits mailing list at
+<a href="http://mail.millennium.berkeley.edu/mailman/listinfo/tinyos-commits">
+http://mail.millennium.berkeley.edu/mailman/listinfo/tinyos-commits</a>
+</p>
+<dt>
+<font face="tahoma,arial,helvetica">
+<dd><a href="#1.1.15">1.1.15 Changes</a></dd><br>
+<dd><a href="#1.1.14">1.1.14 Changes</a></dd><br>
+<dd><a href="#1.1.13">1.1.13 Changes</a></dd><br>
+<dd><a href="#1.1.12">1.1.12 Changes</a></dd><br>
+<dd><a href="#1.1.11">1.1.11 Changes</a></dd><br>
+<dd><a href="#1.1.10">1.1.10 Changes</a></dd><br>
+<dd><a href="#1.1.9">1.1.9 Changes</a></dd><br>
+<dd><a href="#1.1.8">1.1.8 Changes</a></dd><br>
+<dd><a href="#1.1.7">1.1.7 Changes</a></dd><br>
+<dd><a href="#1.1.6">1.1.6 Changes</a></dd><br>
+<dd><a href="#1.1.5">1.1.5 Changes</a></dd><br>
+<dd><a href="#1.1.4">1.1.4 Changes</a></dd><br>
+<dd><a href="#1.1.3">1.1.3 Changes</a></dd><br>
+<dd><a href="#1.1.1">1.1.1 Changes</a></dd><br>
+</font>
+</dt>
+<HR>
+<!-- 1.1.15 -->
+<a name="1.1.15"></a>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.14 and 1.1.15</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated Dec 28, 2005
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Kamin Whitehouse's <b>Hood</B> has been moved to the core. 
+Hood provides a Distributed Programming Abstraction for 
+sensor networks and includes
+5 new tinyos libraries to: 1) automatically define a
+namespace of node attributes such as location, sensor values, etc,
+which is exposed through a central 'registry' 2) store these
+attributes to flash 3) expand that namespace to attributes of
+neighbors (hood) 4) expose arbitrary functions, including the get/set
+functions of registry attributes to other nodes and/or the pc through
+an rpc interface 5) expose arbitrary module variables through the same
+rpc interface.  These libraries require code generation and must be
+used with nesc 1.2 or later. The code generation scripts are in
+tinyos-1.x/tools/scripts/codeGeneration. 
+<p>
+You can read an overview of hood and find pointers to papers
+at <a href="
+http://www.cs.berkeley.edu/~kamin/projects.html">Kamin's project page</a>.
+Further documentation can be found at the
+<a href="http://nest.cs.berkeley.edu/nestfe/index.php/Hood">Hood wiki</a>.
+<p>
+<b>Drip/Drain</b>.
+Gilman Tolle's Drip and Drain work has been moved from beta into the core
+(tinyos-1.x/lib).  Drip is a transport-layer component for epidemically
+disseminating messages throughout a network; Drain is a collection
+routing layer. Drip/Drain comes with extensive server-side java tools
+and test applications. You can read more about the Drip and Drain protocols in
+the README files in their respective beta directories: beta/Drip and
+beta/Drain.
+<p>
+<b>pytos.</b> Kamin Whitehouse's pytos is a
+python-based toolchain for tinyos with a dynamic typing system.  It
+automatically imports the enums, types, message formats, modules,
+variables, and rpc functions from applications that are compiled with
+the 'rpc' and 'nescDecls' targets. 
+<p>
+pytos includes several utilities such as the ParseArgs.py utility to
+parse the motecom and platform arguments from the commandline and
+Listen.py that pretty prints all incoming packets, even
+if they come in over a routing layer such as Drain (see below).  
+MessageSnooper is a library that knows about all routing layers.  It uses
+introspection to see which routing layers are compiled into the
+application and registers for all packet types for all routing layers.
+<p>
+Please see the following two wiki pages for pytos documentation:
+<a href="http://today.cs.berkeley.edu/nestfe/index.php/Pytos_Installation_Instructions">
+Pytos Installation Instructions</a> and
+<a href="http://today.cs.berkeley.edu/nestfe/index.php/Pytos_Development_Environment">
+Pytos Development Environment </a>.
+<p>
+<b>Deluge</b> has had a general code cleanup. The trickle timer period has been 
+increased by two orders of magnitude. Rebooting to the same image is now possible. 
+Can ping a specific node ID. Server-side java tools allow rebooting even when
+one or more nodes not running Deluge as expected. TOSBoot size has been 
+reduced for the MSP
+platform. TOSBoot will fail if the program image starts at the wrong address
+(program too small or compiled for a different bootloader/revision).
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Bugs</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Deluge now forwards messages that are not only valid deluge messages, 
+but also do not have image numbers greater than what is
+supported (could occur when running nodes with different number of
+images) (Jonathan Hui).
+<p>
+Fixed a bug in msp430hardware.h:_nesc_atomic_sleep(). If timerA is
+used by a module (such as the ADC) for triggering samples, the DCO
+must stay on.  If the samples are recovered by the DMA, then the
+timerA interrupt enable bit is not set (since the DMA handles the ifg
+flag being set).  In this case, you want to check if timerA is NOT in
+"stop_mode", and if it is using a clock source that relies on the
+DCO. (Joe Polastre)
+<p>
+Fixed LED PowerState bug so that PowerState's version of the LEDs 
+now reflects reality (Viktor Schnayder).
+<p>
+<!-- 1.1.15 -->
+<!-- 1.1.14 -->
+<a name="1.1.14"></a>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3"> 
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.13 and 1.1.14</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated July 29, 2005
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<b>Deluge 2.0</b>.
+Version 2 of Deluge, TinyOS's state-of-the-art network programming
+system, has been moved from beta into the main tree and is now the default
+version for both AVR and MSP430 platforms. 
+Among many significant Deluge
+changes, the TOSBoot bootloader is now installed <i>by default</i>
+when installing any TinyOS application. This policy is implemented
+by setting TINYOS_NP ?= BNP in tools/make/Makedefaults. The user can 
+override the policy by setting TINYOS_NP=x where x is anything != to BNP.
+TOSBoot also provides on/off capability for telosb and tmote sky nodes
+by holding the user button when resetting a node.
+You can read in detail about Deluge 2.0 at the 
+<a href="http://www.cs.berkeley.edu/%7Ejwhui/research/deluge/">
+Deluge web site</a>.
+<p>
+<b>More sample apps.</b>Several apps have been moved from tinyos-1.x/beta into the core apps directory
+tinyos-1.x/apps: GlowRadio, GlowLeds, Pong, SurgeTelos, TelosADC 
+and TelosPWM. To support these apps, the following libraries 
+were also moved from beta into the core: lib/Oscope, lib/LedsIntensity
+and lib/MultiHopLQI.
+<p>
+<b>New Flash Support.</b>
+New Flash support for new Flash BlockStorage interfaces have been
+added for the AT45DB and STM25P flash chips (found in the Mica family).
+Among other things, this allowed Deluge 2.0, which requires these
+new interfaces, to be ported to all of the Mica motes. 
+<p>
+Several improvements to the <b>TOSBase</b> bridge application:
+<ul>
+<li>
+Replaced buffer-swapping queues with buffer-copying queues. This
+works around a buffer-swapping bug in the CC2420 radio stack that we
+have been unable to pin down and fix. This change does fix the bug
+that causes the TOSBase to return 0-length packets under heavy
+load. Using memcpy instead of buffer swapping does not appear to
+impose a noticeable performance penalty.
+<li>Fixed the bug discovered by Michael Newman, in which
+PROTO_PACKET_NOACK packets are not bridged from UART to Radio.
+<li>Increased the size of the task queue to lower the chance of a post
+failure. 
+</ul>
+<p>
+The <b> Hamamatsu sensor </b> has a slightly different interface in
+that it is no longer necessary to set the ADC pin SEL functionality; 
+this is done automatically by MSP430ADC12M. ADCSingle and ADCMultiple 
+interfaces have been added to the PAR and TSR sensors. 
+Lastly,
+the drivers have been cleaned up. The new driver has new features
+not found in any previous version of the humidity sensor driver.
+These features include, but are not limited to:
+<ul>
+<li>fewer race conditions and, where appropriate, more uses of the 'norace' keyword
+    to eliminate spurious warnings.
+<li>removed HumidityProtocolC to avoid misuse. 
+<li> cleaned up code to remove those pesky <i>called asynchronously</i> messages. 
+</ul>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Tools</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<b>Motelist.</b>
+Motelist for Linux kernels 2.6.x now requires only the /sys filesystem such
+that superuser access is no longer necessary to read special files.
+Alos fixed motelist for procfs in kernel 2.4.x to show the correct usb path given
+in usbserial not usb/devices.
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Bugs</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Bug fix to tos/platform/micaz/VoltageM.nc; state was not getting reset to S_IDLE
+(Razvan Musaloiu).
+<p>
+Fixed critical bug that would cause InternalFlash to misbehave after
+128 writes. Wasn't casting a variable to int8_t before testing its
+sign (Jonathan Hui).
+<p>
+Bug fix in CC2420RadioM.nc for race condition in
+CC2420 radio stack: If ACK comes in before PacketSent() runs, the
+PacketSent() task could be posted twice (duplicate sendDone
+events). Fix: set the state to a different value to suppress the later
+task (Matt Welsh).
+<p>
+Fixed bug in java/net/tinyos/message/MoteIF.java 
+where if source was started before MoteIF initialiser called, 
+source.awaitStartup() wasn't called because of a prior
+	 exception when attempting to start source (David Gay).
+<p>
+The problem observed was that timers in TOSSIM sometimes fire
+early. This happened because of a bad interaction between how TOSSIM
+emulates the hardware counter and how it handles time events 
+(David Tucker).
+<p>
+Bug fix in Mate VM Hamamatsu sensor implementation 
+where the HamamatsuM.TSR was 
+accidentally wired to the HamamatsuC.PAR rather than
+Hamamatsu.TSR. (Mark Kranz)
+<p>
+<!-- 1.1.14 -->
+<!-- 1.1.13 -->
+<a name="1.1.13"></a>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.12 and 1.1.13</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated May 25, 2005
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<b>New DemoSensorC</b> component added to Mica Weatherboard sensorboard.
+<p>
+<b>tos/interfaces/HPLPowerManagement interface </b>now has enable() and
+disable() commands to enable proper nested usage. 
+<p>
+<b>Deluge:</b> improved error-case handling in bootloader and added image
+verification by checking CRCs. Reduced bootloader codesize by about
+1.5K; GoldenImage now compiles to 20894 bytes (in
+nesc-1.2alpha7). Overhead of including Deluge in SurgeTelos is 7746
+bytes, which includes the storage stack.
+<p>
+Code cleanup for <b>MSP430's internal flash</b>; reduces code size by
+nearly 25%.
+<p>
+Because Deluge's StdControl.init() configures TOS_LOCAL_ADDRESS,
+moved <b> MultiHop basestation initialization </b>from 
+StdControl.init() to StdControl.start(). 
+<p>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Tools</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<b>Matlab documentation</b> in tools/matlab/doc has been consolidated 
+into a single FAQ in the same directory and updated the 
+tutorial in doc/matlab.html.
+<p>
+<p>
+Make system additions:
+<ul>
+<li>
+The make system includes more <b>support for the nesdoc</b> documentation
+generator. A new command line option <i>docs,here</i> 
+(or the corresponding DOCS=here environment variable definition) 
+creates nesdoc documentation in doc/ in the current app directory. 
+You can also define and export the DOCS environment variable to make this
+the default. Modified the definition of the environment variable 
+TOPDIR to support applications that are <i>not</i> located under 
+$TOSDIR/.. . The user is also free to define
+additional directories in NESDOC_TOPDIRS, which will take precendence.
+<li>if <b>TOS_IMAGE_REPO</b> is set, 
+tos_image.xml is copied to $(TOS_IMAGE_REPO)/$(COMPONENT).$(PLATFORM).xml
+for additional convenience in an interactive environment.
+<li> Keep DEFAULT_PROGRAM for backward
+compatibility, but also add <b>DEFAULT_PROGRAM_AVR and DEFAULT_PROGRAM_MSP </b>that
+take precedence for defaults, so that a default can be specified and
+not conflict with other platforms.
+<li><b>Support networked BSL invocation</b>. Syntax is IP:PORT as in
+192.168.1.77:10002 or shorthand as in <i>77.2</i> where the 77 is
+prefixed with the value in NETBSL_HOSTPORT_PREFIX, which defaults to
+<i>192.168.1.</i>, and the 2 is added to 10000.  This applies to the
+netbsl.extra parameter as well -- so you could write
+netbsl,192.168.1.77:10002 or equivalently netbsl,77.2.
+</ul>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Bugs</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Removed some atomic sections from around commands in
+MSP430 platform-specific files where
+(1) the command compiles to a single MSP instruction and (2) it doesn't
+break Deluge for some unknown reason. 
+(Recommended by Henri Dubois-Ferriere, EPFL)
+<p>
+Added code to help with serial problems between Linux 2.6, USB serial
+ports, and the MIB510. These changes included changing the port
+settings and adding a retry if the programmer doesn't respond
+initially. Also changed the COMn reference to /dev/ttySn to help
+Cygwin work better.(David Gay, Intel Berkeley)
+<p>
+Fixed a bug in CC1000ControlM.nc where the incorrect register was 
+written. (Joe Polastre, UCB, SF Bug#1110032) 
+<p>
+Fixed CC1000 stack to work if someone specifies a 0-length packet. (Joe Polastre, UCB)
+<p>
+<!-- 1.1.13 -->
+<!-- 1.1.12 -->
+<a name="1.1.12"></a>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.11 and 1.1.12</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated April 25, 2005
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+In CC2420 stack, added additional protection on starting and stopping the SPI bus.
+Keeps track of whether the component is busy doing something before
+disabling SPI.  Also added more protections in other functions for
+enable/disable.
+<p>
+In preparation for TinyOS 2.0, many components are being rewritten
+according to TEP (TinyOS Enhancement Protocol) 101. You can read TEP
+101 (currently in draft form) on the <a
+href="http://www.tinyos.net/scoop/special/working_group_tinyos_2-0">TinyOS
+2.0 Working Group page</a>. Please also refer to other TEPS on that
+page.  Along these lines code has committed an HPL for the telos DMA
+and other components. Please refer to the <a
+href="http://mail.millennium.berkeley.edu/mailman/listinfo/tinyos-commits">
+http://mail.millennium.berkeley.edu/mailman/listinfo/tinyos-commits</a>
+archives for full details.
+<p>
+A new <b>Voltage Component</b> replaced the old one in tos/system. The
+new component's interface returns the ADC value in millivolts, and
+uses new underlying platform-specific voltage modules. On the msp430
+platform, the voltage module automatically switches between 1.5 and
+2.5V reference voltage depending on what the measured system voltage.
+Allows for accurate sampling of voltages above 3V. The conversion was
+carefully coded to reduce computation time but does include one integer 
+divide; those concerned about this computation time can use the ADC 
+interface directly.
+<p>
+Rewrite for MSP430 DCO calibration/init methods. Single calibration/initialization gains include: order of 
+magnitude faster (9ms), 2/3 smaller (74 ROM bytes), 5-8 bytes less RAM.
+Using this calibration routine, have successfully transmitted over the
+UART at up to 1Mbaud (though 256Kbaud appears overall more robust). Continual/sliding-mode recalibration improvements include: the DCO can be adjusted by about 0.35% every two seconds; this routine can account for
+a change of about 0.5 degC / sec. Please see 
+<a href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2005-March/005959.html">http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2005-March/005959.html</a> for details. 
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Tools</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+The <b>ncc</b> family of tools (ncc, mig, ncg, nesdoc) has moved from
+the nesc project's source tree into the TinyOS source tree. ncc can be
+found in tools/src/ncc.
+<p>
+tools/scripts/taskCount.pl will count the number of tasks in an application
+for you. For example, to count the tasks in Blink for the telos
+platform, do 'taskCount.pl telos'. (You must compile the application beforehand.)
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Bugs</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Bug fixed where when stop is called on HPLCC2420M while it is in the middle of an operation
+then the while(spi_action) loops never return and system is hosed.
+By including an enable flag, the loops break out and program execution
+continues. (Joe Polastre, UCB)
+<p>
+Merged in proposed changes suggested by Anders Blomdell, who wants bsl to
+recognize a mote reference number and deduce the serial port.  Modified
+his original submission to recognize bsl,ref,<ref> instead of bsl,<ref> to
+avoid any ambiguity between serial port names and reference names. (Anders
+Blomdell, Lund University, Sweden)
+<p>
+Tweaks to build-mspgcc to make it more robust: added some 
+exit code under certain conditions and modified how BUILD_BASE is
+defined. (Henri Dubois-Ferriere, EPFL, Switzerland) Another tweak to
+enable use within firewalls (David Gay, Intel).
+<p>
+Slow down broken I2C, so that the mda300ca digital I/O stuff works. This involved changing a wait in the I2C task from a nop to a TOSH_uwait(1). (David Gay, Intel)
+<p>
+Updated enable/disable functions or msp430 USARTs to appropriately change the pin functionality when enable or disable are called. (Jonathan Hui, UCB)
+<p>
+<!-- 1.1.11 -->
+<a name="1.1.11"></a>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.10 and 1.1.11</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated February 23, 2005
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<b>Deluge.</b> Added a script to generate an xml file for a TinyOS
+image. The file includes various metadata information important for
+network programming. Sample output is included below. Currently only
+included when building for telosa/b. Increased the program name length
+in Ident.h from 10 to 17 bytes to be more meaningful.
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Platforms</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+
+<p>
+<b>MSP430. In preparation for TinyOS 2.0, many MSP430 platform components are being
+rewritten according to TEP (TinyOS Enhancement Protocol) 101. You can
+read TEP 101 (currently in draft form) on the <a
+href="http://www.tinyos.net/scoop/special/working_group_tinyos_2-0">TinyOS
+2.0 Working Group page</a>. 
+<p>
+</b>MSP430ADC12[Advanved|Basic] has been replaced by
+MSP430ADC12[Single|Multiple]; high-frequency sampling of above 70ksps
+is now available.  HIL (see TEP 101 for what HIL means)now provides
+ADCSingle and ADCMultiple (to stay compatible also ADC and ADCControl
+are provided). The MSP430 platform also saw the initial checkin of
+hardware I2C module driver for. The I2C module the
+f15x and f16x series of microcontrollers as well as any others that
+have the built-in hardware I2C module. Details on the msp430 I2C interface
+are <a href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2005-January/005806.html">
+here</a>. This MSP430 work was contributed by Jan-Hinrich Hauer, Vlado Handziski, and
+Kevin Klueska of TU-Berlin.
+<p>
+<b>Telos B.</b>A more efficient CRC calculation has been added 
+by providing a method in the HPL. A new component, I2CPacket, was committed
+which uses the new I2C functionality described above; I2CPacket is responsible
+for obtaining exclusive access of the I2C bus (in the case of telosb,
+it is shared with SPI and UART) starting the I2C component (MSP430I2CM
+in our case), running the operation, and then stopping the I2C
+component (which restores the previous settings for the USART, such as
+SPI configuration for the radio). More details on I2CPacket can be found <a
+href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2005-January/005807.html">
+here</a>.
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Tools</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+The TinyOS RPMS sets the MAKERULES environment variable to point to 
+the new make system in tools/make. If you want to use the old 
+system simply comment out where MAKERULES is defined in 
+the file /etc/profile.d/tinyos.sh. If MAKERULES is not defined the
+old make system will be used. 
+<p>
+New options to support Debian linux were added to motelist-linux2:
+<ol>
+<li>Add -f to specify /tmp/usb-serial 
+<li>add -dev_prefix to override standard /dev/
+prefixes, which currently search /dev/usb/tts/ and /dev/ttyUSB.
+</ol>
+Added functionality to avr makefile for compiling frequency
+into app via the make extra flags. See /tools/make/avr/freq.extra.
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Bugs</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p> 
+Fix for the MicaZ CC24220 where sleep mode halted and didn't wake up.
+(Jaidev Prabhu, Crossbow)
+<p>
+Fixed a bug in the AVR makefiles which caused images to be recompiled 
+under the reinstall command. (Jonathan Hui, UC Berkeley)
+<p>
+Fixed a bug in the HPLUART1M.stop() code reported by Paul Young for the 
+mica2 platform.
+<!-- 1.1.10 -->
+<p>
+<a name="1.1.10"></a>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.9 and 1.1.10</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated January 7, 2005
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+Additional radio configuration tweaks are available for the CC2420 radio: 
+<ul>
+<li>When radio is turned on, frequency is set to a value other than the
+    default, the radio is turned off, and then turned back on again,
+    the radio tunes back to the default frequency.  This code also fixes the bug
+    by using the cached radio frequency setting.
+<li>GetPreset (nearest) and GetFrequency are now available through the
+    CC2420Control interface
+<li>bit/byte/symbol timing available from CC2420Const.h (soon to be exposed
+    in a HW independent manner)
+</ul>
+</p>
+
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Platforms</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+1.1.10 includes full support for Berkeley's Telos Revision B. Rev B has 10kB of RAM (vs 2kB for Rev A) and 48kB of Flash (vs 60kB for Rev A), reduced radio startup time, JTAG support, and more. Moteiv has written an <a href="http://www.moteiv.com/products/docs/an001-changesrevb.pdf">changes document</a> for Rev B.
+</p>
+<p>
+New build scripts for the MSP platform tools are now in tools/src/mspgcc. The
+build-mspgcc script will download, build, and install mspgcc with the
+appropriate patches for the newest, greatest msp430 devices.
+</p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Bug fixes and Minor Modifications</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Miscellaneous bug fixes and platform cleanup were done on the C serial forwarder [tools/src/sf]. 
+See <a href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2004-December/005743.html">here</a>, 
+<a href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2004-December/005744.html">here</a>, and 
+<a href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2004-December/005745.html">here</a>  for details. 
+(David Gay, Intel Research)
+</p>
+<p>
+Fixed bug so that now any sensorboard will work with PowerTOSSIM. (Victor Schnayder, Harvard)
+</p>
+Fixed bug in which message pointers could be erroneously
+shared by multiple motes in TOSSIM (Matt Welsh, Harvard).
+<!-- 1.1.9 -->
+<p>
+<a name="1.1.9"></a>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.8 and 1.1.9</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated December 1, 2004
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+<p>
+PowerTOSSIM, a power modeling extension to the TOSSIM TinyOS simulator, is included in 1.1.9. 
+PowerTOSSIM accurately models power consumed by TinyOS applications. You can find more information
+at <a href="http://www.eecs.harvard.edu/~shnayder/ptossim/">
+http://www.eecs.harvard.edu/~shnayder/ptossim/
+</a>. (Victor Schnayder, Harvard.)
+</p>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Tools</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+Since 1.1.6, TinyOS has included an alternative make system which
+allows easier introduction of platforms. We have not made this make
+system the default, however, because it requires make 3.8 which (1)
+not everyone has and (2) has some bugs which are tickled by some of
+TInyOS's major subsystems. Towards fixing (2), Phil Levis has provided
+a patch for make 3.8. We have included a patched make executable in
+tools/make (the executable is also present in 1.1.8).
+</p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Bug fixes</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+On the <b>TI MSP430 platform</b>, each sensor now has its own header file with constants for interface ID and the "adcPort" parameter.
+This makes code cleaner and saves RAM, since uniqueCount("ADCPort") now reflects the actual number of interfaces wiring to ADCC. Some files 
+in the corresponding platforms were modified to take into account the new msp430 definitions. (Jan-Hinrich Hauer, TU Berlin.)
+</p>
+<p>
+Bug fix to the avr and msp make rules to fix the RAM usage byte count; was previously undercounting usage. (David Gay, Intel Research)
+</p>
+<p>
+Bug fixes to SerialForwarder multiple platform support. Details can be found at 
+<a href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2004-November/005527.html">
+http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2004-November/005527.html</a>. (David Gay, Intel Research)
+</p>
+<p>
+<a name="1.1.8"></a>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.7 and 1.1.8</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated November 15, 2004
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+
+<p>
+TinyOS 1.1.8 includes the new network programming system called
+<b>Deluge</b> . Deluge provides the ability to wirelessly install a
+new program image. This is accomplished by propagating a program image
+over the wireless network and having each node program themselves with
+the new image. 
+See the <a href="http://www.cs.berkeley.edu/~jwhui/research/projects/deluge/"> 
+ Deluge web site </a> for more information on how to start programming 
+your motes wirelessly with Deluge.
+</p>
+
+<p>
+Initial checkin of the InternalFlash interface. This is a generic
+interface for reading and storing values in the internal flash of a
+microcontroller. This generic interface is necessary since different
+platforms have different requirements when writing values to internal
+flash. For example, on the msp the entire segment which encloses the
+intended write location must first be erased. Some software logic is
+required to make sure all other values not at the intended write
+location are preserved. However, on the avr platform (which has an
+EEPROM), an erase of an entire segment is not required.
+</p>
+
+<p>
+Replaced the CC2420 stack with new interrupt-driven stack.
+New interfaces (Capture and Interrupt) signal radio interrupts
+on a platform independent basis and allow time stamping information
+to propogate up through the radio stack.  This interrupt driven
+radio stack is needed to support time stamping as well as low
+power listening.
+</p>
+
+<p>
+Introduced a Quick/Fast CRC calculation for MSP430 based platforms. 
+See tos/platform/msp430/crc.h.
+</p>
+
+<p>
+</p>
+
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Platforms</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+
+<p>
+The tools/make makefile system now has support for Telos Rev B (telosb vs telosa). 
+</p>
+
+<p>
+Matt Welsh has added some support for the FreeBSD <i>development</i> platform.
+</p>
+
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Bug fixes</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+1.1.8 includes many bug fixes in the 
+</p>
+<p>
+Patch submitted by David Moore to fix a condition under which the
+CC1000 stack hangs due to a task queue starvation problem. Details
+can be found at 
+<a href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2004-August/004891.html">
+http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2004-August/004891.html</a>. The fix 
+was to only make some relatively expensive calls if a post succeeded rather than whether or
+not the post succeeded; not making those calls gives the task queue enough time to run in the case 
+that the post failed due to task queue overflow. 
+</p>
+<p>
+Bug reported by Thanos Stathopoulos which occured in CC1000 stack
+when acks were enabled and broadcast messages were sent. 
+This fix causes the radio to only wait for an ack if the
+message is unicast, otherwise it transitions to the TX_DONE state.
+Details are at
+<a href="http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2004-August/004990.html">
+http://mail.millennium.berkeley.edu/pipermail/tinyos-commits/2004-August/004990.html</a>.
+</p>
+
+<p>
+This patch fixes two sources of Timer error. The first is when a task
+post fails: TimerM now sets state appropriately and does not blindly
+assume it was able to fire its timers. The second is when adjusting
+the firing interval in very small amounts. In the old version, a
+subtle race condition could cause TimerM to set the compare register
+to a past value. Instead of firing in 1ms, it would fire in 256 ms,
+which completely threw all timers off.
+<p>
+For full details on this patch, refer to the discussion on the
+tinyos-devel list under the threads "mica* TimerM" and "TimerM.nc
+changes" on Aug. 9-12 2004.
+</p>
+
+<p>
+Bug fix from Hardy Griech in tos/lib/MultiHopLQI: update interval
+should have been in seconds, not milliseconds. 
+</p>
+
+<p>
+Bug fix by Crossbow on micaz platform where TIMER2 Compare Interrupt
+Service routine incorrectly sets TIMER0 (should be TIMER2) scale and
+interval when in REPEAT mode. 
+</p>
+
+<p>
+Bug pointed out by Peter Tian in CC1000ControlM: removed outp() statement to 
+timer3 (not needed, adverse affects when others are using timer3).
+</p>
+
+<p>
+Bug fix submitted for tos/platform/telos/TimerJiffyAsyncM.nc  by phil buonadonna 
+for  timers longer than 0xFFFF
+that caused an overflow-ish problem. 
+</p>
+
+<p>
+Bug fix from Xiaofan Jiang, Joe Polastre for tos/platform/msp430/ADCM.nc: 
+reset busy-variable in dataReadySingle so that the eventhandler can call getData right away.
+</p>
+
+<p>
+</p>
+
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Tools</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+Added motelist support for linux. Motelist lists
+currently connected telos motes and which USB port they're connected
+with.
+</p>
+
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Systems</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+Since 1.1.7 but before 1.1.8, Phil Levis released version 2.0 of Maté. Maté allows you
+to program sensor networks with high-level scripts that compile down
+to bytecodes for an application specific virtual machine. RPMs and a
+full set of tutorials can be found at 
+<a href="http://www.cs.berkeley.edu/~pal/mate-web/">
+http://www.cs.berkeley.edu/~pal/mate-web/
+</a>.
+</p>
+
+<b><font size=4><a href="index.html">Index &gt;</a></font></b> </p>
+<HR>
+<a name="1.1.7"></a>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.6 and 1.1.7</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated July 14, 2004
+ </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Platforms</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+
+<p>
+1.1.7 includes platform support for <b> MicaZ </b> and <b> Telos </b>. For more 
+information on the MicaZ platform, please see <a href="http://www.xbow.com">Crossbow</a>. For 
+more information on Telos, please see <a href="http://www.moteiv.com"> Moteiv </a>. The telos 
+support includes code contributed by TU-Berlin for the <b>TI MSP430</b>.
+</p>
+
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Systems</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+TASK-TinyDB 1.1.3 will be released in conjunction with tinyos-1.1.7. TASK-TinyDB 1.1.3 
+includes fixes to address compilation errors caused by changes in TinyOS 1.1.6 and 1.1.7.
+</p>
+<b><font size=4><a href="index.html">Index &gt;</a></font></b> </p>
+<HR>
+<a name="1.1.6"></a>
+<head>
+  <title>TinyOS 1.1.6 Significant Changes</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.5 and 1.1.6</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated May 10,
+2004 </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+TOSSIM now supports the <b> PageEEPROM</b> component for the PC platform.
+</p>
+
+<p>
+There is a <b> new make system </b> which, among other things, eases
+the addition of new targets and platforms. The old make system is
+still the default.  To read about and use the new make system, see
+tinyos-1.x/tools/make/README.
+</p>
+
+<p>
+<b>You can now have >= 16 timers </b> 
+thanks to a bugfix in tos/system/TimerM.nc. 
+</p>
+
+<p>
+Add hardware platform abstraction component for <b>Mic component</b>
+to fix the cross-platform interrupt issues.  TONE_INTR compiling issue
+is also resolved.
+</p>
+
+<p>
+A number of changes to the <b> simulation tools</b>. Please
+see the tinyos-1.x/ChangeLog for details.
+</p>
+
+<p>
+<b> MACControl interface change.</b>
+MacControl no longer has the Backoff events in it.  It seemed that
+people really just wanted to turn ACKs on and off and likewise other
+radio functionality but not worry about changing the backoff.  As a
+result, there are two interfaces--MacControl and MacBackoff and you
+can wire to the appropriate one.  The CC2420 radio stack also has
+these two interfaces.
+</p>
+
+<p>
+<b> Task scheduling. </b> You can now change the size of the task queue 
+by adding -DTOSH_MAX_TASKS_LOG2=n (to get 2^n tasks) to the compile
+command line via, say, a Makelocal file.
+</p>
+
+
+<p>
+<b> </b>
+</p>
+
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Systems</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+Tinyos-contrib version 1.1.2 was released a few weeks ago. It includes the first 
+release of <A HREF="http://ptolemy.eecs.berkeley.edu/papers/03/TinyGALS/">TinyGALs</A>. 
+The tinyos-contrib rpms can be found in the <A HREF="http://today.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux/">linux</A> 
+and <A HREF="http://today.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows/"> windows </A> rpm directories 
+along with all of the other 1.1.x releases.
+</p>
+<b><font size=4><a href="index.html">Index &gt;</a></font></b> </p>
+<HR>
+<a name="1.1.5"></a>
+<head>
+  <title>TinyOS 1.1.5 Significant Changes</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.4 and 1.1.5</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated 26 March
+2004 </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> This section outlines the changes that have occured in TinyOS
+since the 1.1.4 snapshot release  and the 1.1.5 minor release. 
+While there are no major changes for 1.1.5, the changes with
+the most impact include bug fixes and improvements to the Tython
+scripting environment, an update release of TinyDB/TASK, plus
+miscellaneous bug fixes across the system.
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+Improvements and bug fixes were make to <b>Tython</b>, the TOSSIM
+scripting environment introduced in 1.1.3. The improvements made
+include internal restructuring to support the simulation of SimObjects
+that are not MoteSimObjects (this may cause minor incompatibilities
+with plugins)and some miscellaneous bugs that left the TOSSIM
+processes running after TinyViz/Tython exited.</p> For more
+information about Tython, please see the User Manual in the doc/tython
+directory.
+</p>
+<p>
+Among numerous tweaks: fixed bug #909637 regarding interrupt pin
+incompatability between the MICA and the MICA2; fixed the file save
+operation in the Oscilloscope Java GUI to correctly handle dropped 
+packets and null elements in the vector.
+</p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Systems</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+The 1.1.2 minor release of TinyDB/TASK is <i>expected</i> to be
+released simultaneously with TinyOS 1.1.5. The 1.1.2 TinyDB/TASK
+snapshot will include numerous bug fixes and upgrades. For more
+information on TinyDB, please see documentation in the doc/ directory. 
+We will also be releasing some contrib directories where the authors 
+have requested it. 
+</p>
+<b><font size=4><a href="index.html">Index &gt;</a></font></b> </p>
+<HR>
+<a name="1.1.4"></a>
+<head>
+  <title>TinyOS 1.1.4 Significant Changes</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.3 and 1.1.4</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated 5 February
+2004 </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> This section outlines the changes that have occured in TinyOS
+since the 1.1.3 snapshot release and 1.1.4 minor release. 
+The major changes in 1.1.4 include the new tython scripting environment plus  
+various bug fixes.
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+TinyOS 1.1.3 includes <b>Tython</b>. 
+Tython is a TOSSIM scripting environment that uses a Java
+implementation of the Python programming language. Tython allows users
+to write scripts to do things such as dynamically move motes, inject
+packets, and inspect the internal state of the simulation. Tython
+allows full access to the existing Java TinyOS toolchain, so users can
+write a piece of TinyOS messaging code, generate a Java packet object
+from it using mig, then use Tython to inject those packets into a
+running simulation. 
+<P>Tython is integrated with the TinyViz environment;
+this means that, for example, if a script makes a mote move, a user
+can see the movement in the TinyViz visualization and its radio
+connectivity will be updated as expected. TinyViz and Tython can be
+run separately from one another.<p>
+For more information about Tython, please see the User Manual in the doc/tython directory.
+</p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Systems</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+The 1.1.2 minor release of task-tinydb is <i>expected</i> to be released simultaneously with TinyOS 1.1.4. The 1.1.2 task-tinydb snapshot will include numerous bug fixes and upgrades. For more 
+information on TinyDB, please see documentation in the doc/ directory. 
+</p>
+<b><font size=4><a href="index.html">Index &gt;</a></font></b> </p>
+<HR>
+<a name="1.1.3"></a>
+<head>
+  <title>TinyOS 1.1.3 Significant Changes</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.1 and 1.1.3</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated 7 January
+2004 </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> This section outlines the changes that have occured in TinyOS
+since the 1.1.1 snapshot release and the 1.1.3 minor release.
+The major changes in 1.1.3 include the new MAC layer, B-MAC, as well as various bug fixes.
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+TinyOS 1.1.3 includes <b>B-MAC</b>, a new MAC layer w/ CSMA with collision avoidance, gain control, channel filtering for channel clear decisions; max bw from 42 pckts/sec to 53 pckts/sec, outperforms the 1.1 MAC layer by over 100% (in terms of packet throughput) while achieving 85% channel utilization.
+</p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Systems</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Released simultaneously with TinyDB 1.1.3 is the 1.1.3 minor release of
+task-tinydb which includes numerous bug fixes and upgrades. For more 
+information on TinyDB, please see documentation in the doc/ directory.
+</p>
+<b><font size=4><a href="index.html">Index &gt;</a></font></b> </p>
+<HR>
+<a name="1.1.1"></a>
+<head>
+  <title>TinyOS 1.1.1 Significant Changes</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big>
+Significant Changes in TinyOS between v1.1.0 and 1.1.1</big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Updated 24 November
+2003 </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> This section outlines the changes that have occured in TinyOS
+since the last major release (1.1.0) and the 1.1.1 minor release.
+The changes in 1.1.1 include a more reliable routing implementation, a 
+calibrated interface to the ADC as well as various bug fixes.
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>
+TinyOS 1.1.1 includes a <b>new routing module, named MintRoute</b> 
+with increased reliability. The algorithm features 
+improved parent selection leading to relatively shorter trees. 
+</p>
+A <b> new ADC interface </b> allows for calibrated and non-calibrated
+(legacy) ADC reads by providing two additional methods to control
+reference value calibration. The new interface is used by default, but
+supports legacy ADC reads. See the ADCControl.nc file for more
+information.
+<p>
+<b>The TinySec usage model has changed</b>.  Rather than having to wire to
+SecureGenericComm to use TinySec, you can now leave your wiring files the same
+and simply use TINYSEC=true on the command line. Example:
+<code>
+    make mica2 TINYSEC=true
+</code>
+This works with any application using the Makerules in the apps
+directory. The methods for changing the security mechanism used
+(authentication, authentication+encryption, or CRC) for transmission
+still use the TinySecMode interface exported by TinySecC, but will likely 
+change in the next release.
+</p>
+<p>
+There is now a <b>reset target</b> in Makerules: make <i>platform</i> reset.
+</p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Bug fixes</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>Bug fixes include I2C bug fixes, and a compile fix for tossim so that newer versions of cygwin (newer than that distributed with TinyOS 1.1.0) work.</p>
+<p></p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Systems</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Released simultaneously with TinyDB 1.1.1 is the 1.1.1 minor release of
+task-tinydb which includes numerous bug fixes and upgrades. For more 
+information on TinyDB, please see documentation in the doc/ directory.
+</p>
+<b><font size=4><a href="index.html">Index &gt;</a></font></b> </p>
+</body>
+</html>

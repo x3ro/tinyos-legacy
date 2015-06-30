@@ -1,0 +1,6 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: reinstall.extra,v 1.1 2004/01/08 03:45:55 cssharp Exp $
+
+NODEID = $(REINSTALL)
+BUILD_DEPS = setid program
+

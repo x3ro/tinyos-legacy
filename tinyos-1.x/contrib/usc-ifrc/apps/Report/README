@@ -1,0 +1,32 @@
+
+ Module sending log information to UART/USB
+         |
+         |
+         | SendMsg
+         |
+         v
+ SerialQueuedSend
+ (Buffers the packet (not the pointer but the complete
+ packet) and serially sends it to the UART/USB)
+        |
+        |
+        |
+        v SendMsg
+     Report
+        |
+        |
+        |
+        v
+    UARTFramedPacket    
+ 
+
+UARTFramedPacket is used to avoid conflict between the Radio
+stack and Serial communication as in our experiments
+UART/USB is used exclusively for Logging. 
+
+
+
+
+
+
+# vim: set ts=4 tw=60:

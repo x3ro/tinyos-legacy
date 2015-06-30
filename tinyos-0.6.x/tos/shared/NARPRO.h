@@ -1,0 +1,28 @@
+#ifndef __NARPRO___
+#define __NARPRO___
+#include "super.h"
+//ACCEPTS
+char TOS_COMMAND(NARPRO_ACTIVE)(void);
+char TOS_COMMAND(NARPRO_INIT)(void);
+char TOS_COMMAND(NARPRO_SEND)(char* data, char len);
+//HANDLES
+TOS_MsgPtr TOS_EVENT(DATA_MSG)(TOS_MsgPtr data);
+char TOS_EVENT(NARPRO_PING_RECEIVE)(short moteID, char sequence);
+char TOS_EVENT(NARPRO_PING_RESPONSE)(short moteID, char sequence);
+char TOS_EVENT(NARPRO_SEND_DONE)(TOS_MsgPtr data);
+//SIGNALS
+//USES
+char TOS_COMMAND(NARPRO_GREEN_LED_OFF)();
+char TOS_COMMAND(NARPRO_GREEN_LED_ON)();
+char TOS_COMMAND(NARPRO_GREEN_LED_TOGGLE)();
+char TOS_COMMAND(NARPRO_PING_SEND)(short moteID, char sequence);
+char TOS_COMMAND(NARPRO_RED_LED_OFF)();
+char TOS_COMMAND(NARPRO_RED_LED_ON)();
+char TOS_COMMAND(NARPRO_RED_LED_TOGGLE)();
+char TOS_COMMAND(NARPRO_SUB_INIT)(void);
+char TOS_COMMAND(NARPRO_SUB_SEND_MSG)(short addr,char type, TOS_MsgPtr data);
+char TOS_COMMAND(NARPRO_YELLOW_LED_OFF)();
+char TOS_COMMAND(NARPRO_YELLOW_LED_ON)();
+char TOS_COMMAND(NARPRO_YELLOW_LED_TOGGLE)();
+//INTERNAL
+#endif //__NARPRO___//

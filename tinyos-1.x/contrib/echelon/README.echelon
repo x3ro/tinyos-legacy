@@ -1,0 +1,67 @@
+$Id: README.echelon,v 1.3 2004/04/24 01:08:50 cssharp Exp $
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+@author Prabal Dutta <dutta.4@osu.edu>
+
+
+This README explains the directory structure for files relevant to the
+Echelon platform and provides a quick start for getting up and running.
+
+
+OUTLINE OF SUBDIRECTORIES
+
+    make/  is the TinyOS Make System directory for echelon make files
+    osu/  is a contribution directory for Ohio State University
+    platform/echelon/  is the platform directory
+    sensorboard/echelon/  is the sensorboard directory
+    ucb/  is a contribution directory for UC Berkeley
+
+    Other subdirectories may also exist to hold contributions from other
+    groups and universities.
+
+
+QUICK START
+
+    # These variables should get set when you log in
+    export TOSDIR=`ncc -print-tosdir`
+    export MAKERULES=$TOSDIR/../beta/make/Makerules
+    export TOSMAKE_PATH=$TOSDIR/../contrib/echelon/make
+
+    # Just once, to help nesc
+    ln -s $TOSDIR/../contrib/echelon/platform/echelon $TOSDIR/platform/
+
+    # Later, to build an application for the Echelon
+    make echelon
+
+    # Or, or (re)install over an MIB600 (also known as EPRB)
+    make echelon eprb,192.168.1.103 reinstall,22
+
+
+DESCRIPTION OF QUICK START
+
+    TOSDIR is set to make easy reference to that directory in the following
+    commnds of the quick start.
+
+    MAKERULES points to the new TinyOS Make System (also known as TOSMake),
+    required to build for the echelon target.  This is the Makerules that
+    will be used when you type "make" in an application directory.
+
+    TOSMAKE_PATH is used by TOSMake to pull in additional build targets and
+    platforms from the specified directory.  This is how the build system
+    knows about the "echelon" target.
+
+    The symbolic link of echelon to $TOSDIR/platform/ is necessary for nesc
+    to build the echelon platform.  This step is not needed when using nesc
+    1.1.1beta4 or newer.
+
+    After that, making and installing on the echelon platform occurs just
+    like any other platform.
+
+
+ADDITIONAL REQUIREMENTS AND POINTS OF INTEREST
+
+    GNUMake version 3.80 or newer is required by TOSMake.  Many linux
+    systems install version 3.79.1, which is insufficient.
+
+    If anyone needs commit access to tinyos-1.x/contrib/echelon/, please
+    email Kristin Wright <kwright@cs.berkeley.edu>.
+

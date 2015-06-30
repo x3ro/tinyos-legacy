@@ -1,0 +1,12 @@
+/* $Id: generic_s19.bbl,v 1.1 2005/01/31 21:05:01 freefrag Exp $ */
+
+OPENFILE "%BurnOut%"
+format=motorola
+busWidth=1
+origin=0
+len=0x10000
+destination=0
+SRECORD=Sx
+SENDBYTE 1 "%BurnIn%"
+CLOSE
+

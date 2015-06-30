@@ -1,0 +1,3 @@
+COMPONENT=CntToLedsAndRfm
+include ../Makerules
+

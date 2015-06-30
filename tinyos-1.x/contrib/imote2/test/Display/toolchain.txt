@@ -1,0 +1,14 @@
+
+Toolchain to create an Imote2 image (for 96x64x4bit OLED display)
+
+1. Resize image to 96x64 pixels (colums x rows)
+2. Convert image to 4-bit grayscale BMP (16 levels), e.g. with MS Paint
+3. Convert to text with "od -x -j 118 -v --width=48 img.bmp > img.od"
+4. Reverse file with "tac img.od > img.odr"
+5. Edit img.odr, e.g., with Emacs:
+   Remove addresses with set-mark, kill-rectangle
+   Add header: "uint16_t ib[1536] = {"
+   Add trailer: "};"
+   Replace spaces " " with ",0x" after the first one (replace-regexp)
+6. Save as "img.h"
+7. Include in "FileM.nc" file below "implementation"

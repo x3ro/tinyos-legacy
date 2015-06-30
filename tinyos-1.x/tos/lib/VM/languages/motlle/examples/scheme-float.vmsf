@@ -1,0 +1,37 @@
+// Declare the VM. You will want to specify a separate name (NAME)
+// and directory (DIR) for each VM.
+<VM NAME="FTinySchemeVM" DESC="A basic tinyscheme VM with single-hop communication and floating-point numbers." DIR="../../../../../../apps/FTinySchemeVM">
+// 1024 is the amount of RAM available for motlle programs. You can
+// increase while there is RAM available... On telosb motes, you should
+// probably set this to something larger.
+<OPTION CAPSULE_SIZE=1024>
+// The following lines should always be present (the paths are
+// relative to the .vmsf file, so you may need to adjust them
+// depending on where your file is)
+<SEARCH PATH="../../../opcodes">
+<SEARCH PATH="../../../contexts">
+<SEARCH PATH="../mate">
+<SEARCH PATH="../mate/rep-float">
+<SEARCH PATH="../mate/runtime">
+<SEARCH PATH="../mate/runtime/sgen">
+<SEARCH PATH="../matelib">
+<SEARCH PATH="../matelib/sgen">
+<SEARCH PATH="../../../../Util">
+
+<LANGUAGE NAME="tinyscheme"> // Use the scheme language
+<LOAD FILE="../mate/runtime/sgen/floatfns.vmsf"> // Load basic scheme functions
+
+// Here is where you add VM-specific contexts and functions, either
+// from Mate's library (led, id, the mica sensorboard) or from motlle's
+// (the commfns.vmsf file, which contains single-hop communication
+// primitives)
+<FUNCTION NAME="led">
+<FUNCTION name="id">
+<FUNCTION name="sleep">
+<CONTEXT NAME="Timer0">
+<LOAD FILE="../matelib/sgen/commfns.vmsf">
+// This VM does not have any sensor board access. You should add a line like
+//   <LOAD FILE="../../../sensorboards/micasb.vmsf"> // micasb sensor board
+// or
+//   <LOAD FILE="../../../sensorboards/telosb.vmsf"> // built-in telosb sensors
+// to get access to sensors from your favourite sensorboard.

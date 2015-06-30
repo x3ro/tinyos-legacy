@@ -1,0 +1,153 @@
+
+<html>
+<head>
+<title>Interface: MCPS_DATA</title>
+</head>
+<body>
+<table BORDER="0" CELLPADDING="3" CELLSPACING="0" width="100%">
+<tr><td>
+<font size="-1">
+<b><font color="blue"><a href="apps_p.html">Apps</a></font></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="components_p.html">Components</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="interfaces_p.html">Interfaces</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="allfiles_p.html">All Files</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="index.html">Source Tree</a></b>
+&nbsp;&nbsp;&nbsp;
+</font>
+</td>
+<td align="right">
+<font size="-1">
+source: <b><a href="beta.CC2420Radio.ieee.802.15.4.MCPS.MCPS_DATA.nc.source">beta.CC2420Radio.ieee.802.15.4.MCPS.MCPS_DATA.nc</a></b>
+</font>
+</td></tr></table>
+<hr>
+
+<h1 align="center">Interface: MCPS_DATA</h1>
+<p>
+
+ The MCPS-SAP supports the transport of SSCS protocol data units (SPDUs)
+ between peer SSCS entities.
+ MCPS_DATA is used to transmit and receive data from the
+ MAC sublayer.
+
+ <table border="0" cellpadding="0">
+<tr valign="top"><td><b>Author:</b>
+<td> Joe Polastre
+</td></tr></table>
+
+<p>
+
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Commands</h3></td></tr></table>
+<ul>
+<li>
+         void     <a href="# void request(uint8_t SrcAddrMode, uint16_t SrcPANId, uint8_t *SrcAddr, uint8_t DstAddrMode, uint16_t DstPANId, uint8_t *DstAddr, uint8_t msduLength, uint8_t *msdu, uint8_t msduHandle, uint8_t TxOptions)">
+<b>request</b>    </a>
+(uint8_t SrcAddrMode, uint16_t SrcPANId, uint8_t *SrcAddr, uint8_t DstAddrMode, uint16_t DstPANId, uint8_t *DstAddr, uint8_t msduLength, uint8_t *msdu, uint8_t msduHandle, uint8_t TxOptions)
+<menu>
+ Request a data transfer.  
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Events</h3></td></tr></table>
+<ul>
+<li>
+         void     <a href="# void confirm(uint8_t msduHandle, IEEE_status status)">
+<b>confirm</b>    </a>
+(uint8_t msduHandle, IEEE_status status)
+<menu>
+ Confirm reports the results of a request to transfer a data MSDU.
+</menu><p>
+
+<li>
+         void     <a href="# void indication(uint8_t SrcAddrMode, uint16_t SrcPANId, uint8_t *SrcAddr, uint8_t DstAddrMode, uint16_t DstPANId, uint8_t *DstAddr, uint8_t msduLength, uint8_t *msdu, uint8_t mpduLinkQuality, bool SecurityUse, uint8_t ACLEntry)">
+<b>indication</b>    </a>
+(uint8_t SrcAddrMode, uint16_t SrcPANId, uint8_t *SrcAddr, uint8_t DstAddrMode, uint16_t DstPANId, uint8_t *DstAddr, uint8_t msduLength, uint8_t *msdu, uint8_t mpduLinkQuality, bool SecurityUse, uint8_t ACLEntry)
+<menu>
+ Indicates the transfer of a data unit from the MAC sublayer.
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Commands - Details</h3></td></tr></table>
+    <a name=" void request(uint8_t SrcAddrMode, uint16_t SrcPANId, uint8_t *SrcAddr, uint8_t DstAddrMode, uint16_t DstPANId, uint8_t *DstAddr, uint8_t msduLength, uint8_t *msdu, uint8_t msduHandle, uint8_t TxOptions)"></a>
+        <h4>request</h4>
+         void <b>request</b>(uint8_t SrcAddrMode, uint16_t SrcPANId, uint8_t *SrcAddr, uint8_t DstAddrMode, uint16_t DstPANId, uint8_t *DstAddr, uint8_t msduLength, uint8_t *msdu, uint8_t msduHandle, uint8_t TxOptions)<P><menu>
+ Request a data transfer.  
+ See page 57 of the IEEE 802.15.4 specification.
+ 
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>SrcAddrMode</b> -  The source addressing mode for this primitive and
+                    subsequent MPDU
+ </p><p STYLE="text-indent: -1cm"><b>SrcPANId</b> -  The 16 bit PAN identifier of the source
+ </p><p STYLE="text-indent: -1cm"><b>SrcAddr</b> -  Individual device address of the source as per 
+                the SrcAddrMode
+ </p><p STYLE="text-indent: -1cm"><b>DstAddrMode</b> -  The destination addressing mode for this primitive
+                    and subsequent MPDU
+ </p><p STYLE="text-indent: -1cm"><b>DstPANId</b> -  The 16 bit PAN identifier of the destination
+ </p><p STYLE="text-indent: -1cm"><b>DstAddr</b> -  Individual device address of the destination as per
+                the DstAddrMode
+ </p><p STYLE="text-indent: -1cm"><b>msduLength</b> -  Number of octets contained in the msdu
+ </p><p STYLE="text-indent: -1cm"><b>msdu</b> -  Set of octets forming the msdu
+ </p><p STYLE="text-indent: -1cm"><b>msduHandle</b> -  Handle associated with the MSDU to be transmitted
+ </p><p STYLE="text-indent: -1cm"><b>TxOptions</b> -  Bitwised OR transmission options
+</menu></menu>
+</td></tr></table>
+</menu><table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Events - Details</h3></td></tr></table>
+    <a name=" void confirm(uint8_t msduHandle, IEEE_status status)"></a>
+        <h4>confirm</h4>
+         void <b>confirm</b>(uint8_t msduHandle, IEEE_status status)<P><menu>
+ Confirm reports the results of a request to transfer a data MSDU.
+ See page 59 of the IEEE 802.15.4 specification.
+
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>msduHandle</b> -  The handle associated with the MSDU
+ </p><p STYLE="text-indent: -1cm"><b>status</b> -  That status of the last MSDU transmission
+</menu></menu>
+</td></tr></table>
+</menu><hr>
+    <a name=" void indication(uint8_t SrcAddrMode, uint16_t SrcPANId, uint8_t *SrcAddr, uint8_t DstAddrMode, uint16_t DstPANId, uint8_t *DstAddr, uint8_t msduLength, uint8_t *msdu, uint8_t mpduLinkQuality, bool SecurityUse, uint8_t ACLEntry)"></a>
+        <h4>indication</h4>
+         void <b>indication</b>(uint8_t SrcAddrMode, uint16_t SrcPANId, uint8_t *SrcAddr, uint8_t DstAddrMode, uint16_t DstPANId, uint8_t *DstAddr, uint8_t msduLength, uint8_t *msdu, uint8_t mpduLinkQuality, bool SecurityUse, uint8_t ACLEntry)<P><menu>
+ Indicates the transfer of a data unit from the MAC sublayer.
+ See page 60 of the IEEE 802.15.4 specification.
+ 
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>SrcAddrMode</b> -  The source addressing mode for this primitive and
+                    subsequent MPDU
+ </p><p STYLE="text-indent: -1cm"><b>SrcPANId</b> -  The 16 bit PAN identifier of the source
+ </p><p STYLE="text-indent: -1cm"><b>SrcAddr</b> -  Individual device address of the source as per 
+                the SrcAddrMode
+ </p><p STYLE="text-indent: -1cm"><b>DstAddrMode</b> -  The destination addressing mode for this primitive
+                    and subsequent MPDU
+ </p><p STYLE="text-indent: -1cm"><b>DstPANId</b> -  The 16 bit PAN identifier of the destination
+ </p><p STYLE="text-indent: -1cm"><b>DstAddr</b> -  Individual device address of the destination as per
+                the DstAddrMode
+ </p><p STYLE="text-indent: -1cm"><b>msduLength</b> -  Number of octets contained in the msdu
+ </p><p STYLE="text-indent: -1cm"><b>msdu</b> -  Set of octets forming the msdu
+ </p><p STYLE="text-indent: -1cm"><b>mpduLinkQuality</b> -  LQ value measured during reception
+ </p><p STYLE="text-indent: -1cm"><b>SecurityUse</b> -  An indication whether the received data frame is
+                    using security
+ </p><p STYLE="text-indent: -1cm"><b>ACLEntry</b> -  The macSecurityMode parameter value from the ACL entry
+                 associated with the sender of the data frame.  This value
+                 is set to 0x08 if the sender of the data frame was not
+                 found in the ACL.
+</menu></menu>
+</td></tr></table>
+</menu>

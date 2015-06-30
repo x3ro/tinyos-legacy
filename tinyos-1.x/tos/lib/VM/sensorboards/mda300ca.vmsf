@@ -1,0 +1,11 @@
+<SEARCH PATH="mda300ca">
+<SEARCH PATH="sensors">
+<FUNCTION NAME="thum">
+<FUNCTION NAME="ttemp">
+<FUNCTION NAME="excite">
+<FUNCTION NAME="adread">
+<FUNCTION NAME="setpindirection">
+<FUNCTION NAME="readpin">
+<FUNCTION NAME="writepin">
+<FUNCTION NAME="enablepin">
+<CONTEXT NAME="Pin">

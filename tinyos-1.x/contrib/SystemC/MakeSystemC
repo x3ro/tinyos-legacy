@@ -1,0 +1,50 @@
+ifndef CONTRIBDIR
+CONTRIBDIR := $(shell ncc -print-tosdir)/../contrib
+endif
+
+ifndef MAKERULES
+MAKERULES := $(shell ncc -print-tosdir)/../apps/Makerules
+endif
+
+SCRIPTSDIR := $(CONTRIBDIR)/SystemC/scripts
+
+PFLAGS := -I. -Ibuild $(PFLAGS)
+PFLAGS := $(shell $(SCRIPTSDIR)/ident.pl ../.ident_install_id $(IDENT_PROGRAM_NAME)) $(PFLAGS)
+
+CFLAGS := $(CFLAGS) \
+-I$(CONTRIBDIR)/SystemC/System \
+-I$(CONTRIBDIR)/SystemC/XnpService \
+-I$(CONTRIBDIR)/SystemC/routing \
+-I$(CONTRIBDIR)/SystemC/common \
+-I$(CONTRIBDIR)/SystemC/neighborhood \
+-I$(CONTRIBDIR)/SystemC/TimedLeds \
+-I$(CONTRIBDIR)/SystemC/Config \
+-I$(CONTRIBDIR)/SystemC/ConfigStore \
+-I$(CONTRIBDIR)/SystemC/DiagMsg \
+-I$(shell ncc -print-tosdir)/lib/OnOff
+
+INCLUDES := $(filter -I%,$(PFLAGS) $(CFLAGS))
+
+CREATE_NESC_DEPS := echo "    creating build/nesc_deps.txt" && perl $(SCRIPTSDIR)/list_nesc_deps.pl $(INCLUDES) $(COMPONENT).nc > build/nesc_deps.txt
+
+BUILD_EXTRA_DEPS := systemc $(BUILD_EXTRA_DEPS)
+BUILDLESS_DEPS := bytes ident $(BUILDLESS_DEPS)
+
+include $(MAKERULES)
+
+systemc: FORCE
+	perl $(SCRIPTSDIR)/create_routing.pl $(INCLUDES) RoutingC.routing.nc
+	@$(CREATE_NESC_DEPS)
+	cat build/nesc_deps.txt | perl $(SCRIPTSDIR)/create_RoutingMsgExt.pl -ncstdin
+	@$(CREATE_NESC_DEPS)
+	cat build/nesc_deps.txt | perl $(SCRIPTSDIR)/create_Neighborhoods.pl -ncstdin $(INCLUDES)
+	@$(CREATE_NESC_DEPS)
+	cat build/nesc_deps.txt | perl $(SCRIPTSDIR)/create_Config.pl $(INCLUDES)
+	@$(CREATE_NESC_DEPS)
+
+bytes: FORCE
+	@objdump -h $(MAIN_EXE) | perl -ne '$$b{$$1}=hex $$2 if /^\s*\d+\s*\.(text|data|bss)\s+(\S+)/; END { printf("%16d bytes in ROM\n%16d bytes in RAM\n",$$b{text}+$$b{data},$$b{bss}); }'
+
+ident: FORCE
+	@$(SCRIPTSDIR)/set-mote-id --read $(MAIN_EXE) IdentM.install_id IdentM.program_name IdentM.unix_time TOS_AM_GROUP
+

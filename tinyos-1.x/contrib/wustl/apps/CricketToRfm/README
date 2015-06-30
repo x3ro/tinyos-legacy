@@ -1,0 +1,35 @@
+Author: Chien-Liang Fok (liangfok@wustl.edu)
+
+CricketToRF reads cricket data from the serial interface and transmits
+the data over wireless.  It is to be used in conjuction with RFToCricket,
+which receives the messages and translates them back into a UART ASCII
+string.
+
+---- Making the UART baud rate match ---
+The Cricket motes set their UART baud rate to be 115.2 kbps.  Mica2 motes
+by default use 57.6 kbps.  In order for the two motes to communicate, both
+must have the same baud ratings.
+
+How to change Mica2 to 115.2kbps:
+  1) Open <tos>/tos/platform/mica2/HPLUART0M.nc
+  2) Comment out the two lines following the comment "// Set 57.k KBps".
+     They should be:
+       //outp(0,UBRR0H); 
+       //outp(15, UBRR0L);
+  3) Add the following in its place:
+       outp(0,UBRR0H); 
+       outp(7, UBRR0L);
+
+How to change Cricket motes to run at 57.6kbps:
+  1) Open <tos>/tos/platform/cricket/HPLUART0M.nc
+  2) Comment out the two lines following the comment "// 115kbps, N-8-1".
+     They should be:
+       //outp(0,UBRR0H); 
+       //outp(7, UBRR0L);
+  3) Uncomment the two lines following the comment "// Set 57.6 KBps".
+     They should be:
+       outp(0,UBRR0H); 
+       outp(15, UBRR0L);
+
+-- Installation --
+Install CricketToRF on a mote that is connected to the Cricket.

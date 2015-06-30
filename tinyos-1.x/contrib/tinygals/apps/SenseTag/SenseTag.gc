@@ -1,0 +1,59 @@
+// $Id: SenseTag.gc,v 1.1 2004/04/14 06:43:20 celaine Exp $
+
+/* Copyright (C) 2003-2004 Palo Alto Research Center
+ *
+ * The attached "TinyGALS" software is provided to you under the terms and
+ * conditions of the GNU General Public License Version 2 as published by the
+ * Free Software Foundation.
+ *
+ * TinyGALS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TinyGALS; see the file COPYING.  If not, write to
+ * the Free Software Foundation, 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+/*
+ * Author: Elaine Cheong <celaine @ users.sourceforge.net>
+ * Date: 5 April 2004
+ *
+ */
+
+/** 
+ * TimerActor contains a clock.  For each clock firing, TimerActor
+ * updates the current tick count in the TinyGUYS variable 'count'.
+ * It also triggers SenseActor via the 'trigger' port.  When
+ * triggered, SenseActor requests data from a sensor.  When the sensor
+ * data is received, SenseActor sends the sensor data, along with the
+ * current value of 'count', to DisplayActor, which displays the
+ * sensor value on the LEDs.
+ **/
+application SenseTag {
+    parameter {
+        // Declare and initialize global TinyGUYS variable.
+        uint16_t count = 0;
+    } implementation {
+        actor TimerActor, SenseActor, DisplayActor;
+
+        // Connect global to local TinyGUYS variable names.
+        count = TimerActor.count;
+        count = SenseActor.count;
+
+        // Connect actor output ports to input ports.
+        TimerActor.trigger =[64]=> SenseActor.trigger;
+
+        SenseActor.output =[64]=> DisplayActor.input;
+        DisplayActor.displayComplete =[64]=> SenseActor.outputComplete;
+        DisplayActor.displayComplete =[64]=> TimerActor.outputComplete;
+
+        appstart {
+            // Initial tokens to place in port queues.
+            SenseActor.trigger();
+        }
+    }
+}
+

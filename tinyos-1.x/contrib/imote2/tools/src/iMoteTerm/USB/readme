@@ -1,0 +1,16 @@
+README for Rev1 of iMoteTerm USB edition application
+
+Author:  Robbie Adler
+Last Updated 2/26/2007
+
+The rev1 subdirectory contains the source code for the iMoteTerm USB edition
+application and the project files required for building the application under
+Microsoft Visual Studio 2003.net. If a later version of VS is required, the
+project files should be importable(this has been tested only once).
+
+Features:
+-Ability to talk to either 1 UART or any number of USB-based iMote2's
+-Ability to save the raw data and raw sampleRecords that are produced by
+ the TestSensorboard application.  The src/Matlab directory contains
+ scripts that allow these files to be imported into Matlab.
+

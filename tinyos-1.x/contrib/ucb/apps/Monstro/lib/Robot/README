@@ -1,0 +1,3 @@
+Most of these utilities are designed to work with through the robot
+client/server system. Make sure the CPU is powered on, and two motes
+are connected: a RoboMote and a TOSBase

@@ -1,0 +1,152 @@
+# Energy model for the Telos
+# see http://www.eecs.harvard.edu/~shnayder/ptossim/ for details
+# Lines starting with '#' are comments
+
+# Format: KEY\s+VALUE
+# Unless otherwise specified, VALUE is a current in mA
+# Value is always assumed to be a number
+
+VOLTAGE	 3.0
+
+# CPU numbers:
+# Idle mode is what the CPU is in when not actively executing, but 
+# no special action is taken.  The per-active-cycle numbers are added 
+# on top of that
+
+CPU_ACTIVE			1.8
+CPU_IDLE			0.052
+CPU_STANDBY			0.0024
+# TODO correct these values
+CPU_ADC_NOISE_REDUCTION		1.0
+CPU_POWER_DOWN			0.103
+CPU_POWER_SAVE			0.110
+CPU_EXTENDED_STANDBY		0.223
+
+# The startup mode for the cpu
+# TODO correct these values
+CPU_INIT			3.2
+
+# This is probably incorrect, but the simulator is hardcoded for 4Mhz, and
+# the fixes for that in powertossim aren't merged yet
+CPU_FREQ	4000000
+
+
+# These are from the datasheet.
+# Some of the numbers Joe measured match somewhat closely, off by .3mA.
+# E.g., RX = 20, TX_00 = 17.7
+RADIO_RX   19.7
+RADIO_TX_00   17.4
+RADIO_TX_01   16.5
+RADIO_TX_02   15.2
+RADIO_TX_03   13.9
+RADIO_TX_04   12.5
+RADIO_TX_05   11.2
+RADIO_TX_06   9.9
+RADIO_TX_07   8.5
+#RADIO_TX_08   0
+#RADIO_TX_09   0
+#RADIO_TX_0A   0
+#RADIO_TX_0B   0
+#RADIO_TX_0C   0
+#RADIO_TX_0E   0
+#RADIO_TX_0F   0
+#RADIO_TX_40   0
+#RADIO_TX_50   0
+#RADIO_TX_60   0
+#RADIO_TX_70   0
+#RADIO_TX_80   0
+#RADIO_TX_90   0
+#RADIO_TX_C0   0
+#RADIO_TX_E0   0
+#RADIO_TX_FF	0
+RADIO_ON	1.0
+RADIO_OSCON	0.5
+
+# The default power mode (0x0F, but python doesn't like hex numbers in floats)
+RADIO_DEFAULT_POWER  0.0
+
+# TODO correct all the numbers from this point on
+
+# LED
+LED		2.2
+#default to off
+LED_INIT	0
+
+# EEPROM
+EEPROM_READ	6.24
+EEPROM_WRITE	18.40
+
+#ADC
+# we thought it took power, so it's tracked, but it actually doesn't
+ADC	0.0
+
+# If the sensor board is plugged in, it draws this much current at all times
+SENSOR_BOARD	0.69
+
+# Sensors - don't actually use power beyond the general sensor board power
+SENSOR_PHOTO	0
+SENSOR_TEMP	0
+VOLTAGE	3.0
+
+# Joe's message
+#
+# In each file, the first row is distance, the second row is average value,
+# and the third row is standard deviation.
+# 
+# recv - packet success rate
+# lqi - lqi value as a function of the maximum value.  ie: lqi of 1
+# corresponds to 110, lqi of 0 corresponds to 65.
+# rssi - signal strength in dBm, you will need to convert to the radio's
+# native rssi values (see datasheet)
+# 
+# here are power numbers for Telos:
+# Mote Standby (RTC on)    5.1 uA
+# MCU Idle (DCO on)        54.5 uA
+# MCU Active               1.8 mA
+# MCU + Radio RX           21.8 mA
+# MCU + Radio TX (0dBm)    19.5 mA
+# MCU + Flash Read         4.1 mA
+# MCU + Flash Write        15.1 mA
+# 
+# wakeup times may not be in current power tossim, but this is the time it
+# takes to transition from power down to active, multiplied by the current
+# consumed in that state gives you the power you waste by starting the radio
+# or MCU... just something that would be nice to get in there eventually. 
+# MCU Wakeup               6 us
+# Radio Wakeup             580 us
+# 
+# I also have numbers for MicaZ:
+# 
+# Mote Standby (RTC on)    27.0 uA
+# MCU Idle (DCO on)        3.2 mA 
+# MCU Active               8.0 mA
+# MCU + Radio RX           23.3 mA
+# MCU + Radio TX (0dBm)    21.0 mA
+# MCU + Flash Read         9.4 mA
+# MCU + Flash Write        21.6 mA
+# 
+# wakeup info:
+# MCU Wakeup               180 us
+# Radio Wakeup             860 us
+# 
+# -Joe
+# 
+# 
+# 
+#   1.0000000e+000	  3.0000000e+000	  9.0000000e+000	  1.2000000e+001	  1.5000000e+001	  2.0000000e+001	  2.5000000e+001	  3.0000000e+001	  3.5000000e+001	  5.0000000e+001	  5.5000000e+001	  6.5000000e+001	  7.5000000e+001	  8.5000000e+001	  9.5000000e+001	  1.0500000e+002	  1.1500000e+002	  1.2500000e+002	  1.3500000e+002	  1.5000000e+002	  1.7500000e+002	  1.9000000e+002	  2.0000000e+002	  2.2500000e+002	
+#   1.0000000e+000	  1.0000000e+000	  1.0000000e+000	  1.0000000e+000	  1.0000000e+000	  9.9830076e-001	  9.9305679e-001	  9.9191176e-001	  9.7099573e-001	  9.9012721e-001	  8.9959527e-001	  9.2864832e-001	  6.7069641e-001	  7.0898749e-001	  7.7292225e-001	  6.0699019e-001	  4.8387097e-001	  6.6836263e-001	  5.0676507e-001	  5.3571429e-001	  3.6674146e-001	  2.5000000e-001	  1.2433862e-001	  0.0000000e+000	
+#   0.0000000e+000	  0.0000000e+000	  0.0000000e+000	  0.0000000e+000	  0.0000000e+000	  1.5217949e-006	  1.5953405e-002	  1.6717950e-002	  8.5805197e-002	  3.1202740e-002	  1.5890991e-001	  2.0383086e-001	  2.7743986e-001	  3.7399393e-001	  2.5652034e-001	  3.2716744e-001	  1.1567529e-001	  4.2758101e-001	  3.1273977e-001	  3.6186641e-001	  2.9827014e-001	  1.3517656e-001	  2.6736732e-001	  0.0000000e+000	
+# 
+# 
+# 
+#   1.0000000e+000	  3.0000000e+000	  9.0000000e+000	  1.2000000e+001	  1.5000000e+001	  2.0000000e+001	  2.5000000e+001	  3.0000000e+001	  3.5000000e+001	  5.0000000e+001	  5.5000000e+001	  6.5000000e+001	  7.5000000e+001	  8.5000000e+001	  9.5000000e+001	  1.0500000e+002	  1.1500000e+002	  1.2500000e+002	  1.3500000e+002	  1.5000000e+002	  1.7500000e+002	  1.9000000e+002	  2.0000000e+002	  2.2500000e+002	
+#  -5.0000000e+000	 -3.6972666e+001	 -3.7645155e+001	 -5.2282295e+001	 -5.8172419e+001	 -5.9801555e+001	 -6.2774638e+001	 -6.8945321e+001	 -7.0625093e+001	 -7.1370049e+001	 -7.0580249e+001	 -7.1120391e+001	 -7.0170213e+001	 -7.1000000e+001	 -7.0316849e+001	 -7.1000000e+001	 -7.0041593e+001	 -7.1200000e+001	 -7.6100000e+001	 -7.8800000e+001	 -8.0000000e+001	 -8.0229282e+001	 -8.2024194e+001	 -8.5957447e+001	
+#   0.0000000e+000	  5.4443280e+000	  3.7133265e+000	  2.3515942e+000	  3.4909166e+000	  3.8473819e+000	  3.5159615e+000	  4.1263230e+000	  3.4460830e+000	  4.5158536e+000	  7.6943596e+000	  1.3019756e+001	  1.7342540e+001	  2.1362796e+001	  1.4857934e+001	  3.2027754e+001	  2.3495782e+001	  1.4985474e+000	  1.3997791e+001	  8.3433746e+000	  3.4261554e+000	  7.9204145e+000	  1.4034564e+001	  2.0170351e+000	
+# 
+# 
+# 
+#   1.0000000e+000	  3.0000000e+000	  9.0000000e+000	  1.2000000e+001	  1.5000000e+001	  2.0000000e+001	  2.5000000e+001	  3.0000000e+001	  3.5000000e+001	  5.0000000e+001	  5.5000000e+001	  6.5000000e+001	  7.5000000e+001	  8.5000000e+001	  9.5000000e+001	  1.0500000e+002	  1.1500000e+002	  1.2500000e+002	  1.3500000e+002	  1.5000000e+002	  1.7500000e+002	  1.9000000e+002	  2.0000000e+002	  2.2500000e+002	
+#   9.3167928e-001	  9.3172050e-001	  9.2838997e-001	  9.2618378e-001	  9.2710038e-001	  9.2410780e-001	  9.1113900e-001	  9.0321637e-001	  8.7807560e-001	  8.9593267e-001	  7.9572783e-001	  8.3656970e-001	  5.8661251e-001	  6.6189559e-001	  6.3550314e-001	  4.9604161e-001	  3.3056241e-001	  5.3810073e-001	  3.5478245e-001	  4.4390572e-001	  3.6915175e-001	  2.7706553e-001	  1.4657210e-001	  0.0000000e+000	
+#   4.0700328e-003	  3.8181885e-003	  4.8851738e-003	  6.6601911e-003	  6.0063107e-003	  7.7624898e-003	  3.1499005e-002	  3.9931096e-002	  9.7546236e-002	  4.1023312e-002	  1.7006415e-001	  1.2513008e-001	  1.7504235e-001	  2.8414129e-001	  1.8009302e-001	  2.0437215e-001	  1.2140026e-001	  2.5288831e-001	  1.4113228e-001	  1.9154149e-001	  1.5625198e-001	  1.0901758e-001	  3.3693791e-002	  0.0000000e+000	
+# 
+# 

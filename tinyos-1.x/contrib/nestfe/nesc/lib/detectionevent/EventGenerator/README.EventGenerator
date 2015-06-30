@@ -1,0 +1,20 @@
+//$Id: README.EventGenerator,v 1.1 2005/07/22 20:37:46 phoebusc Exp $
+By default, only the DummyEvent Generator is turned on and all others
+are turned off.
+
+- DummyEventGen (dis)enabled by RegistryC.DummyDetectionTimer
+- UserButtonEvent (dis)enabled by RegistryC.UserButtonEventEnabled
+- PIRSimpleThreshEvent and PIRDetectEvent are (dis)enabled by
+  RegistryC.PirSampleTimer plus special flags to be set by RPC.poke()
+
+- PIRSimpleThreshEvent and PIRDetectEvent both share the
+  same PIRDetectValue registry variable.  They should not be both
+  enabled at the same time.
+  * For either one to work, the sampling timer of PIRRawDriver
+    must be enabled (RegistryC.PirSampleTimer)
+  * by default, PIRDetectEvent is enabled via a boolean flag variable
+    in PIRDetectFilterM.PIRDetectEnabled
+  * by default, PIRSimpleThreshEvent is not enabled via a boolean flag
+    variable in PIRSimpleThreshEventM.PIRSimpleThreshEnabled
+  This hack was to save ROM space... we should really be using
+  RegistryC for this.

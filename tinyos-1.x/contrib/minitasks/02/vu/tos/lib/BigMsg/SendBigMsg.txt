@@ -1,0 +1,31 @@
+SendBigMsg:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The SendBigMsg component allows large memory buffers (few KBs) to be sent back 
+to the base station. The memory region does not have to be continuous, which
+allows the use of circular buffers on the motes. The SendBigMsg component 
+automatically cuts and pastes the data of the memory region into regular
+message packets. The packets contain a sequence number and are transmitted 
+in order. Each packet is retried several times if no acknowledgment is
+received. The base station must run the GenericBase application which forwards 
+all messages to a PC connected to the base station. A java programm 
+(PrintBigMsgs) dumps the messages to the standard output, one line per 
+big message.
+
+THE JAVA PROGRAM:
+
+The java program (PrintBigMsgs) displays each BigMsg in a line. The program 
+can connect to a SerialForward application, or can use the serial port directly.
+The program does not display corrupted or partial messages.
+
+TUNABLE PARAMETERS:
+
+The SendBigMsg component can be configured by changing the following value in 
+BigMsg.h:
+
+BIGMSG_RETRY_COUNT: The number of retries of each packet. If no acknowledgment
+is received for this many times, then the rest of the big message is not 
+transmitted. The default value is 5.

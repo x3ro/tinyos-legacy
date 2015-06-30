@@ -1,0 +1,9 @@
+TDIR=$(shell ncc -print-tosdir)
+COMPONENT=ECCProbe
+NESC_FLAGS=-I$(TDIR)/lib -I./ -I$(TDIR)/lib/Queue -DTIMEOUT_DELTA=250 -DTOSH_DATA_LENGTH=49 \
+-DLEDS
+
+DEFAULT_LOCAL_GROUP=96
+MSG_SIZE=49
+include ./Makerules
+

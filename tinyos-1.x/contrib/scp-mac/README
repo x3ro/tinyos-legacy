@@ -1,0 +1,189 @@
+
+  Guide for Using SCP-MAC
+
+------------------------------------------------------------------------
+This guide is also available at:
+  http://www.isi.edu/ilense/software/scpmac/guide.html
+------------------------------------------------------------------------
+
+Note: this guide reflects the latest SCP-MAC release.
+
+
+    Start Mote Programming with TinyOS
+
+SCP-MAC stack is implemented in TinyOS-1.x. If you have already worked
+with TinyOS-1.x, and have set up your programming environment, you can
+skip this section.
+
+In order to run SCP-MAC, you need to have TinyOS-1.x source code and
+programming environment on your machine. If you don't have experience
+with TinyOS mote programming, you should first look at TinyOS website
+<http://www.tinyos.net>. There is a lot of useful information to help
+you get started.
+
+There are also other useful web pages to help you start mote programming
+with TinyOS. Here is an example
+<http://www.isi.edu/~weiye/teaching/cs558/projects/mote_programming.html>.
+In this page, there are instructions for setting up your programming
+environment on a Linux machine, including links to precompiled tools
+such as cross-compilers.
+
+
+    Download the Source Code
+
+If you do not have TinyOS-1.x source code installed. You need to install
+it first. You can following the instructions on the TinyOS website
+<http://www.tinyos.net>. Or you can simply grab the tarball of
+TinyOS-1.1.14 from here
+<http://www.isi.edu/~weiye/teaching/cs558/projects/tinyos-1.1.14.tgz>,
+which is tested with our SCP-MAC.
+
+Now to download the SCP-MAC source code, go to the Download page
+<index.html#Download>. Note that you should extract the SCP-MAC tarball
+in a separate directory than the TinyOS directory. After extracting the
+tarball, you will see directory commstack/ with the following
+sub-directories:
+
+apps/   tools/   tos/
+
+The apps/ directory has several test programs to test different
+components of SCP-MAC stack. The one that tests SCP-MAC and shows how to
+use it is apps/ScpTest/ .
+
+
+    Things You Should Know Before Using SCP-MAC
+
+
+      CPU Clock Source on Mica2 motes
+
+We have implemented SCP-MAC in TinyOS over Mica2 motes. Our
+implementation uses a new timer component that supports CPU deep sleep
+mode. In this mode, the CPU clock is stopped. But the timer keeps
+running on an asynchronous hardware counter. A local system time is also
+maintained while the CPU is in sleep.
+
+The asynchronous counter is the major source that can wake up the CPU.
+When CPU wakes up, it first starts its clock. After the clock
+stabilizes, it starts executing the timer interrupt handler. The default
+CPU clock on Mica2 is a crystal oscillator (at 7.3MHz). It takes a long
+time (~4ms) for the crystal to stabilize after it starts. This could
+cause timing errors in the timer or system time. Therefore, in SCP-MAC
+implementation, we do not use the crystal oscillator as the CPU clock.
+Instead, we use the microcontroller's calibrated internal RC oscillator
+(at 8MHz). Its long-term stability is not as good as the crystal, but it
+has a very fast wakeup time (~180us). To change the CPU clock source, we
+need to use the 'uisp' program to change the fuse low byte on the Mica2
+motes. This is done automatically every time when you upload a binary
+image to a mote.
+
+However, when you run other TinyOS programs, you may still want to use
+the crystal oscillator. To select the crystal as the CPU clock, use the
+following command:
+
+uisp -dprog=dapa -dpart=ATmega128 --wr_fuse_l=ff
+
+Also, you can use the following command to check what type of clock is
+used:
+
+uisp -dprog=dapa -dpart=ATmega128 --rd_fuses
+
+If the fuse low byte is 0xff, then the crystal is selected. It is 0xc4
+when the internal RC oscillator is selected. Note that the above command
+is used with the parallel programming board. If you're using the serial
+programming board (MIB510), you should change '-dprog=dapa' to
+'-dprog=mib510 -dserial=/dev/ttyS0' (the same for the rest of the guide).
+
+
+      Disabling Boot Loader
+
+This issue may be specific to MicaZ motes. When programming MicaZ motes,
+the new TinyOS make system (as we used on TinyOS-1.1.14) automatically
+includes the network programming component Deluge, which in turn enables
+the boot loader on motes. However, with this configuration, SCP-MAC does
+not work. Therefore, when you build with SCP-MAC, we set to disable
+Deluge and the boot loader. However, if you have previously programmed
+MicaZ motes, the boot loader may already be enabled. To verify this on a
+mote, connect it to the programming board, and use the following command:
+
+uisp -dprog=dapa -dpart=ATmega128 --rd_fuses
+
+If the result has the following two lines,
+
+Fuse High Byte = 0xd8
+Fuse Extended Byte = 0xff
+
+then the boot loader is enabled. If the boot loader is disabled, which
+is we want, you should see the following two lines:
+
+Fuse High Byte = 0xd9
+Fuse Extended Byte = 0xff
+
+That is, the fuse high byte should be 0xd9. If the boot loader is
+enabled, you need to manually disable it with the following command:
+
+uisp -dprog=dapa -dpart=ATmega128 --wr_fuse_h=0xd9
+
+Note that you may have to repeat the command continuously for a few
+times to make it work. Use the previous command to read and verify the
+fuse bytes.
+
+
+    Using SCP-MAC Stack
+
+The best way to learn how to use SCP-MAC is to look at some examples.
+The application at 'apps/ScpTest/' shows you how to run SCP-MAC. Please
+look at the README file first. The config.h file defines compile-time
+options for each included component. Normally, you would program 3
+motes, and give them node ID from 1 to 3. The default configuration
+makes each node send both broadcast and unicast packets.
+
+The major debugging tool is a special node, called snooper. It passively
+listens to all the packets in the air, and display their contents on a
+connected PC. To program a mote as a snooper, you will compile the code
+at 'apps/Snooper/' for Mica2 or 'apps/SnooperZ/' for MicaZ, and upload
+its binary to the mote. You will connect the mote with your PC's serial
+port through a programming board. A simple program to display packet
+contents is at 'tools/snoop.c'. It displays each packet in the
+hexadecimal format. Tyler McHenry in our group has developed a better
+visualization tool <http://www.isi.edu/ilense/software/mnv/>. This tool
+still works with the snooper mote, but on the PC side, it feeds captured
+packets into Ethereal <http://www.ethereal.org/> for better
+visualization and analysis.
+
+There are two ways to set up a sleep/wakeup schedule. The default one is
+an automatic boot process, where each node tries to discover and follow
+an existing schedule through a boot protocol. This boot process usually
+takes a few seconds. No special configuration is needed to use the
+automatic boot. However, currently it does not fully work on MicaZ motes.
+
+The second way to set up a schedule is a manual or fixed boot process.
+To use this way, you will configure one node as a master, and all others
+as normal (slave) nodes. You should start all the slave nodes first (can
+be in multiple hops). Before the master node starts, all the slave nodes
+simply run low-power listening (LPL). When the master node starts (at
+last), it will broadcast its schedule, and all its neighbors will
+synchronize to that schedule. Each neighbor will re-broadcast the
+schedule once using a long preamble, so that the schedule is flooded to
+the whole network. A node will not send data packets before they
+synchronize with the schedule.
+
+
+    Known Issues
+
+Current implementation on MicaZ motes is still preliminary. The
+following configurations do not fully work on MicaZ:
+
+    * Adaptive channel polling
+    * CPU sleep
+    * Automatic boot (works for two nodes, not stable for more)
+    * Unicast only (not stable)
+
+If any of these options is selected, a warning message will be displayed
+during compile time. The option will be either automatically disabled,
+or suggested with a different parameter.
+
+------------------------------------------------------------------------
+Last modified by Wei Ye <mailto:weiye@isi.edu> on Feb. 1, 2007.
+
+
+

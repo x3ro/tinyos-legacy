@@ -1,0 +1,279 @@
+#!/usr/bin/perl -w
+#
+# $Id: toscheck,v 1.4 2002/01/31 06:44:49 kristinwright Exp $ 
+#
+
+sub which {
+    my ($cmd, $found, $warning);
+    $cmd = $_[0]; 
+    open WHICH, "which $cmd 2>&1 |" or die "can't fork which $cmd";
+    while (<WHICH>) {
+	if (/^which: no $cmd/ || /^no $cmd/ ) { 
+	    $warning = "--> WARNING: No $cmd in current path.\n";
+	    print "\n$warning";
+	    $errorstr .= "$warning";
+	    $found = 0;
+	    $errors = 1;
+	} else {
+	    print "\t$_";
+	    $found = 1;
+	}
+    }
+    close WHICH;
+    return $found;
+}
+
+sub is_windows() {
+    return 1 if (grep { /cygwin/i } `uname`);
+    return 0;
+}
+
+sub chk_uisp() {
+    my $found;
+    print "uisp:\n";
+    $found = which("uisp");
+    if ($found) {
+	open UISP, "uisp --version 2>&1 |" or die "can't fork uisp --version";
+	while (<UISP>) {
+	    print "\t$_" if !/Uros/;
+	}
+	close UISP;
+    } else {
+	$errors = 1;
+    }
+    print "\n";
+}
+
+sub chk_cygwin() {
+    my $system;
+    return if !is_windows();
+    print "Cygwin:\n";
+    open CYGCHECK, "cygcheck -s 2>&1 |" or die "can't fork cygcheck -s";
+    while (<CYGCHECK>) {
+	#print "\t$_" if !/Use -h/;
+	print "\tcygwin1.$1\n" if /^\s*(dll m.*)$/;
+    }
+    print "\n";
+}
+
+#
+# Look for the phrase 'version "1.3' in the first line
+#
+sub chk_java() {
+    my $found;
+    my $versionok = 0;
+    print "java:\n";
+    $found = which("java");
+    if ($found) {
+	open JAVA, "java -version 2>&1 |" or die "can't fork java -version";
+	while (<JAVA>) {
+	    print "\t$_";
+	    if ($_ =~ /version \"1\.3/) {
+		$versionok = 1;
+	    }
+	}
+	close JAVA;
+    } else {
+	$errors = 1;
+    }
+    if (!$versionok) {
+	    $warning = "--> WARNING: The JAVA version found first by toscheck may not be version 1.3 " .
+		"which is required by TOS. Please " .
+		          "ensure that the located Java version is 1.3";
+	    if (is_windows()) {
+		$warning .= "Depending on your PATH environment variable, there is often a 1.2 " .
+		    " version of java.exe in c:\\windows\\system32 that is " .
+			"\"seen\" first. Check that this is version 1.3 or reconfigure your PATH " .
+			    "environment variable if this is the case.";
+	    }
+	    print "\n$warning";
+	    $errorstr .= $warning;
+	    $errors = 1;
+    }
+    print "\n";
+};
+
+sub chk_perl() {
+    my $found;
+    print "perl:\n";
+    $found = which("perl");
+    if ($found) {
+	print "\tVersion: ";
+	open PERL, "perl --version 2>&1 |" or die "can't fork perl --version";
+	while (<PERL>) {
+	    print $1 if /(v[\d|\.]+.*$)/;
+	}
+	close PERL;
+    } else {
+	$errors = 1;
+    }
+    print "\n\n";
+};
+
+sub chk_lex {
+    my $found;
+    print "flex:\n";
+    which("flex");
+    print "\n";
+}
+
+sub chk_yacc {
+    my $found;
+    print "bison:\n";
+    which("bison");
+    print "\n";
+}
+
+sub chk_avrgcc {
+    my $found;
+    print "avrgcc:\n";
+    $found = which("avr-gcc");
+    if ($found) {
+	print "\tVersion: ";
+	#print `avr-gcc --version`;
+	my $version = `avr-gcc --version`;
+	print $version;
+	if (!($version =~ /3\.0\.2/)) {
+	    $warning = "--> WARNING: avr-gcc needs to be version 3.0.2 to run correctly.";
+	    print "\n$warning";
+	    $errorstr .= $warning;
+	    $errors = 1;
+	}
+    }else {
+	my $warning = "--> WARNING: avr-gcc not found.\n";
+	print "\n$warning";
+	$errorstr .= $warning;
+	$errors = 1;
+    }
+    print "\n\n";
+}
+
+sub chk_path {
+    my @dirs;
+    print "Path:\n";
+    if (exists $ENV{PATH}) {
+	@dirs = split /:/, $ENV{PATH};
+	foreach $dir (@dirs) {
+	    print "\t$dir\n"
+	}
+	
+    } else {
+	my $warning = "--> WARNING: PATH environment variable doesn't exist.\n";
+	print "\n$warning";
+	$errorstr .= $warning;
+	$errors = 1;
+    }
+    print "\n";
+}
+
+#
+# - should include nest/tools
+# - '.' is recommended
+# 
+sub chk_classpath {
+    my @dirs;
+    my $warning; 
+    my $toolsfound = 0;
+    my $commfound = 0;
+    my $dotfound = 0;
+    print "Classpath:\n";
+    if (exists $ENV{CLASSPATH}) {
+	if (is_windows()) {
+	    $separator = ';';
+	} else {
+	    $separator = ':';
+	}
+	@dirs = split /$separator/, $ENV{CLASSPATH};
+	foreach $dir (@dirs) {
+	    print "\t$dir\n";
+	    if ($dir =~ /comm\.jar/) {
+		$commfound = 1;
+	    }
+	    if ($dir =~ /nest[\\\/]tools/) {
+		$toolsfound = 1;
+	    }
+	    if ($dir =~ /\./) {
+		$dotfound = 1;
+	    }
+
+	}
+	print "\n";
+	if ($commfound == 0) {
+	    $warning = "--> WARNING: CLASSPATH may not include comm.jar. Please add " .
+		           "comm.jar to your CLASSPATH or you may experience " .
+			       "configuration problems\n";
+	    print "$warning";
+	    $errorstr .= $warning;
+	    $errors = 1;
+	}
+	if ($toolsfound == 0) {
+	    $warning = "--> WARNING: CLASSPATH may not include {TOSROOT}/nest/tools. Please add " .
+		          "the {TOSROOT}/nest/tools directory to your CLASSPATH or you may " .
+			      "experience configuration problems\n";
+	    print "$warning";
+	    $errorstr .= $warning;
+	    $errors = 1;
+	}
+	if ($dotfound == 0) {
+	    $warning = "--> WARNING: CLASSPATH may not include '.' (that is, " .
+		          " the wildcard symbol for the current working directory). Please add " .
+		              "'.' to your CLASSPATH or you may " .
+			          "experience configuration problems.\n";
+	    print "$warning";
+	    $errorstr .= $warning;
+	    $errors = 1;
+	}
+    } else {
+	my $warning = "--> WARNING: CLASSPATH environment variable doesn't exist.\n";
+	print "$warning";
+	$errorstr .= $warning;
+	$errors = 1;
+    }
+    print "\n\n";
+}
+
+sub chk_tos {
+    if (is_windows()) {
+    } else {
+    }
+}
+
+sub chk_javacomm {
+    if (is_windows()) {
+    } else {
+    }
+}
+
+$version = "\$Id\$";
+$errorstr = "";
+$errors = 0;    # binary, not a counting var #
+print "toscheck version $version\n";
+
+chk_path();
+chk_classpath();
+chk_avrgcc();
+chk_perl();
+chk_lex();
+chk_yacc();
+chk_java();
+chk_cygwin();
+chk_uisp();
+chk_javacomm();
+chk_tos();
+
+if ($errors) {
+    print "toscheck completed with errors:\n\n$errorstr\n";
+} else {
+    print "toscheck completed without error.\n\n";
+}
+
+__END__
+
+
+
+
+
+
+
+
+

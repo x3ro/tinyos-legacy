@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Uninstalling TinyOS</title>
+</head>
+<body>
+<h1>Uninstalling TinyOS</h1>
+There are two cases: uninstalls of old (1.0, or hand-built)
+installations, and uinstalls of TinyOS 1.1 or later. These are covered
+separately.
+<h2>Uninstalling TinyOS 1.0, or hand-built install</h2>
+On Windows,      if you installed using the Installshield Wizard, use
+the Remove option      under Add/Remove Programs -- save your work
+first. Don't worry about      incomplete removal, but do delete any left
+over files.<br>
+<br>
+If you use Linux, didn't use the installshield, or installshield
+removal failed, remove the following items manually:<br>
+<ul>
+  <li><a href="#cygwin">cygwin</a> (Windows only)</li>
+  <li>avr-gcc, avr-binutils, avr-libc (possibly the WinAVR package on
+Windows, possibly some rpms)</li>
+  <li>previous versions of nesC</li>
+  <li>previous versions of uisp</li>
+</ul>
+<h4><a name="cygwin"></a>Cygwin Uninstallation</h4>
+Remove the following items to fully uninstall cygwin:<br>
+<ul>
+  <li>Cygwin shortcuts and start menu entry (Programs/Cygwin)</li>
+  <li>Cygwin registry entries under <span
+ style="font-family: monospace;">HKEY_LOCAL_MACHINE\SoftWare\Cygnus
+Solutions\ </span>(run <span style="font-family: monospace;">regedit</span>
+or <span style="font-family: monospace;">regedt32</span> to remove these)
+  </li>
+  <li>Everything under the cygwin root directory. Save useful files of
+course... you could just rename the cygwin root to say, cygwin-old, to
+be extra safe.</li>
+</ul>
+<h2>Unistalling TinyOS 1.1 or later</h2>
+On Windows, if you used the InstallShield Wizard, you can just use the
+Remove option under Add/Remove Programs. See the discussion below on
+what to do if this fails (which shouldn't happen under normal
+circumstances, but can occur after failed installations or if some files
+are moved manually after installation).<br>
+<br>
+On Linux, and on Windows when not using the installshield, you can
+simply remove all the rpms (with explicit <span
+ style="font-family: monospace;">rpm -e</span> commands). On Windows,
+you might want to remove cygwin too (see <a href="#cygwin">cygwin
+uninstallation</a>).<br>
+<br>
+In all cases, you may find some files left behind in <span
+ style="font-family: monospace;">/opt/tinyos-1.x</span> or <span
+ style="font-family: monospace;">&lt;installation
+root&gt;\cygwin\opt\tinyos-1.x</span>, you can delete these if you wish.<br>
+<h4>HOW TO RECOVER FROM INCOMPLETE TinyOS 1.1 INSTALLSHIELD UNINSTALLS</h4>
+It is possible for the TinyOS setup to enter a mode where it attempts
+an uninstall, fails for some reason (most often the cygwin directory
+has been moved since installation, and now it cannot be found to
+uninstall the TinyOS RPMs), yet remains      installed. Sometimes the
+Installshield setup will fail during      installation for some reason
+(perhaps because the user had      insufficient privileges, for
+example). Sometimes the Add/Remove Programs uninstall      does not
+complete. In either case, the end result is      that the setup
+continues to attempt uninstall, fails, attempts uninstall, fails,
+attempts uninstall...<br>
+<br>
+One way to recover from this state is to reinstall cygwin manually so
+that the uninstallation can succeed, complete the uninstallation, and
+then re-install TinyOS. You can do this as follows:<br>
+<ol>
+  <li>Don't worry about older, incomplete tinyos-1.x version (1.0)
+uninstalls</li>
+  <li>Delete all previous tools (see list above) </li>
+  <li>(Re)install cygwin. You can download the cygwin setup program
+used for TinyOS 1.1.0 from </li>
+  <li><a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/tinyos-cygwin-auto.zip">
+http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/tinyos-cygwin-auto.zip </a> <br>
+Using winzip, unzip the archive and execute the setup.exe file.  When
+asked to 'choose a      download source', select 'Install from local
+directory'. When asked to select the root      install directory, do not
+modify the given root directory but do take note of the default
+directory because later      you will need to reinstall TinyOS into
+this directory (step 5). Take the default      local package directory.
+Accept the defaults on 'Select Packages'.</li>
+  <li>Using the Add/Remove Programs UI, run Installshield to complete
+the *un*install. Note that the setup wizard will launch black bash
+shells for each     RPM that it uninstalls. These windows might display
+an error at the top of the window -- this is normal.</li>
+  <li>Completely remove the cygwin installation (<a href="#cygwin">see
+steps above</a>)</li>
+  <li>Run the 1.1.0 Installshield setup again to install; SPECIFY
+THE&nbsp; SAME DIRECTORY as the initial, failed install.
+  </li>
+</ol>
+</body>
+</html>

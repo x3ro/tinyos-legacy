@@ -1,0 +1,16 @@
+RSSI measurements are read at the following times:
+
+PRE_TX:  before sending, to see if channel is busy.
+POST_TX: after sending, to estimate clear channel rssi. 
+RX:      during reception, to estimate busy channel rssi.
+
+
+- PRE_TX takes low range measure, and 'possibly' high range measure.
+'possibly' means that "low range measurement saturates low range"
+
+
+- POST_TX only takes one measure at a time (to minimize the delay till we can
+send further packets/ACKs)
+
+- RX takes high range measure, then 'possibly' low range measure, where
+  'possibly means that "high range measurement is 0".

@@ -1,0 +1,85 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>watchSurface</title>
+</head>
+
+<body>
+
+<h1>watchSurface</h1>
+<p><i>watchSurface </i>will plot data over <i>space </i>from all packets coming 
+from a particular set of motes or from a particular set of serial ports.&nbsp; 
+Unlike <i>watch</i>, <i>watchSurface </i>throws away all data from the past.&nbsp; 
+It knows where each mote is located and plots the last data point from each mote 
+in the correct location.&nbsp; These points form a surface in space.&nbsp; To 
+start <i>watchSurface</i>, make sure that the motes you want to listen to are <i>
+mapped </i>to both a <i>packetPort </i>and a <i>location </i>in your
+<a href="../applicationEnvironment.html">environment</a>.&nbsp; Then, to watch 
+data from motes 1, 5, 101 and 34,just type</p>
+<p><font face="Courier New">h= watchSurface([1 5 101 34])</font></p>
+<p>or, if you want to listen to all packets on a particular port, for example 
+COM1 and COM2,type</p>
+<p><font face="Courier New">h=watchSurface(getPacketPorts({'COM1', 'COM2'}))</font></p>
+<p>or if you want to listen to all ports and all motes:</p>
+<p><font face="Courier New">h=watch('all')</font></p>
+<p>The return value 'h' is a handle to the plot that was created.&nbsp; Make 
+sure that the motes you are watching are not colinear or you will get errors 
+when drawing a surface.&nbsp; As long as you have packets coming in that have a 
+field called '<i>samples</i>', you should get output that looks like this:</p>
+<p>&nbsp;</p>
+<p>The <i>oscope </i>application has a '<i>samples</i>' field, so watch works 
+with packets coming from mores running <i>oscope </i>or <i>generic sensor</i>.&nbsp; 
+But what if I don't want to watch the '<i>samples</i>' field, I want to watch a 
+different field?&nbsp; You can set the field to be plot using the following 
+command:</p>
+<p><font face="Courier New">setWatchSurfaceFieldName('lightReadings')</font></p>
+<p>Another thing you might want to do is filter your data before plotting it.&nbsp; 
+For example, if you are plotting light readings you might not want to plot <i>
+all </i>the readings that come in on each packet, you might want to print the 
+average of all light readings in each packet.&nbsp; You can use the following 
+command:</p>
+<p><font face="Courier New">setWatchSurfaceFilterName('mean')</font></p>
+<p>To do exactly that.&nbsp; The default filter is to take the last data point.&nbsp;
+<i>WatchSurface </i>will now plot the mean of your data in each packet instead 
+of the last data point.&nbsp;&nbsp; You can also write more sophisticated 
+filters and use those.&nbsp; </p>
+<p>After you run <i>watchSurface </i>for a while, you might like what you see 
+and what to access the data that was just plotted.&nbsp; You can do that with 
+the following command:</p>
+<p><font face="Courier New">[myXData,myYData,myZData] =get(h,'XData','YData','ZData')</font></p>
+<p>where 'h' is the&nbsp; handle returned by the command <i>watch.</i></p>
+<p>If watchSurface is running too slow and you need to decrease the resolution 
+or if you want to increase the resolution to make it look better, you can use 
+the following command</p>
+<p><font face="Courier New">setWatchSurfaceResolution(10) </font></p>
+<p>The default is 10, which means that the interpolated surface with be a 10 by 
+10 grid.</p>
+<p>You may also want to plot the actual data points on the screen instead of 
+just looking at the interpolated surface.&nbsp;&nbsp; You can do that with this 
+command:</p>
+<p><font face="Courier New">setWatchSurfaceDrawPoints(1)</font></p>
+<p>That command toggles watchSurface to draw the true data points or not.&nbsp;
+</p>
+<p>Just as in watch, you can change the method that adds the data to watch.</p>
+<p><font face="Courier New">setWatchSurfaceAddMethod('myFunction')</font></p>
+<p>The default add method is called <i>addDataToWatchSurface</i>.&nbsp; This is 
+especially useful if you change the global variable WATCH_SURFACE_PLOT_FUNCTION 
+before running watch.&nbsp; WATCH_SURFACE_PLOT_FUNCTION is default set to '<i>surfc</i>' 
+which should plot both a surface and a contour.&nbsp; However, you may want to 
+use '<i>surf</i>' or 'mesh' or 'contour' instead, or even 'plot3' or some other 
+function.&nbsp; If you do, you may or may not have to write your own add method.</p>
+<p>Finally, if you want to change the drawing style of your <i>watchSurface </i>
+plot, you can pass it the same parameters you would pass a SURF command in 
+matlab.&nbsp; You can also use the HOLD, AXIS, LEGEND and other commands that 
+you can use with PLOT.</p>
+<p>Note that watchSurface does not yet have filters for mote IDs, group IDs, or 
+AM types.&nbsp; It also does not yet support reading from multiple data 
+channels.</p>
+
+</body>
+
+</html>

@@ -1,0 +1,27 @@
+$Id: README.SimHelp,v 1.1 2005/07/15 21:28:03 phoebusc Exp $
+Author: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc)
+
+
+This directory is for putting files that are useful for simulation.
+
+Check the output from 'make', but this directory should be one of the
+first entries in ncc's search path, and hence the files found here
+will be used instead of the original files elsewhere.  It is generally
+a good idea only to put files that are relatively stable (not being
+changed in the CVS tree very much) in this directory.  Do a diff on
+the files with the originals if you want to be sure there aren't great
+functional differences.
+
+Purposes
+********
+1) adding Debug Statements to library files without changing the original.
+   ex. OscopeM.nc from contrib/ucb/tos/lib/Oscope
+2) Make sure the proper sensorboard.h file is pulled in for
+   simulation.
+   * this means not including contrib/nestfe/nesc/sensorboard/trio for
+     make pc
+   * this means that we need PIR.nc, the interface file from 
+     contrib/nestfe/nesc/sensorboard/trio, for simulations
+3) Remove TOSSIM compilation compatibility issues with PowerState.nc
+   by not wiring Main.nc to PowerStateM.  (Not sure what PowerState is
+   for, but we don't need it).

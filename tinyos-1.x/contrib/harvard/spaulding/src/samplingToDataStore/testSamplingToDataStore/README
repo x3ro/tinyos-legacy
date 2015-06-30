@@ -1,0 +1,27 @@
+***************************************
+***  DriverSamplingDataStore README ***
+***************************************
+Author: Konrad Lorincz
+Date: May 28, 2005
+
+
+This directory contains an example of how to wire the
+MultiChanSampling, SamplingToDataStore, and DataStore components.  The
+wiring for the final Driver program should be very similar.
+
+To Note:
+========
+ - By default, the DataStore now formats the flash every time
+   DataStore.init() is called.  This makes things a bit simpler, at the
+   cost of a longer init() cycle.  This can be disabled by enabling
+   the compile time flag DS_FORMAT_DISABLED in the Makefile.
+
+ - For the final Driver, you will want most or all the CFLAGS
+   variables in the Makefile under "For Debugging" to be disabled.
+   If disabled, the BLOCK_DATA_SIZE, DS_NBR_BLOCKS_PER_VOLUME,
+   DS_NBR_VOLUMES will be set to the correct values to use the entire
+   flash.  When debugging, it's useful to define a smaller flash for
+   printing amongst other things.
+ 
+ - When BLOCK_PRINT_SAMPLECHUNK is enabled, Block_print() will
+   interpret and print the Block data part as a SampleChunk.

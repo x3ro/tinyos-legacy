@@ -1,0 +1,8 @@
+#!/bin/sh
+# Skip pc
+test "$PLATFORM" == pc && exit 1
+
+cd ../../apps/TestMatchbox/Remote
+make $PLATFORM install.2
+# Exit with make's exit code, to detect compilation errors
+exit $?

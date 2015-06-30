@@ -1,0 +1,21 @@
+/*									tab:4
+ * Sarah Bergbreiter
+ * 11/8/2001
+ * COTS-BOTS
+ *
+ * The following is a UART component to receive data only (for the whiskers).
+ *
+ */
+
+
+TOS_MODULE UARTRX;
+
+ACCEPTS{
+	char UARTRX_INIT(void);
+};
+SIGNALS{
+	char UARTRX_RX_BYTE_READY(unsigned char data);
+};
+USES{
+	char UARTRX_TOGGLE_LED();
+};

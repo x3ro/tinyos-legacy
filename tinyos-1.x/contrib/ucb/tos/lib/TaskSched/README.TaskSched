@@ -1,0 +1,48 @@
+$Id: README.TaskSched,v 1.1 2004/10/14 05:53:25 cssharp Exp $
+
+README for TaskSched 
+Author/Contact: tinyos-help@millennium.berkeley.edu
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+
+Description:
+
+Do you currently worry about ...
+
+  1) Bending over backward when your task post fails?
+  2) Recording that your task posted?
+  3) Trying to prevent your task from posting more than once?
+
+And do you prefer or don't mind if ...
+
+  4) Your task can't be in the queue more than once at a time?
+
+Then end your worries for the low low price of ...
+
+  5) Only one byte per task -- equivalent to the EXTRA one byte or more of
+       RAM you would alone spend to address 2) or 3) and probably 1)!
+  6) Only two byte static overhead.  Wow!
+  7) O(1) insertion, O(1) execution, O(1) is in queue
+
+Because with the TaskSched module ...
+
+  8) Each task has its own private, GUARANTEED slot
+  9) Checking if the task is queued costs no extra space and neglible
+       computation
+  10) A task cannot be queued multiple times simultaneously, though no
+       harm if you try.  A task can always requeue itself, no problem!
+
+Stop worrying about embarassing task queue overflow!
+Use TaskSched!  Today!
+
+
+Tools:
+
+None.
+
+Known bugs / limitations:
+
+A given task cannot appear more than once simultaneously in the queue.
+Because of this, strict ordering of posts to the queue may be lost.  This
+only affects task execution order dependencies between two or more tasks.
+

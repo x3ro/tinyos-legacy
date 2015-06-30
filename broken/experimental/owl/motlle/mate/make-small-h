@@ -1,0 +1,9 @@
+MOTLLE=~/motes/motlle/src
+VM=~/motes/tinyos-1.x/apps/SmallVM/
+ncg -DTOSH_DATA_LENGTH=33 c $VM/MateConstants.h  MateConstants.h | egrep '{|}| OP' > $MOTLLE/mate.h
+java GenPrims.class compilertable $VM/vm.vmdf >$MOTLLE/runtime/mprimops.c
+java GenPrims.class vmargs $VM/vm.vmdf >$VM/primitive_args.h
+java GenPrims.class vmret $VM/vm.vmdf >>$VM/primitive_args.h
+java GenPrims.class vmdispatch $VM/vm.vmdf >$VM/MotllePrimitives.nc
+
+

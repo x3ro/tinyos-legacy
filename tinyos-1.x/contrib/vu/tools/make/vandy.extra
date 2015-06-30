@@ -1,0 +1,38 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: vandy.extra,v 1.4 2006/06/27 14:34:18 kusyb Exp $
+
+ifndef VUTOS
+VUTOS := ../../tos
+endif
+
+ifeq ($(PLATFORM),mica)
+	PFLAGS := $(PFLAGS) -I$(VUTOS)/platform/mica -I$(VUTOS)/platform/avrmote
+endif
+ifeq ($(PLATFORM),mica2)
+	PFLAGS := $(PFLAGS) -I$(VUTOS)/platform/mica2 -I$(VUTOS)/platform/avrmote
+endif
+ifeq ($(PLATFORM),mica2dot)
+	PFLAGS := $(PFLAGS) -I$(VUTOS)/platform/mica2dot -I$(VUTOS)/platform/mica2 -I$(VUTOS)/platform/avrmote
+	SENSORBOARD := sounderdot
+endif
+ifeq ($(PLATFORM),xsm)
+	PFLAGS := $(PFLAGS) -I$(VUTOS)/platform/xsm -I$(VUTOS)/platform/mica2 -I$(VUTOS)/platform/avrmote 
+endif
+ifeq ($(PLATFORM),pc)
+	PFLAGS := $(PFLAGS) -I$(VUTOS)/platform/pc
+endif
+ifeq ($(PLATFORM),micaz)
+	PFLAGS := $(PFLAGS) -I$(VUTOS)/lib/CC2420 -I$(VUTOS)/platform/micaz -I$(VUTOS)/platform/mica2
+endif
+ifeq ($(PLATFORM),telos)
+	PFLAGS := -I$(VUTOS)/lib/CC2420 -I$(VUTOS)/interfaces $(PFLAGS) 
+endif
+ifeq ($(PLATFORM),telosb)
+	PFLAGS := -I$(VUTOS)/lib/CC2420 -I$(VUTOS)/interfaces $(PFLAGS) 
+endif
+
+PFLAGS += -I$(VUTOS)/interfaces -I$(VUTOS)/system
+
+## for every VUTOS library X replace -I%T/lib/X with $(VUTOS)/lib/X
+VULIBS := $(foreach lib,$(filter-out CC2420 DiagMsg PeaceKeeper,$(notdir $(wildcard $(VUTOS)/lib/*))), -I%T/lib/$(lib))
+PFLAGS := $(filter-out $(VULIBS),$(PFLAGS)) $(patsubst -I\%T/lib/%,-I$(VUTOS)/lib/%, $(filter $(VULIBS),$(PFLAGS)))

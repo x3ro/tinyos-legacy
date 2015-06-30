@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+use strict;
+use Getopt::Long;
+
+my $port;
+my $compileFlag;
+my $result = GetOptions ("port=i"  => \$port,          # COM port
+                         "compile" => \$compileFlag);  # flag
+
+if ($result) {
+
+    if ($port) {
+        system("java net.tinyos.sf.SerialForwarder -comm serial\@COM${port}:telos &");
+    }
+    if ($compileFlag) {    
+        system('cd $SPAULDINGSRC/lib/printfRadio/java && make');
+    }
+    system('cd $SPAULDINGSRC/lib/printfRadio/java && make run');
+
+}
+else {
+    print "Incorrect USAGE!\n";
+    print "  printfRadio [-p=<comX> | -c | -h]\n";
+}

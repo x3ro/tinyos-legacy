@@ -1,0 +1,10 @@
+TestClock1:
+
+The TestClock1C component verifies that the real time clock (local time),
+as returned by the LocalTime.read() method, is monotonic and does not jump. 
+In a busy loop we continuously read the current time and compare it to the
+previous value. On the LED we display the maximum positive time difference
+for 2 seconds (should be 3 jiffies) and the minimum time difference 
+for 1 seconds (should be 1 jiffies).
+
+Author: miklos.maroti@vanderbilt.edu

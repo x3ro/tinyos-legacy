@@ -1,0 +1,8 @@
+#!/bin/sh
+dir=/home/owl/field
+rm -rf $dir
+mkdir $dir
+cp *.py *.xbm *.png $dir
+cp field-tool field-config /usr/local/bin
+cp field.menu fieldconfig.menu /usr/lib/menu
+update-menus

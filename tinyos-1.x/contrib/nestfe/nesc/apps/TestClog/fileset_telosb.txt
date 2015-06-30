@@ -1,0 +1,122 @@
+#$Id: fileset_telosb.txt,v 1.3 2005/06/22 18:07:30 gtolle Exp $
+AM.h,Id 1.8 2004/06/21 20:01:38 jpolastre,tinyos-1.x/tos/platform/telos/AM.h
+AMStandard.nc,Id 1.15 2003/10/07 21:46:36 idgay,tinyos-1.x/tos/system/AMStandard.nc
+Attr.nc,Id 1.3 2005/06/14 18:10:09 gtolle,tinyos-1.x/contrib/nucleus/tos/lib/Nucleus/Attr.nc
+AttrList.nc,Id 1.3 2005/06/14 18:10:10 gtolle,tinyos-1.x/contrib/nucleus/tos/lib/Nucleus/AttrList.nc
+Attrs.h,Id 1.5 2005/06/14 18:10:10 gtolle,tinyos-1.x/contrib/nucleus/tos/lib/Nucleus/Attrs.h
+BareSendMsg.nc,Id 1.2 2003/10/07 21:46:13 idgay,tinyos-1.x/tos/interfaces/BareSendMsg.nc
+BusArbitration.nc,Id 1.2 2004/05/06 21:13:54 jpolastre,tinyos-1.x/tos/platform/telos/BusArbitration.nc
+BusArbitrationC.nc,Id 1.1 2004/04/20 01:45:35 jpolastre,tinyos-1.x/tos/platform/telos/BusArbitrationC.nc
+BusArbitrationM.nc,Id 1.4 2005/03/12 03:34:01 jpolastre,tinyos-1.x/tos/platform/telos/BusArbitrationM.nc
+ByteComm.nc,Id 1.3 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/ByteComm.nc
+CC2420Control.nc,Revision 1.6,tinyos-1.x/tos/lib/CC2420Radio/CC2420Control.nc
+CC2420ControlM.nc,Id 1.17 2004/12/16 23:31:35 jpolastre,tinyos-1.x/tos/lib/CC2420Radio/CC2420ControlM.nc
+CC2420RadioC.nc,Id 1.15 2004/09/30 20:09:10 jpolastre,tinyos-1.x/tos/lib/CC2420Radio/CC2420RadioC.nc
+CC2420RadioM.nc,Id 1.38 2004/10/20 05:14:12 jpolastre,tinyos-1.x/tos/lib/CC2420Radio/CC2420RadioM.nc
+Clog.h,CvsEntries 1.1,tinyos-1.x/contrib/nestfe/nesc/lib/clog/Clog.h
+ClogC.nc,CvsEntries 1.2,tinyos-1.x/contrib/nestfe/nesc/lib/clog/ClogC.nc
+ClogM.nc,CvsEntries 1.3,tinyos-1.x/contrib/nestfe/nesc/lib/clog/ClogM.nc
+Drain.h,Id 1.10 2005/06/16 17:46:30 gtolle,tinyos-1.x/beta/Drain/Drain.h
+Drain.nc,Id 1.4 2005/06/16 17:46:30 gtolle,tinyos-1.x/beta/Drain/Drain.nc
+DrainC.nc,Id 1.12 2005/06/14 18:16:22 gtolle,tinyos-1.x/beta/Drain/DrainC.nc
+DrainGroup.nc,Id 1.2 2005/06/14 18:16:22 gtolle,tinyos-1.x/beta/Drain/DrainGroup.nc
+DrainGroupManagerM.nc,Id 1.2 2005/06/14 18:16:22 gtolle,tinyos-1.x/beta/Drain/DrainGroupManagerM.nc
+DrainLinkEst.nc,Id 1.3 2005/06/10 19:38:03 gtolle,tinyos-1.x/beta/Drain/DrainLinkEst.nc
+DrainLinkEstM.nc,Id 1.17 2005/06/16 17:46:30 gtolle,tinyos-1.x/beta/Drain/DrainLinkEstM.nc
+DrainM.nc,Id 1.14 2005/06/16 17:46:30 gtolle,tinyos-1.x/beta/Drain/DrainM.nc
+Drip.h,Id 1.4 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/Drip.h
+Drip.nc,Id 1.3 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/Drip.nc
+DripC.nc,Id 1.5 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/DripC.nc
+DripM.nc,Id 1.6 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/DripM.nc
+DripSend.h,Id 1.2 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/DripSend.h
+DripSendC.nc,Id 1.2 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/DripSendC.nc
+DripSendM.nc,Id 1.2 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/DripSendM.nc
+DripState.nc,Id 1.3 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/DripState.nc
+DripStateC.nc,Id 1.3 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/DripStateC.nc
+DripStateM.nc,Id 1.5 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/DripStateM.nc
+DripStateMgr.nc,Id 1.3 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/DripStateMgr.nc
+FramerAckM.nc,Id 1.2 2003/10/07 21:46:36 idgay,tinyos-1.x/tos/system/FramerAckM.nc
+FramerM.nc,Id 1.6 2004/11/29 19:24:10 idgay,tinyos-1.x/tos/system/FramerM.nc
+GenericComm.nc,Id 1.9 2003/12/12 07:28:23 jpolastre,tinyos-1.x/tos/system/GenericComm.nc
+GroupManager.h,Id 1.2 2005/06/14 18:10:10 gtolle,tinyos-1.x/contrib/nucleus/tos/lib/Nucleus/GroupManager.h
+GroupManager.nc,Id 1.3 2005/06/14 18:10:10 gtolle,tinyos-1.x/contrib/nucleus/tos/lib/Nucleus/GroupManager.nc
+GroupManagerC.nc,Id 1.3 2005/06/14 18:10:10 gtolle,tinyos-1.x/contrib/nucleus/tos/lib/Nucleus/GroupManagerC.nc
+GroupManagerM.nc,Id 1.4 2005/06/14 18:10:10 gtolle,tinyos-1.x/contrib/nucleus/tos/lib/Nucleus/GroupManagerM.nc
+HPLCC2420.nc,Id 1.4 2004/09/19 23:44:27 jpolastre,tinyos-1.x/tos/lib/CC2420Radio/HPLCC2420.nc
+HPLCC2420C.nc,Id 1.7 2005/04/25 03:09:55 jpolastre,tinyos-1.x/tos/platform/telos/HPLCC2420C.nc
+HPLCC2420Capture.nc,Id 1.1 2004/09/19 23:44:27 jpolastre,tinyos-1.x/tos/lib/CC2420Radio/HPLCC2420Capture.nc
+HPLCC2420FIFO.nc,Id 1.2 2005/06/14 09:29:24 cssharp,tinyos-1.x/tos/lib/CC2420Radio/HPLCC2420FIFO.nc
+HPLCC2420Interrupt.nc,Id 1.1 2004/09/19 23:44:27 jpolastre,tinyos-1.x/tos/lib/CC2420Radio/HPLCC2420Interrupt.nc
+HPLCC2420InterruptM.nc,Id 1.2 2004/10/29 04:34:37 jpolastre,tinyos-1.x/tos/platform/telos/HPLCC2420InterruptM.nc
+HPLCC2420M.nc,Id 1.19 2005/04/11 05:21:16 jpolastre,tinyos-1.x/tos/platform/telos/HPLCC2420M.nc
+HPLCC2420RAM.nc,Id 1.1 2004/04/23 02:53:27 jpolastre,tinyos-1.x/tos/lib/CC2420Radio/HPLCC2420RAM.nc
+HPLI2CInterrupt.nc,Revision 1.1,tinyos-1.x/tos/platform/msp430/HPLI2CInterrupt.nc
+HPLInitC.nc,Id 1.2 2004/06/01 08:28:36 cssharp,tinyos-1.x/tos/platform/msp430/HPLInitC.nc
+HPLInitM.nc,Id 1.2 2004/06/01 08:28:36 cssharp,tinyos-1.x/tos/platform/msp430/HPLInitM.nc
+HPLPowerManagementM.nc,Id 1.5 2005/05/19 17:00:32 idgay,tinyos-1.x/tos/platform/msp430/HPLPowerManagementM.nc
+HPLUART.nc,Id 1.4 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/HPLUART.nc
+HPLUARTC.nc,Id 1.1 2004/02/21 20:29:34 jpolastre,tinyos-1.x/tos/platform/telos/HPLUARTC.nc
+HPLUARTM.nc,Revision 1.7,tinyos-1.x/tos/platform/msp430/HPLUARTM.nc
+HPLUSART0M.nc,Revision 1.21,tinyos-1.x/tos/platform/msp430/HPLUSART0M.nc
+HPLUSART1M.nc,Revision 1.15,tinyos-1.x/tos/platform/msp430/HPLUSART1M.nc
+HPLUSARTControl.nc,Revision 1.5,tinyos-1.x/tos/platform/msp430/HPLUSARTControl.nc
+HPLUSARTFeedback.nc,Revision 1.1,tinyos-1.x/tos/platform/msp430/HPLUSARTFeedback.nc
+Intercept.nc,Id 1.2 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/Intercept.nc
+Leds.nc,Id 1.3 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/Leds.nc
+LedsC.nc,Id 1.5 2004/04/12 17:19:43 idgay,tinyos-1.x/tos/system/LedsC.nc
+LocalTime.nc,Id 1.2 2004/06/01 08:28:36 cssharp,tinyos-1.x/tos/platform/msp430/LocalTime.nc
+MSP430Capture.nc,Id 1.3 2004/08/18 02:26:40 jpolastre,tinyos-1.x/tos/platform/msp430/MSP430Capture.nc
+MSP430ClockC.nc,Id 1.11 2005/03/27 03:47:25 cssharp,tinyos-1.x/tos/platform/msp430/MSP430ClockC.nc
+MSP430ClockInit.nc,Id 1.1 2004/06/08 03:15:40 cssharp,tinyos-1.x/tos/platform/msp430/MSP430ClockInit.nc
+MSP430ClockM.nc,Id 1.14 2005/03/27 03:47:25 cssharp,tinyos-1.x/tos/platform/msp430/MSP430ClockM.nc
+MSP430Compare.nc,Id 1.4 2004/08/18 01:39:05 jpolastre,tinyos-1.x/tos/platform/msp430/MSP430Compare.nc
+MSP430DCOCalibC.nc,Id 1.2 2005/03/27 17:17:48 cssharp,tinyos-1.x/tos/platform/msp430/MSP430DCOCalibC.nc
+MSP430DCOCalibM.nc,Id 1.2 2005/03/27 17:17:48 cssharp,tinyos-1.x/tos/platform/msp430/MSP430DCOCalibM.nc
+MSP430Interrupt.nc,Id 1.2 2004/08/26 02:26:26 jpolastre,tinyos-1.x/tos/platform/msp430/MSP430Interrupt.nc
+MSP430InterruptC.nc,Id 1.2 2004/11/05 06:25:54 jpolastre,tinyos-1.x/tos/platform/msp430/MSP430InterruptC.nc
+MSP430InterruptM.nc,Id 1.10 2005/04/22 19:16:22 jpolastre,tinyos-1.x/tos/platform/msp430/MSP430InterruptM.nc
+MSP430Timer.h,Id 1.6 2005/01/10 12:03:27 janhauer,tinyos-1.x/tos/platform/msp430/MSP430Timer.h
+MSP430Timer.nc,Id 1.7 2005/01/10 12:03:27 janhauer,tinyos-1.x/tos/platform/msp430/MSP430Timer.nc
+MSP430TimerC.nc,Id 1.4 2004/08/18 01:39:05 jpolastre,tinyos-1.x/tos/platform/msp430/MSP430TimerC.nc
+MSP430TimerControl.nc,Id 1.1 2004/08/18 01:39:26 jpolastre,tinyos-1.x/tos/platform/msp430/MSP430TimerControl.nc
+MSP430TimerM.nc,Id 1.13 2005/01/10 12:03:27 janhauer,tinyos-1.x/tos/platform/msp430/MSP430TimerM.nc
+MacBackoff.nc,Revision 1.1,tinyos-1.x/tos/lib/CC2420Radio/MacBackoff.nc
+MacControl.nc,Revision 1.2,tinyos-1.x/tos/lib/CC2420Radio/MacControl.nc
+Main.nc,Id 1.2 2004/02/21 19:28:37 cssharp,tinyos-1.x/tos/platform/msp430/Main.nc
+MainM.nc,Id 1.1 2004/02/19 21:23:02 jpolastre,tinyos-1.x/tos/platform/msp430/MainM.nc
+NoLeds.nc,Id 1.3 2003/10/07 21:46:37 idgay,tinyos-1.x/tos/system/NoLeds.nc
+PowerManagement.nc,Id 1.5 2005/05/19 17:00:30 idgay,tinyos-1.x/tos/interfaces/PowerManagement.nc
+RadioCRCPacket.nc,Id 1.1 2004/02/06 22:54:29 jpolastre,tinyos-1.x/tos/lib/CC2420Radio/RadioCRCPacket.nc
+RadioCoordinator.nc,Id 1.6 2005/06/14 09:29:24 cssharp,tinyos-1.x/tos/interfaces/RadioCoordinator.nc
+Random.nc,Id 1.3 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/Random.nc
+RandomLFSR.nc,Id 1.4 2003/10/07 21:46:37 idgay,tinyos-1.x/tos/system/RandomLFSR.nc
+Receive.nc,Id 1.2 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/Receive.nc
+ReceiveMsg.nc,Id 1.2 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/ReceiveMsg.nc
+RouteControl.nc,Id 1.2 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/RouteControl.nc
+Send.nc,Id 1.4 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/Send.nc
+SendMsg.nc,Id 1.2 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/SendMsg.nc
+SplitControl.nc,Id 1.3 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/SplitControl.nc
+StdControl.nc,Id 1.2 2003/10/07 21:46:14 idgay,tinyos-1.x/tos/interfaces/StdControl.nc
+TestClog.h,CvsEntries 1.1,./TestClog.h
+TestClog.nc,CvsEntries 1.3,./TestClog.nc
+TestClogM.nc,CvsEntries 1.3,./TestClogM.nc
+Timer.h,Id 1.5 2003/10/07 21:46:15 idgay,tinyos-1.x/tos/interfaces/Timer.h
+Timer.nc,Id 1.3 2003/10/07 21:46:15 idgay,tinyos-1.x/tos/interfaces/Timer.nc
+TimerC.nc,Id 1.11 2004/08/18 01:39:05 jpolastre,tinyos-1.x/tos/platform/msp430/TimerC.nc
+TimerJiffy.nc,Id 1.2 2004/06/01 08:28:36 cssharp,tinyos-1.x/tos/platform/msp430/TimerJiffy.nc
+TimerJiffyAsync.nc,Id 1.1 2004/05/15 00:25:16 jpolastre,tinyos-1.x/tos/lib/CC2420Radio/TimerJiffyAsync.nc
+TimerJiffyAsyncC.nc,Id 1.2 2004/08/18 01:40:12 jpolastre,tinyos-1.x/tos/platform/telos/TimerJiffyAsyncC.nc
+TimerJiffyAsyncM.nc,Id 1.7 2005/02/16 00:28:28 jpolastre,tinyos-1.x/tos/platform/telos/TimerJiffyAsyncM.nc
+TimerM.nc,Id 1.29 2005/03/30 10:11:29 cssharp,tinyos-1.x/tos/platform/msp430/TimerM.nc
+TimerMilli.nc,Id 1.2 2004/06/01 08:28:36 cssharp,tinyos-1.x/tos/platform/msp430/TimerMilli.nc
+TokenReceiveMsg.nc,Id 1.2 2003/10/07 21:46:15 idgay,tinyos-1.x/tos/interfaces/TokenReceiveMsg.nc
+UART.nc,Id 1.2 2003/10/07 21:46:37 idgay,tinyos-1.x/tos/system/UART.nc
+UARTFramedPacket.nc,Id 1.4 2003/10/07 21:46:37 idgay,tinyos-1.x/tos/system/UARTFramedPacket.nc
+UARTM.nc,Id 1.6 2003/10/07 21:46:37 idgay,tinyos-1.x/tos/system/UARTM.nc
+WakeupComm.h,Id 1.3 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/WakeupComm.h
+WakeupCommC.nc,Id 1.3 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/WakeupCommC.nc
+WakeupCommM.nc,Id 1.3 2005/06/14 18:19:35 gtolle,tinyos-1.x/beta/Drip/WakeupCommM.nc
+byteorder.h,Id 1.2 2005/06/14 09:29:24 cssharp,tinyos-1.x/tos/lib/CC2420Radio/byteorder.h
+crc.h,Id 1.1 2004/09/21 00:44:29 jpolastre,tinyos-1.x/tos/platform/msp430/crc.h
+msp430baudrates.h,Id 1.2 2005/03/28 09:31:13 cssharp,tinyos-1.x/tos/platform/msp430/msp430baudrates.h
+msp430usart.h,Id 1.1 2005/01/24 02:33:04 jpolastre,tinyos-1.x/tos/platform/msp430/msp430usart.h

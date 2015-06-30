@@ -1,0 +1,12 @@
+#
+# FILE:    group.extra
+# AUTHOR:  Martin Turon
+# DATE:    March 3, 2005
+#
+# Copyright (c) 2004-2005 Crossbow Technology, Inc.  All Rights Reserved.
+#
+# $Id: group.extra,v 1.1.1.1 2006/05/04 23:08:21 ucsbsensornet Exp $
+#
+
+DEFAULT_LOCAL_GROUP=$(GROUP)
+

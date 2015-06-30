@@ -1,0 +1,29 @@
+#COMPONENT=TestPIRDetectSimple
+COMPONENT=TestPIRDetect
+PFLAGS += -I%T/../contrib/nestfe/nesc/lib/PIRDetect
+PFLAGS += -I%T/../contrib/nestfe/nesc/sensorboard/trio
+PFLAGS += -I%T/lib/oscope
+
+#PFLAGS += -DRPC_LEDS
+
+#NO_LOCATION = TRUE
+#NO_TIMESYNC = TRUE
+#NO_FILESET = TRUE
+NO_HOOD = TRUE
+#NO_REGISTRY = TRUE
+#NO_REGISTRY_STORE = TRUE
+#NO_NUCLEUS = TRUE
+#NO_RPC = TRUE
+#NO_RPC_FOR_REGISTRY = TRUE
+#NO_PYTHON = TRUE
+#NO_SENSORS = TRUE
+#NO_SUPPLEMENT = TRUE
+#NO_UART = TRUE
+NO_PROMETHEUS = TRUE
+NO_DELUGE = TRUE
+
+DEFAULT_LOCAL_GROUP ?= 0x7d
+
+NEST_MAKERULES ?= $(TOSDIR)/../contrib/nestfe/make/kraken.Makerules
+include $(NEST_MAKERULES)
+

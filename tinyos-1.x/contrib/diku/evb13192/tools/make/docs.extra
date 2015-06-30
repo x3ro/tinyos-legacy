@@ -1,0 +1,23 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: docs.extra,v 1.1 2005/01/31 21:05:03 freefrag Exp $
+
+# configure the base for the app dirs.  This is used to generate more
+# useful package names in the documentation.
+ifeq ($(BASEDIR)_x, _x)
+BASEDIR := $(shell pwd | sed 's@\(.*\)/apps.*$$@\1@' )
+endif
+
+# The output directory for generated documentation
+ifeq ($(DOCDIR)_x, _x)
+DOCDIR := $(BASEDIR)/doc/nesdoc
+endif
+
+BUILD_DEPS = docs2_
+
+#	
+
+docs2_: FORCE
+	@echo "    evb: Making documentation for $(COMPONENT) on $(PLATFORM)"
+	nesdoc $(DOCDIR)/$(PLATFORM) -fnesc-is-app -DENVIRONMENT_USESMAC=1 -D__HIWARE -D__MWERKS $(NESDOC_FLAGS) $(PFLAGS) $(CFLAGS) -target=evb13192 $(COMPONENT).nc
+
+#	D__HIWARE__ -D__MWERKS__ -nostdinc  -I/home/madsdyd/DIKU/TinyOS/tinyos-1.x/tos/tos/interfaces -I/home/madsdyd/DIKU/TinyOS/tinyos-1.x/tos/tos/types -I/home/madsdyd/DIKU/TinyOS/tinyos-1.x/tos/tos/system -I/home/madsdyd/DIKU/Freescale/CW/lib/HC08c/include -I/home/madsdyd/DIKU/TinyOS/tinyos-1.x/tos/../contrib/diku/evb13192/tos/platform/evb13192 -I/home/madsdyd/DIKU/TinyOS/tinyos-1.x/tos/../contrib/diku/evb13192/tos/platform/hcs08 -I/home/madsdyd/DIKU/TinyOS/tinyos-1.x/tos/../contrib/diku/evb13192/tos/types -I/home/madsdyd/DIKU/TinyOS/tinyos-1.x/tos/../contrib/diku/evb13192/tos/interfaces -I/home/madsdyd/DIKU/TinyOS/tinyos-1.x/tos/../contrib/diku/evb13192/tos/lib -I/home/madsdyd/DIKU/TinyOS/tinyos-1.x/tos/../contrib/diku/evb13192/tos/sensorboards/ -S -Os -target=evb13192 -Wall -Wshadow -Wnesc-all -finline-limit=100000 -fnesc-cfile=build/evb13192/app.c TestConsole.nc

@@ -1,0 +1,55 @@
+README for MagMHopRpt Application
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+
+
+SensorNet App: ucbRobo/sensornet/MagMHopRpt (mica2dot)
+CotsBot App: cotsbot/apps/TestMotorBoard (mica2)
+Matlab App (Computation): None
+Matlab Tools:
+  Driving cotsbot		ucbRobo/tools/matlab/lib/controlBot
+  Data Reporting/Gathering	ucbRobo/tools/matlab/apps/MagMHopRpt
+Java Messages:
+	tinyos-1.x/contrib/ucbRobo/tools/java/net/tinyos/RobotTB/MagMHopRpt
+
+
+
+Description:
+
+MagMHopRpt is an application used for gathering magnetometer event
+detections wirelessly over a multihop sensor network.  This is meant
+to be used to test multi-target tracking algorithms running in Matlab.
+
+The event detection algorithm checks that we get a series of magnetometer
+readings that are rising/falling a lot.  We can tune the threshold and
+the window size (number of readings) used in the event detection
+calculation.  See the comments in the implementation file
+MagMHopRptM.nc for more details.
+
+As an added feature, when we get a magnetometer sensing event, the LED
+on that mote blinks.
+
+
+
+Usage:
+
+To run the application, you ideally have a COTSBOT programmed with
+TestMotorBoard with a strong magnet strapped on top (not too close to
+the mote or the motorboard... otherwise, you may get bizarre behavior
+or damage the hardware).  Using the MATLAB command interface, you can
+tell the robot to drive/turn at different speeds, thereby causing a
+magnetic disturbance in the field.  If the sensitivity setting is
+correct, you should see a trail of lights following the robot as it
+moves around.
+
+MagMHopRpt also allows the user to configure/query the magnetometer
+report threshold, the window size for the detection algorithm, the
+frequency of magnetometer sensing, and the fade time for the LED by
+sending packets over the UART/Radio.
+
+
+
+
+Known bugs/limitations: 
+* implementation INCOMPLETE.  Missing magnetometer detection computation.
+* may wish to implement backchannel UART monitoring.

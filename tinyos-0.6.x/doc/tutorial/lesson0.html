@@ -1,0 +1,260 @@
+    <h1>Lesson 0: Confirming your setup.</h1>
+
+    <p>
+    When working with embedded devices, it is very difficult to debug 
+    applications.&nbsp; Because of this, you want to make sure that the tools 
+    you are using are working properly and that the hardware is functioning 
+    correctly.&nbsp; This will save you countless hours of searching for bugs in 
+    your application when the real problem is in the tools.&nbsp; This lesson 
+    will show you how to check your system and the hardware.</p>
+
+    <h2> Step one is to confirm that the TinyOS tools are installed correctly:</h2>
+
+    <p>
+    First, we will check that the tools have been installed correctly and that 
+    the environment variables are set.&nbsp; &quot;toscheck&quot; is a script that will 
+    perform this functions.</p>
+
+    <p>
+    Change into your nest/tools directory and run toscheck.&nbsp; The output 
+    should be:</p>
+
+    <p>
+    &nbsp;</p>
+
+    <p>
+    <font face="Courier New" size="1">toscheck version $Id: lesson0.html,v 1.1 2002/02/05 00:01:13 jlhill Exp $<br>
+    Path:<br>
+    /usr/local/bin<br>
+    /usr/bin<br>
+    /bin<br>
+    /cygdrive/c/jdk1.3.1_01/bin<br>
+    /cygdrive/c/WINDOWS/system32<br>
+    /cygdrive/c/WINDOWS<br>
+    /cygdrive/c/avrgcc/bin<br>
+    .<br>
+    <br>
+    Classpath:<br>
+    /c/nest/tools:.:/c/jdk1.3.1_01/lib/comm.jar<br>
+    <br>
+    avrgcc:<br>
+    /cygdrive/c/avrgcc/bin/avr-gcc<br>
+    Version: 3.0.2<br>
+    <br>
+    perl:<br>
+    /usr/bin/perl<br>
+    Version: v5.6.1 built for cygwin-multi<br>
+    <br>
+    flex:<br>
+    /usr/bin/flex<br>
+    <br>
+    bison:<br>
+    /usr/bin/bison<br>
+    <br>
+    java:<br>
+    /cygdrive/c/jdk1.3.1_01/bin/java<br>
+    java version &quot;1.3.1_01&quot;<br>
+    Java(TM) 2 Runtime Environment, Standard Edition (build 1.3.1_01)<br>
+    Java HotSpot(TM) Client VM (build 1.3.1_01, mixed mode)<br>
+    <br>
+    Cygwin:<br>
+    cygwin1.dll major: 1003<br>
+    cygwin1.dll minor: 3<br>
+    cygwin1.dll malloc env: 28<br>
+    <br>
+    uisp:<br>
+    /usr/local/bin/uisp<br>
+    uisp version 20010909<br>
+    <br>
+    <br>
+    toscheck completed without error.</font><br>
+&nbsp;</p>
+
+    <p>
+    The last line is the most important.&nbsp; If any errors are reported, make 
+    sure to fix the problem.</p>
+
+    <h2>
+    The next step is to confirm that the TinyOS hardware is working:</h2>
+
+    <p>
+    To test the hardware, we have provided an application: mica_hardware_verify.&nbsp; 
+    It is only for use on the mica platform.</p>
+
+    <p>
+    Change to the /nest/apps/mica_hardware_verify directory and type &quot;make 
+    mica.&quot;&nbsp; The compilation process should complete without any errors.&nbsp; 
+    If it compiled correctly it will print out a profile of the memory used by 
+    the application.&nbsp; It should look like:</p>
+
+    <p>
+    <font face="Courier New" size="1">grep _e binmica/img.file | grep =\.<br>
+    0x000015a0 _etext=.<br>
+    0x00800072 _edata=.<br>
+    0x008000b6 _end=.<br>
+    0x00810000 __eeprom_end=</font>.</p>
+
+    <p>
+    Next install the application onto a mica node.&nbsp; Place a powered-on node 
+    into a programming board.&nbsp; The red LED on the programming board should 
+    light.&nbsp; Connect the programming board to the parallel port of your 
+    computer.&nbsp; Type &quot;make mica install&quot;.&nbsp; This will load the program 
+    onto the deveice.&nbsp; The output should look like:</p>
+
+    <p>
+    <font face="Courier New" size="1">$ make mica install<br>
+    Makefile:5: warning: overriding commands for target `all'<br>
+    ../Makeinclude:201: warning: ignoring old commands for target `all'<br>
+    make: Nothing to be done for `mica'.<br>
+    avr-objcopy --output-target=srec binmica/main.exe binmica/main.srec<br>
+    uisp -dprog=dapa -dlpt=3 --erase<br>
+    pulse<br>
+    Atmel AVR ATmega103 is found.<br>
+    Erasing device ...<br>
+    pulse<br>
+    Reinitializing device<br>
+    Atmel AVR ATmega103 is found.<br>
+    sleep 1<br>
+    uisp -dprog=dapa -dlpt=3 --upload if=binmica/main.srec<br>
+    pulse<br>
+    Atmel AVR ATmega103 is found.<br>
+    Uploading: flash<br>
+    sleep 1<br>
+    uisp -dprog=dapa -dlpt=3 --verify if=binmica/main.srec<br>
+    pulse<br>
+    Atmel AVR ATmega103 is found.<br>
+    Verifying: flash</font></p>
+
+    <p>
+    Now you have verified that the programming tools and the computer's parallel 
+    port are working correctly.&nbsp; The next step is to verify the mote 
+    hardware.&nbsp; First, confirm that the LEDs are blinking like a counter.&nbsp; 
+    Next connect the programming board to the serial port of the computer.&nbsp; 
+    The hardware verify program will send data over the UART that contains it 
+    status.&nbsp; To read from the serial port compile and run 
+    hardware_check.java.&nbsp; The commands are shown below.&nbsp; I'm using 
+    COM1 on my computer.</p>
+
+    <p>
+    <font face="Courier" size="1">jhill@JHILL-T20 /c/motework/nest_release/nest/apps/mica_hardware_verify<br>
+    $ javac hardware_check.java<br>
+    jhill@JHILL-T20 /c/motework/nest_release/nest/apps/mica_hardware_verify<br>
+    $ java hardware_check COM1<br>
+    <br>
+    hardware_check started<br>
+    printing all ports...<br>
+    - COM3<br>
+    - COM1<br>
+    - LPT1<br>
+    - LPT2<br>
+    done.<br>
+    baud rate: 9600<br>
+    data bits: 8<br>
+    stop bits: 1<br>
+    parity: 0<br>
+    baud rate: 19200<br>
+    data bits: 8<br>
+    stop bits: 1<br>
+    parity: 0<br>
+    Sending: ff ff 20 7d 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    0 0<br>
+    Sending: ff ff 20 7d 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    0 0<br>
+    7e 0 ff 7d 1 60 48 fb 6 0 0 1d 1 8f 9 5 1 0 45 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    a8<br>
+    Node async clock: passed<br>
+    Node Serial ID: 1 60 48 fb 6 0 0 1d<br>
+    SPI rework: passed<br>
+    4Mbit flash check: passed<br>
+    UART transmissison successful<br>
+    7e 0 ff 7d 1 60 48 fb 6 0 0 1d 1 8f 9 5 1 0 47 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    c1<br>
+    Node async clock: passed<br>
+    Node Serial ID: 1 60 48 fb 6 0 0 1d<br>
+    SPI rework: passed<br>
+    4Mbit flash check: passed<br>
+    UART transmissison successful<br>
+    Sending: ff ff 20 7d 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    0 0<br>
+    7e 0 ff 7d 1 60 48 fb 6 0 0 1d 1 8f 9 5 1 1 49 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    ff<br>
+    Node async clock: passed<br>
+    Node Serial ID: 1 60 48 fb 6 0 0 1d<br>
+    SPI rework: passed<br>
+    4Mbit flash check: passed<br>
+    <font color="#FF0000">UART transmissison successful<br>
+    Packet reception successful: rx_count = 1</font></font><br>
+&nbsp;</p>
+
+    <p>
+    This program is checking the serial ID of the mote, the flash connectivity, 
+    the UART functionality and the external clock.&nbsp; All status reports 
+    should be successful or positive.</p>
+
+    <h2>
+    The final step is to confirm that the radio is working:</h2>
+
+    <p>
+    To do this, you will need two nodes.&nbsp; Take a second node (that has 
+    passed the hardware check up to this point) and install it with 
+    generic_base_high_speed.&nbsp; This node will act as a radio gateway to a 
+    second node.&nbsp; Once installed, leave this node in the programming board 
+    and place the original node next to it.&nbsp; Re-run the hardware_check java 
+    application. You shoud see:</p>
+
+    <p>
+    <font size="1" face="Courier New">jhill@JHILL-T20 /c/motework/nest_release/nest/apps/mica_hardware_verify<br>
+    $ !java<br>
+    java hardware_check COM1<br>
+    <br>
+    hardware_check started<br>
+    printing all ports...<br>
+    - COM3<br>
+    - COM1<br>
+    - LPT1<br>
+    - LPT2<br>
+    done.<br>
+    baud rate: 9600<br>
+    data bits: 8<br>
+    stop bits: 1<br>
+    parity: 0<br>
+    baud rate: 19200<br>
+    data bits: 8<br>
+    stop bits: 1<br>
+    parity: 0<br>
+    7e 0 ff 7d 1 60 48 fb 6 0 0 1d 1 8f 9 5 1 1 f4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    25 87<br>
+    Node async clock: passed<br>
+    Node Serial ID: 1 60 48 fb 6 0 0 1d<br>
+    SPI rework: passed<br>
+    4Mbit flash check: passed<br>
+    RF transmissison successful<br>
+    Packet crc: passed<br>
+    Packet reception successful: rx_count = 1<br>
+    7e 0 ff 7d 1 60 48 fb 6 0 0 1d 1 8f 9 5 1 1 f6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    4c c7<br>
+    Node async clock: passed<br>
+    Node Serial ID: 1 60 48 fb 6 0 0 1d<br>
+    SPI rework: passed<br>
+    4Mbit flash check: passed<br>
+    RF transmissison successful<br>
+    Packet crc: passed<br>
+    Sending: ff ff 20 7d 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    0 0<br>
+    f9 ad<br>
+    7e 0 ff 7d 1 60 48 fb 6 0 0 1d 1 8f 9 5 1 2 f8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    54 27<br>
+    Node async clock: passed<br>
+    Node Serial ID: 1 60 48 fb 6 0 0 1d<br>
+    SPI rework: passed<br>
+    4Mbit flash check: passed<br>
+    <font color="#FF0000">RF transmissison successful<br>
+    Packet crc: passed<br>
+    Packet reception successful: rx_count = 2</font></font></p>
+
+    <p>
+    You can now see both the RF transmission and the RF reception is successful.&nbsp; 
+    Note that some of the packets received will not pass the crc check.&nbsp; 
+    These packets should be ignored.</p>
+
+    <p>&nbsp;</p>

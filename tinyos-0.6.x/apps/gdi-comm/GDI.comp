@@ -1,0 +1,39 @@
+TOS_MODULE GDI;
+
+ACCEPTS{
+    char GDI_INIT(void);
+    char GDI_START(void);
+};
+
+HANDLES{
+    char GDI_IPHOTO_DATA_READY(short data);
+    char GDI_ITEMP_DATA_READY(short data);
+    char GDI_IVOLTS_DATA_READY(short data);
+    char GDI_SNOOZE_WAKEUP();
+    char GDI_SEND_DONE(TOS_MsgPtr msg);
+    char GDI_MICAWB_PHOTO_SET_SWITCH_ALL_DONE(char success);
+    char GDI_MICAWB_PHOTO_GET_READING_DONE(char sensor, short value);
+    TOS_MsgPtr GDI_UPDATE_MSG(TOS_MsgPtr data);
+    void GDI_CLOCK_EVENT();
+    char GDI_INTERSEMA_PWR_DONE(char value);
+    char GDI_INTERSEMA_DATA_EVENT(unsigned short data);	
+};
+
+USES{
+    char GDI_COMM_RESET(void);
+    char GDI_SIB_PWR(char mode);
+    void GDI_SUB_SET_POT_POWER(char val);
+    char GDI_SUB_IPHOTO_GET_DATA();
+    char GDI_SUB_ITEMP_GET_DATA();
+    char GDI_SUB_IVOLTS_GET_DATA();
+    short GDI_SUB_LFSR_NEXT_RAND();
+    char GDI_SUB_SNOOZE(unsigned short time);
+    char GDI_SUB_SEND_MSG(short addr, char type, TOS_MsgPtr msg);
+    char GDI_MICAWB_PHOTO_SET_SWITCH_ALL(char value);
+    char GDI_MICAWB_PHOTO_GET_READING(char sensor);
+    char GDI_CLOCK_INIT(char interval, char scale);
+	
+};
+
+SIGNALS{
+};

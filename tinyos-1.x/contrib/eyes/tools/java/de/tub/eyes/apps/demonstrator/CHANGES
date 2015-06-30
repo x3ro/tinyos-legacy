@@ -1,0 +1,18 @@
+EYES Demonstrator PS_V2 - CHANGES
+=================================
+changed: twimmer 08-dec-2005
+
+-- 1-0b-08Dec2005cvs --
+twimmer:
+* Added snapshot funtionality
+* Improved subscription table resizing
+
+-- 1-0b-09Nov2005cvs --
+twimmer:
+* solved several issues (concurrent modification, scaling)
+* Metric conversion now affects Oscope, too; Y-axis adapted to min/max values
+
+-- 1-0b-02Nov2005cvs --
+twimmer: 
+* Added metric conversion; now needs JEP.jar
+* Now evaluates endinanness settings from attributes.xml for PSSubscription sending

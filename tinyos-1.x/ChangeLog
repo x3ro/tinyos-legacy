@@ -1,0 +1,264 @@
+2004-10-02 Joe Polastre <polastre@cs.berkeley.edu>
+	* Changed Telos' baud rate to 57600 from 19200
+	  Update your platform.properties file or remove the file
+	  and allow SerialForwarder to regenerate the properties file
+	  after recompiling net/tinyos/packet/Platform.java
+	* TOSBase: New TOSBase implementation from Gilman Tolle.
+          New implementation uses a dual buffer swap mechanism instead of a
+          buffer pool of 5 buffers in the past implementation.  
+          The past TOSBase would lock buffers to the point that 
+          under high throughput, each buffer would gradually be 
+          unusable until none of the buffers were useable and TOSBase 
+          failed.  The new TOSBase works well for receiving and transmitting
+          messages to and from the PC and maintains the buffer swap between
+          UART and Radio components.  It doesn't use "hidden flags" 
+          and is generally easier to decypher its operation.
+	* CC2420RadioM reliability and feature updates
+	  - Added RadioCoordinator events on send and receive for
+	    time synchronization protocols.  Only the startSymbol()
+	    event is signalled since the packet-based radio does not
+	    have byte() events.  The time from the hardware capture
+	    register (16-bit value from a 32768Hz clock) is put into
+	    the TX and RX buffer "time" field.
+	  - Reliability fixes.  Stop CC2420 from hanging on transmit
+	    by flushing the radio.  On receive, look for corrupt packets
+	    and lock the receive buffer while it is in use so that the
+	    radio can't stomp on its own buffer thereby corrupting the
+	    packet.  Fixed the checks for RXFIFO overflow and fixed the
+	    RXFIFO flush operation to occur twice.
+	  - Known bugs still exist in the implementation under heavy loads.
+	    See CC2420RadioM comments for more information.
+
+2004-08-13 Phil Levis <pal@cs.berkeley.edu>
+        * Patched system/TimerM to fix two corner cases that could
+          cause single shot timers to fail silently and make timers
+          fire wildly (255ms) late. For safety reasons, users can
+          no longer request continuous timers with period smaller than
+          3ms.
+        * Fixed a situation in the CC1000RadioIntM SPI handler where
+          a failed task post could cause the system to system to
+          enter livelock servicing SPI interrupts. 
+
+2004-07-09 Alec Woo <awoo@cs.berkeley.edu>
+
+	* tos/lib/MintRoute/MultihopWMEWMA.nc
+	Fixes to a 16-bit MAC address issue that makes
+	MintRoute to fail silently.
+
+2004-06-14  Michael Demmer  <demmer@cs.berkeley.edu>
+
+	* tools/java/net/tinyos/sim/plugins/RadioModelGuiPlugin.java 
+	* tools/java/net/tinyos/sim/plugins/RadioModelPlugin.java 
+	* tools/java/net/tinyos/sim/script/reflect/Radio.java 
+	Fixes to the RadioModelPlugin and its GUI counterpart so the GUI
+	accurately reflects changes that are made in scripts.
+
+	* tos/platform/pc/GuiMsg.h 
+	* tos/platform/pc/external_comm.c 
+	* tos/platform/pc/external_comm.h
+	Add support to TOSSIM for the event mask capability of Tython.
+	Also add a new feature to the Tython/TOSSIM protocol for
+	batch commands, improving the efficiency of the protocol.
+	
+	* tools/java/net/tinyos/sim/SimComm.java 
+	* tools/java/net/tinyos/sim/SimProtocol.java 
+	* tools/java/net/tinyos/sim/msg/.cvsignore 
+	* tools/java/net/tinyos/sim/msg/Makefile 
+	* tools/java/net/tinyos/sim/plugins/RadioModelPlugin.java 
+	* tools/java/net/tinyos/sim/event/BeginBatchCommand.java 
+	* tools/java/net/tinyos/sim/event/EndBatchCommand.java 
+	Tython side of the support for batch commands, used in the radio
+	model to improve the efficiency of updates.
+
+2004-06-11  Michael Demmer  <demmer@cs.berkeley.edu>
+
+	* tos/platform/pc/Nido.nc: 
+	Add a -seed= command line option to specify the seed to be passed to
+	srand(). If it's not specified, use the return from gettimeofday().
+
+	* tools/java/net/tinyos/sim/AutoRun.java 
+	* tools/java/net/tinyos/sim/EmpiricalModel.java 
+	* tools/java/net/tinyos/sim/LossyBuilder.java 
+	* tools/java/net/tinyos/sim/MoteLayoutPlugin.java 
+	* tools/java/net/tinyos/sim/SimDriver.java 
+	* tools/java/net/tinyos/sim/SimExec.java 
+	* tools/java/net/tinyos/sim/plugins/CalamariPlugin.java 
+	* tools/java/net/tinyos/sim/plugins/CentroidPlugin.java 
+	* tools/java/net/tinyos/sim/pyscripts/objmover.py 
+	* tools/java/net/tinyos/sim/pyscripts/spell_tython.py 
+	* tools/java/net/tinyos/sim/pyscripts/swarm.py 
+	* tools/java/net/tinyos/sim/script/reflect/Makefile 
+	* tools/java/net/tinyos/sim/script/reflect/SimBindings.java 
+	* tools/java/net/tinyos/sim/SimRandom.java 
+	* tools/java/net/tinyos/sim/script/reflect/Random.java 
+	Consolidate all the places within Tython/TinyViz that generate random
+	numbers and change them to use a new class called SimRandom. This
+	allows a single seed to be passed on the command line, enabling
+	repeatable simulations. Pass the seed along to TOSSIM. Add a reflected
+	object interface to expose SimRandom to scripts and change the
+	existing scripts to use that.
+
+2004-06-10  Michael Demmer  <demmer@cs.berkeley.edu>
+	* tos/platform/pc/Nido.nc: 
+	Move the call to initializeSockets() until after all the internal
+	structures have been set up to avoid a potential race if a new
+	connection comes in before we're ready for it.
+
+	* tools/java/net/tinyos/sim/SimCommands.java
+	* tools/java/net/tinyos/sim/msg/Makefile
+	* tools/java/net/tinyos/sim/msg/.cvsignore
+	* tools/java/net/tinyos/sim/script/reflect/Commands.java
+	* tools/java/net/tinyos/sim/event/SetEventMask.java
+	* tools/java/net/tinyos/sim/pyscripts/event-mask-example.py
+	Add an event masking capability to TOSSIM / Tython. This allows a
+	script to improve the runtime efficiency by eliminating unneeded
+	event communication over the event channel. Include an example
+	script demonstrating how to temporarily mask certain events and
+	re-enable them later.
+
+2004-04-23&25 Alec Woo  <awoo@cs.berkeley.edu>
+	* tos/platform/mica/HPLMicC.nc
+	* tos/platform/mica2/HPLMicC.nc
+	* tos/platform/pc/HPLMicC.nc
+	* tos/sensorboards/micasb/MicC.nc
+	* tos/sensorboards/micasb/MicM.nc	
+	Add hardware platform abstraction component for Mic
+	to fix the cross platform interrupt issues.  TONE_INTR
+	compiling issue is also resolved.
+	
+2004-04-21    <dgay@barnowl.research.intel-research.net>
+
+	* tos/lib/MintRoute/MultiHopWMEWMA.nc: fix setUpdateInterval for
+	  intervals > 65536 / 1024
+
+2004-04-14  Michael Demmer  <demmer@cs.berkeley.edu>
+	* tools/java/net/tinyos/sim/AutoRun.java:
+	* tools/java/net/tinyos/sim/SimExec.java:
+	* tos/platform/pc/Nido.nc:
+	* tos/types/dbg.h:
+	add a TOSSIM command line option -nodbgout to suppress printing of
+	dbg statements to stdout, used to avoid lockups when TinyViz
+	doesn't read from the pipe
+
+	* tools/java/net/tinyos/simSensorAttribute.java
+	* tools/java/net/tinyos/sim/SensorModel.java
+	* tools/java/net/tinyos/sim/plugins/SensorModelPlugin.java
+	* tools/java/net/tinyos/sim/AdditiveSensorModel.java
+	* tools/java/net/tinyos/sim/ConstantSensorModel.java
+	* tools/java/net/tinyos/sim/DiscSensorModel.java
+	* tools/java/net/tinyos/sim/LinearSensorModel.java:
+	Add a framework for a distance based sensor input models, similar to
+	the radio model.
+
+	* tools/java/net/tinyos/sim/pyscripts/motemover.py:
+	* tools/java/net/tinyos/sim/pyscripts/objmover-test.py:
+	* tools/java/net/tinyos/sim/pyscripts/objmover.py:
+	* tools/java/net/tinyos/sim/pyscripts/sensor-test.py
+	* tools/java/net/tinyos/sim/pyscripts/simutil.py:
+	move the functionality from the motemover class to a generic objmover,
+	add example test scripts for objmover and the sensor api
+
+	* tools/java/net/tinyos/sim/script/reflect:
+	update the reflection api to enable manipulation of generic SimObjects
+	as well as MoteSimObjects and add a reflection class for the sensor plugin
+
+	* tools/java/net/tinyos/sim/MoteSimObject.java: 
+	don't need to import the sim.event package
+
+	* tools/java/net/tinyos/sim/SimDebug.java: 
+	Add a "sensor" debug target.
+
+	* tools/java/net/tinyos/sim/SimObject.java:
+	change getDistance() to take a SimObject, not a MoteSimObject
+
+	* tools/java/net/tinyos/sim/MotePlugin.java:
+	Redraw the screen whenever any SimObject moves, not just MoteSimObjects
+
+	* doc/tython/javadoc:
+	update tython javadoc to reflect changes to the reflect api
+
+2004-04-14    <dgay@barnowl.research.intel-research.net>
+
+	* tos/system/TimerM.nc: fix to work with >= 16 timers
+	  (or, the perils of assuming that 1<<n works for n>=16)
+
+2004-04-12    <dgay@barnowl.research.intel-research.net>
+
+	* tos/platform/mica2dot/LedsC.nc: mica2dot has only one LED
+	
+	* tos/platform/mica/hardware.h (TOSH_SET_PIN_DIRECTIONS): 
+	* tos/platform/mica2/hardware.h (TOSH_SET_PIN_DIRECTIONS): 
+	* tos/platform/mica2dot/hardware.h (TOSH_SET_PIN_DIRECTIONS): 
+	  led, flash, etc pin settings moved to respective components
+	  (reduce power usage)
+
+	* tos/platform/mica2dot/HPLFlash.nc: 
+	* tos/platform/mica2/HPLFlash.nc: 
+	  pins set here
+	
+2004-04-02    <dgay@barnowl.research.intel-research.net>
+
+	* sched.c:
+	- n tasks (rather than n-1) to be used in a n-element array
+	- change the size of the task queue at compile time 
+	(using TOSH_MAX_TASKS_LOG2)
+	- remove TOS_empty (apparently unused and not useful)
+
+	To change the size of the task queue, add a 
+	  -DTOSH_MAX_TASKS_LOG2=n
+	option to your command line, e.g., in Makefile:
+	  PFLAGS := $(PFLAGS) -DTOSH_MAX_TASKS_LOG2=4
+	to get 2^n tasks. The maximum value allowed is 8.
+
+2004-03-21 Philip Levis <pal@cs.berkeley.edu>
+       
+        * tos/lib/VM:  Switched over to new Mate version
+        * tools/java/net/tinyos/script: Added new Mate package
+        * doc/: Added new Mate manual, removed old one
+
+2004-03-09    <dgay@barnowl.research.intel-research.net>
+
+	* tos/interfaces/CommandRegister.nc, tos/interfaces/AttrRegister.nc, 
+	  tos/interfaces/Command.h, tos/interfaces/Attr.h,
+	  tos/lib/Attributes/Attr.nc, tos/lib/Commands/Command.nc: change
+	  schema names to pointers (they are already in the data section, 
+	  no need to store twice)
+
+	* apps/Makerules: fix display of ram usage (did not including data
+	  segment)
+
+2004-03-06  Michael Demmer  <demmer@cs.berkeley.edu>
+
+	* tools/java/net/tinyos/sim: internal restructuring to support the
+	  simulation of SimObjects that are not MoteSimObjects (this may 
+	  cause minor incompatibilities with plugins)
+
+2004-03-05  Michael Demmer  <demmer@cs.berkeley.edu>
+
+	* tools/java/net/tinyos/sim: fix some miscellaneous bugs that
+	  left TOSSIM processes running after TinyViz/Tython quit
+
+2004-03-04  Philip Levis  <pal@cs.berkeley.edu>
+       
+        * tools/matlab/: made matlab tools compatible with phoenixSource java tool chain
+
+2004-02-18  Philip Levis  <pal@cs.berkeley.edu>
+       
+        * tos/platform/pc/tos.c: Fixed time wraparound bug.
+
+2004-02-09  Philip Levis  <pal@cs.berkeley.edu>
+
+	* tos/platform/pc: more accurate clock logic in hpl.c and ClockC.nc
+
+
+2004-02-04  Kristin Wright  <kwright@cs.berkeley.edu>
+
+	* index.html: new make to incorporate 1.1.4 changes
+	* index.html.in: point to a general snapshot-installation page
+
+
+2003-12-30  Kristin Wright  <kwright@cs.berkeley.edu>
+
+	* doc/ChangeLog: 
+	New file.
+

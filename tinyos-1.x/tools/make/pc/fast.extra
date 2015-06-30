@@ -1,0 +1,5 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: fast.extra,v 1.1 2004/07/20 05:53:41 scipio Exp $
+
+OPTFLAGS = -O3 -fnesc-no-debug
+

@@ -1,0 +1,68 @@
+#based on perlnesc.target by Cory Sharp
+
+# Copyright (c) 2007, Institute of Parallel and Distributed Systems
+# (IPVS), Universität Stuttgart. 
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+# 
+#  - Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 
+#  - Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the
+#    distribution.
+# 
+#  - Neither the names of the Institute of Parallel and Distributed
+#    Systems and Universität Stuttgart nor the names of its contributors
+#    may be used to endorse or promote products derived from this
+#    software without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+OUTPUTDIR = build/ncunit
+OUTPUTXML = $(OUTPUTDIR)/output.xml
+
+BUILD_EXTRA_DEPS += ncunit
+
+ORIGINAL_INCLUDES = $(filter -I%,$(shell ncc -v -target=$(PLATFORM) $(filter -I%,$(PFLAGS) $(CFLAGS)) 2>&1 | head -1)) -I$(NCUNIT_ROOT)/mote/ 
+
+ADDITIONAL_INCLUDES = -I$(OUTPUTDIR) -I$(NCUNIT_ROOT)/mote/ -I$(NCUNIT_ROOT)/mote/internal -I..
+TEST_COMPONENT := $(COMPONENT)
+TEST_TARGETS += $(TEST_COMPONENT).nc
+
+TEST_ALL_INCLUDES = $(filter -I%,$(shell ncc -v -target=$(PLATFORM) $(filter -I%,$(PFLAGS) $(CFLAGS)) 2>&1 | head -1))
+
+override NCC = $(NCUNIT_ROOT)/scripts/ncc_cl $(ADDITIONAL_INCLUDES)
+override COMPONENT = $(OUTPUTDIR)/$(TEST_COMPONENT)
+
+ORIGINAL_DEFINES := $(filter -D%,$(shell ncc -v -target=$(PLATFORM) $(filter -D%,$(PFLAGS) $(CFLAGS)) 2>&1 | head -1))
+
+ifeq ($(OS),Windows_NT)
+	JAVA_NC_CP := "$(shell cygpath --windows $(NCUNIT_ROOT)/bin);$(shell cygpath --windows $(NESC_CP))"
+else
+	JAVA_NC_CP := "$(NCUNIT_ROOT)/bin:$(NESC_CP)"
+endif
+
+ncunit: FORCE
+	@echo "processing $(COMPONENT) with NCUnit"
+	rm -f $(OUTPUTDIR)/*
+	rm -f build/build
+	mkdir -p $(OUTPUTDIR)
+	ln -s . build/build
+	ncc -fsyntax-only -fnesc-dump=interfaces -fnesc-dump=interfacedefs -fnesc-dump=functions -fnesc-dump=variables\(attribute\(test\)\) -fnesc-dump=referenced\(tags,interfacedefs,functions,interfaces\) -fnesc-dump=components\(wiring\) -fnesc-dumpfile=$(OUTPUTXML) -target=$(PLATFORM) $(ORIGINAL_INCLUDES) $(ORIGINAL_DEFINES) $(TEST_TARGETS)
+	cp $(TEST_TARGETS) $(OUTPUTDIR)
+	java -Xmx128M -cp $(JAVA_NC_CP) ncunit.output.NCUnit $(OUTPUTXML) $(OUTPUTDIR)

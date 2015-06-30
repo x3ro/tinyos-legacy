@@ -1,0 +1,100 @@
+<VM NAME="TSQLVM" DESC="A TinySQL VM with telosb sensor support." DIR="../../../../../apps/TSQLVM">
+<OPTION CAPSULE_SIZE=7168>
+<SEARCH PATH="../../opcodes">
+<SEARCH PATH="../../contexts">
+<SEARCH PATH="../motlle/mate">
+<SEARCH PATH="../motlle/mate/rep-float">
+<SEARCH PATH="../motlle/mate/runtime">
+<SEARCH PATH="../motlle/mate/runtime/gen">
+<SEARCH PATH="../motlle/matelib">
+<SEARCH PATH="../motlle/matelib/gen">
+<SEARCH PATH="../../../Util">
+<SEARCH PATH="../../../MultiHopLQI">
+
+<LANGUAGE NAME="motlle">
+
+<FUNCTION NAME="led">
+<FUNCTION name="id">
+<CONTEXT NAME="Timer0">
+<LOAD FILE="../../sensorboards/telosb.vmsf">
+<LOAD FILE="../motlle/matelib/gen/commfns.vmsf">
+<LOAD FILE="../motlle/matelib/gen/mhopfns.vmsf">
+/* There isn't enough code space. So we cherry pick the available functions.
+   Removed functions are simply commented out, uncomment them if you want
+   them. If you do this, you will probably have to comment some other
+   functions out instead. Note that to allow floating point support we had
+   to remove essentially all built-in functions and the built-in global
+   aggregates (avg, min, max).
+
+   The following functions should NOT be removed as they are used
+   in the generated motlle code: led, id, vector.
+*/
+//<LOAD FILE="../motlle/matelib/gen/queryfns.vmsf">
+<FUNCTION name=mf_epoch>
+<FUNCTION name=mf_next_epoch>
+<FUNCTION name=mf_snoop_epoch>
+<CONTEXT NAME="EpochChange">
+
+//<LOAD FILE="../motlle/mate/runtime/gen/floatfns.vmsf">
+<CONTEXT NAME="Once">
+//<FUNCTION name=mf_floor>
+//<FUNCTION name=mf_ceiling>
+<FUNCTION name=mf_truncate>
+//<FUNCTION name=mf_floatp>
+//<FUNCTION name=mf_max>
+//<FUNCTION name=mf_min>
+//<FUNCTION name=mf_abs>
+//<FUNCTION name=mf_numberp>
+//<FUNCTION name=mf_integerp>
+//<FUNCTION name=mf_realp>
+//<FUNCTION name=mf_error>
+//<FUNCTION name=mf_apply>
+//<FUNCTION name=mf_procedurep>
+//<FUNCTION name=mf_symbolp>
+//<FUNCTION name=mf_garbage_collect>
+//<FUNCTION name=mf_cons>
+//<FUNCTION name=mf_pairp>
+//<FUNCTION name=mf_listp>
+//<FUNCTION name=mf_nullp>
+//<FUNCTION name=mf_set_carb>
+//<FUNCTION name=mf_set_cdrb>
+//<FUNCTION name=mf_list>
+//<FUNCTION name=mf_list_tail>
+//<FUNCTION name=mf_list_ref>
+//<FUNCTION name=mf_car>
+//<FUNCTION name=mf_cdr>
+//<FUNCTION name=mf_caar>
+//<FUNCTION name=mf_cadr>
+//<FUNCTION name=mf_cdar>
+//<FUNCTION name=mf_cddr>
+//<FUNCTION name=mf_caaar>
+//<FUNCTION name=mf_caadr>
+//<FUNCTION name=mf_cadar>
+//<FUNCTION name=mf_caddr>
+//<FUNCTION name=mf_cdaar>
+//<FUNCTION name=mf_cdadr>
+//<FUNCTION name=mf_cddar>
+//<FUNCTION name=mf_cdddr>
+//<FUNCTION name=mf_stringp>
+<FUNCTION name=mf_make_string>
+<FUNCTION name=mf_string_length>
+<FUNCTION name=mf_string_fillb>
+//<FUNCTION name=mf_string>
+//<FUNCTION name=mf_vectorp>
+<FUNCTION name=mf_make_vector>
+<FUNCTION name=mf_vector_length>
+<FUNCTION name=mf_vector_fillb>
+<FUNCTION name=mf_vector>
+//<FUNCTION name=mf_vector2list>
+//<FUNCTION name=mf_string2list>
+//<FUNCTION name=mf_list2vector>
+//<FUNCTION name=mf_list2string>
+//<FUNCTION name=mf_length>
+//<FUNCTION name=mf_assq>
+//<FUNCTION name=mf_assv>
+//<FUNCTION name=mf_memq>
+//<FUNCTION name=mf_memv>
+//<FUNCTION name=mf_reverse>
+//<FUNCTION name=mf_append>
+//<FUNCTION name=mf_for_each>
+//<FUNCTION name=mf_map>

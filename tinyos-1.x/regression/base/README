@@ -1,0 +1,5 @@
+A regression test for TOSBase (and, by extension, most of the basic TinyOS
+functionality). 
+
+app-send.tst: send a message from the app mote to the base mote
+base-send.tst: send a message from the base mote to the app mote

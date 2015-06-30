@@ -1,0 +1,278 @@
+-------------------------------------------------------------
+* Installation instructions
+
+
+Check out the latest release of TinyOS 1.x from Sourceforge CVS at
+cvs.sourceforge.net. The TinyOS tree is located in /cvsroot/tinyos.
+Also you will need the NesC compiler also found at the Sourceforge CVS
+in /cvsroot/nescc.
+
+We will refer to the root of your TinyOS source directory as TOSROOT.
+
+Everything needed for evb13192 support is located in TOSROOT/contrib/diku/evb13192
+
+------------------------------------------------------------
+* Compilation instructions
+
+
+The following environment variables are required when compiling:
+
+COMPILEHOST
+TOSDIR
+MAKERULES
+TOSMAKE_PATH
+TINYOS_EVB13192DIR
+
+They can all be overriden by using e.g.
+$ export TOSDIR=/some/place/weird/that/nesc/does/not/know/about
+
+The make environment makes use of NesC's definition of TOSDIR. If
+you don't know that your NesC TOSDIR is, execute:
+$ ncc -print-tosdir
+in your shell. This should give you the TOSDIR. If this differs from
+the actual location of you tinyos tree, override the TOSDIR as
+described above.
+
+Likewise, if your evb13192 dir is located somewhere other than
+TOSROOT/contrib/diku/evb13192 or if you wish to use another
+implementation, change TINYOS_EVB13192DIR to the proper location.
+
+If your TinyOS tree is a replica of the SourceForge TinyOS tree,
+changing the environment variables should not be necessary.
+
+To compile an application simply do:
+
+$ make dig528
+
+in the application dir.
+Other targets are available, try:
+
+$ make dig528 help
+$ make dig528 install
+$ make dig528 docs
+
+
++ Compilation requirements
+
+- "plain" target
+
+The overall compilation process is like this: All the .nc files are
+translated into a C file (build/dig528/app.c) by the NesC
+compiler. This file needs to be translated into a binary
+file. Normally for TinyOS, this is done by a gcc backend for the
+MCU. Unfortunately, no gcc compiler exists for the MC9S08GT60. We have
+access to a Windows compiler that can perform this step, but due to
+licensing issues, we can not hand it out. Instead, the make file will
+automagically contact a host on DIKUs net that will perform this
+compilation step for you using a compiler we refer to as CW, and
+create the necessary files. Should compilation fail, then you will be
+notified.
+
+The program "curl" is used to contact the host, post the request and
+get the response. This program is available on most Linux systems, and
+can be installed as a package under Cygwin (which is installed by the
+TinyOS installation program under Windows). Proxies can be configured
+if necessary, consult the curl documentation.
+
+We again stress that the system may have bugs/flaws - please do not
+hesitate to contact Jan Flora at janflora@diku.dk or Esben Zeuthen
+at zept@diku.dk if you think you have spotted problems with the system.
+
+
+- install target
+
+As the "plain" target, but will output a line with the syntax for
+calling the bootloader host program under Linux (under Windows you
+should replace /dev/ttyUSB0 with your comport _number_, e.g.:
+"3"). More about using the bootloader below (after installation
+instructions).
+This is not of interest when using the testbed.
+
+
+- docs target
+
+This target creates documentation for the program you have
+compiled. You probably need the doxygen program, and the graphviz/dot
+package to get the fancy component graps. Recommended.
+
+
++ More compilation notes
+
+During the NesC compilation you will get a number of the following
+warnings:
+
+warning: `interrupt' attribute directive ignored
+warning: return type of `main' is not `int'
+
+At this point it is safe to ignore them.
+
+The CW compiler will issue a number of warnings/information too. The
+INFORMATION lines can usually be ignored. The CW compiler will
+typically issue a warning about main not returning an int - this can
+be ignored too.
+
++ Compilation output
+
+After a succesful "make evb13192 install", the following files will be
+present in build/evb13192:
+
+app.c          : The app.c that the CW compiler have translated
+app.c.orig     : The app.c file that the NesC compiler created
+                 This file have been "mangled" into app.c.posted
+app.c.posted   : The app.c file that was posted to the CW compiler
+                 Should be exactly the same as app.c!
+app.exe        : Compiled app.c program in binary format, linked
+	             with any other .o files that have been included.
+app.asm        : Assembly dump of app.c - Good for debugging
+app.map        : Map file: describes sections, dependencies, call
+                 graphs.
+app.o          : app.c object file.
+app.pre        : app.c preprocessed file
+app.s19        : s19 version of app.exe
+compile.tar.gz : All output (files, etc) from the CW compiler 
+EDOUT          : An annoying file that I so far have not gotten CW to
+                 stop producing...
+memusage.txt   : Interesting information about program memory consumption
+http_headers   : The headers returned to curl during compilation.
+OUTPUT         : The stuff the CW progs wrote to stdout + stderr
+                 during compilation
+
+You can often learn things about your program by looking at these
+files. Please note however, that if compilation fails, not all files
+may be present, and that you should sometimes do a "make clean" before
+compilation to ensure that you are not looking at outdated output
+files alongside with fresh ones.
+
++ Compiling with the lighttemp sensorboard or SimpleMac support
+
+In order to support the lighttemp sensorboard, you need to make the system
+aware of this board, by adding a line like this to your Makefile:
+SENSORBOARD=lighttemp
+
+In order to use the SimpleMac component, we need to use a variable
+called ENVIRONMENT, like this:
+ENVIRONMENT=SimpleMac
+You still need to create a TinyOSconfiguration that includes the
+SimpleMac component, etc.
+
+It is also possible to compile you program with 802.15.4 support, although
+the implementation is 100% done yet. This is also achieved using the
+ENVIROMNENT variable. The options are:
+- FFD
+- FFDNB
+- FFDNBNS
+- FFDNGTS
+- RFD
+- RFDNB
+- RFDNBNS
+
+A complete Makefile for an application called "MyApp" may the look like this:
+------------Makefile start-----------
+# This application assumes the 13192EVB board and the lighttemp sensor
+# board, and uses the 802.15.4 FFD component.
+
+PLATFORMS=evb13192
+ENVIRONMENT=FFD
+SENSORBOARD=lighttemp
+COMPONENT=MyApp
+
+# Include the Freescale TinyOS 802.15.4 module
+PFLAGS=-I$(TINYOS_EVB13192DIR)/tos/lib/freescale802154
+
+include ../Makerules
+
+-------------Makefile end------------
+
+The PFLAGS variables should only be set when compiling for
+802.15.4.
+
+------------------------------------------------------------
+NOTE: The sections below are not interesting when using the testbed!
+
+* Using the bootloader/programmer
+
+Documentation for the bootloader is available at:
+http://www.freescale.com/files/microcontrollers/doc/app_note/AN2295.pdf
+
+You should not need to consult this documentation as we present an
+overview of the method used to program here:
+
+Note : Because your node will send output to the UART when the
+bootloader tries to connect to it, you need to program using the
+following steps:
+
+a) Press and hold the reset switch on the board
+b) Run the bootloader program: 
+---------
+$ hc08sprg /dev/ttyUSB0 build/evb13192/main.s19
+hc08sprg - Developer's Serial Bootloader for HC(S)08 - $Version: 1.0.22.0$
+FC protocol versions supported: 1 (HC08), 2 (S08), 3 (large HC08)
+See Freescale Application Note AN2295.
+
+Waiting for HC08 reset ACK...
+---------
+c) Release the reset switch - the bootloader will calibrate, then ask
+for your confirmation before programming:
+---------
+Waiting for HC08 reset ACK...received 0xfc (good).
+Calibration break pulse sent. Count: 1
+Bootloader protocol version: 0x02 (read command supported)
+Bootloader version string: GB/GT60
+System device ID: 0x02 [MC9S08(GB/GT)(32/60)] rev. 4
+Number of memory blocks: 2
+Memory block #1: 0x1080-0x17FF
+Memory block #2: 0x182C-0xFDBF
+Erase block size: 512 bytes
+Write block size:  64 bytes
+Original vector table: 0xFFC0-0xFFFF
+New vector table:      0xFDC0-0xFDFF
+
+Are you sure to program part? [y/N]:
+---------
+d) press y<enter> - this will commence programming:
+---------
+Are you sure to program part? [y/N]: y
+Memory programmed:          100%
+Memory verified:            OK
+---------
+
+Note: Sometimes a byte or two can be latched on the serial port. In
+this case, the bootloader program will abort. Please retry a few
+times.
+
+Note: If you use the bootloader program under cygwin, please note that
+the output gets buffered (or something), which means that the program
+prints a message that you can not see, then waits for your
+input. Press "y" to get going, or run the program in a cmd.exe shell.
+
+------------------------------------------------------------
+* Getting the Uart output
+
+You should use a terminal program such as hyperterm (Windows) or
+minicom/miniterm under Linux. Connect to the port you are connected to
+(most likely /dev/ttyUSB0 under Linux (check dmesg), and com3 under
+Windows), using 300 bps, 8 bit data, no parity, 1 stop bit (8N1).
+NB: When you are using the SimpleMac component, the com speed is 38400
+- the rest is unchanged.
+
+Under Linux, you start the miniterm program something like this:
+
+$ miniterm -b300 -d/dev/ttyUSB0
+
+Because of clock problems, you may experience framing errors, which
+means that the output data is "out of sync". Press reset on the board
+to force synchronization.
+
+The application that is programmed on your board to begin with,
+outputs data like this:
+
+TestLightTemp online
+Light: 0x01D7 - Temp: 0x0104
+Light: 0x0269 - Temp: 0x0104
+Light: 0x0275 - Temp: 0x0105
+Light: 0x029E - Temp: 0x0105
+
+when you press the reset switch, and it will toggle the red led
+approximately each second.
+
+------------------------------------------------------------

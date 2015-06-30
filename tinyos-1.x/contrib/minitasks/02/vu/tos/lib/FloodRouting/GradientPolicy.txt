@@ -1,0 +1,38 @@
+GradientPolicy:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The GradientPolicy component is used to convergecast messages to a stationary
+base station. This policy has to be used together with the FloodRouting component.
+The GradientPolicy first calculates the hop count distance from the root,
+then based on this information forwards packets. Tha basic idea is that if the 
+same packet is heard from a node closer to the root than the currect node, 
+then the packet is not sent from this node. Otherwise, we send each packet up to
+three times (with 2 and 1 sec delays in between). 
+
+HOP COUNT:
+
+The hop count measurement (gradient calculation) is initiated by calling the 
+GradientPolicy.setRoot() method on the root node. The hop count distance from the 
+root is measured 16 times, and the final hop count distance is the average of the 
+measured hop counts. 
+
+ONE POSSIBLE USAGE:
+
+Include the RemoteControl component to your application. Program all motes with 
+this application, and program one mote with the GenericBase application. Turn all 
+motes on, and select the one of your application mote that is relatively close 
+(or the closest) to the base station. This mote will be the root of the convergecast.
+The base station will overhear the communication (either the ones that are sent
+towards to base station, or the ones that are sent by the base station as 
+acknowledgments) and can forward these packets to the PC. First, you have to tell
+the selected mote that it is the root. You can do this by sending the appropriate
+remote command:
+
+	<seq num> <root node id> 0x00 0x81 0x02
+
+where <seq num> is the remote control sequence number (see RemoteControl). After
+this, you can display the remote control acknowledgments, as well as your routed
+messages at the base station using the MessageTable application.

@@ -1,0 +1,3 @@
+COMPONENT=ColorTreeD
+include ../Makerules
+

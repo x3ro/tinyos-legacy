@@ -1,0 +1,10 @@
+ifndef CONTRIBDIR
+CONTRIBDIR := $(shell ncc -print-tosdir)/../contrib
+endif
+
+ifndef MAKESYSTEMC
+MAKESYSTEMC := $(CONTRIBDIR)/SystemC/MakeSystemC
+endif
+
+include $(MAKESYSTEMC)
+

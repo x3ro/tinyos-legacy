@@ -1,0 +1,14 @@
+Sources for TinyDB documentation.  Requires a working installation of elatex
+(latex2e).  To build the documentation, type:
+
+make
+
+If you have latex2html installed, you can also built an html version
+of the documentation by typing:
+
+make tinydb.html
+
+The postscript documentation is written to tinydb.ps. The html documentation
+is written to tinydb/index.html.
+
+author:  Sam Madden

@@ -1,0 +1,36 @@
+#-*-Makefile-*- vim:syntax=make
+# We rely on the master telosb file in TOSDIR to specify most of the
+# parameters
+
+PLATFORM ?= telosb
+
+HAS_USB=True
+USE_ID_CHIP=DS2411LiteM
+
+# for broken gcc 4.3.4	
+#LDFLAGS = -Wl,-gc-sections
+
+PFLAGS += \
+ -I$(HHTOSDIR)/tos/platform/telosb \
+ -I$(HHTOSDIR)/tos/platform/telos \
+ -I$(HHTOSDIR)/tos/platform/msp430_crl_base 
+
+#MSP_MCU = msp430x1611
+
+# Disable MSP430 hardware multiply because it makes MSPGCC die
+CFLAGS += -mdisable-hwmul
+PFLAGS += -fnesc-separator=__
+# for broken gcc 4.3.4	
+#CFLAGS += -ffunction-sections
+
+MSP_BSL_FLAGS = --telosb
+
+CFLAGS += \
+-I$(TOSDIR)/lib/CC2420Radio
+
+ifdef CC2420_CHANNEL
+CFLAGS += -DCC2420_DEF_CHANNEL=$(CC2420_CHANNEL)
+endif
+
+
+

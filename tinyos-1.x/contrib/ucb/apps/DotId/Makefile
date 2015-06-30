@@ -1,0 +1,3 @@
+COMPONENT=DotId
+include ../Makerules
+

@@ -1,0 +1,38 @@
+README for the high resolution Timer component:
+
+Author/Contact: <a href="mailto:miklos.maroti@vanderbilt.edu">miklos.maroti@vanderbilt.edu</a> (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The new Timer component provides timers with 1/32768 sec resolution. The Timer 
+interface is extended with a new method for starting the Timer with the required 
+period in 1/32768 sec units. The maximal achievable interrupt frequency is 
+16.384 KHz. The new Timer component extends the functionality of the native 
+Timer component of TinyOS-1.x. To use this implementation, simply copy the 4 
+files named Timer* to your directory where you compile your application. The 
+NesC compiler will find and use these files instead of the ones in the library. 
+Existing components should not be affected. Note that this component uses the 
+new Clock component (also developed at Vanderbilt), and the Clock* files also 
+must be copied to your application directory.
+
+FILES:
+
+The Timer interface (Timer.nc) has been extended to support the setting of 
+interrupt rates in 1/32768 sec units.
+
+The Timer header file (Timer.h) has been extended to provide constants to 
+describe the possible frequencies of interrupt rates.
+
+The Timer module (TimerM.nc and TimerC.nc) implements the new Timer interface.
+
+OPERATION:
+
+The underlying hardware interrupt rate (Clock) is always set to the highest 
+frequency of all running Timers. It is always guaranteed that each Timer is 
+fired exactly once in each of its time slice (of length rate/32768 sec). But in 
+general it is not true that the elapsed time between two consecutive events is 
+exactly the specified rate.
+
+The Timer running at the highest frequency will get its fired-event evenly as 
+long as the interrupt rate is representable by the underlying hardware clock.
+This is the case with rates (from 2/32768 sec to 256/32768 sec).

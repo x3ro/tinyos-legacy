@@ -1,0 +1,22 @@
+NAME=mate-asvm
+VERSION=2.19aDec2004
+
+cd ../../..
+rm -rf $NAME-$VERSION
+tools/release/extractor $NAME-$VERSION <<'EOF' | gzip > /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz
+!.
+^./tos/lib/VM
+^./tools/java/net/tinyos/script
+^./tools/java/jars/cup.jar
+^./tools/java/jars/JLex.jar
+^./tools/java/jars/xercesImpl.jar
+^./tools/java/jars/xmlParserAPIs.jar
+^./tools/java/jars/junit.jar
+^./tools/java/jars/jazz.jar
+^./tools/java/jars/plot.jar
+^./tools/java/jars/pgjdbc2.jar
+!/CVS/
+!/CVS$
+EOF
+rm -rf $NAME-$VERSION
+

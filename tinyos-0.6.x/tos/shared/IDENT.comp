@@ -1,0 +1,34 @@
+TOS_MODULE IDENT;
+
+ACCEPTS{
+	char IDENT_INIT(short port);
+	char IDENT_START(void);
+	char SET_ID(unsigned char *id, short len);
+	char CLEAR_ID(void);
+};
+
+HANDLES{
+	char SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr SEND_ID(TOS_MsgPtr val);
+	void TIMER_EVENT(short port);
+	char VCC_READY(short data);
+};
+
+USES{
+	void IDENT_LEDS(unsigned char led_action);
+
+	char IDENT_SUB_INIT(void);
+	char SUB_START_TIMER(char port, char interval);
+	char SUB_STOP_TIMER(char port);
+	void SUB_POT_SET(char val);
+	void SUB_POT_INC(void);
+	void SUB_POT_DEC(void);
+	char SUB_POT_GET(void);
+
+	char SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+
+	char VCC_GET(char port);
+};
+
+SIGNALS{
+};

@@ -1,0 +1,10 @@
+logs
+_darcs
+*.pyc
+_boring
+exclude
+build
+apps/RadioTest/RadioTest*
+*.s
+200*\
+*~

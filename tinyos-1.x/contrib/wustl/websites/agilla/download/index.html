@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Download Agilla</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>Download Agilla</h1>
+
+          <p>Agilla source code is distributed as a tarball. Below is a list
+            of releases that are publicly available. For installation instructions,
+          see <a href="../docs/tutorials/1_installation.html">Lesson 1</a> of
+          the <a href="../docs/tutorials/index.html">Tutorial</a>.</p>
+          <hr>
+          <h2>Version 3.0.3</h2>
+          <ul>
+            <li> Release date: 05-13-2007</li>
+            <li><a href="Agilla_v3.0.3.tar.gz">Download</a> </li>
+          </ul>
+          <p><strong>Changes:</strong></p>
+          <ol>
+            <li> Added #if statements around cc2420-specific code</li>
+            <li>Modified the
+                AgentInjector to check whether clustering is enabled before it
+              resets the LocationMgr</li>
+            <li> Modified some default settings to use
+                relative paths for portability. </li>
+          </ol>
+          <hr>
+          <h2>Version 3.0.2</h2>
+          <ul>
+            <li> Release date: 05-22-2006</li>
+            <li>Download </li>
+          </ul>
+          <p><strong>Changes:</strong></p>
+          <ol>
+            <li> Added a file called &quot;Example Makefile.Agilla&quot;, which
+    contains the default local settings.</li>
+            <li>Updated the README to describe the flags
+      in it </li>
+          </ol>
+          <hr>
+          <h2>Version 3.0.1</h2>
+          <ul>
+            <li> Release date: 05-16-2006</li>
+            <li>Download </li>
+          </ul>
+          <p><strong>Changes:</strong></p>
+          <ol>
+            <li> A bug fix that rectifies the &quot;QUEUE_ENQUEUE&quot; error
+              that sometimes occurs when there are numerous agents in the network. </li>
+          </ol>
+          <hr>
+          <h2>Version 3.0</h2>
+          <p> * Release date: 05-14-2006<br>
+  * Download </p>
+          <p><strong>Changes:</strong></p>
+          <p> 1. Added support for TelosB platform<br>
+  2. Allow the user to disable the grid topology filter and greedy routing<br>
+  3. The Java Makefile now assumes an $AGILLA environment variable that specifies
+  the root directory of Agilla's NesC code. The default value of this variable
+  is $TOSROOT/contrib/wustl/apps/Agilla/. </p>
+          <hr>
+          <h2>Version 2.2</h2>
+          <p> * Release date: 07-14-2005<br>
+  * Download </p>
+          <p><strong>Changes:</strong></p>
+          <p> 1. Reduced memory usage to avoid stack overflow when large agents
+            are injected. </p>
+          <hr>
+          <h2>Version 2.1</h2>
+          <ul>
+            <li> Release date: 05-25-2005</li>
+            <li>Download </li>
+          </ul>
+          <p><strong>Changes:</strong></p>
+          <ol>
+            <li> Fixed a bug that prevented a mote from moving more than once.</li>
+            <li> Changes
+              the &quot;reset all&quot; function to only reset nodes that are
+    reachable from the base station that broadcasted the reset message. </li>
+          </ol>
+          <hr>
+          <h2>Version 2.0</h2>
+          <ul>
+            <li> Release datea: 05-17-2005</li>
+            <li>Download </li>
+          </ul>
+          <p><strong>Changes:</strong></p>
+          <ol>
+            <li> The grid size can be changed using the AgentInjector (you no
+            longer have to reprogram all the motes to change the grid size)</li>
+            <li>When
+              specifying the grid size, you only specify the number of columns
+              (you no longer need to specify the number of rows). The
+              node&#8217;s TinyOS address
+    still determines the mote&#8217;s location. Mote 0 is at (1,1) located at
+    the lower-left corner of the grid. TinyOS address&#8217;s increase in row
+    major order.</li>
+            <li>A mote&#8217;s location can be changed using the AgentInjector
+    (you no longer need to reprogram the mote to change its address/location).
+    The original ID
+    of the mote is always used to specify which mote to modify, e.g., &#8220;move
+    mote 1 to location (2,3).&#8221;</li>
+            <li> The AgentInjector enters a modal state for
+    ~3 seconds after a reset to allow the network components to reinitialize
+    themselves. This is especially
+    critical
+    now that I&#8217;m sending the base station a message immediately after it
+    resets telling it that it is a base station.</li>
+            <li>The nodes periodically broadcast
+      a beacon, neighbor discovery is done by each node</li>
+            <li>The base station can be
+                any node in the network. It no longer has a special address.
+              There can be multiple base stations. Base stations can
+        also move,
+        their location is set like any other node using the AgentInjector.</li>
+            <li>Since
+                the location of a base station is no longer known by the non-base
+          station nodes, Agilla no longer performs multi-hop routing to (uart_x,
+          uart_y). Only the base station can perform a remote tuple space operation
+          to (uart_x,
+          uart_y). It is now up to the application to route messages to the base
+          station. If an agent knows the location of the base station, Agilla
+              can still perform
+          the greedy multi-hop routing to it. </li>
+          </ol>
+          <hr>
+          <h2>Version 1.6</h2>
+          <p> * Release date: 03-30-2005<br>
+  * Download </p>
+          <p><strong>Changes:</strong></p>
+          <p> 1. Fixed a bug in OPcompare preventing comparisons between variables
+            of two different types. Now, whenever you try to compare two variables
+            of different types, the condition code will always be set to 0. </p>
+          <p><strong>Known issues:</strong></p>
+          <p> 1. Linux's timing seems to be different from Windows resulting
+            in agents being corrupted when injected. To solve this, open &lt;agilla&gt;/types/MigrationMsgs.h,
+            uncomment lines 63-66, and comment out lines 77-84. </p>
+          <hr>
+          <h2>Version 1.5</h2>
+          <p> * Release date: 03-24-2005<br>
+  * Download </p>
+          <p><strong>Changes:</strong></p>
+          <p> 1. Fixed a bug preventing agents in the WSN from inserting tuples
+            into the laptop's tuple space. Added an Oscilloscope example to demonstrate
+            how a Java application running on the laptop can access the laptop's
+            tuple space. </p>
+          <hr>
+          <h2>Version 1.4</h2>
+          <p> * Release date: 03-23-2005<br>
+  * Download </p>
+          <p><strong>Changes:</strong></p>
+          <p> 1. Fixed the tuple space and modified assembler to report line
+            numbers in errors. </p>
+          <hr>
+          <h2>Version 1.3</h2>
+          <ul>
+            <li> Release date: 03-21-2005</li>
+            <li>Download </li>
+          </ul>
+          <p><strong>Changes:</strong></p>
+          <p> 1. Removes instruction shiftl and shiftr and replaces them with
+            mul (multiply) and div (divide). Agents can perform operations on
+            the laptop's tuple space by using location (uart_x, uart_y). </p>
+          <p><strong>Known Issues:</strong></p>
+          <p> 1. The RMI code for allowing remote access to the laptop's tuple
+            space has not been implemented yet. </p>
+          <hr>
+          <h2>Version 1.2
+          </h2>
+          <ul>
+            <li> Release date: 11-30-2004</li>
+            <li>Download </li>
+          </ul>
+          <p><strong>Note: </strong>This is the version used to write the IPSN 2005 SPOTS paper.</p>
+          <p><strong>Known Issues:</strong></p>
+          <ol>
+            <li> The PC can access the tuple space on mote (0,0), but there is
+              no clean interface for this yet. The PC cannot register reactions.
+              The agents on the laptop cannot register reactions on tuple spaces
+              within the WSN. </li>
+          </ol>
+          <p><em>This page was last updated on
+              <!-- #BeginDate format:Am1a -->April 7, 2008 3:48 PM<!-- #EndDate -->
+by Chien-Liang Fok.</em></p>
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

@@ -1,0 +1,75 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="David Culler">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>lesson3: Introducing Tasks for Application Data Processing</title>
+</head>
+<body>
+
+<h1>
+Lesson 3: Introducing Tasks for Application Data Processing</h1>
+
+
+    <p><br>TinyOS provides a two level scheduling hierarchy consisting
+    of tasks and events. TOS events generalize interrupt handling and
+    must do only a small amount of work before completing.&nbsp; TOS
+    tasks are provided to do any kind of&nbsp; general purpose
+    processing, providing concurrency throughout the application
+    graph.&nbsp; They may be preempted by events, so real-time
+    requirements, such as servicing the radio, may be met while
+    processing tasks.
+
+    <p>A <i>TOS task</i> is declared as <tt>void
+    TOS_TASK(taskname)()</tt>. It is a lower-level scheduling entity
+    than events and may be preempted by events.&nbsp; Tasks execute
+    atomically, relative to other tasks.&nbsp; Tasks do not preempt
+    task.&nbsp; A task is posted using
+    <tt>TOS_POST_TASK(taskname)()</tt>.&nbsp;&nbsp; They may be
+    posted from within commands, events, or tasks.&nbsp; Tasks may
+    not spin or block.&nbsp; They operate on their frame and complete
+    their work.&nbsp; Chunks of work separated by long latency
+    operations are broken into distinct tasks within a component
+    sharing a frame. <p>To illustrate tasks, we have modified the
+    SENSE application from lesson 2.&nbsp; It can be found at <a
+    href="../../apps/sense2">nest/apps/sense2</a>. We have expanded
+    the frame to contain a simple circular data buffer and provided a
+    helper function putdata to deposit data into this buffer.
+
+
+    <blockquote><tt>TOS_FRAME_BEGIN(SENSE_frame) {</tt>
+<br><tt>&nbsp; char head;</tt>
+<br><tt>&nbsp; short data[maxdata];</tt>
+<br><tt>}</tt></blockquote>
+
+
+    <p><br>The data_ready event simply deposits data into the buffer and posts
+a task for processing.
+<br>&nbsp;
+<blockquote><tt>char TOS_EVENT(SENSE_DATA_READY)(short data){</tt>
+<br><tt>&nbsp; putdata(data);</tt>
+<br><tt>&nbsp; TOS_POST_TASK(processData);</tt>
+<br><tt>&nbsp; return 1;</tt>
+<br><tt>}</tt></blockquote>
+
+<p><br>Some time after the event completes (there may be other tasks running
+as well), the processData task will run.&nbsp; It computes a simple average
+and renders it to the display.
+<br>&nbsp;
+<blockquote><tt>TOS_TASK(processData){</tt>
+<br><tt>&nbsp; int i, sum = 0;</tt>
+<br><tt>&nbsp; TOS_CALL_COMMAND(SENSE_LEDg_toggle)();</tt>
+<br><tt>&nbsp; for (i=0; i&lt;maxdata; i++)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; sum = sum + (VAR(data[i]) >> 7);</tt>
+<br><tt>&nbsp; display(sum >> shiftdata);</tt>
+<br><tt>}</tt></blockquote>
+
+<p>
+<hr>
+<b><font size=4><a href="lesson2.html">&lt; Previous Lesson</a></font></b> |
+<b><font size=4><a href="lesson4.html">Next Lesson &gt;</a></font></b>
+
+
+</body>
+</html>

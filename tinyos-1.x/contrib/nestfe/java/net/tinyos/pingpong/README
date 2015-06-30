@@ -1,0 +1,6 @@
+java net.tinyos.pingpong <dest> <type>
+
+  <type> can be
+  1: reply on a mote doesn't use task
+  2: reply on a mote uses task
+

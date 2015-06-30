@@ -1,0 +1,4 @@
+cp SwingMotes.java_noWebCam SwingMotes.java
+javac SwingMotes.java
+java SwingMotes&
+

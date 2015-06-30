@@ -1,0 +1,482 @@
+#-*-Makefile-*-
+######################################################################
+#
+# Main makefile for TOS applications.
+#
+# Created: 7/20/2001,  Rob von Behren <jrvb@cs.berkeley.edu>
+#
+#
+# To use this, applications need to simply include this file from
+# within their own Makefiles.  No other rules should be necessary for
+# most applications.
+#
+# ADDING NEW TARGET PLATFORMS.  This file is organized with the aim to
+# make adding new hardware platforms relatively straightforward.
+# There are several places below marked with a "HARDWARE PLATFORM"
+# comment, describing what needs to be done.
+#
+######################################################################
+######################################################################
+# Vlad B.:
+# To use application specific header/object files at the very top 
+# of your Makefile for your project specify 
+# include path for header files:
+#	APP_INCLUDE := -I path1 path2 path3...
+# source/object path
+#	APP_OBJS    := path_to_source/file.o path_to_source/file.o
+# (see diffusion_sensor example)
+# Note: this will only work when compiling for one target platform
+#       at a time
+# <disclaimer>Your milage may vary.</disclaimer>
+######################################################################
+
+# FIXME: determine this automatically
+DEFAULT_LOCAL_GROUP = 0x7d
+
+# If you would like to change from the default sensor board
+# Set the environment variable SENSORBOARD to either 
+# micasb or basic
+
+# If you're an IBM Thinkpad, uncomment this line
+#HOST=THINKPAD
+
+
+# output directories
+# HARDWARE PLATFORM: add new output directories here
+RENEBIN     = binrene
+RENE2BIN    = binrene2
+DOTBIN     = bindot
+MICABIN     = binmica
+PCBIN       = binpc
+WORKINGDIRS = bin* 
+
+ifeq (,$(BASEDIR)) 
+BASEDIR = ../..
+endif
+
+TOOLS   = $(BASEDIR)/tools
+TOS     = $(BASEDIR)/tos
+SYSTEM  = $(TOS)/system
+
+SHARED  = $(TOS)/shared
+INCLUDE = -I. -I$(BINDIR) -I$(TOS)/include
+AM_DISPATCH_MAP = $(TOS)/include/AM_DISPATCH.mapping
+
+
+PROGRAMER      = uisp
+WIN_PROGRAMER  = $(TOOLS)/mote_prog.exe
+SET_ID         = $(TOOLS)/munge_srec
+
+
+PROGRAMMER_FLAGS=-dprog=dapa 
+LG_PROGRAMMER_FLAGS=-dprog=dapa_2 -dno-poll
+# -dlpt=3 required for IBM thinkpad.  Remove on other platforms
+ifeq ($(HOST),THINKPAD)
+	PROGRAMMER_FLAGS += -dlpt=3
+endif
+
+######################################################################
+# specific defines for different hardware platforms
+######################################################################
+# HARDWARE PLATFORM: add defs for new platforms below.  Note that the
+# name of the binary (main vs main.exe) is used to determine which
+# build rule to use.  This should probably be fixed to do something a
+# bit nicer in the future.
+
+# the names for the different hardware targets
+HARDWARE_TARGETS = pc rene mica dot rene2
+
+# determine the requested platform from the make command line args.
+# Note that only one platform may be built at a time.
+ifneq ($(patsubst pc,,$(MAKECMDGOALS)), $(MAKECMDGOALS)) 
+    PLATFORM=pc
+    PLATFORM_DIR = $(TOS)/platform/$(PLATFORM)
+    PLATFORM_DEFAULT_OBJS = $(PLATFORM_DIR)/events.o \
+        $(PLATFORM_DIR)/heap_array.o $(PLATFORM_DIR)/event_queue.o \
+        $(PLATFORM_DIR)/rfm_model.o $(PLATFORM_DIR)/adc_model.o \
+	$(PLATFORM_DIR)/spatial_model.o \
+        $(PLATFORM_DIR)/rfm_space_model.o $(PLATFORM_DIR)/hardware.o\
+	$(PLATFORM_DIR)/eeprom.o
+
+    PLATFORM_SPECIAL_OBJS = $(BINDIR)/external_comm.o $(PLATFORM_DIR)/dbg.o
+endif
+ifneq ($(patsubst rene,,$(MAKECMDGOALS)), $(MAKECMDGOALS)) 
+    PLATFORM=rene
+endif
+ifneq ($(patsubst rene2,,$(MAKECMDGOALS)), $(MAKECMDGOALS)) 
+    PLATFORM=rene2
+    PLATFORM_DIR=$(TOS)/platform/rene
+endif
+ifneq ($(patsubst dot,,$(MAKECMDGOALS)), $(MAKECMDGOALS)) 
+    PLATFORM=dot
+endif
+ifneq ($(patsubst mica,,$(MAKECMDGOALS)), $(MAKECMDGOALS)) 
+    PLATFORM=mica
+endif
+
+ifndef (PLATFORM_DIR)
+	PLATFORM_DIR = $(TOS)/platform/$(PLATFORM)
+endif
+
+INCLUDE = -I. $(APP_INCLUDE) -I$(BINDIR) -I$(TOS)/include -I$(PLATFORM_DIR) -I$(PLATFORM_DIR)/include -I$(TOS)/platform/sensorboard/$(SENSORBOARD)/include
+
+# make sure that we have a valid platform name, and define build vars
+GOODPLATFORM = no
+ifeq ($(PLATFORM),rene)
+    MCU=at90s8535
+    AS     = avr-as
+    LD     = avr-gcc -Xlinker -M   -mmcu=$(MCU) 
+    CC     = avr-gcc 
+    OBJCOPY= avr-objcopy
+    CFLAGS = -c -O3 -Wall $(INCLUDE) -mmcu=$(MCU) -DDEFAULT_LOCAL_GROUP=$(DEFAULT_LOCAL_GROUP)
+    BINDIR = $(RENEBIN)
+    BINARY = $(BINDIR)/main.exe
+    GOODPLATFORM = yes
+    ifeq ($(SENSORBOARD),)
+	SENSORBOARD = basic
+    endif 
+endif
+
+ifeq ($(PLATFORM),rene2)
+    MCU=atmega163
+    BOOTLOADERDIR=$(BASEDIR)/tos/platform/bootloader163
+    AS     = avr-as
+    LD     = avr-gcc -Xlinker -M   -mmcu=$(MCU) -Xlinker -defsym -Xlinker reprogram=0x3C00
+    CC     = avr-gcc 
+    OBJCOPY= avr-objcopy
+    CFLAGS = -c -O3 -Wall $(INCLUDE) -mmcu=$(MCU) -DDEFAULT_LOCAL_GROUP=$(DEFAULT_LOCAL_GROUP)
+    BINDIR = $(RENE2BIN)
+    BINARY = $(BINDIR)/main.exe
+    PLATFORM_DIR=$(TOS)/platform/rene
+    GOODPLATFORM = yes
+    ifeq ($(SENSORBOARD),)
+	SENSORBOARD = basic
+    endif 
+endif
+
+ifeq ($(PLATFORM),dot)
+	MCU=atmega163
+    AS     = avr-as
+    LD     = avr-gcc -Xlinker -M   -mmcu=$(MCU) 
+    CC     = avr-gcc 
+    OBJCOPY= avr-objcopy
+    CFLAGS = -c -O3 -Wall $(INCLUDE) -mmcu=$(MCU) -DDEFAULT_LOCAL_GROUP=$(DEFAULT_LOCAL_GROUP)
+    BINDIR = $(DOTBIN)
+    BINARY = $(BINDIR)/main.exe
+    GOODPLATFORM = yes
+endif
+
+ifeq ($(PLATFORM),mica)
+	MCU=atmega103
+    AS     = avr-as
+    LD     = avr-gcc -Xlinker -M   -mmcu=$(MCU) 
+    CC     = avr-gcc 
+    OBJCOPY= avr-objcopy
+    CFLAGS = -c -O2 -Wall $(INCLUDE) -mmcu=$(MCU) -DDEFAULT_LOCAL_GROUP=$(DEFAULT_LOCAL_GROUP)
+    BINDIR = $(MICABIN)
+    BINARY = $(BINDIR)/main.exe
+    GOODPLATFORM = yes
+    ifeq ($(SENSORBOARD),)
+      SENSORBOARD = micasb
+    endif
+endif
+
+ifeq ($(PLATFORM),pc)
+    AS     = as
+    LD     = gcc
+    CC     = gcc 
+    CFLAGS = -c -O0 -g -Wall $(INCLUDE) -DTOSSIM -DFULLPC -DDEFAULT_LOCAL_GROUP=$(DEFAULT_LOCAL_GROUP)
+    BINDIR = $(PCBIN)
+    BINARY = $(BINDIR)/main
+    GOODPLATFORM = yes
+    ifeq ($(SENSORBOARD),)
+	SENSORBOARD = basic
+    endif
+endif
+
+# no platform needed for make clean
+ifeq ($(MAKECMDGOALS),clean)
+    GOODPLATFORM = yes
+endif 
+
+CFLAGS += $(APP_CFLAGS)
+
+
+######################################################################
+######################################################################
+##                                                                  ##
+##                      Begin main rules                            ##
+##                                                                  ##
+######################################################################
+######################################################################
+
+
+all:
+	$(MAKE) mica
+	$(MAKE) rene
+	$(MAKE) pc
+
+ifeq ($(GOODPLATFORM),no)
+ifneq (all,$(MAKECMDGOALS))
+ifneq (,$(MAKECMDGOALS))
+    $(error Unknown platform specified - $(MAKECMDGOALS))
+endif
+endif
+endif
+
+
+$(HARDWARE_TARGETS): $(BINARY)
+
+
+# make missing directories
+$(BINDIR)/x:
+	mkdir $(BINDIR)
+	touch $(BINDIR)/x
+
+ifeq (,$(DESC)) 
+DESC = $(wildcard *.desc)
+ifeq (,$(DESC)) 
+$(error No .desc file found!!)
+endif
+endif
+
+SCHEMA = $(wildcard $(subst desc,schema,$(DESC)))
+ifeq (x_$(SCHEMA), x_)
+    SCHEMA = $(BINDIR)/$(subst desc,schema,$(DESC))
+endif
+
+#accessors are the functions which the schema code uses
+#to retrieve sensor values from motes
+ACCESSORS = $(subst .desc,_acc.c,$(DESC))
+
+$(BINDIR)/Makefile.objs: $(SCHEMA) $(BINDIR)/moteschema.h $(DESC)
+	$(TOOLS)/desc2objs $(DESC) $(PLATFORM_DIR) $(SYSTEM) $(SHARED) $(TOS)/platform/sensorboard/$(SENSORBOARD) $(SHARED_LOCAL)  > $@
+
+ifneq ($(GOODPLATFORM),no)
+ifneq ($(MAKECMDGOALS),clean)
+include $(BINDIR)/Makefile.objs
+endif
+endif
+
+
+$(SYSTEM)/AMdispatch.c: $(OBJS) $(SYSTEM)/AM.h $(SYSTEM)/AMdispatch.template
+	(cpp -I. -I$(INCLUDE) $(SYSTEM)/AMdispatch.template | grep -v NULL_FUNC > $@) >& /dev/null
+
+
+COMPS = $(subst .o,.comp,$(PARSED_OBJS))
+
+$(BINDIR)/super.h: $(BINDIR)/x $(SCHEMA) $(BINDIR)/moteschema.h $(DESC) $(COMPS) 
+	$(TOOLS)/mksuper_desc $(DESC) $(PLATFORM_DIR) $(SYSTEM) $(SHARED) $(TOS)/platform/sensorboard/$(SENSORBOARD) $(SHARED_LOCAL)> $@
+
+
+$(SCHEMA): $(BINDIR)/x
+	touch $(SCHEMA)
+
+
+$(BINDIR)/am_dispatch.h: $(BINDIR)/x $(BINDIR)/super.h
+	$(TOOLS)/mk_amdisp $(AM_DISPATCH_MAP) $(INCLUDE) > $@
+
+
+
+$(BINDIR)/moteschema.h: $(BINDIR)/x $(SCHEMA) $(TOOLS)/parseschema
+	if (test -f $(ACCESSORS)) then \
+		$(TOOLS)/parseschema $(SCHEMA) $@ $(ACCESSORS) ACCESSORS.c; \
+		touch $@; \
+	else \
+		touch $@; \
+	fi 
+
+
+$(TOOLS)/parseschema:
+	make -C $(TOOLS) parseschema
+
+
+
+
+
+
+SHARED_OBJS = $(addprefix $(BINDIR)/, $(subst $(SHARED)/,,$(filter $(SHARED)/%,$(PARSED_OBJS))))
+SHARED_OBJS_SB = $(addprefix $(BINDIR)/, $(subst $(TOS)/platform/sensorboard/$(SENSORBOARD)/,,$(filter $(TOS)/platform/sensorboard/$(SENSORBOARD)/%,$(PARSED_OBJS))))
+SYSTEM_OBJS = $(addprefix $(BINDIR)/, $(subst $(SYSTEM)/,,$(filter $(SYSTEM)/%,$(PARSED_OBJS))))
+ifneq (,$(SHARED_LOCAL))
+  SHARED_LOCAL_OBJS = $(addprefix $(BINDIR)/, $(subst $(SHARED_LOCAL)/,,$(filter $(SHARED_LOCAL)/%,$(PARSED_OBJS))))
+endif
+LOCAL_OBJS = $(addprefix $(BINDIR)/, $(subst ./,,$(filter ./%,$(PARSED_OBJS))))
+PLATFORM_OBJS = $(addprefix $(BINDIR)/, $(subst $(PLATFORM_DIR)/,,$(filter $(PLATFORM_DIR)/%,$(PARSED_OBJS))))
+OBJS = $(SHARED_OBJS) $(SYSTEM_OBJS) $(BINDIR)/sched.o $(PLATFORM_OBJS) $(LOCAL_OBJS) $(PLATFORM_DEFAULT_OBJS) $(PLATFORM_SPECIAL_OBJS) $(APP_OBJS)
+ifneq (,$(SHARED_LOCAL))
+  OBJS += $(SHARED_LOCAL_OBJS)
+endif
+OBJS += $(SHARED_OBJS_SB)
+
+%.h : %.comp
+	$(TOOLS)/mkheader $< > $@
+
+$(SHARED_OBJS) : $(BINDIR)/%.o : $(SHARED)/%.c $(SHARED)/%.h $(BINDIR)/super.h
+	$(CC) $(CFLAGS)  -o $@ $<
+
+$(SHARED_OBJS_SB) : $(BINDIR)/%.o : $(TOS)/platform/sensorboard/$(SENSORBOARD)/%.c $(TOS)/platform/sensorboard/$(SENSORBOARD)/%.h $(BINDIR)/super.h
+	$(CC) $(CFLAGS)  -o $@ $<
+
+$(SYSTEM_OBJS) : $(BINDIR)/%.o : $(SYSTEM)/%.c $(SYSTEM)/%.h $(BINDIR)/super.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+ifneq (,$(SHARED_LOCAL))
+$(SHARED_LOCAL_OBJS) : $(BINDIR)/%.o : ../shared/%.c ../shared/%.h
+	$(CC) $(CFLAGS) -o $@ $<
+endif
+
+$(LOCAL_OBJS) : $(BINDIR)/%.o : ./%.c ./%.h $(BINDIR)/super.h
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ $<
+
+$(BINDIR)/external_comm.o :  $(BINDIR)/%.o : $(PLATFORM_DIR)/%.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+
+$(PLATFORM_DIR)/dbg.o : $(PLATFORM_DIR)/%.o : $(PLATFORM_DIR)/%.c $(TOS)/include/dbg.h $(TOS)/include/dbg_modes.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+$(PLATFORM_DEFAULT_OBJS) : $(PLATFORM_DIR)/%.o : $(PLATFORM_DIR)/%.c 
+	$(CC) $(CFLAGS) -o $@ $<
+
+$(PLATFORM_OBJS) : $(BINDIR)/%.o : $(PLATFORM_DIR)/%.c $(PLATFORM_DIR)/%.h $(BINDIR)/super.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+$(BINDIR)/sched.o : $(BINDIR)/%.o : $(SYSTEM)/%.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+$(BINDIR)/dbg.o : $(BINDIR)/%.o : $(SYSTEM)/%.c $(TOS)/include/dbg.h $(TOS)/include/dbg_modes.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+
+# FIXME: generate dependancy files for the .c files
+# FIXME: put appropriate dependancies on the Makefile itself 
+
+
+
+
+
+
+install: $(BINDIR)/main.srec
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase 
+	sleep 1
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=$<
+#ifeq ('$(MCU)', 'atmega163')
+#	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=$(BOOTLOADERDIR)/DOT.srec
+#	$(PROGRAMER) -dapa --segment=fuse --upload if=avrfuse.srec
+#endif
+	sleep 1
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --verify if=$<
+
+install.%: $(BINDIR)/main.srec
+	$(SET_ID) $(BINDIR)/main `echo $@ |sed 's:install.::g'`
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase 
+	sleep 1	             
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=out.srec
+	sleep 1	             
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --verify if=out.srec
+
+
+install_windows: $(BINDIR)/main.srec
+	$(WIN_PROGRAMER) --erase --speed 124 --upload $<
+
+install_windows.%: $(BINDIR)/main.srec
+	$(SET_ID) $(BINDIR)/main `echo $@ |sed 's:install_windows.::g'`
+	$(WIN_PROGRAMER) --erase --speed 124 --upload out.srec
+
+$(BINDIR)/%.srec : $(BINDIR)/%.exe
+	$(OBJCOPY) --output-target=srec $< $@
+
+
+ifeq ('$(PLATFORM)', 'mica') 
+bootloader: 
+	make -C ../../tos/platform/littleguy MICA.srec
+
+netinstall: $(BINDIR)/main.srec bootloader
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase 
+	$(PROGRAMER) $(LG_PROGRAMMER_FLAGS) --erase
+	$(PROGRAMER) $(LG_PROGRAMMER_FLAGS) --upload if=../../tos/platform/littleguy/MICA.srec
+	$(PROGRAMER) $(LG_PROGRAMMER_FLAGS) --verify if=../../tos/platform/littleguy/MICA.srec
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=$(BINDIR)/main.srec
+	sleep 1
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --verify if=$(BINDIR)/main.srec
+
+netinstall.%: $(BINDIR)/main.srec bootloader
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase 
+	$(PROGRAMER) $(LG_PROGRAMMER_FLAGS) --erase
+	$(PROGRAMER) $(LG_PROGRAMMER_FLAGS) --upload if=../../tos/platform/littleguy/MICA.srec
+	$(PROGRAMER) $(LG_PROGRAMMER_FLAGS) --verify if=../../tos/platform/littleguy/MICA.srec
+	$(SET_ID) $(BINDIR)/main `echo $@ |sed 's:install_windows.::g'`
+	sleep 1
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase 
+	sleep 1
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=out.srec
+	sleep 1
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --verify if=out.srec
+endif
+
+ifeq ('$(PLATFORM)', 'rene2') 
+
+bootloader:
+	make -C ../.../tos/platform/bootloader163 DOT.srec
+
+netinstall: $(BINDIR)/main.srec bootloader
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase 
+	sleep 1
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=$(BINDIR)/main.srec
+	sleep 1	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=$(BOOTLOADERDIR)/DOT.srec
+	sleep 1
+	$(PROGRAMER) -dapa --segment=fuse --upload if=avrfuse.srec
+	sleep 1
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --verify if=$(BINDIR)/main.srec 
+
+endif
+
+ifeq ('$(PLATFORM)', 'rene') 
+
+bootloader:
+	make -C ../.../tos/platform/littleguy I2CSPI.srec
+
+netinstall: $(BINDIR)/main.srec bootloader
+	echo "Make sure that the programming board switch is in the Big guy poistion"
+	echo "Press Enter to continue"
+	read
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase 
+	echo "Mote the switch into Little Guy position"
+	echo "Press Enter to continue"
+	read
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --erase
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=../.../tos/platform/littleguy I2CSPI.srec
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --verify if=../.../tos/platform/littleguy I2CSPI.srec
+	echo "Move the switch into Big Guy poistion"
+	echo "Press Enter to continue"
+	read
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --upload if=$(BINDIR)/main.srec
+	sleep 1
+	$(PROGRAMER) $(PROGRAMMER_FLAGS) --verify if=$(BINDIR)/main.srec
+endif
+# HARDWARE PLATFORM: For the time being, these two rules correspond to
+# building for the rene and building for the PC.  It may be necessary
+# to add specific build rules for different platforms when new ones
+# are added.
+$(BINDIR)/main.exe: $(BINDIR)/x $(BINDIR)/am_dispatch.h $(OBJS) $(BINDIR)/All_headers.o
+	$(LD) -o $@ $(OBJS) > $(BINDIR)/img.file
+	grep _e $(BINDIR)/img.file | grep =\.
+
+
+# Ugh. Cruft necessary to compile under cygwin properly
+$(BINDIR)/main: $(BINDIR)/x $(BINDIR)/am_dispatch.h $(OBJS) $(BINDIR)/All_headers.o
+	@if test $(OSTYPE) = "cygwin"; then \
+	echo "$(LD) -o $@ $(OBJS)"; $(LD) -o $@ $(OBJS); \
+	else echo "$(LD) -lpthread -lm -o $@ $(OBJS)"; \
+	     $(LD) -lpthread -lm -o $@ $(OBJS); \
+	fi
+
+clean:
+	rm -rf $(WORKINGDIRS) $(APP_OBJS) [A-Z]*.h
+
+HEADER_FILES = $(subst .comp,.h,$(COMPS))
+
+$(BINDIR)/All_headers.o: $(COMPS) 
+	$(TOOLS)/desc2hdrs $(HEADER_FILES) > $(BINDIR)/All_headers.c
+	$(CC) $(CFLAGS) -o $(BINDIR)/All_headers.o $(BINDIR)/All_headers.c

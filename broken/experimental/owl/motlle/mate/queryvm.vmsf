@@ -1,0 +1,29 @@
+<VM NAME="QueryVM" DESC="A simple example VM that enables a few basic operations, such a packet sends, sensing, and operating the LEDs" DIR="/home/dgay/motes/tinyos-1.x/apps/QueryVM">
+<OPTION CAPSULE_SIZE=1024>
+<SEARCH PATH="/home/dgay/motes/motlle/mate">
+<SEARCH PATH="/home/dgay/motes/motlle/mate/rep-BASEREP">
+<SEARCH PATH="/home/dgay/motes/motlle/mate/runtime">
+<SEARCH PATH="/home/dgay/motes/motlle/mate/runtime/gen">
+<SEARCH PATH="/home/dgay/motes/tinyos-1.x/tos/lib/Util">
+<SEARCH PATH="/home/dgay/motes/tinyos-1.x/tos/lib/VM/opcodes">
+<SEARCH PATH="/home/dgay/motes/tinyos-1.x/tos/lib/VM/contexts">
+<SEARCH PATH="/home/dgay/motes/tinyos-1.x/tos/lib/VM/languages">
+<SEARCH PATH="/home/dgay/motes/tinyos-1.x/tos/lib/VM/sensorboards">
+<SEARCH PATH="/home/dgay/motes/tinyos-1.x/tos/lib/VM/sensorboards/sensors">
+<SEARCH PATH="/home/dgay/motes/tinyos-1.x/tos/lib/VM/sensorboards/micawb">
+<SEARCH PATH="/home/dgay/motes/tinyos-1.x/contrib/xbow/tos/sensorboards/mts400">
+<SEARCH PATH="/home/dgay/motes/contrib/ucb/tos/CC1000Pulse">
+<SEARCH PATH="/home/dgay/motes/owl/YARoute">
+<LOAD FILE="/home/dgay/motes/tinyos-1.x/tos/lib/VM/sensorboards/micawb.vmsf">
+<LANGUAGE NAME="motlle">
+<FUNCTION NAME="led">
+<FUNCTION name="id">
+<CONTEXT NAME="Timer0">
+<CONTEXT NAME="Once">
+
+<CONTEXT NAME="Snoop">
+<CONTEXT NAME="Intercept">
+<CONTEXT NAME="Receive">
+<CONTEXT NAME="EpochChange">
+
+<LOAD FILE="runtime/gen/allfns.vmsf">

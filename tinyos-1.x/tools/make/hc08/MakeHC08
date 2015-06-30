@@ -1,0 +1,77 @@
+#-*-Makefile-*- vim:syntax=make
+# $Id: MakeHC08,v 1.2 2004/01/09 10:18:23 cssharp Exp $
+# @author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+###
+### Define these environment variables in your startup script, particular 
+### to your installation: TELOSPATH, CWPATH, PEMICROPATH
+###
+
+ifndef TELOSPATH
+TELOSPATH = c:/home/telos
+endif
+
+ifndef CWPATH
+CWPATH = c:/apps/CodeWarrior
+endif
+
+ifndef PEMICROPATH
+PEMICROPATH = c:/apps/pemicroHCS08
+endif
+
+
+###
+### You probably won't have to change anything below here to get started
+###
+
+CHC08  = $(CWPATH)/prog/chc08.exe
+LINKER = $(CWPATH)/prog/Linker.exe
+BURNER = $(CWPATH)/prog/Burner.exe
+START_OBJ = $(CWPATH)/lib/HC08c/lib/start08.o
+ANSI_LIB = $(CWPATH)/lib/HC08c/lib/ansi.lib
+TELOSLIB = $(TELOSPATH)/hc08/lib
+
+LINKER_PRM = $(TELOSPATH)/hc08/lib/hcs08gb60.prm
+BURNER_BBL = $(TELOSPATH)/hc08/lib/generic_s19.bbl
+PEPROG = $(TELOSPATH)/hc08/bin/peprog
+
+CHC08_OPTS := -Os -Oi=c65536 -Cu=i8 -F2 -Lasm $(CHC08_OPTS)
+CFLAGS := $(CFLAGS) -I$(TELOSPATH)/tos/platform/hc08 -I$(TELOSPATH)/hc08/include 
+PEPROG_OPTS = -cprog $(PEMICROPATH)/cprogHCS08.exe Interface=USBMULTILINK Port=USB1
+
+ifndef FORCE_HC08
+START_OBJ := $(START_OBJ:start08.o=start08s.o)
+ANSI_LIB  := $(ANSI_LIB:ansi.lib=ansis.lib)
+CHC08_OPTS := -Cs08 $(CHC08_OPTS)
+endif
+
+ifdef NESC
+TELOS_EXE_DEPS =
+else
+TELOS_EXE_DEPS =  $(TELOSLIB)/hcs08gb60.o
+endif
+
+
+%.install: %.s19 FORCE
+	$(PEPROG) -srec $< $(PEPROG_OPTS)
+
+%.s19: %.exe
+	BurnIn=$< BurnOut=$@ $(BURNER) -f $(BURNER_BBL)
+
+%.exe: %.o $(TELOS_EXE_DEPS)
+	DEFAULTDIR=. $(LINKER) -O./$@ $(addprefix -Add,$+ $(START_OBJ) $(ANSI_LIB)) $(LINKER_PRM)
+	map=$(TELOSLIB)/$(basename $@).map && [ -f $$map ] && mv $$map ./
+
+%.o: %.c
+	$(CHC08) $(CHC08_OPTS) $(PFLAGS) $(CFLAGS) $<
+
+clean: FORCE
+	rm -f $(TELOSLIB)/hcs08gb60.o EDOUT err.log
+	@a=`for a in *.c; do b=$${a%.c}; for c in $$b.o $$b.map $$b.exe $$b.s19; do [ -f $$c ] && echo -n "$$c "; done; done`; [ -n "$$a" ] && echo "rm -f $$a" && rm -f $$a; true
+
+extra_clean: FORCE
+	rm -f $(TELOSLIB)/hcs08gb60.o
+
+.PRECIOUS: %.o %.exe %.s19
+.PHONY: FORCE
+

@@ -1,0 +1,2 @@
+COMPONENT=SoundRecorderC
+include ../Makerules

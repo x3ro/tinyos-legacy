@@ -1,0 +1,25 @@
+README for Blink2
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+Blink2 is a basic application that toggles the leds on the mote
+on every clock interrupt.  The difference between Blink and Blink2
+is how the Clock.fire() event is handled.  Blink2 offloads processing
+to a task which controls the LEDs.  Blink controls the LEDs directly
+in the event handler thereby not returning from the event until the
+LEDs have been toggled.  The clock interrupt is scheduled to
+occur every second.  The initialization of the clock can be seen
+in the Blink initialization function, StdControl.start().
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:
+
+apps/Blink

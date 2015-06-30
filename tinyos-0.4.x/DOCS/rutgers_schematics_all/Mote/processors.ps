@@ -1,0 +1,4739 @@
+%-12345X@PJL JOB
+@PJL SET RESOLUTION = 600
+@PJL SET ECONOMODE = OFF
+@PJL ENTER LANGUAGE = POSTSCRIPT 
+%!PS-Adobe-3.0
+%%Title: MOTE : PROCESSORS
+%%Creator: Windows NT 4.0
+%%CreationDate: 16:53 11/26/2001
+%%Pages: (atend)
+%%BoundingBox: 13 12 780 598
+%%LanguageLevel: 2
+%%DocumentNeededFonts: (atend)
+%%DocumentSuppliedFonts: (atend)
+%%EndComments
+%%BeginProlog
+
+%%BeginResource: procset NTPSOct95
+/NTPSOct95 100 dict dup begin/bd{bind def}bind def/ld{load def}bd/ed{exch def}
+bd/a{currentpoint}bd/c/curveto ld/d/dup ld/e/eofill ld/f/fill ld/tr/translate
+ld/gr/grestore ld/gs/gsave ld/j/setlinejoin ld/L/lineto ld/M/moveto ld/n
+/newpath ld/cp/closepath ld/rm/rmoveto ld/sl/setlinewidth ld/sd/setdash ld/g
+/setgray ld/r/setrgbcolor ld/s/stroke ld/t/show ld/aw/awidthshow ld/im
+/imagemask ld/MS{moveto show}bd/SF{findfont exch scalefont setfont}bd/SM{cmtx
+setmatrix}bd/MF{findfont exch makefont setfont}bd/CM{/cmtx matrix currentmatrix
+def}bd/B{M exch dup 0 rlt exch 0 exch rlt neg 0 rlt}bd/CB{B cp eoclip}bd/EA{1
+index 0/G0 put 4 string 1 1 4 -1 roll{3 copy neg exch cvs dup 0 71 put cvn 3 -1
+roll exch put}for pop}bd/rlt/rlineto ld/L2?/languagelevel where{pop
+languagelevel 2 ge}{false}ifelse def end def 
+%%EndResource
+%%EndProlog
+%%BeginSetup
+[{0
+/languagelevel where{pop languagelevel 2 ge}{false}ifelse
+{1 dict dup/JobTimeout 4 -1 roll put setuserparams}
+{statusdict/setjobtimeout get exec}ifelse
+}stopped cleartomark
+[{120
+/languagelevel where{pop languagelevel 2 ge}{false}ifelse
+{1 dict dup/WaitTimeout 4 -1 roll put setuserparams}
+{statusdict/waittimeout 3 -1 roll put}ifelse
+}stopped cleartomark
+/#copies 1 def
+[{
+%%BeginFeature: *HPPaperPolicy PromptUser
+
+   <</DeferredMediaSelection true>> setpagedevice
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPHalftone PrinterDefault
+
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPCollate False
+<</Collate false>> setpagedevice
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *Smoothing True
+
+  << /PostRenderingEnhance true /PostRenderingEnhanceDetails << /REValue 2 /Type 8 >>
+  >> setpagedevice
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *PageSize Letter
+
+  <</PageSize [612 792] /ImagingBBox null>> setpagedevice
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *MediaType None
+
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *Duplex DuplexNoTumble
+
+  <</Duplex true /Tumble false>> setpagedevice
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPwmFont HelveticaB
+
+  /Helvetica-Bold findfont dup length dict begin
+    {1 index /FID ne {def} {pop pop} ifelse} forall
+    /Encoding ISOLatin1Encoding def currentdict 
+  end
+  /HPwmFont exch definefont pop
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPwmFontSize pt48
+userdict /HPwmSize 48 put
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPwmTextStyle Medium
+userdict /HPwmStyle .48 put
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPwmTextAngle Deg45
+userdict /HPwmAngle 45 put
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPwmText None
+
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPwmLocation True
+userdict /HPwmLocation true put
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPNup OneUp
+
+% Copyright (c) Hewlett-Packard Co 1997
+  userdict begin
+  true setglobal /HPwm 5 dict dup begin /HPwmOn true def /HPwmOdd true def end def false setglobal
+
+  userdict /HPwmAngle known not {/HPwmAngle 45 def} if
+  userdict /HPwmSize known not {/HPwmSize 48 def} if
+  userdict /HPwmLocation known not {/HPwmLocation true def} if
+  userdict /HPwmStyle known not {/HPwmStyle .48 def} if
+  userdict /HPwmDuplex known not {/HPwmDuplex 0 def} if
+
+  /HPwmEOP {HPwmDuplex 0 eq {true}{HPwmDuplex 1 eq HPwmOdd eq dup not {erasepage}if
+    true setglobal /HPwmOdd HPwmOdd not def false setglobal}ifelse} bind def
+  end
+
+  <<
+  /EndPage {userdict begin
+  userdict /HPwmText known HPwm /HPwmOn get and
+    {initmatrix
+     0 setgray 1 setlinewidth true setstrokeadjust 0 setlinejoin 0 setlinecap [] 0 setdash
+     currentpagedevice /PageSize get aload pop 2 div exch 2 div exch translate
+     HPwmAngle rotate /HPwmFont HPwmSize selectfont
+     HPwmText stringwidth 2 div neg exch 2 div neg exch HPwmSize .25 mul sub moveto
+     HPwmText false charpath userdict /HPwmStyle1 known
+       {gsave 1 setgray HPwmStyle1 HPwmStyle add setlinewidth stroke grestore} if
+     0 setgray HPwmStyle setlinewidth stroke
+     HPwmLocation not {true setglobal HPwm /HPwmOn false put false setglobal} if
+    } if
+  2 eq {pop false}{pop HPwm begin HPwmEOP end} ifelse
+  end } bind
+  >> setpagedevice
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *HPScalePatterns Scale
+/GDIBWPatternDict 18 dict def
+/dtransform {GDIBWPatternDict /Width known {currentpagedevice /HWResolution get 0 get
+150 div mul exch currentpagedevice /HWResolution get 0 get 150 div mul exch dtransform}{dtransform}ifelse} bind def
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *Option1 True
+
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *Option2 False
+
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *Option3 True
+
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *Option4 True
+
+%%EndFeature
+} stopped cleartomark
+[{
+%%BeginFeature: *VMOption 36MB
+
+%%EndFeature
+} stopped cleartomark
+%%EndSetup
+NTPSOct95 begin
+%%Page: 1 1
+NTPSOct95 /PageSV save put
+90 rotate 0 -612 translate
+13.059 598.762 translate 72 600 div dup neg scale
+0 0 transform .25 add round .25 sub exch .25 add round .25 sub exch itransform translate
+1 j
+1 setlinecap
+6 sl
+gs
+n
+6349 6 0 0 CB
+n
+1 1 M
+6344 1 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+gs
+n
+9 4714 6340 0 CB
+n
+6344 1 M
+6344 4709 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+gs
+n
+6349 9 0 4705 CB
+n
+6344 4709 M
+1 4709 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+gs
+n
+6 4714 0 0 CB
+n
+1 4709 M
+1 1 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+n
+66 66 M
+6279 66 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 66 M
+6279 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 4644 M
+66 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+66 4644 M
+66 66 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+%%IncludeFont: Helvetica
+[46.543 0 0 -46.543 0 0]/Helvetica MF
+n
+26 52 687 8 B
+1 g
+f
+0 g
+(5)687 50 MS
+n
+26 52 687 4651 B
+1 g
+f
+0 g
+(5)687 4693 MS
+gs
+n
+9 71 1304 0 CB
+n
+1308 66 M
+1308 1 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+n
+1308 4709 M
+1308 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+26 52 1929 8 B
+1 g
+f
+0 g
+(4)1929 50 MS
+n
+26 52 1929 4651 B
+1 g
+f
+0 g
+(4)1929 4693 MS
+gs
+n
+9 71 2547 0 CB
+n
+2551 66 M
+2551 1 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+n
+2551 4709 M
+2551 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+26 52 3172 8 B
+1 g
+f
+0 g
+(3)3172 50 MS
+n
+26 52 3172 4651 B
+1 g
+f
+0 g
+(3)3172 4693 MS
+gs
+n
+9 71 3789 0 CB
+n
+3793 66 M
+3793 1 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+n
+3793 4709 M
+3793 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+26 52 4414 8 B
+1 g
+f
+0 g
+(2)4414 50 MS
+n
+26 52 4414 4651 B
+1 g
+f
+0 g
+(2)4414 4693 MS
+gs
+n
+9 71 5032 0 CB
+n
+5036 66 M
+5036 1 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+n
+5036 4709 M
+5036 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+26 52 5657 8 B
+1 g
+f
+0 g
+(1)5657 50 MS
+n
+26 52 5657 4651 B
+1 g
+f
+0 g
+(1)5657 4693 MS
+n
+33 52 18 638 B
+1 g
+f
+0 g
+(D)18 680 MS
+n
+33 52 6296 638 B
+1 g
+f
+0 g
+(D)6296 680 MS
+n
+33 52 18 1782 B
+1 g
+f
+0 g
+(C)18 1824 MS
+n
+33 52 6296 1782 B
+1 g
+f
+0 g
+(C)6296 1824 MS
+gs
+n
+71 9 0 1206 CB
+n
+66 1210 M
+1 1210 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+n
+6344 1210 M
+6279 1210 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+31 52 18 2927 B
+1 g
+f
+0 g
+(B)18 2969 MS
+n
+31 52 6296 2927 B
+1 g
+f
+0 g
+(B)6296 2969 MS
+gs
+n
+71 9 0 2351 CB
+n
+66 2355 M
+1 2355 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+n
+6344 2355 M
+6279 2355 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+1 sl
+n
+66 2355 M
+34 2336 L
+34 2373 L
+cp
+gs
+e
+gr
+s
+n
+6279 2355 M
+6311 2336 L
+6311 2373 L
+cp
+gs
+e
+gr
+s
+n
+31 52 18 4071 B
+1 g
+f
+0 g
+(A)18 4113 MS
+n
+31 52 6296 4071 B
+1 g
+f
+0 g
+(A)6296 4113 MS
+6 sl
+gs
+n
+71 9 0 3495 CB
+n
+66 3499 M
+1 3499 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+gr
+n
+6344 3499 M
+6279 3499 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+1 sl
+[24 24 24 24 24 24 24 24 ]0 sd
+n
+4644 2093 M
+6149 2093 L
+s
+n
+5690 2682 M
+6214 2682 L
+s
+n
+6214 2682 M
+6214 3663 L
+s
+n
+6214 3663 M
+5690 3663 L
+s
+n
+5690 3663 M
+5690 2682 L
+s
+%%IncludeFont: Courier
+[54.988 0 0 -59 0 0]/Courier MF
+(LITTLE_GUY_RE)3401 2598 MS
+(S)3830 2598 MS (E)3862 2598 MS (T)3894 2598 MS
+(PW4)3401 2533 MS
+(PW3)3401 2467 MS
+(I2C_BUS_2_D)3401 2402 MS
+(A)3764 2402 MS (T)3796 2402 MS (A)3828 2402 MS
+(I2C_BUS_2_)3401 2337 MS
+(C)3731 2337 MS (L)3763 2337 MS (K)3795 2337 MS
+(RFM_RX)3401 2271 MS
+(D)3599 2271 MS
+(UART_TX)3401 2206 MS
+(D)3632 2206 MS (0)3664 2206 MS
+(UART_RX)3401 2140 MS
+(D)3632 2140 MS (0)3664 2140 MS
+(LED_1 \(RE)3401 1879 MS
+(D)3698 1879 MS (\))3730 1879 MS
+(LED_2 \(GRE)3401 1813 MS
+(E)3731 1813 MS (N)3763 1813 MS (\))3795 1813 MS
+(LED_3 \(YELL)3401 1748 MS
+(O)3764 1748 MS (W)3796 1748 MS (\))3828 1748 MS
+(POT_SELE)3401 1683 MS
+(C)3665 1683 MS (T)3697 1683 MS
+(I2C_BUS_1_D)3401 1617 MS
+(A)3764 1617 MS (T)3796 1617 MS (A)3828 1617 MS
+(I2C_BUS_1_)3401 1552 MS
+(C)3731 1552 MS (L)3763 1552 MS (K)3795 1552 MS
+(SCK_SPI/LITTLE_GUY_S)3401 1421 MS
+(P)4061 1421 MS (I)4093 1421 MS (_)4125 1421 MS (C)4157 1421 MS (L)4189 1421 MS (K)4221 1421 MS
+(MISO_SPI/LITTLE_GU)3401 1356 MS
+(Y)3995 1356 MS (_)4027 1356 MS (M)4059 1356 MS (I)4091 1356 MS (S)4123 1356 MS (O)4155 1356 MS
+(MOSI_SPI/LITTLE_GU)3401 1290 MS
+(Y)3995 1290 MS (_)4027 1290 MS (M)4059 1290 MS (O)4091 1290 MS (S)4123 1290 MS (I)4155 1290 MS
+(SS_SPI/P)3401 1225 MS
+(W)3665 1225 MS (1)3697 1225 MS
+(PW2)3401 1159 MS
+(RFM_TX)3401 1094 MS
+(D)3599 1094 MS
+(RF_CNTRL)3401 1029 MS
+(_)3665 1029 MS (1)3697 1029 MS
+(RF_CNTRL)3401 963 MS
+(_)3665 963 MS (0)3697 963 MS
+(ADC0_BB_O)3401 375 MS
+(U)3698 375 MS (T)3730 375 MS
+(ADC1)3401 440 MS
+(ADC2)3401 505 MS
+(ADC3)3401 571 MS
+(ADC4)3401 636 MS
+(ADC5)3401 702 MS
+(ADC6)3401 767 MS
+(ADC7)3401 832 MS
+(Battery P)5756 3645 MS
+(a)6053 3645 MS (c)6085 3645 MS (k)6117 3645 MS
+(I2C_BUS_2_CLK & SCK_SPI/LITTLE_)1766 4364 MS
+(G)2789 4364 MS (U)2821 4364 MS (Y)2853 4364 MS (_)2885 4364 MS (S)2917 4364 MS (P)2949 4364 MS (I)2981 4364 MS (_)3013 4364 MS (C)3045 4364 MS (L)3077 4364 MS (K)3109 4364 MS
+(I2C_BUS_2_D)1766 4429 MS
+(A)2129 4429 MS (T)2161 4429 MS (A)2193 4429 MS
+(RESE)1766 3579 MS
+(T)1898 3579 MS
+(I2C_BUS_2_D)1766 3514 MS
+(A)2129 3514 MS (T)2161 3514 MS (A)2193 3514 MS
+(MISO_SPI/LITTLE_GU)1766 3383 MS
+(Y)2360 3383 MS (_)2392 3383 MS (M)2424 3383 MS (I)2456 3383 MS (S)2488 3383 MS (O)2520 3383 MS
+(MOSI_SPI/LITTLE_GU)1766 3318 MS
+(Y)2360 3318 MS (_)2392 3318 MS (M)2424 3318 MS (O)2456 3318 MS (S)2488 3318 MS (I)2520 3318 MS
+(I2C_BUS_2_CLK & SCK_SPI/LITTLE_)1766 3448 MS
+(G)2789 3448 MS (U)2821 3448 MS (Y)2853 3448 MS (_)2885 3448 MS (S)2917 3448 MS (P)2949 3448 MS (I)2981 3448 MS (_)3013 3448 MS (C)3045 3448 MS (L)3077 3448 MS (K)3109 3448 MS
+(ADC Channel Assig)4971 375 MS
+(n)5532 375 MS (m)5564 375 MS (e)5596 375 MS (n)5628 375 MS (t)5660 375 MS (s)5692 375 MS
+(0)4775 505 MS
+(TR1000 Baseband )4906 505 MS
+(O)5434 505 MS (u)5466 505 MS (t)5498 505 MS (p)5530 505 MS (u)5562 505 MS (t)5594 505 MS
+(1)4775 571 MS
+(Simple Sensor Board - Phot)4906 571 MS
+(o)5764 571 MS ( )5796 571 MS (R)5828 571 MS (e)5860 571 MS (s)5892 571 MS (i)5924 571 MS (s)5956 571 MS (t)5988 571 MS (o)6020 571 MS (r)6052 571 MS
+(2)4775 636 MS
+(Simple Sensor Board - T)4906 636 MS
+(h)5665 636 MS (e)5697 636 MS (r)5729 636 MS (m)5761 636 MS (i)5793 636 MS (s)5825 636 MS (t)5857 636 MS (o)5889 636 MS (r)5921 636 MS
+(6)4775 963 MS
+(Mag Sensor - Perpendicul)4906 963 MS
+(a)5698 963 MS (r)5730 963 MS ( )5762 963 MS (C)5794 963 MS (h)5826 963 MS (a)5858 963 MS (n)5890 963 MS (n)5922 963 MS (e)5954 963 MS (l)5986 963 MS
+(7)4775 1094 MS
+(Mag Sensor - Paralle)4906 1094 MS
+(l)5566 1094 MS ( )5598 1094 MS (C)5630 1094 MS (h)5662 1094 MS (a)5694 1094 MS (n)5726 1094 MS (n)5758 1094 MS (e)5790 1094 MS (l)5822 1094 MS
+(3)4775 767 MS
+(4)4775 832 MS
+(5)4775 898 MS
+(Accel Sensor - Paralle)4906 702 MS
+(l)5632 702 MS ( )5664 702 MS (C)5696 702 MS (h)5728 702 MS (a)5760 702 MS (n)5792 702 MS (n)5824 702 MS (e)5856 702 MS (l)5888 702 MS
+(Accel Sensor - Perpendicul)4906 767 MS
+(a)5764 767 MS (r)5796 767 MS ( )5828 767 MS (C)5860 767 MS (h)5892 767 MS (a)5924 767 MS (n)5956 767 MS (n)5988 767 MS (e)6020 767 MS (l)6052 767 MS
+(Pin 3 of P1)4644 2206 MS
+( )5007 2206 MS (h)5039 2206 MS (a)5071 2206 MS (s)5103 2206 MS
+(polarizing )4644 2287 MS
+(k)5007 2287 MS (e)5039 2287 MS (y)5071 2287 MS
+(Revision His)4840 3710 MS
+(t)5236 3710 MS (o)5268 3710 MS (r)5300 3710 MS (y)5332 3710 MS
+(2k Flash, 128 Byt)1047 3187 MS
+(e)1608 3187 MS (s)1640 3187 MS ( )1672 3187 MS (R)1704 3187 MS (A)1736 3187 MS (M)1768 3187 MS
+(32k x 8 Se)328 4299 MS
+(r)658 4299 MS (i)690 4299 MS (a)722 4299 MS (l)754 4299 MS
+(EEPRO)328 4379 MS
+(M)493 4379 MS
+(8k Flash, 512 )1178 1421 MS
+(B)1640 1421 MS (y)1672 1421 MS (t)1704 1421 MS (e)1736 1421 MS (s)1768 1421 MS
+(EEPROM, 512 B)1178 1500 MS
+(y)1607 1500 MS (t)1639 1500 MS (e)1671 1500 MS (s)1703 1500 MS
+(RAM)1178 1579 MS
+[0 -54.992 -59 0 0 0]/Courier MF
+(R)5938 2675 MS (E)5938 2642 MS
+(D)5938 2609 MS
+(B)5807 2675 MS (L)5807 2642 MS
+(K)5807 2609 MS
+[54.988 0 0 -59 0 0]/Courier MF
+(Rev 1 - Changed symbol for AT90LS2343. Added neg)3925 3841 MS
+( )5509 3841 MS (p)5541 3841 MS (o)5573 3841 MS (w)5605 3841 MS (e)5637 3841 MS (r)5669 3841 MS ( )5701 3841 MS (l)5733 3841 MS (e)5765 3841 MS (a)5797 3841 MS (d)5829 3841 MS ( )5861 3841 MS (c)5893 3841 MS (o)5925 3841 MS (m)5957 3841 MS (m)5989 3841 MS
+(e)6021 3841 MS (n)6053 3841 MS (t)6085 3841 MS (.)6117 3841 MS
+(Added ADC reference comment. Added PW )3925 3922 MS
+(p)5179 3922 MS (i)5211 3922 MS (n)5243 3922 MS ( )5275 3922 MS (a)5307 3922 MS (s)5339 3922 MS (s)5371 3922 MS (i)5403 3922 MS (g)5435 3922 MS (n)5467 3922 MS (m)5499 3922 MS (e)5531 3922 MS (n)5563 3922 MS (t)5595 3922 MS (s)5627 3922 MS (.)5659 3922 MS
+(Pin 1 and 3)4644 1748 MS
+( )5007 1748 MS (c)5039 1748 MS (u)5071 1748 MS (t)5103 1748 MS
+(on PCB side o)4644 1829 MS
+(f)5073 1829 MS ( )5105 1829 MS (J)5137 1829 MS (1)5169 1829 MS
+(Pin 3 cut)4644 1944 MS
+( )4941 1944 MS (o)4973 1944 MS (n)5005 1944 MS
+(connector side)4644 2025 MS
+( )5106 2025 MS (o)5138 2025 MS (f)5170 2025 MS ( )5202 2025 MS (J)5234 2025 MS (1)5266 2025 MS
+(J1 soldered)4840 1552 MS
+( )5203 1552 MS (o)5235 1552 MS (n)5267 1552 MS
+(LED sid)4840 1633 MS
+(e)5071 1633 MS (.)5103 1633 MS
+(Negative lead)4840 1290 MS
+( )5269 1290 MS (i)5301 1290 MS (s)5333 1290 MS
+(closest to co)4840 1370 MS
+(r)5269 1370 MS (n)5301 1370 MS (e)5333 1370 MS (r)5365 1370 MS
+(on PCB)4840 1450 MS
+(.)5038 1450 MS
+(Note that ADC reference will change )458 2860 MS
+(w)1646 2860 MS (i)1678 2860 MS (t)1710 2860 MS (h)1742 2860 MS ( )1774 2860 MS (c)1806 2860 MS (h)1838 2860 MS (a)1870 2860 MS (n)1902 2860 MS (g)1934 2860 MS (i)1966 2860 MS (n)1998 2860 MS (g)2030 2860 MS
+(battery voltage. OK for sensors that c)458 2939 MS
+(h)1712 2939 MS (a)1744 2939 MS (n)1776 2939 MS (g)1808 2939 MS (e)1840 2939 MS ( )1872 2939 MS (l)1904 2939 MS (i)1936 2939 MS (k)1968 2939 MS (e)2000 2939 MS (w)2032 2939 MS (i)2064 2939 MS (s)2096 2939 MS (e)2128 2939 MS (,)2160 2939 MS
+(potentially a problem for absolute o)458 3018 MS
+(u)1646 3018 MS (t)1678 3018 MS (p)1710 3018 MS (u)1742 3018 MS (t)1774 3018 MS ( )1806 3018 MS (s)1838 3018 MS (e)1870 3018 MS (n)1902 3018 MS (s)1934 3018 MS (o)1966 3018 MS (r)1998 3018 MS (s)2030 3018 MS (.)2062 3018 MS
+(PW Pin Assignm)458 309 MS
+(e)920 309 MS (n)952 309 MS (t)984 309 MS (s)1016 309 MS
+(PW)197 440 MS
+(1)263 440 MS
+(PW)197 571 MS
+(2)263 571 MS
+(PW)197 767 MS
+(3)263 767 MS
+(PW)197 832 MS
+(4)263 832 MS
+(PW)197 898 MS
+(5)263 898 MS
+(PW)197 963 MS
+(6)263 963 MS
+(Not connec)328 963 MS
+(t)658 963 MS (e)690 963 MS (d)722 963 MS (?)754 963 MS
+(Not connec)328 898 MS
+(t)658 898 MS (e)690 898 MS (d)722 898 MS (?)754 898 MS
+(Simple Sensor - Phot)328 440 MS
+(o)988 440 MS (r)1020 440 MS (e)1052 440 MS (s)1084 440 MS (i)1116 440 MS (s)1148 440 MS (t)1180 440 MS (o)1212 440 MS (r)1244 440 MS
+(Simple Sensor - The)328 571 MS
+(r)955 571 MS (m)987 571 MS (i)1019 571 MS (s)1051 571 MS (t)1083 571 MS (o)1115 571 MS (r)1147 571 MS
+(Mag Sensor - )328 636 MS
+(P)757 636 MS (o)789 636 MS (w)821 636 MS (e)853 636 MS (r)885 636 MS
+(Mag Sensor - )328 767 MS
+(P)757 767 MS (o)789 767 MS (t)821 767 MS ( )853 767 MS (C)885 767 MS (S)917 767 MS
+(Mag Sensor - )328 832 MS
+(P)757 832 MS (o)789 832 MS (t)821 832 MS ( )853 832 MS (C)885 832 MS (S)917 832 MS
+(Accel Sensor - Photo)328 505 MS
+(r)988 505 MS (e)1020 505 MS (s)1052 505 MS (i)1084 505 MS (s)1116 505 MS (t)1148 505 MS (o)1180 505 MS (r)1212 505 MS
+(Accel Sensor - Ther)328 1029 MS
+(m)955 1029 MS (i)987 1029 MS (s)1019 1029 MS (t)1051 1029 MS (o)1083 1029 MS (r)1115 1029 MS (?)1147 1029 MS
+(Accel Sensor - The)4906 1029 MS
+(r)5500 1029 MS (m)5532 1029 MS (i)5564 1029 MS (s)5596 1029 MS (t)5628 1029 MS (o)5660 1029 MS (r)5692 1029 MS
+(Accel Sensor IC )328 702 MS
+(-)856 702 MS ( )888 702 MS (P)920 702 MS (o)952 702 MS (w)984 702 MS (e)1016 702 MS (r)1048 702 MS
+[58.902 0 0 -59 0 0]/Helvetica MF
+(h:\\orcad\\motes\\mote\\mote1.dsn)4186 4501 MS
+(1)6148 4501 MS
+(Berkeley Mote - Processors - Rutgers Interpretation)4186 4305 MS
+(A)3990 4501 MS
+(1)5560 4632 MS
+(3)5952 4632 MS
+(Monday, November 26, 2001)4265 4632 MS
+(Title)3925 4239 MS
+(S)3925 4435 MS (i)3963 4435 MS (z)3975 4435 MS (e)4003 4435 MS
+(Document Number)4186 4435 MS
+(Rev)6083 4435 MS
+(Date:)3925 4632 MS
+(Sheet)5233 4632 MS
+6 sl
+[]0 sd
+n
+3925 4055 M
+6279 4055 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 4055 M
+6279 4186 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 4186 M
+3925 4186 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3925 4186 M
+3925 4055 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3925 4186 M
+6279 4186 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 4186 M
+6279 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 4382 M
+3925 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3925 4382 M
+3925 4186 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3925 4382 M
+4121 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4121 4382 M
+4121 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4121 4579 M
+3925 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3925 4579 M
+3925 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4121 4382 M
+6083 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6083 4382 M
+6083 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6083 4579 M
+4121 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4121 4579 M
+4121 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6083 4382 M
+6279 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 4382 M
+6279 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 4579 M
+6083 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6083 4579 M
+6083 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3925 4579 M
+5233 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5233 4579 M
+5233 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5233 4644 M
+3925 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3925 4644 M
+3925 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5233 4579 M
+6279 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 4579 M
+6279 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6279 4644 M
+5233 4644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5233 4644 M
+5233 4579 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(of)5756 4632 MS
+(PD0)4382 2140 MS
+(PC1)4382 1617 MS
+(PD6)4382 2532 MS
+(PD5)4382 2467 MS
+(PD1)4382 2205 MS
+(PC2)4382 1682 MS
+(PB0)4382 963 MS
+(PB3)4382 1159 MS
+(PC0)4382 1551 MS
+(PB4)4382 1224 MS
+(PB6)4382 1355 MS
+(PB5)4382 1290 MS
+(PD7)4382 2598 MS
+(PC4)4382 1813 MS
+(PC3)4382 1747 MS
+(PC5)4382 1878 MS
+(PB2)4382 1093 MS
+(PB1)4382 1028 MS
+(PA5)4382 701 MS
+(PA4)4382 636 MS
+(PA2)4382 505 MS
+(PA7)4382 832 MS
+(PA1)4382 439 MS
+(PD2)4382 2271 MS
+(PA6)4382 766 MS
+(PA[0..7] PB[0..7] PC[0..5] PD[0..7])4840 237 MS
+(PA0)4382 374 MS
+(PA3)4382 570 MS
+(PD4)4382 2401 MS
+(PB7)4382 1420 MS
+(PD3)4382 2336 MS
+n
+5887 131 M
+5920 98 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5887 131 M
+5920 165 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5919 131 M
+5953 165 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5919 131 M
+5953 98 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(RESET)5965 152 MS
+n
+1570 2682 M
+1702 2682 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1590 2702 M
+1682 2702 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1662 2721 M
+1608 2721 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1629 2741 M
+1643 2741 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+393 3728 M
+525 3728 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+413 3748 M
+505 3748 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+485 3768 M
+431 3768 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+452 3787 M
+466 3787 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1374 916 M
+1506 916 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1394 936 M
+1486 936 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1466 955 M
+1412 955 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1433 975 M
+1447 975 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1459 315 M
+1419 315 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 315 M
+1439 329 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1420 315 M
+1440 261 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 262 M
+1460 316 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(VCC)1374 250 MS
+n
+478 3323 M
+438 3323 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+458 3323 M
+458 3337 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+439 3323 M
+459 3270 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+458 3271 M
+479 3324 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(VCC)393 3258 MS
+n
+5187 2734 M
+5147 2734 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5167 2734 M
+5167 2748 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5148 2734 M
+5168 2681 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5167 2682 M
+5188 2735 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(VCC)5102 2670 MS
+n
+785 4513 M
+917 4513 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+805 4533 M
+898 4533 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+877 4552 M
+824 4552 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+844 4572 M
+858 4572 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1786 4173 M
+1746 4173 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1766 4173 M
+1766 4187 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1747 4173 M
+1767 4120 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1766 4121 M
+1787 4174 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(VCC)1701 4108 MS
+n
+1112 2224 M
+1244 2224 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1132 2244 M
+1225 2244 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1204 2263 M
+1151 2263 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1171 2283 M
+1185 2283 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5494 1766 M
+5626 1766 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5514 1786 M
+5606 1786 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5586 1806 M
+5532 1806 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5553 1825 M
+5567 1825 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+589 2682 M
+721 2682 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+609 2702 M
+701 2702 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+681 2721 M
+627 2721 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+648 2741 M
+662 2741 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3552 3388 M
+3512 3388 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3532 3388 M
+3532 3402 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3513 3388 M
+3533 3335 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3532 3336 M
+3553 3389 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(VCC)3467 3324 MS
+n
+3421 4108 M
+3381 4108 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3401 4108 M
+3401 4122 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3382 4108 M
+3402 4054 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3401 4055 M
+3422 4109 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(VCC)3336 4043 MS
+n
+1112 1832 M
+1244 1832 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1132 1851 M
+1225 1851 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1204 1871 M
+1151 1871 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1171 1891 M
+1185 1891 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5579 1361 M
+5539 1361 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5560 1361 M
+5560 1375 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5540 1361 M
+5561 1308 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5560 1309 M
+5580 1362 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(VCC)5494 1296 MS
+n
+674 2146 M
+634 2146 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+655 2146 M
+655 2160 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+635 2146 M
+656 2092 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+655 2093 M
+675 2147 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(VCC)589 2081 MS
+n
+2440 3846 M
+2400 3846 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2420 3846 M
+2420 3860 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2401 3846 M
+2421 3793 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2420 3794 M
+2441 3847 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(VCC)2355 3781 MS
+n
+589 2551 M
+721 2551 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+655 2577 M
+655 2618 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+717 2598 M
+699 2584 677 2577 654 2577 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+654 2577 M
+654 2577 654 2577 654 2577 c
+631 2577 608 2584 590 2599 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+(C5)779 2604 MS
+(0.1 uF)779 2663 MS
+n
+655 2486 M
+655 2551 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+655 2682 M
+655 2617 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1897 328 M
+2617 328 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2617 328 M
+2617 2682 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2617 2682 M
+1897 2682 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1897 2682 M
+1897 328 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(U2)1943 289 MS
+(AT90LS)1897 2735 MS
+(8)2110 2735 MS (5)2142 2735 MS (3)2174 2735 MS (5)2206 2735 MS
+n
+2813 393 M
+2617 393 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(37)2663 392 MS
+n
+2813 458 M
+2617 458 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(36)2663 457 MS
+n
+2813 524 M
+2617 524 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(35)2663 523 MS
+n
+2813 589 M
+2617 589 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(34)2663 588 MS
+n
+2813 655 M
+2617 655 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(33)2663 654 MS
+n
+2813 720 M
+2617 720 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(32)2663 719 MS
+n
+2813 785 M
+2617 785 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(31)2663 784 MS
+n
+2813 851 M
+2617 851 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(30)2663 850 MS
+n
+2813 982 M
+2617 982 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(40)2663 981 MS
+n
+2813 1047 M
+2617 1047 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(41)2663 1046 MS
+n
+2813 1112 M
+2617 1112 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(42)2663 1111 MS
+n
+2813 1178 M
+2617 1178 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(43)2663 1177 MS
+n
+2813 1243 M
+2617 1243 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(44)2663 1242 MS
+n
+2813 1309 M
+2617 1309 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(1)2663 1308 MS
+n
+2813 1374 M
+2617 1374 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(2)2663 1373 MS
+n
+2813 1439 M
+2617 1439 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(3)2663 1438 MS
+n
+2813 1570 M
+2617 1570 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(19)2663 1569 MS
+n
+2813 1636 M
+2617 1636 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(20)2663 1635 MS
+n
+2813 1701 M
+2617 1701 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(21)2663 1700 MS
+n
+2813 1766 M
+2617 1766 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(22)2663 1765 MS
+n
+2813 1832 M
+2617 1832 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(23)2663 1831 MS
+n
+2813 1897 M
+2617 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(24)2663 1896 MS
+n
+2813 1963 M
+2617 1963 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(25)2663 1962 MS
+n
+2813 2028 M
+2617 2028 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(26)2663 2027 MS
+n
+2813 2159 M
+2617 2159 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(9)2663 2158 MS
+n
+2813 2224 M
+2617 2224 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(10)2663 2223 MS
+n
+2813 2290 M
+2617 2290 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(11)2663 2289 MS
+n
+2813 2355 M
+2617 2355 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(12)2663 2354 MS
+n
+2813 2420 M
+2617 2420 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(13)2663 2419 MS
+n
+2813 2486 M
+2617 2486 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(14)2663 2485 MS
+n
+2813 2551 M
+2617 2551 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(15)2663 2550 MS
+n
+2813 2617 M
+2617 2617 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(16)2663 2616 MS
+n
+1701 393 M
+1897 393 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(5)1818 392 MS
+n
+1701 458 M
+1897 458 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(17)1785 457 MS
+n
+1701 524 M
+1897 524 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(38)1785 523 MS
+n
+1701 720 M
+1897 720 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(6)1818 719 MS
+n
+1701 785 M
+1897 785 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(18)1785 784 MS
+n
+1701 851 M
+1897 851 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(39)1785 850 MS
+n
+1701 1309 M
+1897 1309 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(4)1818 1308 MS
+n
+1701 1636 M
+1897 1636 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(8)1818 1635 MS
+n
+1701 2028 M
+1897 2028 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(7)1818 2027 MS
+n
+1701 2486 M
+1897 2486 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(27)1785 2485 MS
+n
+1701 2617 M
+1897 2617 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(28)1785 2616 MS
+n
+1701 2355 M
+1897 2355 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(29)1785 2354 MS
+0.203 g
+(PA0 \(ADC0\))2259 420 MS
+(PA1 \(ADC1\))2259 485 MS
+(PA2 \(ADC2\))2259 551 MS
+(PA3 \(ADC3\))2259 616 MS
+(PA4 \(ADC4\))2259 682 MS
+(PA5 \(ADC5\))2259 747 MS
+(PA6 \(ADC6\))2259 812 MS
+(PA7 \(ADC7\))2259 878 MS
+(PB0 \(T0\))2348 1009 MS
+(PB1 \(T1\))2348 1074 MS
+(PB2 \(AIN0\))2287 1139 MS
+(PB3 \(AIN1\))2287 1205 MS
+(PB4 \(SS\))2339 1270 MS
+1 sl
+n
+2486 1216 M
+2564 1216 L
+s
+(PB5 \(MOSI\))2268 1336 MS
+(PB6 \(MISOI\))2253 1401 MS
+(PB7 \(SCK\))2296 1466 MS
+(PC0)2469 1597 MS
+(PC1)2469 1663 MS
+(PC2)2469 1728 MS
+(PC3)2469 1793 MS
+(PC4)2469 1859 MS
+(PC5)2469 1924 MS
+(PC6 \(TOSC1\))2216 1990 MS
+(PC7 \(TOSC2\))2216 2055 MS
+(PD0 \(RXD\))2288 2186 MS
+(PD1 \(TXD\))2295 2251 MS
+(PD2 \(INT0\))2286 2317 MS
+(PD3 \(INT1\))2286 2382 MS
+(PD4 \(OC1B\))2252 2447 MS
+(PD5 \(OC1A\))2252 2513 MS
+(PD6 \(ICP\))2316 2578 MS
+(PD7 \(OC2\))2291 2644 MS
+(VCC1)1930 420 MS
+(VCC2)1930 485 MS
+(VCC3)1930 551 MS
+(GND1)1930 747 MS
+(GND2)1930 812 MS
+(GND3)1930 878 MS
+(RESET)1930 1336 MS
+n
+1930 1282 M
+2126 1282 L
+s
+(XTAL1)1930 1663 MS
+(XTAL2)1930 2055 MS
+(AVCC)1930 2513 MS
+(AGND)1930 2644 MS
+(AREF)1930 2382 MS
+6 sl
+0 g
+n
+4513 2832 M
+4513 2925 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4644 2878 M
+4578 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4513 2878 M
+4381 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4513 2878 M
+4513 2878 L
+4579 2924 L
+4579 2832 L
+4513 2878 L
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4435 2826 M
+4435 2826 L
+4409 2813 L
+4422 2839 L
+4435 2826 L
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4474 2826 M
+4474 2826 L
+4448 2813 L
+4461 2839 L
+4474 2826 L
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4454 2819 M
+4495 2860 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4415 2819 M
+4455 2860 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(D1)4252 2800 MS
+(RED)4448 2800 MS
+n
+4709 2878 M
+4644 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4317 2878 M
+4382 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4775 2878 M
+4795 2858 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4794 2859 M
+4835 2899 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4834 2898 M
+4874 2858 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4873 2859 M
+4913 2899 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4912 2898 M
+4952 2858 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4951 2859 M
+4972 2879 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(R12)4775 2800 MS
+(470)4971 2800 MS
+n
+4709 2878 M
+4775 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5036 2878 M
+4971 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1374 589 M
+1506 589 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 615 M
+1439 656 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1502 636 M
+1484 622 1462 615 1439 615 c
+1437 615 1437 615 1438 615 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1438 615 M
+1415 615 1393 622 1375 637 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+(C4)1505 577 MS
+(0.01 uF)1505 642 MS
+n
+1439 524 M
+1439 589 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 720 M
+1439 655 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+655 2224 M
+675 2245 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+674 2244 M
+634 2284 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+635 2283 M
+675 2323 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+674 2322 M
+634 2363 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+635 2362 M
+675 2402 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+674 2401 M
+654 2421 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(R9)720 2277 MS
+(100)720 2343 MS
+n
+655 2159 M
+655 2224 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+655 2486 M
+655 2420 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1112 1701 M
+1244 1701 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1178 1727 M
+1178 1767 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1240 1748 M
+1222 1734 1200 1727 1177 1727 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1177 1727 M
+1177 1727 1177 1727 1177 1727 c
+1154 1727 1131 1734 1113 1749 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+(C9)982 1689 MS
+(13 pF)916 1754 MS
+n
+1178 1636 M
+1178 1701 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1178 1832 M
+1178 1766 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4513 3356 M
+4513 3448 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4644 3401 M
+4578 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4513 3401 M
+4381 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4513 3401 M
+4513 3401 L
+4579 3447 L
+4579 3356 L
+4513 3401 L
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4435 3349 M
+4435 3349 L
+4409 3336 L
+4422 3362 L
+4435 3349 L
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4474 3349 M
+4474 3349 L
+4448 3336 L
+4461 3362 L
+4474 3349 L
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4454 3343 M
+4495 3383 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4415 3343 M
+4455 3383 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(D3)4252 3324 MS
+(YELLOW)4448 3324 MS
+n
+4709 3401 M
+4644 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4317 3401 M
+4382 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4775 3140 M
+4795 3119 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4794 3120 M
+4835 3160 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4834 3159 M
+4874 3119 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4873 3120 M
+4913 3160 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4912 3159 M
+4952 3119 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4951 3120 M
+4972 3141 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(R13)4775 3062 MS
+(470)4971 3062 MS
+n
+4709 3140 M
+4775 3140 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5036 3140 M
+4971 3140 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+393 3467 M
+525 3467 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+458 3493 M
+458 3533 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+521 3514 M
+503 3500 481 3493 458 3493 c
+456 3493 456 3493 457 3493 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+457 3493 M
+434 3493 412 3500 394 3515 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+(C10)524 3520 MS
+(0.01 uF)524 3585 MS
+n
+458 3401 M
+458 3467 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+458 3598 M
+458 3532 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1112 4186 M
+1505 4186 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1505 4186 M
+1505 4513 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1505 4513 M
+1112 4513 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1112 4513 M
+1112 4186 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(U4)1158 4148 MS
+(24LC256)1197 4592 MS
+n
+916 4252 M
+1112 4252 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(1)1033 4251 MS
+n
+916 4317 M
+1112 4317 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(2)1033 4316 MS
+n
+916 4382 M
+1112 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(3)1033 4381 MS
+n
+916 4448 M
+1112 4448 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(4)1033 4447 MS
+n
+1701 4448 M
+1505 4448 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(5)1551 4447 MS
+n
+1701 4382 M
+1505 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(6)1551 4381 MS
+n
+1701 4317 M
+1505 4317 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(7)1551 4316 MS
+n
+1701 4252 M
+1505 4252 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(8)1551 4251 MS
+0.203 g
+(A0)1145 4279 MS
+(A1)1145 4344 MS
+(A2)1145 4409 MS
+(VSS)1145 4475 MS
+(SDA)1351 4475 MS
+(SCL)1357 4409 MS
+(WP)1375 4344 MS
+(VCC)1347 4279 MS
+0 g
+n
+2093 3925 M
+2114 3904 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2113 3905 M
+2153 3945 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2152 3944 M
+2193 3904 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2192 3905 M
+2232 3945 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2231 3944 M
+2271 3904 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2270 3905 M
+2291 3926 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(R8)2093 4043 MS
+(10k)2093 4108 MS
+n
+2028 3925 M
+2093 3925 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2355 3925 M
+2290 3925 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5756 2159 M
+6083 2159 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6083 2159 M
+6083 2290 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6083 2290 M
+5756 2290 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5756 2290 M
+5756 2159 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(P1)5494 2212 MS
+(4 pin housing)5363 2277 MS
+n
+6017 2486 M
+6017 2290 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+[0 -58.906 -59 0 0 0]/Helvetica MF
+(1)6016 2405 MS
+n
+5952 2486 M
+5952 2290 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(2)5951 2405 MS
+n
+5887 2486 M
+5887 2290 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(3)5886 2405 MS
+n
+5821 2486 M
+5821 2290 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(4)5820 2405 MS
+n
+1112 2093 M
+1244 2093 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1178 2120 M
+1178 2160 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1240 2141 M
+1222 2127 1200 2120 1177 2120 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1177 2120 M
+1177 2120 1177 2120 1177 2120 c
+1154 2120 1132 2127 1113 2141 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+[58.902 0 0 -59 0 0]/Helvetica MF
+(C6)982 2081 MS
+(13 pF)916 2146 MS
+n
+1178 2028 M
+1178 2093 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1178 2224 M
+1178 2159 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4513 3094 M
+4513 3187 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4644 3140 M
+4578 3140 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4513 3140 M
+4381 3140 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4513 3140 M
+4513 3140 L
+4579 3186 L
+4579 3094 L
+4513 3140 L
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4435 3087 M
+4435 3087 L
+4409 3074 L
+4422 3101 L
+4435 3087 L
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4474 3087 M
+4474 3087 L
+4448 3074 L
+4461 3101 L
+4474 3087 L
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4454 3081 M
+4495 3121 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4415 3081 M
+4455 3121 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(D2)4252 3062 MS
+(GREEN)4448 3062 MS
+n
+4709 3140 M
+4644 3140 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4317 3140 M
+4382 3140 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4775 3401 M
+4795 3381 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4794 3382 M
+4835 3422 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4834 3421 M
+4874 3381 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4873 3382 M
+4913 3422 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4912 3421 M
+4952 3381 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4951 3382 M
+4972 3402 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(R14)4775 3324 MS
+(470)4971 3324 MS
+n
+4709 3401 M
+4775 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5036 3401 M
+4971 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2649 3009 M
+2716 3009 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2617 2983 M
+2748 2983 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2747 2983 M
+2747 2903 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2747 2904 M
+2616 2904 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2617 2904 M
+2617 2984 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2649 2878 M
+2716 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(X)2420 2931 MS (2)2454 2931 MS
+(32.768 kHz)2290 2997 MS
+n
+2682 3074 M
+2682 3009 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2682 2813 M
+2682 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3532 3467 M
+3553 3487 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3552 3486 M
+3512 3527 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3513 3526 M
+3553 3566 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3552 3565 M
+3512 3605 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3513 3604 M
+3553 3644 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3552 3643 M
+3531 3664 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(R17)3598 3520 MS
+(4.7k)3598 3585 MS
+n
+3532 3401 M
+3532 3467 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3532 3728 M
+3532 3663 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5756 1897 M
+6083 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6083 1897 M
+6083 2028 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+6083 2028 M
+5756 2028 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5756 2028 M
+5756 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(J1)5494 1950 MS
+(4 pin rt. angle)5363 2016 MS
+n
+6017 1701 M
+6017 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+[0 -58.906 -59 0 0 0]/Helvetica MF
+(1)6016 1851 MS
+n
+5952 1701 M
+5952 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(2)5951 1851 MS
+n
+5887 1701 M
+5887 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(3)5886 1851 MS
+n
+5821 1701 M
+5821 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(4)5820 1851 MS
+n
+1603 1897 M
+1669 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1570 1871 M
+1702 1871 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1701 1871 M
+1701 1792 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1701 1793 M
+1569 1793 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1570 1793 M
+1570 1872 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1603 1766 M
+1669 1766 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+[58.902 0 0 -59 0 0]/Helvetica MF
+(X1)1374 1819 MS
+(4.0 MHz)1309 1885 MS
+n
+1636 1963 M
+1636 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 1701 M
+1636 1766 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5952 2878 M
+6018 3010 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+[0 -58.906 -59 0 0 0]/Helvetica MF
+(S)6072 3009 MS (W)6072 2970 MS (1)6072 2914 MS
+(P)6138 3127 MS (o)6138 3088 MS (w)6138 3055 MS (e)6138 3012 MS (r)6138 2979 MS ( )6138 2959 MS (S)6138 2943 MS (w)6138 2904 MS (i)6138 2861 MS (t)6138 2848 MS (c)6138 2832 MS (h)6138 2803 MS
+n
+5970 2858 M
+5970 2847 5961 2839 5951 2839 c
+5941 2839 5933 2847 5933 2858 c
+5933 2868 5941 2877 5951 2877 c
+5961 2877 5970 2868 5970 2858 c
+cp
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5952 2682 M
+5952 2839 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5970 3028 M
+5970 3017 5961 3009 5951 3009 c
+5941 3009 5933 3017 5933 3028 c
+5933 3038 5941 3047 5951 3047 c
+5961 3047 5970 3038 5970 3028 c
+cp
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5952 3205 M
+5952 3048 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5560 1596 M
+5560 1637 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5494 1570 M
+5626 1570 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5560 1505 M
+5560 1571 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5622 1617 M
+5604 1603 5582 1596 5559 1596 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5559 1596 M
+5559 1596 5559 1596 5559 1596 c
+5536 1596 5513 1603 5495 1618 c
+CM [1 0 0 1 66 66] concat
+s
+SM
+[54.988 0 0 -59 0 0]/Courier MF
+(+)5579 1558 MS
+[58.902 0 0 -59 0 0]/Helvetica MF
+(C3)5690 1558 MS
+(10 uf)5690 1623 MS
+n
+5560 1439 M
+5560 1505 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5560 1701 M
+5560 1636 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5893 3271 M
+6012 3271 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5893 3362 M
+6012 3362 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5919 3401 M
+5986 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5919 3316 M
+5986 3316 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+[0 -58.906 -59 0 0 0]/Helvetica MF
+(B)6072 3388 MS (T)6072 3349 MS (1)6072 3313 MS
+(3)6138 3519 MS (v)6138 3486 MS ( )6138 3457 MS (\()6138 3441 MS (1)6138 3421 MS (.)6138 3388 MS (5)6138 3372 MS ( )6138 3339 MS (x)6138 3323 MS ( )6138 3294 MS (2)6138 3278 MS (\))6138 3245 MS
+n
+5952 3205 M
+5952 3271 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5952 3467 M
+5952 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3401 4186 M
+3422 4207 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3421 4206 M
+3381 4246 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3382 4245 M
+3422 4285 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3421 4284 M
+3381 4325 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3382 4324 M
+3422 4364 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3421 4363 M
+3400 4383 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+[58.902 0 0 -59 0 0]/Helvetica MF
+(R16)3467 4239 MS
+(2.2k)3467 4305 MS
+n
+3401 4121 M
+3401 4186 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3401 4448 M
+3401 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+785 3271 M
+1636 3271 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 3271 M
+1636 3794 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 3794 M
+785 3794 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+785 3794 M
+785 3271 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(U5)831 3232 MS
+(AT90LS)785 3847 MS
+(2)998 3847 MS (3)1030 3847 MS (4)1062 3847 MS (3)1094 3847 MS
+n
+1832 3728 M
+1636 3728 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(1)1682 3727 MS
+n
+1832 3532 M
+1636 3532 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(2)1682 3531 MS
+n
+1832 3598 M
+1636 3598 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(3)1682 3597 MS
+n
+589 3663 M
+785 3663 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(4)706 3662 MS
+n
+1832 3336 M
+1636 3336 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(5)1682 3335 MS
+n
+1832 3401 M
+1636 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(6)1682 3400 MS
+n
+1832 3467 M
+1636 3467 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(7)1682 3466 MS
+n
+589 3401 M
+785 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+(8)706 3400 MS
+0.203 g
+(RESET)1407 3755 MS
+1 sl
+n
+1407 3701 M
+1603 3701 L
+s
+(PB3 \(CLOCK\))1232 3559 MS
+(PB4)1492 3625 MS
+(GND)818 3690 MS
+(PB0 \(MOSI\))1287 3363 MS
+(PB1 \(MISO/INT0\))1144 3428 MS
+(PB2 \(SCK/T0\))1230 3494 MS
+(VCC)818 3428 MS
+6 sl
+0 g
+n
+4579 1112 M
+4512 1179 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2486 M
+4512 2552 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 393 M
+4512 459 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1374 M
+4512 1440 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2224 M
+4512 2291 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2551 M
+4512 2618 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 916 M
+4512 983 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2355 M
+4512 2421 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2290 M
+4512 2356 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2093 M
+4512 2160 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1832 M
+4512 1898 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 589 M
+4512 656 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1243 M
+4512 1310 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1701 M
+4512 1767 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 655 M
+4512 721 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2355 M
+4512 2421 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1505 M
+4512 1571 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2420 M
+4512 2487 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1047 M
+4512 1113 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1570 M
+4512 1637 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1636 M
+4512 1702 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 524 M
+4512 590 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1766 M
+4512 1833 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1178 M
+4512 1244 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1309 M
+4512 1375 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 458 M
+4512 525 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 982 M
+4512 1048 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2159 M
+4512 2225 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 720 M
+4512 786 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 328 M
+4512 394 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 785 M
+4512 852 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+19 sl
+n
+4579 2159 M
+4579 2225 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2290 M
+4579 2356 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1505 M
+4579 1571 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 524 M
+4579 590 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 393 M
+4579 459 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 328 M
+4579 394 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 655 M
+4579 721 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 916 M
+4579 983 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1636 M
+4579 1702 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1309 M
+4579 1375 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2486 M
+4579 2552 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2355 M
+4579 2421 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1832 M
+4579 2094 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1243 M
+4579 1310 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1178 M
+4579 1244 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 458 M
+4579 525 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2224 M
+4579 2291 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2093 M
+4579 2160 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 720 M
+4579 786 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1701 M
+4579 1767 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1374 M
+4579 1506 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1047 M
+4579 1113 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 2420 M
+4579 2487 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4644 262 M
+4578 329 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 982 M
+4579 1048 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1766 M
+4579 1833 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1570 M
+4579 1637 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 1112 M
+4579 1179 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 785 M
+4579 917 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4644 262 M
+5888 262 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4579 589 M
+4579 656 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+6 sl
+n
+5167 3140 M
+5167 3402 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 2159 M
+4514 2159 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1897 M
+4122 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 785 M
+1636 852 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1636 M
+4514 1636 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2682 2813 M
+2879 2813 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2944 1963 M
+2944 3075 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 2486 M
+1702 2486 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 2551 M
+4514 2551 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 2486 M
+4514 2486 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 2224 M
+4514 2224 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1963 M
+2945 1963 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1701 M
+4514 1701 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5167 2747 M
+5167 2879 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 2028 M
+2879 2028 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 1963 M
+1636 2029 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 2617 M
+1702 2617 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 982 M
+4514 982 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2878 2028 M
+2878 2814 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1178 M
+4514 1178 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1178 2028 M
+1637 2028 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1178 1636 M
+1637 1636 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 2420 M
+3272 2420 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+458 3336 M
+458 3402 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 1636 M
+1702 1636 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 2355 M
+1636 2487 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1832 M
+4056 1832 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2682 3074 M
+2945 3074 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 1636 M
+1636 1702 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 2355 M
+1702 2355 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 2028 M
+1702 2028 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1570 M
+4514 1570 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1243 M
+4514 1243 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 720 M
+1702 720 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1766 M
+3991 1766 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1374 M
+3141 1374 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+458 3663 M
+458 3729 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1832 3336 M
+3075 3336 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3074 1309 M
+3074 3337 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1309 M
+3075 1309 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1832 3401 M
+3141 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3140 1374 M
+3140 3402 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3140 1374 M
+4514 1374 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3074 1309 M
+4514 1309 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+851 4317 M
+851 4383 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+851 4448 M
+917 4448 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1701 4252 M
+1767 4252 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1832 3532 M
+3272 3532 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3271 2420 M
+3271 3533 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 2617 M
+3402 2617 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3401 2617 M
+3401 3729 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3401 2617 M
+4514 2617 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3205 3467 M
+3205 4383 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3271 3532 M
+3271 4449 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1701 4448 M
+3272 4448 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+655 2486 M
+1637 2486 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+131 3925 M
+1964 3925 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1963 3598 M
+1963 3926 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 458 M
+1702 458 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+131 1309 M
+1702 1309 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1832 3598 M
+1964 3598 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 393 M
+1636 459 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 458 M
+1636 525 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5560 1439 M
+5953 1439 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 328 M
+1439 394 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5036 3401 M
+5168 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5952 3467 M
+5952 3533 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+851 4382 M
+917 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+851 4382 M
+851 4449 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 2617 M
+1636 2683 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5560 1701 M
+5822 1701 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5560 1374 M
+5560 1440 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+851 4448 M
+851 4514 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+458 3598 M
+458 3664 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5821 3532 M
+5953 3532 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5167 2878 M
+5167 3141 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5560 1701 M
+5560 1767 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 720 M
+1439 852 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+458 3401 M
+590 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5036 2878 M
+5168 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+851 4252 M
+851 4318 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5036 3140 M
+5168 3140 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 785 M
+1702 785 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 393 M
+1637 393 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5821 2486 M
+5821 3533 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+851 4317 M
+917 4317 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 524 M
+1702 524 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+851 4252 M
+917 4252 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1766 4186 M
+1766 4253 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+458 3663 M
+590 3663 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 720 M
+1636 786 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 851 M
+1637 851 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4121 2878 M
+4318 2878 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4121 1897 M
+4121 2879 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4055 3140 M
+4318 3140 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4055 1832 M
+4055 3141 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4055 1832 M
+4514 1832 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3990 3401 M
+4318 3401 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3990 1766 M
+3990 3402 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3990 1766 M
+4514 1766 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+131 131 M
+131 1310 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+131 131 M
+5888 131 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5952 1439 M
+5952 1702 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5952 2486 M
+5952 2683 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4121 1897 M
+4514 1897 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1832 3728 M
+3402 3728 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3401 3728 M
+3533 3728 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+131 1309 M
+131 3926 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 393 M
+1702 393 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 393 M
+1439 525 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1439 851 M
+1439 917 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1636 851 M
+1702 851 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2028 3925 M
+1962 3925 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2355 3925 M
+2421 3925 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2420 3925 M
+2420 3858 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1112 M
+4514 1112 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1047 M
+4514 1047 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3271 4448 M
+3402 4448 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 1439 M
+3272 1439 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 720 M
+4514 720 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 655 M
+4514 655 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 524 M
+4514 524 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1701 4382 M
+3206 4382 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1832 3467 M
+3206 3467 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 851 M
+4514 851 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 458 M
+4514 458 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3271 1439 M
+3271 2356 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 2290 M
+4514 2290 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 785 M
+4514 785 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 393 M
+4514 393 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 589 M
+4514 589 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3205 2355 M
+3205 3468 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+2813 2355 M
+3206 2355 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3271 2355 M
+4514 2355 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3271 2420 M
+4514 2420 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3271 1439 M
+4514 1439 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3205 2355 M
+3272 2355 L
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1648 2027 M
+1648 2020 1642 2015 1635 2015 c
+1628 2015 1623 2020 1623 2027 c
+1623 2034 1628 2040 1635 2040 c
+1642 2040 1648 2034 1648 2027 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1648 1635 M
+1648 1628 1642 1623 1635 1623 c
+1628 1623 1623 1628 1623 1635 c
+1623 1642 1628 1648 1635 1648 c
+1642 1648 1648 1642 1648 1635 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3283 2419 M
+3283 2412 3277 2407 3270 2407 c
+3263 2407 3258 2412 3258 2419 c
+3258 2426 3263 2432 3270 2432 c
+3277 2432 3283 2426 3283 2419 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+470 3400 M
+470 3393 464 3388 457 3388 c
+450 3388 445 3393 445 3400 c
+445 3407 450 3413 457 3413 c
+464 3413 470 3407 470 3400 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4067 1831 M
+4067 1824 4061 1819 4054 1819 c
+4047 1819 4042 1824 4042 1831 c
+4042 1838 4047 1844 4054 1844 c
+4061 1844 4067 1838 4067 1831 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4002 1765 M
+4002 1758 3996 1753 3989 1753 c
+3982 1753 3977 1758 3977 1765 c
+3977 1772 3982 1778 3989 1778 c
+3996 1778 4002 1772 4002 1765 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3152 1373 M
+3152 1366 3146 1361 3139 1361 c
+3132 1361 3127 1366 3127 1373 c
+3127 1380 3132 1386 3139 1386 c
+3146 1386 3152 1380 3152 1373 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3086 1308 M
+3086 1301 3080 1296 3073 1296 c
+3066 1296 3061 1301 3061 1308 c
+3061 1315 3066 1321 3073 1321 c
+3080 1321 3086 1315 3086 1308 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+863 4381 M
+863 4374 857 4369 850 4369 c
+843 4369 838 4374 838 4381 c
+838 4388 843 4394 850 4394 c
+857 4394 863 4388 863 4381 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3283 3531 M
+3283 3524 3277 3519 3270 3519 c
+3263 3519 3258 3524 3258 3531 c
+3258 3538 3263 3544 3270 3544 c
+3277 3544 3283 3538 3283 3531 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3413 2616 M
+3413 2609 3407 2604 3400 2604 c
+3393 2604 3388 2609 3388 2616 c
+3388 2623 3393 2629 3400 2629 c
+3407 2629 3413 2623 3413 2616 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3283 4447 M
+3283 4440 3277 4435 3270 4435 c
+3263 4435 3258 4440 3258 4447 c
+3258 4454 3263 4460 3270 4460 c
+3277 4460 3283 4454 3283 4447 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+667 2485 M
+667 2478 661 2473 654 2473 c
+647 2473 642 2478 642 2485 c
+642 2492 647 2498 654 2498 c
+661 2498 667 2492 667 2485 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1648 2485 M
+1648 2478 1642 2473 1635 2473 c
+1628 2473 1623 2478 1623 2485 c
+1623 2492 1628 2498 1635 2498 c
+1642 2498 1648 2492 1648 2485 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1975 3924 M
+1975 3917 1969 3912 1962 3912 c
+1955 3912 1950 3917 1950 3924 c
+1950 3931 1955 3937 1962 3937 c
+1969 3937 1975 3931 1975 3924 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1648 457 M
+1648 450 1642 445 1635 445 c
+1628 445 1623 450 1623 457 c
+1623 464 1628 470 1635 470 c
+1642 470 1648 464 1648 457 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+863 4447 M
+863 4440 857 4435 850 4435 c
+843 4435 838 4440 838 4447 c
+838 4454 843 4460 850 4460 c
+857 4460 863 4454 863 4447 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5572 1438 M
+5572 1431 5566 1426 5559 1426 c
+5552 1426 5547 1431 5547 1438 c
+5547 1445 5552 1451 5559 1451 c
+5566 1451 5572 1445 5572 1438 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5179 3139 M
+5179 3132 5173 3127 5166 3127 c
+5159 3127 5154 3132 5154 3139 c
+5154 3146 5159 3152 5166 3152 c
+5173 3152 5179 3146 5179 3139 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5572 1700 M
+5572 1693 5566 1688 5559 1688 c
+5552 1688 5547 1693 5547 1700 c
+5547 1707 5552 1713 5559 1713 c
+5566 1713 5572 1707 5572 1700 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+5179 2877 M
+5179 2870 5173 2865 5166 2865 c
+5159 2865 5154 2870 5154 2877 c
+5154 2884 5159 2890 5166 2890 c
+5173 2890 5179 2884 5179 2877 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+863 4316 M
+863 4309 857 4304 850 4304 c
+843 4304 838 4309 838 4316 c
+838 4323 843 4329 850 4329 c
+857 4329 863 4323 863 4316 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1451 392 M
+1451 385 1445 380 1438 380 c
+1431 380 1426 385 1426 392 c
+1426 399 1431 405 1438 405 c
+1445 405 1451 399 1451 392 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1648 392 M
+1648 385 1642 380 1635 380 c
+1628 380 1623 385 1623 392 c
+1623 399 1628 405 1635 405 c
+1642 405 1648 399 1648 392 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+470 3662 M
+470 3655 464 3650 457 3650 c
+450 3650 445 3655 445 3662 c
+445 3669 450 3675 457 3675 c
+464 3675 470 3669 470 3662 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1648 784 M
+1648 777 1642 772 1635 772 c
+1628 772 1623 777 1623 784 c
+1623 791 1628 797 1635 797 c
+1642 797 1648 791 1648 784 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1451 850 M
+1451 843 1445 838 1438 838 c
+1431 838 1426 843 1426 850 c
+1426 857 1431 863 1438 863 c
+1445 863 1451 857 1451 850 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+1648 850 M
+1648 843 1642 838 1635 838 c
+1628 838 1623 843 1623 850 c
+1623 857 1628 863 1635 863 c
+1642 863 1648 857 1648 850 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+4133 1896 M
+4133 1889 4127 1884 4120 1884 c
+4113 1884 4108 1889 4108 1896 c
+4108 1903 4113 1909 4120 1909 c
+4127 1909 4133 1903 4133 1896 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+143 1308 M
+143 1301 137 1296 130 1296 c
+123 1296 118 1301 118 1308 c
+118 1315 123 1321 130 1321 c
+137 1321 143 1315 143 1308 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3413 3727 M
+3413 3720 3407 3715 3400 3715 c
+3393 3715 3388 3720 3388 3727 c
+3388 3734 3393 3740 3400 3740 c
+3407 3740 3413 3734 3413 3727 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3283 1438 M
+3283 1431 3277 1426 3270 1426 c
+3263 1426 3258 1431 3258 1438 c
+3258 1445 3263 1451 3270 1451 c
+3277 1451 3283 1445 3283 1438 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3283 2354 M
+3283 2347 3277 2342 3270 2342 c
+3263 2342 3258 2347 3258 2354 c
+3258 2361 3263 2367 3270 2367 c
+3277 2367 3283 2361 3283 2354 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3217 3466 M
+3217 3459 3211 3454 3204 3454 c
+3197 3454 3192 3459 3192 3466 c
+3192 3473 3197 3479 3204 3479 c
+3211 3479 3217 3473 3217 3466 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+n
+3217 2354 M
+3217 2347 3211 2342 3204 2342 c
+3197 2342 3192 2347 3192 2354 c
+3192 2361 3197 2367 3204 2367 c
+3211 2367 3217 2361 3217 2354 c
+cp
+gs
+e
+gr
+CM [1 0 0 1 66 66] concat
+s
+SM
+showpage
+PageSV restore
+%%Trailer
+%%DocumentNeededFonts:
+%%+ Courier
+%%+ Helvetica
+%%DocumentSuppliedFonts:
+end
+%%Pages: 1
+%%EOF
+%-12345X@PJL EOJ

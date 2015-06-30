@@ -1,0 +1,15 @@
+//Module for searching sending and receiving active
+//messages.
+
+TOS_MODULE BASE_COMM_STRENGTH;
+IMPLEMENTED_BY BASE_COMM_STRENGTH;
+
+ACCEPTS{
+    	char COMM_INIT(void);
+        void COMM_POWER(char mode);
+        char COMM_SEND_MSG(short addr, char type, char* data);
+};
+SIGNALS{
+         char COMM_MSG_REC(char type, char* data);
+         char COMM_MSG_SEND_DONE(char success);
+};

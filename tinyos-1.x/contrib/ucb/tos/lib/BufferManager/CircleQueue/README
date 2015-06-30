@@ -1,0 +1,20 @@
+README for CircleQueue 
+Author/Contact: hohltb@cs.berkeley.edu 
+
+Description:
+
+CircleQueueM implements the CircleQ interface and provides the methods 
+that operate on data type CircleQueue. FreeList and FIFOQueue components 
+allocate CircleQueue space, use the methods in CircleQueueM, and implement 
+the List interface.
+
+Tools:
+None
+
+Known bugs/limitations:
+None
+
+See Also:
+/templates
+../BufferPool
+../QueuedASend

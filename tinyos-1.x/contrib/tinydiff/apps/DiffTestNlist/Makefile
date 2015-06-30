@@ -1,0 +1,7 @@
+COMPONENT=DiffTestNlist
+
+PROGRAMMER_EXTRA_FLAGS=-v=2
+
+CFLAGS+=-DENABLE_GRADIENT_OVERRIDE
+
+include ../Makerules

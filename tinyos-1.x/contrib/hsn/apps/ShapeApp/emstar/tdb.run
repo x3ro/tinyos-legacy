@@ -1,0 +1,28 @@
+
+include mote/mote.run
+
+
+set index = 0;
+set serial = "/dev/tts/2";
+
+
+&mote_hostmote($serial,mica2,$index);
+&mote_motenic(mote0,$index);
+
+# hostmote starts emproxy
+#process proxy {
+#	type = daemon;
+#	cmd = "$(EMSTAR_ROOT)/obj.stargate/emproxy/emproxy";
+#}
+
+process shaped {
+	type = daemon;
+	cmd = "$(EMSTAR_ROOT)/obj.stargate/devel/shaped/shaped";
+}
+
+process ShapeApp {
+	type = daemon;
+	waitfor = mote0;
+	cmd = "$(EMSTAR_ROOT)/obj.stargate/mote/ShapeApp --leds";
+}
+

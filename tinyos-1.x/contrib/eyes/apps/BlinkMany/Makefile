@@ -1,0 +1,3 @@
+COMPONENT=BlinkMany
+include ../MakeEyes
+

@@ -1,0 +1,8 @@
+README for Threshold
+Author/Contact: T.E.V.Parker@ewi.tudelft.nl
+
+Description:
+
+Threshold is originally based on Chirp, but now just sends out
+a message every time we see a significant drop in our sensor readings
+i.e. for the LDR boards, this means there's some shadows turned up.

@@ -1,0 +1,18 @@
+/ADCControl.nc/1.1/Tue Feb 24 23:45:28 2004//
+/AcousticBeacon.nc/1.1/Wed Nov 19 09:52:15 2003//
+/AcousticSampling.nc/1.1/Wed Nov 19 09:52:15 2003//
+/EEPROM.nc/1.2/Wed Nov 19 09:52:15 2003//
+/Figure8Calibration.nc/1.2/Thu Apr 15 17:41:49 2004//
+/HPLMotor.nc/1.1/Thu Jan 30 08:19:27 2003//
+/I2C.nc/1.1/Wed Nov 19 09:52:15 2003//
+/I2C.nc.new/1.1/Wed Nov 19 09:52:15 2003//
+/MotorAccel.nc/1.1/Wed Nov 19 09:52:15 2003//
+/MotorReceiveMsg.nc/1.1/Thu Jan 30 08:19:27 2003//
+/MotorSendMsg.nc/1.1/Thu Jan 30 08:19:27 2003//
+/Navigation.nc/1.1/Thu Jan 30 08:19:27 2003//
+/Obstacle.nc/1.1/Wed Nov 19 09:52:15 2003//
+/Robot.nc/1.1/Thu Jan 30 08:19:27 2003//
+/Servo.nc/1.1/Thu Jan 30 08:19:27 2003//
+/ServoCalibration.nc/1.2/Sun Feb  2 22:54:45 2003//
+/SlotRing.nc/1.1/Wed Nov 19 09:52:15 2003//
+D

@@ -1,0 +1,12 @@
+Mote Schema GUI Tool HOWTO (mikechen@cs.berkeley.edu)
+-----------------------------------------------------
+
+This doc describes Sam Madden's GUI tool, MoteDBGUI, of the schema package.
+ 
+1. compile generic_base and attatch it to the serial port.
+
+2. compile some basic_db_motes, each with a unique ID (set in system/main.c, to be fixed)
+
+3. compile MoteDBGUI and starts it (e.g. java MoteDBGUI COM1). 
+it writes queries to be sent out by the BS, and the motes
+reply with their schema and data readings.

@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# FILE:         settos
+# AUTHOR:       Martin Turon
+# DATE CREATED: Aug 1, 2004
+# DESCRIPTION:  Support script for having multiple TOS trees
+#               This is done by making /opt/tinyos-1.x a symbolic link
+#               to an actual tree.  Common trees include:
+#                    tinyos-1.1.0     // specific rpm    `settos 1.0`
+#                    tinyos-1.cvs     // latest from cvs `settos cvs`
+#                    tinyos-1.user    // local user tree `settos user`
+#
+# $Id: settos,v 1.1 2004/09/13 21:02:15 mturon Exp $
+#
+cd /opt
+rm tinyos-1.x
+ln -s tinyos-1.$1 tinyos-1.x
+echo "Set TinyOS tree to: /opt/tinyos-1.$1"
+
+

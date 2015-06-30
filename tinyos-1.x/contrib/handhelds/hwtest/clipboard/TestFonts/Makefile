@@ -1,0 +1,4 @@
+COMPONENT=TestFonts
+
+include ../Makerules
+

@@ -1,0 +1,16 @@
+Sniffer readme
+==============
+Install the sniffer program (make tnode install), and then run
+../parse.py <your serial port>. You should see lots of RADIO_TEST_RECV
+messages. Look at the two data items after that. 255 255 is start of message,
+then the next byte is the length of the packet, followed by a type byte.
+Types:
+	6 = DATA
+	7 = RTS
+	8 = CTS
+	9 = ACK
+	10 = SYNC
+
+The file tos/system/TMACMsg.h has details of the rest of the packet formats.
+Note that a data packet currently consists of a MACHeader followed by a TOS_Pkt
+but this will be better compressed in the future.

@@ -1,0 +1,8 @@
+021704.tar
+- compile and check alec's version, find that it is too slow
+- so decide to add in feature one by one
+- simplemintrans respond within 15 seconds both moving forward and
+backward
+022703.tar
+- after debug with alec
+- solve a lot unseen bug

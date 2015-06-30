@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# The following would skip this app for the mica
+# test "$PLATFORM" == mica && exit 1
+
+cd ../../apps/TOSBase
+make $PLATFORM install.2
+# Exit with make's exit code, to detect compilation errors
+exit $?

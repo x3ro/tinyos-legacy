@@ -1,0 +1,3 @@
+COMPONENT=CntToRfm
+include ../Makerules
+

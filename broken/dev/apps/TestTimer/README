@@ -1,0 +1,27 @@
+This application service two purpose:
+    1. To test the timer interface and timer component
+    2. To give an example of using the timer interface.
+
+Description:
+
+This is a TonyOS application. 
+It tests the Timer interface. 
+It creates 4 difference timers and haddles the timer event in 
+difference manner. 
+
+If you wish to do you own tests, you can modify the code
+and create difference test scenarioes. 
+If you want to use the timer interface in your application, 
+you can use this app. as an example. 
+
+This application is not part of Tiny OS tutorial. 
+
+Tools:
+
+
+Known bugs/limitations:
+
+
+
+
+

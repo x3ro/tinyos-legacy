@@ -1,0 +1,78 @@
+Package: net.tinyos.packet
+Description: Provides Java abstractions of TinyOS packets.
+Author: Philip Levis <pal@cs.berkeley.edu>
+
+This package allows application programmers to write a Packet class
+once for their packet format, then use it in many different Java
+applications. Packets in this package use java.lang.reflect utilities
+to allow new packet formats to be easily incorporated into Java
+utilities. For example, a GUI can query a packet for its fields, then
+use the results to construct a display panel for it, instead of
+writing a new Panel each time a new Packet is written.
+
+For this functionality to work, fields in the Packet class
+representing fields of the underlying binary packet must follow a
+naming convention; all names should be preceded by "packetField_". In
+addition, it is highly recommended that the protocol layer is
+specified in the name. For example, "packetField_AM_dest" refers to
+the ActiveMessage layer destintion field, while
+"packetField_BLESS_dest" refers to a BeaconLESS ad-hoc routing
+protocol address. It is critical that one use the accessor/mutator
+methods instead of directly modifying fields, as endian transformation
+issues could cause your packet to be corrupted.
+
+
+Executables: none
+
+Test Programs: AMPacket, BLESSPacket, PacketPanel
+
+net.tinyos.packet.AMPacket
+        usage: java net.tinyos.packet.AMPacket
+        descr: Tests packet marshalling and unmarshalling.
+               Demonstrates use of packet classes.
+
+net.tinyos.packet.BLESSPacket
+	usage: java.net.tinyos.packet.BLESSPacket
+	descr: Tests packet marshalling and unmarshalling.
+	       Demonstrates use of packet classes.
+
+net.tinyos.packet.PacketPanel
+	usage: java.net.tinyos.packet.PacketPanel
+	descr: Shows what the PacketPanel looks like.
+               Demonstrates how byte packets can be obtained.
+
+Classes:
+
+TOSPacket.java
+
+The base class for all packets. TOSPacket defines the length of a
+packet and provides the methods for modifying and querying packets, as
+well a the methods defining the packet header and footer lengths, from
+which data lengths are inferred.
+
+AMPacket.java
+
+An Active Message packet, as per those defined in MSG.h and used in
+AM.c of the TinyOS distribution.
+
+BLESSPacket.java
+
+A BeaconLESS ad-hoc routing packet, as defined in bless_msg.h and used
+in BLESS.c of the TinyOS distribution.
+
+ArrayPackerLE.java
+
+Provides the translation between big and little endian necessary for Java
+to talk in binary to TinyOS.
+
+IllegalTypeException.java
+
+Exception thrown when one calls the wrong set methods on packet
+fields. (e.g. trying to set a one byte field with setTwoByteField()).
+
+PacketPanel.java
+
+GUI panel for entering packet data. Packet types are added as prototype
+instances of a packet class. Packets types can be cycled through by
+use of a tabbed pane. The intention is for GUIs to be able to
+include it as is for building packets and turning them into byte arrays.

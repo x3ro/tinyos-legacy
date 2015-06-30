@@ -1,0 +1,255 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=FrontPage.Editor.Document>
+<meta name=Generator content="Microsoft FrontPage 5.0">
+<meta name=Originator content="Microsoft Word 10">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"Lucida Console";
+	panose-1:2 11 6 9 4 5 4 2 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-2147482993 6144 0 0 31 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman"; margin-left:0in; margin-right:0in; margin-top:0in}
+h1
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	mso-font-kerning:16.0pt;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:2112779608;
+	mso-list-type:hybrid;
+	mso-list-template-ids:221576556 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l0:level1
+	{mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman"}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US style='tab-interval:.5in'>
+
+<h1>Defining your Application Environment</h1>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The following code can be found in the file nest/tools/matlab/contrib/template/myWorld.m.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>When you start matlab, you want it to automatically setup 
+your environment to work with your motes and your data ports and use your 
+commands, etc.&nbsp; You should 
+write a script to do that for you.&nbsp; Here is an example of such as script 
+called &quot;myWorld&quot; that defines most of what you will want to do.&nbsp; 
+Let's go through it in detail:</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>First define you path. This defines which matlab scripts and 
+files you are allowed to call.&nbsp; You need to &quot;import&quot; the ROOT variable, 
+which is the root directory of matTOS on your machine.&nbsp; Then, add your own 
+directory and the directory of your application(s).</p>
+
+<p class=MsoNormal><font face="Courier New">global ROOT<br>
+addpath([ROOT '/contrib/template'])<br>
+addpath([ROOT '/contrib/template/myApp'])<br>
+<br>
+&nbsp;</font></p>
+
+<p class=MsoNormal>You may also want to use some of the functions in the &quot;matlab/shared&quot;, 
+&quot;matlab/tools&quot; or &quot;matlab/apps&quot; directories.&nbsp; In this case, we want to use 
+the matlab commands associated with generic_sensor, the TOS application.&nbsp; 
+We add that directory to our path and then define the environment required to 
+use those commands.&nbsp;&nbsp; </p>
+
+<p class=MsoNormal><font face="Courier New">addpath([ROOT '/apps/genericSensor'])<br>
+defineGenericSensorEnvironment;<br>
+&nbsp;</font></p>
+
+<p class=MsoNormal>If you prefer to read hexidecimal, uncomment the following 
+lines.&nbsp; They set the global variable to 1.&nbsp;&nbsp; </p>
+
+<p class=MsoNormal><font face="Courier New">% global DISPLAY_HEX<br>
+% DISPLAY_HEX=1;<br>
+<br>
+&nbsp;</font></p>
+
+<p class=MsoNormal>The following line is very important.&nbsp; The matlab serial 
+interface has a long startup time each time it wants to read from the serial 
+port, although after this startup time it reads from the serial ports quite 
+quickly.&nbsp; If you are using the serial interface (which you are, by default) 
+and you have many many packets being read in by matlab, you may experience very 
+slow poerformance.&nbsp; One way to improve this is to read in more than 1 
+packet from the serial port at a time to decrease the startup time.&nbsp; The 
+following command will change matlab to read in 10 packets at a time, where the 
+default is 1.&nbsp; The disadvantage to doing this is that if you only get 9 
+packets, no data will be read at all.&nbsp; </p>
+
+<p class=MsoNormal><font face="Courier New">%setDataPortBufferSizes(10);<br>
+<br>
+&nbsp;</font></p>
+
+<p class=MsoNormal>The following lines are being run in &quot;defineTOSenvironment&quot; 
+and define the default headers with which a packet is parsed.&nbsp; If you are 
+using different headers, uncomment this to REDEFINE the default packet headers. 
+You might want to do this, for example, if you are using the new comm stack 
+which uses variable length packets and uses a header field for 'length' of the 
+packet. I've already added that field in here for you and reduced the size of 
+the payload correspondingly.<br>
+<br>
+<font face="Courier New">% newTosHeader(1) = createField('address', 2); %tosHeader 
+is a group of headers in the general TOS packet.<br>
+% newTosHeader(2) = createField('AM', 1); %It can of course be changed or 
+replaced.<br>
+% newTosHeader(3) = createField('groupID', 1); %To replace, define a new header 
+class and tell the <br>
+% newTosHeader(4) = createField('length', 1); %To replace, define a new header 
+class and tell the <br>
+% newTosHeader(5) = createField('data', 29); %bytes2packet function to use the 
+new class of headers<br>
+% newTosHeader(6) = createField('CRC', 2); %by setting the packetType variable 
+of the packetPort object<br>
+% addPacketHeaders('newTosHeader', newTosHeader);<br>
+% defineDefaultPacketHeaders('newTosHeader');<br>
+<br>
+&nbsp;</font></p>
+
+<p class=MsoNormal>Here, you define your incoming packet type.&nbsp; When a new 
+packet comes in, the commStack automatically tries to parse it. It uses the AM 
+type of the packet to find out what kind of packet it is, and it uses that type 
+to parse it. If you define a new type of packet, your should define the headers 
+that will be used to parse it and register those headers for packets of that AM 
+type. </p>
+
+<p class=MsoNormal>Here is an example: whenever a packet comes in on Am type 
+100, the data load of the packet is parsed into the following fields:&nbsp; 
+hopCount which has 1 byte, Xcoord which has 2 bytes, Ycoord which has 2 bytes, 
+and lightReadings, which is an array of size 10 where each element has 2 bytes.&nbsp; 
+All fields of more than one byte are automatically aggregated into a single 
+decimal number.</p>
+
+<p class=MsoNormal>The advantage of doing this is that, when you receive the 
+packet, you can easily read your data.&nbsp; For example if you had a packet 'pkt', 
+you would simply type &quot;plot(get(pkt,'lightReadings'))&quot; to plot the 10 light 
+readings.&nbsp; You don't have to do any byte parsing.<br>
+<br>
+<font face="Courier New">MY_AM_NUMBER=100;<br>
+myPayload(1) = createField('hopCount', 1); %the number of hops away I am, 1 byte<br>
+myPayload(2) = createField('Xcoord', 2); %my X coordinate, 2 bytes<br>
+myPayload(1) = createField('Ycoord', 2); %my Y coordinate, 2 bytes<br>
+myPayload(2) = createField('lightReadings', [2 2 2 2 2 2 2 2 2 2]); %an array of 
+ten light readings, 2 bytes each.<br>
+addAMHeaders(MY_AM_NUMBER, myPayload);<br>
+<br>
+&nbsp;</font></p>
+
+<p class=MsoNormal>You will need to create your comm stack, which looks like 
+opening a serial port.&nbsp; The first line would open both local serial ports 
+while the second line opens one COM1.&nbsp; What really happens when you run 
+these commands is that a serial port is opened and a corresponding packetPort is 
+created. Whenever the serial port receives data, it sends it to the packetPort, 
+which parses the data into packets and distributes them to functions that want 
+the packets.<br>
+<font face="Courier New">%addPacketPorts({'COM1' 'COM2'});<br>
+addPacketPorts('COM1');<br>
+<br>
+</font>The following functions define the &quot;port mapping&quot; of your motes.&nbsp; 
+This maps each mote to one or more ports.&nbsp; This is useful because it gives 
+us a level of indirection over the ports.&nbsp; Instead of saying &quot;read from COM 
+port 14&quot; we can say &quot;listen to mote #221&quot;.&nbsp; In theory, this port mapping 
+can be created automatically by matlab, relieving us of ever thinking about the 
+ports themselves.&nbsp; <br>
+<br>
+<font face="Courier New">setPortMapping(1, getPacketPorts('serial-COM1'));<br>
+%setPortMapping(2, getPacketPorts('serial-COM2'));<br>
+<br>
+</font>The following functions define the location of your motes.&nbsp; This is 
+important, for example, if we want to plot the data from our mores over space.&nbsp; 
+In theory, the locations could be sent to us from the motes and used to define 
+this location mapping.&nbsp; <br>
+<br>
+<font face="Courier New">setLocation(1, 0,0,0);<br>
+%setLocation(2, 1, 1, 1);<br>
+<br>
+</font>The following commands define ports on your machine that allow you to 
+access the intel/Berkeley testbed.&nbsp; This only works if you install the comm 
+port redirector from linksys, which can be found in the nest/tools/commRedirector 
+directory.&nbsp; This tunnels your serial ports over a network.&nbsp; The 
+following functions open your serial ports to connect to the 32 port testbed.&nbsp; 
+See how to connect to the testbed on the internal Intel website for more 
+details.<br>
+<br>
+<font face="Courier New">% addpath([ROOT '/contrib/kamin'])<br>
+% defineTestbed<br>
+%add the ports on the testbed, define a mote/port mapping, and define their 
+locations<br>
+% global testBed<br>
+% addPacketPorts(testBed.everything);<br>
+% defineTestbedPortMapping<br>
+% defineTestbedLocations</font></p>
+
+</body>
+
+</html>

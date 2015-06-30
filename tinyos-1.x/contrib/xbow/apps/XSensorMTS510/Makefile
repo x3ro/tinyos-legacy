@@ -1,0 +1,10 @@
+COMPONENT=TestSensorMTS510
+SENSORBOARD=mts510
+
+XBOWROOT=%T/../contrib/xbow/tos
+XBOWBETAROOT=%T/../contrib/xbow/beta/tos
+
+PFLAGS=-I$(XBOWROOT)/interfaces  -I$(XBOWROOT)/system  -I$(XBOWROOT)/platform/$(PLATFORM) -I$(XBOWROOT)/platform/mica2 -I$(XBOWROOT)/AXStack/$(PLATFORM) -I$(XBOWROOT)/lib -I$(XBOWROOT)/sensorboards/$(SENSORBOARD)
+
+include ../MakeXbowlocal
+include ${TOSROOT}/tools/make/Makerules

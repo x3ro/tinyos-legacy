@@ -1,0 +1,11 @@
+
+TOS_MODULE TIMESTAMP;
+
+ACCEPTS{
+	char TIMESTAMP_INIT();
+};
+
+SIGNALS{
+	void TIMESTAMP_FIRE(void);
+};
+

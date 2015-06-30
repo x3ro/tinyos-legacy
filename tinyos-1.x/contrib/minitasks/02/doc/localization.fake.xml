@@ -1,0 +1,337 @@
+<!-- $Id: localization.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="Localization API document">
+
+<p> We break localization into four sub-systems: </p>
+
+<ol>
+<li> sensing/actuation </li>
+<li> data management </li>
+<li> computation </li>
+<li> system control </li>
+</ol>
+
+<p> This breakdown gives us modularity and interchangeability because each
+sub-system has its own API. </p>
+
+<p> First, we describe each sub-system and a few important points about them.
+Then, we write down the APIs for each sub-system.  Finally, we make a few
+concluding remarks about protocols, incremental development, non-homogenous
+networks, and data representation. </p>
+
+<section name="The Subsystems">
+
+<section name="Localization Sensing/Actuating">
+
+<p> The sensing/actuation sub-system gives you ranging and/or angle data (with
+which you would later do multi-lateration and/or triangulation, respectively).
+This sub-system should be broken into at least two components: sensor and
+actuator.  This allows non-homogenous networks, e.g. an infrastructure might
+always transmit localization beacons while the network always senses or vice
+versa.  We can have a homogenous network by simply installing both components
+on every mote. </p>
+
+<p> This subsystem has three top interfaces with which it </p>
+
+<ol>
+<li> is requested to actuate (e.g. send a localization beacon) </li>
+<li> gives new data (e.g. ranging estimates) </li>
+<li> is commanded to turn on and off </li>
+</ol>
+
+<p> It also has a lower interface to interact with whatever actuator or sensor.
+</p>
+
+</section>
+
+<section name="Localization Data Management">
+
+<p> The data sub-system holds ranging/angle/location data of all important
+neighbors.  This subsystem is not just a passive data structure, it is actually
+quite active.  Let.s say, for instance, that my localization algorithm works
+best with 8 neighbors.  If I have more than 8 neighbors, I need to know which
+neighbors to ignore (perhaps those with the noisiest ranging estimates or
+perhaps those with short distances).  I also have to know when data becomes old
+and invalid, etc.  Every implementation of this sub-system will have to make
+all of these decisions based on the type of ranging being used and the type of
+localization algorithm begin used. </p>
+
+<p> This sub-system has a bottom interface with which it receives new data.  It
+also has a top interface with which it gives data and a top interface with
+which it can be commanded to start and stop (starting and stopping here might
+not be well defined).   </p>
+
+</section>
+
+<section name="Localization Computation">
+
+<p> The computational level is where we do triangulation, multilateration, or
+whatever.  This is what most people think of when they hear .localization. but
+it is really the easiest part to write for an embedded system like TinyOS. </p>
+
+<p> This sub-system has a bottom interface with which it requests data from the
+data management sub-system.  It also has a top interface with which it gives
+new location estimates and a top interface with which is can be commanded to
+start or stop.   </p>
+
+</section>
+
+<section name="Localization System Control">
+
+<p> This sub-system controls all the other sub-systems.  This should be
+separate from the other systems because its functionality is completely defined
+by the application.   For example, in a static environment we may only want to
+localize once in the beginning of the application and then never again.  If
+something walks into the room we might want all nodes near the moving node to
+help it localize.  In a completely dynamic environment we might want all nodes
+localizing by following some scheduling algorithm, which would be implemented
+here.  Sometimes, we may want very frequent ranging estimates but only
+infrequent location estimates, etc. etc. </p>
+
+<p> This sub-system has a bottom interfaces with which it controls all lower
+sub-systems.  It also has a top interface with it is told to start and stop.
+</p>
+ 
+</section>
+
+</section>
+
+<section name="API Definitions">
+
+<section name="Localization Sensing/Actuating">
+
+<code>
+module PrototypeLocalizationActuatorM {
+    provides {
+        interface StdControl;
+        interface LocalizationActuator;
+    }
+    uses {
+        interface Actuator;
+    }
+}
+</code>
+
+<code>
+module PrototypeLocalizationSensorM {
+    provides {
+        interface StdControl;
+        interface LocalizationSensor;
+    }
+    uses {
+        interface Sensor;
+    }
+}
+</code>
+
+</section>
+ 
+<section name="Localization Data Management">
+
+<code>
+module PrototypeLocalizationDataManagerM {
+    provides {
+        interface StdControl;
+        interface LocalizationData;
+    }
+    uses {
+        interface LocalizationSensor;
+    }
+}
+</code>
+
+</section>
+
+<section name="Localization Computation">
+
+<code>
+module PrototypeLocalizationComputationM {
+    provides {
+        interface StdControl;
+        interface LocalizationCompute;
+        interface LocalizationSensor;
+    }
+    uses {
+        interface LocalizationData;
+    }
+}
+</code>
+
+</section>
+
+<section name="Localization System Control">
+
+<code>
+module PrototypeLocalizationControlM {
+    provides {
+        interface StdControl;
+    }
+    uses {
+        interface StdControl as LocalizationSensorControl;
+        interface StdControl as LocalizationActuatorControl;
+        interface StdControl as LocalizationDataControl;
+        interface StdControl as LocalizationComputationControl;
+        interface LocalizationActuator;
+        interface LocalizationCompute;
+    }
+}
+</code>
+
+</section>
+
+</section>
+
+<section name="Interfaces">
+
+<code>
+interface LocalizationActuator{
+    command result_t Actuate(uint16_t actuationDestinationAddress, uint16_t dataDestinationAddress);
+}
+</code>
+
+<code>
+interface LocalizationSensor{
+    event result_t DataSensed(localization_t newData);
+   }
+</code>
+
+<code>
+interface LocalizationData{
+    command result_t GetLocalizationInfo(uint16_t moteID);
+}
+</code>
+
+<code>
+interface LocalizationCompute{
+    command result_t Localize();
+   }
+</code>
+
+</section>
+
+
+<section name="Data Types">
+
+<code>
+typedef struct {
+    uint16_t moteID;
+    distance_t* distanceFromMe;
+    angle_t* distanceFromMe;
+    location_t* distanceStdv;
+   } localization_t;
+</code>
+
+<code>
+typedef struct {
+    uint16_t EstimatedXCoord; //or theta angle for spherical coords
+    uint16_t XCoordStdv;
+    uint16_t EstimatedYCoord; //or phi angle
+    uint16_t YCoordStdv;
+    uint16_t EstimatedZCoord; //or r value
+    uint16_t ZCoordStdv;
+    uint16_t CoordinateSystemID;
+   } location_t;
+</code>
+ 
+<code>
+typedef struct {
+    uint16_t DistanceFromMe;
+    uint16_t DistanceStdv;
+   } ranging_t;
+</code>
+ 
+<code>
+typedef struct {
+    uint16_t phiAngleRelativeToMe;
+    uint16_t phiAngleStdv;
+    uint16_t thetaAngleRelativeToMe;
+    uint16_t thetaAngleStdv;
+   } angle_t;
+</code>
+
+</section>
+
+<section name="Important Notes and Problems">
+
+<section name="Protocols">
+
+<p> Note that these interfaces are really simple and don.t support any
+protocols.  However, you can always wrap any sub-system in a component that
+gives you a more sophisticated interface to support your protocol.  For
+example, you may want an interface that allows you to request N chirps at
+frequency F.  This can be done with a wrapper class around your
+[[LocalizationActuator]] component.  You might also have motes that want to ask
+other motes for their locations.  You can do this by wrapping your
+[[LocalizationData]] component in a wrapper component that interprets packet
+commands.  By not including these things in the interfaces above, we are
+separating the functionality from the protocol, thereby allowing us to
+interchange protocols. </p>
+
+</section>
+
+<section name="Incremental Development and Non-homogeneity">
+
+<p> Given the above about protocols, we do not have to make any assumption that
+each mote has all four sub-systems (i.e. a homogenous assumption).  For
+example, system control might be contained in a single "leader" mote or all
+computational sub-system might be implemented centrally on a PC.  In my
+particular case, for example, all I have is a sensor/actuator system that sends
+time of flight chirps and makes ranging estimates.  I could wrap it in a
+wrapper component that chirps when it receives my command packet and sends me
+back the data in a data packet.  Then, data management, computation, and chirp
+scheduling is done centrally in Matlab.  This is good for incremental
+development. </p>
+
+</section>
+
+<section name="Data Representation Problems">
+
+<p> Notice that we have a huge problem with data representation.  If the above
+[[localization_t]] data structure is not sufficient for all or most
+localization applications, there is little hope of interchanging components.  I
+note three main problems here: units, coordinate systems, and error terms. </p>
+
+<section name="Units" numbered="yes">
+
+<p> Do we store every distance estimate with its units (i.e. cm or meters or
+hop-counts) or do we just use the convention that all distances are in
+centimeters.  What about systems with relative distances that don.t know the
+units of their ranging estimates?  In the above [[localization_t]] data
+structure I assumed we would use the convention that all distance estimates are
+in centimeters and all rho/theta estimates are in degrees. </p>
+
+</section>
+
+<section name="Coordinate Systems" numbered="yes">
+
+<p> Are all of our positions stored with their coordinate systems, eg.  if this
+position is in GPS coordinates it should say so?   What about relative
+coordinate systems?  Do we need a LocalizationCoordinateSystem component to
+bootstrap a coordinate system?  How do we identify the units of a relative
+coordinate system?  How do we identify the identity of a relative coordinate
+system, i.e. when two networks that have different relative coordinate systems
+meet, how do we resolve them?  What about networks that have two overlaid
+coordinate systems, i.e. it has some GPS nodes and some nodes on a relative
+coordinate system or room-based coordinate system.  In the above
+[[localization_t]] data structure I assumed that we could identify each
+coordinate system with the ID of the leader or creator of that coordinate
+system.  However, I have not defined a coordinateSystem component. </p>
+
+</section>
+
+<section name="Error terms" numbered="yes">
+
+<p> Quite often your ranging or angle estimations or location estimations come
+with error terms.  How do we represent this?  With a canonical probability
+distribution?  We could assume Gaussian noise on everything and always couple
+every estimate with a standard deviation.  Is that sufficient for everybody?
+In the above [[localization_t]] data structure I assumed that it is. </p>
+
+</section>
+
+</section>
+
+</section>
+
+</section>
+

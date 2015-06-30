@@ -1,0 +1,13 @@
+MagSensor Application
+Author/Contact: Sarah Bergbreiter
+		Prabal Dutta
+
+This is an application used to test the magnetometer bearing information.
+It sends information back to the base station for testing and debugging
+purposes.
+
+Leds:
+
+green:	
+yellow:	 
+red:	

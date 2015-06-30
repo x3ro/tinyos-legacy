@@ -1,0 +1,17 @@
+All the IFRC specific code in this directory is meant for
+experiment/verfication purpose. 
+
+For any other routing protocol IFRC requires that the
+routing protocol provide an interface 
+    command uint16_t RouteControl.getParent() 
+        which returns the current id of the current parent. 
+    command void stopChange()
+        which stops any further parent change.
+    command void startChange()
+        which starts any parent change (if required)
+    command void breakLoop()
+        which asks the routing module to change the parent
+        as the current parent causes a loop.
+    
+
+# vim: set ts=4 tw=60:

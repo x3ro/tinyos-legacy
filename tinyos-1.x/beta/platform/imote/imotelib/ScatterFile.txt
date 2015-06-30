@@ -1,0 +1,172 @@
+;*****************************************************************************
+; P4_FlashScatter.txt
+;
+; Scatter link file for locating the ZBase Bluetooth executable code
+; to run out of Flash memory.
+;
+
+; If the target you compilied to is ZUL_TEST, please change the MaxLength
+; from 0x6C000 to 0xFC000
+;
+; Name           Address   Method   MaxLength
+LoadFlashCode    0x004000  ABSOLUTE 0x7C000
+{
+
+    ; Execution region 1:
+    ;   intial flash boot code; 
+    FlashCode2 +0  ;
+    {
+        *	(FlashBoot)   ; area is found in SU_FlashBoot.s
+    }
+
+    ; TinyOS Execution region (isolated):
+    ;TOSFlashCode +0
+    ;{
+    ;    main.axf.o    (+RO)
+    ;}
+
+    ; Execution region 2
+    ;   This region contains all remaining flash code.
+    ; old header VEH -- FlashCode3 +0
+    ; attempt to isolate VEH -- FlashCode3 0x010000 FIXED
+    FlashCode3 +0
+    {
+        *         (+RO)
+    }
+
+    ;***************************************************************************
+    ;*  IRam Execution regions
+    ;***************************************************************************
+    ; Rom link exectution region: links to functions existing in ROM, (or not)
+    ; These tables are loaded in flash, but are linked to run @ an execution
+    ; address in IRAM.  There are two tables, one for each version of Rom which
+    ; may exsit on the target.  Boot code determines which rom is on target
+    ; then copies the appropriate link table to the exectuion region.
+    RomLinkV1 0x200000 OVERLAY
+    {
+        SU_ROMLinkV1.o        (+RO)
+    }
+    RomLinkV2 0x200000 OVERLAY
+    {
+        SU_ROMLinkV2.o        (+RO)
+    }
+
+    ; ZBase Stack exectution region. leaves x20 bytes @ start of IRAM for
+    ; remapable vectors.
+    ; This execution region takes up no space in the load region.
+    IRamStack +0 ABSOLUTE
+    {
+        * (Stacks) ; area is currently in (6-7-01) found in SU_SystemStartup.s
+    }
+
+    ; IRam code execution region: code that must be run out of IRam.
+    ;   This code is loaded in Flash.  It is linked to be exectued in IRam.
+    ; Boot code copies it from flash to IRam where it is executed during normal
+    ; ZBase code operation.
+    IRamCode  +0 ABSOLUTE
+    {
+	TM_FlashDrvAmend.o    (+RO) ;//Ammendments to Flash driver code
+        TM_IRamCode.o         (+RO)
+    }
+
+    ; IRam uninitialized execution region:
+    ;   This region takes up no room in flash.  Its execution region is in IRam
+    ; and is NOT initialized at all. It it used to preserve variables accross
+    ; warm boot, to determine warm/cold boot etc...
+    IRamNI +0
+    {
+      *	(ResetFlags)
+      SU_PowerUpCheckVar.o (+ZI)
+      ; Removed for TinyOS - VEH
+      ; TS_LogMonitor.o ( +ZI )
+    }
+
+    ; IRam Read/Write exectution region: intialized variables
+    ;   This region is loaded in Flash.  It is linked to be exectued in IRam.
+    ; Boot code copies it from flash to IRam where it is used during normal
+    ; ZBase code operation.
+    IRamRW +0
+    {
+        * ( +RW )
+    }
+
+    ; IRam Zero intialized execution region: zero initialzed variables
+    ;   This region takes up no space in flash. Address are lined to exectue
+    ; in IRam.  Boot code initializes this entire area to 0's.
+    IRamZI +0
+    {
+        ; Removed for TinyOS - VEH
+        ; BBD_GlobalVars.o (+ZI )
+        * ( +ZI )
+    }
+
+
+    ;***************************************************************************
+    ;*  BRam Execution regions
+    ;***************************************************************************
+    ; BRam uninitialized data execution region:
+    ;   This region takes up no space in any load region.  It only specifies
+    ; where unitialized data will be at execution time.
+    BRamNI 0x20CB00 ABSOLUTE
+    {
+; dynamically allocate        TOSBufferVar.o    ( +ZI)
+    }
+
+    ; BRam R/W (initialized data) execution region:
+    ;   This region takes up space in the load region (where initial
+    ; values are stored and copied from). Boot code should copy the init data
+    ; from flash load region to its execution address in BRam.
+;    BRamRW +0
+;    { ; As soon as entries are put in for this, the "BRamData" table entry
+      ; in SU_FlashBoot.s must have the zeros removed and the comment portion
+      ; of the same line uncommented.
+      ; The IMPORTS for the refrenced symbols must also be uncommented.
+;    }
+
+    ; BRam Zero Initialized data execution region:
+    ;   This region takes up no space in any load region.  It only
+    ; specifies where data will be at exectuion time.  Boot code should
+    ; initialize the execution region to 0's
+;    BRamZI +0; 0x20F900 ABSOLUTE 0x700 ; +0 ;when either BRamRW or BRamNI become valid
+    BRamZI 0x20F900 ABSOLUTE 0x700 ; +0 ;when either BRamRW or BRamNI become valid
+                                   ;the absolute address before the +0 must be
+                                   ;removed from here and the +0 on the BRamRW
+                                   ;or BRamNI must be replaced with it.
+    {
+        BBD_BufferSramVar.o   ( +ZI)
+        LM_BufferSramVar.o    ( +ZI)
+        BP_BufferSramVar.o    ( +ZI)
+    }
+
+    ;***************************************************************************
+    ;*  XRam Execution regions
+    ;*    P4 can have no external ram.
+    ;*    We will let the log monitor stuff think it will run there (if it exists).
+    ;***************************************************************************
+    ; XRam uninitialized execution region:
+    ;   This region is used to preserve the Log monitor from execution through
+    ; warm boot. It takes up no space in the Flash load area.
+;    XRamNI 0x400000 ABSOLUTE
+;    {
+;    }
+
+    ; XRam Read/Write execution region:
+    ;   This region contains intialized R/W Data.  Initalized data for this
+    ; region is stored in flash load region and is copied by the boot code
+    ; to its execution region.
+;    XRamRW +0
+;    { ; As soon as entries are put in for this, the "XRamData" table entry in
+;      ; SU_FlashBoot.s must have the zeros removed and the commented portion
+;      ; of the same line uncommented.
+;      ; The IMPORTS for the refrenced symbols must also be uncommented.
+;    }
+
+    ; XRam Zero initialized exectuion region:
+    ;   This region contains zero intialized data.  It takes up no space in the
+    ; Flash load area.
+    XRamZI 0x400000 ABSOLUTE
+    {
+      BP_DummyXramVar.o ( +ZI)
+    }
+}
+

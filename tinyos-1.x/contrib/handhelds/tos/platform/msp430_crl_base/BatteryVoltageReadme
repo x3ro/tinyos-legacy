@@ -1,0 +1,34 @@
+
+
+Impt note, we can't seem to have 2 outstanding A/d requests active at
+teh same time so we need to round robin them or else they don't
+return.
+
+i.e. 
+
+This works:
+  event result_t Timer.fired() {
+    result_t ok;
+
+    if (NumData%2)
+      ok = call ITADC.getData();
+    else
+      ok = call BVADC.getData();
+
+    return ok;
+    
+  }
+
+This does not:
+  event result_t Timer.fired() {
+    result_t ok;
+
+      ok = call ITADC.getData();
+      ok = call BVADC.getData();
+
+    return ok;
+    
+  }
+-- 
+In the second case whatever I scheduled first returns but the second
+does not.

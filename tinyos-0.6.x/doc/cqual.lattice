@@ -1,0 +1,10 @@
+partial order {
+$aevent [level=value, color = "pam-color-tainted", sign = neg]
+$sevent [level=value, color = "pam-color-tainted", sign = neg]
+$command [level=value, color = "pam-color-untainted", sign = pos]
+
+
+$aevent < $command
+$sevent < $command
+
+}

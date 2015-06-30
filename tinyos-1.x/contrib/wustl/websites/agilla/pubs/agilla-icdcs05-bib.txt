@@ -1,0 +1,10 @@
+@InProceedings{fok:agilla,
+  author        = "C.-L. Fok and G.-C. Roman and C. Lu",
+  title         = "Rapid Development and Flexible Deployment of Adaptive Wireless Sensor Network Applications",
+  booktitle     = {Proceedings of the 24th International Conference on Distributed Computing Systems (ICDCS'05)},
+  month		= {June},
+  year          = {2005},
+  pages		= {653--662},
+  publisher	= {IEEE},
+  location      = {Columbus, OH, USA}
+}

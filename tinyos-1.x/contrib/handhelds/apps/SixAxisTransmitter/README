@@ -1,0 +1,85 @@
+This application collects and converts analog data from three
+accelerometer and three gyroscope channels and transmits the data over
+udp socket to a remote address.  Configuration and operation are
+controlled over a telnet interface to the sensor (shimmer* or
+equivalent). 
+
+/*************** HOW TO COMPILE **********************/
+Since the IP stack takes several parameters at compile-time, here's a word of explanation:
+
+The standard tinyos build line is "make <target>"
+
+with a shimmer, you'd have "make shimmer"; similarly, with a shimmer2
+you'd have "make shimmer2"
+
+To build and install the executable image in flash simultaneously, you'd have 
+
+"make shimmer install bsl,<tty port of programming board>"
+
+For example, if the programming board occupies the ports /dev/ttyUSB0
+and /dev/ttyUSB1, the complete compilation commmand is:
+
+make shimmer install bsl,/dev/ttyUSB0
+
+HOWEVER, with IP-enabled applications like this one, that line alone
+will give you errors.  Four parameters describe the CC2420's network
+behavior:  
+
+CC2420_CHANNEL -  this radio operates over 16 channels, from 11 to 26.
+channel 26 is a popular choice for low interference.
+
+SSID - like an ssid with Wi-Fi, choose a personal SSID up to 15
+characters.
+
+PAN_ID - 802.15.4 radios operate on a PAN, and manage associations
+based upon PAN membership.  supply one hex word (16 bits).
+
+IP - the device's IP address.  choose one on the same LAN subnet as
+the access point, and not occupied by another computer.
+
+For example, let's use channel 26; an SSID of rti; a PAN_ID of 0xfeed;
+and an IP address of 192.168.1.200.  Now, the correct compile line is
+
+make shimmer CC2420_CHANNEL=26 SSID=rti PAN_ID=0xfeed IP=192.168.1.200 install bsl,/dev/ttyUSB0
+
+/**************** TELNET COMMANDS ******************/
+Once the application is flashed and the device associates with an
+IP-enabled access point on a networked host, you can telnet to it to
+control its behavior and check on its status.  In this example, say 
+
+bash# telnet 192.168.1.200
+
+Trying 192.168.1.200...
+Connected to research-folks.edu (192.168.1.200).
+Escape character is '^]'.
+Featherweight command shell
+Type '?' for help
+Mote> 
+
+This application provides the commands "ship," "conv," "stop," and
+"stopconv," which are triggered by the keyword "run."
+
+For example, to tell the device to sample and covert the analog
+signals every 50 ms (which translates to 20 hz), you say
+
+Mote> run conv 50
+
+to stop the conversion, just use "run stopconv" at a prompt.
+
+similarly, to tell it to transmit the data over udp socket to a udp
+server running on 192.168.1.50, just do this:
+
+Mote> run ship 192.168.1.50
+
+To stop the transmission, just use "run stop"
+
+One more feature available with this interface is the param view
+mechanism, which allows you to see the status of runtime variables.
+ParamView provides the following, and you can look at the source to
+see how to add your own variables.
+
+Type "show" at a prompt to see what's details are available; see the
+source code to find out what additional variables are provided by this
+application.
+
+

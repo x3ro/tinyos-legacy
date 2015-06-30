@@ -1,0 +1,59 @@
+nest/tools/		broken/dev/tools/java/
+nest/tos/include	broken/dev/tos/lib/tinydb
+nest/tos/shared		broken/dev/tos/lib
+nest/apps/		broken/dev/apps/
+TUPLE_ROUTER_QUERY_MESSAGE	Network.querySub event
+QUERY_MESSAGE		query message
+TUPLE_ROUTER_TIMER_EVENT	Timer.fired event
+TUPLE_ROUTER_RESULT_MESSAGE 	Network.resultSub event
+AGG_OPERATOR_PROCESS_TUPLE	Operator.processTuple
+AGG_OPERATOR_PROCESS_PARTIAL_RESULT Operator.processPartialResult
+AGG_OPERATOR_NEXT_RESULT	Operator.nextResult
+AGG_OPERATOR_RESET_EXPR_STATE	Operator.resetExprState
+TUPLE_ROUTER.c		TupleRouterM.td
+TUPLE_ROUTER.comp	TupleRouter.ti
+TUPLE.c			Tuple.td
+TUPLE.comp		TupleIntf.ti
+QUERY_RESULT.c		QueryResult.td
+QUERY_RESULT.comp	QueryResult.ti
+AGG_OPERATOR.c		AggOperator.td
+SELECT_OPERATOR.c	SelOperator.td
+tinydbtest		TestTinyDB
+SCHEMA			AttrUse
+ATTR			TinyDBAttr
+TUPLE			Tuple
+QUERY_RESULT		QueryResult
+TUPLE_ROUTER		TupleRouter
+TINYDB_NETWORK		Network
+TINY_ALLOC_COMPLETE	MemAlloc.allocComplete
+TINY_ALLOC_COMPACT_COMPLETE	MemAlloc.compactComplete
+TINY_ALLOC_SIZE		MemAlloc.size
+TINY_ALLOC		TinyAlloc
+GENERIC_COMM		GenericComm
+CLOCK			Clock
+LEDS			Leds
+MAIN			Main
+POT			Pot
+RANDOM_LFSR		RandomLFSR
+RESET			Reset
+TIMER			Timer
+ACCEL			Accel
+MAG			Mag
+PHOTO			Photo
+TEMP			Temp
+VOLTAGE			Voltage
+
+removed files:
+
+MAGNET
+
+new files:
+
+Operator.ti
+TupleRouter.td
+QueryIntf.ti
+Query.td
+ParsedQueryIntf.ti
+ParsedQuery.td
+DBBuffer.ti
+DBBuffer.td

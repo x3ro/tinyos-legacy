@@ -1,0 +1,11 @@
+ Semantics
+ ---------
+ YellowLED indicates radio status: when its on the radio is on
+ RedLED: toggles when sendnig a message
+GreenLED: toggles when receiving a message
+ Coordination between nodes:
+ 1) Nodes stay on until hear initial time-synch message from
+   cluster-head
+ 2) When time-synch timer fires, then they expect to hear a
+   ts message from the cluster-head or they stay on
+

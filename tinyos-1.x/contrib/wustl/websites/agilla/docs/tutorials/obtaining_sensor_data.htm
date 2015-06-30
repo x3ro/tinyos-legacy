@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+<table width="95%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><p>&nbsp;</p>
+      <table width="100%" border="1" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80%">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><!-- InstanceBeginEditable name="MainText" -->
+
+          <h2><font face="Verdana, Arial, Helvetica, sans-serif">Lesson 3: Obtaining
+
+            Sensor Data</font></h2>
+
+          <p>When an agent arrives on a node, how does it know what type of sensors
+
+            are available? There are special sensor tuples placed into the local
+
+            tuple space that indicate which sensors are available. The format
+
+            of the tuple is {&lt;name = &quot;sns&quot;&gt;, &lt;name = x&gt;}
+
+            where x is the name of the sensor. Possible names include:</p>
+
+          <ul>
+
+            <li>pho - Photo (light)</li>
+
+            <li>mic - Microphone</li>
+
+            <li>tmp - Temperature</li>
+
+            <li>acx - Accelerometer X</li>
+
+            <li>acy - Accelerometer Y</li>
+
+            <li>mgx - Magnometer X</li>
+
+            <li>mgy - Magnometer Y</li>
+
+            </ul>
+
+          <p>Sensor readings are obtained using the <font face="Courier New, Courier, mono">sense</font> instruction.
+            This is
+
+            a blocking instruction that takes a value as a parameter that determines
+            which type of sensor to query. The types of sensors are:</p>
+          <ul>
+            <li>PHOTO  = 1</li>
+            <li>TEMP = 2</li>
+            <li>MIC = 3</li>
+            <li>MAGX = 4</li>
+            <li>MAGY = 5</li>
+            <li>ACCELX = 6</li>
+            <li>ACCELY = 7</li>
+          </ul>
+          <p>Consider the following agent found in &lt;agilla&gt;/Examples/Oscilloscope.ma:</p>
+          <p><img src="oscilloscope.jpg" width="722" height="231"></p>
+          <p>This agent sits in a loop reading the photo sensor and displaying
+            the bottom three bits on the LEDs. It sleeps 1/8 of a second during
+            each loop, making it refresh the LEDs a maximum of 8 times per second.</p>
+          <p>The current version of Agill only supports a fixed-set of sensors.
+            Future versions will enable the programmer to plug in custom components
+            and will offer instructions for accessing any type of sensor.</p>
+          <p>&nbsp;</p>
+        <!-- InstanceEndEditable --></td>
+        </tr>
+        <tr>
+          <td width="80%" cellpadding="2" cellspacing="2" bgcolor="#990000">&nbsp;           </td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

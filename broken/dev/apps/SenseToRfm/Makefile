@@ -1,0 +1,3 @@
+COMPONENT=SenseToRfm
+include ../Makerules
+

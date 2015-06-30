@@ -1,0 +1,38 @@
+This is an experimental version of TOSBase that provides manageability
+in the same way that a manageable bridge does: it creates a virtual
+link that is connected to the bridge's own local endpoint.
+
+- All packets arriving on the serial link are sent to both the radio
+  link and the local endpoint.
+ 
+- All packets arriving on the radio link are sent to both the serial
+  link and the local endpoint.
+
+- All packets arriving from the local endpoint are sent to both the
+  radio link and the serial link.
+
+This allows the TOSBase virtual endpoint to respond to Nucleus queries
+using Drip and Drain. You can use this to control the address, group,
+RF power, and radio ACK status. You can query the TOSBase for
+performance statistics. You can even just ping the TOSBase to see if
+it's running. 
+
+For those wondering what happens when the TOSBase bridges Drip and
+Drain messages while also participating in the procotol:
+
+- If the TOSBase is listening to a given Drip channel, like MgmtQuery,
+  then it will participate in the epidemic protocol. If not, the
+  packets will just be bridged and the injection will proceed
+  normally.
+
+- The TOSBase is compiled with the DRAIN_ENDPOINT_ONLY flag, which
+  prevents the Drain stack from forwarding messages or broadcasting
+  route updates. This prevents nodes from selecting the TOSBase itself
+  as their parent, instead of the PC-side node on the other side of the
+  bridge. Managed bridges also tend not to be IP routers.
+
+This is something I've been meaning to try for a while. It may or may
+not be useful. But being able to ping the bridge to see if it's
+running seems like a good idea, and being able to dynamically
+reconfigure bridge parameters without recompiling also seems like a
+good idea.

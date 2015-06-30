@@ -1,0 +1,181 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: kraken.Makerules,v 1.25 2005/09/23 10:24:33 kaminw Exp $
+
+ifndef TOS2DIR
+define NO_TOS2_ERROR
+
+
+ERROR. The environment variable TOS2DIR is not set.
+
+Define TOS2DIR to point to tinyos-2.x/tos/.  The Deluge and STM25P software
+components from TinyOS 2.x are required by the Kraken system.  The TOS2DIR
+environment variable is only used by the Kraken make system.
+
+If you need TinyOS 2.x, execute these commands to check out TinyOS 2.x
+into tinyos-2.x in your home directory, set TOS2DIR, then return here:
+
+  pushd $$HOME
+  cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/tinyos co -r tinyos-2_0_devel-BRANCH tinyos-2.x
+  export TOS2DIR=$$HOME/tinyos-2.x/tos
+  popd
+
+Aborting
+endef
+$(error $(NO_TOS2_ERROR))
+endif
+
+TOSMAKE_PATH += $(TOSDIR)/../contrib/nestfe/make
+#GOALS += kraken
+
+ifeq ($(PLATFORM),pc)
+NO_SUPPLEMENT = TRUE
+NO_SENSORS = TRUE
+NO_REGISTRY_STORE = TRUE
+NO_DELUGE = TRUE
+endif
+
+ifdef NO_PYTHON
+NO_RPC = TRUE
+endif
+
+ifdef NO_SENSORS
+NO_PROMETHEUS = TRUE
+endif
+
+ifdef NO_REGISTRY
+NO_REGISTRY_STORE = TRUE
+endif
+
+ifdef NO_UART
+ifneq ($(PLATFORM),pc) #pc always needs uart (or it's useless)
+CFLAGS += -I%T/../contrib/nestfe/nesc/lib/fakeuart
+endif
+endif
+
+ifndef NO_TIMESYNC
+GOALS += vutimesync
+# TIMESYNC_USE_SKEW: 0=none, 1=8.24 fixed, 2=float
+TIMESYNC_USE_SKEW ?= 0
+PFLAGS += -DTIMESYNC_USE_SKEW=$(TIMESYNC_USE_SKEW)
+else
+PFLAGS += -DNO_TIMESYNC
+endif #NO_TIMESYNC
+
+ifndef NO_FILESET
+GOALS += fileset
+endif #NO_FILESET
+
+ifndef NO_HOOD
+GOALS += hood
+else
+PFLAGS += -DNO_HOOD
+endif #NO_HOOD
+
+ifndef NO_REGISTRY
+GOALS += registry
+ifdef NO_RPC_FOR_REGISTRY
+PFLAGS += -DNO_RPC_FOR_REGISTRY
+endif
+else
+PFLAGS += -DNO_REGISTRY
+endif #NO_REGISTRY
+
+ifndef NO_REGISTRY_STORE
+else
+PFLAGS += -DNO_REGISTRY_STORE
+endif #NO_REGISTRY_STORE
+
+ifndef NO_RPC
+GOALS += rpc
+else
+PFLAGS += -DNO_RPC
+endif #NO_RPC
+
+ifndef NO_NUCLEUS
+TOSMAKE_PATH += $(TOSDIR)/../contrib/nucleus/scripts
+GOALS += nucleus
+CFLAGS += -I%T/../contrib/nucleus/tos/lib/NucleusExamples
+PFLAGS += -DNUCLEUS_NO_LEDS
+else
+PFLAGS += -DNO_NUCLEUS
+endif #NO_NUCLEUS
+
+ifndef NO_PYTHON
+GOALS += nescDecls
+CFLAGS += -I%T/../tos/lib/RamSymbols
+else
+PFLAGS += -DNO_PYTHON
+endif #NO_PYTHON
+
+ifndef NO_SUPPLEMENT
+GOALS += supplement
+else
+PFLAGS += -DNO_SUPPLEMENT
+endif #NO_SUPPLEMENT
+
+ifndef NO_PROMETHEUS
+else
+PFLAGS += -DNO_PROMETHEUS
+endif #NO_PROMETHEUS
+
+ifndef NO_DELUGE
+CFLAGS += -I$(TOS2DIR)/lib/deluge
+PFLAGS += -DDELUGE_NUM_IMAGES=7
+else
+PFLAGS += -DNO_DELUGE
+endif #NO_DELUGE
+
+ifndef NO_SENSORS
+CFLAGS += -I%T/../contrib/nestfe/nesc/sensorboard/trio
+else
+CFLAGS += -I%T/../contrib/nestfe/nesc/sensorboard/pc
+PFLAGS += -DNO_SENSORS
+endif #NO_SENSORS
+
+ifndef NO_LOCATION
+CFLAGS += -I%T/../contrib/nestfe/nesc/lib/location
+else
+PFLAGS += -DNO_LOCATION
+endif #NO_LOCATION
+
+
+#BAUD ?= 57600
+TINYOS_NP ?= BNP
+BOOTLOADER ?= $(TOSDIR)/../contrib/nestfe/nesc/tosboot/main.ihex
+
+PFLAGS += -DTOSH_MAX_TASKS_LOG2=8
+
+# VERSION 2 OF PROMETHEUS AND PIR
+PFLAGS += -I%T/../contrib/nestfe/nesc/apps/GoldenImage
+PFLAGS += -I%T/../contrib/nestfe/nesc/sensorboard/trio/v2
+
+CFLAGS += -I%T/../contrib/nestfe/nesc/lib/kraken
+#CFLAGS += -I%T/../contrib/nestfe/nesc/lib/kraken/comm
+CFLAGS += -I%T/../contrib/nestfe/nesc/lib/detectionevent
+CFLAGS += -I%T/../contrib/nestfe/nesc/lib/detectionevent/EventGenerator
+CFLAGS += -I%T/../contrib/nestfe/nesc/lib/detectionevent/EventGenerator/DummyEvent
+CFLAGS += -I%T/../contrib/nestfe/nesc/lib/detectionevent/EventGenerator/PIRDetectEvent
+CFLAGS += -I%T/../contrib/nestfe/nesc/lib/detectionevent/EventGenerator/PIRSimpleThreshEvent
+CFLAGS += -I%T/../contrib/nestfe/nesc/lib/detectionevent/EventGenerator/UserButtonEvent
+CFLAGS += -I%T/../tos/lib/Rpc
+CFLAGS += -I%T/../tos/lib/Hood
+CFLAGS += -I%T/../tos/lib/Registry
+CFLAGS += -I%T/../tos/lib/RegistryStore
+CFLAGS += -I%T/../contrib/nucleus/tos/lib/Nucleus
+
+CFLAGS += -I$(TOS2DIR)/chips/stm25p
+
+CFLAGS += -I%T/../beta/Drip
+CFLAGS += -I%T/../beta/Drain
+CFLAGS += -I%T/../contrib/nucleus/tos/lib/GenericDutyCycle
+
+BUILD_EXTRA_DEPS += partial_clean_builddir
+
+partial_clean_builddir: builddir FORCE
+	@echo
+	@echo "***  Cleaning all nesC files from $(BUILDDIR)"
+	rm -f $(BUILDDIR)/*.nc $(BUILDDIR)/*.h $(BUILDDIR)/*.txt
+
+
+include $(MAKERULES)
+

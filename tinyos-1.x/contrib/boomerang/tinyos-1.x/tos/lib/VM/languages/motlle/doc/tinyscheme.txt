@@ -1,0 +1,414 @@
+		      An Introduction to TinyScheme
+		      =============================
+			       October 2005
+
+
+0) Preface
+==========
+
+TinyScheme is a scripting language for motes built in the Mate
+virtual-machine framework. It's basically an implementation of the
+Scheme programming language, but with a few significant features
+missing (see below for more details).
+
+At this point, if you hate Scheme's syntax but like the concept of a
+full-featured scripting language, you might want to check the documentation
+for "motlle", which should be available from the same directory/web
+page as this document. motlle is essentially TinyScheme with a C-like
+syntax; except for a few library routine changes, VMs for motlle and
+TinyScheme are identical.
+
+This document assumes you are already familiar with sensor networks and the
+Mate framework, but detailed knowledge of TinyOS is not required (you only
+need to be able to compile and install existing TinyOS programs).  
+
+Compared to TinyScript, TinyScheme supports more advanced data structures
+(arrays, lists, etc), but in counterpart it is a little less efficient and
+does not support concurrent handler execution.
+
+The classic "Count the LEDs" example in motlle is:
+  (define i 0)      ; declare i
+  (settimer0 10)    ; start timer
+  (define (timer0)  ; timer handler: increment i, set the LEDs
+    (set! i (+ i 1))
+    (led (& i 7)))
+  
+As this examples shows, TinyScheme uses the standard Mate handlers and
+procedure libraries (in this case, the timer0 handler and settimer0, led
+procedures)
+
+The current version of TinyScheme only supports the pc (tossim), mica2 and
+mica2dot platforms. The PC-side support tools have only been tested on
+x86-based machines.
+
+1) Building a TinyScheme VM
+===========================
+
+Note: to use TinyScheme, you need to have installed the VM's tools. If you
+get a prepackaged distribution, this is done for you. Otherwise follow
+the directions in the INSTALL file at tinyos-1.x/tos/lib/VM.
+
+The tinyos-1.x/tos/lib/VM/languages/motlle/examples directory contains a
+file called scheme.vmsf which defines a simple TinyScheme VM. We reproduce
+it here with comments explaining its contents. Currently, TinyScheme does
+not support the GUI-based VM builder, so to create your own VM you must
+create your own .vmsf file similar to scheme.vmsf (we suggest using
+scheme.vmsf as your starting point).
+
+  // Declare the VM. You will want to specify a separate name (NAME)
+  // and directory (DIR) for each VM.
+  <VM NAME="TinySchemeVM" DESC="A basic tinyscheme VM with single-hop communication." DIR="../../../../../../apps/TinySchemeVM">
+  // 1024 is the amount of RAM available for motlle programs. You can
+  // increase while there is RAM available... On telosb motes, you should
+  // probably set this to something larger.
+  <OPTION CAPSULE_SIZE=1024>
+  // The following lines should always be present (the paths are
+  // relative to the .vmsf file, so you may need to adjust them
+  // depending on where your file is)
+  <SEARCH PATH="../../../opcodes">
+  <SEARCH PATH="../../../contexts">
+  <SEARCH PATH="../mate">
+  <SEARCH PATH="../mate/rep-16">
+  <SEARCH PATH="../mate/runtime">
+  <SEARCH PATH="../mate/runtime/sgen">
+  <SEARCH PATH="../matelib">
+  <SEARCH PATH="../matelib/sgen">
+  <SEARCH PATH="../../../../Util">
+
+  <LANGUAGE NAME="tinyscheme"> // Use the scheme language
+  <LOAD FILE="../mate/runtime/sgen/intfns.vmsf"> // Load basic scheme functions
+
+  // Here is where you add VM-specific contexts and functions, either
+  // from Mate's library (led, id, the mica sensorboard) or from motlle's
+  // (the commfns.vmsf file, which contains single-hop communication
+  // primitives)
+  <FUNCTION NAME="led">
+  <FUNCTION name="id">
+  <FUNCTION name="sleep">
+  <CONTEXT NAME="Timer0">
+  <LOAD FILE="../matelib/sgen/commfns.vmsf">
+  // This VM does not have any sensor board access. You should add a line like
+  //   <LOAD FILE="../../../sensorboards/micasb.vmsf"> // micasb sensor board
+  // or
+  //   <LOAD FILE="../../../sensorboards/telosb.vmsf"> // built-in telosb sensors
+  // to get access to sensors from your favourite sensorboard.
+
+Once you have a .vmsf file, you build a TinyScheme VM by executing the
+motlle-vmbuild command, passing the .vmsf file as its argument (you
+will typically need to be in the directory containing the .vmsf file
+when doing this). This will generate a VM in the directory specified
+by the DIR= directive. You build and install the generated VM like a
+usual TinyOS program.
+
+Note that TinyScheme library procedures are found in directories named sgen,
+while motlle library functions are found in directories named gen.
+
+1.1 Building a VM with floating-point support
+---------------------------------------------
+
+The default scheme.vmsf configuration given above has 15-bit integers only.
+If you replace
+  <SEARCH PATH="../mate/rep-16">
+by
+  <SEARCH PATH="../mate/rep-float">
+and 
+  <LOAD FILE="../mate/runtime/sgen/intfns.vmsf">
+by
+  <LOAD FILE="../mate/runtime/sgen/floatfns.vmsf">
+in your .vmsf file, you get 16-bit integers and 32-bit floating-point
+numbers, at the cost of approximately double RAM usage for your
+data structures.
+
+Note that / (real division) is only available if you have a floating-point
+VM.  If you use rep-16, you get quotient (integer division) but not /.
+
+Finally, by default, transcendental (sin, cos, tan, etc) and other 
+miscellaneous (sqrt, expt) procedures are not included. If you want all of
+these, add
+  <LOAD FILE="../mate/runtime/sgen/transcendentalfns.vmsf">
+to your .vmsf file. Or you can include these procedures individually by
+adding
+  <FUNCTION name=mXXX>
+lines to your .vmsf file, where XXX=sin, cos, etc.
+
+2) Running TinyScheme programs
+==============================
+
+The motlle-load utility is used to install TinyScheme programs on motes with
+TinyScheme VMs. This utility expects to find the conf.mt file that
+motlle-vmbuild generated in the current directory. motlle-vmbuild places
+this file in the VM's directory (the one specified by DIR=), so you have
+two main choices for how to run motlle-load:
+- run it from the VM's directory
+- create a symbolic link to conf.mt in the current directory before
+  executing motlle-load (`ln -s <path to VM dir>/conf.mt').
+
+Using motlle-load is straightforward:
+  motlle-load <file containing TinyScheme source>: compiles and loads the file
+  motlle-load -e "<TinyScheme expression>": run a 1-line TinyScheme program
+    (motlle-load -e "(led 4)") is a good test that your VM is working...)
+
+The examples directory contains two simple TinyScheme applications:
+  - cnttoleds.ts: seen above
+  - oscilloscope.ts: a TinyScheme version of the TinyOS OscilloscopeRF 
+    application. You should build a VM with functions to access some
+    sensorboard, and edit oscilloscope.ts to replace the call to (light)
+    by some appropriate sensor function if you want to try this
+    application.
+
+3) TinyScheme vs Scheme
+=======================
+
+The major differences between TinyScheme and Scheme are:
+- quasiquote and macros are not available
+- there is no call-with-current-continuation and no support for delayed
+  evaluation
+- characters and booleans are integers (like in C), rather than separate
+  types
+- all input/output and character and most string procedures are missing
+- numbers are 15-bit integers or 16-bit integers and 32-bit floats
+  (see Section 1.1 above)
+- the handling of numbers doesn't quite match the Scheme standard
+- equal?, member, assoc are not available
+
+See Appendix A for more details on the differences between TinyScheme
+and Scheme, and Appendix B for a list of standard Scheme procedures
+present, absent or modified in TinyScheme.
+
+TinyScheme also includes a few extensions:
+
+- bitwise operations are supported:
+  (| k1 ...): bit-wise or of its integer arguments
+  (& k1 ...): bit-wise and of its integer arguments
+  (^ k1 ...): bit-wise xor of its integer arguments
+
+- some vector, string and list operations are unified:
+  (any-ref x k): applies to vectors, lists, strings
+  (any-set! x1 k x2): applies to vectors, lists (sets the k-1th car), strings
+  map, for-each, and length's arguments can be lists, vectors or strings
+
+- a few miscellaneous procedures:
+  (error k): causes error k
+  (garbage_collect): does a garbage collection
+
+
+4) Mote library
+===============
+
+As mentioned above, TinyScheme can use standard Mate librarires such as sensor
+access. It also currently comes with its own set of mote-specific procedures
+(some of these will be merged with the standard Mate libraries in future
+releases). The only documented library at this point is the communications
+library.
+
+4.1 Using Mate libraries
+------------------------
+
+To use a Mate procedure or context, you can just include it in your .vmsf
+file with
+  <FUNCTION NAME=...>
+and
+  <CONTEXT NAME=...>
+
+At this point, only procedures taking integer arguments, and those returning
+integer or sensor values will work with TinyScheme (in particular, procedures
+relating to Mate buffers cannot be used). Mate sensor values become integers
+in TinyScheme.
+
+4.2 Communication procedures
+----------------------------
+
+To include the communications library in a VM, add 
+  <LOAD FILE="../matelib/sgen/commfns.vmsf">
+to your .vmsf file (scheme.vmsf already contains this library).
+
+This library supports single-hop, broadcast and serial port communication.
+It includes three procedures and one context:
+
+  (send k s) --> b 
+    Send packet s (a string) to address k, returning success/failure.
+    if k is uart-addr, sends to the serial port
+    if k is bcast-addr, broadcasts the message
+    otherwise, the packet is sent to mote with id k
+
+  (encode v) --> s
+   Encode a vector as a string. Produces a string which is the concatenation
+   of the elements of v, each encoded as follows:
+    k: encode as 2 little-endian bytes
+    n: encode as a 4-byte float
+    s: encode n-char string as n identical bytes
+    k . x: encode x as usual, pad (w/ 0s) or truncate (lowest significant
+           bytes) to k bytes
+           ignored for floats (always encoded as 4 bytes)
+
+    example: (encode (vector (1 . 33) "aa")) --> "!aa"
+
+
+  (decode s v) --> v
+   Decode string s into v, and return v.
+   Each element x of v is replaced by a value decoded from s according
+   to rules which depend on the value of x:
+   If x = 1, decode 1 byte from s as an unsigned number
+   If x = 2, decode 2 bytes from s as an unsigned little-endian number
+   If x = -1, decode 1 byte from s as a signed number
+   If x = -2, decode 2 bytes from s as a signed little-endian number
+   If x is any floating point number, decode 4 bytes from s as a 
+     floating point number
+   If x is a string of length k, overwrite x with k bytes from s
+
+     example: (decode "!aa" (vector 1 (make-string 2))) --> #(33 "aa")
+
+The context is called receive, and is executed when a message sent via
+'send' from another mote is received. To access the message, you use the
+  (received-msg) --> s
+  Return received message
+procedure.
+
+The messages sent and received by this library use active message id 42.
+
+For example, in the oscillosope application, mote 0 forwards all received
+messages to the serial port:
+  (define (receive)
+    (if (zero? (id))
+      (send uart-addr (received_msg))))
+
+Messages are typically sent using encode:
+  // send a 4-byte message with the values of x and y
+  (send bcast-addr (encode (vector x y)))
+
+This message could be decoded like this:
+  (define (receive)
+    (let ((decoded (decode (received-msg) (vector 2 2))))
+      ;; (vector-ref decoded 0) is now the x value sent, 
+      ;; and (vector-ref decoded 1) the y value
+      ...))
+
+The oscilloscope.ts example contains a more complex use:
+  (define readings (make-vector 10))
+  ...
+  (send bcast-addr (encode (vector (id) current 0 (encode readings))))
+
+This creates a 26 byte message whose format is:
+  bytes 0, 1: the sender's node id
+  bytes 2, 3: the value of current
+  bytes 4, 5: 0
+  bytes 6-25: the 10 elements of readings, encoded with 2 bytes per number
+This is the format expected by the net.tinyos.oscope.oscilloscope application.
+
+
+Appendix A: Changes from R5RS
+=============================
+
+The following summarise the differences between TinyScheme and Scheme,
+following the structure of the "Revised^5 Report on the Algorithmic
+Language Scheme":
+
+3.2 Disjointness of Types
+
+Character, boolean and port types do not exist.
+
+4.1.4 Procedures
+
+The <variable> form of arguments is supported, but the <variable> receives
+a vector of the arguments.
+
+The (<variable1> ... <variablen> . <variablen+1>) form of arguments is not
+supported.
+
+Procedures are limited to 15 arguments.
+
+4.2.4 Iteration
+
+-- "Named let", i.e., (let <variable> <bindings> <body>), is not available
+
+4.2.5 Delayed evaluation
+
+-- is not available
+
+4.2.6 Quasiquotation
+
+-- is not available
+
+4.3 Macros
+
+-- are not available
+
+5.3 Syntax definitions
+
+-- are not available
+
+6.1 Equivalence predicates
+
+-- eqv? and eq? behave identically
+
+-- equal? is not available
+
+6.2 Numbers
+
+The numbers available depend on the configuration of the TinyScheme
+VM. Choices are 15-bit integers only or 16-bit integers and 32-bit
+floating-point numbers. See Section XXX for more details.
+
+Numbers behave mostly like Scheme numbers should. The departures are:
+- there is no exact/inexact distinction
+- the lexical syntax for numbers is that of C, except that the #b, #o, #d
+  and #x radix specifiers are supported
+- floating-point numbers that are integers can not be used where integers
+  are expected
+- =, <, >, <= and >= only accept two arguments (and = is actually eqv?)
+- the optional more-than-2-arguments form of - and / are not available
+- round, numerator, denominator, rationalize, gcd, lcm are not available
+- numerical input and output is not available
+- expt is only available with a floating-point VM
+
+6.3.1 Booleans
+
+Booleans are handled as in C -- 0 is false, everything else is true. #t is
+the same as 1 and #f is the same as 0. The boolean? procedure does not exist.
+
+6.3.2 Pairs and lists
+
+-- c[ad]*r are only available up to three a+d's (i.e., the four car/cdr forms
+are absent).
+
+-- member and assoc are not available
+
+6.3.3 Symbols
+
+-- symbol->string and string->symbol are not available
+
+6.3.4 Characters
+
+Characters are integers, as in C. For instance, #\a is 97. None of the
+character procedures are available.
+
+6.3.5 Strings
+
+-- the string comparison and substring procedures are not available
+
+6.4 Control features
+
+-- apply takes a single vector argument:
+  (apply proc v)
+    Calls proc with the values in vector as the actual arguments.
+
+-- force, call-with-current-continuation, values, call-with-values,
+   dynamic-wind are not available
+
+6.5 Eval
+
+-- eval and its related procedures are not available
+
+6.6 Input and output
+
+-- Scheme's I/O procedures are not available. See the description of the
+   motlle/TinyScheme communication library in Section 4.
+
+7.1.1 Lexical structure
+
+The lexical changes from Scheme (already mentioned above) are:
+- numbers follow C syntax, except that the #b, #o, #d and #x radix
+  specifiers are supported
+
+Appendix B: Scheme procedures in TinyScheme
+===========================================

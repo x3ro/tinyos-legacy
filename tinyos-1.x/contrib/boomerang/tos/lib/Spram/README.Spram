@@ -1,0 +1,39 @@
+Application: Spram
+Directory: moteiv/tinyos/apps/invent/tests/Spram/
+Author: Cory Sharp <cory@moteiv.com>
+Date: 27 Jan 2006
+
+
+OVERVIEW
+
+make tmoteinvent and install on at least one node.
+
+The application is currently configured to sample at 8192 Hz for 4096 16-bit
+samples, meaning you have 0.5 seconds of record time.  (I'd been planning on
+eventually configuring 4096 Hz for 8192 8-bit samples for 2 seconds of record
+time.)
+
+Double click the user button to begin recording.  Recording occurs while the
+red led is on.
+
+Single click the user button to play back the recording.  Playback occurs while
+the green led is on.
+
+The sample buffer is versioned and nodes advertise it.  So if you have more
+than one node, as soon as you're done recording, it'll advertise and share out
+the new recording.  Communication occurs while the blue led is on.
+
+javac *.java to compile the java application.
+
+To download the song over serial, do this
+
+    java downloadSamples motecom=serial@COM100:telos > samples.txt
+
+The command line format is what I use in Sentry, and I just quickly pulled over
+some helper classes for this app.
+
+The PC just pretends to a node needing the new version of the samples.  When
+done downloading, it prints out each sample, one per line.  This is an ideal
+format for loading into Matlab -- in Matlab just type "load samples.txt;".  To
+play the song in Matlab, type "soundsc(samples,8192);".
+

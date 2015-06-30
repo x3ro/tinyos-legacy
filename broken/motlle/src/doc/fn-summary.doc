@@ -1,0 +1,1566 @@
+*** The compiler is not supposed to read this file ***
+
+**********************
+*** MUDLLE SUMMARY ***
+**********************
+
+13 Jun 94  Ancalagon	Online summary setup.
+13 Jun 94  Ilie		Cancan info revised.
+14 Jun 94  Vivriel	Various echo function removed...use act instead.
+21 Jun 94  Ancalagon	/* */, long strings, some control structures and exit
+13 Jul 94  Ancalagon	order_list, prune_list
+15 Jul 94  Rubius       room_players
+
+Please update the table above if you edit any information here, so it's easy 
+to see if your old, local version, if you have one, is correct.
+Please also update the dragonstaff (obj 1756) summary update information
+(top of the file), so it's not necessary to load this whole file to find out
+if there has been any changes.
+Changes to file format and other unimportant changes might not be recorded.
+
+***************************
+*** GENERAL INFORMATION ***
+***************************
+
+Mudlle mailing address: mudlle@masun1.epfl.ch
+Cancan ftp:	ftp nova.pvv.unit.no
+		login: anonymous
+		get pub/mud/clients/cancan/cancan*.tar.Z
+		uncompress <filename>.Z
+		tar xvf <filename>.tar
+		make_it
+         There are also compiled versions of cancan available in
+         /pub/mud/clients/cancan/binaries/<ver>/cancan@<architecture>
+         for example /pub/mud/clients/cancan/binaries/current/cancan@sunos5
+         (Cancan 2.4.2a is also has binaries for Next and irix4)
+
+         A new mudlle.el mode for use with emacs is available in
+         /pub/mud/clients/cancan/new-mudlle-tar.Z
+
+x, y, x1, y1, x2, y2	a value of any type
+n, n1, n2		an integer
+b, b1, b2		a boolean value (0 = FALSE, everything else = TRUE)
+s, s1, s2		a string
+c, c1, c2		a function (or closure as it is sometimes known)
+sym, sym1		a symbol
+table, table1		a symbol table
+l, l1, l2		a list
+v, v1, v2		a vector
+p, p1, p2		a MUME person (player or mobile)
+o, o1, o2		a MUME object (eg a sword)
+
+I have used the following terms:
+
+An operator is like a function that doesnt need paranthesis.
+A primitive is a hardcoded, and thus an ultimately (eh) fast function.
+A closure is a function that is defined in a mudlle file, object, room or mob.
+A compound is a definition of a behaviour, usually using events.
+
+*******************************
+*** PRECEDENCE OF OPERATORS ***
+*******************************
+
+function call, array reference
+- (unary), ~, not
+*, /, %
++, -
+<<, >>
+&
+|, ^
+==, !=, <, <=, >, >=
+and, &&
+or, ||
+. (cons)
+= (assignment)
+if, while, functions
+
+**************************
+*** CONTROL STRUCTURES ***
+**************************
+
+if (<expression1>) then <expression2> [else <expression3>];
+   expression2 is executed if expression1 returns non-zero, otherwise
+   expression3 is executed
+
+while (<expression1>) expression2;
+   execute expression2 while expression1 is non-zero
+
+exit
+   exit_test = fn () <tester> [
+      display ("ok 1");
+      if (1) exit <tester> false;
+      display ("ok 2");
+   ];
+   will display ok 1 and return false
+
+   Named statements may be nested of course, but the exit<name> must be inside
+   the same function, so this doesn't work:
+
+   f = fn (a, b) <function> [
+      ...;
+      mapcar(fn (x) if (x == 3) exit<function> false, some_list);
+      ...
+   ];
+
+   All function expressions are implicitly named "function", so the naming
+   of the expression wasn't necessary.
+
+loop
+   a general looping facility, for use in conjunction with exit.
+
+   lforall? = fn (f, l)
+      loop
+         if (l == null) exit true
+         else if (!f(car(l))) exit false
+         else l = cdr(l);
+
+   The expression which forms the body of the loop is executed indefinitely, 
+   so it must contain one or more 'exit' for termination. Exit without a
+   statement name implicitly exists from the innermost 'loop'.
+
+*************************
+*** INTEGER OPERATORS ***
+*************************
+
+n1 + n2 -> n.	Addition. There is no overflow or underflow checking (so
+		1073741823 + 1 is undefined)
+n1 - n2 -> n.	Subtraction. No checking either.
+n1 * n2 -> n.	Multiplication. No checking.
+n1 / n2 -> n.	Division. If n2 == 0, a runtime error is signaled. The
+		result of the division is rounded towards 0.
+-n1 -> n2.	Numerical negation.
+n1 == n2 -> b.	Numerical equality.
+n1 != n2 -> b.	Numerical inequality.
+n1 < n2 -> b, 
+n1 <= n2 -> b, 
+n1 > n2 -> b, 
+n1 >= n2 -> b.	Numerical ordering.
+n1 | n2 -> n.	Bitwise or.
+n1 & n2 -> n.	Bitwise and.
+n1 ^ n2 -> n.	Bitwise xor.
+~n1 -> n2.	Bitwise negation
+n1 << n2 -> n.	Shift n1 left by n2 bits.
+n1 >> n2 -> n.	Shift n1 right by n2 bits. If n1 is negative, the n2 most
+		significant bits are set to 1, otherwise to 0 ('arithmetic 
+		shift right').
+n1 % n2 -> n.	Returns remainder of division of n1 by n2, defined in such 
+		a way that: (a/b)*b + %(a,b) == a.
+
+**************************
+*** INTEGER PRIMITIVES ***
+**************************
+
+integer?	x -> b. Returns TRUE if x is an integer.
+modulo		n1 n2 -> n. Returns (n1 mod n2), with the usual mathematical
+		definition of modulo (this is different from % when negative 
+		numbers are involved).
+min		n1 n2 -> n. Returns n1 if n1<n2, n2 otherwise.
+max		n1 n2 -> n. Returns n1 if n1>n2, n2 otherwise.
+abs		n1 -> n2. Returns |n1|.
+random		n1 n2 -> n3. Returns n3: n1 <= n3 <= n2
+
+************************
+*** INTEGER CLOSURES ***
+************************
+
+flip		(n) -> b.
+	True n% of the time.
+stat_percent	(stat:n) -> n2.
+	Returns a value to be used with flip to get the success of a stat roll.
+	stat_percent (-1) -> 1, 15 -> 50, 31 -> 99. It is a totally 
+	deterministic function that returns the value of an array index.
+quantize	(n1 v1) -> n2.
+	Quantizes n1 using vector v1. v1 must be a vector of INCREASING 
+	integers. Some examples for quantize (N, '[5 10 15]), with varying N:
+	0->0, 4->0, 5->0, 6->1, 10->1, 11->2, 15->2, 16->3, 1000 ->3.
+	Quantize returns the index of the first element in v1 being >= n1.
+unique		-> n. 
+	Returns a unique number for every call.
+
+************************
+*** STRING OPERATORS ***
+************************
+
+s1 + s2		Shortcut for string_append (s1, s2).
+
+A string can span more than one line if the last character is a \, e.g.
+   "this is a very long \
+   string"
+
+*************************
+*** STRING PRIMITIVES ***
+*************************
+
+string?		x -> b. Returns TRUE if x is a string.
+make_string	n -> s. Creates a new string of length n. The contents
+		are undefined.
+string_length	s -> n. Returns the length of string s.
+string_fill	s n -> . Sets all the characters in s to ascii code n. s
+		must not be a constant. The result is undefined.
+string_ref	s n1 -> n2. Return the ascii code (n2) of the n1'th
+		character of s.
+string_set	s n1 n2 -> . Set the n1'th character of s to the character
+		whose ascii code is n2. s must not be a constant. The result 
+		is undefined.
+string_cmp	s1 s2 -> n. Compare 2 strings. Returns 0 if s1 = s2, < 0
+		if s1 < s2 and > 0 if s1 > s2.
+string_icmp	s1 s2 -> n. Compare 2 strings ignoring the case of the
+		characters.  Returns 0 if s1 = s2, < 0 if s1 < s2 and > 0 if 
+		s1 > s2.
+substring	s1 n1 n2 -> s2. Extract substring of s starting
+		at n1 of length n2. The returned string is modifiable.
+string_append	s1 s2 -> s. Concatenate s1 and s2. The returned string
+		is modifiable.
+split_words	s -> l. Split string s into words in list l. The strings
+		in l are modifiable.
+atoi		s -> n/s. string to integer (or string if s cannot be a number)
+itoa		n -> s. integer to string
+format		s x1 x2 ... -> s. Formats string s with parameters x1, ...
+		%s, %c, %% is used for string representation/char rep./"%"
+
+***********************
+*** STRING CLOSURES ***
+***********************
+
+string_tail	(str:s, nth:n) -> s. 
+	Returns the tail of the string, from position nth.
+string_head?	(str:s, word:s, min:n) -> b.
+	True if 'str' is the at least 'n' first chars of 'word'. 
+	Can be used to identify spells etc. Caseindependent.
+find_index	(str:s, val:n) -> n.
+	Returns the index of letter 'val' in 'str' or -1.
+find_word?	(word:s, sent:s) -> b.
+	True if 'word' is a word in sentence 'sent'.
+concat_words (l separator:s) -> s.
+	Assembles a list of a string into a single string.
+upper_first	(str:s) -> s
+	Returns 'str' with the first letter upper case.
+half_chop	(str:s) -> l.
+	Returns a pair of (first word . rest of string).
+int2word	(n, syltable) -> s
+	Convert integer to word. Syltable is an array of 16 syllables. 
+	A syllable mustnt be the first part of another.
+word2int	(s, syltable) -> n
+	Convert word to integer.
+money2str	(amount:n, race:n) -> s
+	Make money string.
+str2int		(s) -> n.
+	Returns some value to be used with int2word to produce 
+	individual keywords (s is the name of the player then).
+split_string	(s, sep:s) -> l. 
+	Splits s into words separated by any letter in sep, e.g.
+	split_string("2.bag", ".") = '("2" "bag").
+
+**********************
+*** LIST OPERATORS ***
+**********************
+
+'(x1 x2 x3 ...)	creates a list. Elements can only be constants,
+		The list may not be changed.
+x1 . x2		creates a pair. Shortcut for cons (x1, x2).
+
+***********************
+*** LIST PRIMITIVES ***
+***********************
+
+list		x1 x2 ... -> l. Returns a list of the arguments.
+pair?		x -> b. Returns TRUE if x is a pair.
+cons		x1 x2 -> l. Make a new pair from elements x1 and x2.
+		cons (a, b) can also be written a . b
+car		l -> x. Returns first element of pair l
+cdr		l -> x. Returns 2nd element of pair l
+set_car		l x ->. Sets the first element of pair l to x. l must not be
+		a constant.
+set_cdr		l x ->. Sets the 2nd element of pair l to x. l must not be
+		a constant.
+filter_list	l f -> l. Returns a (copied) list with all elements x for 
+		which fnk(x) is false removed. Preserves the order.
+find_first	(lst:l, fkn:f) -> x. Returns the first element x for which 
+		fkn(x) is true, or FALSE if none is.
+mapcar		(f l1) -> l2. Returns a list l2 of f(x), where x is an element
+		of l1.
+foreach		(f l) -> . Evaluates f(x) for all elements x of l.
+list_member?	(x, l) -> b. TRUE if x is an element of l.
+
+*********************
+*** LIST CLOSURES ***
+*********************
+
+*** Functions with '!' postfix changes the original list.
+
+list_length	(lst:l) -> n.
+	Returns the length (number of elements) of lst.
+nth_pair	(nth:n, lst:l) -> l.
+	Returns the nth pair of the list l, or null if out of range.
+nth_element	(nth:n, lst:l) -> x.
+	Returns the nth element of the list lst, or null if out of range.
+random_element	(lst:l) -> x.
+	Returns a random element of the list lst.
+reverse_list	(lst:l) -> l.
+	Returns the same list as lst, but with order reversed.
+last_pair	(lst:l) -> l.
+	Returns the last pair of a list.
+last_element	(lst:l) -> x.
+	Returns the last element of a list.
+list_copy	(lst:l) -> l.
+	Returns a copy of l.
+list_append	(l1, l2) -> l3.
+	Returns a copy of l1, with a copy of l2 appended at the end.
+list_append!	(l1, l2) -> l3.
+	Returns l1, with l2 appended at the end.
+list_first_n!	(n, l) -> l.
+	Returns the first n elements of l.
+filter_list!	(lst:l, fnk:f) -> l.
+	Removes all elements x for which fnk(x) is false. Preserves the order.
+nth_element_cond	(nth:n, lst:l, fkn:f) -> x.
+	Returns the nth element of lst for which fkn(x) is true, or null.
+list_delete!	(x, l1) -> l1.
+	Deletes all x's from l1.
+list_to_vector	(l) -> v. 
+	Makes a vector of a list.
+list_index	(x l) -> n.
+	Returns the index (1..list_length) of x or 0.
+assq		(l x1) -> x2.
+	Returns cdr of pair where car is x1, or null if not found.
+count_list	(l,f) -> n. 
+	Counts for how many of l's elements 'x'  f(x) is true.
+order_list	l f(x) -> l. 
+	Returns an ordered list, low f(x) first.
+prune_list	l f(x) -> l. 
+	Returns a list with max one f(x) each.
+
+************************
+*** ARRAYS OPERATORS ***
+************************
+
+'[x1 x2 ...]	creates an array. Elements must be constants. The vector may
+		not be changed.
+v [n]		short for vector_ref (v, n), index is 0..size-1
+v [n] = x	short for vector_set (v, n, x), index is 0..size-1
+
+*************************
+*** ARRAYS PRIMITIVES ***
+*************************
+
+vector		x1 ... -> v. Returns a vector of the arguments.
+vector?		x -> b. Returns TRUE if x is a vector.
+make_vector	n -> v. Create an empty vector of length n (all elements
+		are set to null).
+vector_length	v -> n. Returns the length of the vector.
+vector_fill	v x -> . Sets all elements of vector v to x. This is
+		illegal if v is a constant array.
+vector_set	v n x -> . Set the n'th element of v to x.
+vector_ref	v n -> x. Return the n'th element of v.
+
+**********************
+*** ARRAY CLOSURES ***
+**********************
+
+vector_index	(x, v) -> n. 
+	Returns index of first element matching x or -1.
+vector_resize	(v1, n) -> v2. 
+	Expands or truncates v1 to size n, keeping contents unchanged up
+	to the smaller size.
+
+*************************
+*** SYMBOL PRIMITIVES ***
+*************************
+
+symbol?		x -> b. Returns TRUE if x is a symbol
+symbol_name	sym -> s. Returns the name of a symbol
+symbol_get	sym -> x. Returns the value of a symbol
+symbol_set	sym x -> . Sets the value of symbol sym to x. The result
+		is undefined.
+table?		x -> b. Returns TRUE if x is a symbol table.
+make_table	-> table. Create a new (empty) symbol table.
+table_lookup	table s -> sym. Returns the symbol named s in the table.
+		If their was no symbol by that name already there, a new 
+		symbol is created (with value null) and added to the table.
+table_list	table -> l. Returns list of symbols in table whose value 
+		isn't null.
+table_ref	table s -> x. Returns the value of s in symbol table.
+table_set	table s x -> . Sets the value of entry s in symbol table to x
+char_set,
+obj_set,
+room_set
+char_ref
+obj_ref
+room_ref	p/o/n s x -> . 
+		Sets/gets the value of entry s in p/o/n's symbol table [to x]
+char_table
+obj_table
+room_table	p/o/n -> table. Return p/o/n's symbol table.
+
+*************************
+*** LOGICAL OPERATORS ***
+*************************
+
+FALSE == 0. Other values are interpreted as TRUE.
+b1 and b2	Returns TRUE if b1 and b2 are true.
+b1 or b2	Returns TRUE if b1 or b2 are true.
+not b
+!b		Returns TRUE if b is FALSE.
+b1 == b2	Returns TRUE if x1 and x2 are the same object.
+a && b		a and b, b is checked only if a is true.
+a || b		a or b, b is checked only if a is false.
+
+**************************
+*** LOGICAL PRIMITIVES ***
+**************************
+
+eq?		x1 x2 -> b. Returns TRUE if x1 and x2 are the same object.
+
+***********************
+*** ROOM PRIMITIVES ***
+***********************
+
+room_name	n -> s. Returns name of room n.
+room_lit?	n -> b. Returns TRUE if room n is artificially lit.
+room_light?	n -> b. Returns TRUE if there is light in the room.
+change_room_light n1 n2 -> . Adds n2 to the number of light sources of room n1
+room_contents	n -> l. Returns a list of the objects in a room.
+room_people	n -> l. Returns a list of the people in a room.
+room_exits	n -> l. Returns a list of the exits from room n (as numbers).
+exit_room	n1 n2 -> n3. Returns the room (n3) which is the n2'nd exit 
+		of room n1
+exit_flags	n1 n2 -> n3. Returns the flags (n3) for the n2'nd exit of 
+		room n1
+set_exit_flags!	n1 n2 n3 -> . Sets the flags (n3) for the n2'nd exit of room
+		n1. Only CLOSED, LOCKED can be set.
+exit_key	n1 n2 -> n3. Returns the key (n3) for the n2'nd exit of 
+		room n1
+find_the_path	n1 n2 n3 n4 n5 -> l. Looks for a path from rooms n1 to n2.
+		Returns a list of dirs, or false if no path can be found.
+		n5 is max length of the path (a hard limit of 100 exists).
+		n3 & n4 restrict the search as follows:
+		Only takes exits if (exit_flags(direction) & ~n3) == 0
+		Ignores rooms where (room_flags(room) & n4) != 0
+room_flags	n1 -> n2. Flags of room n1.
+room_type	n1 -> n2. Type of room n1.
+room_owner	n1 -> n2. Returns the # of the room n1's owner.
+get_zone_alignment n -> n. Returns zone alignment
+change_zone_alignment n1 n2 -> . Adds n2 to zone n1's alignment
+zone_read?	p n -> b. True if p has read access to zone n
+zone_write?	p n -> b. True if p has write access to zone n
+
+*********************
+*** ROOM CLOSURES ***
+*********************
+
+is_exit?	(room:n, dir:n) -> b
+	TRUE if dir is an exit of room n.
+get_room_weight	(room:n) -> n
+	Weight (items) + weight (chars).
+is_room_owner?	(p, room:n) -> b.
+	TRUE if p is the owner of room n.
+find_char_in_room	(room:n, name:s) -> p. !! undocumented, Manwe
+reverse_dir	(n) -> n.
+	Returns the reverse direction of n.
+is_bi_exit? (room:n, dir:n)
+	TRUE if exit is bidirectional.
+vis_room_people	-> l.
+	Returns a list of all chars (except actor) in room <i> visible for
+	actor. Returns null if none.
+room_dir_desc	(n s) -> . 
+	Shows the string <s> when you look in direction <n>. For use when you 
+	want a description in a direction and there is no exit in 
+	that direction (example in room 1, look west).
+town_name	(n) -> s.  
+	Returns the name of town n, or "no town".
+
+**********************
+*** ROOM COMPOUNDS ***
+**********************
+
+r00_hide	(dummy_var)
+	 Hide keywords in room for people without access.
+exit_block_noride (dir:n, fn (who))
+	Blocks exit 'dir' if fn (who) is FALSE, or who is riding.
+room_players (room:n) -> l.
+        Returns a list of players (PC's) present in room n.
+room_react_random ()
+	Reactions for random rooms.
+room_react_galgals ()
+	Reactions for galgals (fog).
+room_react_old_forest ()
+	Reactions for Old Forest.
+town_citizenship (cost_fn:fn(p, n)) -> .  
+	Sets up room as office where players can apply for citizenship of the 
+	town, if 'secretary' is present. n is the number of past
+	citizenships granted, which can be used to adjust citizenship cost. If
+	cost_fn() returns -1, player is rejected.
+inside_gate (room:n, dir:n|v, hours:v[n]|FALSE, check_fn:fn(p), 
+	bribe_fn:fn(p)|FALSE) -> .
+	If hours are given, gate opens at hours[0] and closes at hours[1] (-1 
+	for sunrise and -2 for sunset). Player can ask gatekeeper to open if 
+	check_fn() returns TRUE, or if bribes of amount >= bribe_fn() are 
+	offered. If bribe_fn is FALSE or bribe_fn() < 0, gatekeeper cannot be 
+	bribed.
+outside_gate (dir:n|v, check_fn:fn(p), bribe_fn:fn(p)|FALSE) -> .
+	Player can 'call' for gatekeeper to open, if check_fn() returns TRUE 
+	or bribes of amount >= bribe_fn() are offered.
+
+*************************
+*** OBJECT PRIMITIVES ***
+*************************
+
+object?		x -> b. True if x is an object.
+find_objects	x -> l. Returns all objects whose name or number is x.
+find_object_in	x s -> o. Returns the object in room x/object x/x's 
+		inventory whose name is 's', that can be seen by the actor, 
+		FALSE if there are none.
+find_object_hidden	x s -> o. Returns the object in room x/object x/x's 
+		inventory whose name is 's', FALSE if there are none.
+find_object_equipment	s -> n. Returns position of object s in actor's 
+		equipment, null if nothing by that name (beware: FALSE = 
+		0 is a valid position)
+obj_contains	o -> l. Returns list of objects contained in o.
+equip_char	o n -> . Puts object o at position n in actor's equipment.
+move_object	o x -> . Moves object o to x (room/mobile/object).
+get_obj_val	o n1 -> n2. Returns the n1'th (0 <= n1 <= 3) value of
+		object c.
+set_obj_val	o n1 n2 -> . Set the n1'th (0 <= n1 <= 3) value of object o.
+get_obj_room	o -> n. Return object's room number, -1 if none
+get_obj_name	o -> s. Returns object's name
+get_obj_short	o -> n. Returns object's short description.
+get_obj_carrier	o -> c. Returns character carrying o, FALSE if none
+get_obj_container	o1 -> o2. Returns object o2 which contains o1,
+		FALSE if none
+get_obj_type	o -> n. Return object's type.
+get_obj_extra	o -> n. Return object's extra flags.
+get_obj_wear	o -> n. Return object's wear flags.
+get_obj_number	o -> n. Return object's number (identical for all
+		instances of a given object class)
+get_obj_value	o -> n. Returns object's cost.
+get_obj_weight	o -> n. Returns object's weight.
+get_obj_hit	o -> n. Return object's health (0-10000).
+gain_obj_hit	o n -> b. Increases object's health (max is 10000). 
+		TRUE if fully mended.
+make_object	n -> o. Makes object whose number is n
+purge		x -> . Purges object or NPC x
+can_see_obj?	o -> b. Returns TRUE if the actor can see object o.
+
+***********************
+*** OBJECT CLOSURES ***
+***********************
+
+get_obj_real_room	(obj:o) -> n.
+	As get_obj_room, but checking for carrier.
+is_obj_name?		(obj:o, str:s) -> b.
+	True if obj can be specified with str.
+object_help		(text:s) ->.
+	Sends text to carrier of object if help <object> is typed.
+	Creates a command_event reaction.
+liqname			(int n) -> s 
+	Name of liquid number n.
+act_object_room		(room:n, b, msg:s, o) -> .
+	An 'act' by object o.
+obj_room		(o) -> n.
+	Room of the object. Checks for nested containers.
+
+************************
+*** OBJECT COMPOUNDS ***
+************************
+
+artifact	rent_days:n -> . 
+	Various reacts for artifacts.
+item_conflict	(itemlist:l(n), typelist:l(n), keylist:l(s), posvector:v(b), 
+		maxhurt:n, %chance_destruct:n, text_for_hurt:s, 
+		text_for_destruct:s) -> .
+	Cause item conflict if player equipped with this obj as well as 
+	another in itemlist, or matching typelist and keylist.  Player suffers
+	random(0, maxhurt) hurt, and obj falls with %chance of destruction. 
+
+****************************
+*** CHARACTER PRIMITIVES ***
+****************************
+
+*** Most set_char_xxx are reserved for A+ ***
+
+character?		x -> b. True if x is mobile or player.
+is_npc?			p -> b. Includes metamorphs.
+is_mobile?		p -> b. Not metamorph or player.
+find_players		x -> l. Returns all mobiles whose name or number is x
+find_player_visible	p1 s -> p2. Returns the player p2 whose name is s, and
+			who can be seen by p1, FALSE if there isn't anybody
+find_player_known	p1 s -> p2. Returns the player p2 known by p1
+			whose name is s, FALSE if there are none
+get_player		s -> p or b. Return player (non-mobile) with given 
+			name s or FALSE.
+char_inventory		p -> l. Returns list of objects in player's inventory
+char_equipment		p -> v. Returns a vector of p's equipment (Unused
+			positions are FALSE)
+send_char		p s -> . Sends message s to p
+move_char		p n -> . Moves p to room n
+get_char_name		p -> s. Returns characters name
+get_char_short		p -> s. Short description of p.
+make_char_name		p -> s. Returns a name the actor can use unambigously 
+			for p for 'room-effect' commands
+get_char_sex		p -> n. Returns characters sex
+get_char_class		p -> n. Returns characters class
+get_char_race		p -> n. Returns characters race
+get_char_level		p -> n. Returns characters level
+get_permanent_str	p -> n. Returns characters strength
+get_permanent_intel	p -> n. Returns characters intelligence
+get_permanent_wis	p -> n. Returns characters wisdom
+get_permanent_dex	p -> n. Returns characters dexterity
+get_permanent_con	p -> n. Returns characters constitution
+get_permanent_power	p -> n. Returns characters power !! helptext
+get_char_str		p -> n. Returns characters strength
+get_char_str_add	p -> n. Returns characters additional strength
+get_char_intel		p -> n. Returns characters intelligence
+get_char_wis		p -> n. Returns characters wisdom
+get_char_dex		p -> n. Returns characters dexterity
+get_char_con		p -> n. Returns characters constitution
+get_char_power		p -> n. Returns characters power !! helptext
+get_char_position	p -> n. Returns characters position
+set_char_position	Sets p's position to n.
+		(SLEEPING/RESTING/SITTING/STANDING/STUNNED/INCAP/MORTALLYW)
+get_char_act		p -> n. Returns characters act flags
+get_char_flags		p -> l. Returns list of characters affected flags
+get_char_alignment	p -> n. Returns characters alignment
+set_char_alignment	p n -> . Sets character p's alignment to n,
+			-1000 <= n <= 1000.
+change_char_alignment	p n -> . Changes p's (player) alignment after an action
+			whose alignment is n (in [-1000,+1000].
+get_char_language	p -> v. Returns p's knowledge of languages
+gain_istarihood		p -> b. p becomes an Istar. Returns FALSE if p is not 
+			allowed to (NPC, Not Elda, Orc, Not enough TP)
+get_char_room		p -> n. Returns room in which p is (-1 if out of game)
+get_char_mana		p -> n. Returns characters mana
+gain_mana		p n -> . p gains (or loses) n mana points
+get_char_max_mana	p -> n. Returns characters max mana
+get_char_hit		p -> n. Returns characters hit points
+gain_hit		p n -> b. p gains (or loses) n hit points. 
+			Returns TRUE if p dies
+get_char_travel_points	p -> n. Returns characters travel points.
+gain_travel_points	p n -> . p gains (or loses) n travel points.
+			Maximum gain or loss is 100.
+get_char_max_hit	p -> n. Returns characters max hit points
+get_char_move		p -> n. Returns characters move points
+get_char_move_extra	p -> n. Returns characters extra move points 
+			when riding
+gain_move		p n -> . p gains (or loses) n move points
+get_char_max_move	p -> n. Returns characters max move points
+get_char_gold		p -> n. Returns characters fortune (in copper)
+gain_gold		p n -> . p gains (or loses) n coppers
+get_char_age		p -> n. Returns characters age in game minutes, with
+			0 = 17 years old
+set_char_age		p n -> . Sets p's age to 17 years + n minutes (n >= 0)
+get_char_experience	p -> n. Return character experience points.
+gain_experience		p n -> . p gains (or loses) n experience points
+get_char_fighting	p1 -> p2. Returns mobile p2 being fought by p1,
+			or FALSE if none
+get_char_leader		c1 -> c2. Returns mobile c2 who is c1's leader, or 
+			FALSE if none.
+char_group_members	p -> l. Returns list of members of p's group.
+get_char_following	c1 -> c2. Returns mobile c2 whom c1 is following, or 
+			FALSE if none.
+char_followers		p -> l. Returns list of followers of p
+get_char_riding		c1 -> c2. Returns mobile c2 whom c1 is riding (as a 
+			passenger), or FALSE if none.
+get_char_driving	c1 -> c2. Returns mobile c2 whom c1 is driving, or 
+			FALSE if none.
+get_char_driver		c1 -> c2. Returns mobile c2 which is driven by c1, or 
+			FALSE if none.
+char_passengers		p -> l. Returns list of passengers of p
+get_char_drunk		p -> n. Returns characters drunkenness, -1 <= n <= 24
+set_char_drunk		p -> n. Sets characters drunkenness, -1 <= n <= 24
+get_char_thirst		p -> n. Returns characters thirst, -1 <= n <= 24
+set_char_thirst		p -> n. Sets characters thirst, -1 <= n <= 24
+get_char_hunger		p -> n. Returns characters hunger, -1 <= n <= 24
+set_char_hunger		p -> n. Sets characters hunger, -1 <= n <= 24
+get_char_height		p -> n. Returns characters body height
+get_char_weight		p -> n. Returns characters body weight
+get_char_carry_weight	p -> n. Returns weight carried by character
+get_char_max_carry	p -> n. how much weight can p carry ?
+get_char_carry_number	p -> n. Returns # of objects carried by character
+get_char_max_carry_number p -> n. how many objects can p carry ?
+get_char_max_wield	p -> n. how much weight can p wield ?
+can_know?		p -> b. TRUE if the actor can know of p.
+can_see?		p -> b. True if actor can see p.
+make_mobile		n1 n2 -> p. Makes mobile whose number is n1 and places
+			it in room n2
+all_players		-> l. All current players of mume
+get_char_number		p -> n. Returns p's number (negative for players)
+purge			x -> . Purges object or NPC x
+
+*** CITIZENSHIP ***
+is_citizen		p n -> b. TRUE if p is a n (town) citizen.
+set_citizen		p n -> . p becomes a n (town) citizen.
+remove_citizen		p n -> . p loses n (town) citizenship.
+is_wanted		p n -> b. TRUE if p is wanted in n (town).
+
+*** SPELLS AND SKILLS ***
+get_char_skill		p n1 -> n2. Returns p's skill in skill n1
+get_skill_number	s -> n. Returns the number of skill s, or -1
+get_skill_info		n -> l. Returns l=(name class level stat1 stat2), a 
+			partial definition of skill n (FALSE if n is not skill)
+get_skill_cost		p n1 -> n2. Returns the skill cost to p of skill n1
+skill_practice		p n1 -> n2 practices skill n. Returns PRACTICE_OK, 
+			PRACTICE_UNKNOWN, PRACTICE_NOTENOUGH or PRACTIVE_MAX
+can_learn_skill?	p n -> b. Returns TRUE if p can learn skill n
+get_effective_level	p n1 -> n2. Returns p's effective level in skill n1
+set_skill		p n1 n2 -> Sets skill n1 to n2 for p. Can be done for
+			all mobiles.
+skill_test		n1 -> n2. Does a skill test and returns the outcome.
+			Typical usage is 
+			skill_test (get_char_skill (who, SKILL_XXX)),
+                        and returns one of MAX_FAILURE, TOTAL_FAILURE, FAILURE,
+			SUCCESS, TOTAL_SUCCESS, MAX_SUCCESS
+immediate_cast		n1 x s -> n2. Actor casts spell 'n' with argument x 
+			(a character, object or null)
+			s is an extra string argument for some spells (or 
+			null). n2 can be: 
+			CAST_OK: all went well.
+			CAST_FAILED: actor failed to cast the spell (not 
+			skilled enough)
+			CAST_NOT_IMPLEMENTED: the spell is unimplemented
+			CAST_NO_MANA: the actor didn't have enough mana
+			CAST_BAD_TARGET: the argument was invalid for the spell
+cast			n1 x s -> n2. Actor casts spell n1 on x, with delay
+			(function returns immediately).
+cc_cast			n1 x s c -> n2. Actor casts spell n1 on x, with delay
+			(function returns immediately).
+			Function c is called with the result of the cast.
+get_spell_delay		Returns spell delay for p for spell n1
+
+*** PRIMITIVE ACTIONS ***
+poison			p n -> . Poison's p for duration n
+tell		p s -> . Actor tells p 's'.
+say		s -> . Actor says 's'.
+exec		s -> . Actor executes command 's'. This allows rapid access 
+		to all MUME commands, but isn't very convenient (or efficient).
+open_door	n -> b. Actor opens door n. TRUE if door ends up open
+close_door	n -> b. Actor closes door n. TRUE if door ends up closed
+lock_door	n -> b. Actor locks door n. TRUE if door ends up locked
+unlock_door	n -> b. Actor unlocks door n. TRUE if door ends up unlocked
+move		n -> b. Actor moves in direction n. TRUE if successful
+act		(n1 n2 p1 s [p2 o1 ...]) -> .
+	n1 is TO_ROOM		action is sent to all except p1
+	n1 is TO_VICT		action is sent to p2
+	n1 is TO_NOTVICT	action is sent to all except p1 and p2
+	n1 is TO_CHAR		action is sent to p1
+	n2 should be true to keep invisible things hidden.
+	The first letter of the string sent is converted to upper case.
+	Reports action 's' done by p1.
+	$n, $m, $s, $e: p1: name, him/her/it, his/her/its, he/she/it
+	$N, $M, $S, $E: same for p2 (if unused p2 can be null)
+	$<n>o, $<n>p, $<n>a: o<n>: (first) object name, short descr, an/a
+
+**************************
+*** CHARACTER CLOSURES ***
+**************************
+
+room_number	(str:s) -> n.
+	Returns the number of the room defined by 'str' (can be name) by 
+	actor.
+char_allowed_in_room?	(room:n) -> b.
+	Returns true if actor is allowed to go to 'room' by own force.
+find_player	(name:s) -> p or b.
+	Returns the player or mobile if he exists, FALSE if he doesnt.
+find_keyword_mob	(str:s) -> p.
+	Returns the mobile specified by 'str' by actor, like '2.orc' for 
+	second in room and '2:orc' for second in the world.
+	'orc' == '1.sword'
+is_char_name?	(who:p, str:s) -> b
+	True if who is identified with 'str'.
+is_metamorph?	(who:p) -> b.
+char_invisible_name	(p) -> s.
+	"Someone" if humanoid, "Something" otherwise.
+char_action_name	(p) -> s.
+	Name or short description.
+unequip_char	(who:p, pos:n) -> o/b.
+	Removes object from who's eq at position pos and puts it on the 
+	ground. Returns object or false if failed.
+players_in_zone	(zone:n) -> l.
+	Returns all players in zone 'zone'.
+awake?		(p) -> b. 
+	TRUE if p is awake.
+char_is_good	(p) -> b.
+	TRUE if p is good.
+char_is_evil	(p) -> b.
+	TRUE if p is evil.
+mobile_help	(text:s) -> .
+	Sends text if help <mobile> is typed. Creates a command_event reaction.
+follow		(p) -> b.
+	Makes actor follow p. TRUE is success.
+is_mount?	(p) -> b.
+	TRUE if p is a four-legged mount.
+get_char_riders (p) -> l.
+	Returns list of people riding p, or FALSE if none.
+can_notice?	(p) -> b.
+	TRUE if actor is in a position to see p.
+effective_followers	(p) -> l.
+	Returns all effective followers of p taking into account riding.
+view_room	(room:n) -> ?.
+	Makes the actor look at a room.
+look_around	().
+	Make the actor look at a random char in the room.
+yell		(s) ->.
+	Actor yells to everyone in zone.
+move_door	(dir:n doors?:b) -> b.
+	As 'move', but opens and closes doors if doors? is TRUE.
+exec_delay	(me:p command:s delay:n) -> .
+	Makes 'me' execute 'command' in 'delay' seconds.
+say_delay	(me:p text:s dealy:n) -> .
+	Makes 'me' say 'text' in 'delay' seconds.
+	so language doesnt matter.
+charmed?	(p) -> b. 
+	Returns TRUE if char p is charmed and following a player.
+char_all_inventory	(p) -> l.  
+	Returns list of objects in p's inventory and held by p, with checks
+	for nested containers.
+effective_leader	(p1) -> p2
+    Returns real leader, reverse of effective_followers.
+find_obj_equipped	(s, pos:v) -> o|FALSE. 
+	Returns object worn by actor in any given pos, with name
+	s as seen by actor. s can be "2.name". 
+
+***************************
+*** CHARACTER COMPOUNDS ***
+***************************
+
+special_attack (chance:f(me) victext:s obstext:s dice:n die:n)
+	Attacks every 5-10 seconds with 'percent'% chance.
+	Victim will see victext with any $n replaced with the attacker, and
+	observers will see obstext with $n replaced with the attacker, and
+	$N replaced with the victim. The damage is 'dice'D'die' (like 4D6),
+	with no armour absorbtion, max all hits except one (i.e. you cannot
+	die from a special attack).
+std_hunt (me, victim, delay, return_delay, hunt_depth, goto_depth, attack?)
+	makes 'me' hunt 'victim'. Delay is the speed of the hunt.
+	If return_delay != 0, 'me' returns to its starting place when the hunt
+	is done, with delay equal to return_delay.
+	Hunt_depth is how far 'me' looks for 'victim'.
+	Goto_depth is how far 'me' looks for 'victim' first time, and how far 
+	'me' looks for its starting place when returning.
+	If attack? is true, 'me' will attack 'victim' on sight.
+assist	(vnums:l hunt?:b) 
+	React to assist those in list.
+backup	(vnumlist:(l of n) range:n me_fn backup_fn percent:n)
+	Reaction to make vnums rescue if fighting. xx_fn is fn (who) or FALSE.
+instant_attack_races	(list:l) -> . 
+	Makes a mobile instantly attacks all players whose race are in the 
+	list <l>. Will not attack players who are sneaking.
+assist_attack	(list:l) -> .
+	Makes a mobile assist all mobiles with mob# that are in <list>. 
+	This function will only make the mobile assist in fights that
+	start while it is in the room.
+assist_newroom (list:l) -> .
+	Same as assist_attack, but scans all rooms entered instead. (It does 
+	NOT react to fights started in the same room, only fights that are 
+	going on wghen it enters a room).  This function is much more CPU 
+	intensive that assist_attack, and should only be used on leaders in 
+	groups etc.
+assister (list:l) -> .
+	The combination of assist_newroom() and assist_attack().
+rescue_mobs	(l n s) -> . 
+	Makes a mob attempt rescue all mobs with mob# that appears in
+	list <l> with a rescue skill of <n>.  The mobile will only rescue 
+	fights that are started in the same room.  If s is non-null, rescuer 
+	will say s when rescueing
+move_a_step (from:n, to:n, door_handler:f) -> .
+	Causes actor to move one step on the (shortest) path to room <to>.
+	If the move doesn't suceed (normally due to a closed door), 
+	door_handler will be called with args (room:n, dir:n), where room is 
+	the room the actor is in, and dir is teh direction the actor should 
+	move in. Note!! door_handler() is responsible for moving actor if door
+	is opened successfully.
+std_door_handler	(room:n, dir:n, home_zones:l, special_handler:f) -> .
+	For use in the door_handler function of move_a_step...
+	std_door_handler opens all 'normal' doors, in addition it will open 
+	all hidden doors in zones that are in the home_zones list. If this 
+	isn't enough (locked door, for instance) special_handler (room:n, 
+	dir:n) is called to handle the special case.
+	NOTE!! special_handler is responsible for moving the char if door is 
+	unlocked or whatever.
+action_start (me:p action_fn, exit_fn, delay_fn:fn(me) actnr:n, regtext:s)
+	Starts a (temporary) cyclic function until exit_fn (me) -> TRUE.
+	Max one action per mob per actnr. This can be used to avoid several
+	register_ats of the same type to be generated in the same situation.
+limited_ride (fn (me, who))
+	Riding is allowed for those for which fn (me, who) is TRUE.
+guildmaster	
+	Guildmaster behaviour
+guild_guard	n -> .
+	A guard that blocks command 'dir' (should be a direction, for guilds)
+act_every_fight	c s n1 n2 -> . 
+	Actor does action c (description s) every n1 to n2 seconds during fight
+magic_offensive	l i1 i2 i3.
+	Casts spells in the list l every random(i1,i2) seconds.
+	If i3 != 0, casts only at buffer.
+	The list-members are of the format vector(spell, chance, when_charmed?)
+fido	-> .
+	Makes a mobile that eat corpses.
+aggressive_but	l1 l2 n -> . 
+	Mobile is aggressive against everybody except those given in lists
+	classes, races (every n seconds)
+aggressive_but_goodrace n -> . 
+	default aggression (except good races), frequency n.
+aggressive_but_evilrace n -> . 
+	default aggression (except evil races), frequency n.
+aggressive_but_citizens -> . 
+	Mob will attack anyone but citizens of the same town.
+snake	s n -> . 
+	Bites opponents every n seconds with probability depending on
+	the monsters level. Uses verb s for messages.
+thief	n -> . 
+	Make this mobile act like a thief with probability n.
+caster	castlist, probabilitylist, learnlist, time).
+	!! helptext
+do_switch n1 n2 n3 -> . 
+	Makes a mobile switch opponent with <n1>% chance every 
+	random (n2, n3) seconds.
+do_kick   n1 n2 n3 -> . 
+	Makes a mobile kick its opponent with <n1>% skill every
+	random (n2, n3) seconds.
+do_bash   n1 n2 n3 -> . 
+	Makes a mobile bash its opponent with <n1>% skill every
+	random (n2, n3) seconds.
+do_backstab n b-> . 
+	Make a mob attempt to backstab players entering the mobs room with
+	n% skill.  If b is TRUE, mobile will attack the player if the backstab
+	is not successful.
+
+**************************
+*** VARIOUS PRIMITIVES ***
+**************************
+
+rent		p n -> . p rents for n copper pieces per day
+rent_cost	p -> x. Returns the cost per day for p to rent, or FALSE if 
+		he has too many items, no items or unrentable items (note: 
+		the cost is never 0 ...). If actor is an NPC, some error 
+		messages will be sent to the room.
+rent_time	p n -> . The actor tells p how long he may stay given that 
+		rent costs n copper pieces a day.
+time		-> . Seconds since some date in 1970.
+hour_string	n -> s. String for hour n.
+change_sunlight	n -> . Makes the sun rise or set immediately.
+
+************************
+*** VARIOUS CLOSURES ***
+************************
+
+visible?	(p, x) -> b. 
+	TRUE if p can see x, where x is one of the following:
+	a mobile, a meta, a player, an object or the integer 0 (==FALSE). if 
+	any integer other than 0 is passed, this function returns FALSE. If 0 
+	is passed, this function wil return true if the person can see the 
+	room desc in the room (s)he is in.
+echo_room	(n:room, text:s) -> ?. 
+	Send_char to all with position > 4 in room.
+echo_zone	(n:room, text:s) -> ?. 
+	Send_char to all with position > 4 in zone room/100.
+hostile_action?	(verb:n, args:s) -> (n.s) or 0.
+	Returns (n . victim) if action is hostile, 0 otherwise. 1 <= n <= 20.
+	n is the level of hostility. Senses all known spells.
+position_failure	(p) -> s.
+	Send a position failure message to p.
+adjacent_rooms	(n) -> l.
+	Rooms adjacent to room n.
+
+*************************
+*** VARIOUS COMPOUNDS ***
+*************************
+
+register_sun_action (x, type:n) -> . 
+	Registers sunlight-related action of type:
+	    SUN_ACT_ROOM to light room x by sunlight
+	    SUN_ACT_LANTERN to make all mobs of vnum x hold lanterns at night
+	    SUN_ACT_LAMPLIGHTER to make mob instance x a lamplighter for rooms
+	      listed in x["lamplighter"], except the last where x goes to rest.
+
+***********************
+*** TIME PRIMITIVES ***
+***********************
+
+register_at	c s n -> id. Registers function c (description s) to be
+		executed at time n. Returns id for use with cancel (id).
+		Returns a magic cookie for use with cancel ().
+register_every	c s n -> . Register closure c (descr s) to be executed 
+		every n seconds
+register_list	-> l. Returns currently registered timed functions.
+		This function is intended for debugging purposes.
+mudlle_time	-> n. Returns the current time (in minutes since
+		midnight), as known to be mudlle. This is the time used to 
+		decide when to execution action procedures.
+mume_date	-> v. Returns a [year, month, day, hour] vector of the 
+		current mume time
+cancel		x -> b. Cancels timed operation x. Returns TRUE if cancel 
+		successful, FALSE if x had already been executed.
+override_command -> . If called in a reaction procedure, the command
+		which caused the procedure to be executed is overridden
+react_list	x -> l. Returns a list of reactions on object/mobile/room x
+
+**************************
+*** EDITING PRIMITIVES ***
+**************************
+
+load_mobile	n -> . Load code for mobile n
+load_room	n -> . Load code for room n
+load_object	n -> . Load code for object n
+load		s -> . Load file s
+
+edit_mobile	n -> . Edit mobile n
+edit_room	n -> . Edit room n
+edit_object	n -> . Edit object n
+edit		s -> . Edit file s
+
+*************************
+*** MUDLLE PRIMITIVES ***
+*************************
+
+write		x -> . Print a representation of x.
+display		x -> . Display a representation of x.
+examine		x -> . Examine a representation of x.
+newline		-> . Print a newline.
+load		s -> . Loads file s.
+quit		-> . Exit mudlle.
+help		c -> . Provides help on function c.
+apropos		s -> . Outputs all functions which have a substring 's'.
+debug		n -> . Set debug level (0 = no debug). This is most useful if
+		you know how the mudlle internals work ...
+//		Rest of line is comment.
+/* ... */	Text between /* and */ is a comment. May be nested.
+list_files	s -> . List all files belonging to player s.
+list_all_files	-> . List all files.
+define_god_command commandname:s level:n function:f(who, args)
+list_god_commands -> .
+define_command	commandname:s position:n function:f(who, args)
+list_commands	-> .
+profile		fn -> l. (Total calls Total cost)
+textedit	p s1 s2 n c -> b. Have p edit text s1 (descr s2) with key n.
+		Call c(p, text) when the edit is done (text=null for cancel).
+		Returns true if the edit could proceed, false if there was a 
+		key conflict.
+asctime		v -> s. Makes a string representing a particular date, as 
+		returned by gmtime.
+gmtime		n -> v. Converts time in seconds to a vector of GMT time 
+		information.
+room_read?	p n -> b. True if p has read access to room n.
+with_output	p fn -> . Evaluates fn() with output sent to player p.
+		If p is not a player, just evaluates fn() (no error).
+		Output is restored when done.
+with_output_to	s fn -> x. Evaluates fn() and returns its result. During this 
+		evaluation, output is sent to player 's' (if he/she is 
+		connected).
+
+*****************
+*** CONSTANTS ***
+*****************
+
+(Find what you want with apropos ("wear_") etc.)
+
+WEAR_XXX : Wear position
+HEAD, BODY, RIGHT_ARM, RIGHT_HAND, LEFT_HAND, FEET : Body location
+MAX_TONGUE, NEW_MAX_TONGUE, MAX_WEAR,DRUNK, FULL, THIRST : Various
+AFF_XXX : Affected flags
+RACE_XXX : Race number
+LAN_XXX : Language number
+CLASS_XXX, NPC_CLASS_NUMBER : Class number / NPC class (humanoid etc.)
+SEX_NEUTRAL, SEX_MALE, SEX_FEMALE : Sex number
+POSITION_XXX : Position number
+ACT_XXX : Mobile action number
+PLR_XXX : Player flags
+ATT_XXX : Mood number
+LVL_XXX : Levels
+SITUATION_XXX : Situation numbers
+XXX_CHANNEL : Communication channels
+ITEM_XXX : Item types / Item location / Item flags
+LIQ_XXX : Liquid type
+CONT_XXX : Container flags
+MAX_OBJ_AFFECT, OBJ_NOTIMER : Various
+APPLY_XXX : Item apply number
+MAX_DAMAGE, MAX_ROOM_NUMBER : Various
+THE_VOID, LIMBO, RM_XXX, ZO_DEAD, NOWHERE : Room numbers
+DARK, DEATH, NO_MOB, INDOORS, LAWFUL,NEUTRAL, CHAOTIC, NO_MAGIC,
+ISOLATED, PRIVATE, ROOM_RANDOM, CLIMB, SECURITY, PEACEFUL,
+BUILD, WATER, NO_SHOUT, SILENT : Room flags
+REWARDED : Various
+NORTH, EAST, SOUTH, WEST, UP, DOWN : Directions
+EX_XXX : Exit flags
+SECT_XXX : Sector type
+TOWN_XXX : Town number
+SKILL_XXX : Skill number
+SPELL_XXX : Spell number
+CMD_XXX : Command number
+DOOR_XXX : Used by event_door
+
+**************
+*** EVENTS ***
+**************
+
+*** PRIMITIVES ***
+
+react_event	c s n -> . Registers function c (with description s) to be 
+		called as a reaction on event n for the current object.
+react_list	x -> l. Returns a list of reactions on object/mobile/room x
+cause_event	n v b d1 ... -> b. Sends event n, with arguments v, to 
+		destinations d1 ... If b is true the event occurs immediately,
+		it is delayed otherwise. A destination is a sequence of two 
+		arguments: a destination class and value:
+		The destination class is one of:
+		EVENT_CHAR: value is character to whom the event is sent
+		EVENT_ROOM: value is room to which the event is sent
+		EVENT_OBJ: value is object to which the event is sent
+		EVENT_IN_ROOM: all characters and inventory in a given room
+allocate_event	s -> . Creates a new event called 's' (global variable 's' 
+		will be the event identifier).
+handles_event?	x, event:n -> b. TRUE if x handles event. Yor
+
+*** EVENTS ***
+
+EVENT: event_create
+  Sent: when instance X is created
+  To: X only
+  Args: (me)
+  Execution: delayed
+
+EVENT: event_command
+  Sent: anytime a command is executed by a player X
+  To: objects in X's equipment
+      objects in X's inventory
+      characters in X's room
+      objects in X's room
+      X's room
+  Args: (me, X, command_number : integer, command_arguments : string)
+  Execution: immediate
+	     command may be overridden by calling override_command
+
+EVENT: event_tell
+  Sent: When X tells Y text S
+  To: Y only
+  Args: (me, X, S)
+  Execution: delayed
+
+EVENT: event_give
+  Sent: When X gives Y object O
+  To: characters in Y's room
+      object O
+  Args: (me, X, Y, O)
+  Execution: delayed
+
+EVENT: event_give_money
+  Sent: When X gives Y N copper pennies
+  To: characters in Y's room
+  Args: (me, X, Y, N)
+  Execution: delayed
+
+EVENT: event_drop
+  Sent: When X drops object O
+  To: characters in X's room
+      object O
+      X's room
+  Args: (me, X, O)
+  Execution: delayed
+
+EVENT: event_take
+  Sent: When X takes object O from a room
+  To: characters in X's room
+      object O
+      X's room
+  Args: (me, X, O)
+  Execution: delayed
+
+EVENT: event_take_money
+  Sent: When X takes N copper pennies from a room
+  To: characters in X's room
+      X's room
+  Args: (me, X, N)
+  Execution: delayed
+
+EVENT: event_enter
+  Sent: When X enters room N
+  To: characters in room N (including X)
+      room N
+  Args: (me, X)
+  Execution: delayed
+
+EVENT: event_exit
+  Sent: When X exits room N
+  To: characters in room N (including X)
+      room N
+  Args: (me, X)
+  Execution: delayed (so X will not be in room N anymore)
+
+EVENT: event_death
+  Sent: When character X dies
+  To: characters in X's room
+      X's room
+  Args: (me, X)
+  Execution: delayed
+  
+EVENT: event_attack
+  Sent: When character X attacks character Y
+  To: characters in X's room
+      X's room
+  Args: (me, X, Y)
+  Execution: delayed
+
+EVENT: event_help_cry
+  Sent: When X attacks citizen Y
+  To: complain room of the town
+  Args: (me, X, Y, crime)
+  Execution: delayed
+
+EVENT: event_door
+  Sent: When a door is locked, unlocked, opened or closed
+  To: everything in the rooms on both sides of the door
+  Args: (me, who, type, room, direction)
+	type: door_opened, door_locked, door_closed, door_unlocked.
+	direction -1 to the other room in case of one-way exit.
+  Execution: delayed
+
+EVENT: event_weather
+  Sent: sun rise, sun set, dark, light
+  To: global event handlers
+  Args: (WEATHER_SUN  SUN_SET | SUN_RISE | SUN_LIGHT | SUN_DARK)
+  Execution: delayed
+
+EVENT: event_equiped
+  Sent: When an object is equipped
+  To: who, and who's equipment
+  Args: (me, who, object)
+  Execution: delayed
+
+EVENT: event_enter_game
+  Sent: When a player enters the game
+  To: room and global
+  Args: (me, player, room)
+  Execution: delayed
+
+EVENT: event_i_moved
+  Sent: When a mobile has moved
+  To: mobile
+  Args: (me, mobile)
+  Execution: delayed
+
+EVENT: event_door
+  Sent: When a door has
+  To: the two rooms connected by the door
+  Args: (me, who, evt, room, dir)
+  Execution: delayed
+
+EVENT: event_create_global
+  Sent: When something is created
+  To: mob/obj/room x and global
+  Args: (me, x)
+  Execution: delayed
+
+***********************
+*** SPECIAL ATTACKS ***
+***********************
+
+by Ancalagon
+
+I have written a few functions to make special attacks easy to implement.
+Example of use is mob 7422 (wight lord). He will either attack his opponent 
+with a spell, or make all other players in the room flee.
+You just have to trap some reaction, like event_attack, that will set off
+the special attack. Only one special attack will be active, another call
+to special_attack will not start another special attack.
+
+The main function is attack_special (me, attack_fn, delay_fn).
+'me' is the mobile executing the attack.
+'attack_fn' is a fn (), that, when called, will execute the attack.
+   The actor can be assumed to be 'me', and it may produce an error (allowed).
+'delay_fn' is a fn (), that, when called, will return the time until next
+   special attack, or 0 if the fight is done (the special attack will be
+   executed, with or without effect, until delay_fn () -> 0).
+   Actor can be assumed to be 'me'.
+   attack_delay_std (min, max) -> 0 if there are no players in the room of
+      the actor, or random (min, max) otherwise.
+
+* Attack functions -> fn ():
+(actor == 'me' for all these functions. The actor is set from special_attack)
+attack_aggressive (attack_mode)   : attacks the last player entering
+attack_random (attack_mode)       : attacks a random player in room
+attack_hunt (attack_mode, victim) : attacks victim
+attack_select = fn (attack_mode, choice_fn) : attacks a selected player among
+   those who fight actor. Should be used with event_attack, not event_enter.
+
+* Choice functions (p1, p2) selects which one of p1 and p2 will be attacked.
+attack_choice_weakest (p1, p2) : a choice function for the lowest level.
+
+* Attack modes -> fn (victim) defines in what way actor is attacking.
+attack_mode_std (percent) : executes "hit <victim>" with stated probability.
+attack_mode_slap : executes "slap <victim>"....for debugging.
+
+If you want a mob to switch to the weakest attacker now and then, you just 
+have to add:
+
+react_event (fn (me, attacker, victim) if (attacker == me)
+      attack_special (me,
+         attack_select (attack_mode_std (70), attack_choice_weakest),
+         attack_delay_std (5, 10)),
+   "attack react", event_attack);
+
+If you want it to be aggressive and change opponents now and then, add this
+reaction instead (and make the mob non-aggressive):
+
+react_event (fn (me, who)
+      attack_special (me,
+         attack_random (attack_mode_std (90)),
+         attack_delay_std (5, 10)),
+   "enter react", event_enter);
+
+*********************
+*** ACTION STATES *** 
+*********************
+
+by Ancalagon
+
+reg_rest (me, delay, acute_fn, enter_fn, attack_fn)
+	Rest.
+reg_post (me, delay, acute_fn, enter_fn, attack_fn)
+	No action.
+reg_stray (me, delay, acute_fn, enter_fn, attack_fn, doors?)
+	Random walk. If doors? is TRUE, he also walks through doors.
+	Checks for NO_MOB and ACT_STAY_ZONE.
+reg_hunt (me, delay, acute_fn, enter_fn, attack_fn, 
+	  search_rec, victim, exit_fn, path)
+	'me' Walks along 'path', and starts hunting 'victim' with
+	search parameters defined by search_rec. When he cant find his
+	victim (exit_fn (me)) () is called.
+	set_hunt (me, victim) must be called before the hunt, and you 
+	can break it with clear_hunt (me).
+	Standard path is null, but can be set with find_the_path.
+reg_route (me, delay, acute_fn, enter_fn, attack_fn,
+	   search_rec, main_route, exit_fn, route, path)
+	Walks path, and then 'me' starts looking for the rooms in the 'route'
+	list. When he cant find any there, he looks in main_route.
+	If he cant find any there, (exit_fn (me)) () is executed.
+	Standard path is null, but may be set with find_the_path.
+	Standard route is null, but may be set as a list of checkrooms to the 
+	main_route.
+reg_goto (me, delay, acute_fn, enter_fn, attack_fn,
+	  search_rec, room, exit_fn, path)
+	Goto a room, and execute (exit_fn (me)) () at arrival, or if the room
+	cant be found.
+
+Actor is set to 'me' in all functions (acute_fn, enter_fn, attack_fn, exit_fn)
+The parameters are:
+me: the mobile.
+delay: the delay (seconds) until next action.
+acute_fn: executed before any action. If acute_fn == 0 or acute_fn () == 0
+	the action is executed, otherwise it is halted (and the acute_fn
+	must call next action itself, if you dont want the action to stop). 
+	A typical acute_fn is to check if 'me' is hunting anything, in which 
+	case (reg_hunt (..)) () should be called, and TRUE (or 1) returned.
+enter_fn: executed after each action.
+	If enter_fn == 0 or enter_fn () == 0, there is no change of action
+	state, otherwise (enter_fn ()) () is called after 'delay' seconds
+	(i.e. enter_fn is 0, or enter_fn () returns 0 or fn ()).
+	If enter_fn () returns null, the action is halted (since null () 
+	creates an error. That is a simple way of stopping some action.)
+	Enter_fn defines changes in action states.
+attack_fn: Same as for special attacks. If attack_fn != 0,
+	attack_fn () is called after each action. Since it's called after
+	the next register_at, it is allowed to make it cause an error.
+search_rec: An array of four values - 
+	'[search_depth max_depth exit_flags room_flags].
+	search_depth is n5 in find_the_path, exit/room_flags are n3/n4.
+	max_depth is how often a next find_the_path is made (used mainly
+	for hunting, when it can search 10 rooms, but check every three).
+	If exit_flags != 0, the mob will open doors (not secret).
+exit_fn: (exit_fn (me)) () is called when find_the_path == 0.
+
+Special hunting functions:
+
+get_hunt (me) returns the victim of 'me', or null if there is none.
+set_hunt (me, victim) sets the victim of 'me' to 'victim'.
+	The hunt must be initiated with (reg_hunt (...)) (), though.
+clear_hunt (me) sets the victim of 'me' to null, and stops any hunting by 'me'.
+	If reg_hunt is active, its 'exit_fn ()' will be called next execution.
+std_hunt (me, victim, delay, return_delay, hunt_depth, goto_depth, attack?)
+	See Compounds
+	makes 'me' hunt 'victim'. Delay is the speed of the hunt.
+	If return_delay != 0, 'me' returns to its starting place when the hunt
+	is done, with delay equal to return_delay.
+	Hunt_depth is how far 'me' looks for 'victim'.
+	Goto_depth is how far 'me' looks for 'victim' first time, and how far 
+	'me' looks for its starting place when returning.
+	If attack? is true, 'me' will attack 'victim' on sight.
+
+acute_hunt (reg_fn_hunt) can be used as an acute_fn.
+	If get_hunt != null, it executes (reg_fn_hunt (me, victim)) (), and
+	returns TRUE. Otherwise it returns 0.
+
+reg_debug is a variable that is set to some mob to debug it.
+   The mob will echo its action everytime it's called.
+   To stop debugging, set reg_debug to null.
+
+WARNING! Do not use continuous actions (like Glorfindel and Tom), that
+	executes an action every X seconds, without asking me (or possibly 
+	some imp).
+	You can use temporary, event-trigged actions anytime, though (like
+	having a mob hunt its aggressor if it starts a fight, trigged by
+	event_attack.)
+
+********************
+*** MUDLLE SHOPS ***
+********************
+
+by Yorick
+
+A working example shop can be found in room 5722.
+Shops are initialized with initshop() in the room code:
+   initshop(int room, parameters)
+the parameter list looks like:
+   (("foo" 13 19) ("bar" 17) ("frotz" "burble"))
+
+Parameters:
+Most parameters can be omitted, since reasonable default values are provided. 
+
+    ("keeper" n)
+        sets the shopkeeper to mobile number n. You will usually always want
+	to specify this parameter. (Default shopkeeper is a grocer, I think.)
+
+    ("buytypes" t1 t2 ... tN)
+        sets the types of objects that the shopkeeper buys (that the players
+	can sell) to t1 t2 ... tN. Default is none (the shopkeeper doesn't
+	buy anything).
+
+    ("mendtypes" t1 t2 ... tN)
+        sets the types of objects that the shopkeeper mends to t1 t2 ... tN.
+	Default is none (the shopkeeper won't mend anything).
+
+    ("buyfactor" c)
+        sets the price scale for objects that the shopkeeper buys to c/1000.
+	Thus, a player will receive the amount <object value> * c / 1000 when
+	he sells something. The default is 500 (a player will get half the
+	value of the object when selling).
+
+    ("sellfactor" c)
+        sets the price scale for objects that the shopkeeper sells to c/1000.
+	Thus, a player will pay the amount <object value> * c / 1000 when
+	he buys something. The default is 2000 (a player has to pay twice the
+	value when buying).
+
+    ("mendcost" a b c)
+        sets the cost for mending an object to
+
+	       a + (<object value> * b + 10000 - <damage points> * c) / 1000.
+	
+	Note that b and c are scaled by 1000, not a. The default values are
+	a = 50, b = 20, c = 10.
+
+    ("hours" open1 close1 open2 close2 ... openN closeN)
+        sets the opening hours of the shop. There can be any number of
+	intervals specified. The intervals must not overlap. For example,
+	("hours" 8 12 14 19 23 3) would make the shop open from 8 am to noon,
+	from 2 pm to 7 pm, and from 11 pm to 3 am. The default value is the
+	empty list (which means that the shop is always open, which is more
+	useful than a shop that is always closed).
+
+    ("dealok?" fun(keeper, customer))
+        will cause the function fun to be executed each time a customer wants
+	to do something (list, sell, buy, value, mend etc). The function takes
+	two arguments: the shopkeeper and the customer. If the function returns
+	FALSE, nothing will happen; if TRUE, the shop will work as usual.
+	Default value is a function that always returns TRUE.
+	Since nothing happens if fun() returns FALSE, it should take care to
+	display appropriate messages explaining why the customer was denied
+	service. This is useful to let a shopkeeper refuse to deal with orcs,
+	for example.
+
+    ("buyok?" fun(keeper, customer, object))
+        will cause the function fun to be executed each time someone attempts
+	to buy something. The function takes three arguments: The shopkeeper,
+	the customer and the intended object (still in the shopkeeper's stock).
+	If the function returns FALSE, nothing will happen; otherwise, the
+	buy will proceed as usual. The default value is always TRUE.
+	The function should take care to display an explanation if it returns
+	FALSE. This is useful to control who is allowed to buy what (the
+	classic example is to refuse to serve alcohol to players < 18 years
+	old).
+
+    ("sellok?" fun(keeper, customer, object))
+        will cause the function fun to be executed each time someone attempts
+	to sell something. The function takes three arguments: The shopkeeper,
+	the customer and the intended object (still in the player's inventory).
+	If the function returns FALSE, nothing will happen; otherwise, the
+	sell will proceed as usual. The default value is always TRUE.
+	The function should take care to display an explanation if it returns
+	FALSE.
+
+    ("produce" (V-number delay) (V-number delay) ...)
+        will determine what items will be produced and sold in the shop.
+	Each sublist contains the V-number of an item that will be produced,
+	and a delay for its reproduction in rl seconds (mume minutes) after
+	it is sold to a player (or after the shop is booted). If the delay
+	is absent, the reproduction is immediate. For example:
+        ("produce (6523) (6522 30)) makes the whisky bottle (6523) be reloaded
+	as soon as someone buys it, and the wine barrel (6522) be reloaded
+	with a delay of 30 seconds. The default is that no items are produced,
+	so you will usually want to specify this parameter.
+
+***************
+*** FERRIES ***
+***************
+
+by Vivriel
+
+simple_ferry (ferry:n, shore1:n, shore2:n, voyage:v, autoexit:b) -> .
+timed_ferry (ferry:n, shore1:n, shore2:n, voyage:v, autoexit:b) -> . 
+	Both the above functions set up a ferry between 2 shores, the diff is 
+	that simple_ferry has no fixed schedule, while timed_ferry runs on a 
+	fixed time_table.  Both require a room with no exits to be used for 
+	the ferry, and autoexit if TRUE will move passengers off automatically
+	at destination. voyage is a vector of the form:
+        [ [ departure_timing    departure_fn ]
+          [ periodic_delay      periodic_echo_fn ]
+          [ journey_time        arrival_fn ] ]
+	in which departure_timing is a simple time delay for the simple_ferry,
+	and a vector of departure timetable for the timed_ferry.
+ferry_station (arrivef:fn(ferry:n), departf:fn(ferry:n), 
+	checkf:fn(p, ferry:n)|b, summonf:fn(p)|b) -> .
+	checkf is the pre-boarding check function which must return TRUE for 
+	the player to board successfully.
+	summonf works only for simple_ferry, and is the corresponding echo 
+	function for when a player calls a ferry from the opposite shore.
+shadow_ferry (shore:n) -> .  
+	Sets up room as shadow for ferry when it is at
+	shore, works only with timed_ferry(). 
+Examples of use:
+simple ferry as in Bucklebury Ferry, rooms 4911, 4921 4931
+timed ferry as in Harlond-Forlond Ferry, rooms 5726, 5748, 5749, 5750, 5782.
+
+
+******************
+** Watch towers **
+******************
+
+By Dain, 940805
+
+There is an example of a working watchtower in room 14901. watched_room
+can be seen in room 14911.
+
+watch_tower (room_list:l) -> .
+        This makes the room a watchtower, overlooking the rooms in room_list.
+   	It will make "look <dir>" have the effect that the person will scan
+        the rooms in room_list for any players, and reporting them as
+        "You see an Elf riding the trained horse far to the west". The
+        room_list is a list of list (<room_number>, <dir>, <dist>), defining
+	which rooms can be seen, in what direction they are from the watch-
+       	tower, and how far they are. <dist> can be in the range 0..3, where
+        0 is very close, and 3 is very far.
+        This also makes the command "watch" available. See below.
+
+watched_room (watch_tower_room:n, param_vect:v) -> .
+	This will make the current room report any people LEAVING it to all
+	people who have typed "watch" in watch_tower_room. Messages will
+	be as follows: "You see a Dwarf approaching close to the east".
+        To determine if the person is moving away/approaching, the list
+        room_list in watch_tower will be used (comparing distance for
+        the rooms the player is moving between). To allow this to work
+        properly, one can add rooms in the room_list that can't be seen 
+        with "look <dir>" with negative distance and illegal direction
+     	close to the watch_tower. This will report peopole as "approaching".
+	Moving to a room not in room_list will always be reported as
+        "moving away".
+	param_vect contains extra parameters. If it is '[] default values
+	will be used. Otherwise, it is used as follows:
+    		param_vect[0]:	The watched terrain, e.g. "the Old East Road".
+				Default is "surroundings".

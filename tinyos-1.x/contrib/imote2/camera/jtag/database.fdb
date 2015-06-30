@@ -1,0 +1,111 @@
+# -----------------------------------------------------------------------
+# INTEL CORPORATION MAKES NO WARRANTY OF ANY KIND WITH REGARD TO THIS
+# MATERIAL, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+# INTEL CORPORATION ASSUMES NO RESPONSIBILITY FOR ANY ERRORS THAT MAY
+# APPEAR IN THIS DOCUMENT. INTEL CORPORATION MAKES NO COMMITMENT TO
+# UPDATE NOR TO KEEP CURRENT THE INFORMATION CONTAINED IN THIS DOCUMENT.
+# -----------------------------------------------------------------------
+# This is a Flash Configuration File for the XDB-Flash-Programmer.
+# Do not edit!!
+
+[GP_J3_K3_K18_32]
+JEDEC_ID=0
+Manufacturer=Intel
+Manufacturer_ID=137
+Width=32
+Parallel_Flashes=1
+Serialized_Flash_Groups=1
+BurnAlgo_DebugInfo=~/../plugin/intelxsc/flash/burnalg/BGP_J3_K3_K18.bd
+BurnAlgo_Description=Generic relocatable burn algorithm that works for J3, K3 and K18 type flashes.
+Block_Attributes=
+
+
+[GP_J3_K3_K18_16]
+JEDEC_ID=0
+Manufacturer=Intel
+Manufacturer_ID=137
+Width=16
+Parallel_Flashes=1
+Serialized_Flash_Groups=1
+BurnAlgo_DebugInfo=~/../plugin/intelxsc/flash/burnalg/BGP_J3_K3_K18.bd
+BurnAlgo_Description=Generic relocatable burn algorithm that works for J3, K3 and K18 type flashes.
+Block_Attributes=
+
+[GP_J3_K3_K18_8]
+JEDEC_ID=0
+Manufacturer=Intel
+Manufacturer_ID=137
+Width=8
+Parallel_Flashes=1
+Serialized_Flash_Groups=1
+BurnAlgo_DebugInfo=~/../plugin/intelxsc/flash/burnalg/BGP_J3_K3_K18.bd
+BurnAlgo_Description=Generic relocatable burn algorithm that works for J3, K3 and K18 type flashes.
+Block_Attributes=
+
+[GP_IQ80310]
+JEDEC_ID=0
+Manufacturer=Intel
+Manufacturer_ID=137
+Width=8
+Parallel_Flashes=1
+Serialized_Flash_Groups=1
+BurnAlgo_DebugInfo=~/../plugin/intelxsc/flash/burnalg/BGP_IQ80310.bd
+BurnAlgo_Description=Generic relocatable burn algorithm with special adaptation for the IQ80310 board.
+Block_Attributes=
+
+[GP_J3_K3_K18_16X2]
+JEDEC_ID=0
+Manufacturer=Intel
+Manufacturer_ID=137
+Width=16
+Parallel_Flashes=1
+Serialized_Flash_Groups=2
+BurnAlgo_DebugInfo=~/../plugin/intelxsc/flash/burnalg/BGP_J3_K3_K18.bd
+BurnAlgo_Description=Relocatable algorithm for two consecutive flashes. This can be used for the internal flash in PXA262.
+Block_Attributes=
+
+[GP_B_C_W30_8]
+JEDEC_ID=0
+Manufacturer=Intel
+Manufacturer_ID=137
+Width=8
+Parallel_Flashes=1
+Serialized_Flash_Groups=1
+BurnAlgo_DebugInfo=~/../plugin/intelxsc/flash/burnalg/BGP_B_C_W30.bd
+BurnAlgo_Description=Generic relocatable burn algorithm that works for B, C, W30 type flashes.
+Block_Attributes=
+
+[GP_S_800F_DSP]
+JEDEC_ID=34855
+Manufacturer=Intel
+Manufacturer_ID=137
+Width=16
+Parallel_Flashes=1
+Serialized_Flash_Groups=1
+BurnAlgo_DebugInfo=~/../plugin/intelxsc/flash/burnalg/BGP_800FDSP.bd
+BurnAlgo_Description=Relocatable algorithm for MSA flash of PXA800F.
+Block_Attributes=0-1-256-BOOT
+
+[GP_S_800F_CPU]
+JEDEC_ID=34855
+Manufacturer=Intel
+Manufacturer_ID=137
+Width=16
+Parallel_Flashes=1
+Serialized_Flash_Groups=1
+BurnAlgo_DebugInfo=~/../plugin/intelxsc/flash/burnalg/BGP_B_C_W30.bd
+BurnAlgo_Description=Relocatable algorithm for Intel XScale(R) flash of PXA800F.
+Block_Attributes=0-63-64-BOOT
+
+[GP_NBMMNS2_FIX]
+JEDEC_ID=-1
+Manufacturer=Intel
+Manufacturer_ID=137
+Width=16
+Parallel_Flashes=2
+Serialized_Flash_Groups=1
+BurnAlgo_DebugInfo=~/../plugin/intelxsc/flash/burnalg/BGP_J3_K3_K18.bd
+BurnAlgo_Description=Relocatable burn algorithm that works for J3, K3 and K18 type flashes. Fix for a problem with early NBMMNS2BVS boards.
+Block_Attributes=0-127-64-BOOT
+

@@ -1,0 +1,33 @@
+ifeq ($(MCTORRENT_ROOTDIR),)
+  $(error "MCTORRENT_ROOTDIR not specified.")
+endif
+
+PFLAGS += -I$(MCTORRENT_ROOTDIR)/tos/lib/McTorrent -I$(MCTORRENT_ROOTDIR)/tos/interfaces
+
+# Determine platform from the make command. 
+SUPPORTED_PLATFORMS = pc mica2 telosb
+PLATFORM := $(filter $(SUPPORTED_PLATFORMS), $(MAKECMDGOALS))
+
+######## The following options are platform dependent ########
+
+ifeq ($(PLATFORM),pc)
+  PFLAGS += -DTOTAL_PAGES=5
+  PFLAGS += -I$(MCTORRENT_ROOTDIR)/tos/platform/pc \
+            -I$(MCTORRENT_ROOTDIR)/tos/platform/pc/RFMRadioMC 
+else
+  ifeq ($(PLATFORM),mica2)
+    PFLAGS += -I$(MCTORRENT_ROOTDIR)/tos/platform/mica2 
+  else
+    ifeq ($(PLATFORM),telosb)
+      PFLAGS += -I$(MCTORRENT_ROOTDIR)/tos/platform/telosb 
+    else
+      ifneq ($(MAKECMDGOALS),clean)
+        $(error "Platform not supported.")
+      endif
+    endif
+  endif
+endif
+
+# For network programming; macro used in $(MAKERULES).
+TOSBOOT_DIR=$(MCTORRENT_ROOTDIR)/tos/lib/McTorrent/TOSBoot/build
+

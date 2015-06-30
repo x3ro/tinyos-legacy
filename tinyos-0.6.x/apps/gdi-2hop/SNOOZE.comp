@@ -1,0 +1,19 @@
+
+TOS_MODULE SNOOZE;	
+JOINTLY IMPLEMENTED_BY SNOOZE;
+
+ACCEPTS{
+    char SNOOZE_INIT(void);
+    char SNOOZE_AWHILE(unsigned short timeout);
+};
+
+SIGNALS{
+    char SNOOZE_WAKEUP(void);
+};
+
+USES{
+    char SNOOZE_COMM_RESET(void);
+};
+
+HANDLES{
+};

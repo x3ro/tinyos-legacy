@@ -1,0 +1,7 @@
+COMPONENT=TSyncAppC
+
+PFLAGS += -I../
+CFLAGS += -DPERIOD=20000
+
+include $(MAKERULES)
+

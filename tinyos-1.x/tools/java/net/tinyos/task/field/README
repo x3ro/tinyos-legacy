@@ -1,0 +1,4 @@
+This directory contains the Python code for the
+Tiny Application Sensor Kit (TASK) field tool.
+To config: python config-gui.py
+To run: python tool.py

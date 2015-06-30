@@ -1,0 +1,41 @@
+README:
+
+
+There exists a GUI that draws exactly what is happening in the magtracking application, i.e. 
+1.  what are the magnetic readings being detected by each mote?
+2.  where does the network think the car is?
+3.  where is the camera pointing now?
+4.  what is the multi-hop routing scheme doing?
+
+
+
+To use this GUI, you have to follow seven steps (for those who regularly use Matlab as a TinyOS environment, this should be easy.  For others, you should refer to the tinyos-1.x/docs/tutorial/matlab.html document for help).
+
+1.  type make twice (2x) in net/tinyos/magtracking to create and compile the java message objects that correspond to the messages used by magTracking
+
+2.  make sure that Matlab6.5 is setup to use TinyOS (follow the steps in the tutorial mentioned above).  Also add "minitasks/02/ucb/magtracking/tools/java" to your matlab classpath.
+
+3.  make sure that you have a GenericBase on your serial port (using the same commStack and groupID as the magtracking network).  This generic base will eavesdrop on the network and tell matlab what packets are being sent.
+
+4.  Make sure serialforwarder is serving your COM port on port "9001" (instead of the default "9000").  You can do this by typing "java tinyos-1.x/tools/java/net/tinyos/sf/SerialForward -comm COM1 -port 9001"
+
+5.  open matlab and go to directory /minitasks/02/ucb/magtracking/tools/matlab//magtracking
+
+7.  run 'startMagtrackingGUI' to start the GUI
+
+
+
+
+
+If the demo is not working:
+1.  look at your serial forwarder to make sure that it is receiving packets.  
+
+2.  Make sure matlab is receiving the packets.  You can do this by placing break points in the packet-receive functions in the /minitasks/02/ucb/magtracking/tools/matlab//magtracking directory:  "RouteByBroadcastMessageReceived.m" etc to make sure that those functions are being called.
+
+3.   Make sure that your matlab timer is working.  You can do this by placing break points in the "drawMagTracking.m" function to make sure that it is being called repeatedly by the timer object.  It is best if you replace your matlab6p5/java/jar/timer.jar file with the tinyos-1.x/tools/java/net/tinyos/matlab/timer.jar file as described in the tutorial mentioned above.  This will give you a small gui window that allows you to control the timer (start, stop, speed up, slow down).  If you are using Matlab prior to Version 13 (6.5), you may need to change the matlab code in the GUI to use my own MatlabClock.java class instead of the built-in matlab timer (do this as described in the tutorial).  
+
+
+
+
+
+

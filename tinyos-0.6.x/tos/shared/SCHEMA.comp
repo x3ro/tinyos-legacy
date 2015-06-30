@@ -1,0 +1,37 @@
+TOS_MODULE SCHEMA;
+#include "SchemaAPI.h";
+
+ACCEPTS{
+	AttrDescPtr SCHEMA_GET_ATTR(char *attr);
+	AttrDescPtr SCHEMA_GET_ATTR_BY_ID(int1 attrIdx);
+	AttrDescsPtr SCHEMA_GET_ATTRS(void);
+	bool SCHEMA_HAS_ATTR(char *attr);
+	int1 SCHEMA_NUM_ATTRS(void);
+	char SCHEMA_ADD_ATTR(char *attrName, TOSType type, int1 attrLen, func_ptr getFunc, func_ptr setFunc);
+	CommandDescPtr SCHEMA_GET_COMMAND(char *commandName);
+	CommandDescPtr SCHEMA_GET_COMMAND_BY_ID(int1 commandIdx);
+	CommandDescsPtr SCHEMA_GET_COMMANDS(void);
+	int1 SCHEMA_NUM_COMMANDS(void);
+	char SCHEMA_ADD_COMMAND(char *commandName, func_ptr commandFunc, TOSType retType, int1 retLen, int1 nargs, ... );
+	char SCHEMA_INVOKE_COMMAND(CommandDescPtr commandDesc, char *resultBuf, SchemaErrorNo *errorNo, ... /* variable number of data pointers for args */);
+	char SCHEMA_INVOKE_COMMAND_WITH_PARAMS(CommandDescPtr commandDesc, char *resultBuf, SchemaErrorNo *errorNo, ParamVals *params);
+	char SCHEMA_INIT();
+};
+
+HANDLES{
+	TOS_MsgPtr INVOKE_COMMAND_MSG(TOS_MsgPtr msg);
+};
+
+SIGNALS{
+	void COMMAND_COMPLETE(CommandDescPtr commandDesc, char *resultBuf, SchemaErrorNo errorNo);
+};
+
+USES{
+	char SCHEMA_SUB_INIT(void);
+};
+
+INTERNAL{
+	CommandCallInfo *allocCommandCallInfo(void);
+	char freeCommandCallInfo(CommandCallInfo *callInfo);
+	void callFunction(func_ptr func, ParamVals *params, CommandCallInfo *callInfo);
+};

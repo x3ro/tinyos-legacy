@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+</head>
+<body>
+To manually install TinyOS, using the provided packages, you need to do
+the following:<br>
+<h3> REMOVE ALL TRACES OF PREVIOUS TOOLS (they will only cause
+problems). </h3>
+Please see <a href="./uninstall.html">uninstall.html</a>.
+<h3>WINDOWS INSTALLATION (Win 2K and XP)<br>
+</h3>
+<ul>
+  <li>Download and install Sun's 1.4 JDK, from <a
+ href="http://java.sun.com">http://java.sun.com</a></li>
+</ul>
+<ul>
+  <li>Download our cygwin package from<a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/tinyos-cygwin-1.1.zip"><br>
+http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/tinyos-cygwin-1.1.zip</a> <br>
+unzip this, and run the install.bat script<br>
+    <br>
+  </li>
+  <li>Download and install Sun's javax.comm package from <br>
+    <a href="http://java.sun.com/products/javacomm/">http://java.sun.com/products/javacomm/</a><br>
+and install it as follows (instructions for a cygwin shell), assuming
+you install JDK in <span style="font-family: monospace;">c:\Program
+Files\jdk</span>:<br>
+    <ul>
+      <li style="font-family: monospace;"> unzip javacomm20-win32.zip</li>
+      <li style="font-family: monospace;"> cd commapi</li>
+      <li style="font-family: monospace;"> cp win32com.dll "c:\Program
+Files\jdk\jre\bin"</li>
+      <li style="font-family: monospace;"> chmod 755 "c:\Program
+Files\jdk\jre\bin\win32com.dll"</li>
+      <li style="font-family: monospace;"> cp comm.jar "c:\Program
+Files\jdk\jre\lib\ext"</li>
+      <li><span style="font-family: monospace;"> cp
+javax.comm.properties "c:\Program Files\jdk\jre\lib"</span><br>
+      </li>
+    </ul>
+If you are going to use the Installshield setup to install TinyOS in the future, do this also: 
+    <ul>
+      <li><span style="font-family: monospace;"> cp
+javax.comm.properties "c:\Program Files\jdk\lib"</span><br>
+      </li>
+    </ul>
+  </li>
+</ul>
+<ul>
+  <li>Download graphviz from<a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/graphviz-1.10.exe"><br>
+http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/graphviz-1.10.exe</a> <br>
+and install it by executing it.<br>
+  </li>
+</ul>
+<ul>
+  <li>Download the following rpms from <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows">
+http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows</a> (if the
+links do not work, check this directory for newer versions):<a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/avarice-2.0.20030825cvs-1w.cygwin.i386.rpm"><br>
+    </a>
+    <div style="margin-left: 40px;"><a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/avarice-2.0.20030825cvs-1w.cygwin.i386.rpm">avarice-2.0.20030825cvs-1w.cygwin.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/avr-binutils-2.13.2.1-1w.cygwin.i386.rpm">avr-binutils-2.13.2.1-1w.cygwin.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/avr-gcc-3.3tinyos-1w.cygwin.i386.rpm">avr-gcc-3.3tinyos-1w.cygwin.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/avr-insight-pre6.0cvs.tinyos-1w.cygwin.i386.rpm">avr-insight-pre6.0cvs.tinyos-1w.cygwin.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/avr-libc-20030512cvs-1w.cygwin.i386.rpm">avr-libc-20030512cvs-1w.cygwin.i386.rpm</a><br>
+    </div>
+and from <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows/">
+http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows</a> (again, if
+the links do not work, check this directory for newer versions):<a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows/nesc-1.1pre4-2w.cygwin.i386.rpm"><br>
+    </a>
+    <div style="margin-left: 40px;"><a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows/nesc-1.1-1w.cygwin.i386.rpm">nesc-1.1-1w.cygwin.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows/tinyos-tools-1.1.0-1.cygwin.i386.rpm">tinyos-tools-1.1.0-1.cygwin.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows/tinyos-1.1.0-1.cygwin.noarch.rpm">tinyos-1.1.0-1.cygwin.noarch.rpm</a><br>
+    </div>
+and install them with "<span style="font-family: monospace;">rpm
+--ignoreos -ivh *.rpm</span>" in the directory where you saved the files
+(in a cygwin shell). This will take a while (the tinyos package
+installation includes compiling the java code). TinyOS is installed in
+/opt/tinyos-1.x.</li>
+  <li>You're done! Check the documentation in
+/opt/tinyos-1.x/doc/index.html for more information. See <a
+ href="#INSTALLING_AND_UPDATING_PACKAGES">Installing and Updating
+Packages</a> if you want to install further packages.<br>
+  </li>
+</ul>
+<h3>LINUX INSTALLATION (Redhat 9):<br>
+</h3>
+<ul>
+  <li>Download and install IBMs 1.4 JDK and javax.comm rpms, currently
+at <a href="https://www6.software.ibm.com/dl/lxdk/lxdk-p"><br>
+https://www6.software.ibm.com/dl/lxdk/lxdk-p&nbsp; </a> (<a
+ href="http://www.ibm.com/developerworks/java/jdk/">http://www.ibm.com/developerworks/java/jdk/</a>
+is a good starting point if this link changes)<br>
+    <ul>
+      <li>select the IBM SDK for 32-bit xSeries (Intel compatible)</li>
+      <li>you will have to register</li>
+      <li>download the IBMJava2-SDK and IBMJava2-JAVACOMM rpms, and
+install them</li>
+    </ul>
+  </li>
+</ul>
+<ul>
+  <li>Download the following rpms from <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux">
+http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux</a> (if the links
+do not work, check this directory for newer versions):<a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/avarice-2.0.20030825cvs-1.i386.rpm"><br>
+    </a>
+    <div style="margin-left: 40px;"><a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/avarice-2.0.20030825cvs-1.i386.rpm">avarice-2.0.20030825cvs-1.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/avr-binutils-2.13.2.1-1.i386.rpm">avr-binutils-2.13.2.1-1.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/avr-gcc-3.3tinyos-1.i386.rpm">avr-gcc-3.3tinyos-1.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/avr-gcc-3.3tinyos-1.i386.rpm"> </a><a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/avr-insight-pre6.0cvs.tinyos-1.3.i386.rpm">avr-insight-pre6.0cvs.tinyos-1.3.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/avr-insight-pre6.0cvs.tinyos-1.3.i386.rpm"> </a><a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/avr-libc-20030512cvs-1.i386.rpm">avr-libc-20030512cvs-1.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/avr-libc-20030512cvs-1.i386.rpm"> </a><a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/graphviz-1.10-1.i386.rpm">graphviz-1.10-1.i386.rpm</a><br>
+    </div>
+and from <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux">
+http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux</a> (again, if
+the links do not work, check this directory for newer versions):<a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/linux/graphviz-1.10-1.i386.rpm"><br>
+    </a>
+    <div style="margin-left: 40px;"><a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux/nesc-1.1-1.i386.rpm">nesc-1.1-1.i386.rpm</a><br>
+    <a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux/tinyos-tools-1.1.0-1.i386.rpm">tinyos-tools-1.1.0-1.i386.rpm</a><br>
+    </div>
+and install them with "<span style="font-family: monospace;">rpm -ivh
+*.rpm</span>" in the directory where you saved the files. </li>
+  <li>Change the permissions on /dev/ttyS&lt;n&gt; to 666 for all
+serial ports you will use with TinyOS.</li>
+  <li>Change the permission on /dev/parport0 to 666 if you plan to
+program motes via the parallel port (this will allow uisp to access the
+port).</li>
+  <li>Download the tinyos rpm from (again, check the tinyos/linux
+directory if the link doesn't work)<a
+ href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux/tinyos-1.1.0-1.noarch.rpm"><br>
+http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux/tinyos-1.1.0-1.noarch.rpm</a><br>
+install this rpm with <br>
+    <div style="margin-left: 40px; font-family: monospace;">rpm -ivh --prefix
+<span style="font-style: italic;">TINYOSDIR</span> 
+tinyos-1.1.0-1.noarch.rpm<br>
+cd <span style="font-style: italic;">TINYOSDIR;</span> chown -R <span
+ style="font-style: italic;">USER.GROUP</span> tinyos-1.x<br>
+    </div>
+This will install TinyOS in <span
+ style="font-style: italic; font-family: monospace;">TINYOSDIR</span><span
+ style="font-family: monospace;">/tinyos-1.x</span>),  for user <span
+ style="font-style: italic; font-family: monospace;">USER</span> (with
+group <span style="font-style: italic; font-family: monospace;">GROUP</span>).
+Installing this rpm will take a while as the java code will be compiled.<br>
+Note that this only allows one TinyOS source tree per machine, see the <a
+ href="install-cvs.txt">directions for using a CVS-based tree</a> if you
+need several distinct source trees.</li>
+  <li>You're done! Check the documentation in
+/opt/tinyos-1.x/doc/index.html for more information. See <a
+ href="file:///home/dgay/motes/tinyos-1.x/doc/install.html#INSTALLING_AND_UPDATING_PACKAGES">Installing
+and Updating Packages</a> if you want to install further packages.<br>
+  </li>
+</ul>
+<ul>
+</ul>
+<h3><a name="INSTALLING_AND_UPDATING_PACKAGES"></a>INSTALLING AND
+UPDATING PACKAGES</h3>
+The <a href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux">http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux</a>
+and <a href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows">http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows</a>
+directories contain a number of optional packages you can install if you
+wish. In the future, they will also contain updates to the core tinyos
+rpms. Just download the appropriate rpms, and install them with <span
+ style="font-family: monospace;">rpm -ivh &lt;rpm file name&gt;</span>
+(first installation) or <span style="font-family: monospace;">rpm -Uvh
+&lt;rpm file name&gt;</span> (upgrade). <instdir><instdir><owner><group><instdir><instdir><owner><group> </group></owner></instdir></instdir></group></owner></instdir></instdir>
+</body>
+</html>

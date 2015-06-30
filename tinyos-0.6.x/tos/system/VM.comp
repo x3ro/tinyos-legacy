@@ -1,0 +1,87 @@
+/*									tab{4
+ *  VM.comp
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Philip Levis
+ * Date:     Feb 8 2002
+ *
+ * This is a virtual machine that runs under TinyOS. VM programs are sent
+ * in AM packets of AM type 30. These instructions are then computed on
+ * every clock tick. If a program is running when the clock ticks, it is
+ * halted and reset. If a program is blocking when the clock ticks (e.g.
+ * sending a packet), it is not interrupted.
+ *
+ * A description of the instruction set can be found in include/tos-vm.h.
+ *
+ */
+
+TOS_MODULE VM;
+
+ACCEPTS{
+	char VM_INIT(void);
+	char VM_START(void);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	void VM_CLOCK_EVENT(void);
+	char VM_PHOTO_EVENT(short datum);
+	char VM_TEMP_EVENT(short datum);
+	char VM_LOG_DONE_EVENT(char success);
+	char VM_LOG_READ_EVENT(char* data, char success);
+
+	TOS_MsgPtr VM_CAPSULE_RECEIVE(TOS_MsgPtr packet);
+	TOS_MsgPtr VM_CAPSULE_SEND_DONE(TOS_MsgPtr packet);
+	char VM_SEND_DONE(char* data);
+};
+
+USES{	
+	char VM_SUB_INIT();
+	char VM_SUB_CLOCK_INIT(char, char);
+	char VM_SUB_SEND_PACKET(char* data, char len);
+	char VM_SUB_SEND_CAPSULE(short addr, char type,  TOS_MsgPtr data);
+	char VM_SUB_LOG_WRITE(char* data);
+	char VM_SUB_LOG_READ(short line, char* data);
+
+	char VM_SUB_SOUND_ON();
+	char VM_SUB_SOUND_OFF();
+
+	char VM_SUB_GET_PHOTO();
+	char VM_SUB_GET_TEMP();
+
+	char VM_LEDy_on();
+	char VM_LEDy_off();
+	char VM_LEDr_on();
+	char VM_LEDr_off();
+	char VM_LEDr_toggle();
+	char VM_LEDy_toggle();
+	char VM_LEDg_toggle();
+	char VM_LEDg_on();
+	char VM_LEDg_off();
+};
+
+INTERNAL{
+	void compute_instruction();
+};
+
+

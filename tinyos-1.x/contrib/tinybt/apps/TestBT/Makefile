@@ -1,0 +1,3 @@
+COMPONENT=TestBT
+include ../Makerules
+

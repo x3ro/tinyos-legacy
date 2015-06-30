@@ -1,0 +1,34 @@
+-----------------------------------------------------------
+Title: Trio sensor board GUI
+Authors: Jaein Jeong
+Last Modified: May 31, 2005
+
+-----------------------------------------------------------
+
+This java application is used to interact with a sensor node running
+a Trio sensor board test application. 
+
+This program can send a command to different sensor board modules.
+To switch between different sensor board modules, a user can select
+one of the following items at 'Select Operations' combo box:
+
+  - Leds
+  - IO Switch 1 (Low-level component)
+  - IO Switch 2 (Low-level component)
+  - X1226       (Low-level component)
+  - PW Switch   (Low-level component)
+  - PIR
+  - Magnetometer
+  - Microphone
+  - Sounder
+  - Grenade Timer
+
+A sensor node that receives a command from this program only responds
+when it implements that command. For example, TestMag only responds
+to Leds commands and Magnetometer commands.
+
+To run this application:
+
+  Go to directory: tinyos-1.x/contrib/nestfe/java
+  Run: java java/test_trio/Injecter [optional Group number]
+

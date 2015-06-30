@@ -1,0 +1,40 @@
+AGENT GROUP COMMUNICATION
+-------------------------------------------------------------------------------
+The group is *not* hard coded in the leader.  To join a group, members query
+the base station for the location of the leader.  The base station maintains
+a hashtable that maps group name to location of the leader.  It dynamically
+injects leaders based on need.  send a "join" message to 
+the leader, which records the members in its heap. The leader has a reaction 
+sensitive to member broadcast messages.  When this reaction fires, the leader 
+sends the value stored within the message to each member.
+
+The members react to the group broadcast message, extract the value and display 
+it on the LEDs.
+
+The MemberSend periodically sends the leader a member broadcast message that 
+triggers the sending of the group message.
+
+MESSAGE FORMATS
+-------------------------------------------------------------------------------
+Member Broadcast Message:
+ <"mbm", value> 
+ This message is sent from the member to the leader for broadcasting to the 
+ group.
+
+Leader Broadcast Message:
+  <"lbm", value> 
+  This message is sent from the group leader to each member in the group.
+
+Member Join Message:
+  <"jng", location>
+  This message is sent from a member to the leader to join the leader's group.
+
+Member Request Message:
+  <"req", location>  
+  This message is sent from a member to the base station to find the location
+  of the group leader.
+
+Group Leader Location Message:
+  <"grl", location>
+  This message is sent from the base station to a member telling it where the
+  leader is.

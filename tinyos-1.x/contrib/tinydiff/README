@@ -1,0 +1,28 @@
+This contrib directory contains an alpha release of TinyDiffusion.
+This implementation came about as part of the Extensible Sensing System
+(ESS) now deployed at the James Reserve (http://www.jamesreserve.edu) to
+enable energy-efficient, taskable, fault-tolerant gathering of
+micro-climate data.
+
+More details about this implementation can be found at:
+
+http://www.cens.ucla.edu/~mmysore/Design/
+
+Current installation instructions are being maintained at:
+
+http://www.cens.ucla.edu/~mmysore/Design/OPP/installation-instructions.html
+
+Please contact mmysore AT cens.ucla.edu if you have any
+questions/problems/suggestions.
+
+NOTE: 
+
+- The main Services application currently works only on mica2s.  But the
+  underlying TinyDiffusion and Neighborlist related modules are independent
+  of platform.  
+
+- This software has been developed and used mainly on Linux.  The mote-side
+  apps should compile on Cygwin as they do on linux.  The current
+  host-side code has linux dependencies (which we are working on removing).
+
+

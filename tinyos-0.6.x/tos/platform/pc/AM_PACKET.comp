@@ -1,0 +1,329 @@
+/*
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ *
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Jason Hill, Phil Levis
+ * Date:     April 3, 2002
+ *
+ *
+ * This module performs the Active Messages dispatching and address
+ * checking.  When the user application send out a packet, this module
+ * will fill in the address, group_id, and the handler number before
+ * forwarding the packet down to the packet controller.
+ * 
+ * In additiona to sending data out over the network, it also will
+ * send any pakcet addressed to 0x7e to the UART.
+ * 
+ * When a packet arrives, this component check that the address is
+ * either the local address or the broadcast address.  It also checks
+ * the group id.  Finally it signals the correct AM_MSG_HANDLER event
+ * for the message type that arrived.
+ * 
+ * The AM_POWER command can be used to put the communication stack
+ * into a low_power mode.
+ */
+
+TOS_MODULE AM_PACKET;
+
+ACCEPTS{
+	char AM_SEND_MSG(short addr,char type, AMBuffer_ptr data, char len);
+	char AM_SEND_MSG_FINITE(short addr, char type, AMBuffer_ptr data, char len, char max_wait);
+	char AM_POWER(char mode);
+	char AM_INIT(void);
+};
+
+SIGNALS{ 
+  char AM_MSG_SEND_TIMEOUT(AMBuffer_ptr msg);
+  char AM_MSG_SEND_DONE(AMBuffer_ptr msg);
+	AMBuffer_ptr AM_MSG_HANDLER_0(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_1(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_2(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_3(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_4(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_5(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_6(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_7(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_8(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_9(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_10(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_11(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_12(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_13(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_14(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_15(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_16(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_17(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_18(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_19(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_20(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_21(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_22(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_23(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_24(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_25(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_26(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_27(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_28(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_29(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_30(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_31(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_32(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_33(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_34(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_35(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_36(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_37(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_38(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_39(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_40(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_41(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_42(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_43(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_44(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_45(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_46(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_47(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_48(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_49(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_50(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_51(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_52(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_53(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_54(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_55(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_56(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_57(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_58(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_59(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_60(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_61(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_62(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_63(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_64(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_65(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_66(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_67(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_68(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_69(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_70(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_71(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_72(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_73(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_74(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_75(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_76(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_77(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_78(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_79(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_80(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_81(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_82(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_83(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_84(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_85(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_86(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_87(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_88(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_89(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_90(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_91(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_92(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_93(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_94(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_95(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_96(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_97(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_98(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_99(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_100(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_101(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_102(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_103(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_104(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_105(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_106(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_107(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_108(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_109(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_110(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_111(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_112(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_113(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_114(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_115(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_116(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_117(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_118(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_119(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_120(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_121(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_122(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_123(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_124(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_125(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_126(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_127(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_128(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_129(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_130(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_131(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_132(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_133(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_134(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_135(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_136(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_137(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_138(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_139(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_140(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_141(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_142(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_143(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_144(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_145(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_146(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_147(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_148(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_149(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_150(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_151(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_152(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_153(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_154(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_155(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_156(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_157(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_158(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_159(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_160(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_161(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_162(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_163(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_164(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_165(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_166(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_167(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_168(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_169(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_170(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_171(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_172(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_173(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_174(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_175(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_176(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_177(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_178(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_179(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_180(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_181(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_182(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_183(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_184(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_185(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_186(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_187(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_188(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_189(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_190(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_191(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_192(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_193(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_194(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_195(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_196(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_197(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_198(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_199(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_200(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_201(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_202(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_203(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_204(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_205(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_206(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_207(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_208(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_209(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_210(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_211(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_212(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_213(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_214(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_215(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_216(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_217(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_218(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_219(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_220(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_221(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_222(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_223(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_224(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_225(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_226(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_227(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_228(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_229(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_230(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_231(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_232(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_233(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_234(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_235(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_236(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_237(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_238(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_239(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_240(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_241(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_242(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_243(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_244(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_245(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_246(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_247(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_248(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_249(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_250(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_251(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_252(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_253(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_254(AMBuffer_ptr data);
+	AMBuffer_ptr AM_MSG_HANDLER_255(AMBuffer_ptr data);
+};
+
+HANDLES{
+	char AM_TX_PACKET_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr AM_RX_PACKET_DONE(TOS_MsgPtr packet);
+	char AM_SUB_TX_TIMEOUT(TOS_MsgPtr msg);
+};
+
+USES{
+  char AM_SUB_TX_PACKET(TOS_MsgPtr data);
+  void AM_SUB_POWER(char mode);
+  char AM_UART_SUB_INIT(void);
+  char AM_UART_SUB_TX_PACKET(TOS_MsgPtr);
+  void AM_UART_SUB_POWER(char mode);
+  char AM_SUB_INIT(void);
+  void AM_SUB_SET_HEADER_SIZE(char size);
+};
+

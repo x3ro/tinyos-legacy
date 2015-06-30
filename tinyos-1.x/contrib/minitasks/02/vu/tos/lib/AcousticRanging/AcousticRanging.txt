@@ -1,0 +1,10 @@
+AcousticRanging:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The AcousticRangingActuator and AcousticRangingSensor interfaces are used to initiate
+and receive acoustic ranging measurements. Currently, these interfaces are implemented
+by the OutsideRangingActuator and OutsideRangingSensor components.
+

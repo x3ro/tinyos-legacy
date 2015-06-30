@@ -1,0 +1,105 @@
+#!/usr/bin/perl -w
+
+# This simple script uses the Deluge java tool to:
+# - look up the currently running image
+# - download the supplement for that image into /tmp
+# - unpack the supplement in /tmp
+#
+# Gilman Tolle <get@cs.berkeley.edu>
+
+use XML::Simple;
+use Data::Dumper;
+use strict;
+
+my $tmpdir = "/tmp";
+my $file = "tos_image.xml";
+my $supp = "supplement.tar.bz2";
+my $imageNum = 65535;
+
+print "Changing to directory: $tmpdir\n";
+
+chdir "/tmp";
+
+unlink($file);
+unlink($supp);
+
+print "Checking running images\n";
+
+my $pingResult = `java net.tinyos.tools.Deluge -p`;
+$pingResult =~ /.*Currently Executing:(.*?)(Stored.*)\s+/s;
+
+my $currentProgText = $1;
+my @storedProgsText = split(/Stored Image \d/s, $2);
+shift(@storedProgsText);
+
+#print "($currentProgText)";
+my $currentProg;
+
+if ($currentProgText =~ /Prog Name:\s+(.*?)\s+/) {
+    $currentProg->{'progName'} = $1;
+}
+if ($currentProgText =~ /Compiled On:\s+(.*)\s+/) {
+    $currentProg->{'compiledOn'} = $1;
+}
+if($currentProgText =~ /User Hash:\s+(.*?)\s+/) {
+    $currentProg->{'userHash'} = $1;
+}
+
+my $i = 0;
+my @storedProgs;
+foreach my $progText (@storedProgsText) {
+
+#    print "---\n$progText\n---\n";
+
+    if ($progText =~ /Prog Name:\s+(.*?)\s+/) {
+	$storedProgs[$i]->{'progName'} = $1;
+    }
+    if ($progText =~ /Compiled On:\s+(.*)\s+/) {
+	$storedProgs[$i]->{'compiledOn'} = $1;
+    }
+    if($progText =~ /User Hash:\s+(.*?)\s+/) {
+	$storedProgs[$i]->{'userHash'} = $1;
+    }
+
+    print "Checking: ($storedProgs[$i]->{'progName'}) ($storedProgs[$i]->{'compiledOn'}) ($storedProgs[$i]->{'userHash'})\n"; 
+    print "Against: ($currentProg->{'progName'}) ($currentProg->{'compiledOn'}) ($currentProg->{'userHash'})\n";
+    if ($storedProgs[$i]->{'progName'} eq $currentProg->{'progName'} &&
+	$storedProgs[$i]->{'compiledOn'} eq $currentProg->{'compiledOn'} &&
+	$storedProgs[$i]->{'userHash'} eq $currentProg->{'userHash'}) {
+	print "Found a Match: image $i\n";
+	$imageNum = $i;
+	last;
+    }
+    $i++;
+}
+
+if ($imageNum == 65535) {
+    print "Running program is not Deluged. Not downloading supplement.\n";
+    exit();
+}
+
+print "Downloading image $imageNum to $file\n";
+
+system "java net.tinyos.tools.Deluge -d -in=$imageNum -o=$file";
+
+print "Transforming $file to $supp\n";
+
+my $xs1 = XML::Simple->new();
+my $doc = $xs1->XMLin($file);
+
+my $hex = $doc->{'supplement'}->{'content'};
+$hex =~ s/\n//g;
+$hex =~ s/\r//g;
+$hex =~ s/\s+$//;
+
+my $bin = pack("h*", $hex);
+
+open(SUPP, ">$supp");
+print SUPP $bin;
+
+print "Unpacking $supp\n";
+
+system "tar -xjvf $supp";
+
+
+

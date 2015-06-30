@@ -1,0 +1,4 @@
+# source this file from your .bashrc in order to setup your pytos environment variables
+export PYTHONPATH=$TOSROOT/tools/python:$PYTHONPATH
+export PATH=$TOSROOT/tools/python/apps:$TOSROOT/tools/python/util:$PATH
+

@@ -1,0 +1,973 @@
+\documentclass[10pt]{article}
+
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{multicol}
+\usepackage{epsfig,amsmath,amsfonts}
+\usepackage{xspace}
+
+\makeatletter                                   % Make '@' accessible. 
+\oddsidemargin=0in                              % Left margin minus 1 inch.
+\evensidemargin=0in                             % Same for even-numbered pages.
+\marginparsep=0pt                               % Space between margin & text
+
+\renewcommand{\baselinestretch}{1}              % Double spacing
+
+\textwidth=6.5in                                % Text width (8.5in - margins).
+\textheight=9in                                 % Body height (incl. footnotes)
+
+\topmargin=0in                                  % Top margin minus 1 inch.
+\headsep=0.0in                                  % Distance from header to body.
+\skip\footins=4ex                               % Space above first footnote.
+\hbadness=10000                                 % No "underfull hbox" messages.
+\makeatother                                    % Make '@' special again.
+
+\newcommand{\name}{{Tython}\xspace}
+\newcommand{\driver}{{\tt SimDriver}\xspace}
+
+\title{\name: Scripting TOSSIM\\{\small \bf Work in Progress: Do not cite or distribute, comments welcome}}
+\author{Michael Demmer and Philip Levis}
+\date{}
+
+\begin{document}
+
+\maketitle
+\vspace{2in}
+\begin{center}
+Version 0.4\\
+Jan 9, 2004
+\end{center}
+
+\fontfamily{cmr}                                % Make text Roman (serif).
+\fontseries{m}                                  % Medium spacing.
+\fontshape{n}                                   % Normal: not bold, etc.
+\fontsize{10}{10}                               % 10pt font, 10pt line spacing
+
+
+\thispagestyle{empty}
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+Experimenting with and testing sensor networks is hard. TOSSIM, a
+TinyOS simulator, allows users to run and test algorithms, protocols,
+and applications in a controlled, reproducible environment. However,
+by itself a TOSSIM simulation is static. Instead of modeling behaviors
+such as motion or changing sensor readings, TOSSIM provides a
+socket-based command API for other programs to do so. On one hand, this
+keeps TOSSIM simple and efficient; on the other, it puts the burden
+of writing complex real-world models on the user.
+
+One solution to this problem is TinyViz, a GUI that communicates with
+TOSSIM over the socket API. With TinyViz, users can interact with a
+simulation through a GUI panel, by dragging motes and setting options.
+These actions can be difficult to reproduce exactly (e.g., dragging a
+mote). Additionally, TinyViz can (as its name suggests) visualize what
+goes on in the network. Users can write TinyViz ``plugins'' in Java to
+extend the GUI's functionality and issue commands to TOSSIM. However,
+because users must precompile their plugins, this only allows limited
+interactivity.
+
+\name (or, Tinython) complements TinyViz's vizualization by adding a
+scripting interace to TOSSIM. Users can interact with a running
+simulation through TinyViz, a \name console, or both simultaneously.
+\name is based on Jython, a Java implementation of the Python
+language. In addition to being a complete scripting language (with
+plenty of documentation, literature, tutorials, etc.), Jython makes it
+very easy to import and use Java classes within Python. This allows
+users to access the entire TinyOS Java tool chain, including packet
+sources, MIG-generated messages, and TinyViz.
+
+This document explains how to get started with \name, and explains the
+library functions that can be used to access TOSSIM or TinyViz. It
+does not contain an in-depth Python tutorial: many of those can be
+found at {\tt www.python.org}.
+
+\section{Getting Started}
+
+TinyViz and \name sit on top of \driver, a java application that
+manages interactions with TOSSIM. The simplest way to use \name is to
+start a TOSSIM simulation with the {\tt -gui} option, then run \driver
+with the {\tt -console} option:
+
+\begin{verbatim}
+java net.tinyos.sim.SimDriver -console
+\end{verbatim}
+
+The Jython environment may take a little while to come up the first
+time; it scans all of the TinyOS jar files, but caches this
+information for later invocations. After booting, \name will give you
+a script prompt:
+
+\begin{verbatim}
+>>>
+\end{verbatim}
+
+\subsection{Pausing and Resuming}
+\label{sec:pause}
+
+If you used the {\tt -gui} option when invoking TOSSIM (or used the
+{\tt -run} option), then the simulation will be paused when \name
+boots. The {\tt sim} object allows you to pause and resume TOSSIM.
+Additionally, hitting the escape key and hitting return will pause a
+running simulation. For example:
+
+\begin{verbatim}
+
+>>> sim.resume()
+>>> sim.pause()
+
+\end{verbatim}
+
+You can either type in scripts (useful for examining data) at the
+prompt, or execute script files with the {\tt execfile} command,
+specifying the file name:
+
+\begin{verbatim}
+
+>>> execfile("script.py")
+
+\end{verbatim}
+
+\subsection{Invoking SimDriver}
+
+\driver can be invoked with a variety of options. For example, {\tt
+  -console} has \driver start a scripting console, while {\tt -gui}
+has it start a GUI interface (TinyViz). The {\tt -run} option will
+automatically invoke a TOSSIM simulation, while {\tt -args} allows you
+to pass arguments to the TOSSIM invocation. For example,
+
+\begin{verbatim}
+# java net.tinyos.sim.SimDriver -console -gui -args "-l=1.0 -b=1" -run main.exe 20
+\end{verbatim}
+
+Will start TinyViz, provide a console, and start a TOSSIM simulation
+(in this case, {\tt main.exe}) of 20 motes. The TOSSIM arguments
+specify that it should run in real time if it can ({\tt -l=1.0}), and
+the motes should boot in the first second ({\tt -b=1}). The {\tt -h}
+flag option will proint the full set of \driver command line options.
+For TOSSIM options, refer to the TOSSIM reference manual.
+
+When \driver invokes TOSSIM, it always enables the TOSSIM lossy radio
+model.
+
+\subsection{Some Basic Commands}
+\label{sec:commands}
+
+In addition to a basic Jython environment, \name has several objects
+that provide functions to interact with
+TOSSIM. Section~\ref{sec:pause} showed how the {\tt sim} object can be
+used to pause and resume a simulation. 
+
+For all commands, specifying a time in the past will cause the command
+to be executed as soon as possible (i.e., at current time in TOSSIM).
+An easy way to have something happen immediately is to specify a time
+of 0. Time is measured in simulator ticks, which are at 4MHz. So, a
+time of one minute is 240,000,000, or 60 seconds of four million ticks
+each. Some basic commands are shown in
+Table~\ref{table:basic_commands}. Appendix B contains a reference
+description of the \name object model.
+
+\begin{table}
+
+\centering
+
+\begin{tabular}{|l|l|}\hline
+Name & Effect \\ \hline
+sim.pause()  & Pause TOSSIM\\
+sim.resume() & Resume TOSSIM\\
+motes[i].turnOn(time)  & Turn mote {\it i} on at time {\it time}\\
+motes[i].turnOff(time) & Turn mote {\it i} off at time {\it time}\\
+motes[i].moveTo(x, y)  & Move mote {\it i} to {\it x,y}\\
+motes[i].move(x,y)     & Move mote {\it i} {\it x,y} from its current position\\
+comm.waitUntil(time)   & Make the script block until {\it time} in TOSSIM\\
+& Note script will hang if TOSSIM is paused.\\
+comm.setSimRate(rate)  & Set the simulator rate to {\it rate}\\
+                       & This is identical to TOSSIM's {\tt -l} option.\\
+comm.sendRadioMessage(mote, time, message) & Deliver message to mote over radio\\
+comm.sendUARTMessage(mote, time, message)  & Deliver message to mote over UART\\ \hline
+\end{tabular}
+\caption{Basic \name Commands}
+\label{table:basic_commands}
+\end{table}
+
+
+The send commands have a message as a parameter; this message must be an
+instance of a sublcass of {\tt net.tinyos.message.Message}. In the common
+case, this is a message class created with the MIG tool. For example, to
+send a basic AM packet to mote 2, with an address field of 2, AM type of 12, 
+and an empty payload:
+
+\begin{verbatim}
+from net.tinyos.message import TOSMsg
+msg = TOSMsg()
+msg.set_addr(2)
+msg.set_type(12)
+msg.set_length(0)
+comm.sendRadioMessage(2, 10 * 4000000, msg)
+\end{verbatim}
+
+This packet is scheduled to arrive at mote 2, ten seconds into
+simulation (each second has four million ticks).
+
+
+\subsection{Exploring Objects}
+
+The \name environment has a few predefined Python objects specific to
+a TOSSIM simulation. For example, the {\tt sim} object has functions for
+pausing and resuming simulation. Use the {\tt dir()} function to see
+the set of functions an object provides. First, type the name of the object:
+
+\begin{verbatim}
+
+>>> sim
+net.tinyos.sim.script.reflect.Sim@5f3a5f53
+
+\end{verbatim}
+
+This tells you that the {\tt sim} object is actually an instance of the
+{\tt net.tinyos.sim.script.reflect.Sim} Java class. To see the functions a
+{\tt Sim} object provides, type {\tt dir(Sim)}.
+
+\begin{verbatim}
+
+>>> dir(Sim)
+['dumpDBG', 'exit', 'pause', 'resume', 'setSimDelay', 'simDelay', 'stop', 'stopDBGDump']
+
+\end{verbatim}
+
+{\tt dir()} can be used on both Java and Python objects. For example,
+{\tt dir(Sim)} returns a Python list of strings, with each element being a
+method of the Sim class. So, {\tt dir(dir(Sim))} lists the functions
+a Python list object provides:
+
+\begin{verbatim}
+
+>>> dir(dir(sim))
+['append', 'count', 'extend', 'index', 'insert', 'pop', 'remove', 'reverse', 'sort']
+
+\end{verbatim}
+
+Note that {\tt dir()}'s semantics are slightly different for Python and
+Java. One can call {\tt dir()} on a Python object to learn its functions,
+but for Java, one must call it on the class. Specifically:
+
+
+\begin{verbatim}
+
+>>> sim
+net.tinyos.sim.script.reflect.Sim@5f3a5f53
+>>> dir(sim)
+[]
+>>> dir(Sim)
+['dumpDBG', 'exit', 'pause', 'resume', 'setSimDelay', 'simDelay', 'stop', 'stopDBGDump']
+>>> m = dir(Sim)
+>>> dir(m) 
+['append', 'count', 'extend', 'index', 'insert', 'pop', 'remove', 'reverse', 'sort']
+
+\end{verbatim}
+
+Calling {\tt dir()} with no parameters lists the set of variables
+bound in the Jython environment:
+
+\begin{verbatim}
+
+>>> dir()
+['Commands', 'Interp', 'Location', 'Mote', 'Motes', 'PacketType', 'Packets', 'Radio', 'Sim', 
+'SimBindings', 'SimReflect', '__doc__', '__driver', '__name__', 'comm', 'interp', 'location', 
+'motes', 'packets', 'radio', 'sim', 'simcore', 'sys']
+\end{verbatim}
+
+\subsection{Importing and Instantiating Java}
+
+Jython allows you to import Java classes with Python's import syntax.
+For example, to import {\tt java.util.Enumeration}, or the entire
+{\tt java.util} package:
+
+
+\begin{verbatim}
+
+>>> from java.util import Enumeration
+>>> from java.util import *
+
+\end{verbatim}
+
+Python is a dynamically typed language. Therefore, variables do not
+have type specifiers. While instantiating a {\tt StringBuffer} in
+Java looks like this\footnote{From now on, \name code will be shown as if it were in a file, that is, without a command line prompt. Each line could be just as easily typed into a console.},
+
+\begin{verbatim}
+StringBuffer buffer = new StringBuffer();
+\end{verbatim}
+
+in Jython it looks like this,
+
+\begin{verbatim}
+buffer = StringBuffer()
+\end{verbatim}
+
+Note, however, that Jython does not automatically import {\tt java.lang.*}.
+
+By importing Java classes, one can access the TinyOS Java toolchain:
+
+\begin{verbatim}
+from net.tinyos.message import *
+from net.tinyos.packet import *
+
+moteIF = MoteIF()
+msg = BaseTOSMsg()
+msg.set_addr(0)
+msg.set_type(5)
+moteIF.send(0, msg)
+\end{verbatim}
+
+The above code will send a message of AM type 5 to mote 0 over the default
+MoteIF interface.
+
+Access to the toolchain includes GUI-based programs. For example, one
+can instatiate a SerialForwarder:
+
+\begin{verbatim}
+from net.tinyos.sf import *
+s = SerialForwarder([])
+\end{verbatim}
+
+Note, however, that some classes (SerialForwader's GUI among them)
+expect to be stand-alone applications. This means that when you tell
+them to quit, with the quit button, for example, they may cause the
+entire Jython environment to quit.
+
+\section{The Caffeinated Snake}
+
+Jython's Java support allows a user to basically use it as a 
+Java scripting language. However, being dynamically typed, it loses
+many of the correctness benefits of the Java compilation process. 
+Essentially, there is a lot of redundancy between Java and Python,
+and moving back and forth between the two can be a little difficult at times.
+
+For objects such as strings, lists, and maps, it's often easier to use
+Python's primitives instead of Java's, as they are syntactically built
+into the language. For example, compare the use of a Python map and a
+Java hashtable:
+
+\begin{verbatim}
+# Java
+from java.util import *
+h = new Hashtable()
+h.put("Seed", getPacket())
+print(h.get("Seed"))
+
+# Python
+h = {}
+h["Seed"] = getPacket()
+print h["Seed"]
+\end{verbatim}
+
+Similarly, one can use either Java or Python to write a file:
+
+
+\begin{verbatim}
+# Java
+from java.io import *
+file = FileWriter("output.txt")
+file.write(packets[0])
+
+# Python
+file = open("output.txt", "w")
+file.write(packets[0])
+\end{verbatim}
+
+We've found that, for data collection and processing, Python is much
+easier to use than Java. Among other things, its data structure
+primitives end up being a lot simpler and less error prone. However,
+Java allows you to interact with all of the existing structure a
+TinyOS distribution provides, such as packet sources, message class
+generation, and interaction with TinyViz.
+
+\section{\name, SimDriver, plugins, and the radio}
+
+The core of SimDriver is an event bus. Java plugins can connect to this
+event bus, receiving TOSSIM events and sending TOSSIM commands; many
+of the \name abstractions are built on top of SimDriver plugins. TinyViz,
+the visualization environment, also uses plugins, so users can write new
+visualizations. Correspondingly, there are two classes of SimDriver plugins:
+GUI and non-GUI.
+
+Examples of GUI plugins include TinyViz's radio quality visualization, 
+and its communication visualization. Examples of non-GUI plugins include 
+the radio model plugin and the packet logger plugin. GUI plugins are only
+loadable through TinyViz, while non-GUI plugins are accessible through
+\name, and are used to actuate TOSSIM in response to network changes.
+SimDriver maintains a list of mote objects, which store state pertinent
+to the scripting environment, such as position and LED values.
+
+For example, calling mote.moveTo() (see Table~\ref{table:basic_commands}) 
+modifies that mote's position. This can change radio connectivity. The
+mote object uses the radio model plugin to calculate bit error rates
+based on new distances. The plugin will then automatically communicate the
+new link qualities to TOSSIM, which is unaware of mote position.
+
+\subsection{Position-based Radio Models}
+
+\name and TinyViz provide two position-based radio models: disc and
+empirical. The first models the network using "perfect disc" connectivity,
+at three different disc radii ("disc10", "disc100", and "disc1000"). 
+Connectivity is perfect
+in that links are either error-free or not present, depending on
+whether the target is in or outside of the disc. Although
+links are perfect, collisions can still occur, which will corrupt a packet.
+
+The second model, empirical, uses an error distribution based on
+empirical data. Essentially, for any particular distance there is a 
+distribution of possible bit error rates: two links of identical length
+can have different rates. These bit errors can cause a packet to be
+corrupted so that a receiver does not recover it properly. Links are
+directed: the error rate from A to B is distinct from the rate
+from B to A. Roughly speaking, motes closer than 16 units will have
+good connectivity, motes between 16 and 28 units will have highly variable
+and possibly asymmetric connectivity, and motes 30 units and higher away
+will have poor connectivity. 
+
+These position models boil down to a simple function: given a distance
+between two motes, produce a bit error rate. For disc-based models,
+this is a simple cutoff, which results in symmetric and perfect links. For
+the empirical model, the function returns a sample from the
+distribution corresponding to the distance.
+
+Scripts can also explicitly specify connectivity qualities with the
+{\tt radio} object. {\tt setLossRate(src, dest, prob)} sets
+the bit error rate from ID {\tt src} to ID {\tt dest} to be 
+probability {\tt prob}. {\tt comm.packetLossToBitError(prob)}  calculates 
+bit error rates from a packet loss rate~\footnote{This is actually a 
+non-trivial calculation. It makes several assumptions about the data link 
+encoding (the mica stack, with SecDed based encoding and a 9 bit start
+symbol) and packet length. Specifically, the packet error rate represents
+a 36-byte packet. As packets grow longer, their loss rate increases,
+as there is a set bit error rate.}. Calling this function does not update
+TOSSIM; that must be done with {\tt radio.publishModel()}. Calling
+this updates the entire graph to TOSSIM, which is $O(n^{2})$. Therefore,
+if a large number of links are updated, it's best to only publish
+the model once, after all of the updates.
+
+\subsection{GUI Labels}
+
+When using \name with TinyViz, scripts can add annotations to 
+mote visualizations. The {\tt setLabel()} method of the mote class
+takes three parameters: a string, an X offset, and a Y offset.
+For example,
+
+\begin{verbatim}
+
+motes[2].setLabel("queue depth: " + depth, 10, 0)
+
+\end{verbatim}
+
+will put a small label by mote 2 in the TinyViz visualization panel,
+stating what its queue depth is (assuming the variable {\tt depth} has
+been set to this value previously).
+
+\section{\name Data Structures}
+
+Section~\ref{sec:commands} described a few of the commands that
+\name provides to interact with TOSSIM. In addition to these functions,
+\name provides data structures to access simulator events. For
+example, the {\tt packets} variable is a dictionary of every packet
+that has been sent over the radio, indexed by mote ID.
+
+\begin{verbatim}
+print packets[3]
+\end{verbatim}
+
+will print all of the packets mote 3 has sent. Section~\ref{sec:commands}
+mentioned the {\tt motes} variable, which is a list of motes. 
+
+\begin{verbatim}
+print motes[3]
+\end{verbatim}
+
+will display the current state of mote 3.
+
+\subsection{Packets}
+\label{sec:packets}
+
+The {\tt packets} variable allows scripts to access all of the packets
+that motes have transmitted. The variable is a dictionary of lists, keyed
+by mote ID. Each list contains all of the packets a given mote has sent, 
+in temporal order (the first packet is the first element of the list). 
+Each element is a Java object, an instance of 
+{\tt net.tinyos.sim.event.RadioMsgSentEvent}. This class is used because
+it stores not only the message sent, but also metadata, such as time. 
+The time represents when the packet send {\it completed}, not when it 
+began. 
+
+{\tt RadioMsgSentEvent} has three basic accessor functions: {\tt getMessage()},
+which returns a {\tt net.tinyos.message.TOSMsg}, 
+{\tt getMoteID()}, which returns the sender's
+ID, and {\tt getTime()}, which returns the send time.
+
+{\tt packets} is an immutable object; unlike normal dictionaries, a
+script cannot assign to it. If a script needs to transform the packet 
+dictionary, it can make a copy with {\tt packets.copy()}, which is
+a normal Python dictionary and can be modified accordingly.
+
+In addition to normal dictionary operations, {\tt packets} has an extra
+function to support TinyOS messages, {\tt addPacketType(Message message)}.
+This function can create packet type specific reflections of {\tt packets}.
+For example,
+
+\begin{verbatim}
+from net.tinyos.message import IntMsg
+packets.addPacketType(IntMsg())
+\end{verbatim}
+
+will create a new variable in the /name environment, {\tt IntMsgs}, which
+contains all of the messages in {\tt packets} that are of type {\tt IntMsg},
+as defined by active message type. This variable, {\tt IntMsgs}, can
+be indexed and accessed just as {\tt packets} is.
+
+Note, however, that each element in the {\tt packets} lists
+contains a {\tt TOSMsg};
+this means that in the above example, {\tt IntMsgs} also has {\tt TOSMsgs};
+you cannot easily manipulate the elements as if they were actually instances
+of {\tt IntMsg}, by accessing their message type specific fields, etc. 
+
+In order to transform the {\tt IntMsgs} into a dictionary of
+{\tt net.tinyos.message.IntMsg}, you must call {\tt IntMsgs.downCast()}.
+For example:
+
+\begin{verbatim}
+from net.tinyos.msg import IntMsg
+packets.addPacketType(IntMsg())
+
+# Get a dictionary of IntMsgs, instead of TOSMsgs
+myMsgs = IntMsgs.downCast()
+# Print the value in the first IntMsg that mote 0 transmitted
+print myMsgs[0].pop().get_val()
+\end{verbatim}
+
+Using a {\tt downCast()} dictionary allows you to easily access
+message fields. However, it discards the additional metadata (such as
+transmit time) that a {\tt RadioMsgSentEvent} contains.
+
+The variable defined by {\tt addPacketType()} will update as more
+motes send packets; it represents a filter on top of {\tt packets}. 
+The dictionary returned by {\tt downCast()}, however, is static;
+it does not update as more motes send packets.
+
+\subsection{Motes}
+\label{sec:motes}
+
+The {\tt motes} variable is a list of {\tt Mote} objects, which
+provide the following methods:
+
+\begin{table}
+\centering
+\begin{tabular}{|l|l|} \hline
+Name                                & Effect \\ \hline
+int getID()                         & Returns the mote's ID\\
+String getCoords()                  & A string representation of its x,y position\\
+double getYCoord()                  & The x coordinate of its position\\
+double getXCoord()                  & The y coordinate of its position\\
+double getDistance(int otherMoteID) & The euclidean distance from another mote\\
+void turnOn()                       & Turn this mote on\\
+void turnOff()                      & Turn this mote off\\
+boolean isOn()                      & Is this mote on?\\
+void move(double x, double y)       & Mote mote (x,y) from its current position\\
+void moveTo(double x, double y)     & Move mote to (x,y)\\
+byte[] getBytes(String variable)    & Get a variable\\
+long getLong(String variable)       & Get a variable\\
+int getInt(String variable)         & Get a variable\\
+short getShort(String variable)     & Get a variable\\ \hline
+\end{tabular}
+\caption{Mote Methods}
+\label{table:motes}
+\end{table}
+
+The final four functions ({\tt getBytes()}, {\tt getLong()}, {\tt
+getInt()}, and {\tt getShort()}) allow you to request variable values
+from TOSSIM. The string parameter is the variable's C name. For nesC
+components, this takes the form of $<component name>$\$$<variable
+name>$. For example, this code fetches some variables from the TimerM
+component of mote 2,:
+
+\begin{verbatim}
+
+tail = motes[2].getByte("TimerM$queue_tail")
+head = motes[2].getByte("TimerM$queue_head")
+print "head: ", head,  "tail: ", tail
+
+\end{verbatim}
+
+The {\tt getBytes()} function can be used to fetch entire
+structures. Currently, the variable parameter does not support
+accessing structure fields, pointer traversals, or array
+elements. Therefore, while {\tt getBytes("TimerM\$mTimerList")} will
+return all of the timer structures as an array of bytes, \\
+{\tt getBytes("TimerM\$mTimerList[1]")} and
+{\tt getBytes("TimerM\$mTimerList[1].ticks")} do not work.
+
+
+\section{Complex Scripting}
+
+The previous sections described how to control and monitor TOSSIM through
+\name. However, the examples given were fairly simple. By using some
+of Python's expressive power, one can write much more intricate and complex
+scripts.
+
+\subsection{Event Handlers}
+\label{sec:handlers}
+
+Many \name primitives depend on being able to handle events sent by
+TOSSIM, which update the known state about the simulation. For
+example, every time a mote transmits a packet, TOSSIM sends an event
+to {\tt SimDriver}.\name subscribes to packet event notifications and
+uses them to update the {\tt packets} variable (discussed in
+Section~\ref{sec:packets}).
+
+Scripts can also register event handlers through the {\tt interp}
+object. Event handlers must be functions with a single parameter, the
+event handled. Scripts register handlers with {\tt
+interp.addEventHandler()}. The first parameter is the event handling
+function, the second, optional parameter is an instance of an event
+type. Passing an event type will register the handler for only events
+of that type; omitting it will have it handle all event types. For example:
+
+\begin{verbatim}
+
+def print_handler(event):
+  print event
+
+# Print all events
+interp.addEventHandler(print_handler)
+
+# Print only LED events
+from net.tinyos.sim.event import LedEvent
+interp.addEventHandler(print_handler, LedEvent())
+
+\end{verbatim}
+
+The {\tt net.tinyos.sim.event} package contains all of the events that
+TOSSIM generates (as well as a few which TinyViz uses internally). The
+TOSSIM events are:
+
+\begin{table}
+\centering
+\begin{tabular} {|l|l|} \hline
+Name                    & When? \\ \hline
+ADCDataReadyEvent       & When a mote receives an ADC reading\\
+DebugMsgEvent           & Each enabled {\tt dbg} statement\\
+RadioMsgSentEvent       & When a mote finishes sending a radio packet\\
+SimulationPausedEvent   & In response to a pause command; refer to Section~\ref{sec:pausing} \\
+TossimInitEvent         & When \name connects to TOSSIM \\
+UARTMsgSentEvent        & When a mote finishes sending a UART packet \\
+VariableResolveEvent    & In response to a variable resolve command \\
+VariableValueEvent      & In response to a variable request command \\ \hline 
+\end{tabular}
+\caption{TOSSIM Events}
+\label{table:events}
+\end{table}
+
+Event handlers can be useful for waiting for a condition, or for
+logging information. For example, if you want to examine why a mote
+sends a specific (perhaps malformed) packet, you can register a
+handler for send events, and when the handler detects the packet,
+pause TOSSIM.
+
+\subsection{Future Actions}
+\label{sec:pausing}
+
+Most of the events described in Table~\ref{table:events} are issued
+when a mote performs a certain action. TOSSIM also provides an event
+for external programs to receive a callback in the future, the
+SimulationPausedEvent. TOSSIM issues a SimulationPausedEvent in
+response to a SimulationPauseCommand, which one can issue with {\tt
+comm.pauseInFuture()}. This function takes two parameters; the first
+is time (in 4MHz simulator ticks), while the second is an integer ID.
+The integer ID allows a program to distinguish pause events when it
+has issued several concurrently. Scripts can obtain globally unique
+pause IDs with {\tt comm.getPauseID()}.
+
+Here is an example use of these pause events, where a user wants to
+print out mote state one minute into simulation:
+
+\begin{verbatim}
+from net.tinyos.sim.event import SimulationPausedEvent
+
+id = comm.getPauseID()
+
+def time_handler(event):
+  global id
+  if event.get_id() == id:
+    print "Printing motes 1-20"
+    for i in range(0, 20):
+      print motes[i]
+
+interp.addEventHandler(time_handler, SimulationPausedEvent())
+comm.pauseInFuture(60 * 4000000, id)
+\end{verbatim}
+
+To help manage some of the event and id bookkeeping, the {\tt simutil}
+package provides a simpler python function interface to accomplish the
+same task:
+
+\begin{verbatim}
+import simutil
+
+def time_handler():
+  print "Printing motes 1-20"
+  for i in range(0, 20):
+    print motes[i]
+
+simutil.call_in(60 * 4000000, time_handler);
+
+\end{verbatim}
+
+Note that all the pause and event identifiers are managed by the
+wrapper function. In addition, note that the first parameter to {\tt
+simutil.call\_in} is an offset from the current time, so the above
+call will occur 60 seconds in the future. This is in contrast to both
+{\tt comm.pauseInFuture} and the simple wrapper {\tt simutil.call\_at}
+which both take a absolute time value.
+
+\subsection{Periodic Actions}
+\label{sec:periodic}
+
+SimulationPausedEvents allow a script to take actions in the future
+without having to block using {\tt comm.waitUntil()}; this way, they
+can easily be doing multiple things simultaneously. Event handlers
+can be made to reschedule themselves, for periodic actions:
+
+\begin{verbatim}
+def time_handler(event):
+  global id
+  if event.get_id() == id:
+    print "Printing motes 1-20"
+    for i in range(0, 20):
+      print motes[i]
+    # Reschedule to happen again in one minute
+    comm.pauseInFuture(event.getTime() + 60 * 4000000, id)
+\end{verbatim}
+
+This can get the job done, but is clunky, verbose and difficult.
+Changing the period from once a minute to twice a minute requires a
+new function. In order to just print out mote state every thirty
+seconds, a user has to write a function, request a pause ID, register
+a handler, and schedule an event to go off. The {\tt simutil} package
+provides a convenience class, {\tt Periodic} for exactly this reason:
+
+\begin{verbatim}
+from simutil import Periodic
+
+def time_handler(event):
+  print "Printing motes 1-20"
+  for i in range(0, 20):
+    print motes[i]
+
+p = Periodic(60 * 4000000, time_handler)
+
+\end{verbatim}
+
+Because Python functions are first class values, we can use closures
+to dynamically generate functions with the parameters a user needs.
+Thus telling \name to print out a range of mote states periodically
+can be done with a single function call:
+
+\begin{verbatim}
+from simutil import Periodic
+
+def print_state(low_mote, high_mote, period):
+  def time_handler(event):
+    print "Printing motes ", low_mote, " to ", high_mote
+    for i in range(low_mote, high_mote):
+      print motes[i];
+  return Periodic(period, time_handler);
+
+p = print_state(3, 5, 60 * 4000000);
+
+\end{verbatim}
+
+{\tt print\_state} returns the newly allocated {\tt Periodic} object
+instance, whose {\tt stop} method can be used to stop the recurring
+action. Once {\tt print\_state} is called, the \name environment will
+print out the state of motes {\tt low\_mote} to {\tt high\_mote},
+every {\tt period} ticks.
+
+Closures can also be used for periodic commands to TOSSIM. For
+example, a routing protocol may need periodic beacons from a PC to a
+mote over the UART:
+
+\begin{verbatim}
+from simutil import *
+def uart_beacon(mote, period, msg):
+  def sendMessage(event):
+    comm.sendUARTMessage(mote, 0, msg)
+  return Periodic(period, sendMessage)
+\end{verbatim}
+
+\subsection{Behavior Objects}
+
+Using closures as described in Section~\ref{sec:periodic} allows
+scripts to start periodic actions in a concise and simple manner. One
+use of this is to implement mote behaviors. For example, to make a
+mote move in a random walk, all one needs is a handler that moves a
+mote a small random step, then schedule this event to go off
+periodically.
+
+One problem that emerges is conflicting behaviors. For example, one
+could call {\tt random\_walk()} to make a mote move randomly, and also
+call {\tt move\_to()} to make it move towards a specific destination.
+By registering two event handlers, the script has specified two
+conflicting movement behaviors, which will interleave and come into
+conflict.
+
+A clean solution to solve this problem is through the use of a Python
+object. The object has functions for each of the different behaviors,
+and stores state on what behavior a mote is currently following. 
+
+From an abbreviated example adapted from the {\tt simutil} package:
+
+\begin{verbatim}
+class MoteMover:
+  handlers = {}
+
+  def moveTo(self, moteID, step, x, y, arrivedCallback = None):
+    if (self.handlers.has_key(moteID)):
+      raise IndexError, "Mote ID %d already on the move" % moteID 
+
+    dx = x - mote.getXCoord();
+    dy = y - mote.getYCoord();
+    distance = mote.getDistance(x, y);
+    nsteps = distance / step;
+
+    def callback(pauseEvent):
+      distance = mote.getDistance(x, y);
+      if (distance < step):
+        mote.moveTo(x, y);
+        self.stop(mote); # clear handlers, cancel event, etc
+        if (arrivedCallback != None):
+          arrivedCallback(mote)
+      else:
+        mote.move(dx / nsteps, dy / nsteps);
+
+    periodic = Periodic(rate, callback);
+    self.handlers[moteID] = (periodic, 'move_to');
+
+  def randomWalk(self, mote, step):
+    moteID = mote.getID();
+
+    if (self.handlers.has_key(moteID)):
+      raise IndexError, "Mote ID " + moteID + " already on the move"
+
+    r = Random();
+    
+    def callback(pauseEvent):
+      x = r.nextDouble() * step * 2.0 - step;
+      y = r.nextDouble() * step * 2.0 - step;
+      motes[moteID].move(x, y)
+      
+    periodic = Periodic(rate, callback);
+    self.handlers[moteID] = (periodic, 'random_walk')
+
+  def stop(self, mote):
+    moteID = mote.getID()
+    if (self.handlers.has_key(moteID) == False):
+      raise IndexError, "Mote ID % not moving" % moteID
+
+    (periodic, what) = self.handlers.get(moteID);
+    periodic.stop();
+    del self.handlers[moteID]
+
+\end{verbatim}
+
+The class variable {\tt handlers} is used to store the notion of
+whether or not a particular mote is moving. Conflicting movement
+patterns are therefore detected and an error is reported. Additional
+movement patterns can be easily added to the  object as new functions
+that follow the same pattern to avoid conflict.
+
+\section{Conclusions}
+
+\name is a new system that adds a powerful new tool to the sensor
+network developer's portfolio. Through both predefined scripts and
+interactive console sessions, \name aids the tasks of developing,
+testing, and evaluating a new algorithm or application. The core
+architecture is extensible, allowing developers to write new python
+modules and {\tt SimDriver} plugins to add new forms of interaction
+and manipulation.
+
+\newpage
+\section{Appendix A: Design Ideology}
+
+The primary goal of \name is to offer the sensor network developer a
+simulation environment with dynamic interactivity, enabling both
+unattended simulation experiments, as well as interactive debuggging
+and simulation control. The confluence of these two goals informs the
+major design decisions of our project, as well as the particular
+interfaces exposed by the \name commands and classes.
+
+In some senses, the first order design question relates to the value
+of a dynamic simulation environment. Indeed, TOSSIM alone is a
+valuable tool for aiding sensor network development, offering a
+scalable simulation of a network of sensor motes with a fairly
+realistic radio model and a rich debugging capability (gdb). Yet
+TOSSIM alone essentially just simulates tossing a set of motes into a
+field and letting them go, assuming a constant radio topology. On the
+other hand, the real world is a dynamic place; objects and motes can
+move, radio connectivitity changes, motes can fail. An important tool
+in the developer's toolbox, therefore, is the ability to simulate
+these dynamic interactions and thereby engineer a program that can
+cope with these situations.
+
+Rather than integrating dynamically controlled interfaces to TOSSIM,
+the simulator instead implements a network protocol that allows
+interactive applications to connect to and control a running
+simulation. This separation allows the TOSSIM code base to remain
+insulated and relatively lean (maintaining performance capabilities),
+while more complicated calculations and interactivity can be
+implemented in a separate process.
+
+TinyViz is an existing tool that enables developers to dynamically
+manipulate a simulation. The protocol between TOSSIM and TinyViz
+enables the GUI to introduce dynamics into a test application's
+execution. However, GUI elements do not address all the needs of a
+dynamic interaction. In general, a user's interaction with a GUI is
+non-deterministic, making repeated executions of a test case difficult
+if not impossible to reproduce. Furthermore, to run a set of
+experiments using manual manipulation of the simulation state is an
+extremely cumbersome task, limiting the developer to a simple cursory
+exploration of the potential interactivity parameter space.
+
+The TinyViz plugin system is an available avenue to manipulate or
+visualize the parameters of an application. The plugin API allows a
+Java object to be loaded into the TinyViz GUI environment and to
+interact with the TOSSIM protocol. Through custom plugins, an
+application writer could fully express control over the dynamics of a
+particular experiment. In point of fact, much of the core \name
+functionality is implemented using the TinyViz plugin system. However,
+writing custom plugins is an insufficient solution due not only to the
+cumbersome nature of writing experiments in a compiled language, but
+more importantly that it does not enable interactive code execution.
+In addition, being able to run an unattended simulation is a valuable
+convenience to developers.
+
+Through a scripting environment, developers are able to control
+experiments through repeatable interactions. The Python and reflected
+Java commands/objects expose the key control elements of the
+simulation environment. These hooks can be used both in a controlled
+experiment framework and through console interaction with a running
+simulation. The interative session is both useful for dynamic
+debugging and investigation of an experiment, but also as a
+prototyping arena for code that may become part of a longer experiment
+framework. The dynamic console functionality not only eases the burden
+of writing simulation scripts, but also enables interactive
+experimentation with the simulation itself. A developer can pause a
+simulation at a given time, use the variable resolution features to
+probe around (and potentially alter) the simulation state, then
+continue the simulation to observe the effects of the actions.
+
+\include{reference}
+
+\end{document}
+

@@ -1,0 +1,13 @@
+#!/bin/sh
+# kill any suspended asf (just resuming the card doesn't work)
+if ps ax | grep asf | grep -v grep | egrep ' [RST]N? '; then
+  kill -9 `ps ax | grep asf | grep -v grep | cut -c1-6`
+  sleep 1
+fi
+# resume card if suspended after sleep
+if /sbin/cardctl status 0 | grep suspended; then
+  /sbin/cardctl resume 0
+fi
+setserial /dev/ttyS3 baud_base 460800 # needed for mote CF card
+asf 9001 /dev/ttyS3 57600 &
+evm -Xprogress:3200 -XappName=$0 -cp /usr/local/lib/spy-tool.jar net.tinyos.task.spy.Tool

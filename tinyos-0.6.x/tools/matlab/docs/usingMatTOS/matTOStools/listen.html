@@ -1,0 +1,48 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Listen</title>
+</head>
+
+<body>
+
+<h1>Listen</h1>
+<p>Listen will print all packets from a particular set of motes or from a 
+particular set of serial ports.&nbsp; To start listen, make sure that the motes 
+you want to listen to are <i>mapped </i>to a packetPort in your
+<a href="../applicationEnvironment.html">environment</a>.&nbsp; Then, to listen 
+to motes 1, 5, 101 and 34,just type</p>
+<p><font face="Courier New">listen([1 5 101 34])</font></p>
+<p>or, if you want to listen to all packets on a particular port, for example 
+COM1 and COM2,type</p>
+<p><font face="Courier New">listen(getPacketPorts({'COM1', 'COM2'}))</font></p>
+<p>or if you want to listen to all ports and all motes:</p>
+<p><font face="Courier New">listen('all')</font></p>
+<p>As long as you have packets coming in, you should get output that looks like 
+this:</p>
+<p>What if you don't want to read hexidecimal byte streams?&nbsp; You want 
+decimal byte streams instead?&nbsp; Change the display mode with this command:</p>
+<p><font face="Courier New">setListenDisplayMode('decimal')</font></p>
+<p>or just 'd' for short.&nbsp; What if you want to see the real numbers in the 
+packet, and the real structure?</p>
+<p><font face="Courier New">setListenDisplayMode('verbose')</font></p>
+<p>or just 'v' for short.&nbsp; you should then get output that looks like this:</p>
+<p>What if you are getting somebody else's packets that clutter your screen (a 
+very common problem)?&nbsp; Or what if you only want to listen to packets of a 
+certain AM type.&nbsp; You can filter all packets that don't come from a certain 
+set of motes, have a certain AM type or group ID using the following three 
+commands:</p>
+<p><font face="Courier New">setListenAMfilter(8)<br>
+setListenMoteIDfilter([1 2 3 4 100 101 102])<br>
+setListenGroupIDfilter(hex2dec('7d'))</font></p>
+<p>You can also do all of this as command-line arguments as follows:</p>
+<p><font face="Courier New">listen([1 2 3 4 100 101 102], 'verbose', 8, 
+hex2dec('7d'))</font></p>
+
+</body>
+
+</html>

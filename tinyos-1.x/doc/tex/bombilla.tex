@@ -1,0 +1,1110 @@
+
+\documentclass[10pt]{article}
+
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{multicol}
+\usepackage{epsfig,amsmath,amsfonts}
+\usepackage{xspace}
+
+\makeatletter                                   % Make '@' accessible. 
+\oddsidemargin=0in                              % Left margin minus 1 inch.
+\evensidemargin=0in                             % Same for even-numbered pages.
+\marginparsep=0pt                               % Space between margin & text
+
+\renewcommand{\baselinestretch}{1}              % Double spacing
+
+\textwidth=6.5in                                % Text width (8.5in - margins).
+\textheight=9in                                 % Body height (incl. footnotes)
+
+\topmargin=0in                                  % Top margin minus 1 inch.
+\headsep=0.0in                                  % Distance from header to body.
+\skip\footins=4ex                               % Space above first footnote.
+\hbadness=10000                                 % No "underfull hbox" messages.
+\makeatother                                    % Make '@' special again.
+
+\newcommand{\mate}{Mat\'{e}\xspace}
+\newcommand{\bomb}{Bombilla\xspace}
+
+\title{Mat\'{e}: A Tiny Virtual Machine for TinyOS}
+\author{Philip Levis and Neil Patel\\pal@cs.berkeley.edu}
+\date{}
+
+\begin{document}
+
+%\fontfamily{cmss}                               % Make text sans serif.
+%\fontseries{m}                                  % Medium spacing.
+%\fontshape{n}                                   % Normal: not bold, etc.
+%\fontsize{10}{10}                               % 10pt font, 10pt line spacing 
+
+\maketitle
+\vspace{2in}
+\begin{center}
+Version 1.1\\
+August 21, 2003
+\end{center}
+
+\fontfamily{cmr}                                % Make text Roman (serif).
+\fontseries{m}                                  % Medium spacing.
+\fontshape{n}                                   % Normal: not bold, etc.
+\fontsize{10}{10}                               % 10pt font, 10pt line spacing
+
+
+\thispagestyle{empty}
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\mate is a tiny bytecode interpreter that runs on top of
+TinyOS. Because it presents a high-level communication-centric
+interface, \mate's programs are very short; combined with a safe
+execution environment, this makes mote reprogramming rapid and
+error-free. Programs can self-propagate through a network; this makes
+reprogramming mostly autonomous, as once a self-propagating capsule is
+introduced, it will eventually install itself over the entire network.
+
+
+\mate has multiple execution contexts; each runs in response to an
+event, and they can interleave at instruction granularity. \mate
+prevents race conditions by implicitly locking all shared state that
+is used; as every resource is statically named and \mate programs
+are short, the set of required locks can be quickly determined with a
+full program analysis. Program writers can explicitly yield or release
+locks to improve parallelism.
+
+
+One goal of \mate is to provide a programming interface to motes
+that is much simpler than TinyOS; a sense-and-send program can be as
+few as six instructions in \mate, and \mate's error detection
+mechanisms can help novice programmers find the bugs in their
+programs.
+
+\mate is a architecture for constructing application specific virtual
+machines. Using the architecture, developers can easily change
+instruction sets, execution events, and VM subsystems. The first half
+of this document presents \bomb, a specific instance of a \mate VM
+that is part of the standard TinyOS distribution, explaining it as a
+complete system. The second half explains the \mate architecture,
+shows how \bomb is an instance of \mate, and gives examples on how
+\bomb can be used as a template to build other virtual machines.
+
+
+\section{\bomb}
+
+\bomb is a set of TinyOS components that sit on top of several
+system components, including sensors, the network stack, and
+non-volatile storage (the ``logger'')\footnote{Support for the logger
+is currently not implemented, due to the pending addition of a new
+logger interface in TinyOS.}. Code is broken in {\bf capsules} of 24
+instructions, each of which is a single byte long; larger programs can
+be composed of multiple capsules. In addition to bytecodes, capsules
+contain identifying and version information. Each \bomb context has
+two stacks: an operand stack and a return address stack. Most
+instructions operate solely on the operand stack, but a few
+instructions control program flow and several have embedded
+operands. There are three execution contexts that can run concurrently
+at instruction granularity. \bomb provides both a built-in ad-hoc
+routing algorithm (the {\tt send} instruction) as well as mechanisms
+for writing new ones (the {\tt sendr} instruction).
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{fig/bombillamodel.jpg}
+
+\caption{\bomb Architecture and Execution Model: Capsules, Contexts, and Stacks}
+
+\label{fig:exec}
+\end{figure}
+
+
+\begin{figure}
+\begin{center}
+\def\W{3.25in}
+
+\begin{tabular}{|l|l|l|}\hline
+basic   &{\tt 00iiiiii} & {\tt i} = instruction\\ \hline
+m-class &{\tt 010iixxx} & {\tt i} = instruction, {\tt x} = argument \\ \hline
+v-class &{\tt 011ixxxx} & {\tt i} = instruction, {\tt x} = argument \\ \hline
+j-class &{\tt 10ixxxxx} & {\tt i} = instruction, {\tt x} = argument \\ \hline
+x-class &{\tt 11xxxxxx} & {\tt i} = instruction, {\tt x} = argument\\ \hline
+\end{tabular}
+
+
+\caption{\bomb Instruction Formats}
+
+\label{fig:instr}
+\end{center}
+\end{figure}
+
+\subsection{Architecture, Instruction Set, and Data Types}
+
+
+\bomb instructions hide the asynchrony (and oft-resulting race
+conditions) of TinyOS programming. For example, when the {\tt send}
+instruction is issued, \bomb calls a command in the ad-hoc routing
+component to send a packet. \bomb suspends the context until a
+message send complete event is received, at which point it resumes
+execution. By doing this, \bomb does not need to manage message
+buffers -- the capsule will not resume until the network component is
+done with the buffer. Similarly, when the {\tt sense} instruction is
+issued, \bomb requests data from the sensor TinyOS component and
+suspends the context until the component returns data with an
+event. This synchronous model makes application level programming much
+simpler and far less prone to bugs than dealing with asynchronous
+event notifications. Additionally, \bomb efficiently uses the
+resources provided by TinyOS; during a split-phase operation, \bomb
+does nothing on behalf of the calling context, allowing TinyOS to put
+the CPU to sleep or use it freely.
+
+
+\bomb is a stack-based architecture. This allows a concise
+instruction set; most instructions do not have to specify operands, as
+they exist on the operand stack. There are five classes of \bomb
+instructions: basic, m-class, j-class, v-class, and x-class. Figure
+\ref{fig:instr} shows the instruction formats for each class. Basic
+instructions include such operations as arithmetic, halting, and
+activating the LEDs on a mote. m-class instructions access message
+headers; they can only be executed within the message send and receive
+contexts. v-class instructions access the 16 word \bomb
+heap. j-class instructions are the two jump instructions, for loops
+and conditionals. The one x-class instructions is {\tt pushc} (push
+constant). All instruction classes except basic have embedded operands..
+
+
+\bomb's three principal execution contexts, illustrated in Figure
+
+\ref{fig:exec}, correspond to three events: clock timers, message
+receptions and message send requests.  Inheriting from languages such
+as FORTH, each context has two stacks, an operand stack and a return
+address stack. The former is used for all instructions handling data,
+while the latter is used for subroutine calls. The operand stack has a
+maximum depth of 16 while the call stack has a maximum depth of 8. We
+have found this more than adequate for programs we have written.
+
+There is an additional context, the ``once'' context. Unlike other
+contexts, which run their capsules many times, this context only runs
+its capsule once, when it is installed; this allows a user to
+initialize state, adjust constants, or perform other operations that
+only need a single execution.
+
+There are three operands types: values, sensor readings, and
+buffers. Some instructions can only operate on certain types. For
+example, the {\tt putled} instruction expects a value on the top of
+the operand stack. However, many instructions are polymorphic. For
+example, the {\tt add} instruction can be used to add any combination
+of the types, with different results. Adding buffers results in
+appending the data in the second operand onto the first
+operand. Adding a value to a message appends the value to the message
+data payload. Sensor readings can be turned into values with the {\tt
+cast} instruction.
+
+Sensor readings are typed, and cannot be modified. For example, in
+order to take an average over a set of readings, each reading must be
+first be converted to a value; these values can then be averaged. Many
+instructions (e.g. {\tt inv}) automatically cast sensor readings to
+values. This ensures that a sensor reading variable has some meaning;
+otherwise, it could express some arbitrary quantity. Adding two sensor
+readings of the same type (e.g. magnetometer X-axis) produces a value,
+and adding two sensor readings of different values is an error.
+
+Buffers are also typed, and can hold up to ten values. A buffer can
+only hold elements of one type, whether they be values or a certain
+sensor type. An empty buffer has no type; the first element added will
+set the type of the buffer. Buffers have several access instructions,
+including {\tt bhead} (copy of the first element of the buffer onto
+the operand stack), {\tt byank} (pull the nth element out of the
+buffer and push it into the operand stack), and {\tt bsorta} (sort the
+elements in ascending order.
+
+There is a 16 word heap shared among the context. It can be accessed
+with the {\tt setvar} and {\tt getvar} instructions, which have a
+4-bit embedded operand.. This allows the separate contexts to
+communicate shared state (e.g. sensor readings).
+
+\subsection{Capsules and Execution}
+
+
+\bomb programs are broken up into capsules of up to 24
+instructions. This limit allows a capsule to fit into a single TinyOS
+packet. By making capsule reception atomic, \bomb does not need to
+buffer partial capsules, which conserves RAM. Every code capsule
+includes type and version information. \bomb defines two types of code
+capsules: context capsules, which are the root execution of a context,
+and subroutine capsules, which can be called from context capsules or
+other subroutine capsule. Subroutine capsules allow programs to be
+more complex than what fits in a single capsule. Applications invoke
+and return from subroutines using the {\tt call} and {\tt return}
+instructions. There are names for up to $2^{15}$ subroutines; to keep
+\bomb's RAM requirements small, its current implementation has only
+four.
+
+
+
+\bomb begins execution in response to an event -- a timer going
+
+off, a packet being received, or a packet being sent. Each of these
+events has a capsule and an execution context. Control jumps to the
+first instruction of the capsule and executes until it reaches the
+{\tt halt} instruction. These three contexts can run
+concurrently. Each instruction is executed as a TinyOS task, which
+allows execution interleaving at an instruction
+granularity. Additionally, underlying TinyOS components can operate
+concurrently with \bomb instruction processing. When a subroutine is
+called, the return address (capsule, instruction number) is pushed
+onto a return address stack and control jumps to the first instruction
+of the subroutine. When a subroutine returns, it pops an address off
+the return stack and jumps to the appropriate instruction.
+
+\begin{figure}
+\begin{center}
+\scriptsize
+\begin{tabular}{l}
+\verb;getvar 0    # Get heap variable 0;\\
+\verb;pushc 1     # Push one onto operand stack;\\
+\verb;add         # Add the one to the stored counter;\\     
+\verb;copy        # Copy the new counter value;\\
+\verb;setvar 0    # Set heap variable 0;\\
+\verb;pushc 7 ;\\     
+\verb;and         # Take bottom three bits of counter;\\
+\verb;putled      # Set the LEDs to these three bits;\\
+\verb;halt;\\
+\end{tabular}
+\normalsize
+
+
+\caption{\bomb {\tt cnt\_to\_leds} -- Shows the bottom 3 bits of a counter on mote LEDs}
+
+\label{fig:cnt}
+\end{center}
+\end{figure}
+
+
+\begin{figure}
+\begin{center}
+\scriptsize
+\begin{tabular}{l}
+\verb;pushc 1     # Push one on the operand stack;\\
+\verb;sense       # Read sensor 1 (light);\\
+\verb;copy        # Copy the sensor reading;\\
+\verb;getvar 0    # Get previous sent reading;\\
+\verb;;\\
+\verb;inv         # Invert previous reading ;\\
+\verb;add         # Current - previous sent value;\\
+\verb;copy        # 2 copies of difference on top of stack;\\
+\verb;pushc 32    #;\\
+\verb;;\\
+\verb;gt          # Is current 32 greater than previous?;\\
+\verb;swap        # Swap result with copy ;\\
+\verb;pushc 32    #;\\
+\verb;inv         #;\\
+\verb;;\\
+\verb;lt          # Is current 32 less than previous?;\\
+\verb;or          # Either  32> or 32<;\\
+\verb;jumps 15    # Jump to send;\\
+\verb;halt;\\
+\verb;;\\
+\verb;copy        # Copy new value;\\
+\verb;setvar 0    # Set current;\\
+\verb;bpush0      # Push buffer 0 onto stack;\\
+\verb;bclear      # Clear its contents;\\
+\verb;;\\
+\verb;add         # Add current reading to buffer;\\
+\verb;send        # Send buffer;\\
+\verb;halt;\\
+
+\end{tabular}
+\normalsize
+
+\caption{\bomb Program to Read Light Data and Send a Packet on Reading Change}
+
+\label{fig:sense}
+\end{center}
+\end{figure}
+
+The packet receive and clock capsules execute in response to external
+events; in contrast, the packet send capsule executes in response to
+the {\tt sendr} instruction. As {\tt sendr} will probably execute a
+number of \bomb instructions in addition to sending a packet, it can
+be a lengthy operation. Therefore, when {\tt sendr} is issued, \bomb
+copies the message buffer onto the send context operand stack and
+schedules the send context to run. Once the message has been copied,
+the calling context can resume execution. The send context executes
+concurrently to the calling context, preparing a packet and later
+sending it. This frees up the calling context to handle subsequent
+events -- in the case of the receive context, this is very important.
+
+
+The constrained addressing modes of \bomb instructions ensure a
+context cannot access the state of a separate context. Every push and
+pop on the operand and return value stack has bound checks to prevent
+overrun and underrun. As there is only a single shared variable, heap
+addressing is not a problem. Unrecognized instructions result in
+simple no-ops. All bounds are always checked -- the only way two
+contexts can share state is through {\tt gets} and {\tt
+sets}. Nefarious capsules can at worst clog a network with packets --
+even in this case, a newer capsule will inevitably be heard. By
+providing such a constrained execution environment and providing
+high-level abstractions to services such as the network layer, \bomb
+ensures that it is resilient to buggy or malicious capsules.
+
+\subsection{Simple Programs}
+\label{sec:sub:simple}
+
+
+The \bomb program in Figure \ref{fig:cnt} maintains a counter that
+increments on each clock tick. The bottom three bits of the counter
+are displayed on the three mote LEDs. The counter is kept as a value
+which persists at the top of the stack across invocations. This
+program could alternatively been implemented by using {\tt gets} and
+{\tt sets} to modify the shared variable.  This code recreates one of
+the simplest TinyOS applications, {\tt cnt\_to\_leds}, implemented in
+seven bytes.
+
+
+The \bomb program in Figure \ref{fig:sense} reads the light sensor
+on every clock tick. If the sensor value differs from the last sent
+value by more than a given amount (32 in this example), the program
+sends the data using \bomb's built-in ad-hoc routing system. This
+program is 24 bytes long, fitting in a single capsule.
+
+\subsection{Capsule Injector}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=2in]{fig/CapsuleInjector.jpg}
+\caption{CapsuleInjector GUI}
+\label{fig:capsuleinject}
+\end{center}
+\end{figure}
+
+A tool is included in the TinyOS release to aid in the writing of
+
+\bomb programs: {\tt net.tinyos.vm\_asm.CapsuleInjector}. {\tt
+
+CapsuleInjector} provides an interface for writing assembly programs
+and sending them to a mote connected to a PC; if the capsule is marked
+self-forwarding, it will then start propagating into the network.
+
+One must set the destination mote ID of the capsule packet (important
+when using a GenericBase) and the version number of the
+capsule. Version numbers are explained in Section \ref{sec:viral};
+\bomb only installs a capsule if its version number is higher than
+the one it currently has.
+
+
+If the program has an error (e.g. an unknown instruction), {\tt
+CapsuleInjector} does not send out a packet.
+
+
+\subsection{Synchronization}
+
+\bomb interleaves the execution of its contexts at instruction
+granularity. The presence of a 16-word shared heap means that if
+different contexts communicate or share variables (e.g. an aggregated
+sensor reading), race conditions can easily occur. As the program
+running on a mote is the combination of possibly forwarding capsules,
+applications can go through transient states of partial installation,
+making programmer efforts (e.g. a spin loop) ineffectual.
+
+\bomb therefore uses an implicit locking scheme, so that
+programmers are assured that there will be no race conditions in their
+programs. Experienced programmers can relax the locking requirements
+to improve parallelism.
+
+\subsubsection{Model}
+
+The \bomb sychronization model is based on five abstractions:
+\emph{handlers, invocations, resources, scheduling points} and
+\emph{sequences}. We describe how we discover the resources used by an
+invocation, and how invocation communicate their resource requirements
+to the runtime system.
+
+A \emph{handler} is a function that is executed in response to some
+event. An \emph{invocation} represents a particular execution of a
+handler in response to an event. At any time, invocations are in one
+of four states: \emph{waiting} (for resources), \emph{suspended}
+(waiting for an operation to complete), \emph{ready} (can execute),
+\emph{running} (executing). We say that an invocation that is ready or
+running is \emph{active}.
+
+A \emph{resource} is a shared piece of state that a handler requires
+access to -- examples are a variable, a disk arm, or a sensor.
+Resources can only be held by invocations.
+
+A handler contains a number of \emph{scheduling points} at which it can be
+suspended and gain or lose resources (and resources cannot be acquired
+anywhere but at scheduling points). Scheduling points are the handler's
+entry and exit points, and some subset of its operations which we call
+\emph{scheduled operations}. An invocation goes through two states during
+execution of a scheduled operation: first, the invocation is suspended
+awaiting the completion of the operation; second, the invocation is
+waiting for the resources it wishes to gain to become
+available. Either of these two phases may be trivial: a {\tt yield}
+operation completes immediately but may wait for some resources, a
+message send does not complete immediately but, if it is not waiting
+for any resources, will not wait. A \emph{sequence} is any code path
+between two scheduling points which does not include another
+scheduling point.
+
+The model for resource acquisition and release is as follows: before
+an invocation can start execution, it must acquire all resources it
+will need during its lifetime. At each subsequent scheduling point,
+the invocation can release a set $R$ of resources before suspending
+execution, and acquire a set $A$ of resources before resuming. To
+prevent deadlock, we require $A
+\subseteq R$ (we prove below that this condition is sufficient for building
+deadlock-free schedulers). Finally, when an invocation exits it must
+release all held resources. Note that we do not guarantee any atomicity
+between two invocations of the same handler.
+
+To preserve safety, the static analysis of a handler's resource usage
+and the runtime system must guarantee that an invocation holds all
+resources at the time(s) at which they are accessed and that the
+intersection of the resources held by any two invocations is empty. We
+restrict our invocation model to considering a static number of
+resources, and require operations to explicitly name the resources
+they use so that we can easily analyse handlers at compile (or load)
+time. Resource discovery must be conservative to preserve correctness.
+
+
+\subsubsection{\bomb Implementation}
+
+
+We implemented this syncronization model in \bomb. Each
+\bomb context is an invocation, and capsules are implicitly
+broken up into sequences. \bomb maintains two queues of
+invocations: ready and waiting. Whenever \bomb installs a new
+capsule, it performs a static full-program analysis to generate the
+acquire sets of its invocation start points. Without requiring any
+annotation from a programmer, \bomb runs invocations atomically
+while allowing parallelism. Programmers can improve the degree of
+parallelism by yielding resources at scheduling points.
+
+\bomb invocations are broken into sequences by scheduling point
+instructions. When a context executes one of these instructions, the
+\bomb runtime examines the current release set of the issuing
+context and releases the locks on the indicated resources. \bomb
+then checks the waiting queue to see if any contexts have been made
+runnable by the release of these locks. When the scheduling point
+instruction completes, \bomb checks the acquire set of the
+context to see if it can be made active; if so, the context acquires
+its locks and \bomb places it on the ready queue. If the context
+cannot be made active, \bomb places it on the waiting queue.
+
+\begin{figure}
+\centering
+\tiny
+\begin{tabular}{|l|l|}\hline
+\verb;pushc 3  #                   ;&\verb; pushc 3 ;\\
+\verb;unlock   # Add lock 3 to R,A ;&\verb; unlockb   # Add locks 0,1 to R,A;\\
+\verb;pushc 2  #                   ;&\verb; pushc 12 ;\\
+\verb;punlock  # Add lock 2 to R   ;&\verb; punlockb  # Add locks 2,3 to R;\\
+\verb;sense    # Yield             ;&\verb; sense     # Yield;\\ \hline
+
+\end{tabular}
+
+\caption{Sample \bomb Unlocking}
+
+\label{fig:locks}
+
+\end{figure}
+
+\bomb defines its scheduling point instructions to be those that
+trigger split-phase operations in TinyOS. This includes acquiring
+sensor data ({\tt sense}), sending packets ({\tt send, sendr, uart}),
+and accessing non-volatile flash memory storage ({\tt logr, logw,
+logwl}). Additionally, there is a {\tt yield} instruction, which is
+effectively a split-phase operation that immediately completes. Locks
+are added to a context's release set with the {\tt unlock} instruction
+-- by default, the set is empty. {\tt unlock} also adds the lock to
+the context's acquire set. For a lock to be released, but not
+re-acquired, a context much use the {\tt punlock} (unlock permanent)
+instruction. The {\tt unlock} and {\tt punlock} instructions affect
+individual locks, enumerated by an operand; the {\tt unlockb} and {\tt
+punlockb} instructions use the operand as a bitmask for locks to be
+released. Locks are not released until a scheduling-point instruction
+is executed. Figure \ref{fig:locks} contains two sample \bomb
+instruction sequences that demonstrate resource unlocking.
+
+Release and acquire sets are atomically handled by \bomb. A
+context does not acquire any locks in its acquire set unless it can
+acquire all of them, and acquires them atomically. Similarly, release
+sets are released atomically. This, combined with monotonically
+decreasing lock sets, ensures the system is deadlock free.
+
+\subsection{Viral Programming}
+\label{sec:viral}
+
+
+\bomb code capsules can be marked ``forwarding.'' Capsules marked
+forwarding are automatically forwarded by the viral propagation
+subsystem (BVirus) of the VM.
+
+
+The first implementation of the VM had an explicit caspule forwarding
+system (the {\tt forw} instruction); experimental results showed this
+to be a terrible idea, as programs could very easily saturate the
+network unknowingly. We therefore adopted this simple probabilistic
+model. It is by no means perfect; for example, even if every mote in
+the network is running the same capsule, they will continue to forward
+it indefinitely.
+
+Every capsule has a version number. When \bomb hears a capsule
+broadcast, it checks if the capsule is newer than the one currently
+installed; if so, \bomb halts execution of that context and
+installs the new capsule.
+
+Our first implementation of the VM had an explicit caspule forwarding
+system (the {\tt forw} instruction); experimental results showed this
+to be a terrible idea, as programs could very easily saturate the
+network unknowingly. We therefore adopted this simple probabilistic
+model. It is by no means perfect; for example, even if every mote in
+the network is running the same capsule, they will continue to forward
+it indefinitely.
+
+Currently, \bomb uses a density-adjusting algorithm; every mote
+maintains a time interval of length $\tau$, and picks a random
+point $t$ in $tau$ in which to transmit a summary of capsule
+versions. If the mote hears an identical version summary before
+$t$, it suppresses its transmission. This mechanism controls the
+number of version summaries sent within a cell during any time period
+$tau$, keeping it to a small constant. The algorithm also scales
+$tau$ to achieve low overhead when the network is stable and high
+reprogramming rates when there is new code. When a node hears a
+version summary with older capsules than it has, it broadcasts the
+needed capsules.
+
+\subsection{Error State}
+
+
+\bomb has an error state, which can help users debug their
+programs. If a program triggers an error (for example, by trying to
+add incompatible sensor readings, or by overflowing the operand
+stack), \bomb halts execution on all contexts. Then, every second, it
+blinks all of the LEDs and sends a packet containing debugging
+information over the UART. The packet contains the offending context
+identifier, the capsule it was executing, the instruction that caused
+the error, and the error code. Error codes can be found in
+{\tt \bomb.h}. They are:
+
+
+\begin{verbatim}
+typedef enum {
+  BOMB_ERROR_TRIGGERED                =  0,
+  BOMB_ERROR_INVALID_RUNNABLE         =  1,
+  BOMB_ERROR_STACK_OVERFLOW           =  2,
+  BOMB_ERROR_STACK_UNDERFLOW          =  3, 
+  BOMB_ERROR_BUFFER_OVERFLOW          =  4,
+  BOMB_ERROR_BUFFER_UNDERFLOW         =  5,
+  BOMB_ERROR_INDEX_OUT_OF_BOUNDS      =  6,
+  BOMB_ERROR_INSTRUCTION_RUNOFF       =  7,
+  BOMB_ERROR_LOCK_INVALID             =  8,
+  BOMB_ERROR_LOCK_STEAL               =  9,
+  BOMB_ERROR_UNLOCK_INVALID           = 10,
+  BOMB_ERROR_QUEUE_ENQUEUE            = 11,
+  BOMB_ERROR_QUEUE_DEQUEUE            = 12,
+  BOMB_ERROR_QUEUE_REMOVE             = 13,
+  BOMB_ERROR_QUEUE_INVALID            = 14,
+  BOMB_ERROR_RSTACK_OVERFLOW          = 15,
+  BOMB_ERROR_RSTACK_UNDERFLOW         = 16, 
+  BOMB_ERROR_INVALID_ACCESS           = 17,
+  BOMB_ERROR_TYPE_CHECK               = 18,
+  BOMB_ERROR_INVALID_TYPE             = 19,
+  BOMB_ERROR_INVALID_LOCK             = 20,
+  BOMB_ERROR_INVALID_INSTRUCTION      = 21
+} BombillaErrorCode;
+\end{verbatim}
+
+
+The \bomb error packet has the following payload:
+
+
+\begin{verbatim}
+typedef struct BombillaErrorMsg {
+  uint8_t context;
+  uint8_t reason;
+  uint8_t capsule;
+  uint8_t instruction;
+} BombillaErrorMsg;
+\end{verbatim}
+
+\section{\mate}
+
+\bomb is an instance of the \mate virtual machine. \mate's architecture
+has many similarities to TinyOS; the core of the VM is a simple
+component that schedules contexts to execute. nesC wiring allows
+developers to easily customize and change the VM contexts,
+instructions, and subsystems.
+
+\subsection{Component Architecture}
+
+The core \mate component, {\tt BombillaEngine}, receives requests from
+contexts to be scheduled and executes them at a granularity of up to a
+single \mate instruction. The contexts themselves, the instruction
+set, and the VM services are all separate from the VM scheduler.
+
+A TinyOS component provides every \mate instruction. While most
+instruction components implement only one instruction, some implement
+several related instructions. For example, the shared memory access
+instructions, {\tt getvar} and {\tt setvar}, are both provided by a
+single component; it's unlikely that only one of the two would ever be
+needed. Instruction components provide the {\tt BombillaBytecode}
+interface, and {\tt BombillaEngine} uses that interface with an 8-bit
+parameter: each instruction is a single byte. The set of instruction
+components wired to {\tt BombillaEngine} specifies the instruction
+set.
+
+To be specific, this is the interface signature of {\tt BombillaEngine}:
+
+\begin{verbatim}
+configuration BombillaEngine {
+  provides {
+    interface StdControl;
+    command result_t computeInstruction(BombillaContext* context);
+    command result_t executeContext(BombillaContext* context);
+    
+    interface BombillaContextComm;
+  }
+  uses interface BombillaBytecode as Bytecode[uint8_t bytecode];
+}
+\end{verbatim}
+
+and this is a snippet of \bomb's configuration:
+
+\begin{verbatim}
+configuration AbstractMate {}
+implementation {
+  components BombillaEngine as VM;
+  components OPhalt, OPputled, OPcopy, OPadd, OPland, OPlor, OPlnot;
+
+  ...
+
+  VM.Bytecode[OPhalt] -> OPhalt;
+  VM.Bytecode[OPputled] -> OPputled;
+  VM.Bytecode[OPadd] -> OPadd;
+  VM.Bytecode[OPcopy] -> OPcopy;
+  VM.Bytecode[OPland] -> OPland;
+  VM.Bytecode[OPlor] -> OPlor;
+  VM.Bytecode[OPlnot] -> OPlnot;
+
+  ...
+}
+\end{verbatim}
+
+The bytecode wirings use the name of a bytecode twice, as a component
+and as a constant from an enum. For example, {\tt VM.Bytecode[OPadd]}
+$->$ {\tt OPadd;} means ``wire the OPadd {\bf component} to the
+instance of Bytecode specified by the enum {\bf constant} OPadd.'' The
+constant is specified in {\tt Bombilla.h}.
+
+{\Large something similar is done for contexts}
+
+By encapsulating instructions into components, TinyOS allocates
+storage only for used systems. For example, the {\tt sense}
+instruction keeps some state on the sensor being sampled and maintains
+a wait queue of contexts. Similarly, subroutine capsules are part of
+the {\tt call} instruction; if a VM can't call the subroutines,
+there's no need to waste RAM on them.
+
+\subsection{Service Proxies}
+
+Instructions often need to use several VM subsystems; for example,
+almost every instruction manipulates the operand stack, requiring a
+component that provides the {\tt BombillaStacks} interface. This
+raises the issue of where these wirings are made. On one hand, wiring
+at the top-level configuration is laborious: up to 256 instructions,
+with 2-3 used interfaces each, leads to a very large file. On the
+other, wiring at the instruction component level makes consistency
+difficult: it's possible that two instructions wire in two different
+implementations of a VM service.
+
+To solve this problem, every instruction is a configuration, but
+instead of wiring used interfaces to a specific component, they're
+wired to proxy configurations, such as {\tt BStacksProxy}. Every
+instruction has a module, e.g. {\tt OPhaltM}, and a configuration,
+e.g. {\tt OPhalt}. The configuration wires all of the module's used
+interfaces to these proxies. For example, every instruction modules
+that uses the {\tt BombillaStacks} interface has a configuration that
+has something like:
+
+\begin{verbatim}
+  Instr.BombillaStacks -> BStacksProxy;
+\end{verbatim}
+
+These proxy configurations are simple ``pass-through''
+configurations. For example:
+
+\begin{verbatim}
+configuration BStacksProxy {
+  provides {
+    interface BombillaStacks;
+    interface BombillaTypes;
+  }
+}
+implementation {}
+\end{verbatim}
+
+They do not actually provide a service; instead, they represent a
+single, common wiring point for all users of that service. Then, the
+top-level VM configuration can pick an implementation of that service and
+wire it to the proxy:
+
+\begin{verbatim}
+configuration AbstractMate{}
+implementation {
+  components BStacks, BStacksProxy;
+
+  BStacksProxy.BombillaStacks -> BStacks;
+  BStacksProxy.BombillaTypes -> BStacks;
+}
+\end{verbatim}
+
+This abstraction is necessary for when there are multiple versions of
+a service, and a single implementation needs to be chosen for the
+entire VM. For example, there are two providers of {\tt
+BombillaLocks}: {\tt BLocks} and {\tt BLocksSafe}. The former is a
+fast and efficient implementation, while the latter performs
+additional checks in case callers have errors in their logic (e.g.,
+unlocking locks they do not hold). The implementation can be changed
+by modifying a single line in the VM configuration.
+
+\subsection{Instruction Examples}
+
+Every instruction component must provide the {\tt BombillaBytecode}
+interface, which the {\tt BombillaEngine} calls when it reaches the
+associated opcode in a program. Perhaps the simplest \bomb instruction
+is {\tt pop}, which pops an operand off the operand stack. This is the
+complete code for the {\tt OPpopM} module:
+
+\begin{verbatim}
+includes Bombilla;
+includes BombillaMsgs;
+
+module OPpopM {
+  provides interface BombillaBytecode;
+  uses interface BombillaStacks as Stacks;
+}
+
+implementation {
+
+  command result_t BombillaBytecode.execute(uint8_t instr,
+                                            BombillaContext* context,
+                                            BombillaState* state) {
+    dbg(DBG_USR1, "VM (%i): Popping top operand off of stack. \n", context->which);
+    call Stacks.popOperand(context);
+    return SUCCESS;
+  }
+}
+\end{verbatim}
+
+Its configuration ({\tt OPpop}) is:
+
+\begin{verbatim}includes Bombilla;
+includes BombillaMsgs;
+
+configuration OPpop {
+  provides interface BombillaBytecode;
+}
+
+implementation {
+  components OPpopM, BStacksProxy;
+  
+  BombillaBytecode = OPpopM;
+
+  OPpopM.Stacks -> BStacksProxy;
+}
+\end{verbatim}
+
+\subsubsection{Error Checking}
+
+Most of the \mate service components automatically perform checks; for
+example, if {\tt BStacks} is told to pop off an empty stack, it
+triggers an error condition ({\tt BOMB\_STACK\_UNDERFLOW}). Error
+conditions are triggered through the {\tt BErrorProxy}
+component. Sometimes, however, instructions have additional checks;
+for example, the {\tt bfull} instruction takes a buffer as an
+operand. If the top operand is not a buffer, it triggers an error
+condition.
+
+\begin{verbatim}
+includes Bombilla;
+includes BombillaMsgs;
+
+module OPbfullM {
+  provides interface BombillaBytecode;
+  uses interface BombillaStacks as Stacks;
+  uses interface BombillaTypes as Types;
+}
+
+implementation {
+
+  command result_t BombillaBytecode.execute(uint8_t instr,
+                                            BombillaContext* context,
+                                            BombillaState* state) {
+    BombillaStackVariable* arg = call Stacks.popOperand(context);
+    dbg(DBG_USR1, "VM (%i): Checking if buffer full.\n", (int)context->which);  
+                
+    if (!call Types.checkTypes(context, arg, BOMB_VAR_B)) {return FAIL;}
+    call Stacks.pushOperand(context, arg);
+    call Stacks.pushValue(context, (arg->buffer.var->size == BOMB_BUF_LEN)? 1: 0
+);
+    return SUCCESS;
+  }
+}
+\end{verbatim}
+
+If {\tt Types.checkTypes()} fails, it triggers an error condition in
+the calling context. The final parameter is a bitmask of valid types:
+{\tt BOMB\_VAR\_B} for buffer, {\tt BOMB\_VAR\_S} for sensor, and {\tt
+BOMB\_VAR\_V} for value. These can be combined; for example, {\tt
+(BOMB\_VAR\_B | BOMB\_VAR\_V)} will succeed for buffers or values.
+
+Error conditions can also be triggered explicitly. For example, the
+comparison instructions {\tt gte, gt, lt, lte, eq} all require two
+operands of the same type. The code for {\tt gte} is as follows:
+
+\begin{verbatim}
+module OPgteM {
+  provides interface BombillaBytecode;
+  uses interface BombillaStacks as Stacks;
+  uses interface BombillaError;
+}
+
+implementation {
+
+  command result_t BombillaBytecode.execute(uint8_t instr,
+                                            BombillaContext* context,
+                                            BombillaState* state) {
+    BombillaStackVariable* arg1 = call Stacks.popOperand(context);
+    BombillaStackVariable* arg2 = call Stacks.popOperand(context);
+    
+    if ((arg1->type == BOMB_VAR_V) &&
+        (arg2->type == BOMB_VAR_V)) {
+      call Stacks.pushValue(context, arg2->value.var > arg1->value.var);
+    }
+    else if ((arg1->type == BOMB_VAR_S) &&
+             (arg2->type == BOMB_VAR_S) &&
+             (arg1->sense.type == arg2->sense.type)) {
+      call Stacks.pushValue(context, arg2->sense.var > arg1->sense.var);
+    }
+    else {
+      call BombillaError.error(context, BOMB_ERROR_INVALID_TYPE);
+      return FAIL;
+    }
+    return SUCCESS;
+  }
+}
+\end{verbatim}
+
+where {\tt BombillaError.error} is explicitly called at the end.
+
+\subsubsection{Split Phase Operations}
+
+Generally, instructions that merely manipulate operands are fairly
+simple, as the examples above show. Instructions that encapsulate
+split-phase operations (such as {\tt sense} and {\tt send}) are a bit
+more complex, as these instructions cause contexts to block. As
+split-phase operations are scheduling points, they can also yield
+locks.
+
+The basic pseudocode for a scheduling point instruction is this:
+
+\begin{tabbing}
+none\=none\=none\=none\=none\=none\=none\=none\=none\= \kill
+if another context is using the resource \\
+\>put caller on wait queue\\
+else if underlying resource is busy \\
+\>put caller on wait queue \\
+else  \\
+\>start split-phase operation \\
+\>set context state to appropriate value\\
+\>set active context as one executing operation\\
+\>call Synch.releaseLocks \\
+\>call Synch.yieldContext \\
+\end{tabbing}
+
+{\tt Synch.releaseLocks()} releases all of the locks a context has set
+to yield with, for example, the {\tt unlock} or {\tt punlock}
+instructions. {\tt Synch.yieldContext()} then takes the context off
+the run queue, and checks if there are any contexts made runnable by
+yielded locks. Putting a caller on a wait queue also requires
+restoring it to its state before it executed this instruction, so it
+can retry later.
+
+The corresponding event of the split-phase operation is then
+responsible for resuming the blocked context, and pulling a waiting
+context off the wait queue.
+
+\begin{tabbing}
+none\=none\=none\=none\=none\=none\=none\=none\=none\= \kill
+if no active context\\
+\>return\\
+put active context in run state\\
+call Synch.resume\\
+make any necessary operand stack operations\\
+clear active context \\
+if wait queue is not empty\\
+\>dequeue context from wait queue\\
+\>call Synch.resume\\
+\end{tabbing}
+
+The second {\tt Synch.resume} will cause the waiting context to
+execute its next instruction, which will be the one that executes the
+split-phase operation.
+
+For examples of this logic, look at {\tt OPsense} and {\tt OPsend}.
+
+\subsubsection{Embedded Operands}
+
+Some instructions, such as {\tt pushc}, have embedded
+operands. Instruction components that expect embedded operands have a
+number at the end of their name, specifying the bit width of the
+expected value. For example, {\tt OPcall2} says that the {\tt call}
+instruction expects two bits of operand, while {\tt OPpushc6} says
+that {\tt pushc} expects six. These instructions take up more than one
+slot in a VM's instruction set. For example,
+
+\begin{verbatim}
+  VM.Bytecode[OPcall0] -> OPcall2;
+  VM.Bytecode[OPcall0+1] -> OPcall2;
+  VM.Bytecode[OPcall0+2] -> OPcall2;
+  VM.Bytecode[OPcall0+3] -> OPcall2;
+\end{verbatim}
+
+The code of {\tt call} then reads:
+
+\begin{verbatim}
+command result_t BombillaBytecode.execute(uint8_t instr,
+                                          BombillaContext* context,
+                                          BombillaState* state) {
+  dbg(DBG_USR1, "VM (%i): Calling subroutine %hhu\n", (int)context->which, (ui
+nt8_t)(instr & 0x3));
+  call Stacks.pushReturnAddr(context);
+  context->capsule = &(state->capsules[instr & 0x3]);
+  context->pc = 0;
+  return SUCCESS;
+}
+\end{verbatim}
+
+\subsection{Contexts}
+
+\mate contexts are essentially what is described in the \bomb section;
+they have two stacks, etc. Making each instruction a component allows
+a user to customize the VM instruction set. Contexts follow a similar
+model: each context is a separate component, which is wired to {\tt
+BombillaEngine}. The component handles the event that triggers the
+context, and sets it runnable. The context component is responsible
+for both the context state and the context capsule; as with
+instructions, this means the VM only needs memory for contexts that
+are used. \bomb has four contexts: clock, send, receive, and
+once. These implementations can be used as templates for new contexts.
+
+The viral propagation subsystem, {\tt BVirusProxy}, requires that
+components register capsules with it when the VM boots. This allows it
+to easily generate version vectors and install new code. When new code
+is installed, all running contexts must halt and reset. 
+
+\section{Customizing \mate}
+\label{sec:extending}
+
+The easiest way to customize \mate is to start from a working VM and
+modify it. For example, let's say your application needs to take
+square roots; implementing this in an instruction is much more
+efficient than trying to code it in \mate bytecodes.
+
+The first step is to write the {\tt OPsqrt} component. {\tt sqrt} pops
+a single value operand off the stack, takes its square root, and
+pushes the result back onto the stack. This component provides one
+interface, {\tt BombillaBytecode}, uses two: {\tt BombillaStacks} to
+push and pop, and {\tt BombillaTypes} to check that the top of the
+stack is a value.
+
+The resulting signature for the module is:
+
+\begin{verbatim}
+includes BombillaMsgs;
+
+module OPsqrtM {
+  provides interface BombillaBytecode;
+  uses {
+    interface BombillaStacks as Stacks;
+    interface BombillaTypes as Types;
+  }
+}
+\end{verbatim}
+
+The component only implements one function, {\tt execute}:
+
+\begin{verbatim}
+implementation {
+
+  command result_t BombillaBytecode.execute(uint8_t instr,
+                                            BombillaContext* context,
+                                            BombillaState* state) {
+    BombillaStackVariable* arg = call Stacks.popOperand(context);
+    dbg(DBG_USR1, "VM (%i): Taking squart root of top of stack.\n", (int)context->which);
+    if (!call Types.checkTypes(context, arg, BOMB_VAR_V)) {return FAIL;}
+    arg->value.var = (int16_t)sqrt(arg->value.var)
+    call Stacks.pushOperand(context, arg);
+    return SUCCESS;
+  }
+}
+\end{verbatim}
+
+The module needs a configuration, which wires it to the appropriate
+proxies:
+
+\begin{verbatim}
+includes Bombilla;
+includes BombillaMsgs;
+
+configuration OPsqrt {
+  provides interface BombillaBytecode;
+}
+implementation {
+  components OPsqrtM, BStacksProxy;
+
+  BombillaBytecode = OPinvM;
+  OPsqrtM.Stacks -> BStacksProxy;
+  OPsqrtM.Types -> BStacksProxy;
+}
+\end{verbatim}
+
+The {\tt OPsqrt} component is now a functioning instruction. The final
+step is to include it in the VM. There are two steps to this: the
+first is to define the opcode value of the instruction (probably
+replacing another instruction), and the second is to wire it to the VM.
+
+The first is accomplished by modifying the application's {\tt
+BombillaOpcodes.h}. In this case, we'll remove the {\tt cpull}
+instruction. Do this by changing the line {\tt OPcpull = 0x11} to {\tt
+OPsqrt = 0x11}. Then, in the top-level VM configuration, remove the
+component {\tt OPcpull}, adding {\tt OPsqrt}, and the line {\tt
+VM.Bytecode[OPcpull] -> OPcpull;}, replacing it with {\tt
+VM.Bytecode[OPcpull] -> OPsqrt;}
+
+Now, when {\tt BombillaEngine} encounters the opcode {\tt 0x11}, it
+will execute the square root instruction.
+
+\subsection{Customizing CapsuleInjector}
+
+By default, {\tt CapsuleInjector} uses the \bomb configuration for its
+opcodes and contexts. Changing contexts and capsule options requires
+changing {\tt CapsuleInjector}'s code, but the instruction set can be
+changed with much less work.
+
+{\tt CapsuleInjector} uses the java class {\tt BombillaConstants} to
+assemble instructions to binary opcodes. {\tt BombillaConstants} is
+automatically generated using {\tt ncg}; if you change the {\tt .h}
+file that {\tt BombillaConstants} is generated from, then {\tt
+CapsuleInjector} will recognize a different set of instructions.
+
+{\tt CapsuleInjector} recognizes constants whose name begins with {\tt
+OP} as opcodes. For example, when it reads the instruction {\tt jumpc}
+from a program, it looks for a constant named {\tt OPjumpc} and
+translates it to the corresponding value.
+
+\end{document}

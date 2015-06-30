@@ -1,0 +1,13 @@
+
+TOS_MODULE NBR_LIST;
+
+ACCEPTS{
+	char NBR_LIST_INIT();
+	char NBR_LIST_LOOKUP(short nbr);
+	void NBR_LIST_INSERT(short nbr);
+	char NBR_LIST_GET_COUNT();
+};
+
+HANDLES{
+	void NBR_LIST_CLOCK_EVENT();
+};

@@ -1,0 +1,8 @@
+#!/bin/bash
+# $Id: flash-xsm,v 1.2 2004/11/13 02:43:05 mturon Exp $
+
+echo "Flashing XSM golden image with node id=$1"
+set-mote-id build/xsm/main.srec build/xsm/main.srec.out $1
+uisp -dprog=mib510 -dserial=/dev/ttyS0 --wr_fuse_h=0xd8 -dpart=ATmega128 --wr_fuse_e=ff  --erase --upload if=build/xsm/main.srec.out
+echo "Flashing XSM boot loader"
+uisp -dprog=mib510 -dserial=/dev/ttyS0 --wr_fuse_h=0xd8 -dpart=ATmega128 --wr_fuse_e=ff  --upload if=./bl_xsm.srec

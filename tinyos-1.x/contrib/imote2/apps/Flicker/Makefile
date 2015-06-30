@@ -1,0 +1,3 @@
+COMPONENT=Flicker
+include ../Makerules
+

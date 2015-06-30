@@ -1,0 +1,14 @@
+package net.tinyos.magtracking.*
+
+README:
+
+The tools in this directory allow you to interact with motes running the code found in: "minitasks/02/ucb/magtracking_demo", which you can checkout from sourceforge similarly to the tinyos-1.x directory
+
+To create the tools in this java package, type make twice (2X).  The makefile uses MIG to generate message classes that interact with the code in tinyos1.x/lib/Ranging.  MIG (message interface generator) usually goes into the NesC code found in those directories to figure out the structure of the packets they are generating/expecting and then generates Java message objects with a matching structure.  However, because magtracking uses a dynamic message structure, MIG doesn't quite work.  As a workaround, I defined the actual packets used in magtracking in the ./Packets.h file, which MIG is directed to.  Make sure you change this file if the magtracking application changes
+
+There are many ways to use the message objects created by MIG.  One such way is found in the tinyos1.x/doc/tutorial/matlab.html tutorial.
+
+To use the ranging message objects from Matlab:
+1) open matlab
+2) change to your /tinyos1.x/tools/matlab/contrib/magtracking directory
+3) run 'defineMagtrackingEnvironment' to setup matlab to use these tools

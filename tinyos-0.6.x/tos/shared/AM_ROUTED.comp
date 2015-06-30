@@ -1,0 +1,77 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Jason Hill, David Culler
+ *
+ *
+ */
+
+/*
+  AM_ROUTED provides delivery of Active Messages either to the local cell
+  or to a base (host) node.  Base messages must leave data[0] unused.
+
+*/
+
+TOS_MODULE AM_ROUTED;
+
+ACCEPTS{
+	char ROUTED_INIT(void);
+	char ROUTED_SEND_LOCAL(short value);
+	char ROUTED_SEND_BASE(short value);
+	char ROUTED_SEND_HOST(char val0, char val1, char val2, char val3, char val4, char val5, char val6, char val7);
+};
+
+HANDLES{
+	char AM_msg_handler_5(char* data);
+	char AM_msg_handler_6(char* data);
+	char AM_msg_handler_7(char* data);
+	char AM_msg_send_done(char success);
+	void ROUTED_CLOCK_EVENT();
+};
+
+SIGNALS{
+	void SUPER_CLOCK_EVENT();
+	char ROUTED_CAPSULE_EVENT(char* code);
+};
+
+USES{
+	char ROUTED_SUB_SEND_MSG(short addr,char type, char* data);
+	void ROUTED_SUB_POWER(char mode);
+	char ROUTED_SUB_INIT();
+	char ROUTED_CLOCK_INIT(char interval, char status);
+	char ROUTED_SUB_LED_INIT();
+	char ROUTED_LED1_OFF();
+	char ROUTED_LED1_ON();
+	char ROUTED_LED1_TOGGLE();
+	char ROUTED_LED2_OFF();
+	char ROUTED_LED2_ON();
+	char ROUTED_LED2_TOGGLE();
+	char ROUTED_LED3_OFF();
+	char ROUTED_LED3_ON();
+	char ROUTED_LED3_TOGGLE();
+
+};
+
+
+
+
+

@@ -1,0 +1,12 @@
+TimeSync Application
+Author/Contact: Sarah Bergbreiter
+		Prabal Dutta
+
+The TimeSync application is used to test the time synchronization component
+used in Mobiloc.
+
+Leds:
+
+green:	should blink simultaneously
+yellow:	 
+red:	

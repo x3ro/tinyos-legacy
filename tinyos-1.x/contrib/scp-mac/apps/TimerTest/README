@@ -1,0 +1,21 @@
+README for TimerTest
+Author/Contact: weiye@isi.edu
+
+Description:
+
+TimerTest tests the implementation of Timer. The tests also use LocalTime,
+the local system time since a node boots, as a reference to verify the timing
+accuracy of each timer. Both Timer and LocalTime implementations are based on 
+the free-running asynchronous counter. Their implementations support CPU deep
+sleep mode, i.e., when there is no interrupts and tasks, the CPU will be put
+into deep sleep mode.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:

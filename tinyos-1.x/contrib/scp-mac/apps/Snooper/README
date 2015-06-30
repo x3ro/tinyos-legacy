@@ -1,0 +1,21 @@
+1. INTRODUCTION
+
+   The snooper listens all packets and send them to UART. So you can use
+tools/snoop.c to receive and display the packet contents on PC.
+
+2. FUNCTIONALITY
+
+   The snooper streams each byte in a received packet to the UART. When it is
+connected with the PC through the programming board and the serial port, you can
+display the each packet on PC by using tools/snoop.c. snoop.c is modified from
+the listen.c, which awares variable length packets.
+
+3. HOW TO USE
+
+   Simply type 'make mica' and/or 'make install mica'.
+
+4. NOTES
+
+   The implementation assumes that the speed of the UART is faster than the data
+arrival rate (after decoding) on the radio.
+

@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>Lesson 2: Injecting an agents into a Network</h1>
+          <p><em>Last Updated on
+              <!-- #BeginDate format:Am1a -->November 29, 2005 1:41 AM<!-- #EndDate -->
+.</em></p>
+          <p>Example Agilla agents can be found in <code>$TOSROOT/contrib/wustl/apps/AgillaAgents</code>.
+            Read the README file within this directory for a description of each
+            agent.</p>
+
+          <!-- <ol><li>RandomWalk.ma - Randomly walks around the network, blinking all
+
+              LEDs three times upon arrival.</li>
+
+            <li>Traverse column.ma - Moves down a column of nodes, each time
+
+              turning on the red LED.</li>
+
+            <li>Traverse perimeter.ma - Traverses the perimeter of the network
+
+              in a counter-clockwise fashion, each time turning on the red LED.</li>
+
+            <li>Traverse row.ma - Moves down a row, each time
+
+              turning on the red LED.</li>
+
+            <li>VisitAll_L2R.ma - Visits every node in the network by sequentially
+
+              cloning itself on each row from left to right. Blinks the green
+
+              LED after cloning itself.</li>
+
+          </ol>-->
+
+          <h3>Configuring the AgentInjector</h3>
+          <p><a name="aiproperties"></a>The AgentInjector searches for an <code>agilla.properties</code> file in the
+             directory from which you launched it. This file may contain the
+            following properties:</p>
+<pre class="screen">initDir=../../apps/AgillaAgents
+defaultAgent=3Blink.ma
+runTest=false</pre>
+          <h3>&nbsp;</h3>
+          <h3>Injecting an Agent</h3>
+          <p>To inject an agent into the network, you have
+
+            open them using the AgentInjector, and select the destination location.</p>
+
+          <ol>
+
+            <li>Run the Agent Injector:<br>
+<br>
+<pre class="screen">$ java edu.wustl.mobilab.agilla.AgentInjector -comm COM1:115200 -d</pre>
+              The AgentInjector GUI will appear:<br>
+
+              <br>
+
+              <img src="injector.jpg" width="510" height="496"><br>
+
+              <br>
+            </li>
+
+            <li>Go to File, Open, and choose <em>3Blink.ma</em>.
+
+                    You should see the following:<br>
+
+                    <br>
+
+                    <img src="3blink_injector.jpg" width="506" height="513"><br>
+
+                    <br>
+
+            </li>
+
+            <li>            The instructions shown in the main text area are
+
+              the 3Blink agent's.             3Blink simply blinks all 3 LEDs
+
+              three times, pauses, and repeats. Below this text area is a panel
+
+              that allows you to specify which location to inject the agents
+
+              into. Currently, it's set to node (0,0) which has an TOS Address
+
+              of 0. The location and TOS Address are related as described <a href="../network_topology.html">here</a>.
+
+              If this is not correct, check the
+
+              size
+
+              of the network by going to
+
+              <em>WSN </em>and selecting <em>Grid Size</em>. </li>
+
+            <li>Hit the Inject
+
+                Agent! button at the bottom of the Agent Injector and the
+
+              agent should be injected into the network.  If you selected a
+              destination
+
+              location that is not immediately connected to the PC, you will see 
+			  the base station mode briefly blink its red and green LEDs to indicate that the agent
+			  bounced off of it.  <!-- You can disable this by commenting out 
+			  <em>#define SHOW_BOUNCE_LED</em> in <em>&lt;agilla&gt;/types/Agilla.h</em> (Note:
+
+              You will have to reinstall Agilla on all of the motes for this
+
+              to take effect). When the 
+
+              arrives, the 3 LEDs should repeately
+
+              blink 3 times. --> </li>
+
+          </ol>
+
+          <br>
+
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

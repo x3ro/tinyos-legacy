@@ -1,0 +1,54 @@
+Introduction.
+
+This an example demonstration for TinyOS using the USART0 of the MSP430 on the Telos platforms.  Many people seem to have difficulty in using the USART in SPI mode (for the CC2420 radio chipset) and in UART mode (for a serial device) at the same time.  I hope the following example will help people better understand the starting and stopping of the communication interfaces as well as the use of the bus arbitration code.  I have also created a java GUI application to go along with this demonstration.  I have tested this example code on Telos rev. B and Tmote Sky devices, compiled on a TinyOS code base checked out of CVS.
+
+Description of TinyOS example code.
+
+Most of the code used in the radio communications part of this example came from the SenseLightToLog example in tinyos-1.x/apps.  I modified the SimpleCmdMsg.h to my own ConsoleMsg.h to create a ConsoleMsg, which is a data message from a mote to a base station, and a ConsoleCmdMsg, which is a control message from the base station to an end mote.  The normal mode of operation of the code is to listen for messages from the radio.  The message format of the ConsoleCmdMsg is not the entire TOS_Msg, but is contained in the data element of the TOS_Msg structure.  The format of the ConsoleCmdMsg is the following:
+
+Element  # of Bytes   Description
+seqno         1       Sequence number of a multiple message command
+hop_count     1       Number of hopped taken to reach node
+source        2       The address of the node that orginated the message
+destaddr      2       The address of the node that the message was intended for
+cmdType       1       The type of command that is being issued
+length        1       Number of bytes of valid data being sent in the data element
+data          20      Data related to the command issued, always 20 sent
+
+In every command message 20 bytes are sent, but only the number of bytes set by the length element are valid.  The command type is determined by the enumeration values from the Console.h and also defined at the top of the Java GUI application.  When the destination mote receives the command to read bytes from the serial device it will change USART0 from SPI mode to UART mode and read bytes from the serial device.  In this example the mote will stop reading bytes when either of these conditions is met:
+
+The number of bytes specified by NUM_BYTES_DATA have been received.  The default for this example is 10.
+The byte defined by TERM_BYTE is received.  In this example the byte is the carriage return character or 0x0D HEX.
+
+You can change the operation of the serial processor to suit your application needs, this is only an example.  Also command types can be changed or added without having to recompile the message classes using MIG.  If the console message structures are changed the message class files for the Java application will have to be recompiled with MIG.
+
+Value       Type      Description
+1          LED_ON     Turn on specified LED.  First byte of data element specifies which LED
+2          LED_OFF    Turn off specified LED.  First byte of data element specifies which LED
+3         SEND_DATA   Send data contain in data element to serial device
+4        SERIAL_DATA  Change USART0 to UART mode and listen for data from serial device
+
+I plan on adding how to recompile the message class files with MIG at a later time.  I want to make sure that I capture all the information for a detailed explanation of the process.
+
+Description of Serial Demo Java application.
+
+There are two forms of the serial demonstration application available.  The project zip archive is an entire eclipse project that contains everything you need to edit, compile and run the serial demo.  This means that it contains the some of the directories and files from tinyos-1.x/tools/java/net/tinyos.  This may repeat some of the files you already have, but I found it much easier to present this as an entire eclipse project rather than piece it into the existing location.  You should be able to copy the serialdemo directory into the tinyos-1.x/tools/java/net/tinyos/ directory and copy the files net_tinyos_serialdemo_SerialDemo.h and motelist.dll to tinyos-1.x/tools/java and compile from there.  I want to make it a point to say that I have not tried this yet and I will update this information when I have verified the process.  I think this should work for those that want to try compiling without eclipse.  Also for those that do not have eclipse, or do not wish to use it, I have created the SerialDemo.jar.  All that you need to run the jar file is these three things:
+
+1.  A JRE (tested j2re1.4.2_06) with the Sun CommAPI installed.  The JDK that TinyOS installs will work for this, make sure you set the CLASSPATH for your Windows environment.
+
+2.  The SerialDemo.jar and the motelist.dll in the same folder.
+
+3.  The FTDI drivers installed.
+
+If you install a Windows JRE with the CommAPI you will be able to double click on the jar file and run it.  The only way that I have gotten the application JAR to run with the TinyOS installed JDK is to start java from the command prompt with the <-jar> option.  Someone else might be able to set environmental variables and get it to work through double clicking.  It is also required to execute the JAR application from the directory that contains the motelist.dll or it will not be able to find the library in the path.
+
+The motelist.dll is a modified version of motelist-win32.cpp from the tinyos-1.x\tools\src\motelist directory (the modified version is included in the base folder of the eclipse project).  It is modified to be used with JNI to "autodetect" the connected motes and returns a string with all the connected motes and their com ports.  However, this only works on Windows 2000 and XP since the FTDI drivers enumerate the serial devices differently on other operating systems.  The java code checks for the substring "Windows" in the system properties and if not on a Windows OS then it will not even load the motelist library.  If the OS is Windows 98 the motelist.dll will return a string of "error" since the registry entries for the FTDI driver are different.  I cases where the motes are not "autodetected" the user is presented with a text field in the communications dialog so the COM port can be entered by hand.  The format of this string is the same as that which is entered for the SerialForwarder; I have not tested to see if the network TCP address and port string work.  You should note at this point that you do not need to run the SerialForwarder for this application to function, it creates its own interface to the packet source.  A note specifically for Windows 98 users, the java CommAPI did not seem to work with any COM port greater than four.  The COM port of the USB device can be changed from the device manager in the Windows control panel.
+
+A mote with TOSBase should be plugged into a USB port before starting the application.  The JNI autodetect code only runs when the application is first started.
+
+When you first start the application you will be presented with the 'Data' tab, with text fields for data bytes received and text fields for data to be sent.  To create the connection to the TOSBase mote click on the Connection menu and then click on the "New" menu item.  If the mote was autodetected you will be presented with a dialog box that contains a choice box of all the connected motes, select the one with TOSBase loaded and click OK.  If the mote was not autodetected then you will be presented with a dialog box with a text field in which to enter the desired COM port number (replacing the 1 in the default string).  The bytes in the data received fields are bytes received, displayed in HEX, from the serial device connected to USART0 of the source mote designated by the Src field.  The text fields for the data to be sent are bytes, in HEX, to be sent the destination mote identified in the Dst field, the address is an integer number.  You will note that the first four fields are label with red text, this is to indicate that all messages sent from the interface will use the values from those fields in the creation of the packet.  The Dst field defaults to a value of one, which is the default address programmed to a mote unless specified differently when the mote is loaded with code.  The command message type field, Msg, defaults to the value of three which is the SEND_DATA command and the bytes from the data text fields will be passed on to the serial device.  All of the data text fields will be sent to the destination mote but only the number of bytes specified by the length element, Len, will be passed on the serial device.  If you click on the 'LED' tab you will see six buttons to change the state of the LEDs on the destination mote.  You can use these LED buttons to verify that your setup is working and the destination mote is receiving your messages.  The 'Raw' tab will allow you to view the raw messages being received by the interface.  The messages displayed in the text area on the 'Raw' tab are only the console message not the full TOS_Msg and are in the order in which they are received.  This means that values that are two bytes, like the source and destination addresses, have the lower byte first and the upper byte second.
+
+I hope this demonstration can help someone that is having difficulty using a serial device on USART0 and the radio at the same time.  I plan on refining this document with more information and improving the wording to make it easier to follow.  I first just want to get the example code out and have people give me some feedback.  Let me know if there is anything that you find unclear or think would be an improvement to this document.
+
+Author:  Chris Pettus
+email: cepett01@gmail.com

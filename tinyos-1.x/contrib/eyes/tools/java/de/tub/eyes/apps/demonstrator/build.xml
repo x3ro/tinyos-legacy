@@ -1,0 +1,95 @@
+<project name="EYES Demonstrator" default="compile" basedir=".">
+	<description>
+        EYES Demonstrator build file.
+    </description>
+	<!-- set global properties for this build -->
+
+  <property environment="env"/>
+  <property name="classpath" value="${env.TOSROOT}/contrib/eyes/tools/java:${env.TOSROOT}/contrib/eyes/tools/java/tinyos_eyes.jar:${env.TOSROOT}/tools/java:${env.TOSROOT}/tools/java/tinyos.jar:${env.TOSROOT}/contrib/eyes/tools/java/de/tub/eyes/apps/demonstrator/lib/forms-1.0.4.jar:${env.TOSROOT}/contrib/eyes/tools/java/de/tub/eyes/apps/demonstrator/lib/l2fprod-common-all.jar:${env.TOSROOT}/contrib/eyes/tools/java/de/tub/eyes/apps/demonstrator/lib/looks-1.2.2.jar:${env.TOSROOT}/contrib/eyes/tools/java/de/tub/eyes/apps/demonstrator/lib/jep-2.3.0.jar:${env.TOSROOT}/tools/java/jars/log4j-1.2.11.jar"/>
+  
+	<!-- uncomment next line to display CLASSPATH -->
+  <!--<echo message="Using CLASSPATH = ${classpath}"/>-->
+  
+	<property name="src" location="./../../../../../" />
+	<property name="dist" location="dist" />
+	<property name="docdir" value="docs" />
+	<!-- change this value to the name of the application -->
+	<property name="app.name" value="EYES_Demonstrator"/>
+        <property name="main.class" value="de.tub.eyes.apps.demonstrator.Demonstrator"/>
+	
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+	</target>
+
+	<target name="compile" depends="init" description="compile the source ">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac classpath="${classpath}" srcdir="${src}" destdir="${src}"/>
+	</target>
+
+	<target name="dist" depends="compile" description="generate the distribution">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}" />
+		<jar jarfile="${dist}/${app.name}-${DSTAMP}.jar" basedir="${src}">
+			<fileset dir="${src}">
+				<include name="img/*"/>
+			</fileset>
+			<manifest>
+				 <attribute name="Main-Class" value="${main.class}"/>
+				 <attribute name="Class-Path" value="${jar-classpath}"/>
+			</manifest>
+		</jar>
+		<copy todir="${dist}">
+			<fileset dir="${src}">
+			 <include name="lib/*.jar"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="run" depends="compile" description="run the EYES Demonstrator">
+		<java classname="${main.class}" fork="true">
+			<classpath>
+				<pathelement path="${classpath}"/>
+			</classpath>
+                        <!--<jvmarg value="-Xrunhprof:cpu=times,heap=sites"/>-->
+		</java>
+	</target>
+
+	<target name="doc" description="build the Javadocs">
+		<javadoc destdir="${docdir}" author="true" version="true" use="true" windowtitle="EYES Demonstrator JavaDoc" access="private">
+			<classpath>
+				<pathelement path="${classpath}"/>
+			</classpath>
+			<packageset dir="${src}">
+				<include name="de/**" />
+			</packageset>
+			<link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
+		</javadoc>
+	</target>
+	
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build} and ${docdir} directory trees and all .class files-->
+		<delete>
+			<fileset dir="${src}" includes="**/*.class" />
+		</delete>
+		<delete dir="${dist}" />
+		<delete dir="${docdir}" />
+	</target>
+        
+        <target name="debug" depends="compile" description="Debug Project">
+                <fail unless="netbeans.home">This target can only run inside the NetBeans IDE.</fail>
+                <nbjpdastart name="${app.name}" addressproperty="jpda.address" transport="dt_socket">
+                        <classpath path="${classpath}"/>
+                    <!-- Optional - If source roots are properly declared in project, should
+                                        work without setting source path.     
+                                            <sourcepath path="debug.sourcepath"/> -->
+                </nbjpdastart>
+                <java fork="true" classname="${main.class}">
+                        <jvmarg value="-Xdebug"/>
+                        <jvmarg value="-Xnoagent"/>
+                        <jvmarg value="-Djava.compiler=none"/>
+                        <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+                        <classpath path="${classpath}"/>
+                </java>
+        </target>        
+</project>

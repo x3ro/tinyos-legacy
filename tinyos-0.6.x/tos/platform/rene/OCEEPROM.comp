@@ -1,0 +1,8 @@
+TOS_MODULE OCEEPROM;
+
+ACCEPTS{
+	void OCEEPROM_READ(int addr, int size, char* buf);
+	void OCEEPROM_WRITE(int addr, int size, char* buf);
+};
+
+

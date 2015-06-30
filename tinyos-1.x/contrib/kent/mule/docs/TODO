@@ -1,0 +1,5 @@
+Remove long delays after sending messages. This can be accomplished as 
+follows:
+	MULEApp: add new command "Ack". Just sends back an ack.
+	MULEPacket: After all sending is done, send an ack to all motes.
+		    In receive_all_waiting, stop once ack is received.

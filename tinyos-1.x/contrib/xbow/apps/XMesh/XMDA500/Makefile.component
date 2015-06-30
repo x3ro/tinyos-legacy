@@ -1,0 +1,6 @@
+# $Id: Makefile.component,v 1.2 2005/01/28 03:47:41 husq Exp $
+
+COMPONENT=XMDA500
+SENSORBOARD=basicsb
+
+

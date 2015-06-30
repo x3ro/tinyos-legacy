@@ -1,0 +1,9 @@
+Creating the MSP430 toolchain for the MSP430F161x series of microcontrollers
+============================================================================
+Joe Polastre <tinyos-help@mail.millennium.berkeley.edu>
+
+$Id: README.TOOLCHAIN,v 1.1.1.1 2007/11/05 19:10:38 jpolastre Exp $
+
+This document is a supplement to the build-mspgcc script found in
+tinyos-1.x/tools/src/mspgcc.  Please see the documentation in that
+directory.

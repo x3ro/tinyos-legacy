@@ -1,0 +1,12 @@
+IR module
+
+$Id: README,v 1.2 2003/12/26 11:43:09 korovkin Exp $
+
+  This module provides the IR motion detector sensor functionality. 
+Ir provides just interface to ADC. IrDetect module provides the detection 
+functionality, AttrIrDetect registeres and attribute so that this 
+functionality may be used by TinyDB. IrDetectProbe is an application 
+that tests this functionality.
+  Module was tested with mica2dot mote only.
+  
+-end-

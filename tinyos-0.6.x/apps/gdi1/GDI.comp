@@ -1,0 +1,14 @@
+TOS_MODULE GDI;
+
+ACCEPTS{
+    char GDI_INIT(void);
+    char GDI_START(void);
+};
+
+HANDLES{
+    char GDI_PHOTO_DATA_READY(short data);
+};
+
+USES{
+    char GDI_SUB_PHOTO_GET_DATA();
+};

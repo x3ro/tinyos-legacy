@@ -1,0 +1,78 @@
+FloodRouting:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+		gabor.pap@vanderbilt.edu (Gabor Pap, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The FloodRouting component provides a generic framework for writing and using 
+routing protocols based on directed flooding. The user of the FloodRouting 
+component can send and receive regular sized data packets, can select the
+flooding policy (like broadcast, convergecats, tree routing, etc.). Multiple
+data packet types and flooding policies can be used simultaneously. The 
+framework automatically supports the aggregation of multiple data packets
+into a single TOS_Msg, and allows the modification and control of the routed
+messages in the network. 
+
+DATA PACKET:
+
+The routed packet can contain any data, but it must be uniquely identifiable 
+by the first few bytes in the packet. For example, if we want to send
+sensor data back to the base station, then the packet format can be:
+<node id> <time> <sensor value>, or it can be <node id> <seq num> <sensor value>.
+The packets of thees formats are uniquely identifiable by their first two fields.
+As another example, the format can be just a single field <missing capsule number> 
+in a future multi-hop network reprogramming application. 
+
+The flood routing framework has very little overhead, the maximum size of the 
+payload is 26 bytes (3 bytes are reserved out of 29). So we can aggregate six 
+4-byte long data packets into a single TOS_Msg and send them all together. The
+format of the data packet is:
+
+	uint8_t appId
+	uint16_t location
+	<packet 1>
+	<packet 2>
+	...
+	<packet n>
+
+MESSAGE TABLE:
+
+The MessageTable class in the MessageCenter java application can display 
+routing messages. It automatically slices the aggregated incoming messages
+and displays them individually. The AM type of all flood routing messages
+is 130. The way to configure the message format in the message table is:
+
+	const uint8_t appId = <your app id>
+	omit uint16_t location
+	<field 1>
+	...
+	<field k>
+
+where <your app id> is the application id of your routed messages,
+and the fields are the fields of your data packet. You can use the unique
+modifier for some of your fields (for example, node id), if appropriate.
+
+WIRING and USAGE:
+
+The FloodRoutingC component provides the parameterized interface FloodRouting,
+and uses the parameterized interface FloodingPolicy. The user must select a
+unique number (the application id) and wire the FloodRouting[appId] interface 
+to her application code and the FloodingPolicy[appId] interface to the 
+flooding policy of her choice. 
+
+The application must ensure that the FloodRoutingC.StdControl is properly
+connected and the init() and start() methods are called before using the 
+FloodRouting interface.
+
+Before the application can send or receive any message, it must call the
+FloodRouting.init() method on ALL nodes of the network. Then any node can send
+and receive messages. It is important to realize that the FloodRouting.receive()
+event is fired at each hop, and the application must process the packet where
+appropriate. Please read the documentation in the FloodRouting interface.
+
+EXAMPLE:
+
+We use the flood routing for reporting acknowledgments back to the base station
+in our remote control application (see RemoteControlM.nc). The returned acknowledge
+values can be displayed in a message table (see MessageCenter).

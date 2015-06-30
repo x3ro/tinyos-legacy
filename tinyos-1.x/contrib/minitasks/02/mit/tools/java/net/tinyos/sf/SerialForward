@@ -1,0 +1,3 @@
+#!/bin/bash
+
+java -classpath ../../..:.:$CLASSPATH net.tinyos.sf.SerialForward -comm COM1 -baud 57600

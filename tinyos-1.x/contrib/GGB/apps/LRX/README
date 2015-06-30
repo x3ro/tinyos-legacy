@@ -1,0 +1,26 @@
+////////////////////////////////
+//
+// Reliable data transfer for single hop
+//
+//
+////////////////////////////////
+
+From RAM to RAM
+
+Interface is done
+Finite state machine diagram is done
+Implementation is done
+Works for no packet loss
+Seems to work for packet loss
+Change in LRXSend.transferDone interface (include *desc)
+Put more test code
+Documentation is done
+Change in algorithm (use timer for data send)
+Nack for open when not IDLE
+Oops! Working!!!
+Trigger by message
+More code for statistics
+
+ackBuf may need be replaced
+
+

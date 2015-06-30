@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+<table width="95%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><p>&nbsp;</p>
+      <table width="100%" border="1" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80%">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><!-- InstanceBeginEditable name="MainText" -->
+
+          <h2><font face="Verdana, Arial, Helvetica, sans-serif">Lesson 8: Interacting
+
+            with an Agilla Network Remotely via RMI</font></h2>
+
+          <p>Agilla allows a remote user to connect to the local AgentInjector
+
+            and inject an agent via RMI. To do this, first start an Agent Injector
+
+            locally as usual by typing <font face="Courier New, Courier, mono">ri</font> if
+
+            you have the Agilla <a href="getting_started.htm#AgillaAliases">aliases</a> setup,
+
+            or </p>
+
+          <blockquote>
+
+            <p><em>cd /opt/tinyos-1.x/tools/java<br>
+
+                </em><em>java -Djava.security.policy=java.policy
+
+                  edu.wustl.mobilab.agilla.AgentInjector -comm [port]:57600 -d</em> </p>
+
+          </blockquote>
+
+          <p>if
+
+                you do not where <em>[port]</em> is the port the mote programming board
+
+            is attached to (e.g., <em>COM1</em>)</p>
+
+          <p>Open another prompt and
+
+              type <font face="Courier New, Courier, mono">rmiregistry</font>.
+
+              This will start the rmi regsitry running on the local pc. You should
+
+              see something like the window below.</p>
+
+          <p align="center">              <img src="../rmiregistry.jpg" width="508" height="199"></p>
+
+          <p>In the AgentInjector window, click
+
+              on Remote and
+
+              select
+
+              &quot;enable&quot; as shown below.</p>
+
+          <p align="center"><img src="rmi_enable.jpg" width="525" height="505"></p>
+
+          <p align="left">This will register the injector with the RMI server
+
+            and allow a remote user to inject agents. The address of the RMI
+
+            server is shown in the upper-left corner. In this
+
+            case,
+
+            it's
+
+            128.252.166.33. The remote user must know this address to remotely
+
+            inject agents.</p>
+
+          <p align="left">On the remote computer, run the injector using <font face="Courier New, Courier, mono">ri_rmi</font> if
+
+            you have the Agilla <a href="getting_started.htm#AgillaAliases">aliases</a> setup,
+
+            or </p>
+
+          <blockquote>
+
+            <p align="left">                <em>cd /opt/tinyos-1.x/tools/java<br>
+
+                </em>            <em>java -Djava.security.policy=java.policy
+
+                edu.wustl.mobilab.agilla.AgentInjector -comm RMI:[address] -d </em></p>
+
+          </blockquote>
+
+          <p align="left">            if you do not, where <em>[address]</em> is
+
+            the address of the RMI server.</p>
+
+          <p align="left">The Agent Injector on the remote host will automatically
+
+            connect to Agent Injector on the local host. You can inject an agent
+
+            from the remote host by opening an agent and injecting it as if it
+
+            were local.</p>
+
+          <p align="left">&nbsp;</p>
+
+        <!-- InstanceEndEditable --></td>
+        </tr>
+        <tr>
+          <td width="80%" cellpadding="2" cellspacing="2" bgcolor="#990000">&nbsp;           </td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

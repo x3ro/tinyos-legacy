@@ -1,0 +1,27 @@
+PyTOS - Python for TinyOS
+
+This initial version is just a proof of concept of how I might like the
+Python command line interface to work out for TinyOS.  IPython is the
+defauly CLI.
+
+MoteIF's and Deluge are currently the only things that have any code written 
+for them.  Currently the syntax looks something like this
+
+  pytos.com23.deluge.ping
+  pytos.com23.deluge.reboot 1
+
+and so on.  The com specifications are cache and restarted if they died.  It's
+all currently using PhoenixSource from Java, but it's having problems in
+interactive context if the com port doesn't exist (and I assume if it dies,
+etc).  I've also had to hack up the beta Deluge tools to also be more
+interactive-friendly, like removing all the System.exit's, which cause the
+while interpretter to quit.
+
+I'm considering some sort of pluggable architecture so that Deluge plugging
+into Comm isn't so crufty.
+
+I'd also spent some significant amount of time trying to get wxPython to
+compile for MinGW32/Cygwin to no avail.  It was primarily with the intent of
+getting MatPlotLib to work well.  I am now considering that it may be worth
+it to just write the Java driver stub for MatPlotLib and be done with it.
+

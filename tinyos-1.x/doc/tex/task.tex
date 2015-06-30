@@ -1,0 +1,118 @@
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage{mathptmx}
+\usepackage{courier}
+\usepackage[dvips]{graphicx}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{subfigure}
+\usepackage[small]{caption}
+
+% margin hacking
+\setlength{\textwidth}{6.5in}
+\setlength{\oddsidemargin}{0in}
+%\setlength{\textheight}{9.125in}
+\setlength{\textheight}{9in}
+\setlength{\topmargin}{0in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+
+\pagestyle{plain}
+
+%!PN, old LaTeX209 font commands, replaced by the new ones
+% keeping just this one
+%\def\tenrm{\fontsize{10}{12}\normalfont\rmfamily\selectfont}
+%\def\BibTeX{{\rmfamily B\kern-.05em{\scshape i\kern-.025em b}\kern-.08em
+%\TeX}}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\def\qed{\rule[.25mm]{2.5mm}{2.5mm}}
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\etc}{\emph{etc.}\xspace}
+
+%\renewcommand{\baselinestretch}{0.995}
+
+\begin{document}
+
+\title{Tiny Application Sensor Kit (TASK)}
+
+\author{Wei Hong \\
+Intel Research, Berkeley \\
+whong@intel-research.net}
+
+\date{}
+
+\maketitle
+
+Sensor network application development and deployment present daunting 
+challenges to even sophisticated software developers.  Sensor network 
+applications combine the complexities of both distributed and embedded 
+systems design, and these are often amplified by unreliable network 
+connections and extremely limited physical resources.  Moreover, many 
+sensor network applications are expected to run unattended for months at a time.
+
+Real users of sensor networks ranging from plant biologists monitoring
+micro-climates in a giant redwood tree to facility managers monitoring
+vibration signatures of their equipments are most likely not sophisticated
+software developers.  We must reduce the complexity of sensor network
+application development and deployment to ensure the success of sensor
+network technology in the real world.
+
+We believe that many of the complexities in sensor network application
+development and deployment are caused by the current low-level
+programming interfaces and the lack of tools.  At Intel Research
+in Berkeley, we have been building a suite of tools called the Tiny Application
+Sensor Kit (TASK) aiming to break down the barrier to entry for
+non-sophisticated users to develop and deploy their own sensor network
+applications.
+
+TASK consists of the following components:
+\begin{itemize}
+\item {\bf TinyDB} 
+based sensor network that allows traditional programs
+  to interact the sensor network through a declarative SQL-like interface.
+  See {\tt tinydb.pdf} for details.
+\item {\bf TASK Server}, a server process running on a sensor network gateway
+  that acts as a proxy for the sensor network on the internet.
+\item {\bf TASK DBMS}, a relational database that stores sensor readings, sensor
+  network health statistics, sensor locations and calibration coefficients, etc.
+  Curently TASK only works with PostgreSQL (see http://www.postgresql.org) and
+  has been tested on both 7.2 and 7.3 releases.
+\item {\bf TASK client tools} including {\bf TASK Deployment Tool} that helps users record
+  sensor node metadata, {\bf TASK Configuration Tool} that helps users choose
+  data collection intervals and data filtering and aggregation criteria,
+  and {\bf TASK Visualization Tool} that helps users monitor the network health
+  and sensor readings.  See {\tt TASKVisualizer.pdf} for details.
+\item {\bf TASK Field Tool} running on a PDA that help users diagnose
+  and resolve problems in certain areas of the network in the field.
+  See {\tt TASKFieldTool.pdf} for details.
+\end{itemize}
+TASK also integrates easily with most popular data analysis tools, e.g.,
+MS Excel, Matlab, ArcGIS, etc through standard ODBC or JDBC interfaces.
+
+
+The following is a quick-start guide for using TASK.
+\begin{enumerate}
+\item After the installation of TASK, the PostgreSQL database needs to be
+initialized before TASK can be used.  First, {\tt cd tinyos-1.x/tools/java/net/tinyos/task/tasksvr}.  On Cygwin, simply  and run {\tt setup-task-db.sh}.  On Linux, do the following
+\begin{enumerate}
+\item as root: {\tt mkdir /pgdata; chown postgres.postgres /pgdata/}
+\item change user to postgres
+\item run {\tt initdb}
+\item edit {\tt /pgdata/pg\_hba.conf} to uncomment ``local all all trust''
+and ``host all all 127.0.0.1 255.255.255.255 trust'' and comment out ``local all all ident sameuser'' at the end of the file
+\item run {\tt setup-task-db.sh}
+\end{enumerate}
+\item program TASK motes from {\tt tinyos-1.x/apps/TASKApp}.  You must program a
+node $0$ for the basestation.
+\item start the TASK server by {\tt cd tinyos-1.x/tools/java; java net.tinyos.task.tasksvr.TASKServer \&}
+\item start TASK GUI by {\tt cd tinyos-1.x/tools/java; java net.tinyos.task.taskviz.TASKVisualizer localhost}
+\item start TASK Field Tool by {\tt cd tinyos-1.x/tools/java/ne/tinyos/task/field; python config-gui.py; python tool.py}
+\end{enumerate}
+
+TASK bugs can be submitted at \\
+{\tt https://sourceforge.net/tracker/?atid=551233\&group\_id=28656\&func=browse}
+
+\end{document}

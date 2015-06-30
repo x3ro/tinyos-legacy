@@ -1,0 +1,172 @@
+
+table.header { 
+   background-color:#e0e0ff;
+   width:100%;
+   font-family:tahoma,arial,helvetica;
+   font-weight:bold;
+   font-size:150%;
+}
+
+table.code { 
+   background-color:#e0e0e0;
+   border:none;
+   width:80%;
+}
+
+table.db_schema { 
+   background-color:#ffff66;
+   border:solid;
+   width:80%;
+   font-size:75%;
+}
+
+table.new { 
+   width:50%;
+}
+
+
+tr.code { 
+   /*background-color:#ffff66; */
+}
+
+tr.msg_header {  
+   background-color:#ffcc00;
+   text-align:center;
+}
+
+td.code { 
+   padding:5px;
+   width:100%;
+}
+
+
+h1 {
+   background-color:#e0e0ff;
+   /* color:#ffffff;*/
+   font-family:tahoma,helvetica,arial;
+   font-size:150%;
+}
+
+h2 {
+   background-color:#e0e0ff;
+   /* color:#ff3300; */
+   font-family:tahoma,helvetica,arial;
+   font-size:100%;
+}
+
+
+code.progname {
+   font-weight:bold;
+}
+
+
+BODY {
+color:black;
+background-color:#FFFFF5;
+}
+
+
+SPAN.title {color:green}
+SPAN.author {color:purple;}
+SPAN.publication {color:green}
+SPAN.fortran {
+font-variant: small-caps;
+}
+
+span.invisible {
+color:#FFFFF5;
+}
+
+P.abstract {color:blue;
+            margin-left: 10%; 
+            /* width: 80%; */
+            margin-right: auto;
+           /*  background-color: gray; */
+}
+
+
+/*
+a:active { 
+   color:red;
+}
+
+a:visited { 
+   color:yellow; 
+   background-color:blue;
+}
+
+a:link { 
+   color:green;
+}
+
+a:hover {
+   color:green; 
+   font:bold;
+}
+*/
+
+
+
+/*
+IMG.inlinemath {
+text-align: bottom
+}
+*/
+
+
+/************************************************/
+
+body {  
+    margin:9px 9px 0 9px;
+    padding:0;
+    background-color:#ffffff;
+}
+
+#level0{  
+   background-color:#ffcc00;
+}
+
+#level1 {  
+    margin-left:143px;
+    padding-left:9px;
+    background-color:#FFFFFF;
+}
+#level2 {
+    background:#FFF3AC;
+   position:relative;
+}
+
+#level3 {
+    margin-right:143px;
+    padding-right:9px;
+    background:#FFFFFF;
+}
+#main {
+    background:#fff3ac;
+}
+#topBar {
+    background:#ffffff;
+}
+#advBar {
+    background:#fff3ac;
+}
+
+#tipDay {
+    float:right;
+    width:175px;
+    background:#FFF3AC;
+}
+
+#lftBar {
+    position:absolute;
+    width:143px;
+    top:9px;
+    left:9px;
+}
+
+#rgtBar {
+    position:absolute;
+    width:143px;
+    top:0;
+    right:0;
+}

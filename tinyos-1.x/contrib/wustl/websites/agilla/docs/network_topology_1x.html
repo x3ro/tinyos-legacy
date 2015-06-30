@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla Docs - Network Topology</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>The Network
+
+              Topology: An n x m Grid</h1>
+
+          <p>Since TinyOS does not provide geographic routing or location discovery,
+
+            and a real multi-hop networks would require too much space, Agilla
+
+            assumes a multi-hop sensor network arranged in an <em>n</em> <font face="Arial, Helvetica, sans-serif">x</font> <em>m</em> grid.
+
+            A multi-hop network is achieved by modifying TinyOS's network
+
+            stack to  filter out messages from non-neighbors. A node
+
+            can only communicate with its immediate neighbors as specified by
+
+            the grid topology. Each node is identified by its integer (x,y) location.
+
+            The lower-left corner of the network is (1,1) and the <em>x</em> and <em>y</em> coordinates
+
+              increase going left and up, respectively. The mote connected to
+
+              the base station is at (0,0). Each node in
+
+              the grid
+
+              can communicate with its immediate horizontal, vertical, and diagonal
+
+              neighbors, for a maximum of 8 neighbors. The base station node
+
+            can communicate with any node on the first row.</p>
+
+          <p>Below
+
+              is a 5<font face="Arial, Helvetica, sans-serif"> x</font> 5
+
+              network:</p>
+
+          <p align="center"><img src="network_setup.JPG" width="350" height="233"></p>
+
+          <p>By assuming a grid topology, we corrolate the mote
+
+            ID with its location as follows: </p>
+
+          <p align="center"><em>ID = x + (y-1)*(number of columns)</em></p>
+
+          <p>Alternatively, given the node ID, its location can be calculated
+
+            as follows:</p>
+
+          <p align="center"><em>x = [(ID-1) mod (number of columns)] + 1<br>
+
+  y = (ID &#8211; x)/(number of columns) + 1</em></p>
+
+          <p>For example, in a 4x4 network, the nodes would have the following
+
+            IDs and locations:<br>
+
+</p>
+
+          <p align="center"><img src="4x4_network.jpg" width="425" height="419">            </p>
+
+          <p>Agilla implements a simple greedy-forwarding where each agent simply
+
+            looks at its neighbors and forwards a message to whichever neighbor
+
+            is closer to the ultimate destination. It does not adopt to node
+
+            failure or perform neighbor discovery.</p>
+
+          <h2><font face="Verdana, Arial, Helvetica, sans-serif">Customizing</font></h2>
+
+          <p>To change the network grid size, open <em>&lt;agilla&gt;/types/Agilla.h</em> and
+
+            <em>&lt;java&gt;/edu/wustl/mobilab/agilla/variables/AgillaLocation.java</em> and
+
+            change <em>NUM_ROWS</em> and <em>NUM_COLUMNS</em>.
+
+            Once done, recompile and re-install Agilla on all motes. </p>
+
+          <p>To install the NesC portion of Agilla, you can use an included
+
+            gawk script that streamlines the installation process. Use it by
+
+            going to <em>&lt;agilla&gt;</em> and
+
+              typing <em>gawk -f installer_m2.awk</em> for Mica2 motes, or <em>gawk
+
+              -f installer_mz.awk </em>for MicaZ motes. Alternatively, if you
+
+              added the <a href="../download/index.html#AgillaAliases">Agilla
+
+              aliases</a> to
+
+              your /etc/profile, just type <em>riall_m2 </em>or <em>riall_mz </em>anywhere
+
+              for Mica2 and MicaZ motes, respectively.</p>
+
+          <p>To recompile the Java portion, type <em>mj</em> if you have the <a href="../download/index.html#AgillaAliases">Agilla
+
+            aliases</a> setup, or go to <em>&lt;java&gt;/edu/wustl/mobilab/agilla/variables/</em> and
+
+            type <em>make</em>.</p>
+
+          <p>&nbsp;</p>
+
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

@@ -1,0 +1,17 @@
+README for SenseLightToSounder
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+SenseLightToSounder periodically samples the light sensor and displays the
+highest 3 bits of the raw ADC light reading to the LEDs, with RED being the 
+most signficant bit and YELLOW being the least significant bit.  If it is dark,
+the sounder will turn on for one clock tick.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

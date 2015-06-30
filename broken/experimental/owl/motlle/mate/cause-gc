@@ -1,0 +1,5 @@
+cause GC:
+S.push
+V.allocate
+T.alloc_
+T.alloc_

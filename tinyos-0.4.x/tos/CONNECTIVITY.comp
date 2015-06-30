@@ -1,0 +1,29 @@
+
+TOS_MODULE CONNECTIVITY;
+
+ACCEPTS{
+	char CONNECTIVITY_INIT(void);
+	char CONNECTIVITY_START(void);
+	char CONNECTIVITY_SET_MODE(char mode);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	void CONNECTIVITY_CLOCK_EVENT(void);
+	char CONNECTIVITY_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr CONNECTIVITY_BEACON_MSG(TOS_MsgPtr data);
+	TOS_MsgPtr CONNECTIVITY_START_MSG(TOS_MsgPtr data);
+	TOS_MsgPtr CONNECTIVITY_FLUSH_LOG(TOS_MsgPtr data);
+	char CONNECTIVITY_WRITE_LOG_DONE(char success);
+};
+
+USES{
+	char CONNECTIVITY_SUB_INIT(void);
+	char CONNECTIVITY_SUB_CLOCK_INIT(char interval, char scale);
+	void CONNECTIVITY_SET_POT(char);
+	char CONNECTIVITY_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	char CONNECTIVITY_SUB_WRITE_LOG(int, char *);
+};
+

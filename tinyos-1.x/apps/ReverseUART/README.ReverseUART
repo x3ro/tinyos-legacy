@@ -1,0 +1,47 @@
+$Id: README.ReverseUART,v 1.1 2004/05/30 20:46:33 cssharp Exp $
+
+README for ReverseUART
+Author/Contact: tinyos-help@millennium.berkeley.edu
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+Description:
+
+ReverseUART is a simple echo-like utility to exercise the mote UART and
+java-side tools.  It's expected to be useful for debugging new platforms
+and possibly as part of an automated regression suite.  It's small enough
+that it may even be useful as part of the mote "dial-tone".
+
+On the mote side, ReverseUART uses UARTComm to receive a message that
+contains a zero-terminated string.  It then replies with a message
+containing that message reversed (flipped front-to-back).  Compile
+ReverseUART with
+
+    make <platform>
+
+On the PC side, testReverseUART takes strings given on the command line,
+sends them over the UART, and waits for a reply.  Compile testReverseUART
+with
+
+    javac *.java
+
+After starting SerialForwarder, run testReverseUART with
+
+    java testReverseUART "Testing ReverseUART" "Berkeley!"
+
+If everthing is working properly, the above command produces the following
+output
+
+    Send> Testing ReverseUART
+    Recv> TRAUesreveR gnitseT
+    Send> Berkeley!
+    Recv> !yelekreB
+    ... done.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+None.
+

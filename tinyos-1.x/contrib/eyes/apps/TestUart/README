@@ -1,0 +1,18 @@
+TestUART is a test application for the UARTDebugger component.  
+UARTDebugger drives a Scott Edwards Electronics LCD display and provides
+an interface for writing text messages to the screen during runtime.
+This test application prints an incrementing sequence of numbers
+on the display.
+
+Note that the display requires the UART to be set to 9600 bps (which the
+component does on initialization), meaning that it cannot be used with
+GenericComm / other components that may want to drive the UART at a faster
+rate.
+
+Also note that this test component WILL NOT WORK WITH CROSSBOW'S NEW
+PROGRAMMING BOARD.  It works fine with the original Mica programming/uart
+board, however.
+
+For more information, contact Sam Madden (madden@cs.berkeley.edu).
+
+

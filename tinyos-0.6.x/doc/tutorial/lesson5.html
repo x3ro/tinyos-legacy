@@ -1,0 +1,339 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 FINAL//EN">
+<html>
+  <head>
+    <title>Lesson 5: Displaying Data on a PC</title>
+  </head>
+
+  <body>
+    <h1>Lesson 5: Displaying Data on a PC</h1>
+
+    <p>
+    The goal of this application is to close the loop on communicating
+    with the motes and bring the data onto a PC.&nbsp;&nbsp; First
+    we'll introduce you to the tools that we have developed for
+    communicating between a mote and a PC.&nbsp; We will then use
+    these tools to display sensor reading that are coming from a mote
+    onto the screen of a computer.&nbsp; The first stage of this will
+    be to display the data coming from the mote in a text
+    console.&nbsp; We will then extend this to demonstrate the display
+    of this data on a graphical interface.&nbsp;&nbsp; Finally we will
+    close the communication loop by demonstrating how to send data
+    back to the motes.</p>
+
+    <p>
+    The program to be run on the motes is <a
+    href="../../apps/oscilloscope/">apps/oscilloscope</a>.  The
+    application consists of a single module that reads data from the
+    ADC and sends out packets of the sensor reading of data channel 1
+    to the to the serial port.&nbsp; This application does not
+    transmit the data over the radio.&nbsp; However, it would be
+    simple to extend it to do so. It is intended to be used with the
+    basic sensor board. Once the application is installed, each time
+    the yellow LED blinks, a packet will be send to the serial
+    port.&nbsp;&nbsp; Additionally, the RED led will be turned on when
+    the sensor reading is greater that 0x20.&nbsp; In normal lighting,
+    you should see the red led on.&nbsp; If you place the mote in
+    darkness (very dark) then you&nbsp; should see the red led go
+    off.&nbsp; </p>
+
+    <h2> Step one is to simply get the data printed out onto the
+    screen...</h2>
+
+    <p>
+    The first step to establishing communication between the PC and
+    the mote is to connect up your serial port cable to the
+    programming boards and to make sure that you have java and
+    javax.comm installed.&nbsp; After programming your mote with the
+    oscilloscope code, switch to the tools directory and run &quot;make&quot; then
+    &quot;java listen COM1&quot; (assuming the mote is programmed into
+    COM1).</p>
+
+    <p>
+    cd nest/tools<br>
+    java listen COM1</p>
+
+    <p>
+    The expected output is:</p>
+
+    <font SIZE="2">
+    <pre><font face="Courier">listen started
+<font color="#FF0000">printing all ports...
+- COM3
+- COM1
+- LPT1
+- LPT2
+</font>done.
+baud rate: 9600
+data bits: 8
+stop bits: 1
+parity: 0
+baud rate: 19200
+data bits: 8
+stop bits: 1
+parity: 0
+7E 00 0A 7D 01 00 72 EE 01 00 5D 03 5A 03 5A 03 59 03 53 03 4B 03 4B 03 58 03 61 03 61 03 00 00 00 00 76 9B
+7E 00 0A 7D 01 00 7C EE 01 00 61 03 66 03 67 03 69 03 67 03 63 03 64 03 64 03 64 03 65 03 00 00 00 00 84 E0
+7E 00 0A 7D 01 00 86 EE 01 00 65 03 66 03 65 03 65 03 64 03 65 03 66 03 65 03 66 03 66 03 00 00 00 00 10 97
+7E 00 0A 7D 01 00 90 EE 01 00 66 03 66 03 66 03 66 03 66 03 66 03 66 03 66 03 66 03 66 03 00 00 00 00 CD 5E
+.
+.
+.</font></pre>
+    </font>
+
+    <p>
+    If you do not see the list of port that are available to
+    javax.comm, then you have not correctly installed the javax.comm
+    package.&nbsp; Please refer to the installation instructions that
+    came with that code.&nbsp; If you do not see that data lines
+    on&nbsp; your screen, then you may have chosen the wrong COM port
+    or the mote may not be correctly connected to the computer.&nbsp;
+    If this basic output program does not work, then it will not be
+    possible to continue on.</p>
+
+    <p>
+    &nbsp;</p>
+
+    <h2>
+    Now what are you seeing?</h2>
+
+    <p>
+    The application that you are running is simply printing out the
+    packets that are coming form the mote.&nbsp; Each data packet that
+    comes out of the mote contains several fields of data.&nbsp; They
+    include: the source ID, the reading number of the first reading,
+    the ADC channel that the data is coming from and 10 sensor
+    readings.</p>
+
+    <p>
+    Here is the definition of the packet format as the code that places the data 
+    into the packet.....</p>
+
+    <p:colorscheme colors="#FFFFFF,#000000,#808080,#000000,#BBE0E3,#333399,#009999,#99CC00" />
+    <div v:shape="_x0000_s1026" class="O">
+      <div style="mso-line-spacing:&quot;90 20 0&quot;;mso-margin-left-alt:216;mso-char-wrap:
+1;mso-kinsoku-overflow:1">
+        <span style="font-family:Courier;font-size:12pt">struct data_packet{<br>
+        &nbsp;&nbsp;&nbsp; unsigned short source_mote_id;<br>
+        &nbsp;&nbsp;&nbsp; unsigned short last_reading_number;<br>
+        <span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp; </span>unsigned short channel;<br>
+        &nbsp;&nbsp;&nbsp; short data[READINGS_PER_PACKET];<br>
+        }; </span>
+      </div>
+      <div style="mso-line-spacing:&quot;100 50 0&quot;;mso-margin-left-alt:216;mso-char-wrap:
+1;mso-kinsoku-overflow:1">
+&nbsp;</div>
+    </div>
+
+    <p>
+    <font face="Courier">This structure is mapped onto the data portion of the 
+    packet.&nbsp; This starts at byte 5 of the packet.&nbsp; Remember that bytes 
+    1 and 2 are the destination address 0x007E here.&nbsp; Bytes 3 is the 
+    handler ID 0xA, and byte 4 is the group ID, 0x7D.</font></p>
+
+    <p>
+    Here is the section of the mote code that is placing the data into the 
+    packet.&nbsp; Text in red is not actually in the OSCOPE.c file.</p>
+
+    <p>
+    <font face="Courier">char TOS_EVENT(OSCOPE_CHANNEL1_DATA_EVENT) (short data) {<br>
+&nbsp;&nbsp;&nbsp; struct data_packet* pack = (struct data_packet*)(VAR(msg)[(int)VAR(curr)].data);&nbsp;
+    <font color="#FF0000" size="1">Type cast the data buffer to the packet type</font><br>
+&nbsp;&nbsp;&nbsp; printf(&quot;data_event\n&quot;);<br>
+&nbsp;&nbsp;&nbsp; pack-&gt;data[(int)VAR(state)] = data;&nbsp;&nbsp;&nbsp;
+    <font color="#FF0000" size="1">Add the new sensor reading to the packet.</font><br>
+&nbsp;&nbsp;&nbsp; VAR(state) ++;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <font color="#FF0000" size="1">Increment the counter that records the number 
+    of bytes.</font><br>
+&nbsp;&nbsp;&nbsp; VAR(reading_number) ++;<br>
+&nbsp;&nbsp;&nbsp; if(VAR(state) == READINGS_PER_PACKET){&nbsp;&nbsp;&nbsp;
+    <font color="#FF0000" size="1">If the packet is full, then it is time to 
+    send it out.</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VAR(state) = 0;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <font color="#FF0000">Set the byte counter back to zero.</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pack-&gt;channel = VAR(data_channel);&nbsp;&nbsp;&nbsp;
+    <font color="#FF0000">Record the channel that the data came from.</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pack-&gt;last_reading_number = 
+    VAR(reading_number);&nbsp;&nbsp; <font color="#FF0000" size="1">Put the 
+    reading number into the packet.</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pack-&gt;source_mote_id = 
+    TOS_LOCAL_ADDRESS;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <font color="#FF0000">Put the source address into the packet.</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (TOS_CALL_COMMAND(OSCOPE_SUB_SEND_MSG)(TOS_UART_ADDR,0x1,&amp;VAR(msg)[(int)VAR(curr)])) 
+    {&nbsp;<font color="#FF0000">Send the packet.&nbsp;&nbsp; </font> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    VAR(send_pending)++;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VAR(curr) ^= 
+    0x1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    if(VAR(curr))TOS_CALL_COMMAND(OSCOPE_LEDy_on)();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else 
+    TOS_CALL_COMMAND(OSCOPE_LEDy_off)();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 0;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; if(data &gt; 0x20)TOS_CALL_COMMAND(OSCOPE_LEDr_on)();<br>
+&nbsp;&nbsp;&nbsp; else TOS_CALL_COMMAND(OSCOPE_LEDr_off)();<br>
+&nbsp;&nbsp;&nbsp; return 1;<br>
+    }</font></p>
+
+    <p>
+    &nbsp;</p>
+
+    <h2>
+    Starting the SerialForwarder?</h2>
+
+    <p>
+    Listen is the most basic way of communicating with the mote.&nbsp;
+    It is a program that directly opens the serial port and prints the
+    data that it read out to the screen.&nbsp; While you will be able
+    to clearly see a changing pattern in the data (try covering and
+    uncovering the sensor),&nbsp; it is difficult to visualize the
+    sensor readings. </p>
+
+    <p>
+    Along with the mote code, we also provide a PC application designed to 
+    visualize the data coming from a mote.&nbsp; However to use the GUI, you 
+    have to switch over to using our SerialForwarder, a tool that abstracts away 
+    the serial port from an application.</p>
+
+    <p>
+    To run the serial forwarder, remain in the tools directory and run
+    <font face="Courier">&quot;java
+    net.tinyos.SerialForwarder.SerialForward&quot; </font> This will
+    open up a GUI window and will also display text in the shell that
+    started it.&nbsp; Check both locations to make sure that no errors
+    occurred.&nbsp; Make sure that it states that the serial port was
+    successfully opened.&nbsp; The window should look like...</p>
+
+    <p>
+    <img border="0" src="imgs/SerialForwarder.JPG" width="640" height="512"></p>
+
+    <p>
+    As packets arrive from the mote connected to the serial port, you
+    will see the &quot;Pckts Read:&quot; field in the lower right
+    corner begin to increment.</p>
+
+    <p>
+    &nbsp;</p>
+
+    <h2>
+    Starting the Oscilloscope GUI</h2>
+
+    <p>
+    It is now time to graphically display the data coming from the
+    motes.&nbsp; In a new window, return to the tools directory and
+    run: java net.tinyos.oscilloscope.oscilloscope.&nbsp; A graphical
+    window will popup and begin displaying the data coming from your
+    mote.&nbsp; This application is actually connecting to the serial
+    forwarder, not directly to you serial port.&nbsp; This allows you
+    to simultaneously run other applications that are communicating
+    with a mote.</p>
+
+    <p>
+    Note, power cycle the mote that is generating the data prior to
+    starting the oscilloscope.&nbsp; If the mote has been running for
+    a long time, the reading number may be quite large and you may not
+    be able to see the data coming from mote on the screen.&nbsp;
+    Power cycling the mote will restart the reading counter.&nbsp;
+    Alternatively, you could used the scroll and zoom buttons to
+    locate the data.</p>
+
+    <p>
+    <img border="0" src="imgs/oscilloscope.JPG" width="640" height="603"><br>
+    </p>
+
+    <p>
+    &nbsp;</p>
+
+    <p>
+    Here is the code that reads the data from the SerialForwarder</p>
+
+    <p>
+    <font face="Courier">public void run() {<br>
+&nbsp;&nbsp;&nbsp; SerialForwarderStub r = new SerialForwarderStub(&quot;127.0.0.1&quot;, 
+    9000);<br>
+&nbsp;&nbsp;&nbsp; try{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; r.Open();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; r.registerPacketListener(this);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; r.Read();<br>
+&nbsp;&nbsp;&nbsp; }catch(Exception e){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; e.printStackTrace();<br>
+&nbsp;&nbsp;&nbsp; }<br>
+    }</font></p>
+
+    <p>
+    <font face="Times New Roman">The packet Listener interface that must be 
+    implemented is:</font></p>
+
+    <p>
+    <font face="Courier">public interface PacketListenerIF extends 
+    java.util.EventListener {<br>
+&nbsp;&nbsp;&nbsp; public void packetReceived(byte[] packet);<br>
+    }</font></p>
+
+    <p>
+    Here the r.Read() function call will never return.&nbsp; Instead
+    it will block on waiting for packet to arrive.&nbsp; As the do, it
+    will automatically call the &quot;<font face="Courier">public void
+    packetReceived(byte[] readings)</font>&quot; function with each
+    packet.&nbsp; </p>
+
+    <p>
+    &nbsp;</p>
+
+<h2> Exercise</h2>
+    <div align="left">
+<p align="left">As written, the oscilloscope program is setup to use the UART 
+and the light sensor from the basic sensor board.&nbsp; Instead of using 
+oscilloscope use oscilloscope_RF.&nbsp;&nbsp; This version transmits the sensor 
+readings over the radio creating a wireless sensing platform.&nbsp; In order to 
+use this app, you need to provide a bridge between the mote RF and the serial 
+port.&nbsp; With mica nodes, this is done by using generic_base_high_speed.&nbsp; 
+Program a second node to be generic_base_high_speed and use it to tie the 
+wireless sensor into the SerialForwarder and the oscilloscope GUI.</div>
+    
+    
+    <div align="left">
+<p align="left">Next, change the Makefile so that you can use the Mica sensor 
+board.</div>
+    
+    
+    <div align="left">
+<p align="left"><b>Extra Credit</b>:&nbsp; Change can you figure out how to get 
+readings from two motes simultaneously?&nbsp; Note:&nbsp; the oscilloscope GUI 
+groups readings by the pair &lt;mote ID, channel NUM&gt;.</div>
+    
+    
+    <div align="left">
+<p align="left">&nbsp;</div>
+    
+    
+    <p>
+    Below is a picture of the overall architecture for used in this tutorial.</p>
+
+    <p>
+    <img border="0" src="imgs/Serial_Forward_topology.jpg" width="720" height="540"></p>
+
+    <p>
+    &nbsp;</p>
+
+    <p>
+    <br>
+    </p>
+
+    <div align="left">
+<p align="left"> <br>
+&nbsp;&nbsp;&nbsp; <br> &nbsp;&nbsp;&nbsp;
+    
+    
+    
+      </div>
+    
+    
+<hr>
+<b><font size=4><a href="lesson4.html">&lt; Previous Lesson</a></font></b> |
+<b><font size=4><a href="lesson6.html">Next Lesson &gt;</a></font></b>
+</body>
+</html>

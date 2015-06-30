@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences>
+  <node name="net">
+    <node name="tinyos">
+      <node name="mcenter">
+        <node name="MessageTable">
+          <node name="config">
+            <node name="shooterLoc - pollMsg">
+              <entry key="amType" value="189" />
+              <entry key="counter" value="false" />
+              <entry key="timeStamp" value="true" />
+              <entry key="firstUnique" value="false" />
+              <entry key="format" value="uint16 pollerID;uint16 msgID;uint16 cmd" />
+            </node>
+            <node name="shooterLoc - test">
+              <entry key="amType" value="0x83" />
+              <entry key="counter" value="false" />
+              <entry key="timeStamp" value="false" />
+              <entry key="firstUnique" value="false" />
+              <entry key="format" value="omit uint8  appID;omit uint16 location ;uint32 timestamp;uint8 data-sender;uint8 seqNum;uint24 ts;;;" />
+            </node>
+          </node>
+        </node>
+      </node>
+    </node>
+  </node>
+</preferences>
+

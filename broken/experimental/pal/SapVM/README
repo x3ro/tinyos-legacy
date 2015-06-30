@@ -1,0 +1,130 @@
+(Also, see monibus/README for other notes.)
+
+Pre-Installation:
+-----------------
+1. CVS checkout the 1.1.10 snapshot of the tinyos-1.x tree
+
+  cvs -z3 -d:ext:YOURUSERNAME@cvs.sourceforge.net:/cvsroot/tinyos co -P -r tos-1-1-10Jan2005cvs-release tinyos-1.x
+
+If you don't have a username then you will have to use the anonymous access.
+See sourceforge CVS pages for details.
+
+2. CVS update to 1.1.14 of TinyOS
+
+  cvs update -dP -r tos-1-1-14Jul2005cvs-release
+
+3. Follow the Mate instructions and build the necessary toolchains.
+
+Installation:
+-------------
+
+0. This directory needs to be in /tos/lib/VM, so copy it over if necessary
+1. Comment out 'exp' from tinyscript.ldf in /VM/languages
+2. Copy /VM/SapVM/monibus/mhop.h to tos/lib/VM/types. (You may want to
+   move the original file before copying the modified version to avoid
+   overwriting the original.)
+3. Change "<SEARCH PATH="../../../../contrib/ucb/tos/lib/MultiHopLQI">" to
+          "<SEARCH PATH="../../MultiHopLQI">"
+4. Copy 'hardware.h' to '/contrib/ucb/tos/sensorboards/monibus
+5. Copy savia.vmsf to /VM/samples and run: 
+   javac net.tinyos.script.VMBuilder savia.vmsf
+6. Type 'make telosb install.0' in apps/SapVM/
+
+InternalFlash Usage:
+--------------------
+This metadata is used to recover the system if the power goes out. The
+following are addresses on the internal flash of where the information is.
+
+4 - blkoffset (4 bytes)
+8 - fresh start boolean (1 byte)
+12 - sequence number (4 bytes)
+16 - record size (2 bytes)
+
+Record:
+-------
+
+|------------------|
+|    TIMESTAMP     | <- 4 bytes (2 words)
+|------------------|
+|     SEQ NO       | <- 4 bytes (2 words)
+|------------------|
+|  STATUS |         <- 2 bytes (1 words)
+|---------|
+
+bit 1: FS Error
+
+Components:
+-----------
+The SynchTimerContext is written on top of TimeSync, which handles global
+time synchronization. It supports three functions, START, STOP, and DUMP.
+More information can be found in the ODF files on how to use them. TimeSyncM
+has been told not to elect a node, and it will become synchronized if
+mote 0 goes down.
+
+The FSMateC component is the system call layer that supports two main
+functions read and write. More information on how to use them are in the
+ODF files. It is written on top FlashLoggerC, which is written on top of
+BlockStorageC from STM25P. FlashLoggerC simply manages the raw blocks in
+a sequential way. It keeps state as to which block and block offset it
+is currently on.
+
+The DataCache component acts as an intermediary to process raw data
+readings into a tidy Mate Buffer, which can be used to send across the
+radio or written to the file system. If you write to InternalFlash
+extensively, you will break it and have to reset the mote.
+
+Boot Sequence:
+--------------
+The boot sequence for loading flash memory follows TEP103 for the most
+part. If the FormatStorage has not been initialized via checking the
+0xAB cookie, then it proceeds to initialize the storage, mount some
+blocks, and then commit them. Blue LED means it is in the process of
+starting up. Green LED means it is done. The Flash system bootup MUST
+be done after the Radio has completed (using interface SpiltControl),
+or else you will run into a bad race condition.
+
+In addition to starting up the Flash, some metadata must be initialized.
+Three of them are used by the Flash system itself. These are blkid,
+blkoffset, and freshstart. These tell the flash where to pick up if the
+memory is reset at anytime. The last one is used by DataCacheM and says
+what the last sequence number was. This type of metadata loading is done
+via VolumeInit.init().
+
+Telos TimeSync Secrets:
+-----------------------
+Due to an alleged race condition with the timer. TimeSync will occasionally
+think it is synchronized when it really isn't. Thus we must not always trust
+what TimeSync tells us; rather we must see if the global time is reasonable.
+If it's not, we ignore it. To see how we determine this, see comments of
+relevant code in SynchTimerContextM.
+
+Configurables:
+--------------
+In FSMate.h, you can configure the following values.
+
+SENSOR_RECORDS = 3; 
+
+Be careful what you set this to. This is the size of the actual sensor
+readings you want. Specifically, MATE_BUF_LEN must be bigger than the sum
+of SENSOR_RECORDS and (sizeof(RecordMetadata) / 2). You can adjust
+MATE_BUF_LEN within packet limits though. This value will be checked at
+runtime to make sure you put exactly 3 records in there.
+
+struct RecordMetadata { ...
+
+You can change the type of metadata you want, but you'll have to write
+your own code to store it in DataCacheM. However, that is all you should
+need to do. Your actual sensor data will be adjusted to be stored in the
+right place, and the fread/fwrite functions do not need to be touched.
+
+FSMATE_NUM_BLOCKS = 3 // number of flash blocks you want to use
+
+In SynchTimerContextM
+
+// If you have long deployments, you may want to adjust the following
+// two variables to be longer. This is how long the base timer takes
+// to fire. See SynchTimerContextM for details
+
+SYNCH_TIMER_DEFAULT_MS           = 1000, 
+SYNCH_TIMER_DEFAULT_TIMER_TICKS  = 1360,
+SYNCH_TIMER_ERROR_TOLERANCE	 = 100000

@@ -1,0 +1,3 @@
+#!/bin/sh
+exec ipython "$@" InitPyTOS.py
+

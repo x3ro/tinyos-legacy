@@ -1,0 +1,29 @@
+-----------------------------------------------------------
+Title: Trio sensor board test applications
+Authors: Jaein Jeong
+Last Modified: May 31, 2005
+
+-----------------------------------------------------------
+
+The applications in this directory demonstrate the use of Trio 
+sensor board:
+
+  - Magnetometer (TestMag)
+  - PIR (Passive Infra Red) sensor (TestPIR)
+  - Microphone (TestMic)
+  - Magnetometer, PIR, Microphone (TestTrio)
+  - Sounder (TestSounder)
+  - Grenade Timer (TestGrenade)
+  - Prometheus charging (TestBatt)
+
+These applications need Trio sensor board modules which are located at:
+
+  tinyos-1.x/contrib/nestfe/tos/sensorboard/trio
+
+Trio GUI program is a tool that interacts with the sensor nodes running
+these applications. Trio GUI program is located at:
+
+  tinyos-1.x/contrib/nestfe/tools/java/net/tinyos/test_trio
+
+
+

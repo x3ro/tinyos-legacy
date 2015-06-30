@@ -1,0 +1,25 @@
+<VM NAME="SimpleVM" DESC="A simple example VM that enables a few basic operations, such a packet sends, sensing, and operating the LEDs" DIR="../../../../apps/ASimpleVM">
+<SEARCH PATH="../opcodes">
+<SEARCH PATH="../contexts">
+<SEARCH PATH="../languages">
+<SEARCH PATH="../../../../contrib/xbow/tos/lib/ReliableRoute">
+<SEARCH PATH="../extensions">
+<LOAD FILE="../sensorboards/micasb.vmsf">
+<LANGUAGE NAME="tscript">
+<FUNCTION NAME="led">
+<FUNCTION NAME="send">
+<FUNCTION NAME="light">
+<FUNCTION NAME="temp">
+<FUNCTION NAME="bclear">
+<FUNCTION NAME="bufsorta">
+<FUNCTION NAME="bufsortd">
+<FUNCTION NAME="int">
+<FUNCTION NAME="id">
+<FUNCTION NAME="son">
+<FUNCTION NAME="soff">
+<FUNCTION NAME="uart">
+<FUNCTION NAME="rand">
+<CONTEXT NAME="Once">
+<CONTEXT NAME="SendCounter">
+<CONTEXT NAME="Timer1">
+

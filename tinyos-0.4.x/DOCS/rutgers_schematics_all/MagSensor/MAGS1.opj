@@ -1,0 +1,129 @@
+(ExpressProject "Design2"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (NoModify)
+    (File ".\mags1.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x"))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (PartMRUSelector
+    ("GND_FIELD SIGNAL"
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (OFFPAGELEFT-R
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (OFFPAGELEFT-L
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (BATTERY
+      (FullPartName "BATTERY.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (VCC_ARROW
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (VCC
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (GND
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (R
+      (FullPartName "R.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (74HC00
+      (FullPartName "74HC00.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\GATE.OLB")
+      (DeviceIndex "0"))
+    ("SW PUSHBUTTON-SPDT"
+      (FullPartName "SW PUSHBUTTON-SPDT.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    ("SW SPDT"
+      (FullPartName "SW SPDT.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    ("CAPACITOR POL"
+      (FullPartName "CAPACITOR POL.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    ("MOSFET P"
+      (FullPartName "MOSFET P.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (TLE2426
+      (FullPartName "TLE2426.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    (GND_SIGNAL
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (C
+      (FullPartName "C.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (GND_POWER
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (DS1804
+      (FullPartName "DS1804.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    (INA2126
+      (FullPartName "INA2126.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    (HMC1002
+      (FullPartName "HMC1002.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0")))
+  (LastUsedLibraryBrowseDirectory "C:\Cadence\PSD_14.0\Capture\Library")
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources" ".\mags1.dsn")
+      (Path "Design Resources" ".\mags1.dsn" "MAGSENSOR")
+      (Path "Design Resources" ".\mags1.dsn" "TESTJIG")
+      (Path "Design Resources" ".\mags1.dsn" "Design Cache")
+      (Select "Design Resources" ".\mags1.dsn" "MAGSENSOR" "SENSOR"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 14 214 14 400"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 63 923 51 549")
+        (Scroll "139 0")
+        (Zoom "100"))
+      (Path "H:\ORCAD\MOTES\MAGSENSOR\MAGS1.DSN")
+      (Schematic "TESTJIG")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 157 980 85 498")
+        (Scroll "0 0")
+        (Zoom "100")
+        (Occurrence "/"))
+      (Path "H:\ORCAD\MOTES\MAGSENSOR\MAGS1.DSN")
+      (Schematic "MAGSENSOR")
+      (Page "CONNECTOR"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 118 941 120 533")
+        (Scroll "0 0")
+        (Zoom "100")
+        (Occurrence "/"))
+      (Path "H:\ORCAD\MOTES\MAGSENSOR\MAGS1.DSN")
+      (Schematic "MAGSENSOR")
+      (Page "SENSOR"))))

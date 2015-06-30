@@ -1,0 +1,29 @@
+ifndef TOSDIR
+TOSDIR := $(shell ncc -print-tosdir)
+endif
+
+ifndef CONTRIBDIR
+CONTRIBDIR := $(shell ncc -print-tosdir)/../contrib
+endif
+
+ifndef MAKESYSTEMC
+MAKESYSTEMC := $(CONTRIBDIR)/SystemC/MakeSystemC
+endif
+
+
+CFLAGS := $(CFLAGS) \
+-I$(CONTRIBDIR)/calamari/include \
+-I$(CONTRIBDIR)/calamari/localization \
+-I$(CONTRIBDIR)/calamari/ranging \
+-I$(CONTRIBDIR)/calamari/localization/math \
+-I$(CONTRIBDIR)/SystemC/TimedLeds \
+
+#-I$(CONTRIBDIR)/calamari/include/noxnp \
+
+#taking this out to compile with mica2 //mica2
+#-I$(CONTRIBDIR)/calamari/micaUltrasoundLib \
+#-I$(CONTRIBDIR)/ucb/tos/sensorboards/honeydot \
+
+
+include $(MAKESYSTEMC)
+

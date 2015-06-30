@@ -1,0 +1,43 @@
+README for sample VM files
+
+Philip Levis, Feb 16 2004
+
+The files in this directory are sample VM specifications. The
+VMBuilder tool, when passed the -nw option, will produce a Mate' 
+runtime based on the specification:
+
+java.net.tinyos.script.VMBuilder -nw <filename>
+
+VMSFs (Virtual Machine Specification Files) have five commands. All
+commands follow an XML-like syntax; each command begins with a
+'<' and ends with a '>'. The first word within the brackets states
+which command it is. After the command name are a series of parameters.
+The full list of the commands and required parameters is below.
+
+
+VM
+  NAME      The name of the VM
+  DESC      Description of the VM
+  DIR       Directory to write the VM to
+
+SEARCH
+  PATH      Add path to the search path for languages, contexts and primitives.
+            Search paths specified earlier in a file are searched first.
+            Searches are one-pass; a search path for an item (e.g., context)
+            must appear before that item. These entries will also
+            be used as compilation flags to the VM.
+
+LANGUAGE
+  NAME      The name of the language to use. Must be specified in a
+            language description file (.ldf) of that name.
+
+FUNCTION
+  NAME      The name of a function to include. Must be specified in an
+            opcode description file (.odf).
+
+CONTEXT
+  NAME      The name of a context to include. Must be specified in a
+            context description file (.cdf).
+
+
+

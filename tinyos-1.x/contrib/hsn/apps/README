@@ -1,0 +1,20 @@
+Current HSN Applications
+Contact: Mark Yarvis (mark.d.yarvis@intel.com)
+
+If you are using a Makelocal file in tinyOS-1.x/apps, make sure to copy
+that file into hsn/apps directory before installing applications in this
+folder. Do NOT redefine PFLAGS, CFLAGS and BASEDIR inside Makelocal.
+Instead, use += to modify PFLAGS or CFLAGS.  Modify BASEDIR by putting
+the desired path in ./BaseDIR.
+
+To use the HSN routing layer from a tinyOS-1.x/apps application
+(ex. GSK, TinyApps), modify the application's Makefile to remove
+"include ../Makerules" (if present, it should be at the end of the Makefile)
+with the following 4 lines:
+
+ BASEDIR=../../tos
+ HSNDIR=$(BASEDIR)/../contrib/hsn/tos
+ PFLAGS += # Any additional flags you might want
+ include $(HSNDIR)/../apps/MakeHSN  # This must be always at the end
+
+

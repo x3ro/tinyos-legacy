@@ -1,0 +1,2 @@
+COMPONENT=MicaHWVerify
+include ../Makerules

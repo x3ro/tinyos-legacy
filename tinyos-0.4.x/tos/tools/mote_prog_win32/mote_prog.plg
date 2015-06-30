@@ -1,0 +1,62 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: mote_prog - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\User\LOCALS~1\Temp\RSP8A.tmp" with contents
+[
+/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/mote_prog.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\Atmel_base.cpp"
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\AtmelCMD.cpp"
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\Avr_base.cpp"
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\AvrCmd.cpp"
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\Main.cpp"
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\mote_prog.cpp"
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\PartDB.cpp"
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\PSPI.cpp"
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\sdf.cpp"
+"C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\Serial.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\User\LOCALS~1\Temp\RSP8A.tmp" 
+Creating temporary file "C:\DOCUME~1\User\LOCALS~1\Temp\RSP8B.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/mote_prog.pdb" /machine:I386 /out:"Release/mote_prog.exe" 
+.\Release\Atmel_base.obj
+.\Release\AtmelCMD.obj
+.\Release\Avr_base.obj
+.\Release\AvrCmd.obj
+.\Release\Main.obj
+.\Release\mote_prog.obj
+.\Release\PartDB.obj
+.\Release\PSPI.obj
+.\Release\sdf.obj
+.\Release\Serial.obj
+.\TVicPort.lib
+]
+Creating command line "link.exe @C:\DOCUME~1\User\LOCALS~1\Temp\RSP8B.tmp"
+<h3>Output Window</h3>
+Compiling...
+Atmel_base.cpp
+C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\Atmel_base.cpp(56) : warning C4244: '=' : conversion from 'long' to 'unsigned char', possible loss of data
+AtmelCMD.cpp
+Avr_base.cpp
+AvrCmd.cpp
+Main.cpp
+mote_prog.cpp
+PartDB.cpp
+PSPI.cpp
+sdf.cpp
+Serial.cpp
+C:\cygwin\home\user\scratch\tos\tos\tools\mote_prog_win32\Serial.cpp(87) : warning C4700: local variable 'i' used without having been initialized
+Linking...
+
+
+
+<h3>Results</h3>
+mote_prog.exe - 0 error(s), 2 warning(s)
+</pre>
+</body>
+</html>

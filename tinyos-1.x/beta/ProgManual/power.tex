@@ -1,0 +1,45 @@
+
+
+The whole point of using HPLPowerManagement is that you don't actually *use*
+it.  You call HPLPowerManagement.enable() and then the mote will
+automatically sleep when the following conditions are met:
+  * the radio is off
+  * all high speed clock output compare interrupts are disabled
+  * spi interrupt disabled
+  * task queue is empty
+
+There is no code to "use" power management, instead each service (Timer,
+Radio, SpiByteFifo, etc) calls HPLPowerManagement.adjustPower() when the
+component has shut down to notify the PowerManagement component that it
+should check the state of the above items again and reset the sleep
+register.  Thus applications need not worry about explicitly telling the
+mote to go to sleep (THIS is the main difference between HPLPowerManagement
+and the *deprecated* Snooze).
+
+The main advantage of this approach is it allows services to clean up, save
+state, and shut down before the cpu is halted.  In snooze, the cpu is stolen
+out from under running services without any notification to those services.
+For HPLPowerManagement to work, an application must call
+CC1000RadioC.StdControl.stop().  After this call, HPLPowerManagement takes
+over (once the radio is done shutting down), and sets the appropriate
+registers to put the mote to sleep after the task queue empties.  Note that
+if using a low power radio listening state (such as
+CC1000RadioIntM.setListeningMode(i)), the CC1000 radio module will take care
+of notifying HPLPowerManagement to say it is okay to halt the CPU.
+
+The mote will wake up on the next 32kHz Timer interrupt.
+
+The long winded answer to your question, Mark, is that *only* services need
+to call adjustPower() when they have finished shutting down or starting up.
+It is invalid semantics for an application to call adjustPower(), however
+you are not penalized by it in the current implementation.  Thus, your
+application should call HPLPowerManagement.enable() in its
+StdControl.init().  Power Management is disabled by default.
+
+I believe HPLPowerManagement is documented somewhere in the TOS 1.1 release.
+
+GDI and TASK/TinyDB both enable HPLPowerManagement.  The GDI code is in
+contrib/ucb/apps/TestLabApp.  GDI uses low power radio sampling (part of the
+default CC1000 radio stack) and achieves 30uA sleep state.  TinyDB uses its
+own TDMA scheme for low power communications and also achieves the same low
+power state.

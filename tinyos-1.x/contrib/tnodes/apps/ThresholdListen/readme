@@ -1,0 +1,9 @@
+README for ThresholdListen
+Author/Contact: T.E.V.Parker@ewi.tudelft.nl
+
+Description:
+
+ThresholdListen listens for messages from Threshold nodes, and then
+dumps the message to the serial port, where it can be interpreted by
+the nodes.py
+

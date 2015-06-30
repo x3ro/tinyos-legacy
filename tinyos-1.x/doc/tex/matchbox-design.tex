@@ -1,0 +1,197 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+
+\parindent 0em
+\parskip 0.2cm
+
+\newcommand{\kw}[1]{\mbox{\tt #1}}
+\newcommand{\file}[1]{\mbox{\tt #1}}
+
+\title{Design of Matchbox, the simple filing system for motes}
+\author{David Gay \\
+Version 1.0}
+
+\begin{document}
+  
+\maketitle
+
+\section{Overview}
+
+The mote filing system is designed to provide a simple filing system for
+mote-based applications. Its design goals and functionality are covered
+in the matchbox document; this document describes Matchbox's implementation
+for the mica family of motes.
+
+This implementation is tailored to the Atmel AT45DB041B flash chip used
+on the Micas. It should consider the following constraints of this 
+particular flash chip:
+\begin{itemize}
+\item The flash is divided into sectors (mostly 128K, though some are smaller).
+\item Each sector is divided into pages, each page is 264 bytes long. 
+\item Pages can only be written as a whole.
+\item Pages should be erased before being written (whatever ``should'' means).
+\item After 10'000 writes to a sector, all its pages should have been
+written at least once.
+\end{itemize}
+
+Note that these are different from ``usual'' flash rules. These typically say:
+\begin{itemize}
+\item Each page/byte/whatever can be written a limited number of times (e.g.,
+100'000)
+\item Erases are on a larger granularity than writes (e.g., 64k-erases, 
+528-byte writes)
+\end{itemize}
+
+\section{Data structures}
+
+\subsection{On flash} 
+
+The 264-byte page is divided into 256 data bytes and 8 metadata bytes.
+The metadata stores the following information:
+\begin{itemize}
+\item per-page CRC (data bytes only) (16 bits)
+\item page-write counter (16 bits)
+\item last-byte-used in page (9 bits)
+\item next page pointer (a page number), or \kw{IFS\_EOF\_BLOCK} for
+the last page
+\item root page marker (3 bits)
+\item metadata check byte (8 bits)
+\end{itemize}
+
+Pages are numbered from 0 to <file system capacity in pages>-1. The
+expectation is that the file system will use some whole number of flash
+sectors. Pages \kw{IFS\_FIRST\_PAGE} through \kw{IFS\_FIRST\_PAGE +
+IFS\_NUM\_PAGES} are requested from the \kw{ByteEEPROM} component for
+use by the filing system.
+
+There are two types of pages: data pages (root page marker is 0), and
+first-meta-data-page pages (root page marker is \kw{IFS\_ROOT\_MARKER}).
+
+The metadata check byte detects inconsistent metadata. It is the bitwise
+complement of the sum of the three bytes that store the last-byte-used in
+page, the next page pointer and the root page marker.
+
+Files and the metadata are both byte-streams. A byte-stream is a sequence
+of bytes, and is identified by its initial page number. The pages of a
+byte-stream are found by following the linked list formed by the next page
+pointers. Data ends at the first page where last-byte-used is not 256. Note
+that the linked list of pages may extend arbitrarily past the last page
+containing data - this means that space has been reserved for future
+expansion of the byte-stream.
+
+The per-page CRC is always used for metadata, it is used for files if the
+\kw{FS\_CRC\_FILES} constant (in \file{Matchbox.h}) is true.
+
+\paragraph{Meta-data format (viewed as a byte-stream)}:
+A header stores the meta-data version number, followed by an unsorted list
+of file entries. Each file entry is a 14-byte null-terminated string
+followed by the file's byte-stream's initial page number (2 bytes). The
+first page of the meta-data bytestream has the first-meta-data-page
+page-type. The other pages of the meta-data, and the file byte-stream pages
+have the data page type.
+
+Note that their is no fixed \emph{root} page: the initial page number of the
+meta-data is found by scanning the flash looking for the page with type
+first-meta-data-page which contains the highest meta-data version number.
+This avoids continuously writing the \emph{root} page (a bad idea given the 
+limited number of writes supported by flash). Scanning the flash to locate
+this page at boot time is acceptable in Matchbox as the flash is small
+(a few 100k) and page access relatively fast (approx. 1ms). 
+
+There is also no explicit listing of the free pages, this can also be
+reconstructed at boot time once the initial page of the meta-data is
+found.
+
+\subsection{In memory} 
+
+We must keep the following information (each piece of information is
+followed by the name of the component which owns it):
+\begin{itemize}
+\item Meta-data root page.
+\item Meta-data version number.
+\item Free page bitmap.
+\item Last allocated page.
+\item Number of free pages.
+\item For each read file descriptor:
+  \begin{itemize}
+  \item initial page number
+  \item current page
+  \item next page
+  \item current page offset
+  \item last offset on this page
+  \item use-crc-for-this-file flag
+  \end{itemize}
+\item For each write file descriptor:
+  \begin{itemize}
+  \item initial page number
+  \item current page
+  \item next page
+  \item the current page's number (first page is 0, second is 1, etc)
+  \item current page offset
+  \item last offset on this page
+  \item remaining reserved bytes
+  \item use-crc-for-this-file flag
+  \end{itemize}
+\item various pieces of miscellaneous state for operations in progress
+\end{itemize}
+
+Matchbox uses one read and one write file descriptor internally (for the
+metadata).
+
+\section{Algorithms}
+
+This section mentions a few basic principles, rather than cover the
+(straightforward) algorithms for each operation:
+
+Update of meta-data is always atomic: new meta-data is written by making a
+copy of the old meta-data in new pages, with appropriate changes. The new
+initial metadata page contains a higher version number than the current
+metadata. The initial page is only marked as a first-meta-data-page once
+all other metadata has been written. New meta-data is only written after the
+information it refers to is known to be valid (e.g., on new file creation,
+the file's first page has been successfully written).
+
+At boot time, the initial metadata page is located by reading all of the
+flash sequentially and finding the valid (by reling both on the metadata
+check byte and the per-page CRC) first-meta-data-page page with the highest
+version number.
+
+Once the initial metadata page is located, the free page bitmap is built by
+walking through the filing system. Inconsistencies in free pages will lead
+to the filing system being marked readonly. A separate fsck-style tool
+should be written to fix this (note that this should only happen as a
+result of page corruption given the atomic metadata updates, hence should
+be hopefully rare).
+
+A corrupt file is one containg a page with a bad CRC. This could be due,
+e.g., to a power-off during a file-page write. Currently, attempts to
+read such a file will fail when the corrupt page is reached. Attempts
+to open a corrupt file for writing will fail.
+
+A free page is found by scanning the free page bitmap starting at the value
+of \emph{Last allocated page} (and updating \emph{Last allocated
+page}). This produces some amount of ``wear levelling'' (i.e., writing each
+page an equal number of times). The boot-time value of \emph{Last allocated
+page} is the meta-data initial page number.
+
+A background task sequentially walks over the filing system's pages
+and checks their write counters. Any page which is more than 9000
+writes ``old'' is rewritten (and hence sees its write counter updated).
+The write counter value is maintained inside the EEPROM component.
+A walk rate of one page per minute should be sufficient (assuming
+that write-rate is not high - may need further analysis and/or
+adaptivity).
+
+\section{Interaction with TinyOS and Current Status}
+
+Matchbox will interoperate with direct access to the flash chip via the
+\kw{ByteEEPROM} component. Matchbox reserves its area of the flash chip
+with \kw{ByteEEPROM} at boot time. It is possible to change this area by
+editing the \kw{IFS\_FIRST\_PAGE} and \kw{IFS\_NUM\_PAGES} constants in
+\file{tos/lib/FS/IFS.h}.
+
+The write counters and the background task which rewrites pages have not
+yet been implemented.
+
+\end{document}

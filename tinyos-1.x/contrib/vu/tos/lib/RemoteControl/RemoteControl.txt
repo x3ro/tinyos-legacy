@@ -1,0 +1,246 @@
+RemoteControl:
+
+Author: Miklos Maroti, ISIS, Vanderbilt
+
+Contact: Janos Sallai (sallai@isis.vanderbilt.edu), ISIS, Vanderbilt
+
+
+DESCRIPTION:
+
+The RemoteControl service allows sending commands, and starting/stopping and 
+restarting TinyOS components on all or on a subset of nodes of a multi-hop network,
+and it routes acknowledgments or return values from the affected components
+back to the base station. 
+
+The network must have a TOSBase or GenericBase node attached to a base station
+laptop running MessageCenter (net.tinyos.mcenter.MessageCenter). The commands 
+can be initiated from the RemoteControl panel and the acknowledgments displayed
+using the MessageTable panel. To use the service, one must select a unique remote
+control application ID and implement one or more of the following interfaces:
+
+	IntCommand:	allows one uint16_t to be passed as argument. 
+			An uint16_t acknowledgment return value can be routed
+			back to the base station.
+
+	DataCommand: allows an unstructured stream of bytes to be passed
+			(up to 24 bytes) to the component and an acknowledgment
+			be sent back.
+
+	StdControl:	allows stopping/starting and restarting one component
+			that already implements the StdControl interface.
+			The return value (result_t) will be routed back to
+			the base station.
+
+The IntCommand and DataCommand interfaces support split-phase execution, that
+is, the acknowledgment value can be sent back from a posted task at some later time.
+Once one of these interfaces are implemented, the following wiring must be done:
+
+
+	components ..., RemoteControlC, ...
+
+	RemoteControlC.IntCommand[AppID] -> CommandedModuleM.IntCommand;
+
+USAGE:
+
+1.	First you have to start MessageCenter (net.tinyos.mcenter.MessageCenter)
+	and load the remote control panel (net.tinyos.mcenter.RemoteControl). This
+	panel lets you issue the command, and store your frequently used commands.
+	Use the MessageCenter documentation for further details.
+
+2.	The RemoteControl middleware service uses the FloodRouting module to route back
+	the acknowledgements to the base station. Currently, the GradientPolicy is used,
+	which needs to be initialized in the following way: Create a remote command
+	with the following parameters:
+
+		configuration:	"set gradient root"
+		usage:	"type the node id of a mote close to TOSBase mote into 
+			the target field"
+		command target:
+		command appID:	0x81
+		integer parameter:	2
+	
+	Save this configuration, you will be able to reload this latter. This remote 
+	command will set the root of the gradient field. Note, the TOSBase should not
+	be the root, the TOSBASE node will overhear the messages passed towards the
+	root. Alternatively, you have to create your alternative TOSBase that includes
+	the RemoteControl component.
+
+3.	The command target field is the node ID of the target mote, or 0xFFFF for
+	commanding all motes. The motes can be subdiveded into several groups. You shall
+	define the TOS_SUBGROUP_ADDR macro to a number between 0xFF00 and 0xFFFE
+	and compile the RemoteControl with this parameter. If this number is written
+	in the target field, then nodes of the subgroup will get the command.
+
+	The RemoteControl increments a sequence number that is used by the 
+	motes to discard duplicate remote commands, and those whith sequence 
+	number at least 64 less than the sequence number of the most 
+	recently received command. You can view/set the sequence number of 
+	the most recently sent command in the sequence number field. Note 
+	that you need to press enter after typing the new value in the field 
+	to make the change effective.
+
+4.	The acknowledgments or returned values can be displayed with the MessageTable
+	(net.tinyos.mcenter.MessageTable) panel. You have to configure it with the
+	following parameters:
+
+		configuration: "remote control acknowledgments"
+		msg type:	130
+		do not check any flags
+		format:
+			const hex8 appId = 0x5e
+			omit uint16 gradient
+			unique uint16 nodeId
+			uint8 seqNum
+			uint16 retVal
+
+5.	Once you have initialized the gradient field, all remote control acknowledgments
+	will be routed back. You have to create your own configuration and save it.
+	The RemoteControl library comes with a few sample controls, which are also
+	useful for monitoring your network. These are:
+
+	The LedCommandsC 
+	----------------
+	allows to set and query the LEDs on the motes. The acknowledgment
+	value is the current LED setting. Here are the configurations that needs to be created:
+
+		configuration:	"set the LEDs"
+		usage:	"type a number between 0 and 7 to the integer parameter field
+			indicating which LED you want to turn on/off, and change the target"
+		command target: 0xFFFF 
+		command appID:	0x21
+		integer parameter:
+	
+		configuration:	"query the LEDs"
+		usage:	"change the target field"
+		command target: 0xFFFF
+		command appID:	0x21
+		integer parameter: 8
+
+	The RadioCommandsC 
+	------------------	
+	component allows you to change the radio transmit strength on the 
+	MICA and MICA2 platforms, and changing the radio frequency on MICA2. 
+	Here are the configurations:
+
+		configuration:	"set the transmit power"
+		usage:	"change the integer parameter to the platform dependent radio
+			strength value. The return value is SUCCESS or FAIL"
+		command target: 0xFFFF
+		command appID:	0x22
+		integer parameter:
+
+		configuration:	"set the radio frequency"
+		usage:	"This works only on the MICA2. Change the integer parameter
+			to the required preset frequency number"
+		command target:	0xFFFF
+		command appID:	0x24
+		integer parameter:
+	
+	The VoltageCommandsC 
+	--------------------
+	component allows you to query the current voltage of the
+	motes. For some reason this number is not really reliable probably due to 
+	broken ADCs. The voltage as returned by the ADC is reported back.
+
+		configuration:	"query voltage"
+		usage:	"change the target for specific node or leave it 0xFFFF,
+			the returned value is the voltage"
+		command target:	0xFFFF
+		command appID:	0x25
+		integer parameter:	0
+	
+	The StackCommandsC 
+	------------------
+	reports the maximum used and minimum avaiable stack space
+	on the motes. 
+
+		configuration:	"query maximum used stack space"
+		usage:	"change the target"
+		command target:	0xFFFF
+		command appID:	0x23
+		integer parameter:	0
+	
+		configuration:	"query the minimum unused stack space"
+		usage:	"change the target"
+		command target:	0xFFFF
+		command appID:	0x23
+		integer parameter:	1
+
+	The TimeSyncCommandsC
+	---------------------
+	(1) remotely assigns a poller, that consequently broadcasts a reference broadcast.
+	all the receivers of the broadcast respond with the global time or global time error
+	(2) query all nodes for the time sync debug information
+		
+		configuration: "query global time error = sender global time - receiver global time"
+		usage: "change the target to a specific node (*never* use broadcast here), the returned 
+			value is time error in jiffies (1 jiffy ~= 1us for CPU clock and 1 jiffy ~= 30us 
+			for external crystal) - the returned values should be small (0,1,2)"
+		command target: a single node
+		command appID: 0x26
+		integer parameter: 0
+	
+		configuration: "query the global time"
+		usage: "change the target to a specific node (*never* use broadcast here), the returned 
+			value is sending time for the poller and receving times for all	the receivers of 
+			the poller's broadcast, time is in jiffies (1 jiffy ~= 1us for CPU clock and
+			1 jiffy ~= 30us for external crystal) - these values should be small (0,1,2)"
+		command target: a single node
+		command appID: 0x26
+		integer parameter: 1
+		
+		configuration: "query the id of the root"
+		usage: "change the target to a specific node or broadcast , the returned value is the id
+			of the current root of the target node"
+		command target: 0xffff
+		command appID: 0x26
+		integer parameter: 2
+		
+		configuration: "query the sequence number"
+		usage: "change the target to a specific node or broadcast , the returned value is the 
+			highest sequnce number heard from the current root so far"
+		command target: 0xffff
+		command appID: 0x26
+		integer parameter: 3
+
+		configuration: "query the number of entries in the LR table"
+		usage: "change the target to a specific node or broadcast , the returned value is the 
+			current number of entries in linear regression table"
+		command target: 0xffff
+		command appID: 0x26
+		integer parameter: 4
+		
+		configuration: "query the heartbeats"
+		usage: "change the target to a specific node or broadcast , the returned value is the 
+			value of heartbeats variable at the target node"
+		command target: 0xffff
+		command appID: 0x26
+		integer parameter: 5
+
+	ResetCommands
+	-------------
+	component allows you to reset nodes, param is number of seconds to wait before reset
+
+		configuration:	"reset nodes"
+		usage:	"change the time to set the timer which triggers reset at the mote (motes)"
+		command target:	0xFFFF
+		command appID:	0x27
+		integer parameter:	10
+
+
+	The GradientPolicy 
+	------------------
+	implements a few more commands that are accessible through
+	the following configurations:
+
+		configuration:	"query the gradient root"
+		usage:	"returns the root of the gradient field of each nodes"
+		command target:	0xFFFF
+		command appID:	0x81
+		integer parameter:	0
+
+		configuratgion:	"query the hop count of the gradient field"
+		command target:	0xFFFF
+		command appID:	0x81
+		integer parameter:	1
+

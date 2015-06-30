@@ -1,0 +1,27 @@
+/Makefile/1.3/Tue Jun  7 10:29:44 2011//
+/codeZeros.h/1.3/Tue Jun  7 10:29:44 2011//
+/dctfstBlk.h/1.3/Tue Jun  7 10:29:44 2011//
+/decodeZeros.h/1.3/Tue Jun  7 10:29:44 2011//
+/diff_dctfstBlk.h/1.3/Tue Jun  7 10:29:44 2011//
+/diff_idctfstBlk.h/1.3/Tue Jun  7 10:29:44 2011//
+/dpcm.h/1.3/Tue Jun  7 10:29:44 2011//
+/dpcmDecodeApp.c/1.3/Tue Jun  7 10:29:44 2011//
+/dpcmEncodeApp.c/1.3/Tue Jun  7 10:29:44 2011//
+/dpcmEncodeApp.exe/1.3/Tue Jun  7 10:29:44 2011//
+/dpcm_decoder.h/1.3/Tue Jun  7 10:29:44 2011//
+/dpcm_encoder.h/1.3/Tue Jun  7 10:29:44 2011//
+/huffmanCompress.h/1.3/Tue Jun  7 10:29:44 2011//
+/huffmanUncompress.c/1.3/Tue Jun  7 10:29:44 2011//
+/huffmanUncompress.h/1.3/Tue Jun  7 10:29:44 2011//
+/idctfstBlk.h/1.3/Tue Jun  7 10:29:44 2011//
+/jpegTOS.c/1.3/Tue Jun  7 10:29:44 2011//
+/jpegTOS.h/1.3/Tue Jun  7 10:29:44 2011//
+/jpegUncompress.c/1.3/Tue Jun  7 10:29:44 2011//
+/jpegUncompress.h/1.3/Tue Jun  7 10:29:44 2011//
+/jpeghdr.h/1.3/Tue Jun  7 10:29:44 2011//
+/quanttables.h/1.3/Tue Jun  7 10:29:44 2011//
+/quanttables_odrb.h/1.3/Tue Jun  7 10:29:44 2011//
+/rgb2ycc.h/1.3/Tue Jun  7 10:29:44 2011//
+/tinyos_macros.h/1.3/Tue Jun  7 10:29:44 2011//
+/ycc2rgb.h/1.3/Tue Jun  7 10:29:44 2011//
+D

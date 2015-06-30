@@ -1,0 +1,81 @@
+(ExpressProject "Design5"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (NoModify)
+    (File ".\simplesensor.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x"))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (PartMRUSelector
+    (GND_SIGNAL
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    ("CONN IC 24"
+      (FullPartName "CONN IC 24.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    ("CONN IC 8"
+      (FullPartName "CONN IC 8.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    ("CONN FB 8-H"
+      (FullPartName "CONN FB 8-H.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CONNECTOR.OLB")
+      (DeviceIndex "0"))
+    (CON4
+      (FullPartName "CON4.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CONNECTOR.OLB")
+      (DeviceIndex "0"))
+    (PHOTORESISTOR
+      (FullPartName "PHOTORESISTOR.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    (THERMISTOR
+      (FullPartName "THERMISTOR.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (R
+      (FullPartName "R.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (VCC_ARROW
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (GND
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    ("51 PIN FEMALE HIROSE"
+      (FullPartName "51 PIN FEMALE HIROSE.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    ("51 PIN  MALE HIROSE"
+      (FullPartName "51 PIN  MALE HIROSE.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0")))
+  (LastUsedLibraryBrowseDirectory "C:\Cadence\PSD_14.0\Capture\Library")
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources" ".\simplesensor.dsn")
+      (Path "Design Resources" ".\simplesensor.dsn" "SCHEMATIC1")
+      (Select "Design Resources" ".\simplesensor.dsn" "SCHEMATIC1" "PAGE1"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 320 541 -1 -1 15 396 3 482"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 110 933 110 523")
+        (Scroll "186 62")
+        (Zoom "100")
+        (Occurrence "/"))
+      (Path "H:\ORCAD\MOTES\SIMPLESENSOR\SIMPLESENSOR.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1"))))

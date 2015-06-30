@@ -1,0 +1,161 @@
+README for tinyos-1.x/contrib/ucbRobo Directory
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+UCB Robot TestBed (ucbRobo, or RobotTB)
+
+
+
+Description:
+************
+This directory contains all the tools and applications meant to be run
+on the 330 Cory Testbed.  The goal of the testbed is to monitor and
+better understand control algorithms that close the loop around sensor
+networks.  The target application is a Pursuit Evasion Game (PEG),
+where a team of pursuer robots chase after a team of evader robots,
+using the sensor network as "eyes" to see where the evaders are
+located.
+
+Further documentation can be found under each directory.
+
+
+
+General Directory Structure:
+****************************
+The directory structure below is the initial conception of how files
+are laid out, but may not reflect reality.  However, it is instructive
+to use it as a guide for where files should be placed in the tree.
+Generally, from a control loop viewpoint, the control computation is
+done in MATLAB, the cotsbot serves as the actuator (NesC code), and
+the sensor network serves as the observer in our applications.
+
+under tinyos-1.x/contrib/ucbRobo/ :
+
+apps/
+     cotsbot/
+     sensornet/
+     [application name] (ex. PointNav/  ,  MagLightTrail/)
+include/
+        RobotTB_AM.h
+        [other message files] (ex. MagLightMsgs.h)
+	[NesC type definitions]
+	[C libraries, callable from NesC]
+interfaces/
+	   [NesC interface files]
+lib/
+    cotsbot/
+    sensornet/
+    [general NesC library files]
+tools/
+      matlab/
+             PointNavSim/
+             PEGSim/
+             MainSim/
+             lib/
+		 [common tools and utilities]
+             apps/
+		  [application specific interaction tools] (ex. MagLightTrail/)
+      java/net/tinyos/RobotTB/
+			      [MIG files for messages]
+      camera/
+
+The apps directory is the starting point for finding out how to
+compile an application that involves the sensor network.  All the
+application directories are listed under apps starting with an
+uppercase letter.  These application directories contain
+README/documentation files for what components (sensor network,
+cotsbot, matlab, and otherwise) to compile to work together, and any
+other miscellaneous files pertaining to each application.  The
+sensornet and cotsbot directories contain Makefiles and any extra
+"glue" code necessary for building the NesC components to be installed
+on the sensor network and cotsbots respectively.  Basically, you
+"build" the NesC applications in the sensornet and cotsbot
+directories.
+
+The include directory holds *.h files.  Particularly, it holds files
+that define new NesC types (naming convention: *Types.h), "C
+libraries" for doing computations (naming convention: lowercase with
+underscores), and the message header files (naming convention:
+*Msg.h).  There are a few files that stray from this naming convention
+(ex. common_structs.h), so be wary when searching for code.  Message
+headers files should be set up to include RobotTB_AM.h, which
+enumerates all the AM message name->number assignments used by any
+applications in this directory, to keep AM message numbers unique.
+The actual message structures will be stored as before in separate
+___Msg.h files.  This arrangement was chosen to minimize the amount of
+merging anytime someone commits to CVS (to just a few lines in
+RobotTB_AM.h), yet make each contributer conscious of making their
+messages compatible with others.  Also, note that there may be
+'testing' subdirectories for testing the C-library files under the
+include directory, named testCOMPONENT_NAME (ex. test_neighbor_table).
+
+The interfaces directory contains NesC interfaces.
+
+The lib directory holds *.nc files common to different applications.
+Particularly, files under the cotsbot directory contain reusable NesC
+code for the cotsbot, and likewise files under the sensornet directory
+contain reusable NesC code for the sensor network.  All other generic
+NesC files that are used by multiple applications are just stored in
+the lib directory directly.  Note that the sensornet/magsensor
+directory for the magsensor stack is special in that it contains
+header files and interfaces as well.  This is to keep it clear (if we
+have multiple magsensor stacks) which sensor stack we're using.  See
+the README in the lib/sensornet/magsensor directory for more details.
+
+The tools/matlab directory contains the simulators (hot swappable with
+real components) as well as any application specific interaction
+tools. The main "end product" simulator, MainSim, "incorporates" the
+good features of the smaller, quick and dirty simulators (such as
+PointNavSim and PEGSim... there may be others).  The tools/matlab/lib
+directory also contains a library of commonly used matlab FUNCTIONS
+(not scripts), such as plotting or data analysis tools.  The
+tools/matlab/apps directory contains matlab tools specific to each
+application.
+
+The java/net/tinyos/RobotTB directory is meant to contain the
+MIGGed messages and NCG constant files, as well as any other java
+tools that are handy for the testbed.
+
+The camera directory is for any camera code (C code, etc.).  In the
+future (relative to the writing of this document), it may contain
+camera applications such as ones for camera calibration.
+
+Read the README files under each directory, if there is one, for more
+details on how to make your files conform to how the other files in
+that directory are written.  (particularly, look at README.matlab)
+
+
+
+Getting Started:
+****************
+A great number of the applications in this directory require the use
+of Matlab, Java, MIG (Message Interface Generator), and NCG (NesC
+Constant Generator).  Not all of these are required for all
+applications, but it would be best to follow the documentations under
+tinyos-1.x/docs to set these up and/or get familiar with the tools.
+
+If you wish to log data, it would be helpful to set up PostgreSQL.
+Also, for tools to program/interact with the testbed, look under the
+tinyos-1.x/contrib/testbed directory.  For more information, consult
+the Sastry NEST page, listed below.  Some documentation on environment
+setup is also available under the ucbRobo/doc directory.
+
+To run your first application, look under the apps/ directory for an
+application name, and read the application's README file.  A simple
+application to start with is MagLightTrail.
+
+There are various other READMEs sprinkled throughout the directories
+to provide more help.  For example, some help on getting the MATLAB
+side of things up and running is under ucbRobo/tools/matlab directory.
+
+
+
+Other Useful Directories/Websites:
+**********************************
+tinyos-1.x/contrib/cotsbots	for the robot platform we are using
+tinyos-1.x/contrib/PEGSensor	for PEG demoed in the Summer of 2003
+tinyos-1.x/contrib/SystemC	for Middleware demonstrated by PEG'03
+tinyos-1.x/contrib/testbed	for tools to program testbeds
+
+Sastry NEST Page
+http://www.eecs.berkeley.edu/~phoebusc/330NEST/welcome.html
+

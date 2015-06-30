@@ -1,0 +1,41 @@
+README for Chirp running over S-MAC without modification
+Author/Contact: weiye@isi.edu
+
+Description:
+
+The application is copied from tinyos-1.x/apps/Chirp/ to demonstrate the
+compatibility provided by S-MAC stack that allows applications developed on 
+standard UCB's stack (based on GenericComm and AMStandard) to run over
+S-MAC with out any modifications.
+
+There is no modifications in ChirpM.nc and ChirpMsg.h. The only modification
+in Chirp.nc is to include config.h at its beginning. config.h is used to 
+configure S-MAC. For example, in the Chirp application, S-MAC is configured
+to run in fully active mode (no sleep cycles). If config.h file is not
+included by Chirp.nc, default configurations of S-MAC will be used (10% duty
+cycle with adaptive listen, and packets won't be sent if no neighbor is
+discovered).
+
+Makefile is modified to include correct search paths.
+
+The following is the original README for Chirp application
+
+README for Chirp
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+Chirp is an application that periodically obtains sensor data from
+the photo sensor and sends the data over the radio.  The application
+demonstrates:
+  * how to obtain data from the ADC
+  * how to send a packet
+  * how to use the Timer configuration
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

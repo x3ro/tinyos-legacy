@@ -1,0 +1,25 @@
+# $Id: .sensor,v 1.2 2010/06/25 11:17:10 pineapple_liu Exp $
+
+#
+# Copyright (c) 2010 Data & Knowledge Engineering Research Center,
+#                    Harbin Institute of Technology, P.R. China.
+# All rights reserved.
+#
+
+##
+# @author: LIU Yu <pineapple.liu@gmail.com>
+# @date  : Jun 17, 2010
+#
+
+push( @includes, qw(
+
+  ./sim-synsb
+  ./sim-sensor
+  ./sim
+  %T/sensorboards/synsb/chips
+  %T/sensorboards/synsb
+  %T/lib/tossim/chips
+  %T/lib/tossim
+
+) );
+

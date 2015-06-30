@@ -1,0 +1,69 @@
+#
+# Makefile to be included by each application's Makefile
+# Author: Wei Ye
+#
+
+ifndef TOSDIR
+$(error TOSDIR is not defined)
+endif
+
+ifndef COMMDIR
+COMMDIR := ../../tos
+$(warning COMMDIR is not defined, assuming $(COMMDIR).)
+endif
+
+ifndef INCLUDE
+INCLUDE := -I.
+endif
+
+# now only mica2 and micaz are supported
+PLATALL = mica2 micaz clean
+PLATFORM = $(filter $(PLATALL), $(MAKECMDGOALS))
+
+ifeq ($(PLATFORM),mica2)
+# configuration for mica2
+INCLUDE += -DPLATFORM_MICA2 \
+          -I$(COMMDIR)/platform/mica2 -I$(COMMDIR)/platform/avrmote
+# select frequency (Hz) of the radio 
+#CFLAGS += -DCC1K_DEF_FREQ=426945000
+#CFLAGS += -DCC1K_DEF_FREQ=439058000
+else
+ifeq ($(PLATFORM),micaz)
+# configuration for micaz
+$(warning MicaZ platform: CPU sleeping does not work, so it is disabled.)
+INCLUDE += -DPLATFORM_MICAZ -DDISABLE_CPU_SLEEP\
+          -I$(COMMDIR)/platform/micaz -I$(COMMDIR)/platform/avrmote
+endif
+endif
+
+INCLUDE += -I$(COMMDIR)/interfaces -I$(COMMDIR)/system
+
+CFLAGS += $(INCLUDE)
+
+#disable nesC warning messages
+NESC_FLAGS = -Wall
+
+# can't work with BNP, which sets fuse high byte to 0xd8.
+# we need fuse high byte to be 0xd9
+TINYOS_NP := NO_BNP
+
+# set low fuse byte to 0xc4, so that the MCU will use the internal
+# oscillator (at 8MHz) for fast wakeup.
+ifdef MIB510
+PROGRAMMER_EXTRA_FLAGS_MIB := --wr_fuse_l=c4
+else
+PROGRAMMER_EXTRA_FLAGS := --wr_fuse_l=c4
+endif
+
+ifeq ($(PLATFORM), mica2)
+include $(TOSDIR)/../apps/Makerules
+else
+ifeq ($(PLATFORM), micaz)
+include $(COMMDIR)/platform/micaz/MakeXbowlocal
+include $(TOSDIR)/../tools/make/Makerules
+else
+ifeq ($(PLATFORM), clean)
+include $(TOSDIR)/../apps/Makerules
+endif
+endif
+endif

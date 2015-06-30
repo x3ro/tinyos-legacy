@@ -1,0 +1,34 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: fileset.extra,v 1.1.1.1 2007/11/05 19:11:22 jpolastre Exp $
+
+INCLUDES = $(filter -I%,$(shell ncc -v -target=$(PLATFORM) -I. $(filter -I%,$(PFLAGS) $(CFLAGS)) 2>&1 | head -n 1))
+DEPS_CACHE ?= $(BUILDDIR)/nesc_deps.txt
+FILESET_CACHE ?= $(BUILDDIR)/fileset.txt
+FILESET_REFERENCE ?= fileset_$(PLATFORM).txt
+
+ifneq ($(FILESET),skip)
+
+FILESET_IGNORE_CMD =
+ifeq ($(FILESET),ignore)
+FILESET_IGNORE_CMD = || true
+endif
+
+BUILD_EXTRA_DEPS += verify_fileset
+
+endif
+
+build_deps: builddir FORCE
+	@echo
+	@echo -e "***  Building $(DEPS_CACHE)"
+	$(TOSDIR)/../contrib/nestfe/scripts/list_nesc_deps -v $(INCLUDES) $(COMPONENT).nc > $(DEPS_CACHE)
+
+build_fileset: build_deps FORCE
+	@echo
+	@echo "***  Building $(FILESET_CACHE)"
+	$(TOSDIR)/../contrib/nestfe/scripts/list_fileset $(DEPS_CACHE) > $(FILESET_CACHE)
+
+verify_fileset: build_fileset FORCE
+	@echo
+	@echo "***  Verifying $(FILESET_CACHE) against $(FILESET_REFERENCE)"
+	$(TOSDIR)/../contrib/nestfe/scripts/verify_fileset $(FILESET_REFERENCE) $(FILESET_CACHE) $(FILESET_IGNORE_CMD)
+

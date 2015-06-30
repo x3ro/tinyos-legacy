@@ -1,0 +1,8 @@
+This is the files to support the accelerometer sensors
+made for the 13192SARD's.
+
+The structure of the files are analog to the ones made by
+Mads Bondo Dydensborg, madsdyd@diku.dk, for the light and 
+temperature sensors for the 13192EVB.
+
+July 2005, Marcus Chang <marcus@diku.dk>

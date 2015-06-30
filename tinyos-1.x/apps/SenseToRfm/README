@@ -1,0 +1,17 @@
+README for SenseToRfm
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+SenseToRfm is an application that periodically samples the photo
+sensor and send ADC light reading in a packet over the radio. The
+application is built simply by wiring Main, TimerC, Photo, IntToRfm
+and SenseToInt components together.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

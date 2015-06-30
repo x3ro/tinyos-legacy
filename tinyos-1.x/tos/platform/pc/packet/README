@@ -1,0 +1,31 @@
+This is a drop-in replacement for TOSSIM's radio stack that operates at
+the packet, rather than the bit, level. In preliminary testing it
+performs about 100 times faster than the default bit-level radio stack.
+Obviously it does not capture the subtleties and behavior of the
+bit-level simulation, but, it is useful for testing and simulating large
+networks. 
+
+To use this code, all you need to do is add the line
+  PFLAGS = -I$(BASEDIR)/tos/platform/pc/packet
+to your application Makefile, then rebuild your application with 'make pc'.
+
+This packet-level simulation is compatible with TOSSIM's lossy radio
+models, so if you are using "-r lossy" or setting link-level loss
+probabilities with TinyViz, it will work.
+
+Currently, the component does not model packet collisions (e.g., the
+hidden terminal problem), MAC contention, or variable transmission
+time due to these effects or packet length. Packet transmission takes
+1/40th of a second, based on the empirical observation that the mica
+radio stack can handle about 40 packets/s. Some rough tests indicate
+that packet loss rates due to bit errors from the packet-level model
+are roughly equal to those in the bit-level model.
+
+Please note, while using this component will tremendously increase the
+rate of simulation, its ignorance of the hidden terminal problem
+really makes it of little use for anything approaching evaluation in
+any meaningful context.
+
+
+Matt Welsh - mdw@eecs.harvard.edu
+Philip Levis - pal@cs.berkeley.edu

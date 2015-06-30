@@ -1,0 +1,70 @@
+README for Chirp
+Author/Contact: szewczyk@cs.berkeley.edu
+
+Description:
+
+This application demonstrates the use of the power management modules.
+The main application is the familiar Chirp, which periodically samples
+the photo sensor and sends the data over the radio. Compared with the
+original Chirp, this application calls GenericComm.stop() and
+PhotoCtl.stop() after it has sent the message and GenericComm.start()
+and PhotoCtl.start() in the timer event.  The remaining modules
+contain the power management modifications that are necessary to run
+in a low power state.  These modules work on the mica platform, and
+will eventually overwrite their counterparts in the tree.  In order to
+use them in all other applications, they need to be moved to the
+following locations:
+
+AMStandard.nc -> tos/system/
+GenericComm.nc -> tos/system/
+HPLPowerManagementM.nc -> tos/platform/mica
+HPLUART.nc -> tos/interfaces
+HPLUARTM.nc -> tos/platform/avrmote
+MicaHighSpeedRadioM.nc ->tos/platform/mica
+PowerManagement.nc -> tos/interfaces
+RadioCRCPacket -> tos/platform/mica
+SpiByteFifoC.nc -> tos/platform/mica
+UARTM.nc -> tos/system
+hardware.h -tos/platform/mica
+
+Changes made to standard components:
+AMStandard.nc: after calling start and stop on subcomponents, call
+	PowerManagement module to signal a change in state
+GenericComm.nc: changed configuration to use power management
+HPLPowerManagementM: New component, which implements the
+	PowerManagement interface.  Currently aware of the timer,
+	UART, SPI hardware, and ADC. More will be added.
+HPLUART.nc: interface change, added a stop method
+HPLUARTM.nc: module change, added implementation of the stop method.
+MicaHighSpeedRadioM.nc: implemented start and stop methods.  If a stop
+	is called in the middle of packet transmission, the packet
+	gets dropped, and a sendDone with a failure code is sent to
+	the application.  If a stop() is called while a packet is
+	being received, it is dropped silently.  Attempts to send
+	messages using a stopped component will be rejected. 
+PowerManagement.nc: new interface.  It globally analyzes the state of
+	the mote, and configures the sleep instruction for the most
+	power-efficient state
+RadioCRCPacket.nc: configuration change; wire HPLPowerManagementM to
+	MicaHighSpeedRadioM. 
+SpiByteFifoC.nc: minor change which removes a conflict on the IO lines
+(caused the current consumption to shoot up to 70 mA).
+UARTM.nc: Change to use HPLUART.stop() method. Implemented start()
+	method.
+hardware.h: changed pin directions to remove the potential for IO
+	lines conflict.
+
+After installing LG_sleep application on the little guy (or having a
+network programmable mote), this application should draw < 500 uA in
+sleep state, and about 12 mA in the active state.  Further savings can
+be realized if the boost converter is disabled, but that may require a
+modified mote.  To disable the boost converter, uncomment the two
+lines in ChirpM.init().
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

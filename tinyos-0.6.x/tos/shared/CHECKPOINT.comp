@@ -1,0 +1,26 @@
+TOS_MODULE CHECKPOINT;
+
+ACCEPTS{
+	char CHECKPOINT_INIT(unsigned short eeprom_base, unsigned short data_length, unsigned char ndata_sets);
+	char READ(unsigned char data_set, unsigned char *data);
+	char WRITE(unsigned char data_set, unsigned char *data);
+};
+
+HANDLES{
+	char READ_EEPROM_DONE(char *packet, char success);
+	char WRITE_EEPROM_DONE(char success);
+};
+
+USES{
+	void CHECKPOINT_LEDS(unsigned char led_action);
+
+	char CHECKPOINT_SUB_INIT(void);
+	char READ_EEPROM(short line, char* dest);
+	char WRITE_EEPROM(short line, char* data);
+};
+
+SIGNALS{
+	void INITIALISED(unsigned char cleared);
+	void READ_DONE(unsigned char success, unsigned char *data);
+	void WRITE_DONE(unsigned char success, unsigned char *data);
+};

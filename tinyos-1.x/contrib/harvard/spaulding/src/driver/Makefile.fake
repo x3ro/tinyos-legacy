@@ -1,0 +1,9 @@
+include Makefile.common.in
+
+# MultiChanSampling
+PFLAGS += -DMULTICHANSAMPLING_FAKE
+
+# RealTimeSamples
+PFLAGS += -DREALTIMESAMPLES_ENABLED
+
+include $(MAKERULES)

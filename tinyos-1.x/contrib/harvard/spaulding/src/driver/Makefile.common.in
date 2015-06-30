@@ -1,0 +1,29 @@
+COMPONENT = DriverC
+
+include $(SPAULDINGSRC)/Makefile.in
+include $(SPAULDINGSRC)/sampling/Makefile.in
+include $(SPAULDINGSRC)/dataStore/Makefile.in
+include $(SPAULDINGSRC)/samplingToDataStore/Makefile.in
+include $(SPAULDINGSRC)/realTimeSamples/Makefile.in
+include $(SPAULDINGSRC)/fetch/Makefile.in
+include $(SPAULDINGSRC)/timeSync/Makefile.in
+PFLAGS += -I$(SPAULDINGSRC)/lib/
+PFLAGS += -I$(SPAULDINGSRC)/lib/printfRadio
+PFLAGS += -I$(SPAULDINGSRC)/lib/gyroIDG300
+PFLAGS += -I$(SPAULDINGSRC)/driver
+
+# FTSP
+PFLAGS += -DFTSP_ENTRY_THROWOUT_LIMIT=100
+PFLAGS += -DFTSP_STATIC_ROOT_ID=10
+PFLAGS += -DFTSP_TIMESYNC_RATE=5   # how often beacons are sent [sec]
+
+PFLAGS += -DFTSP_ENTRY_VALID_LIMIT=2
+PFLAGS += -DFTSP_MAX_ENTRIES=16
+
+# DataStore related
+#PFLAGS += -DDATASTORE_FAKE
+#PFLAGS += -DDS_FORMAT_ENABLED
+#PFLAGS += -DDS_ERASE_VOLUMES_ENABLED  # only valid '#ifndef DS_FORMAT_ENABLED'
+
+#PFLAGS += -DPRINTFUART_ENABLED
+#PFLAGS += -DPRINTFRADIO_ENABLED

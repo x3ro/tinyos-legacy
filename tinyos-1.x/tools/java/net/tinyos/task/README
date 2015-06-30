@@ -1,0 +1,9 @@
+This directory contains all the java tools for 
+Tiny Application Sensor Kit (TASK):
+
+Directories:
+tasksvr: the TASK server
+taskapi: the TASK client api
+taskviz: the TASK client GUI
+taskcmd: some TASK utility commands
+field: python code for the TASK field tool

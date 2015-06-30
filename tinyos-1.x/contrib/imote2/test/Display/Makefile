@@ -1,0 +1,3 @@
+COMPONENT=Display
+include ../Makerules
+

@@ -1,0 +1,15 @@
+   This app has multiple uses.
+   1. It uses Bluetooth to stream various combinations of data to BioMOBIUS.
+   Eg. Accelerometer only, Accel + Gyro data, Accel + ECG data etc.
+   It allows the SHIMMER device to be configured and controlled from the BioMOBIUS V2
+   SHIMMER block.
+  
+   2. It can also save data to the micro SD card, though this code
+should be deemed unstable.
+
+This application should be used for testing purposes alongside
+BioMOBIUS only, as it won't work properly as a stand-along.
+Furthermore, it should be used only for testing or quick prototyping,
+and not for deployment.
+
+BioMOBIUS V2 is downloadable from http://biomobius.trilcentre.org/index.php?option=com_content&task=view&id=22&Itemid=27

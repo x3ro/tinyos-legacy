@@ -1,0 +1,17 @@
+
+The following files need to be synchronized 
+with the same named files in the TinyOS tree,
+in the tos/sensorboards directory:
+
+MicaWBSwitch.nc
+MicaWBSwitchM.nc
+Switch.nc
+
+In the future, it would be good to get rid of these 
+files completely, and just use the files in the tree,
+but that is a sticky include problem because they 
+are located with some other code we don't want.
+
+
+
+

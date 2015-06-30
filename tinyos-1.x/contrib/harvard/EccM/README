@@ -1,0 +1,171 @@
+#
+# README for ECC module.
+#
+# @author  David Malan <malan@eecs.harvard.edu>
+#
+# @version 2.0
+#
+# Copyright (c) 2004
+#  The President and Fellows of Harvard College.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#      notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+# 3. Neither the name of the University nor the names of its contributors
+#      may be used to endorse or promote products derived from this software
+#      without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE UNIVERSITY AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE UNIVERSITY OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+
+
+OVERVIEW
+
+
+This module demonstrates the viability of elliptic curve 
+cryptography (ECC) on the MICA2 mote, using a polynomial basis
+over GF(2)[p].  Hardcoded into the module are the following parameters.
+
+  reduction polynomial
+  f(x) = x^163 + x^7 + x^6 + x^3 + 1
+
+  curve
+  y^2 + xy = x^3 + x^2 + 1
+
+  order of curve
+  0x4000000000000000000020108a2e0cc0d99f8a5ef
+
+  base point 
+  (x, y) = (0x2fe13c0537bbc11acaa07d793de4e6d5e5c94eee8,
+            0x289070fb05d38ff58321f2e800536d538ccdaa3d9)
+
+The module represents multiprecision integers over GF(2)[p] 
+(aka "bints," meaning "big ints") in big-endian format, whereby foo[0] is 
+a bint's most significant byte and foo[NUMWORDS-1] is a bint's least 
+significant byte, assuming foo is a bint (i.e., an array of NUMWORDS bytes
+treated as such).
+
+Though wasteful, bints are represented with NUMWORDS bytes in order to 
+handle overflow during point multiplication, even though only NUMWORDS/2 
+bytes are ultimately necessary to represent this module's 163-bit field 
+elements.
+
+In the module's source code, functions implementing low-level bint
+manipulation have names beginning with b_; functions dealing with points
+have names beginning with p_; functions dealing with curves have names 
+beginning with c_; and functions dealing with field elements have names 
+beginning with f_.
+
+Throughout the source code, motes are referred to as Alice and Bob.
+Think of Alice as "this" mote and Bob as "another" mote.  The same code,
+after all, is to run on both motes.
+
+Timers are used to schedule the generation of keys and transmission
+of running times simply because the code is so CPU-intensive.  During
+this module's relatively long computations, tasks posted by other
+asynchronous events (e.g., interrupt handlers) tend to fill
+up TinyOS's queue.  Were we not to use timers but instead to attempt
+to post additional tasks immediately, those posts would likely fail.
+
+For demonstration purposes, timers suffice as a solution.  But a more
+elegant solution would be to use, e.g., Geoffrey Mainland's Fibers
+module, which "provide[s] a simple, cooperative threading mechanism for 
+TinyOS".
+
+
+INSTALLING THE DEMO
+
+Install the module on to two motes, as with the command below,
+
+make mica2 install.n
+
+where a unique ID number for each mote.  (Without unique IDs,
+the motes pseudorandom number generators will work in lockstep,
+effectively compromising security.)
+
+
+RUNNING THE DEMO
+
+1.  ... ON TWO MOTES
+
+    If you wish to log or view running times for one of the motes, 
+    leave one mote on the programming board, which should be connected
+    to your computer with a serial cable.  Execute a serial forwarder
+    on your computer, as with the command below, adjusting as needed
+    for your particular configuration.
+
+    java net.tinyos.sf.SerialForwarder -comm serial@COM1:57600 -no-gui &
+
+    With the SerialForwarder backgrounded (or running in its own
+    terminal), also execute
+
+    java Ecc
+
+    which will simply report to standard output any messages delivered
+    to the UART on the programming board.
+
+    Turn both motes on, roughly simultaneously.
+
+    ... IN TOSSIM
+
+    Simply execute the below, adjusting as needed for your particular
+    configuration or shell.
+
+    setenv DBG am; ./build/pc/main.exe 2
+
+2.  The following will then take place; for the sake of exposition, let's
+    call the mote on the programming board "Alice" and the other mote
+    "Bob."
+
+    i.   Alice will select pseudorandomly a private key, privKeyA, 
+         thereafter computing her public key, pubKeyA = (xA, yA), using
+         Koblitz curve, E, and base point, G = (x, y). 
+
+         Meanwhile, Bob will do the same, generating privKeyB and
+         pubKeyB.
+
+    ii.  Alice will then broadcast a sequence of two packets, the first
+         of which contains xA, the second of which contains yA.
+
+         Meanwhile, Bob will do the same, broadcasting xB and yB.
+
+    iii. Upon receipt of xB and yB, Alice will compute 
+         privKeyA * pubKeyB = privKeyA * privKeyB * G = (xAB, yAB).
+
+         Meanwhile, Bob will compute
+         privKeyB * pubKeyA = privKeyA * privKeyB * G = (xAB, yAB).
+
+         Alice and Bob have thus established a shared secret, 
+         (xAB, yAB).
+
+    iv.  Alice then transmits to her UART the times required to
+         generated each of these keys, which should be displayed
+         on standard output.
+
+    v.   Alice and Bob then repeat this process, starting again with
+         step i.
+
+
+QUESTIONS?
+
+Happy to help.  Feel free to drop me a note at malan@eecs.harvard.edu.
+
+djm
+
+
+# EOF

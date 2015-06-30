@@ -1,0 +1,69 @@
+Blackbook TinyOS Cross-Platform Compatible Flash File System v.5.2
+Copyright (c) 2004-2006 Rincon Research Corporation.  
+All rights reserved.
+
+@author David Moss (dmm@rincon.com)
+Special thanks to Mark Kranz for the ports to Boomerang and many bug fixes! 
+
+
+UPDATES FROM BLACKBOOK V.5.1
+ > Added isOpen() commands to BFileRead, BFileWrite, BDictionary
+ 
+ > Added command getTotalKeys() -> event totalKeys(..) in BDictionary
+   to obtain the total number of valid keys in the open dictionary file
+
+ > Fixed a few non-critical bugs.
+
+ > Added details in documentation about using the Dictionary.
+
+
+UPDATES FROM BLACKBOOK V.5.0
+ > Fixed boot problems, including missed linked nodes and dangling node detection
+
+ > Added flush-and-start-over functionality for write allocation when
+   the garbage collector completes
+
+ > Fixed problems in the AT45DB FlashBridge.  This can stand to have
+   someone else redesign the entire flash implementation from the 
+   ground up, with a focus on making it interact with the flash efficiently.
+
+ > Fixed some CRC corruption check problems.
+ 
+ > Performed some longevity testing to make sure this will stand up to the
+   long term use in the field.
+   
+ 
+     
+
+   
+UPDATES FROM BLACKBOOK V.3.0
+
+   > Complexity reduced
+   > A few things were added
+   > ROM size decreased significantly (24kB to 16.5kB, full implementation)
+
+
+* Blackbook Dictionary-only implementation allows the Blackbook
+  core to be installed without binary file support.
+  
+* BFileRead can read files that are open for writing.
+
+* Filenames are now stored only on flash, not in RAM.
+
+* BDictionary provides functionality to determine if a file is
+  a dictionary file or not, without opening that file.
+  
+* Boot complexity decreased.
+  
+* Node reserveLength does not alter; whenever a node is created, it
+  reserves the full length it requested and nothing more.  This
+  decreases ROM size and recovery complexity at the expense of possibly
+  too many nodes if a file is constantly opened and closed.
+  
+* Nodes are now either Temporary, Valid, Locked, or Deleted.  Unfinalized/Finalized
+  nodes are done away with.
+  
+* Each node's dataLength and dataCrc is kept in the Checkpoint file, instead
+  of in the node's metadata.
+  
+* Fault tolerance improved.

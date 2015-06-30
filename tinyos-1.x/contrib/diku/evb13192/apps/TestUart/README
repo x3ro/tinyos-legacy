@@ -1,0 +1,5 @@
+$id$
+
+This is a very simple test/demo program that outputs characters to the
+UART.
+

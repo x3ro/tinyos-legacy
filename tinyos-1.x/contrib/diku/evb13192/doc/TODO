@@ -1,0 +1,35 @@
+Todo list, 20050131, madsdyd@diku.dk
+
+Note, also check the source.
+
+- If feasible: Write ANSI compatible startup code in TinyOS: Setting
+  up the stack, copying down the variables from flash, zeroing out
+  global variables.
+
+- Make sure all ports are pulled up/down if they are unneeded.
+
+- Make sure that all busspeed are set equally, and that it makes sense
+  to run 16 Mhz. (Note, the 802.15.4 stack _requires_ 16 MHz
+  busspeed).
+
+- Modify the 802.15.4 interfaces to return error codes.
+
+- TOSH_u_wait and friends is broken, I think.
+
+- Redesign the way the clock is used, because we may need to change
+  clock settings from other modules.
+
+- 802.15.4 stakc: Make sure that no atomic statements are more than 50
+  instructions... how (10 us each 64 us)
+
+- Enum sizes: We currently use 32 bit for everything, because of the
+  dbg statements, but that is quite wasteful.
+
+- Clean up linker scripts.
+
+- Document the problems the Net::SSH::Perl on the compile server.
+
+- Fix docs targets to work without smac support (look in docs.extra,
+  must be some env to set).
+
+- Make TOSBase work - need CRC check on receive (send OK).

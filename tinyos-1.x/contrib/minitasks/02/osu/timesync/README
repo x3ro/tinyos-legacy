@@ -1,0 +1,64 @@
+README for Tsync 
+Author/Contact: herman@cs.uiowa.edu (Ted Herman, OSU Group, @ Iowa)
+
+Description:
+
+Here you'll find the TsyncC component (and its helpers, the
+AlarmC component, plus some customized Clock and Timer implementations).
+
+The files Tsync.tex and Tsync.pdf explain its design.
+
+The NestArch supported interface is called "Time".
+
+TimerM_differences.txt lists the modifications made to the native
+TinyOS implementation of TimerM.nc - these should be transparent
+to any application (and if the native TimerM is used, this component
+will still function, but with some reduction in clock precision).
+
+The customization of Clock is to support a new interface;  the 
+standard Clock interface is unchanged -- only a new readClock
+interface has been added.
+
+The TsyncM implementation supports Time and StdControl interfaces.
+It was developed using GenericComm to send and receive messages, 
+but any equivalent interface could easily be wired in.
+
+The Leds interface is used just for debugging.  A test application
+(which does nothing) has also been included.  Running this test
+application along with a base station (some modification of 
+GenericBase will do) is useful for observing behavior of Tsync.
+Tsync uses DBG=usr1 in simulations to print messages.
+
+Tools:
+
+The Java program spy.java can be set up, using say the SerialForward,
+to print Tsync's Beacon messages and watch the time pass.
+
+Known bugs/limitations:
+
+Time is not guaranteed to be monotonic in this prototype version.
+The constant BOUND_DIAMETER, defined in Beacon.h, sets an upper 
+bound on the number of hops between motes in the network.  This is
+used to detect "root mote" failure and elect a new root, using the
+standard "count to infinity" method of distance-vector routing
+algorithms.  However, after time has been synchronized, there isn't
+any catastrophic consequence of loops implied by hop-distance fields
+-- these are mainly used for eventual stability of time.
+
+I conjecture that motes are synchronized to within somewhere around
+(36 * d) milliseconds of the "root mote", which is the mote with
+the least Id in the network, where d is the number of hops to reach
+the root mote.  In this primitive version there is no correction 
+for the message latency of Beacon messages being processed, sent,
+and received, hence the 30 millisecond estimate.  I calibrated the
+inherent drift of a typical mote to be about 1 to 3 percent in a
+minute by comparison to a GPS pulse (my developmental version provides
+a hook to a GPS).  Since all the motes I tried suffered the same 
+drift, I would guess its effect is much smaller with respect to 
+mutual clock synchronization.
+
+Several constants in TsyncM's StdControl.start and mainTask() 
+define the frequency of Beacon messages.  This should be tuned
+based on experience.  Too slow implies that synchronization and
+fault tolerance occur slowly.  Too fast means more overhead, 
+disrupting other components.

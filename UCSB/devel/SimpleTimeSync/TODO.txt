@@ -1,0 +1,2 @@
+- Document all files and create README
+- Make sure all of it works

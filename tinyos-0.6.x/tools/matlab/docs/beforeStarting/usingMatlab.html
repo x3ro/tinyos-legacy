@@ -1,0 +1,147 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Using Matlab</title>
+</head>
+
+<body>
+
+<h1>Using Matlab</h1>
+<p>This page is meant to give you the key concepts to matlab so that you know 
+what to look for in the help files.&nbsp; It is not intended to be a substitute 
+for the help files.</p>
+<p><b>Part I: A few examples</b></p>
+<p>create a variable</p>
+<p><b><font face="Courier">a=3 </font></b></p>
+<p>You should see it show up in your workspace window.&nbsp; It is a 1*1 matrix 
+and if you click on it it should have the value 3 in the first element of the 
+matrix.</p>
+<p>Create an array</p>
+<p><b><font face="Courier">b=[1 2 3]</font></b></p>
+<p>create an array using a series</p>
+<p><b><font face="Courier">b=1:2:5</font></b></p>
+<p>Multiply</p>
+<p><b><font face="Courier">c=a*b</font></b></p>
+<p>Create a matrix</p>
+<p><b><font face="Courier">d=[1 2 3;4 5 6;7 8 9]</font></b></p>
+<p>index the matrix</p>
+<p><b>d(2,1)</b></p>
+<p>index a whole column or row using the colon operator</p>
+<p><b>d(:,1)</b></p>
+<p><b>d(1,:)</b></p>
+<p>index using logical indices</p>
+<p><b>d([1 1 0],1)</b></p>
+<p><b>d(1,[0 1 1])</b></p>
+<p>index a matrix using array indices</p>
+<p><b>d(3)</b></p>
+<p><b>d(4)</b></p>
+<p>index using the 'end' operator</p>
+<p><b>d(1,end)</b></p>
+<p><b>d(end,1)</b></p>
+<p>index using array indices and the end operator</p>
+<p><b>d(end)</b></p>
+<p>make an assignment using the colon operator</p>
+<p><b>d(1,:) = [11 22 33]</b></p>
+<p>make an assignment to a column using the ' operator (transpose)</p>
+<p><b>d(:,1) = [11 44 77]'</b></p>
+<p>use a compare operator</p>
+<p><b>d&gt;10</b></p>
+<p>make an assignment using a compare operator as logical indices</p>
+<p><b>d(d&gt;10)=10</b></p>
+<p>matrix multiply</p>
+<p><b>a*d</b></p>
+<p><b>c*d</b></p>
+<p><b>d*c</b></p>
+<p><b>a*c*d</b></p>
+<p><b>d*d</b></p>
+<p>multiply element-by-element (use the .* operator)</p>
+<p><b>d.*d</b></p>
+<p>delete an element</p>
+<p><b>b(2)=[]</b></p>
+<p>delete a row</p>
+<p><b>d(:,2)=[]</b></p>
+<p>Create a string</p>
+<p><b>a='hey'</b></p>
+<p>index the string</p>
+<p><b>a(2)</b></p>
+<p>create a string array</p>
+<p><b>a(2,:)='you'</b></p>
+<p>index the string array</p>
+<p><b>a(2,1)</b></p>
+<p>As you can see, strings are really just matrices. This can be a problem 
+because matrices must be rectangular whereas strings are frequently different 
+different size.&nbsp; For example, the following won't work because the 
+resulting matrix would not be rectangular:</p>
+<p><b>a(3,:)='get me a drink'</b></p>
+<p>Instead, we can use cell arrays.&nbsp; Cell arrays are identical to arrays 
+except that they use curly brackets.&nbsp; Also, each element can be of any size 
+and different elements can be of different data types:</p>
+<p><b>a{1}='hey'</b></p>
+<p><b>a{2}='you'</b></p>
+<p><b>a{3}='get me a drink'</b></p>
+<p><b>a{1,4}=d</b></p>
+<p>Index a cell array</p>
+<p><b>a{2,1}</b></p>
+<p>plot your data on the y axis</p>
+<p>data=[1 2 3 7 8 9]</p>
+<p><b>plot(data)</b></p>
+<p>now, put your data on the x axis, with the array 1 2 3 4 5 6 on the y axis</p>
+<p><b>plot(data,1:length(data))</b></p>
+<p><b>Part II: the basics of the environment</b></p>
+<p>Matlab is both a programming language and a programming environment.&nbsp; 
+The language is far less powerful than C or java, but it is much more clean and 
+concise when used for it's intended purpose: linear algebra.&nbsp; It is also 
+much more efficient than C is some sense because it can take advantage of 
+sparseness or symmetry in your matrices when you don't know how to, eg, when 
+multiplying, etc.</p>
+<p>Matlab is an interpreted language, and the main window on the matlab desktop 
+is the <b>interpreter</b>.&nbsp;&nbsp; It accepts arithmetic (&quot;1+1&quot;), matlab 
+code (&quot;a+b&quot;), and shell commands (&quot;cd nest/tools/matlab&quot;).&nbsp; Use the TAB 
+button for autocompletion.&nbsp; Use the UP arrow for last command.&nbsp; Type a 
+few letters and use the UP arrow for last-command-starting-with-these-letters.&nbsp;
+</p>
+<p>If you find yourself running the same commands over and over again in the 
+interpreter, you can put them into a <b>script </b>and run the script instead.&nbsp; 
+A script in matlab is any file with extension &quot;.m&quot; that contains matlab commands 
+and is in the matlab <b>path</b>.&nbsp; You can edit your path with the &quot;addpath&quot; 
+command (type &quot;help addpath&quot; in the interpreter for more info).&nbsp; You can 
+add <b>comments </b>to your script with the &quot;%&quot; symbol.&nbsp; The first block of 
+comments in a script called &quot;myscript.m&quot; are printed to the screen when the user 
+types &quot;help myscript&quot; in the interpreter.</p>
+<p>All variables you create are held in the <b>workspace</b>, which is basically 
+your <i>environment</i> or your <i>context</i>.&nbsp; For example, if I type 
+&quot;A=[1 2 3 4]&quot; then a variable A shows up in the workspace.&nbsp; </p>
+<p>Scripts become cumbersome after a while because you will find naming 
+conflicts in your workspace.&nbsp; To avoid this, you can create functions, 
+which will have their <i>own </i>workspace, or context.&nbsp; A <b>function</b> 
+is any script called &quot;functionName.m&quot; where the first line is &quot;function [a,b]=functionName(c,d)&quot;.&nbsp; 
+c and d are parameters to the function and a and b are return values.&nbsp; </p>
+<p>Both parameters and return values are pass-by-value, not pass-by-reference.&nbsp; 
+This is troublesome because you may want your function to have side effects.&nbsp; 
+You can use <b>global </b>variables to do this.&nbsp; Any two workspaces that 
+have a variable defined as global <i>share </i>that variable.&nbsp; I.e., if 
+your main workspace has a variable declared global and you want to effect it in 
+a function, declare it global in the function also and you have, in a sense, 
+imported it to your local workspace.</p>
+<p>Global variables are not the only way to have a variable <i>persist </i>
+between function calls.&nbsp; A matlab <b>object </b>is basically a directory 
+that ends with a &quot;@&quot; symbol.&nbsp; There must be a constructor in that directory 
+that defines a matlab <b>struct</b>, which is the data portion of the object.&nbsp; 
+The function portion of the object is any function in the directory.&nbsp; 
+Whenever a function is called on a struct created by the constructor, this 
+object's directory is searched first.&nbsp; In this sense, objects in matlab are 
+a bunch of structs that have functions associated with them.&nbsp; It is 
+fundamentally the same as a java object, but without the pretty abstractions.</p>
+<p>Note that matlab can freely interact with java objects, and can also call C 
+functions.</p>
+<p>NOTE: if you EVER find yourself using a for-loop, think about whether or not 
+you can vectorize that loop (do it using matlab matrix operators).&nbsp; It is 
+ALWAYS faster.&nbsp; See &quot;how do I vectorize my code&quot; in the help files</p>
+
+</body>
+
+</html>

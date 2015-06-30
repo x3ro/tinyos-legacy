@@ -1,0 +1,18 @@
+COMPONENT=Base
+SENSORBOARD=micasb
+PLATFORMS = mica2 pc xsm xsm2 mica2dot 
+SPOTLIGHT_PLATFORM:=$(filter $(PLATFORMS), $(MAKECMDGOALS))
+
+PFLAGS=-I%T/lib/Util -I../PLATFORM/COMMON
+PFLAGS := $(PFLAGS) -I../TIME/TIMER -I../TIME/SYNC -I../Common
+
+BUILDDIR = build/$(PLATFORM)
+MAIN_EXE = $(BUILDDIR)/main.exe
+MAIN_SREC = $(BUILDDIR)/main.srec
+MAIN_IHEX = $(BUILDDIR)/main.ihex
+
+ifeq ($(SPOTLIGHT_PLATFORM)_x,xsm2_x)
+PFLAGS := $(PFLAGS) -I../PLATFORM/XSM2 -DPLATFORM_XSM2
+endif
+
+include ../Makerules

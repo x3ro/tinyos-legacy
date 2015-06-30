@@ -1,0 +1,90 @@
+Creating the MSP430 toolchain for the MSP430F161x series of microcontrollers
+============================================================================
+Joe Polastre <tinyos-help@mail.millennium.berkeley.edu>
+
+$Id: README.TOOLCHAIN,v 1.1 2004/12/02 22:15:58 jpolastre Exp $
+
+This document is a supplement to the build-mspgcc script found in
+tinyos-1.x/tools/src/mspgcc
+
+Throughout this document, you will need a place where you intend to store
+the MSP430 compiled toolchain (gcc, as, ld, etc).  This path is typically
+/usr/local/msp430, although it may be any path you choose.  Any place in
+this document where /usr/local/msp430 is used, change it to the path that
+you would like all of the compiled files to exist.
+
+After the release of binutils-1.15, f1611 support was added.
+Download the most recent weekly snapshot of binutils from:
+
+ftp://sources.redhat.com/pub/binutils/snapshots/binutils.weekly.tar.bz2
+
+The weekly snapshot was verified on 2004-10-19.
+First configure, build and install binutils. 
+The following commands will unpack the source code
+
+$ tar --bzip2 -xf binutils.weekly.tar.bz2
+$ cd binutils-yymmdd (where yymmdd is the date of the snapshot)
+
+Now, for nesC to correctly compile, instruct the assembler to not use
+the $ character:
+
+$ perl -i.orig -pe 's/define (LEX_DOLLAR) 0/undef $1/' gas/config/tc-msp430.h
+
+The following commands configure binutils as a cross assembly package, 
+build, and install it:
+
+$ ./configure --target=msp430 --prefix=/usr/local/msp430
+$ make
+$ su
+$ make install
+
+Next, ensure the directory in which you installed the binutils binary 
+files is included in your "PATH" variable. The next stage will require 
+the MSP430 binutils to be functional, when the MSP430 library is compiled.
+
+Download GCC version 3.2.3.  It is important that version 3.2.3 is used,
+as it most fully supports the MSP430 toolchain.
+
+http://ftp.gnu.org/gnu/gcc/gcc-3.2.3/gcc-core-3.2.3.tar.gz
+
+After downloading:
+
+$ tar --bzip2 -xf gcc-core-3.2.3.tar.bz2
+
+You must now download the MSP430 extensions to the GCC toolchain.  They
+can be retreived from the mspgcc sourceforge CVS server:
+
+$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/mspgcc login 
+(hit ENTER at the prompt for a password)
+$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/mspgcc co gcc
+
+After retreiving the gcc files, perform the following commands to put them
+in the extract gcc source directory and create the compiler:
+
+$ cp -a gcc/gcc-3.3/* gcc-3.2.3
+$ cd gcc-3.2.3
+$ ./configure --target=msp430 --prefix=/usr/local/msp430
+$ make
+$ su
+$ make install
+
+Download msp430-libc from the mspgcc sourceforge CVS server:
+
+$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/mspgcc co msp430-libc
+
+$ cd msp430-libc/src
+
+If you specified something other than "/usr/local/msp430" as the prefix, 
+when building binutils and GCC, you will need to edit the Makefile. 
+Change "/usr/local/msp430" to the installation directory you are 
+actually using. The use the following commands to build and install 
+the library:
+
+$ make
+$ su
+$ make install
+
+After this step, all of the sources need to use the f1611 microcontroller
+have been completed.  Make sure that the directory where all the binaries 
+are stored, such as /usr/local/msp430/bin, is in your PATH environment
+variable.

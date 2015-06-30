@@ -1,0 +1,10 @@
+To Convert the ASCII image representation to a standard picture format
+use the program "ImageMagic 6.2.4" or higher.  This is an open source
+program 
+  http://www.imagemagick.org/script/index.php
+
+Once installed, use the "convert" utility to convert the ASCII
+representation to a standard image
+
+Example: convert to a JPEG
+  convert myImage.txt myImage.jpg

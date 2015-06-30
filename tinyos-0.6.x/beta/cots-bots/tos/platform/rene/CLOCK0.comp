@@ -1,0 +1,19 @@
+/*
+ * Sarah Bergbreiter
+ * 5/25/2001
+ * COTS-BOTS project
+ *
+ * CLOCK module that sends events every second
+ */
+
+TOS_MODULE CLOCK0;
+
+ACCEPTS{
+	char CLOCK0_INIT(unsigned char interval);
+};
+
+SIGNALS{
+	void CLOCK0_FIRE_EVENT(void);
+};
+
+

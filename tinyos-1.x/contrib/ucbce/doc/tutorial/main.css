@@ -1,0 +1,176 @@
+BODY, TD, P {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+    color: #000000;}
+.black {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+    color: #000000;}
+.grey {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 13px;
+    color: #676767;}
+.white {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+    color: #FFFFFF;}
+	
+a.white {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight:bold;
+    color: #FFFFFF;}
+	
+	
+.orange {color: #FF6600;}
+
+.titlered {color: #960707; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 18px; font-weight:bold;}
+.titleorange {color: #CC6633; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 18px; font-weight:bold;}
+
+.red {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 13px;
+    color: #990000;}
+	
+.small {font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; color: #000000; font-weight:normal;}
+
+a.nav-main {
+	font-size: 10px;
+	color: #FFFFFF;
+	font-weight:bold;
+	text-decoration:none;
+}
+a.nav-main:hover {
+	font-size: 10px;
+	color: #FFF;
+	font-weight:bold;
+	text-decoration:none;
+}
+a.nav-sub {
+	font-size: 10px;
+	color: #FFFFFF;
+	text-decoration:none;
+}
+a.nav-sub:hover {
+	font-size: 10px;
+	color: #CCCCCC;
+	text-decoration:none;
+}
+	
+A {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+    color: #0066CC;}
+A:HOVER {
+	color: #FF9900;
+    text-decoration: underline;}
+A:HOVER.white {
+	color: #FFFFDD;
+    text-decoration: underline;}
+A:HOVER.black {
+	color: #FF9900;
+    text-decoration: underline;}
+A:HOVER.orange {
+	color: #993300;
+    text-decoration: underline;}
+A.small {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+    color: #0066CC;}
+	
+
+.topnav { font-size: 10px;}
+.topnav_active {background-color:#FDCD85; color:#394D73; font-weight: bold; font-size: 10px;}
+a.topnav{font-weight: bold; text-decoration:none; color:#394D73;}
+a.topnav:hover{background-color:#FDCD85; color:#394D73; text-decoration:none;}
+	
+.header {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 15px;
+    color: #000000;
+	font-weight: bold;}
+.headerwhite {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 15px;
+    color: #FFFFFF;
+	font-weight: bold;}
+
+
+	
+.wl	{font-family:verdana, Helvetica, Sans-Serif; 
+     font-size: 12px; 
+	 font-weight:bold; 
+	 color:#666633;}
+	 
+.wlt			{font-family:verdana, Helvetica, Sans-Serif; font-size: 11px; color:#666633;}
+.blueh			{font-family:verdana, Helvetica, Sans-Serif; font-size: 13px;font-weight:bold;color:#336699;}
+.bluet			{font-family:verdana, Helvetica, Sans-Serif; font-size: 12px;color:#336699;}
+.bluetsml		{font-family:verdana, Helvetica, Sans-Serif; font-size: 10px; color:#336699;}
+.bluetout		{font-family:verdana, Helvetica, Sans-Serif; font-size: 10px;color:#336699;}
+.boldsmall		{font-family:verdana, Helvetica, Sans-Serif; font-size: 10px;color:#000000; font-weight:bold}
+
+.spacer1p {margin-top:1px;}
+.spacer2p {margin-top:2px;}
+.spacer4p {margin-top:4px;}
+.spacer5p {margin-top:5px;}
+.spacer7p {margin-top:7px;}
+.spacer10p {margin-top:10px;}
+.spacer12p {margin-top:12px;}
+.spacer15p {margin-top:15px;}
+.spacer20p {margin-top:20px;}
+.spacer25p {margin-top:25px;}
+.navbox {margin-top:2px;}
+
+
+
+
+
+
+
+
+
+TR.NavRow TD {
+	vertical-align: middle;
+	border: 1px solid;
+	border-color: #369 #003 #003;
+	border-left: none;
+	cursor: pointer;
+}
+
+.Nav {
+	background-color: #384ccc;
+	color: #fff;
+	cursor: pointer;
+}
+
+.NavText, .NavHighlightText, .NavGroupText {
+	font-family: verdana, arial, sans-serif;
+	font-size: 10px;
+	font-weight: bold;
+	line-height: 14px;
+	padding-left: 6px;
+	text-decoration: none;
+}
+
+.Nav A:link, .Nav A:visited { color: #fff; Text-decoration: none;}
+
+
+.NavHilite {
+	background-color: #5A6B94;
+	color: #fff;
+	
+}
+.NavHilite A:link, .NavHilite A:visited {
+	color: #fff;
+}
+TR TD.NavHilite A:link, TR TD.NavHilite A:visited {
+	text-decoration: none;
+}
+
+
+TR.NavHiliteRow TD {
+	vertical-align: middle;
+	border: 1px solid;
+	border-color: #000 #5A6B94 #000;
+	border-left: none;
+}

@@ -1,0 +1,74 @@
+1. COMPILE AND EXECUTE JAVA CODE:
+=================================
+1.  get the isis java tools package from contrib/vu: 
+    http://cvs.sourceforge.net/viewcvs.py/tinyos/tinyos-1.x/contrib/vu/tools/java
+    the best is to copy all the files from this directory to (if you followed the first
+    part of this document)   $(ISIS_TINYOS)/tools/java
+    
+2.  include *.jar from contrib/vu/tools/java/jars files to your CLASSPATH
+3.  compile java files: the most important packages are net.tinyos.mcenter.* and
+    isis.nest.localization.rips.*
+4.  start the message center: java net.tinyos.mcenter.MessageCenter,  two windows 
+    will appear - 'SerialConnector' and 'App Loader'
+6.  execute 'isis.nest.localization.rips.RipsDisplay' from 'App Loader'    
+
+
+If all the compilation is successfull and java tools are running, use 'Start Port'
+button in 'SerialConnector' to connect to the base station. rips-doc.zip (.doc, .ppt)
+provides more info how to proceed with rips measurement using motes. 
+
+
+2. QUICK LOOK AT OUR RESULTS:
+=============================
+To have a quick look on how our stuff works, we have included data measued in a large 
+scale experiment, which was described in our IPSN'06 paper:
+
+Localization - compute locations from the ranging data 
+============   (FootballFieldData.ranges)
+    1.) start RipsDisplay in the MessageCenter framework
+    2.) unpack contents of footballFieldData.zip to some directory 
+        (we suggest c:\tmp\rips\data as this is the default load/save dir)
+    3.) click the Load button at the bottom of the RipsDisplay and navigate to
+        the unpacked "footballFieldData.ranges" file
+    4.) after successful load, you should be able to see data in "Ranging" tab
+    5.) you can select/unselect the motes to be anchors in "Motes" tab
+    6.) go to "Localization" tab, which shows the current layout of the experiment,
+        small dots are unknown motes, large dots are anchors, click on the 
+        "Start localization" button to start our genetic-based localization algorithm,
+        log window shows intermediate results, clickin the "Stop localization" button 
+        stops the genetic algorithm and prints out the solved locations (the longer you 
+        wait, the better results you get)
+        
+    The experiment covered 12000 m^2 area with 16 motes, i was able to get the maximum
+    location error under 10cm and the avg error under 5cm, using 4 corner motes as anchors. 
+    
+Ranging - compute ranges from phase measurements at multiple radiochannels 
+=======   (FootballFieldPhaseData.phase) 
+    1.) start RipsDisplay in the MessageCenter framework
+    2.) unpack contents of footballFieldData.zip to some directory 
+        (we suggest c:\tmp\rips\data as this is the default load/save dir)
+    3.) click the Load button at the bottom of the RipsDisplay and navigate to
+        the unpacked "footballFieldPhaseData.phase" file
+    4.) after successful load, you should be able to see data in "Rcvd data" tab
+    5.) go to "Ranging" tab and click "Recalculate"
+        WARNING, this step will take a few minutes to complete. this is because
+        8526 ranges need to be computed.
+    6.) after the computation is ready (your CPU load drops), you'll be able to
+        see computed ranges in the "Ranging" tab
+    7.) computed ranges can be used to localize the motes in the "Localization" tab,
+        by clicking the "Start localization" button
+        (to avoid the time consuming range computation, the computed ranges can be 
+         copy-and-pasted to a text file, which can be loaded back to our GUI; file 
+         extension must be ".ranges")
+
+Disclaimer:
+===========
+You will not be able to obtain the same good ranges (as footballFieldData.ranges) when
+using footballFieldPhaseData.phase and the q-ranging algorithm included in cvs. The 
+footballFieldData.ranges file was obtained by iteratively constraining q-range search 
+with intermediate localization results (see our IPSN'06 paper). This code is currently 
+not part of our cvs sources.
+
+If you have any questions or problems, send me an email (kusy@isis.vanderbilt.edu).
+    
+    

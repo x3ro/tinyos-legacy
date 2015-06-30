@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla Docs - Network Topology</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>The Network
+
+              Topology: An n x m Grid</h1>
+
+          <p><em><font color="#FF0000">Note:</font> The following documentation
+              is for Agilla 2.x. Agilla 3.x and beyond (the version available
+              off the SourceForge CVS server) does not enforce the grid topology.
+              For the Agilla 1.x, click <a href="network_topology_1x.html">here</a>.</em></p>
+          <p> Agilla
+  
+            creates an artificial multi-hop sensor network arranged in an <em>n</em> <font face="Arial, Helvetica, sans-serif">x</font> <em>m</em> grid
+            by filtering out messages from non-neighbors. A node 
+            can only communicate with its immediate neighbors based on the grid
+            topology, i.e., each node in the grid 
+              can communicate with its immediate horizontal, vertical, and diagonal
+  
+              neighbors, for a maximum of 8 neighbors. A node is identified
+            by its (x,y) location, which is calculated based on its address.
+             <strong>Only one node can be located at a particular (x,y) location
+             at a time.</strong> The network grid is arranged in row-major order
+             starting with location (1,1)
+            at the
+            corner.
+            The
+            mote
+            connected
+            to
+  
+              the base station is treated like a regular node, it can be at
+            any valid grid location and its neighbors are based on its position
+             in the grid. Note that this differs from Agilla 1.x where the base
+             station was treated as a special case with an address of (0,0) and
+             the entire first row as its immediate neighbors. In Agilla 2.x,
+             the base station can move and is treated like any other node.</p>
+          <p>The grid location and node address is calculated as follows:</p>
+
+          <p align="center"><em>ID = </em>(<em>x</em> - 1)<em>+ </em>(<em>y </em>- 1)
+              <em>* (number of columns)</em></p>
+
+          <p>Alternatively, given the node ID, its location can be calculated
+
+            as follows:</p>
+
+          <p align="center"><em>x = </em>[(<em>ID</em>) mod (<em>number of columns</em>)]
+              + 1<em><br>
+            y = </em>(<em>ID &#8211; x</em> + 1)/(<em>number of columns</em>) + 1</p>
+
+          <p>For example, in a 4x4 network, the nodes would have the following
+
+            IDs and locations:<br>
+</p>
+          <p align="center"><img src="4x4_network_2x.jpg" width="425" height="419">
+</p>
+          <p align="center">&nbsp;            </p>
+
+          <p>Agilla implements a simple greedy-forwarding where each agent simply
+
+            looks at its neighbors and forwards a message to whichever neighbor
+
+            is closer to the ultimate destination. If there are no neighbors
+            closer to the destination than the node itself, the migration and
+            tuple space access operation will fail. It does not adopt to node
+
+            failure or perform neighbor discovery.</p>
+
+          <h2><font face="Verdana, Arial, Helvetica, sans-serif">Customizing</font></h2>
+
+          <p>The default grid size is specified by the number of columns. It
+            is specified by DEFAULT_NUM_COLUMNS in <em>&lt;agilla&gt;/types/Agilla.h</em> and
+by NUM_COLUMNS in 
+            <em>&lt;java&gt;/edu/wustl/mobilab/agilla/variables/AgillaLocation.java</em>.
+            After changing the default number of columns, the java AgentInjector
+            application and the NesC both have to be recompiled. The NesC code
+            has to be reinstalled on all motes.</p>
+
+          <p>To install the NesC portion of Agilla, you can use an included
+
+            gawk script that streamlines the installation process. Use it by
+
+            going to <em>&lt;agilla&gt;</em> and
+
+              typing <em>gawk -f installer_m2.awk</em> for Mica2 motes, or <em>gawk
+
+              -f installer_mz.awk </em>for MicaZ motes. Alternatively, if you
+
+              added the <a href="../download/index.html#AgillaAliases">Agilla
+
+              aliases</a> to
+
+              your /etc/profile, just type <em>riall_m2 </em>or <em>riall_mz </em>anywhere
+
+              for Mica2 and MicaZ motes, respectively.</p>
+
+          <p>To recompile the Java portion, type <em>mj</em> if you have the <a href="../download/index.html#AgillaAliases">Agilla
+
+            aliases</a> setup, or go to <em>&lt;java&gt;/edu/wustl/mobilab/agilla/variables/</em> and
+
+            type <em>make</em>.</p>
+
+          <p>Agilla 2.x allows you to change the grid topology and a node's location
+            wirelessly. You can start the AgentInjector with a &quot;-col NUM_COL&quot;
+            option, which will change the default number of columns within the
+            AgentInjector. You can change the number of columns within the
+            sensor network by going to the WSN menu and selecting &quot;&quot;Change Grid
+            Topology,&quot; or by
+            hitting
+            ctrl+g.
+            To
+            change
+            a node's
+            location. Note that the grid size within the network MUST match the
+            grid size within the AgentInjector java application.</p>
+
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

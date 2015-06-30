@@ -1,0 +1,4 @@
+enum {
+     DEMO29PALMS_DATA = 6,
+     DEMO29PALMS_ROUTING = 7
+};

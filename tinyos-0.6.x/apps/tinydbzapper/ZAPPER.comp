@@ -1,0 +1,17 @@
+TOS_MODULE ZAPPER;
+
+ACCEPTS{
+	char ZAPPER_INIT();
+	char ZAPPER_START();
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	char ZAPPER_SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+};
+
+USES{
+	char ZAPPER_SUB_SEND_MSG(short addr, char amId, TOS_MsgPtr msg);
+};

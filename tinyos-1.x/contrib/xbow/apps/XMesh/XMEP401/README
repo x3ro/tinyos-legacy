@@ -1,0 +1,7 @@
+README 
+
+
+Description:
+-Read Accel, Light, Pressure, Temperature and Humidity(Internal and External) sensor readings
+-Output message to uart port
+-Output message to radio port

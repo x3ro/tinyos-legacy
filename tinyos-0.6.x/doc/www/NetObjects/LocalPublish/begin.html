@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META NAME="Generator" CONTENT="NetObjects Fusion 5.0.2 for Windows">
+<TITLE>begin</TITLE>
+<!-- DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" -->
+<META CONTENT="NetObjects Fusion 5.0.2 for Windows" NAME="Generator">
+
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" TOPMARGIN=0 LEFTMARGIN=0 MARGINWIDTH=0 MARGINHEIGHT=0>
+    <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH=2509 NOF=LY>
+        <TR VALIGN=TOP ALIGN=LEFT>
+            <TD COLSPAN=5 WIDTH=2509>
+                <P>
+                    <TABLE ID="Table1" BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH="100%">
+                        <COLGROUP>
+                        <COL WIDTH=50>
+                        <COL WIDTH=1>
+                        <COL WIDTH=744>
+                        <COL WIDTH=1714>
+                        </COLGROUP>
+                        <TR VALIGN=TOP ALIGN=LEFT>
+                            <TD COLSPAN=4 VALIGN=MIDDLE ALIGN=CENTER HEIGHT=188>
+                                <P ALIGN=CENTER>
+                                    <TABLE WIDTH="100%" BORDER=0 CELLSPACING=0 CELLPADDING=0 NOF=TE>
+                                        <TR>
+                                            <TD ALIGN="LEFT"><IMG ID="Picture8" HEIGHT=188 WIDTH=800 SRC="./header.jpg" BORDER=0 USEMAP="#map0"><MAP NAME="map0"><AREA SHAPE=RECT ALT="" COORDS="8,113,72,134" HREF="./index.html"><AREA SHAPE=RECT
+                                                 ALT="" COORDS="82,114,180,133" HREF="./download.html"><AREA SHAPE=RECT ALT="" COORDS="193,113,272,135" HREF="./support.html"><AREA SHAPE=RECT ALT="" COORDS="282,113,395,133" HREF="./media.html">
+                                                </MAP></TD>
+                                        </TR>
+                                    </TABLE>
+                            </TD>
+                        </TR>
+                        <TR VALIGN=TOP ALIGN=LEFT>
+                            <TD WIDTH=50 HEIGHT=11>
+                                <P><IMG ID="Picture4" HEIGHT=1 WIDTH=50 SRC="./a_clearpixel_2.gif" VSPACE=0 HSPACE=0 ALIGN="BOTTOM" BORDER=0></TD>
+                            <TD COLSPAN=2>
+                                <P><IMG ID="Picture7" HEIGHT=1 WIDTH=650 SRC="./a_clearpixel_2.gif" VSPACE=0 HSPACE=0 ALIGN="BOTTOM" BORDER=0></TD>
+                            <TD WIDTH=1714>
+                                <P></P>
+                            </TD>
+                        </TR>
+                        <TR VALIGN=TOP ALIGN=LEFT>
+                            <TD COLSPAN=2>
+                                <P></P>
+                                <P ALIGN=CENTER></P>
+                                <P ALIGN=LEFT></P>
+                            </TD>
+                            <TD WIDTH=744>
+                                <P><B><FONT SIZE="+2" FACE="Arial,Helvetica,Univers,Zurich BT,sans-serif">Beginning Programming in TinyOS</FONT></B></P>
+                                <H2>Compile your first program</H2>
+                                <P>If you have not installed TinyOS, please see <A HREF="http://today.cs.berkeley.edu/tos/dist2/download.htm">the download page</A>.</P>
+                                <P>Enter the <FONT FACE="Courier New,Courier,monospace">apps/cnt_to_leds</FONT> directory using your shell (cygwin under Windows); it's a good application to make sure that the most basic hardware is working. Type <FONT
+                                     FACE="Courier New,Courier,monospace">make rene</FONT> in the shell. This should complete successfully and create a binary image of your program for the rene motes. You can ignore the warning about &quot;Makefile.objs&quot; at the beginning. 
+                                </P>
+                                <H2>Downloading Programs to the Device</H2>
+                                <P>To transfer that image to an actual device, connect your programming board to the parallel port. The switch on the board should be towards the &quot;Big_Guy&quot; label, away from the parallel port. Power the 
+                                    mote and type 'make rene install'.&nbsp; If you are using windows and the install doesn't work, you make need to fiddle with the port specified to <FONT FACE="Courier New,Courier,monospace">uisp</FONT>; 
+                                    depending on the hardware, cygwin can map parallel ports to wildly different names (use the <FONT FACE="Courier New,Courier,monospace">-dlpt=</FONT> option). You should see the upload take place (this will take 2 minutes or so) and the leds should be blinking. 
+                                </P>
+                                <P>If you're using an IBM Thinkpad and having trouble downloading rprograms, you'll probably need to go into the <FONT FACE="Courier New,Courier,monospace">apps</FONT> directory and modify <FONT
+                                     FACE="Courier New,Courier,monospace">Makeinclude</FONT>. Halfway through the file is a commented out line that defines <FONT FACE="Courier New,Courier,monospace">HOST</FONT> to <FONT
+                                     FACE="Courier New,Courier,monospace">THINKPAD</FONT>. Uncomment this line. Basically, the communication ports are named differently, and <FONT FACE="Courier New,Courier,monospace">uisp</FONT> needs to be told to use a different port (<FONT
+                                     FACE="Courier New,Courier,monospace">-dlpt=3</FONT>). </P>
+                                <H2>Try running the simulator</H2>
+                                <P>Type 'make clean' then 'make'.&nbsp; This will compile the TinyOS simulator TOSSIM. Typing <FONT FACE="Courier New,Courier,monospace">make</FONT> by itself compiles the program for the rene motes (<FONT
+                                     FACE="Courier New,Courier,monospace">make rene</FONT>), mica mote (<FONT FACE="Courier New,Courier,monospace">make mica</FONT>) and the simulator (<FONT FACE="Courier New,Courier,monospace">make pc</FONT>); due 
+                                    to dependencies, you often have to compile the first two for the latter to build properly. If you're running Linux, you might see a long stream of warnings when the simulator compiles, caused by some 
+                                    questionable declarations in <FONT FACE="Courier New,Courier,monospace">/usr/include/pthread.h</FONT>. Don't worry about them. </P>
+                                <P>If you get the following compilation error: </P>
+                                <P>BLINK.o(.text+0x7): undefined reference to `BLINK_LEDy_off_COMMAND'<BR>BLINK.o(.text+0xc): undefined reference to `BLINK_LEDr_off_COMMAND'<BR>BLINK.o(.text+0x11): undefined reference to `BLINK_LEDg_off_COMMAND'
+                                    <BR>BLINK.o(.text+0x56): undefined reference to `BLINK_LEDy_on_COMMAND'<BR>BLINK.o(.text+0x5d): undefined reference to `BLINK_LEDy_off_COMMAND'<BR>
+                                    BLINK.o(.text+0x67): undefined reference to `BLINK_LEDg_on_COMMAND'<BR>BLINK.o(.text+0x71): undefined reference to `BLINK_LEDg_off_COMMAND'<BR>BLINK.o(.text+0x7b): undefined reference to `BLINK_LEDr_on_COMMAND'
+                                    <BR>BLINK.o(.text+0x85): undefined reference to `BLINK_LEDr_off_COMMAND'<BR>system/CLOCK.o(.text+0x43): undefined reference to `CLOCK_NULL_FUNC_EVENT'<BR>
+                                    system/MAIN.o(.text+0xcb): undefined reference to `MAIN_SUB_INIT_COMMAND'<BR>system/MAIN.o(.text+0xd0): undefined reference to `MAIN_SUB_START_COMMAND'<BR>collect2: ld returned 1 exit status<BR>
+                                    make: *** [main] Error 1</P>
+                                <P>Then your files ended up in a DOS format instead of a UNIX format.&nbsp; This can occur if winzip was used to extract the TinyOS release.&nbsp; To fix the problem, you can use the extractor that came with 
+                                    cygnus.&nbsp; Place the TinyOS release in a directory by itself.&nbsp; Go to the cygnus prompt and cd to that directory.&nbsp; Run: </P>
+                                <P>tar xvfz tos-latest.tar.gz <BR>cd tos5.0/apps/cnt_to_leds <BR>make clean <BR>make </P>
+                                <P>Hopefully that will fix the problem. </P>
+                                <P>When it is finished run &quot;./binpc/main 1&quot;&nbsp; This will run a single TinyOS mote.&nbsp; You should see a tremendous deluge of debugging information, ranging from clock interrupts to LED output to 
+                                    simulator internals. The output the simulator provides can be set with the <FONT FACE="Courier New,Courier,monospace">DBG</FONT> environment variable. The default value is &quot;all&quot;. For a listing of the available debugging modes, type <FONT
+                                     FACE="Courier New,Courier,monospace">./binpc/main -h</FONT>. You can choose modes by setting your DBG environment variable to be a string delimited set of modes. For example, <FONT
+                                     FACE="Courier New,Courier,monospace">export DBG=clock,route</FONT> in <FONT FACE="Courier New,Courier,monospace">bash</FONT> would enable output pertaining to clock events and the network routing layer used, if any. To see the LED output, set DBG to be <FONT
+                                     FACE="Courier New,Courier,monospace">led</FONT> (<FONT FACE="Courier New,Courier,monospace">export DBG=led</FONT>). </P>
+                                <P>After setting DBG, type <FONT FACE="Courier New,Courier,monospace">./binpc/main 1</FONT>. You'll see LED output streaming by at a rate too fast to understand; the simulator is running your program much more 
+                                    quickly than it would in real life. For this reason, the simulator has a command line option to slow its rate of execution down. Try <FONT FACE="Courier New,Courier,monospace">binpc/main -p 1 1</FONT>, which 
+                                    puts a 1 second pause between each issued clock event. You should see output like: </P>
+                                <P>0: Y_off <BR>0: R_off <BR>0: G_off <BR>0: <BR>0: Y_on <BR>0: G_off <BR>0: R_off <BR>0: <BR>0: Y_off <BR>0: G_on <BR>0: R_off <BR>. <BR>. <BR>. <BR>. </P>
+                                <P>If you look closely at the pattern, you will see that it is a binary counter where Y is the least significant digit and R is the most significant. The zero before each line states which mote the message pertains 
+                                    to. Try <FONT FACE="Courier New,Courier,monospace">./binpc/main -p 1 3</FONT> and you'll see three motes execute the program, with their outputs staggered due to different boot times (staggered boot times is necessary so all of the mote clocks aren't perfectly synchronized to a degree impossible in the real world). 
+                                </P>
+                                <H2>Reading from the COM port</H2>
+                                <P>You should build a node that will output data over the serial port, such as generic_base.&nbsp; Plug it into your programming board (as if you were going to program it, but don't program it). Connect the serial 
+                                    port on the programming board to your machine; if you're using a laptop, you can directly plug it in without using a cable, but be careful when doing so. </P>
+                                <P>Build another node that will put some messages on the air, such as <FONT FACE="Courier New,Courier,monospace">cnt_to_led_and_rfm</FONT>. Generic_base will pick them up and put them on the COM (serial) port; you 
+                                    just need to run an application that will listen to them. </P>
+                                <P>Go into the <FONT FACE="Courier New,Courier,monospace">tools</FONT> directory and type <FONT FACE="Courier New,Courier,monospace">javac net/tinyos/SerialForwarder/SerialForward.java</FONT>. This file contains a 
+                                    Java program that presents a unified abstraction of reading mote output. It can be run with <FONT FACE="Courier New,Courier,monospace">java net.tinyos.SerialForwarder.SerialForward</FONT>. In addition, you need 
+                                    to run a program that connects to the SerialForwarder and presents data to you in a meaningful form. Compile a listener with <FONT FACE="Courier New,Courier,monospace">javac net/tinyos/tools/ForwarderListen.java</FONT>. 
+                                    This program connects to the SerialForwarder and presents the binary data in a human-readable (hex bytes) form. It can be run with <FONT FACE="Courier New,Courier,monospace">net.tinyos.tools.ForwarderListen locahost 9000</FONT>
+                                </P>
+                                <P>Start up the SerialForwarder, then start ForwarderListen. You should see the SerialForwarder provide information on how much data it has collected, and your visualizer should begin to spit out hexidecimal bytes.
+                                </P>
+                                <P>The output should look like: <BR><B>7E 126 06 6 0B 11 00 0 02 2 38 56 02 2 38 56 02 2 38 56 02 2 38 56 02 2 38 56 02 2 38 56 02 2 38 56 02 2 38 56 02 2 38 56 02 2 3C 60 02 2 3C 60 3C 60 80 128 FF 255 06 6<BR>7E 
+                                    126 06 6 16 22 00 0 02 2 1F 31 02 2 30 48 02 2 30 48 02 2 30 48 02 2 30 48 02 2 1F 31 02 2 30 48 02 2 30 48 02 2 30 48 02 2 30 48 02 2 30 48 A9 169 3D 61 FF 255 06 6<BR>.<BR>.<BR>.</B>&nbsp; </P>
+                                <P>If you look carefully at the hex output, you should see your <FONT FACE="Courier New,Courier,monospace">cnt_to_led_and_rfm</FONT> messages incrementing one of the message fields</P>
+                                <P>. </P>
+                                <H2>Learning about TinyOS</H2>
+                                <P>Now that you have TinyOS working, you can start learning about it and writing your own programs. In the <FONT FACE="Courier New,Courier,monospace">nest/doc/tutorial</FONT> directory are the first three lessons for learning TinyOS. Read and follow the instructions. There are also some documents in <FONT
+                                     FACE="Courier New,Courier,monospace">nest/doc</FONT>, such as <FONT FACE="Courier New,Courier,monospace">tos-developer.pdf</FONT>, that provide some high level information on the OS structure. Good luck!</P>
+                                <P></P>
+                            </TD>
+                            <TD>
+                                <P></P>
+                            </TD>
+                        </TR>
+                    </TABLE>
+            </TD>
+        </TR>
+        <TR VALIGN=TOP ALIGN=LEFT>
+            <TD WIDTH=24 HEIGHT=3><IMG SRC="./clearpixel.gif" WIDTH=24 HEIGHT=1 BORDER=0></TD>
+            <TD WIDTH=123><IMG SRC="./clearpixel.gif" WIDTH=123 HEIGHT=1 BORDER=0></TD>
+            <TD WIDTH=503><IMG SRC="./clearpixel.gif" WIDTH=503 HEIGHT=1 BORDER=0></TD>
+            <TD WIDTH=125><IMG SRC="./clearpixel.gif" WIDTH=125 HEIGHT=1 BORDER=0></TD>
+            <TD WIDTH=1734><IMG SRC="./clearpixel.gif" WIDTH=1734 HEIGHT=1 BORDER=0></TD>
+        </TR>
+        <TR VALIGN=TOP ALIGN=LEFT>
+            <TD HEIGHT=30></TD>
+            <TD COLSPAN=3 VALIGN=MIDDLE WIDTH=751><HR ID="HRRule1" WIDTH=751 SIZE=1></TD>
+            <TD></TD>
+        </TR>
+        <TR VALIGN=TOP ALIGN=LEFT>
+            <TD COLSPAN=5 HEIGHT=11></TD>
+        </TR>
+        <TR VALIGN=TOP ALIGN=LEFT>
+            <TD COLSPAN=2></TD>
+            <TD WIDTH=503>
+                <P ALIGN=CENTER><A HREF="./index.html"><FONT SIZE="-1" FACE="Arial,Helvetica,Univers,Zurich BT,sans-serif">Home</FONT></A><FONT SIZE="-1" FACE="Arial,Helvetica,Univers,Zurich BT,sans-serif"> | </FONT><A HREF="./download.html"><FONT
+                     SIZE="-1" FACE="Arial,Helvetica,Univers,Zurich BT,sans-serif">Download</FONT></A><FONT SIZE="-1" FACE="Arial,Helvetica,Univers,Zurich BT,sans-serif"> | </FONT><A HREF="./support.html"><FONT SIZE="-1"
+                     FACE="Arial,Helvetica,Univers,Zurich BT,sans-serif">Support</FONT></A><FONT SIZE="-1" FACE="Arial,Helvetica,Univers,Zurich BT,sans-serif"> | </FONT><A HREF="./media.html"><FONT SIZE="-1"
+                     FACE="Arial,Helvetica,Univers,Zurich BT,sans-serif">In the Media</FONT></A></P>
+            </TD>
+            <TD COLSPAN=2></TD>
+        </TR>
+    </TABLE>
+</BODY>
+</HTML>
+ 

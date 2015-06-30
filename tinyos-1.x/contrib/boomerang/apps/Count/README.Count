@@ -1,0 +1,50 @@
+$Id: README.Count,v 1.1.1.1 2007/11/05 19:08:58 jpolastre Exp $
+
+README for Count applications
+Author/Contact: info@moteiv.com, tinyos-help@millennium.berkeley.edu
+
+Description:
+
+The applications in here are simple Count applications that demonstrate
+real, typical, simple TinyOS programs.  These applications show basic TinyOS
+library usage such as Timer, GenericComm, Leds, Button, and so on.
+
+These applications are meant to be a good teaching tool, easy to understand,
+useful, and reusable.
+
+  CountLeds - the node periodically increments a counter and display the
+  count on its LED's.
+
+  CountSend - periodically increment a counter, send the counter value over
+  the radio, and set the LED's to the current counter value.
+
+  CountReceive - set the LED's to any count received over the radio.
+  
+  CountDual - node address 1 periodically increments a counter, sends the
+  counter value over the radio, and sets the LED's to the current counter
+  value.  All other node addresses set their LED's to any count received
+  over the radio.
+
+  CountDualAck -- node address 1 periodically sends a message to node
+  address 2.  If node 2 acknowledges the message, node 1 increments its
+  count and displays the value on the LED's.  Two nodes must be installed
+  with addresses 1 and 2 respectively for this application to operate
+  correctly.
+  
+  CountInput - each click of the user button increments a counter and
+  display the count on its LED's.
+  
+  CountUart - periodically increment a counter, send the counter value over
+  the UART (serial port), and set the LED's to the current counter value.
+
+The authors have found these applications useful as a templates to quickly
+generate other simple programs.  Enjoy.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+None.
+

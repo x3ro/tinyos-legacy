@@ -1,0 +1,4 @@
+@opts = ("-DHANDLE_LCD_BITWISE=1");
+push @opts, "-mingw-gcc" if $cygwin;
+@commonplatforms = ("mwproto","msp430_crl_base","msp430");
+

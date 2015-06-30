@@ -1,0 +1,89 @@
+# Energy model for the mica2
+# see http://www.eecs.harvard.edu/~shnayder/ptossim/ for details
+# Lines starting with '#' are comments
+
+# Format: KEY\s+VALUE
+# Unless otherwise specified, VALUE is a current in mA
+# Value is always assumed to be a number
+
+VOLTAGE	 3.0
+
+# CPU numbers:
+# Idle mode is what the CPU is in when not actively executing, but 
+# no special action is taken.  The per-active-cycle numbers are added 
+# on top of that
+# Added .93mA to idle and active cpu power to account for the
+# oscillator.  Need to make it separate later...
+
+#CPU_ACTIVE			8.0
+CPU_ACTIVE			8.93
+#CPU_IDLE			3.2
+CPU_IDLE			4.13
+CPU_ADC_NOISE_REDUCTION		1.0
+CPU_POWER_DOWN			0.103
+CPU_POWER_SAVE			0.110
+CPU_STANDBY			0.216
+CPU_EXTENDED_STANDBY		0.223
+
+# The startup mode for the cpu
+CPU_INIT			3.2
+
+CPU_FREQ	4000000
+# It's actually 7382800, but the simulator is hardcoded for 4Mhz, and
+# the fixes for that aren't merged yet
+#CPU_FREQ	7382800
+
+
+# These are actual measured numbers
+RADIO_RX   7.03
+RADIO_TX_00   3.72
+RADIO_TX_01   5.21
+RADIO_TX_03   5.37
+RADIO_TX_06   6.47
+RADIO_TX_09   7.05
+RADIO_TX_0F   8.47
+RADIO_TX_60   11.57
+RADIO_TX_80   13.77
+RADIO_TX_C0   17.37
+RADIO_TX_FF	21.48
+RADIO_OFF	0
+ 
+# These are interpolated from above
+RADIO_TX_02   5.3
+RADIO_TX_04   5.75
+RADIO_TX_05   6.1
+RADIO_TX_07   6.67
+RADIO_TX_08   6.87
+RADIO_TX_0A   7.33
+RADIO_TX_0B   7.6
+RADIO_TX_0C   7.93
+RADIO_TX_0E   8.15
+RADIO_TX_40   9.5
+RADIO_TX_50   10.5
+RADIO_TX_70   12.6
+RADIO_TX_90   15.0
+RADIO_TX_E0   19.5
+
+# The default power mode (0x0F, but python doesn't like hex numbers in floats)
+RADIO_DEFAULT_POWER  15.00
+
+
+# LED
+LED		2.2
+#default to off
+LED_INIT	0
+
+# EEPROM
+EEPROM_READ	6.24
+EEPROM_WRITE	18.40
+
+#ADC
+# we thought it took power, so it's tracked, but it actually doesn't
+ADC	0.0
+
+# If the sensor board is plugged in, it draws this much current at all times
+SENSOR_BOARD	0.69
+
+# Sensors - don't actually use power beyond the general sensor board power
+SENSOR_PHOTO	0
+SENSOR_TEMP	0

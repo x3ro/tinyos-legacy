@@ -1,0 +1,8 @@
+# run from this directory
+
+echo "Collecting files for the Mate RPM."
+./vm.files
+echo "Building the RPM."
+rpm -ba vm.spec
+echo "RPM placed in /usr/src/redhat/RPMS/noarch"
+

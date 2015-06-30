@@ -1,0 +1,27 @@
+This directory is for testing nc2momllib (a .xml generator that
+creates MoML files from nesC files).
+
+For more information on MoML, see:
+  http://ptolemy.eecs.berkeley.edu/publications/papers/00/moml
+
+Instructions:
+
+1.  Make sure you have the following environment variables set:
+- TOSROOT [point to the top of the tinyos tree]
+
+- TOSDIR [point to $TOSROOT/tos]
+
+- NC2MOMLLIB_NESC [point to the top of the installation directory of
+the version of the nesc compiler that supports nc2momllib]
+
+2.  Type 'make momllib <platform>'
+(To see valid platforms, type 'make')
+
+----------------------------------------------------------------------
+This directory contains the following:
+
+Makerules:
+- A modification of $TOSROOT/apps/Makerules
+
+Makefile:
+- Contains the arguments to pass to nc2momllib

@@ -1,0 +1,18 @@
+README for Blink
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+Blink is a basic application that starts a 1Hz timer and toggles the red
+LED every time it fires. It is a very simple program that is little
+more than a demonstration of TinyOS programming.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:

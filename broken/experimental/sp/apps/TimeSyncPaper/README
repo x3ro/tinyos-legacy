@@ -1,0 +1,114 @@
+This directory contains the source code of delay measurement time synch
+and related modules: Clock, AbsoluteTimer, Timer, TimeSync and  LogicalTime
+and test applications and test results.
+Most of the source files in this directory coul dbe found under tiny OS source tree. However, the version in this directory works better from time synch pointer of view. 
+These files are similar to the early Feb 2003 version of the same file in cvs source tree.  If I remember corectly, I checked out Feb 04 2003 and added some bug fixing. 
+
+I used these files to collect data for my time synch paper, submitted to WSNA2003. 
+Here are some tips on how to reproduce or repeat the time synch test I did:
+
+1. How to to repeat single hop initial time sync test?
+=======================================================
+
+   cp InitialSync1hopM.nc InitialSyncM.nc
+   check makefile to make sure it builds app InitialSync
+   make mica install.0  --- mote 0 is the master
+   install slave code to a few other mote by
+   make mica install.x ( x = 1,2)
+   put each mote on a programming board and connect it to the serial port of a PC
+   go to tinyos1.x/tools/java dir in the PC
+   run 
+     java net/tinyos/tools/ListenRaw COM1 >> output_file
+
+   By comparing the time stamp in the 3 output files, one will know ow well 
+the 3 mote synch with the master.
+   Due to interference, a receive may drop bad packets. 
+As a result, th 3 output files may have different number of lines.
+It only make sense to compare the time stamps taken at the same time.
+Therefore, one has to process the test results. You may found the python scriptshelpful for this purpose. 
+
+
+2. How to repeat my 2 hop initial synch tests?
+==============================================
+   cp InitialSync2hopM.nc InitialSyncM.nc
+   install the code on 3 motes only. The id of the motes has to be 0, 1 and 2
+   The mote 0 is the time master, mote 1 is 1 hop away from master.
+   Mote 1 rebroadcast a time synch msg. Mote 2 only accept TS msg from mote 1.
+
+   Other steps are the same as simple hop initial time synch test.
+
+
+3. How to repeat my single hop time sync over long period tests?
+===========================================================
+    In this demo, mote 0 is the time master, it broadcasts its own time every minute.
+All the other mote are considered slave motes within the reach of mote 0.
+When a slave mote receives a time sync message, it adjusts its logical time. 
+We also need a special mote, called a trigger, to broadcast a 
+message every 20 seconds. 
+When the other motes, including mote 0, receives this trigger message, it
+time stamp this event using its local clock, and send a message containing
+ the time stamp. GenericBase mote collects these message and forwards them to 
+the PC. 
+    
+To run this demo, you need a mote programmed with the Trigger application provided 
+in this directory .
+
+step 1: In the makefile, leave only TestTimeSync component un-commented. 
+
+step 2: build the demo by typing 
+		make mica
+
+step 3: load the demo code to your motes 
+     make mica reinstall.n ( make sure one of the mote has to be id 0) 
+
+step 4: Program a mote as an event trigger by leaving only Trigger component in 
+the Makefile and do a make mica install.11
+
+step 5: put the master and slave motes on programming board,
+        connect the programming board to a PC's serial port. 
+      If you don't have multiple programming board and multiple PC,
+      change the task debugTime() in source TestTimeSyncM.nc
+      to make it sends to BCAST address instead of UART 
+      and use GenericBase to collect all the msgs. 
+    In this scenario, you may experience high packet lost rate due to collision.
+
+
+step 6: turn all motes on
+
+step 7: on your PC, go to tinyos-1.x/tools/java dir and type:
+        java net/tinyos/sf/SerialForward &
+	java net/tinyos/timesync/oscilloscaope
+	If  you ahev somnething like CLASS not found error, do the following 
+        cd net/tinyos/timesync
+        javac oscilloscope.java
+
+4. How to repeat my 2 hop time sync over long time period test?
+===============================================================
+   cp TimeSyncForce2hopM.nc to TimeSyncM.nc
+   repeat step 1-6. 
+   For this test, you need only 3 motes. 
+   mote 0 as master, mote 1 as midhop router and 
+   mote 2 as a 2 hop away node. You have to give them id 0, 1 and 2 exactly.
+   since it is hardcoded so. 
+
+
+5. EventSync test:
+===================
+
+ This applications showes that when logical time are syncronized using 
+ Delay measurement Time Sync protocol, an application event can be synchronized
+ using AbsoluteTimer event.
+ 
+
+ chekc makefile to make sure it compiles EventSync application
+ make mica install.x (x=0, ... )
+ Mote ID 0 has to be used since it is the default time master. 
+ All other motes are slave mote. 
+
+ LED indications:
+     RED ---- If red LED toggles at the same time, the motes are synched.
+     GREEN -- When green toggle, a time sync msg is received.
+     Yellow -- a Time sync msg is sent.
+
+ 
+        

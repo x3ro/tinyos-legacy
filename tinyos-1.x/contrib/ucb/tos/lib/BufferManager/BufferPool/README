@@ -1,0 +1,29 @@
+README for BufferPool 
+Author/Contact: hohltb@cs.berkeley.edu 
+
+Description:
+This is a global buffer cache for TinyOS. It is partitioned into
+multiple free lists. The size of each free list is configurable and 
+set at compile time in the respective module file.
+
+Each free list is reserved for use by a TinyOS specific component.
+SwapList - a free list of buffers reserved for the routing component
+FreeAlist - a free list of buffers reserved for the QueuedASend component
+		for application layer buffer allocation.
+
+To add additional free lists, simply create a new FreeList component
+using the example in the CircleQueue/templates directory and place it
+in the BufferPool directory. 
+
+Tools:
+None
+
+Known bugs/limitations:
+None
+
+See Also:
+../CircleQueue
+../CircleQueue/templates
+../QueuedASend
+../../../../apps/TestQASend
+

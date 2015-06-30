@@ -1,0 +1,10 @@
+0.5:
+Support for "Tiling"
+Loads o' bug fixes
+Added a new test app: MULESendLine
+
+0.3:
+Support for microphone and photosensor.
+
+0.2: 
+Now can use serial programmers instead of just eMotes.

@@ -1,0 +1,16 @@
+#-*-Makefile-*- vim:syntax=make
+
+######################################################################
+# Core Makefile for TinyOS 
+######################################################################
+
+TOSDIR ?= $(shell ncc -print-tosdir)
+HHTOSDIR ?= $(TOSDIR)/../contrib/handhelds
+include $(HHTOSDIR)/tools/make/Makerules
+
+ifneq ($(TARGETS:clean%=clean),clean)
+ifneq ($(PLATFORM),shimmer)
+$(error You must build this for a SHIMMER)
+endif
+endif
+

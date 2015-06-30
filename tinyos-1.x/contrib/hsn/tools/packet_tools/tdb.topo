@@ -1,0 +1,39 @@
+
+soigui_draw_node_at	0	19	5
+
+
+
+soigui_draw_node_at	26	16	2
+soigui_draw_node_at	27	16	4
+soigui_draw_node_at	28	16	6
+soigui_draw_node_at	31	16	8
+
+soigui_draw_node_at	20	14	2
+soigui_draw_node_at	22	14	4
+soigui_draw_node_at	24	14	6
+soigui_draw_node_at	25	14	8
+
+
+soigui_draw_node_at	1	8	2
+soigui_draw_node_at	2	8	4
+soigui_draw_node_at	3	8	6
+soigui_draw_node_at	4	8	8
+
+soigui_draw_node_at	5	6	2
+soigui_draw_node_at	6	6	4
+soigui_draw_node_at	7	6	6
+soigui_draw_node_at	8	6	8
+
+soigui_draw_node_at	9	4	2
+soigui_draw_node_at	10	4	4
+soigui_draw_node_at	11	4	6
+soigui_draw_node_at	12	4	8
+
+soigui_draw_node_at	13	2	2
+soigui_draw_node_at	14	2	4
+soigui_draw_node_at	15	2	6
+soigui_draw_node_at	16	2	8
+
+soigui_draw_node_at	59	11	5
+
+soigui_register_adjuvant 0 $SoiVar(color,sink) 1

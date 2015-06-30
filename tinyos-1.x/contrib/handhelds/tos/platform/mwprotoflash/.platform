@@ -1,0 +1,3 @@
+@opts = ();
+@commonplatforms = ("mwproto","msp430_crl_base","msp430");
+

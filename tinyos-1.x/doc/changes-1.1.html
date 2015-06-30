@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>TinyOS 1.1 Significant Changes</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big><big>
+Significant Changes in TinyOS between v1.0 and 1.1</big></big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Last updated 20 August
+2003 </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> This document outlines the major changes that have occured in TinyOS
+since the last release (1.0) and the current release (1.1). These
+changes include the replacement of <tt>net.tinyos.sf.SerialForward</tt>
+with <tt>net.tinyos.sf.SerialForwarder</tt> (along with major changes to
+how java programs send and receive packets, and an improved UART
+protocol), compile-time race condition detection in nesC, support for
+the mica2 platform and Chipcon radio, power management, AM-level
+cryptography for integrity and confidentiality (TinySec), network
+reprogrammming, ad-hoc routing, and support for new mote programmers in <span
+ style="font-family: monospace;">uisp</span>. Systems packaged with
+1.0, such as TinyDB and Mat&eacute;, also have many advancements.
+As with the <a href="changes-1.0.html">transition</a> from 0.6 to 1.0,
+there are many small changes such as bug fixes. This document only
+describes these major changes which every user should be aware of.</p>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Serial
+Communications<br>
+      </font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p> 	</p>
+<p><code>net.tinyos.sf.SerialForward</code> has been replaced 	by <code>net.tinyos.sf.SerialForwarder</code>.The
+new SerialForwarder will normally be used with the GenericBase
+replacement, TOSBase (see the TinyOS section). The old serial forwarder
+is still available, at <span style="font-family: monospace;">net.tinyos.sf.old.SerialForward</span>.
+As part of this     transition a new package, <code>net.tinyos.packet</code>,
+provides standardized access to many different packet sources,
+ranging from <span style="font-family: monospace;">SerialForwarder</span>
+to TOSSIM to a serial port. Packet     sources are specified by string
+descriptions: running <code>net.tinyos.packet.BuildSource</code>
+provides a list of all     of the available sources. The new framework
+provides the following advantages:<br>
+</p>
+<ul>
+  <li>The new UART protocol provides reliable PC-mote communication
+(and preserves the destination address of received packets...).</li>
+  <li>The new protocols are packet-size independent, so you should no
+longer need to specify packet sizes in your java applications or in the
+serial forwarder.</li>
+  <li>TOSBase sets the group id on outgoing messages, and filters
+incoming messages by group id. Thus most java programs do not need to
+know the group id <span style="font-family: monospace;">(net.tinyos.packet</span>,
+and <span style="font-family: monospace;">net.tinyos.message</span>
+when used with the new packet sources, do not check or set group ids).<br>
+  </li>
+  <li>Java applications can more easily connect to a variety of packet
+sources (see the next paragraph).<br>
+  </li>
+</ul>
+<p>Most programs (except <span style="font-family: monospace;">SerialForwarder</span>
+itself) read the <span style="font-family: monospace;">MOTECOM</span>
+environment variable to find which packet source they should use, and if <span
+ style="font-family: monospace;">MOTECOM</span> is not defined will
+connect to a <span style="font-family: monospace;">SerialForwarder</span>
+on the local host. <br>
+</p>
+<p>In summary:<br>
+</p>
+<ul>
+  <li>You can still use the old GenericBase, along with
+net.tinyos.sf.old.SerialForward, and leave your current java code
+unchanged.</li>
+  <li>You can switch to TOSBase (which provides reliable PC-mote
+communication), and change your java code to use the new packet sources.
+The necessary changes are extremely minor, especially if you were using <a
+ href="nesc/mig.html"><span style="font-family: monospace;">mig</span></a>
+and the <span style="font-family: monospace;">net.tinyos.message</span>
+package.</li>
+  <li>GenericComm uses the new UART protocol, so if you were connecting
+your PC directly to your mote application (i.e., not using GenericBase),
+you will have to switch to the new packet sources on the PC side.</li>
+</ul>
+More information on the UART protocol, on packet sources and the
+associated java packages can be found <a
+ href="./serialcomm/index.html">here</a>.
+<p></p>
+	
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">nesC</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+<p></p>
+<p>nesC now supports and checks the TinyOS concurrency model. It
+makes a distinction between <b>asynchronous</b> code, which can
+execute in interrupt context, and <b>synchronous</b> code, which can
+only execute in tasks. The boot sequence is considered a task (as
+it runs synchronously). Essentially, sync (synchronous) code     is
+non-preemptive; it runs to completion with respect to other     sync
+code. async code, however, can preempt itself and sync     code.</p>
+<p>This means that if a variable is read or written in async code,
+there is a possible race condition; it can preempt a concurrent
+access. Variables that can be modified by async code must be
+protected by atomic sections, which ensure atomic access. This is an
+example of a state transition that is safe, even in the     presence of
+async code:</p>
+<code></code>
+<pre>    bool oldBusy;<br>    atomic {<br>      oldBusy = busy;<br>      busy = TRUE;<br>    }<br>    if (!oldBusy) {<br>    ...<br>    </pre>
+<p>nesC wiring allows interfaces to "fan-out;" a single <code>uses</code>
+can be wired to more than one <code>provides</code> and vice-versa. A
+single call point calls     multiple functions: this raises the
+question of what the return     value of the call means.</p>
+<p>In nesc 1.0, the return value from a fan-out was that of one of
+the functions, randomly determined at compile-time. nesC 1.1
+introduces the idea of a "combine function," which is associated
+with a type. For example, the combine function for <code>result_t</code>
+returns <code>FAIL</code> if any of its     values to combine are <code>FAIL</code>.
+If calling <code>StdControl.init</code> fails on one of the callees,
+the     caller should see so.</p>
+<p>Some types do not have combine functions; for example <code>TOS_MsgPtr</code>
+does not. Calling two functions, both of     which return a pointer, has
+unclear semantics, and is almost     certainly a bug. In the case of <code>ReceiveMsg.receive()</code>,
+for example, which of the two buffers should be used?</p>
+<p>nesC 1.0 had a <code>unique</code> function, to use with
+parameterized interfaces. However, some parameterized interfaces had
+fixed ranges that were smaller than their parameterization
+suggested (e.g., <code>TimerC</code> had 16 timers, but a <code>uint8_t</code>
+parameterization); using more would fail,     using fewer wasted
+storage. nesC 1.1 has a new function, <code>uniqueCount</code>, which
+is resolved at compile time. Like <code>unique</code>, it takes a
+string parameter. For example, <code>uniqueCount("Timer")</code> will
+return the number of calls     to <code>unique("Timer")</code>.</p>
+<p>nesC 1.1 includes a new tool, <a href="nesc/ncg.html"><code>ncg</code></a>,
+or "nesC     Constant Generator. ncg can take a <code>.h</code> file,
+read all     of the constants defined, and generate a Java class that
+provides those constants. This means that constants no longer have to be
+replicated across TinyOS code and the associated Java tools.</p>
+<p>A more in-depth description of these changes can be found in     the <a
+ href="nesc/ref.pdf">nesC Reference Manual</a>.</p>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">TinyOS</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>TinyOS 1.1 supports the mica2 and mica2dot platforms, including a <a
+ href="">Chipcon-based active message networking stack</a>. It     also
+supports the mica platform, with its RFM-based networking     stack. It
+no longer support the rene platform.</p>
+<p>The directory structure of TinyOS has been changed slightly;     the <code>lib</code>
+subdirectory now only contains directories     representing add-on
+systems.</p>
+<p>TinyOS 1.1 provides a <a href="multihop/multihop_routing.html">many-to-one
+collection     oriented ad-hoc routing system</a>, which has been
+tested and     evaluated both in controlled and deployment conditions
+(e.g., Great Duck Island). The routing system is in <code>lib/Route</code>.</p>
+<p>TinyOS 1.1 includes support for single-hop binary reprogramming
+over the network. This system, <a href="Xnp.pdf">Xnp</a>, was
+developed by <a href="http://www.xbow.com">Crossbow</a> and     refined
+by the TinyOS team. Xnp is in <code>lib/Xnp</code>. There     are
+several example applications that use it: <code>XnpCount</code>, <code>XnpOscopeRF</code>
+and <code>XnpRfmToLeds</code>. The Java tools are in <code>net.tinyos.xnp</code>.</p>
+<p>TinyOS 1.1 has mechanisms for run-time power management.</p>
+<p>GenericBase has been replaced by TOSBase. TOSBase provides the
+same functionality as GenericBase, but uses an improved serial
+communication protocol. GenericBase had no framing besides message
+size, and therefore failed when bytes transmitted to it were     lost.
+TOSBase uses a framing protocol. Correspondingly, old     applications
+tha talk to a serial port may not communicate with     TOSBase.
+Additionally, GenericBase filtered     outgoing messages based on group
+ID; TOSBase instead sets the     group ID of all packets sent out on the
+radio. This means that     Java-side tools do not need to know the
+group ID used in the     network. For special applications, the
+TransparentBase application behaves like TOSBase except that it does not
+set the group id on outgoing messages or filter incoming messages by
+group id (leaving these tasks to the Java tools).<br>
+</p>
+<p><a href="tossim.pdf">TOSSIM</a> has been extended and     refined.
+Its command line syntax has changed slightly. It now     supports a
+lossy networking model, and there is a Java tool to     generate loss
+topologies based on empirical data gathered from a     mica network.
+TOSSIM 1.1 does not simulate the mica2 networking     stack, instead,
+continues to support the mica RFM stack. TOSSIM     does not support the
+new non-volatile storage interfaces yet     (described below).</p>
+<p>TOSSIM now includes TinyViz, a Java application that can
+visualize and actuate running simulations. TinyViz has an extensible
+"plugin" interface, so users can write new     visualization plugins
+and load them into the TinyViz     infrastructure.</p>
+<p>TinyOS 1.1 has improved support for accessing non-volatile     flash
+memory, through the <code>ByteEEPROM</code> region-based and <a
+ href="matchbox.pdf"><code>Matchbox</code></a> file system based
+interfaces. <span style="font-family: monospace;">Matchbox</span> is in <code>lib/FS</code>.
+There is also support for high-frequency sampling; depending on the
+platform and other factors, 3-5kHz ADC sampling to the flash (for later
+retrieval) is possible. This is found in <code>apps/HighFrequencySampling</code>.</p>
+<p><a href="tinysec.pdf">TinySec</a>, a networking stack that
+includes cryptographic integrity and confidentiality, is included in <code>lib/TinySec</code>.</p>
+<p>The ADC component (<code>ADCM</code>) now provides fair-share
+access to different ports. It handles outstanding requests in a
+round-robin fashion, preventing one high-frequency sampler from
+dominating all others. There is also an alternative ADC
+implementation, <code>ADCRef</code>, which produces values taken in
+reference to the system voltage (since ADC readings depend on this).</p>
+<p><code>sendVarLenPacket</code> has been removed from
+GenericComm. Since the UART now uses a framing protocol, this
+functionality is not longer feasible.</p>
+	
+<p>Using nesC's concurrency support, many TinyOS components have
+been modified or rewritten to remove race conditions. System
+services should be correspondingly more stable.</p>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">	<a
+ name="tools">Tools</a></font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>nesC now includes support for <a href="nesc/debugging.html">on-mote
+debugging</a> using JTAG.</p>
+<p><a href="mcenter.html" style="font-family: monospace;">MessageCenter</a>,
+developed by     Vanderbilt, is now part of the standard TinyOS
+toolchain. <span style="font-family: monospace;">MessageCenter</span>
+has several subtools. One allows you to     dynamically specify packet
+formats for reception and     transmission. MessageInjector, a TinyOS
+1.0 that loads all MIG     generated message classes into a GUI for
+setting fields and     transmitting, has been incorporated into <span
+ style="font-family: monospace;">MessageCenter</span>. <span
+ style="font-family: monospace;">MessageCenter</span> is in the Java
+package <code>net.tinyos.mcenter</code>.</p>
+<p>The Chipcon radio has a wide range of available     frequencies. The
+tool <a href="mica2radio/CC1000.html"><code>channelgen</code></a>,
+given a desired     frequency, provides the corresponding values to set
+the radio at.<br>
+</p>
+<p>The <span style="font-family: monospace;">uisp</span> tool now
+supports the new serial-based programming board (mib510) and
+ethernet-based reprogramming (EPRB). Additionally, the standard <a
+ href="../apps/Makerules"><span style="font-family: monospace;">Makerules</span></a>
+file can be told to invoke uisp with appropriate parameters for these
+various programming boards, as explained <a
+ href="tutorial/programmers.html">here</a>.<br>
+</p>
+<p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><nobr><b><font face="arial,helvetica">Systems</font></b></nobr></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>TinyOS 1.1 includes updated versions of <a href="tinydb.pdf">TinyDB</a>
+and <a href="bombilla.pdf">Mat&eacute;</a> as separate packages.<br>
+</p>
+<p>&nbsp;The contrib package includes a number of&nbsp; subsystems from
+other groups. See the README file in each subdirectory of contrib for
+more information.<br>
+<!-- There is no index.html, but maybe there will be in the near future so 
+        I'll merely comment this out. --><!--    <b><font size=4><a href="index.html">Index &gt;</a></font></b> --> </p>
+</body>
+</html>

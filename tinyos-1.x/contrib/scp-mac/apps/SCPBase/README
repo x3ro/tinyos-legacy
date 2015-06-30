@@ -1,0 +1,79 @@
+TOSNIC over SCP-MAC
+From Div7wiki
+
+This page describes how to set up and use TOSNIC (the successor to
+Hostmote/MoteNIC) with SCP-MAC as the MAC layer. So far this has only
+been tested with Mica2 motes.
+Contents
+
+
+    * 1 Basic EmStar Setup
+    * 2 Compiling SCPBase
+    * 3 Running TOSNIC
+    * 4 Interpreting LEDs
+
+
+Basic EmStar Setup
+
+You will first need to do the following (which are not specific to this
+application):
+
+    * Download and compile EmStar
+    * Download and unpack the latest version of SCP-MAC into a
+    * subdirectory of the EmStar tos-contrib directory
+    * Insert the fusd.ko kernel module
+    * Run fusdd as root 
+
+
+Compiling SCPBase
+
+SCPBase is the mote-side application which communicates with the TOSNIC
+application on the host side. You will find it in I-LENSE CVS under
+ilense/tos/commstack/apps/SCPBase. If SCPMAC_ROOT is where you placed
+scp-mac in the EmStar tos-contrib directory, then SCPBase will be in
+SCPMAC_ROOT/apps/SCPBase.
+
+Currently, due to a bug in SCP-MAC, you will have to perform a small
+workaround to get serial communications working properly with
+SCPBase. Find the file
+SCPMAC_ROOT/tos/platform/mica2/HPLUART0M.nc. Rename this file to
+something else (like HPLUART0M.nc.bak). Renaming this file prevents you
+from using SCP-MAC UART debugging, but you can't do that an TOSNIC at
+the same time anyway - just remember to put it back if you need
+something else with UART debugging in the future.
+
+Next, look at the Makefile in SCPMAC_ROOT/apps/SCPBase. Make sure that
+SCPMAC_ROOT and TOSNIC_ROOT are pointing to the right directories (they
+should be by default). Then, look at the config.h file and modify any
+SCP-MAC settings that you wish to customize. Then, simply make mica2,
+and make install.<id>, and your mote is ready.
+
+Running TOSNIC
+
+Once you have compiled EmStar, the tosnicd application is found in
+emstar/obj.<platform>/mote/. Tosnicd requires the fusd module to be
+inserted and fusdd to be running. Run tosnicd (as root or using sudo)
+with the following options:
+
+ ./tosnicd --port <device> --tosbase 512 --node_id <id>
+
+where <device> is replaced by the serial port that the mote is attached
+to, and <id> is the id that you passed to make install (this can be
+omitted if /etc/id exists).
+
+After this is running, the /dev/link/mote devices are available for use
+by TOSNIC-aware applications.
+
+Interpreting LEDs
+
+SCPBase toggles the three LEDs for status information:
+
+    * Yellow: Serial communication
+    * Green: Radio communication
+    * Red: Errors 
+
+If an application attempts to send multiple packets before SCP-MAC has
+acquired a schedule, you may see rapid blinking of the red and yellow
+lights until the schedule is acquired and the packets are sent. Red LED
+errors are usually not fatal - the most common red LED event indicates
+that a packet failed to send and will be retried. 

@@ -1,0 +1,3 @@
+SENSORBOARD=micawb
+include ../Makeinclude
+

@@ -1,0 +1,16 @@
+<VM NAME="FirecrackerVM" DESC="Two timers and link quality estimator information, for examining how traffic affects estimators." DIR="/root/src/tinyos-1.x/apps/Firecracker">
+<SEARCH PATH="/root/src/tinyos-1.x/tos/lib/VM/opcodes">
+<SEARCH PATH="/root/src/tinyos-1.x/tos/lib/VM/contexts">
+<SEARCH PATH="/root/src/tinyos-1.x/tos/lib/VM/languages">
+<SEARCH PATH="/root/src/tinyos-1.x/tos/sensorboards/micasb">
+<LANGUAGE NAME="tscript">
+<PRIMITIVE NAME="putled">
+<PRIMITIVE NAME="bclear">
+<PRIMITIVE NAME="cast">
+<PRIMITIVE NAME="id">
+<PRIMITIVE NAME="uart">
+<PRIMITIVE NAME="rand">
+<PRIMITIVE NAME="route">
+<CONTEXT NAME="Timer1">
+<CONTEXT NAME="Once">
+

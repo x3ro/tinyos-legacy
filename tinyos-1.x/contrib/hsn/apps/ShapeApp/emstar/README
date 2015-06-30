@@ -1,0 +1,47 @@
+
+
+- From the devel directory in emstar, copy/link the shaped dir:
+  $EMSTAR_ROOT/devel/shaped -> ShapeApp/emstar/shaped
+
+- Add the followign line to $EMSTAR_ROOT/devel/BUILD:
+  include {shaped}
+
+- Apply the emtos.patch file while in the $EMSTAR_ROOT/mote dir.
+  This patch provides:
+	- the patches to mote/BUILD to build the shape client
+	  into the emtos applications
+	- an simple API to the stargate button for emtos apps
+	- the support to use the leds on the stargate as the
+	  mote leds using the --leds command
+
+- Edit $EMSTAR_ROOT/mote/BUILD to correct location of ShapeApp.
+  This needs to be set to let emstars make to know to go build the
+  emtos ShapeApp binary.
+
+- Copy shapeclient.c to $EMSTAR_ROOT/mote/libmote
+  This is the client code that talk to shaped
+
+- Copy shaped.h to $EMSTAR_ROOT/mote/emtos
+  Prototypes for the above
+
+- Copy the tdb.run file to any directory you want. You _MUST_ edit
+  this file and set the paths to the programs correctly.
+
+- Setup your emstar build environment for the Stargate or pc, and
+  compile away.
+
+- run emrun and give it the tdb.run file as an argument
+
+
+RANDOM NOTES and things you should know:
+
+- The patch sets your default mote POT setting to 3. You may want to
+  set it higher.
+
+- Putting the stargate in a metal box, and using a mote with a full
+  sized antenna help with the nasty asymetric link that you get with
+  all the motes set at such low POT settings. The Stargates initial
+  POT is set to 3.
+
+
+

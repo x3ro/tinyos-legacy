@@ -1,0 +1,78 @@
+#!/usr/bin/perl -w
+use strict;
+
+if( @ARGV < 1 ) {
+  print "usage: nesc_deps [platform] (component_name,module_name,include)\n";
+  exit 0;
+}
+
+my ($platform,$component) = @ARGV;
+
+my $depsfile = "build/$platform/nesc_deps.txt";
+
+system( "make $platform deps" ) == 0
+  or die "failed to create $depsfile with \"make $platform deps\"\n"
+  if ! -f $depsfile;
+
+my $fh;
+open( $fh, "<$depsfile" ) or die "reading $depsfile: $!\n";
+my $text = do{local $/;<$fh>};
+close $fh;
+
+my %tree = ();
+my $supn = 0;
+
+for my $block (split /\n\n/, $text) {
+  my @files = split /\n/, $block;
+  my $dep = shift @files;
+  my $name = depname($dep);
+  my $subn = 0;
+  my %deps = map { my $n=depname($_); $n => { name=>$n, file=>$_, n=>++$subn } } @files;
+  $tree{$name} = { name=>$name, file=>$dep, deps=>\%deps, n=>++$supn };
+}
+
+my $width = 0;
+for my $name (keys %tree) {
+  $width = length $name if length $name > $width;
+}
+
+if( defined $component ) {
+
+  if( ! defined $tree{$component} ) {
+    print "The system does not depend on $component.\n";
+    print "... try \"nesc_deps $platform\" for a list of system dependencies.\n";
+    exit 0;
+  }
+
+  my @revdeps = grep { exists $tree{$_}->{deps}{$component} } keys %tree;
+
+  print "$component, platform $platform:\n";
+  printdeps( $component );
+
+  print "\nThe following immediately depend on $component:\n";
+  printdeps( @revdeps );
+
+  print "\n$component immediately depends on the following:\n";
+  printdeps( keys %{$tree{$component}->{deps}} );
+
+} else {
+
+  print "The system cumulatively depends on the following:\n";
+  printdeps( keys %tree );
+
+}
+
+sub printdeps {
+  for my $tt (sort @_) {
+    printf( "  %-${width}s  %s\n", $tt, $tree{$tt}->{file} );
+  }
+  print "  nothing\n" if @_ == 0;
+}
+
+sub depname {
+  my ($file) = @_;
+  $file =~ s/^.*\///;
+  $file =~ s/\.nc$//;
+  return $file;
+}
+

@@ -1,0 +1,58 @@
+README for Heterogeneous Sensor Routing (HSN) TraceRouteTest Application
+Contact: Mark Yarvis at mark.d.yarvis@intel.com
+
+1. Introduction
+
+   This TraceRouteTest application tests the basic functionality of the
+   traceroute, DSDV routing, and setting modules.
+
+2. Functionality
+
+   In the default configuration, each mote sends back a traceroute packet
+   to the sink node every 5 seconds along with 1 byte of piggyback information.
+   As a packet multi-hops back to the sink node, each intermediate
+   node along the path adds its node ID (one byte) into the traceroute
+   payload. The sink node receives the complete traceroute message, adds
+   the framing header, and sends it to the UART. If the sink node receives a
+   packet from the UART, it forwards the packet to the radio.
+
+   You can configure parameters through the Settings GUI, or retrieve the
+   current parameter settings from traceroute piggyback. Please see 
+   tos/lib/README and tools/packet_tools/README for details.
+
+   A toggle of the green LED indicates the mote attempted to send a
+   packet, the red LED shows the mote received a packet, and the yellow LED
+   shows the mote received a setting message. All three LEDs flash when
+   switching on the mote.
+
+3. How to Use
+
+   Suppose you are using 3 motes.
+
+   1) Compile and install one sink node by 'make SINK_NODE=1 mica install.0'
+   2) Compile and install the other 2 motes by 'make mica install.x' where x
+      is the node ID (must be unique and other than 0). A TR_SEND_RATE=N can
+      also be added to specify the trace route sending rate (default value is
+      5 seconds).
+   3) Attach the sink node on the programming board and connect it to the PC.
+   4) Compile the uart server by 'make' in tools/packet_tools on the same PC.
+   5) Run uart server by './uartserver COMx 9001' where x is the serial port
+      number.
+   6) Wait for a few seconds for the route update message to sync up and see the
+      traceroute raw packets printed by the uart server. You can adjust the
+      route update interval by using the Settings GUI.
+   7) You can run the packet parser by 'tclsh parse_and_print_packets.tcl'
+      in tools/packet_tools.
+   8) You can run the Settings GUI by 'wish settings_gui_nesc.tcl' in the same 
+      directory.
+
+4. Notes
+
+   You can configure the mote to send back multiple settings within
+   piggyback by the Settings GUI, but you must add 'TR_PIGGYBACK_LEN=x'
+   in steps 1 and 2, where x is the total length of the maximal settings
+   you might want.  However, the parse_and_print tool does not interpret
+   them, since it was hard-coded to only interpret 1-byte piggyback settings.
+   Refer to doc/hsn_arch.pdf for the format of the settings message
+   and tools/packet_tools/README for how to use the Settings GUI.
+

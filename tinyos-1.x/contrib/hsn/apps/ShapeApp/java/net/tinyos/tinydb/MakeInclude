@@ -1,0 +1,87 @@
+TOS = ../../../../$(BASEDIR)
+JAVADIR = $(TOS)../tools/java/net/tinyos/tinydb
+PACKAGE = net.tinyos.tinydb
+INCLUDES += -I $(TOS)/lib/Util -I $(TOS)/lib/Commands -I $(TOS)/lib/Attributes -I $(TOS)/lib/TinyDB -I $(TOS)/sensorboards/micasb -I $(TOS)/lib/TinyDB/Aggregates -I$(TOS)/lib/FS/
+
+LOCAL_SRC = $(wildcard *.java) $(wildcard ./experiment/*.java)
+MAIN_SRC = $(wildcard $(JAVADIR)/*.java) $(wildcard $(JAVADIR)/topology/*.java) $(wildcard $(JAVADIR)/tests/*.java) 
+FILTER_SRC = $(JAVADIR)/TinyDBNetwork.java $(JAVADIR)/TinyDBMain.java
+SRC = $(filter-out $(FILTER_SRC), $(MAIN_SRC)) $(LOCAL_SRC)
+JAVA = $(SRC)
+CLASSES = $(JAVA:.java=.class)
+
+all: message util sf sim QueryResultMsg.java QueryMsg.java UartMsg.java CommandMsg.java StatusMsg.java NetworkMsg.java aparser $(JAVA) $(CLASSES)
+
+# general rule for java files
+%.class: %.java
+	javac $<
+
+QueryResultMsg.java:
+	$(MIG) $(INCLUDES) -java-classname=$(PACKAGE).QueryResultMsg $(TOS)/../apps/TinyDBApp/TinyDBApp.nc QueryResult >$(JAVADIR)/$@
+
+QueryMsg.java:
+	$(MIG) $(INCLUDES) -java-classname=$(PACKAGE).QueryMsg $(TOS)/../apps/TinyDBApp/TinyDBApp.nc QueryMessage >$(JAVADIR)/$@
+
+NetworkMsg.java:
+	$(MIG) $(INCLUDES) -java-classname=$(PACKAGE).NetworkMsg $(TOS)/../apps/TinyDBApp/TinyDBApp.nc NetworkMessage >$(JAVADIR)/$@
+
+UartMsg.java:
+	$(MIG) $(INCLUDES) -java-classname=$(PACKAGE).UartMsg $(TOS)/../apps/TinyDBApp/TinyDBApp.nc UartMsg >$(JAVADIR)/$@
+
+CommandMsg.java:
+	$(MIG) $(INCLUDES) -java-classname=$(PACKAGE).CommandMsg $(TOS)/../apps/TinyDBApp/TinyDBApp.nc CommandMsg >$(JAVADIR)/$@
+
+StatusMsg.java:
+	$(MIG) $(INCLUDES) -java-classname=$(PACKAGE).StatusMsg $(TOS)/../apps/TinyDBApp/TinyDBApp.nc StatusMessage >$(JAVADIR)/$@
+
+MultiHopMsg.java:
+	$(MIG) $(GSKINCLUDES) -java-classname=$(PACKAGE).MultiHopMsg $(TOS)/../apps/GSK/GSK.nc MultihopMsg >$(JAVADIR)/$@
+
+
+#topology: $(wildcard topology/*.java)
+#%	javac $<
+
+message:
+	cd $(JAVADIR)/../message
+	make -C $(JAVADIR)/../message -f Makefile
+
+util:
+	cd $(JAVADIR)/../util
+	make -C $(JAVADIR)/../util -f Makefile
+
+sim:
+	cd $(JAVADIR)/../sim
+	make -C $(JAVADIR)/../sim -f Makefile
+
+sf:
+	cd $(JAVADIR)/../sf
+	make -C $(JAVADIR)/../sf -f Makefile
+
+text:
+	java net.tinyos.tinydb.TinyDBMain -text
+
+gui:
+	java net.tinyos.tinydb.TinyDBMain -gui
+
+run:
+	java net.tinyos.tinydb.TinyDBMain
+
+aparser:
+	cd $(JAVADIR)/parser
+	make -C $(JAVADIR)/parser -f Makefile
+#	javac parser/senseParser.java
+
+clean:
+	rm -rf *.class
+	rm -rf ./experiment/*.class
+	cd $(JAVADIR)
+	rm -f QueryMsg.java QueryResultMsg.java UartMsg.java CommandMsg.java StatusMsg.java MultiHopMsg.java NetworkMsg.java
+	rm -rf $(JAVADIR)/*.class
+	rm -rf $(JAVADIR)/topology/*.class
+	rm -rf $(JAVADIR)/tests/*.class
+	make -C $(JAVADIR)/parser clean
+	make -C $(JAVADIR)/../sf clean
+	make -C $(JAVADIR)/../message clean
+	make -C $(JAVADIR)/../util clean
+#	make -C $(JAVADIR)/../sim clean
+

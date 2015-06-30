@@ -1,0 +1,74 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Phil Levis <pal@cs.berkeley.edu>
+ *
+ * This component implements a Beacon-LESS ad-hoc routing protocol. The
+ * nodes automatically construct a routing tree rooted at a base station.
+ * Route determination is based on hops from the base station; nodes try
+ * to minimize the number of hops. Hop-count information is included in
+ * every data message sent. By looking at other node's traffic, nodes can
+ * determine if there is a shorter route. The tree is bootstrapped by
+ * periodic empty data messages sent by the base station to itself with a
+ * hop count of zero. BLESS_LOUD.c contains greater details.
+ *
+ * BLESS_LOUD_ACTIVE returns whether the mote has a parent, and so whether
+ * its networking is active (will send).
+ *
+ */     
+
+TOS_MODULE BLESS_LOUD;
+JOINTLY IMPLEMENTED_BY BLESS_LOUD;
+
+ACCEPTS{
+	char BLESS_LOUD_INIT(void);
+	char BLESS_LOUD_START(void);
+	char BLESS_LOUD_SEND(char* data, char len);
+	char BLESS_LOUD_ACTIVE(void);
+};
+
+HANDLES{
+	TOS_MsgPtr DATA_MSG(TOS_MsgPtr data);
+	void BLESS_LOUD_SUB_CLOCK(void);
+	char BLESS_LOUD_SEND_DONE(TOS_MsgPtr data);
+};
+
+USES{
+	char BLESS_LOUD_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	char BLESS_LOUD_SUB_POWER(char mode);
+	char BLESS_LOUD_SUB_INIT();
+	char BLESS_LOUD_SUB_CLOCK_INIT(char interval, char scale);
+	char BLESS_LOUD_DATA_INIT();
+	char BLESS_LOUD_SUB_READ();
+	char PHOTO_PWR(char mode);
+	char BLESS_LOUD_LED1_OFF();
+	char BLESS_LOUD_LED1_ON();
+	char BLESS_LOUD_LED1_TOGGLE();
+	char BLESS_LOUD_LED2_OFF();
+	char BLESS_LOUD_LED2_ON();
+	char BLESS_LOUD_LED2_TOGGLE();
+	char BLESS_LOUD_LED3_OFF();
+	char BLESS_LOUD_LED3_ON();
+	char BLESS_LOUD_LED3_TOGGLE();
+	char BLESS_LOUD_SUB_LED_INIT();
+};
+

@@ -1,0 +1,3 @@
+COMPONENT=SingleHopTest
+include ../Makerules
+

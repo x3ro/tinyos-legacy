@@ -1,0 +1,147 @@
+--- hcitool.c.org	2003-02-27 15:35:07.000000000 +0100
++++ hcitool.c	2003-02-27 16:09:40.000000000 +0100
+@@ -472,6 +472,136 @@
+ 	close(dd);
+ }
+ 
++/* Send arbitrary ACL data */
++
++static struct option acl_options[] = {
++	{"help",    0,0, 'h'},
++	{0, 0, 0, 0}
++};
++
++static char *acl_help = 
++	"Usage:\n"
++	"\tacl <handle> <flags> <parameters>\n"
++	"Example:\n"
++	"\tacl 0x01 0x00 0x41 0x42 0x43 0x44\n";
++
++int hci_send_acl(int dd, uint16_t handle, uint8_t flags, 
++		 uint8_t dlen, void *param)
++{
++        uint8_t type = HCI_ACLDATA_PKT;
++        hci_acl_hdr hc;
++        struct iovec iv[3];
++        int ivn;
++
++        hc.handle = htobs(acl_handle_pack(handle, flags));
++        hc.dlen= dlen;
++
++        iv[0].iov_base = &type;
++        iv[0].iov_len  = 1;
++        iv[1].iov_base = &hc;
++        iv[1].iov_len  = HCI_ACL_HDR_SIZE;
++        ivn = 2;
++
++        if (dlen) {
++                iv[2].iov_base = param;
++                iv[2].iov_len  = dlen;
++                ivn = 3;
++        }
++
++        while (writev(dd, iv, ivn) < 0) {
++                if (errno == EAGAIN || errno == EINTR)
++                        continue;
++                return -1;
++        }
++        return 0;
++}
++
++static void cmd_acl(int dev_id, int argc, char **argv)
++{
++        char buf[HCI_MAX_ACL_SIZE], *ptr = buf;
++        struct hci_filter flt;
++        hci_event_hdr *hdr;
++        int i, opt, dd;
++        int len = 0;
++        uint16_t handle; // These names are wrong
++        uint8_t  flags; // These names are wrong
++
++
++        for_each_opt(opt, acl_options, NULL) {
++                switch(opt) {
++                default:
++                        printf(acl_help);
++                        return;
++                }
++        }
++        argc -= optind;
++        argv += optind;
++
++
++
++
++        if (argc < 2) {
++                printf(acl_help);
++                return;
++        }
++
++
++        if (dev_id < 0)
++                dev_id = hci_get_route(NULL);
++
++
++        errno = 0;
++
++
++        handle = (uint16_t) strtol(argv[0], NULL, 16);
++        flags  = (uint8_t) strtol(argv[1], NULL, 16);
++
++        for (i = 2, len = 0; i < argc && len < sizeof(buf); i++, len++)
++                *ptr++ = (uint8_t) strtol(argv[i], NULL, 16);
++
++        dd = hci_open_dev(dev_id);
++        if (dd < 0) {
++                perror("Device open failed");
++                exit(EXIT_FAILURE);
++        }
++
++	/* Setup filter */
++        hci_filter_clear(&flt);
++        hci_filter_set_ptype(HCI_EVENT_PKT, &flt);
++        hci_filter_all_events(&flt);
++        if (setsockopt(dd, SOL_HCI, HCI_FILTER, &flt, sizeof(flt)) < 0) {
++                perror("HCI filter setup failed");
++                exit(EXIT_FAILURE);
++        }
++
++        printf("< HCI Command: handle 0x%04x, flags 0x%02x, dlen %d\n", handle,
++	       flags, len);
++        hex_dump("  ", 20, buf, len); fflush(stdout);
++
++        if (hci_send_acl(dd, handle, flags, len, buf) < 0) {
++                perror("Send failed");
++                exit(EXIT_FAILURE);
++        }
++
++	// Huh?
++        len = read(dd, buf, sizeof(buf));
++        if (len < 0) {
++                perror("Read failed");
++                exit(EXIT_FAILURE);
++        }
++
++        hdr = (void *)(buf + 1);
++        ptr = buf + (1 + HCI_EVENT_HDR_SIZE);
++        len -= (1 + HCI_EVENT_HDR_SIZE);
++
++        printf("> HCI Event: 0x%02x plen %d\n", hdr->evt, hdr->plen);
++        hex_dump("  ", 20, ptr, len); fflush(stdout);
++
++        hci_close_dev(dd);
++        return;
++}
++
++
+ /* Send arbitrary HCI commands */
+ 
+ static struct option cmd_options[] = {
+@@ -1095,6 +1225,7 @@
+ 	{ "name", cmd_name, "Get name from remote device"        },
+ 	{ "info", cmd_info, "Get information from remote device" },
+ 	{ "cmd",  cmd_cmd,  "Submit arbitrary HCI commands"      },
++	{ "acl",  cmd_acl,  "Send arbitrary ACL data"            },
+ 	{ "con",  cmd_con,  "Display active connections"         },
+ 	{ "cc",   cmd_cc,   "Create connection to remote device" },
+ 	{ "dc",	  cmd_dc,   "Disconnect from remote device"      },

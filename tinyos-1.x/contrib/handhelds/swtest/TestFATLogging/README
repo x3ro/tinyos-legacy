@@ -1,0 +1,21 @@
+similar to SixAxisTransmitter (with just three axes) this app uses
+adc->dma to read the accelerometer; the tcp/ip stack in support of a
+telnet server and ntp; the new fat fs, which uses the sd as physical
+storage.
+
+commands from the telnet prompt tell it to
+
+- "store" to a particular directory with a running numerical suffix
+for each hour of logging; files in each subdir are numbered
+sequentially (running uninterrupted for each session for now).
+- "conv" at a particular interval in milliseconds, e.g. 20 = 20 ms =
+50 hz.
+- "stop" stops storage
+- "stopconv" halts the adc and dma transfer
+
+file time stamps are localized; if the app is on the network -- it won't do
+anything without it, actually -- the times are corrected by ntp every
+10 minutes.  without ntp, a time seed should be supplied by the app.
+
+
+

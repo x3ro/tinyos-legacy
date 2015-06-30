@@ -1,0 +1,37 @@
+$Id: README.DS2411,v 1.1.1.1 2007/11/05 19:10:38 jpolastre Exp $
+
+README for DS2411
+Author/Contact: tinyos-help@millennium.berkeley.edu
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+Description:
+
+The DS2411 is a serial ID that provides a distinct, unique 48-bit number.
+It is intended to be used in conjunction with a 16-bit IEEE OUI to produce
+a unique 64-bit mote identifier number.
+
+The DS2411 uses the 1-Wire protocol.  This module has been abstracted to
+live in the to-exist tos/chips/ heirarchy.  The following interfaces,
+configuration, and implementation files are intended to live in
+tos/chips/:
+
+    DS2411.nc
+    DS2411C.nc
+    DS2411M.nc
+    DS2411Pin.nc
+
+DS2411 defines the interface to the chip, and DS2411M implements the
+(hopefully) platform-independent chip-logic.  DS2411Pin defines a semantic
+interface for iteracting with the DS2411 hardware IO pin.  DS2411C in part
+wires to the DS2411PinC configuration presumably provided by the platform.  
+
+The following configuration and module files must be provided by the
+platform:
+
+    DS2411PinC.nc
+    DS2411PinM.nc
+
+DS2411PinC and DS2411PinM implement the basic hardware semantics for
+interacting with the DS2411 at the pin level.  The more complex DS2411
+logic is built given this minimal platform specific implementation.
+

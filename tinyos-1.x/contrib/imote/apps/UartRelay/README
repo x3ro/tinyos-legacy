@@ -1,0 +1,65 @@
+/*
+ * Copyright (c) 2004, Intel Corporation
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * Neither the name of the Intel Corporation nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+README for UartRelay
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+UartRelay was copied from GenericBase.  Update description.
+
+Description:
+
+UartRelay is a PC to sensor network bridge. Packets received from a
+PC from the UART are sent out on the radio, and packets received from
+the radio are sent out on the UART. This allows a PC to monitor
+network traffic and inject packets into a network.
+
+By default, GenericBase checks CRCs. Packets sent to it over the UART
+must set the CRC field of the packet to 1, or GenericBase will not
+successfully receive the packet.
+
+When GenericBase sends a packet to the UART (receives from the radio),
+it toggles the green LED. When GenericBase sends a packet to the radio
+(receives from the UART), it blinks the red LED.
+
+If a send fails, GenericBase toggles the yellow LED.
+
+GenericBase only receives and sends packets addressed to its AM
+group. It receives and sends packets to any mote ID.
+
+Tools:
+
+Many tools use GenericBase as a bridge to send a receive packets from motes.
+
+Known bugs/limitations:
+
+Because the UART layer has no framing protocol, extra bytes over the
+UART can cause the packet layer to become unresponsive, as subsequent
+packets are at unexpected offsets. 

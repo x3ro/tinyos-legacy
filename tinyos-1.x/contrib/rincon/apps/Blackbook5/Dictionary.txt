@@ -1,0 +1,113 @@
+Notes on using Blackbook and Dictionary files
+@author David Moss - dmm@rincon.com
+
+CALLING BLACKBOOK COMMANDS
+Following the standard TinyOS model, Blackbook will only handle one request at a
+time.  It does this through the use of a Blackbook system wide state machine,
+provided by the State library component.  It can only handle one request at a 
+time because there is only one external flash chip on the mote, and it can only
+do one operation at a time.
+
+If one of your application components makes a call to Blackbook, Blackbook will
+block all other calls until the first command has been completely executed and
+an event is returned.  Calling a command in Blackbook while Blackbook is busy
+will return FAIL.
+
+Therefore, if you believe your application may make multiple simultaneous calls
+to Blackbook, it's best to put these requests inside a repetetive task, such as:
+
+task void openWriteFile() {
+  if(call BFileWrite.open("MyFile", 0x1000) != SUCCESS) {
+    post openWriteFile();
+  }
+}
+
+This way, all of your calls to Blackbook will go through serially and the
+Blackbook code can finish executing in the background.  Just be careful that
+you know your commands will actually succeed, or your program code could go into
+an infinite loop.
+
+
+DICTIONARY OPERATION
+I get many questions about Dictionary files and how they work.  First, let's
+talk about regular files.
+
+Regular files (opened with BFileWrite) will always look at the minimum size
+you request each time you open the file, and make the total data portion of the
+file at least that size.  If you open a regular file for the first time with
+a minimum size of 0x100 (resulting in an actual size of 0x1E8 because of 
+metadata and page boundary considerations), then close and open that file again
+with a minimum size of 0x1000 - the file will grow to be at least 0x1000 bytes
+long.  
+
+Dictionary files don't do this.  The first time you open a dictionary file 
+dictates what that file size is going to be throughout its entire lifetime.
+If you open a Dictionary file for the first time with 0x100 bytes minimum,
+and then close and open it again requesting at least 0x1000 bytes minimum, the 
+Dictionary file size will still be original size it was created with.  You 
+cannot change the file size of a dictionary file after you have created it.
+In other words, the Dictionary file is created with a footprint on flash
+that doesn't change.  The data inside and the location of the file's footprint
+on flash can change as you insert and remove key-value pairs, but the physical 
+size won't.
+
+BFileDir is pretty ineffective on Dictionary files, except to find out about
+their footprint size - which is getReserveLength(<dictionary filename>).  To
+find the amount of valid data (key metadatas + value sizes) in a dictionary
+file, you'll need to access the BDictionary.getFileLength() interface on an open
+dictionary file.
+
+Because flash can't be erased except in large units, the Dictionary file
+just retains all old information - even key-value pairs you removed or
+updated.  Each time you update a key-value in a Dictionary file, the Dictionary
+file simply invalidates the old one and adds the new one to the end of
+the valid portion of the Dictionary file.  When enough insertions are made
+to fill up the physical footprint of the existing dictionary file, that whole
+dictionary file is marked invalid and a new footprint is created on flash. 
+All the valid keys from the old file are copied into the new file.  This is
+transparent to the user - all you see is your new value being inserted normally.
+
+When the entire flash gets filled, BClean - our garbage collector - comes
+through and erases each erase unit that is completely filled with invalid
+data.  This is done automatically, but you can also access the BClean interface
+to check the flash periodically and clean it if it is over 75% full, or force
+the flash to be cleaned no matter how clean it is.
+
+Therefore, with a Dictionary file from an application standpoint, you have an
+infinite amount of times you can update keys on flash.
+
+You do not, however, have an infinite number of valid key-value pairs you can
+insert in your file.  This is because your footprint is a static size.  Once
+it's completely filled with valid data, there's nothing to erase so nothing
+can be added.  
+
+
+
+COPYING DATA OUT OF A DICTIONARY FILE
+There are two methods to copy data out:
+  * Traverse through the Dictionary file using getFirstKey() and getNextKey(..)
+    commands.
+    
+  * Open the Dictionary file using BFileRead, copy it to its destination, and
+    use a Dictionary file parser to extract data.  This is sometimes useful
+    when copying a Dictionary file directly from mote-to-mote, but
+    will use more packets to get the data through. 
+    
+The structure of the data portion of a binary Dictionary file is as follows:
+<Dictionary Header Byte - 0xD1C7>
+<keymeta><value><keymeta><value>...<0xFF 0xFF 0xFF fill bytes ...>
+
+Where the keymeta struct can be found in BDictionary.h.
+
+When parsing a dictionary file, key-value pairs are located and the
+write position lands on the first available fill byte at the end.  To speed
+things up and decrease flash access time, a cache is kept in RAM of the last
+X number of keys in the file.  
+
+Keeping Dictionary files rather small will increase access time, because 
+sometimes the Dictionary file needs to be traversed by the BDictionary
+component to find where to obtain/put information.  Large Dictionary files
+make this process take a long time, but increasing the cache size can
+guard against this.
+
+

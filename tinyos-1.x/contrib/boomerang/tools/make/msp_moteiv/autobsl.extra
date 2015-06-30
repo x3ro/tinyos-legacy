@@ -1,0 +1,11 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: autobsl.extra,v 1.1.1.1 2007/11/05 19:11:22 jpolastre Exp $
+
+PROGRAM = autobsl
+BUILD_DEPS = autobsl_run
+AUTOBSL ?= 1
+AUTOPLATFORM ?= $(PLATFORM)
+
+autobsl_run: FORCE
+	(unset MAKELEVEL MAKEFLAGS; $(MOTEIV_DIR)/tools/make/msp_moteiv/autoprog.pl -id $(AUTOBSL) -cmd "make $(AUTOPLATFORM) reinstall,__ID__ bsl,__DEV__")
+

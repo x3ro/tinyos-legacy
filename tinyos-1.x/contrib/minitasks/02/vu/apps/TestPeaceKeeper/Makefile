@@ -1,0 +1,2 @@
+COMPONENT=TestPeaceKeeper
+include ../Makerules

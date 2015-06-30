@@ -1,0 +1,23 @@
+$Id: README.LedsIntensity,v 1.2 2004/05/10 07:25:29 cssharp Exp $
+
+README for LedsIntensity
+Author/Contact: tinyos-help@millennium.berkeley.edu
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+Description:
+
+LedsIntensity allows the LED's to display different intensity levels.  The
+interface allows the specification of 256 intensities, which may not all
+be unique, but which should be nearly-linear: 0 is full-off, 127 is
+half-intensity, and 255 is full-on.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+The current implementation maps to 32 linear intensity levels.  It is CPU
+intensive while running, constantly posting tasks to produce the
+appropriate on/off dithering per LED.
+

@@ -1,0 +1,344 @@
+#!@pathperl@
+#
+# Copyright (c) 2004-2005 Intel Corporation
+# All rights reserved.
+#
+# This file is distributed under the terms in the attached INTEL-LICENSE     
+# file. If you do not find these files, copies can be found by writing to
+# Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA, 
+# 94704.  Attention:  Intel License Inquiry.
+
+
+use Socket;
+use IO::Handle;
+
+$BROADCAST = 0xffff;
+
+# Predefined expansions
+$attribute_expansions{"avg"} = "epoch count sum";
+$attribute_expansions{"min"} = "epoch value";
+$attribute_expansions{"max"} = "epoch value";
+
+add_incdir(".");
+
+for ($i = 0; $i <= $#ARGV; $i++) {
+    $_ = $ARGV[$i];
+    if (/^-/) {
+	if (/^-h$/ || /^--help$/) {
+	    usage();
+	}
+	elsif (/^-I$/ && $i < $#ARGV) {
+	    add_incdir($ARGV[++$i]);
+	}
+	elsif (/^-I(.+)$/) {
+	    add_incdir($1);
+	}
+	else {
+	    usage();
+	}
+    }
+    else {
+	if (!defined($action)) {
+	    $action = $_;
+	}
+	elsif (!defined($query)) {
+	    $query = $_;
+	}
+	else {
+	    usage();
+	}
+    }
+}
+
+usage() unless $action;
+
+$tosdir=`ncc -print-tosdir`;
+$tosdir =~ s/(\n|\r)//g;
+add_incdir("$tosdir/lib/VM/languages/tinysql/lib");
+$tsqlcc = "tinysqlcc " . join(" ", @incdirs);
+
+$tmpf = "/tmp/tinysql.$$";
+$qfile = "$ENV{HOME}/.tinysql_query";
+
+sub END {
+    unlink $tmpf;
+}
+
+if ($action eq "start") {
+    $install = 1;
+    $mote_install = 1;
+    $log = 1; 
+}
+elsif ($action eq "log") {
+    $display = 1;
+    $log = 1;
+}
+elsif ($action eq "compile") {
+    $compile = 1;
+}
+elsif ($action eq "install") {
+    $install = 1;
+    $mote_install = 1;
+}
+elsif ($action eq "reinstall") {
+    $mote_install = 1;
+    $display = 1;
+}
+elsif ($action eq "display") {
+    $display = 1;
+}
+elsif ($action eq "stop") {
+    $stop = 1;
+}
+else {
+    usage();
+}
+
+if ($compile) {
+    exit 2 if system("echo \"$query\" | $tsqlcc > $tmpf");
+    system("cat $tmpf");
+    exit 2 if system("motlle-load -c $tmpf");
+}
+
+if ($install) {
+    exit 2 if system("echo \"$query\" | $tsqlcc > $qfile");
+}
+
+if ($display) {
+    $query = current_query();
+    print "#QUERY: $query\n" if $query;
+    print "No active query\n" if !$query;
+}
+
+if ($mote_install) {
+    if (-f $qfile) {
+	exit 2 if system("motlle-load $qfile");
+    }
+    else {
+	exit 2;
+    }
+}
+
+if ($log) {
+    $schema = current_schema();
+    exit 1 if !$schema;
+    $schema = expand_schema($schema);
+    $schema = "epoch $schema";
+    print "#SCHEMA: $schema\n";
+    tsqllog($schema);
+}
+
+if ($stop) {
+    unlink $qfile;
+    exit 2 if system("motlle-load -e \"led(0)\"");
+}
+
+exit 0;
+
+sub usage {
+    print <<EOF
+Usage: tinysql [-I dir1 -I dir2...] COMMAND QUERY
+where COMMAND is one of:
+  start        install QUERY followed by log
+  install      install QUERY in the sensor network
+  reinstall    reinstall current query in the sensor network
+  log          display continuous results from current query
+  stop         stop current query in sensor network
+  display      display current query
+  compile      just compile QUERY and print resulting motlle code
+
+  QUERY is a TinySQL query (not needed for reinstall, log, stop, display)
+
+  The -I directives specify directories in which user-defined aggregates
+  and attributes can be found.
+
+  start, install, reinstall, log and stop require that a serial forwarder,
+  talking to TinySQL mote 0 be running on the local host.
+
+  Examples:
+    tinysql start "select id, light interval 10"
+    tinysql compile "oops"
+    tinysql stop
+EOF
+;
+    exit 0;
+}
+
+sub add_incdir {
+    my ($dir) = @_;
+
+    $dir .= "/" unless $dir =~ m!/$!;
+    push @incdirs, "\"$dir\"";
+}
+
+sub current_query {
+    my $query;
+
+    open QUERY, $qfile or return undef;
+    while (<QUERY>) {
+	$query = $1 if m!^\s*//\s*(SELECT\s+.*)!;
+    }
+    close QUERY;
+    return $query;
+}
+
+sub current_schema {
+    my $schema;
+
+    open QUERY, $qfile or return undef;
+    while (<QUERY>) {
+	$schema = $1 if m!^\s*//\s*SCHEMA:\s*(.*)!;
+	$attribute_expansions{lc $1} = $2 if m!^\s*//\s*(.*)_SCHEMA:\s*(.*)!;
+    }
+    close QUERY;
+    return $schema;
+}
+
+sub expand_schema {
+    my @schema, $name, $exp;
+
+    # Expand attributes that take more than one field, based on 
+    # attribute_expansions table. For instance, "avg" expands
+    # to "epoch count sum", so an avg_light attribute should
+    # become "avg_light_epoch avg_light_count avg_light_sum"
+    @schema = map {
+	if (/(.*)_.*/ && ($exp = $attribute_expansions{lc $1})) {
+	    $name = $_;
+	    join(' ', map "${name}_$_", (split / /, $exp));
+	}
+	else {
+	    $_;
+	}
+    } (split / /, $_[0]);
+    return join(' ', @schema);
+}
+
+sub tsqllog {
+    my ($schema) = @_;
+    my @schema = split / /, $schema;
+
+    sf_connect(BASE, "localhost", 9001);
+    for (;;) {
+	my $packet = sf_recv(BASE, undef);
+	my ($dest, $amid, $group, $length, $msg) = unpack_message($packet);
+	my $offset;
+
+	if ($amid == 0x2b || $amid == 0x2c) {
+	    $offset = 7;
+	}
+	elsif ($amid == 0x2a) {
+	    $offset = 0;
+	}
+	else {
+	    next;
+	}
+	if (2 * ($#schema + 1) != $length - $offset) {
+	    print "#invalid packet\n";
+	    next;
+	}
+	my @fields = unpack ("v" x ($#schema + 1), substr($msg, $offset));
+	print join(" ", @fields);
+	print "\n";
+	STDOUT->flush();
+    }
+    close(BASE);
+}
+
+# Build a TOSMsg in a perl string
+sub message {
+    my ($dest, $amid, @data) = @_;
+    my ($msg);
+
+    return pack "vCCCC*", $dest, $amid, 0, $#data + 1, @data;
+}
+
+sub unpack_message {
+    my ($msg) = @_;
+
+    return unpack "vCCCa*", $msg;
+}
+
+sub print_message {
+    my ($msg) = @_;
+
+    for ($i = 0; $i < length $msg; $i++) {
+	printf "%02x ", ord(substr($msg, $i, 1));
+    }
+}
+    
+
+# Connect to a serial forwarder
+sub sf_connect {
+    my ($handle, $host, $port) = @_;
+    my ($lhost, $ptcp);
+
+    $lhost = inet_aton($host) || die "can't lookup $host";
+    $ptcp = getprotobyname("tcp");
+    socket($handle, PF_INET, SOCK_STREAM, $ptcp) || die "SF socket";
+    connect($handle, sockaddr_in($port, $lhost)) || die "No serial forwarder at $host:$port";
+    # Send identifying string ('T', ' ' for original version)
+    sf_write($handle, "T ");
+    $s = sf_read($handle, 2);
+    die "Not a serial forwarder at $host:$port" unless
+	substr($s, 0, 1) eq "T" && ord(substr($s, 1)) >= 32;
+}
+
+# Write a string to a handle, abort on error
+sub sf_write {
+    my ($handle, $string) = @_;
+
+    while ($string ne "") {
+	$cnt = syswrite($handle, $string);
+	if (!$cnt) {
+	    print "write error $! $cnt\n";
+	    exit 2;
+	}
+	$string = substr($string, $cnt);
+    }
+}
+
+# Read n bytes from a handle, abort on error and timeout
+sub sf_read {
+    my ($handle, $n, $timeout) = @_;
+    my ($s, $offset, $rin);
+
+    $offset = 0;
+    vec($rin, fileno($handle), 1) = 1;
+    while ($offset < $n) {
+	$cnt = select($rin, undef, undef, $timeout);
+	if (!$cnt) {
+	    print "read error: timeout\n";
+	    exit 2;
+	}
+	$cnt = sysread $handle, $s, $n, $offset;
+	if (!$cnt) {
+	    print "read error $cnt $!\n";
+	    exit 2;
+	}
+	$offset += $cnt;
+    }
+    return $s;
+}
+
+# Send a packet to a serial forwarder
+sub sf_send {
+    my ($handle, $msg) = @_;
+
+    $msg = chr(length $msg) . $msg;
+    sf_write($handle, $msg);
+}
+
+# Receive a packet from a serial forwarder
+sub sf_recv {
+    my ($handle, $timeout) = @_;
+    my ($s);
+
+    $len = ord(sf_read($handle, 1, $timeout));
+    $s = sf_read($handle, $len, $timeout);
+
+    # Set group id to 0 to simplify life
+    substr($s, 3, 1) = chr(0);
+
+    return $s;
+}
+

@@ -1,0 +1,68 @@
+README for Delta, Moteiv's data collection multihop application
+Author/Contact: support@moteiv.com
+
+Description:
+
+The Delta application is an example of a multihop data collection system.
+By installing Delta on Moteiv's motes, the devices will sample their
+internal temperature sensor and report readings using a Multihop/Mesh
+topology.  Compile and install using:
+
+  make tmote
+  make tmote install
+
+Delta supports Tmote Sky and Tmote Invent.  Compile for Tmote Invent
+using:
+
+  make tmoteinvent
+  make tmoteinvent install
+
+Delta also supports low power operation using Moteiv's low power
+synchronization software.  The default duty cycle of Moteiv's low
+power networks is 5%.  To compile Delta with low power duty cycling,
+use the following command:
+
+  make tmote lowpower
+
+The duty cycle for Delta is configurable at compile time.  By specifying
+a value to the lowpower option, you can change the duty cycle.  For
+example, to specify a duty cycle of 2%, compile with:
+
+  make tmote lowpower,2
+
+After installing Delta on Moteiv motes, you have two options for the
+base station mote.
+
+Option 1:
+
+The base station is installed with address 0 using the following command:
+
+  make tmote reinstall,0
+
+Any node with address 0 automatically configures itself to be the base station.
+You can run any application to acquire data from node 0, such as Trawler
+(described below) or Listen (java net.tinyos.tools.Listen).
+
+Option 2:
+
+Any node with USB may be used as the base station, but it must first be
+informed by the PC that it is a base station.  This procedure is
+completed by the Trawler java application.  If your mote is connected
+on communications port COM5, start the Trawler application with the
+command:
+
+  MOTECOM=serial@COM5:tmote java com.moteiv.trawler.Trawler
+
+Trawler will start, communicate with the mote connected to the PC, and
+start building the Multihop network.
+
+NOTE: For nodes with addresses that are not 0, they will cease acting as the
+base station as soon as the Trawler application is closed or terminated.
+
+Tools:
+
+moteiv/tools/java/com/moteiv/trawler
+
+Known bugs/limitations:
+
+None

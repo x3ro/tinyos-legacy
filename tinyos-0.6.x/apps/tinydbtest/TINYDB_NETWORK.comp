@@ -1,0 +1,40 @@
+TOS_MODULE TINYDB_NETWORK;
+#include "TinyDB.h"
+
+ACCEPTS{
+	TinyDBError TINYDB_NETWORK_SEND_DATA_MESSAGE(TOS_MsgPtr msg);
+	TinyDBError TINYDB_NETWORK_SEND_QUERY_MESSAGE(TOS_MsgPtr msg);
+	TinyDBError TINYDB_NETWORK_SEND_QUERY_REQUEST(TOS_MsgPtr msg, short from);
+
+	void TINYDB_NETWORK_INIT();
+	TinyDBError TINYDB_NETWORK_SEND_UART_SYNC(char *msg, char amId);	
+	short TINYDB_NETWORK_GET_PARENT(void);
+	void TDB_POT(char pot);
+	void TDB_FORCE_TOPOLOGY(char fanout);
+	void TDB_SET_CENTRALIZED(bool on);
+};
+
+SIGNALS{
+	void TINYDB_NETWORK_OUTPUT_DONE(TOS_MsgPtr msg, char amId);
+	TOS_MsgPtr TINYDB_NETWORK_DATA_SUB(TOS_MsgPtr msg);
+	TOS_MsgPtr TINYDB_NETWORK_QUERY_SUB(TOS_MsgPtr msg);
+	TOS_MsgPtr TINYDB_NETWORK_SNOOPED_SUB(TOS_MsgPtr msg, char amId, bool isParent);
+	TOS_MsgPtr TINYDB_NETWORK_QUERY_REQUEST_SUB(TOS_MsgPtr msg);
+	TOS_MsgPtr TINYDB_SCHEMA_COMMAND(TOS_MsgPtr msg);
+};
+
+HANDLES{
+	char TINYDB_NETWORK_SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr TINYDB_NETWORK_QUERY_MESSAGE(TOS_MsgPtr msg);
+	TOS_MsgPtr TINYDB_NETWORK_DATA_MESSAGE(TOS_MsgPtr msg);
+	TOS_MsgPtr TINYDB_NETWORK_QUERY_REQUEST_MESSAGE(TOS_MsgPtr msg);
+	TOS_MsgPtr TINYDB_COMMAND_MESSAGE(TOS_MsgPtr msg);
+};
+
+USES{	
+	char TINYDB_SUB_SEND_MESSAGE(short addr, char amId, TOS_MsgPtr msg);
+	char GET_TIME(short *time);
+	char SET_TIME(short time);
+	void TDB_POT_SET(char val);
+	short NEXT_RAND();
+};

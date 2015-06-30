@@ -1,0 +1,356 @@
+<TITLE>Tiny OS FAQ</TITLE>
+
+<!-- IF YOU EDIT THIS FILE BY HAND, TAKE A LOOK AT addfaq.cgi TO UNDERSTAND WHAT YOU NEED TO UPDATE IN THE COMMENTS  -->
+
+<H1>TinyOS FAQ</H1> 
+
+<I>This is a moving work-in-progress -- note that the new,un-categorized entries go into misc to be organized later.</I>
+
+<ADDRESS> 
+You can always find the latest FAQ at 
+<A HREF="http://webs.cs.berkeley.edu/tos/faq.html">
+  http://webs.cs.berkeley.edu/tos/faq.html</A>.
+</ADDRESS>
+
+
+
+<!-- Last number used: 37 -->
+
+<H2>Table of Contents</H2>
+<UL>
+    <LI><A NAME="TOC-general" HREF="faq.html#SEC-general">General Information</A>
+        <UL>
+	    <LI><A NAME="TOC-16" HREF="faq.html#SEC-16">What is TinyOS?</A></LI>
+	    <LI><A NAME="TOC-20" HREF="faq.html#SEC-20">What hardware/software do I need to use TinyOS?</A></LI>
+	    <LI><A NAME="TOC-21" HREF="faq.html#SEC-21">How hard is TinyOS to learn?</A></LI>
+	    <LI><A NAME="TOC-1" HREF="faq.html#SEC-1">Where can I get TinyOS?</A></LI>
+	    <LI><A NAME="TOC-17" HREF="faq.html#SEC-17">What copyright/disclaimer is TinyOS distributed with?</A></LI>
+	    <LI><A NAME="TOC-2" HREF="faq.html#SEC-2">What is the most recent version?</A></LI>
+	    <LI><A NAME="TOC-18" HREF="faq.html#SEC-18">Where is the official TinyOS website?</A></LI>
+	    <LI><A NAME="TOC-4" HREF="faq.html#SEC-4">What platforms are supported?</A></LI>
+	    <LI><A NAME="TOC-35" HREF="faq.html#SEC-35">What TinyOS email lists exist?</A></LI>
+	    <LI><A NAME="TOC-36" HREF="faq.html#SEC-36">Where do I email suggestions for improvements to TinyOS?</A></LI>
+	</UL>
+    </LI>
+    <LI> <A NAME="TOC-installation" HREF="faq.html#SEC-installation">Installation</A>
+        <UL>
+	    <LI><A NAME="TOC-3" HREF="faq.html#SEC-3"> Where are the installation instructions?</A></LI>
+	    <LI><A NAME="TOC-31" HREF="faq.html#SEC-31">I've used the InstallSheild Wizard to install TinyOS and uisp still isn't installed correctly. What's up?</A></LI>
+	    <LI><A NAME="TOC-32" HREF="faq.html#SEC-32">How do I manually install uisp on Windows?</A></LI>
+	    <LI><A NAME="TOC-34" HREF="faq.html#SEC-34">When I run the InstallShield Wizard downloaded 
+from the web, it requests the file 'instmsiw.exe'. What's happening?</A></LI>
+
+	</UL>
+    </LI>
+    <LI> <A NAME="TOC-compilation" HREF="faq.html#SEC-compilation">Compilation & Mote Upload</A>
+        <UL>
+	    <LI><A NAME="TOC-23" HREF="faq.html#SEC-23">When I try to compile TOS java tools, I get the error <I>package javax.comm does not exist</I>.</A></LI>
+	    <LI><A NAME="TOC-30" HREF="faq.html#SEC-30">I get an Error "<function> undeclared (first use in this function)". What's up?
+	    <LI><A NAME="TOC-13" HREF="faq.html#SEC-13">What does <i>...tinyos/SerialForwarder.java:43: cannot resolve symbol</i> mean?</A></LI>
+	    <LI><A NAME="TOC-15" HREF="faq.html#SEC-15">What does <i>...java.lang.NoClassDefFoundError: mytoolname (wrong name: net/tinyos/mytoolname/mytoolname) </i> mean?</A></LI>
+	    <LI><A NAME="TOC-10" HREF="faq.html#SEC-10">When I try to install, I get the message <i>...Probably the wiring is incorrect or target might be damaged...</i>. What is wrong?</A></LI>
+	    <LI><A NAME="TOC-14" HREF="faq.html#SEC-14">What does <i>Probably the AVR MCU is not in the RESET state.
+Check it out and run me again.</i> mean when I type 'make install'?</A></LI>
+	    <LI><A NAME="TOC-29" HREF="faq.html#SEC-29">"make install <i>target</i>" successfully clears and programs my mote, but it always fails during the "verify" stage.  What's wrong?</A></LI>
+	</UL>
+    </LI>
+    <LI> <A NAME="TOC-development" HREF="faq.html#SEC-development">Development</A>
+        <UL>
+	    <LI><A NAME="TOC-37" HREF="faq.html#SEC-37">Where do I find hardware specifications for the TinyOS platforms
+and the sensorboards?</A></LI>
+	    <LI><A NAME="TOC-11" HREF="faq.html#SEC-11">What does <I>
+    Could not chdir to home directory /home/users/<username>: No such file or directory</I>
+when I try to access sourceforge.net mean?</A></LI>
+	    <LI><A NAME="TOC-19" HREF="faq.html#SEC-19">When I try to download from sourceforge using my sourceforge username, why do I get <BR><I>usw-pr-cvs.sourceforge.net: Connection refused<BR>
+cvs [update aborted]: end of file from server (consult above messages if any)</I></A></LI>
+	    <LI><A NAME="TOC-22" HREF="faq.html#SEC-22">I compiled and successfully loaded <code>cnt_to_leds</code>, but the lights don't blink. Why not?</A></LI>
+	    <LI><A NAME="TOC-24" HREF="faq.html#SEC-24">Why does listen.java returns "port busy"?</A></LI>
+	    <LI><A NAME="TOC-25" HREF="faq.html#SEC-25">Why is there no output from oscilloscope.java after successfull compilation?</A></LI>
+	    <LI><A NAME="TOC-33" HREF="faq.html#SEC-33">The CRC doesn't appear to be used at all -- why not?</A></LI>
+
+	</UL>
+    </LI>
+    <LI> <A NAME="TOC-misc" HREF="faq.html#SEC-misc">Miscellaneous</A>
+        <UL>
+<!-- Last miscellaneous toc entry  -->
+	</UL>
+    </LI>
+</UL>
+
+<HR>
+
+<!------------------------- GENERAL --------------------------->
+
+<H2><A NAME="SEC-general" HREF="faq.html#TOC-general">GENERAL</A></H2>
+
+<H3><A NAME="SEC-16" HREF="faq.html#TOC-16">What is TinyOS?</A></H3>
+<P>TinyOS is an event based operating environment designed for use with 
+embedded networked sensors.  More specifically, it is designed to support the concurrency 
+intensive operations required by networked sensors with minimal hardware 
+requirements.
+</P>
+<P>
+The programming language of TinyOS is stylized C. 
+</P>
+<P>
+TinyOS was initially developed by the U.C. Berkeley EECS Department, and is distributed under the disclaimer above.
+At present it has been used in various hardware platforms including Kris Pister's Smartdust.
+</P>
+<P>
+We have support for "offline simulation", i.e. running virtual
+motes on your computer. 
+</P>
+<P>
+TinyOS - because size matters!
+</P>
+
+<H3><A NAME="SEC-20" HREF="faq.html#TOC-20">What hardware/software do I need to use TinyOS?</A></H3>
+<P>
+The software that you will need to develop and run TinyOS is included in the Linux RPMs or Windows Installshield Wizard for TinyOS. You can find pointers to the respective installation packages at <A HREF="http://webs.cs.berkeley.edu/tos/download.html"> http://webs.cs.berkeley.edu/tos/download.html</A>.
+</P>
+<P>
+You need a parallel and a serial port on your machine to be able to communicate with the motes.
+</P>
+
+<H3><A NAME="SEC-21" HREF="faq.html#TOC-21">How hard is TinyOS to learn?</A></H3>
+<P>
+The concurrency concept requires some effort to get used to but it's 
+essentially C. Proficiency and/or experience with GNU development
+tools is a plus, but not mandatory.
+</P>
+
+<H3><A NAME="SEC-1" HREF="faq.html#TOC-1">Where can I get TinyOS?</A></H3>
+You can download the most recent version of Tiny OS 
+<A HREF="http://webs.cs.berkeley.edu/tos/download.html">here</A>.
+
+<H3><A NAME="SEC-17" HREF="faq.html#TOC-17">What copyright/disclaimer is TinyOS distributed with?</A></H3>
+<P>
+<SMALL><CODE>
+Copyright ©2001 The Regents of the University of California (Regents). <BR>
+All Rights Reserved. 
+</P>
+<P>
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose, without fee, and without written agreement is
+hereby granted, provided that the above copyright notice and the following
+two paragraphs appear in all copies of this software.
+</P>
+<P>
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</P>
+<P>
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+</P>
+</CODE></SMALL>
+
+<H3><A NAME="SEC-2" HREF="faq.html#TOC-2">What is the most recent version?</A></H3>
+Version 0.6.1 was released May 10, 2002, for the 'mica', 'rene', and 'rene2' hardware platforms.
+
+<H3><A NAME="SEC-18" HREF="faq.html#TOC-18">Where is the official TinyOS website?</A></H3>
+<A HREF="http://webs.cs.berkeley.edu/tos/">http://webs.cs.berkeley.edu/tos/</A>
+
+<H3><A NAME="SEC-4" HREF="faq.html#TOC-4">What platforms are supported?</A></H3>
+Though it may work on other platforms, the supported platforms are Linux RedHat and Windows 2000.
+
+<H3><A NAME="SEC-35" HREF="faq.html#TOC-35">What TinyOS email lists exist?</A></H3>
+The various TinyOS-related lists can be found
+linked off the <A HREF="http://webs.cs.berkeley.edu/tos/support.html">
+TinyOS support page</A>.
+
+<H3><A NAME="SEC-36" HREF="faq.html#TOC-36">Where do I email suggestions for improvements to TinyOS?</A></H3>
+Email bugs to the <A HREF="mailto:tinyos-bugs@millennium.berkeley.edu">tinyos-bugs@millennium.berkeley.edu</A>.
+Email other suggestions to 
+<A HREF="mailto:kwright@cs.berkeley.edu">
+kwright@cs.berkeley.edu
+</A>. You can also email suggestions to any
+of the appropriate TinyOS mailing lists off
+the <A HREF="http://webs.cs.berkeley.edu/tos/support.html">
+support page </A>.
+
+<!------------------------- INSTALLATION --------------------------->
+
+<H2><A NAME="SEC-installation" HREF="faq.html#TOC-installation">INSTALLATION</A></H2>
+
+<H3><A NAME="SEC-3" HREF="faq.html#TOC-3">Where are the installation instructions?</A></H3>
+You can find the installation instructions here:
+<A HREF="http://webs.cs.berkeley.edu/tos/windows.html">Windows</A> and 
+<A HREF="http://webs.cs.berkeley.edu/tos/linux.html">Linux</A>.
+
+<H3><A NAME="SEC-31" HREF="faq.html#TOC-31">I've used the InstallSheild Wizard to install TinyOS and uisp still isn't installed correctly. What's up?</A></H3>
+You might have installed TinyOS as a regular user rather than Administrator. TinyOS has to be installed as administrator in order to install the 'giveio' driver which is required by uisp. 
+<BR><BR>
+You can manually install uisp. See the related question in this FAQ on installing uisp.
+
+<H3><A NAME="SEC-32" HREF="faq.html#TOC-32">How do I manually install uisp on Windows?</A></H3>
+As administrator, do this in cygwin (TOSROOT here symbolizes the directory where your nest directory is -- usually c:):
+
+<OL>
+<LI> $ cd TOSROOT/nest/tools/uisp/src
+<LI> $ make; make install
+<LI> $ cd TOSROOT/nest/tools/uisp/kernel/win32
+<LI> $ make; make install
+</OL>
+
+<H3><A NAME="SEC-34" HREF="faq.html#TOC-34">When I run the InstallShield Wizard downloaded 
+from the web, it requests the file 'instmsiw.exe'. What's happening?</A></H3>
+InstallShield requires the Microsoft Installer on your machine. If the installation wizard does not
+find it on your machine, it attempts to download
+it from Microsoft. If the file cannot be downloaded
+from Microsoft, you are asked to supply the location
+of the file.
+<BR><BR>
+We have put this and another file that you may need, isscript.msi, online:
+<BR>
+<UL>
+<LI> 
+<A HREF= "http://webs.cs.berkeley.edu/tos/dist-0.6.1/instmsiw.exe">instmsiw.exe</A>
+<LI> <A HREF="http://webs.cs.berkeley.edu/tos/dist-0.6.1/isscript.msi">isscript.msi</A>
+
+</UL>
+ Download
+these two files into the same directory that the
+TinyOS installation file resides in. Run instmsiw.exe, and then run the TinyOS installation
+once again.
+
+
+<!------------------------- COMPILATION -------------------------------->
+
+<H2><A NAME="SEC-compilation" HREF="faq.html#TOC-compilation">COMPILATION & MOTE UPLOAD</A></H2>
+
+<H3><A NAME="SEC-23" HREF="faq.html#TOC-23">When I try to compile TOS java tools, I get the error <I>package javax.comm does not exist</I>.</A></H3>
+Check a couple things:
+<OL>
+<LI>Make sure that <code>which java</code> returns  /cygdrive/your-system-drive/jdk1.3.1_01/bin/java. If it doesn't, add c:\jdk1.3.1_01\bin at the front of your PATH environment variable.</LI>
+<LI>Your CLASSPATH needs to include the comm.jar library -- something like this: <code>
+c:\jdk1.3.1_01\lib\comm.jar</code></LI>
+</OL>
+
+<H3><A NAME="SEC-30" HREF="faq.html#TOC-30">I get an Error "<function> undeclared (first use in this function)". What's up?
+</A></H3>
+Check whether the super.h and NAME.h files are formed properly. (NAME is the name of the component). If not, then probably the opening brace in the .comp file after the keywords USES, HANDLES, SIGNALS or ACCEPTS has not been placed properly. The opening brace has to be immediately following the keyword and cannot be placed in the next line.
+
+<H3><A NAME="SEC-13" HREF="faq.html#TOC-13">What does <i>...tinyos/SerialForwarder.java:43: cannot resolve symbol</i> mean?
+</A></H3>
+It means that java couldn't find the definition for a required Java class. Try adding . (literally a dot, meaning the current working directory) to your CLASSPATH environment variable. Ensure that your classpath also includes <YOUR JDK LOCATION>/lib.
+
+<H3><A NAME="SEC-15" HREF="faq.html#TOC-15">What does <i>...java.lang.NoClassDefFoundError: mytoolname (wrong name: net/tinyos/mytoolname/mytoolname) </i> mean?</A></H3>
+<P>
+The way you've specified the class on the command line does not match what the class itself thinks it is called. The compiled java class might include a path in its name. For example, the class defined in <code>nest/tools/net/tinyos/oscilloscope/oscilloscope.java</code> has the classname nest/tools/net/tinyos/oscilloscope/oscilloscope. For example, to run the oscilloscope tool, you can cd to c:/nest/tools and type <code> java net/tinyos/oscilloscope/oscilloscope </code>.
+</P>
+
+<H3><A NAME="SEC-10" HREF="faq.html#TOC-10">When I try to install, I get the message <i>...Probably the wiring is incorrect or target might be damaged...</i>. What is wrong?
+</A></H3>
+The wiring could be wrong, but probably not. Check these things:
+<ul>
+<li> Ensure that the switch on your mote is toward the Big_Guy label.</li>
+<LI> Ensure that the mote is firmly seated in the right slot. </LI>
+<LI> Ensure that the moste hasn't fallen to the floor </LI>
+<LI> Ensure that you haven't connected your printer to the mote's slot since your last install </LI>
+</ul>
+
+<H3><A NAME="SEC-14" HREF="faq.html#TOC-14">What does <i>Probably the AVR MCU is not in the RESET state.
+Check it out and run me again.</i> mean when I type 'make install'?</A></H3>
+It could mean that the AVR MCU is not in the RESET state, but it could also mean that your mote does not have power. Try a fresh pair of batteries and make sure that the mote is firmly seated in the programming board.
+
+<H3><A NAME="SEC-29" HREF="faq.html#TOC-29">"make install <i>target</i>" successfully clears and programs my mote, but it always fails during the "verify" stage.  What's wrong?</A></H3>
+The mote isn't powered by its own supply or via the adapter connected to the programming board.
+Even though the light on the programming board is on, you may not have the necessary power supply to program and verify the mote successfully.
+You can check for this if the red LED on the programming board is flashing durning the "Uploading: flash" state of the "make install" target.
+
+<!------------------------- DEVELOPMENT -------------------------------->
+
+<H2><A NAME="SEC-development" HREF="faq.html#TOC-development">DEVELOPMENT</A></H2>
+
+<H3><A NAME="SEC-37" HREF="faq.html#TOC-37">Where do I find hardware specifications for the TinyOS platforms
+and the sensorboards?</A></H3>
+It is usually possible to go right to the manufacturer's page and get specs. There are
+design diagrams of all the TinyOS platforms
+off the TinyOS <A HREF="http://webs.cs.berkeley.edu/tos/hardware.html"> design page </A>. Atmel has manuals and specifications online for the chips at 
+<A HREF="http://www.atmel.com"> www.atmel.com </A>. 
+<BR><BR>
+Here's an example of how you might go about finding information about the microphone on the
+Mica Sensorboard:
+<OL>
+<LI> Browsing through the 
+<A HREF="http://webs.cs.berkeley.edu/tos/hardware.html">
+hardware page </A>, you happen upon
+<A HREF="http://webs.cs.berkeley.edu/tos/design/ORCAD_FILES/MICASB/BillOfMaterials5.xls">
+a listing of parts for the Mica Sensorboard </A>. 
+<LI> Looking through the excel spreadsheet, you
+see that the microphone is a Panasonic WM-62A. 
+<LI> Using 'Panasonic WM-62A specifications' as 
+a search string at Google yields the as the
+first entry: 
+<A HREF="http://www.panasonic.com/industrial/components/pdf/em05_wm62_a_c_cc_k_b_dne.pdf">
+Panasonic Omnidirectional Back Electret Condenser
+Microphone Cartridge </A>.
+
+</OL>
+
+<H3><A NAME="SEC-11" HREF="faq.html#TOC-11">What does <I>
+    Could not chdir to home directory /home/users/<username>: No such file or directory</I>
+when I try to access sourceforge.net mean?</A></H3>
+<P>Your user directory doesn't exist on the sourceforge cvs server until you ssh directly into it. Once you ssh into the server directly, your directory will be created and then you can check out source.</P>
+<P>Try something like this:
+<PRE>
+    ssh -l <your-sourceforge-username> cvs.tinyos.sourceforge.net
+</PRE>
+Enter your sourceforge password when asked. Because of the restricted shell, you'll be logged out of cvs.tinyos.sourceforge.net immediately, but the directory will still have been created.</P>
+
+<P>Note that this does not apply to using the 'anonymous' username to check-out files.</P>
+
+<H3><A NAME="SEC-22" HREF="faq.html#TOC-22">I compiled and successfully loaded <code>cnt_to_leds</code>, but the lights don't blink.</A></H3>
+Your source tree might have files left from a make for a different hardware version (mica instead of rene, for example). Try 'make clean' and then  remake and reinstall. Be sure to specify the version of hardware for your mote in your make commands. 
+
+<H3><A NAME="SEC-24" HREF="faq.html#TOC-24">Why does listen.java returns "port busy"?</A></H3>
+<P>
+This means either you are reading from the wrong port,
+           or that the correct port is currently being used by another
+           application. Check to see if some other software is currently
+           occupying the port (your Palm desktop software, etc.) 
+</P>
+<P>
+           If you're using Linux make sure that your current user
+           has read/write access to the port.
+
+</P>
+
+<H3><A NAME="SEC-25" HREF="faq.html#TOC-25">Why is there no output from oscilloscope.java after successfull compilation?</A></H3>
+Oscilloscope.java is currently hard-wired to read from serial
+           port 1. If your mote is connected to serial port 3, you need
+           to change the setup and recompile oscilloscope.java.
+
+<H3><A NAME="SEC-33" HREF="faq.html#TOC-33">The CRC doesn't appear to be used at all -- why not?</A></H3>
+In TinyOS 0.6 and 0.6.1, a bug in [nest]/tos/platform/mica/GENERIC_COMM.desc 
+caused the CRC_PACKET_INIT() to not be called such
+that the flag governing when CRCs should be sent
+was not set correctly.
+<BR><BR>
+There are two ways to fix this bug in your code:
+<OL> 
+<LI>Manually edit GENERIC_COMM.desc such that the reference to CRC:PACKET_INIT is instead CRC:CRC_PACKET_INIT and the reference to CRC:PACKET_POWER is instead CRC:CRC_PACKET_POWER.</LI>
+<LI> Update your file to the current version 
+at <A HREF="http://sourceforge.net/projects/tinyos">
+SourceForge</A>.
+</OL>
+
+</LI>
+
+
+
+
+
+<!------------------------- MISCELLANEOUS -------------------------------->
+
+<H2><A NAME="SEC-misc" HREF="#TOC-misc">MISCELLANEOUS</A></H2>
+
+
+
+<!-- Last miscellaneous sec entry  -->

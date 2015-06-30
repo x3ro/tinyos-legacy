@@ -1,0 +1,39 @@
+OutsideRanging:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The OutsideRangingActuator and OutsideRangingSensor components provide acoustic 
+ranging capability using the standard MICA sensorboard microphone and buzzer. 
+These components use the AcousticBeacon and AcousticMultiSampler components to perform
+the low level operations. 
+
+LIMITATIONS:
+
+- This algorithm is optimized for OUTSIDE and STATIONARY use. Inside buildings there can
+be substantially more echoes. We plan to release an acoustic ranger for inside use and 
+for moving targets.
+
+
+ALGORITHM:
+
+- First we emit a radio signal. The SendMsg.sendDone and ReceiveMsg.receive events are
+used to synchronize the acoustic beacon and acoustic rangers.
+
+- When receiving the radio signal, we turn on the microphone. Both sides wait 0.5 seconds
+for the microphone to power up.
+
+- Then we emit 16 buzzes, each of which is 122 millisecond long. The acoustic ranger samples
+each of the buzzes by streaming the microphone (950 samples per buzz) and adds these samples
+together. The sampling frequency is around 15600 HZ.
+
+- By sampling 16 times we increase the signal to noise ratio. Also, we vary the delay 
+between the buzzes to eliminate some of the unwanted echoes and other motes' buzzes.
+
+- Once the recording is done, we use a 35-length digital filter (with integer coefficients)
+to filter out the 4-5 KHZ range.
+
+- Then we run a nice peak detection algorithm to detect the start of the buzz.
+
+- Finally, we convert the range to centimeters.

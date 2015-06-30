@@ -1,0 +1,133 @@
+README for ShapeApp -> TinyDB+HSN+EmStar/EmTOS+Stargate
+Contact: Martin Lukac -- mlukac at cs.ucla.edu
+
+
+RANDOM NOTES and things you should know:
+
+- This demo is setup for a 4x4 grid of motes that should be setup like
+this:
+
+1  5  9  13  or like this:  13 9  5  1
+2  6  10 14                 14 10 6  2
+3  7  11 15                 15 11 7  3
+4  8  12 16                 16 12 8  4
+
+You can use fewer that 16 motes, but they _MUST_ remain in the same
+configuration. IT IS ALL HARDCODED!!! It should be easy to be able to
+support more motes. You will need to adjust the data width in
+Aggergates.h, and all the functions that use uint16_t's to larger
+datatypes. These are all in ShapeM.nc, shapedclient.c, and shaped.c.
+
+- To add shapes, you must edit shaped.c as well as ShapeReader.java
+  and ResultFrame.java files.
+
+- The shapes supported by this application are:
+	SQUARE
+	TRIANGLE (only ones made of 3 motes)
+	PLUS
+	HRECTANGLE
+	VRECTANGLE
+
+
+- The Photo aggregate was replaced by the covered aggergate for this
+  demo.
+
+- We used half sized antenna that were not soddered into the boards.
+
+- The emtos patch sets your initial motenic POT to be 3.
+
+
+
+SETUP AND INSTALL:
+
+- This works with TinyOS 1.7 and the current HSN routing stack
+  which was hopefully relsease before TinyOS 1.8. These instructions
+  assume you have it installed and configured TinyOS correctly.
+
+- Burn the grid motes. If you want to motes about 4-5 inches from each
+  other, set the TXRES_VAL in the Makefile to about 15. You can set it
+  lower and then use the settings gui to raise the value to 15. We
+  also used HALF SIZED antennae that were not soddered into the motes,
+  but bent around the sensorboards.
+
+- Burn a sink mote with the command:
+	make SINK_NODE=1 mica2 install.0
+
+- Burn some extra motes that will sit between the Stargate and the
+  sink. We used two rows of four or two.
+
+- Get and setup EmStar.  Read the README in ShapeApp/emstar for more
+  notes, then come back here and continue reading.
+
+- You will need to run the uartserver in the tools directory for the
+  TinyDB GUI, the settings GUI, and the traceroute GUI. The proper
+  command line is (change the comm port accordingly):
+	./uartserver -2 COM1 9001 -r56 9000	
+
+- You can now run the packet parser:
+	tclsh ./parse_and_print_packets.tcl
+  The settings gui:
+	wish ./settings_gui_nesc.tcl &
+  The traceroute display:
+	wish soi_gui.tcl -t tdb.topo
+
+- Notes about the settings_gui:
+	YOU MUST SET THE 'Message Size' to 49.
+
+- You can also run the TinyDB GUI. Note that you need to have java
+  installed. The config file is already setup to talk to the
+  uartserver. To compile the GUI, you must compile it first:
+	cd ShapeApp/java
+	export CLASSPATH=`./classpath`
+	cd net/tinyos/tinydb
+	make
+	
+- Then you can run the TinyDB GUI from the ShapeApp/java directory:
+	java net.tinyos.tinydb.TinyDBMain
+
+
+RUNNING THE ShapeApp:
+
+- Start the uartserver, packetparser, settingsgui, traceroute display,
+  and tinyDB gui.
+
+- Optional: Set up a sniffer mote. Burn a mote with the SimpleGateway
+  app, leave it connected to a separate programing board on a separate
+  comm port. Run another uartserver: ./uartserver -2 COM2 9002 and
+  connect the packet parser: 
+	tclsh ./parse_and_print_packets.tcl -r localhost:9002
+
+- Run TinyDB on the Stargate or PC.
+
+- Turn on all the motes
+
+- Turn on the sink last. It broadcasts some packets to initiate the
+  routing protocol
+
+- _WAIT_ for a few minutes, until all the modes have set a couple
+  route updates. The green light toggle indicates send, the red light
+  toggle indicates receive. If you setup a sniffer, you should see
+  the route updates and all the nodes getting to know each other.
+
+- To run a shape aggregate query, select the covered attribute and the
+  SHAPE aggergate. And run the query.
+
+- On the stargate or PC, you can see information about the aggregate
+  running on the stargate/pc through the /dev/shaped/shape status
+  device. You can also set the epoch time out using the
+  /dev/shaped/setting command device.
+
+- The epoch timeout is how long the shaped component remembers hte
+  information it received from a node. It is not decremented every
+  epoch, but rather it is decremented everytime the component
+  calculates the current shape. The current shape is calculated
+  eveytime the stargate gets an aggergate data packet. The best
+  setting for this is
+	numberofepochs * #ofmotesingrid
+  where numberofepochs is approximatly the number of epochs you want 
+  the component to remember the values from the nodes.
+
+
+
+
+

@@ -1,0 +1,23 @@
+README for Blinker
+
+Author/Contact: doolin@ce.berkeley.edu
+
+Description:
+
+Blinker is an application that demonstrates the use 
+of interfaces for handling events.  In this case, 
+the interface defines a Blink event, which is 
+signaled from the BlinkM module, and caught 
+by the implementation in BlinkerM. The application is 
+built on the Blink program described in the TinyOS 
+tutorial.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:

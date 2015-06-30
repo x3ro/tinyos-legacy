@@ -1,0 +1,51 @@
+<body>
+This is the top-level package for the EYES Demonstrator.
+
+<p>
+This package just contains the main Class
+(Demonstrator) and an Interface needed at this Level. All other classes are stored in other
+packages, so they are easy to find. The package hierarchy up to now is:
+<ul>
+	<li>components - contains AbstractComponent and its subtypes. These are the Elements that are shown by the main Frame</li>
+	<li>diagram - The model and Swing classes needed to display a diagram of a Node network</li>
+	<li>gui.customelements - more Swing classes. these are custom Swing Components painting needed information</li>
+	<li>model - this is the first approach to the display of a Node network, as well as some other Classes modeling information needed</li>
+	<li>util - contains Util classes alleviating work that is done often.</li>
+</ul>
+</p>
+
+<h2>Building, running, distributing and documentation</h2>
+<p>
+The build control is completely taken by providing an <code>build.xml</code> file for
+<a href="ant.apache.org">Ant</a>. Different tasks can be carried out for different targets.
+</p>
+<h3>ant compile</h3>
+<p>
+Compiles the source code. Resulting <code>.class</code> files are stored in the source tree.
+</p>
+
+<h3>ant run</h3>
+<p>
+Compiles the source code if needed and starts the main class.
+</p>
+
+<h3>ant dist</h3>
+<p>
+Compiles the source code (if needed). After that a <code>.jar</code> file is built and stored in the
+<code>dist/</code> directory, along with a <code>lib/</code> directory containing needed libraries. The
+generated .jar file is directly executable via <code>java -jar $JARNAME</code>, given that the <code>lib/</code>
+directory is available. 
+</p>
+
+<h3>ant doc</h3>
+<p>
+Given the fact that you can read this you may already have found this target ;)<br>
+It builds the Javadoc for all EYES Demonstrator classes and puts it in the <code>docs/</code> directory.
+</p>
+
+<h3>ant clean</h3>
+<p>
+Removes the <code>dist/</code> and <code>docs/</code> directories, as well as all <code>.class</code> Files.
+</p>
+
+</body>

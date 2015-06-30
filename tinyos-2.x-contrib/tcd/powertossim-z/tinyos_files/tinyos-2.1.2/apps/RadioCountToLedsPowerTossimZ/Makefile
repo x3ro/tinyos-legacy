@@ -1,0 +1,6 @@
+COMPONENT=RadioCountToLedsAppC
+
+CFLAGS += -DPOWERTOSSIMZ
+
+include $(MAKERULES)
+

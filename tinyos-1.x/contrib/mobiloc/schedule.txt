@@ -1,0 +1,69 @@
+
+CS294-1 Project Schedule
+
+MobiLoc: Mobility Enhanced Localization
+
+
+    - Admin (1 day)
+        X Code organization
+        - SourceForge TinyOS module?
+        X Directory names
+        - Makefile includes
+        - Tools (e.g. viz, Matlab)
+        X Docs
+        - Committing, other CVS commands
+11/9
+    - Architecture/Intefaces (1 day now & 1 day later)
+        - Communications
+            - Message Types
+            - ids
+            - etc.
+        - Module Names/roles
+        - System Architecture
+11/11
+    - Visualization (3 days)
+        - >>Java<< or Matlab?
+        - Plot (x,y) + id
+        - Network interface (e.g. SerialForward)
+        - Gridlines to get "visual" sense of error
+11/14
+    - TimeSync (1 day)
+        - Test/Verify/Tune/Integrate
+11/15
+    - Vehicle motion (0 days + time to mount magnets)
+        - Get magnets from Cory
+        - Determine range constraints
+        - Use "unfriendly" car (under radio control of class)
+        - Strap a magnet on the car
+        - Get a "test" car running
+11/15
+    - Mag Ranging/Bearing/Both model (1 week)
+        - Math to support (ranging/bearing)
+        - Math to convert sensor-to-object ranges to sensor-to-ranges
+        - Possibly use MDS
+        - Code to support (has to work)
+        - Verify bias subtraction
+        - Design/validate test trajectories
+11/22
+    - Ultrasonic Ranging (1 week)
+        - Meet with Kamin to understand Calamari
+        - Code to determine ranging
+11/22
+    - Collaborative Localization (2 weeks)
+        - Collect range/bearing locally
+        - Share with neighbors (or centralized fusion center)
+        - Pick "anchor" point (maybe lowest numbered node) and
+          overlay "relative" coordinate system
+        - Update (relative) position as new information arrives
+        - How to deal with noise?
+        - Fix coordinate system relative to some node on first detection
+        - Use history and median (mean?) over range estimates to neighbors
+12/5
+    - Contingency (Dec 1)
+
+    - Ideally outdoor demo (Dec 4)
+        - Assume fixed orientation
+            - Provide calibration routine
+
+
+

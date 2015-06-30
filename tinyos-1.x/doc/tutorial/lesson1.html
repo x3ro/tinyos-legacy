@@ -1,0 +1,495 @@
+<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR"
+ content="Mozilla/4.78 [en] (X11; U; Linux 2.4.7-10 i686) [Netscape]">
+  <title>TinyOS Tutorial Lesson 1: Getting Started with TinyOS and nesC</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><font face="tahoma,arial,helvetica"><font
+ size="-1">Lesson 1: Getting Started with TinyOS and nesC</font></font></b>
+      <p><font face="tahoma,arial,helvetica">Last updated 9 September
+2003</font></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This lesson introduces the basic concepts of TinyOS and the nesC
+language in which the system is written. It includes a quick overview
+of the nesC language concepts and syntax to help you get started with
+programming in this environment.
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Introduction</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>The TinyOS system, libraries, and applications are written in nesC,
+a new language for programming structured component-based applications.
+The nesC language is primarily intended for embedded systems such as
+sensor networks. nesC has a C-like syntax, but supports the TinyOS
+concurrency model, as well as mechanisms for structuring, naming, and
+linking together software components into robust network embedded
+systems. The principal goal is to allow application designers to build
+components that can be easily composed into complete, concurrent
+systems, and yet perform extensive checking at compile time. </p>
+<p>TinyOS defines a number of important concepts that are expressed in
+nesC. First, nesC applications are built out of <b>components</b> with
+well-defined, bidirectional <b>interfaces</b>. Second, nesC defines a
+concurrency model, based on <b>tasks</b> and <b>hardware event handlers</b>,
+and detects <b>data races</b> at compile time. </p>
+<p><b>Components</b> <br>
+<i>Specification</i> <br>
+A nesC application consists of one or more&nbsp; <i>components </i>linked
+together to form an executable. A component <b>provides</b> and <b>uses</b> <i>interfaces</i>.
+These interfaces are the only point of access to the component and are
+bi-directional.&nbsp; An interface declares a set of functions called <b>commands</b>
+that the interface provider must implement and another set of functions
+called <b>events</b> that the interface user must implement. For a
+component to call the commands in an interface, it must implement the
+events of that interface. A single component may use or provide
+multiple interfaces and multiple instances of the same interface. </p>
+<p><i>Implementation</i> <br>
+There are two types of components in nesC: <b>modules</b> and <b>configurations</b>.
+Modules provide application code, implementing one or more interface.
+Configurations are used to assemble other components together,
+connecting interfaces used by components to interfaces provided by
+others. This is called <b>wiring</b>. Every nesC application is
+described by a <b>top-level configuration</b> that <i>wires</i>
+together the components inside. </p>
+<p>nesC uses the filename extension "<tt>.nc</tt>" for all source files
+-- interfaces, modules, and configurations. Please see <a
+ href="naming.html">TinyOS Coding and Naming Conventions</a> for more
+information on naming conventions. </p>
+<p><b>Concurrency Model</b> <br>
+TinyOS executes only one program consisting of selected system
+components and custom components needed for a single application. There
+are two threads of execution: <i>tasks</i> and <i>hardware event
+handlers</i>. Tasks are functions whose execution is deferred.&nbsp;
+Once scheduled, they run to completion and do not preempt one another.
+Hardware event handlers are executed in response to a hardware
+interrupt and also runs to completion, but may preempt the execution of
+a task or other hardware event handler. Commands and events that are
+executed as part of a hardware event handler must be declared with the <b>async</b>
+keyword. </p>
+<p>Because tasks and hardware event handlers may be preempted by other
+asynchronous code, nesC programs are susceptible to certain race
+conditions. Races are avoided either by accessing shared data
+exclusively  within tasks, or by having all accesses within <b>atomic</b>
+statements. The nesC compiler reports potential <i>data races</i> to the
+programmer at compile-time. It is possible the compiler may report a
+false positive. In this case a variable can be declared with the <b>norace</b>
+keyword. The norace keyword should be used with extreme caution. </p>
+<p>Please see the <a href="../../doc/nesc/ref.pdf">nesC Language
+Reference Manual</a> for more information on programming in nesC. <br>
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">An example
+application: Blink</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>So far this is all fairly abstract - let's look at a concrete
+example: the simple test program "Blink" found in <tt><a
+ href="../../apps/Blink">apps/Blink</a></tt> in the TinyOS tree. This
+application simply causes the red LED on the mote to turn on and off at
+1Hz. </p>
+<p>Blink application is composed of two <b>components</b>: a <b>module</b>,
+called "<tt>BlinkM.nc</tt>", and a <b>configuration</b>, called "<tt>Blink.nc</tt>".
+Remember that all applications require a top-level configuration file,
+which is typically named after the application itself. In this case <tt>Blink.nc</tt>
+is the configuration for the Blink application and the source file that
+the nesC compiler uses to generate an executable file. <tt>BlinkM.nc</tt>,
+on the other hand, actually provides the <i>implementation</i> of the
+Blink application. As you might guess, <tt>Blink.nc</tt> is used to
+wire the <tt>BlinkM.nc</tt> module to other components that the Blink
+application requires. </p>
+<p>The reason for the distinction between modules and configurations is
+to allow a system designer to quickly "snap together" applications. For
+example, a designer could provide a configuration that simply wires
+together one or more modules, none of which she actually designed.
+Likewise, another developer can provide a new set of "library" modules
+that can be used in a range of applications. </p>
+<p>Sometimes (as is the case with <tt>Blink</tt> and <tt>BlinkM</tt>)
+you will have a configuration and a module that go together. When this
+is the case, the convention used in the TinyOS source tree is that <tt>Foo.nc</tt>
+represents a configuration and <tt>FooM.nc</tt> represents the
+corresponding module. While you could name an application's
+implementation module and associated top-level configuration anything,
+to keep things simple we suggest that you adopt this convention in your
+own code. There are several other naming conventions used in TinyOS
+code; a <a href="naming.html">summary</a> is provided
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">The
+Blink.nc configuration</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>The nesC compiler, <a href="../nesc/ncc.html">ncc</a>, compiles a
+nesC application when given the file containing the top-level
+configuration. Typical TinyOS applications come with a standard Makefile
+that allows platform selection and invokes ncc with appropriate options
+on the application's top-level configuration. </p>
+<p>Let's look at <tt>Blink.nc</tt>, the configuration for this
+application first: </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>Blink.nc</b>
+      <pre>configuration Blink {<br>}<br>implementation {<br>&nbsp; components Main, BlinkM, SingleTimer, LedsC;<br><br>&nbsp; Main.StdControl -&gt; BlinkM.StdControl;<br>&nbsp; Main.StdControl -&gt; SingleTimer.StdControl;<br>&nbsp; BlinkM.Timer -&gt; SingleTimer.Timer;<br>&nbsp; BlinkM.Leds -&gt; LedsC;<br>}</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>The first thing to notice is the key word <tt>configuration</tt>,
+which indicates that this is a configuration file. The first two lines, </p>
+<pre>&nbsp; configuration Blink {<br>&nbsp; }</pre>
+simply state that this is a configuration called <tt>Blink</tt>.
+Within the empty braces here it is possible to specify <tt>uses</tt>
+and <tt>provides</tt> clauses, as with a module. This is important to
+keep in mind: a configuration can use and provide interfaces!
+<p>The actual configuration is implemented within the pair of curly
+bracket following key word <tt>implementation </tt>. The <tt>components</tt>line
+specifies the set of components that this configuration references, in
+this case <tt>Main</tt>, <tt>BlinkM</tt>, <tt>SingleTimer</tt>, and <tt>LedsC</tt>.
+The remainder of the implementation consists of connecting interfaces
+used by components to interfaces provided by others. </p>
+<p><tt>Main</tt> is a component that is executed first in a TinyOS
+application. To be precise, the <tt>Main.StdControl.init()</tt> command
+is the first command executed in TinyOS followed by
+Main.StdControl.start(). Therefore, a TinyOS application must have Main
+component in its configuration. <tt>StdControl</tt> is a common
+interface used to initialize and start TinyOS components. Let us have a
+look at <tt>tos/interfaces/StdControl.nc</tt>: </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>StdControl.nc</b>
+      <pre>interface StdControl {<br>&nbsp; command result_t init();<br>&nbsp; command result_t start();<br>&nbsp; command result_t stop();<br>}</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>We see that <tt>StdControl</tt> defines three <b>commands</b>, <tt>init()</tt>,<tt>start()</tt>,
+and <tt>stop()</tt>. <tt>init()</tt> is called when a component is
+first initialized, and <tt>start()</tt> when it is started, that is,
+actually executed for the first time. <tt>stop()</tt> is called when
+the component is stopped, for example, in order to power off the device
+that it is controlling. <tt>init()</tt> can be called multiple times,
+but will never be called after either <tt>start()</tt> or <tt>stop</tt>
+are called. Specifically, the valid call patterns of StdControl are <tt>init*(start
+| stop)* . </tt>All three of these commands have "deep" semantics;
+calling <tt>init()</tt> on a component must make it call <tt>init()</tt>
+on all of its subcomponents. The following 2 lines in Blink
+configuration </p>
+<pre>&nbsp; Main.StdControl -&gt; SingleTimer.StdControl;<br>&nbsp; Main.StdControl -&gt; BlinkM.StdControl;</pre>
+wire the <tt>StdControl</tt> interface in <tt>Main</tt> to the <tt>StdControl</tt>
+interface in both <tt>BlinkM</tt> and <tt>SingleTimer</tt>. <tt>SingleTimer.StdControl.init()</tt>and<tt>BlinkM.StdControl.init()</tt>
+will be called by <tt>Main.StdControl.init()</tt>. The same rule
+applies to the <tt>start() and <font color="#000000">stop() </font></tt>commands.
+<p>Concerning <i>used</i> interfaces, it is important to note that
+subcomponent initialization functions must be explicitly called by the
+using component. For example, the BlinkM module uses the interface
+Leds, so Leds.init() is called explicitly in BlinkM.init(). </p>
+<p>nesC uses arrows to determine relationships between interfaces.
+Think of the right arrow (<tt>-&gt;</tt>) as "binds to". The left side
+of the arrow binds an interface to an implementation on the right side.
+In other words, the component that <b>uses</b> an interface is on the
+left, and the component <b>provides </b>the interface is on the right. </p>
+<p>The line </p>
+<pre>&nbsp; BlinkM.Timer -&gt; SingleTimer.Timer;</pre>
+is used to wire the <tt>Timer</tt> interface used by BlinkM to the
+Timer interface provided by SingleTimer. <tt>BlinkM.Timer</tt> on the
+left side of the arrow is referring to the <i>interface</i> called
+Timer (<tt>tos/interfaces/Timer.nc</tt>), while SingleTimer.Timer on
+the right side of the arrow is referring to the <i>implementation </i>of
+Timer (<tt>tos/lib/SingleTimer.nc)</tt>. Remember that the arrow always
+binds interfaces (on the left) to implementations (on the right).
+<p>nesC supports multiple implementations of the same interface. The <tt>Timer</tt>interface
+is such a example. The <tt>SingleTimer </tt>component implements a
+single <tt>Timer</tt> interface while another component, <tt>TimerC, </tt>implements
+multiple timers using timer id as a parameter. Further discussions on
+timers can be found in Lesson 2. </p>
+<p>Wirings can also be implicit. For example, </p>
+<pre>&nbsp; BlinkM.Leds -&gt; LedsC;</pre>
+is really shorthand for
+<pre>&nbsp; BlinkM.Leds -&gt; LedsC.Leds;</pre>
+If no interface name is given on the right side of the arrow, the nesC
+compiler by default tries to bind to the same interface as on the left
+side of the arrow. <br>
+&nbsp; <br>
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">The
+BlinkM.nc module</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+<p>Now let's look at the module <tt>BlinkM.nc</tt>: </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>BlinkM.nc</b>
+      <pre>module BlinkM {<br>&nbsp; provides {<br>&nbsp;&nbsp;&nbsp; interface StdControl;<br>&nbsp; }<br>&nbsp; uses {<br>&nbsp;&nbsp;&nbsp; interface Timer;<br>&nbsp;&nbsp;&nbsp; interface Leds;<br>&nbsp; }<br>}<br>// Continued below...</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>The first part of the code states that this is a module called <tt>BlinkM</tt>and
+declares the interfaces it provides and uses.&nbsp; The <tt>BlinkM</tt>&nbsp;
+module <b>provides</b> the<b> </b>interface <tt>StdControl</tt>.&nbsp;
+This means that <tt>BlinkM</tt> implements the <tt>StdControl</tt>
+interface.&nbsp; As explained above, this is necessary to get the Blink
+component initialized and started.&nbsp; The BlinkM module also <b>uses</b>
+two interfaces: <tt>Leds</tt> and <tt>Timer. </tt>This means that
+BlinkM may call any command declared in the interfaces it uses and must
+also implement any events declared in those interfaces. </p>
+<p><tt>The Leds </tt>interface defines several commands like <tt>redOn()</tt>,<tt>redOff()</tt>,
+and so forth, which turn the different LEDs (red, green, or yellow) on
+the mote on and off. Because <tt>BlinkM</tt> uses the <tt>Leds</tt>
+interface, it can invoke any of these commands. Keep in mind, however,
+that <tt>Leds</tt> is just an interface: the implementation is
+specified in the Blink.nc configuration file. </p>
+<p><tt>Timer.nc</tt> is a little more interesting: </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>Timer.nc</b>
+      <pre>interface Timer {<br>&nbsp; command result_t start(char type, uint32_t interval);<br>&nbsp; command result_t stop();<br>&nbsp; event result_t fired();<br>}</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>Here we see that <tt>Timer</tt> interface defines the <tt>start()</tt>
+and <tt>stop()</tt> commands, and the <tt>fired() </tt>event. </p>
+<p>The <tt>start()</tt> command is used to specify the type of the
+timer and the interval at which the timer will expire. The unit of the
+interval argument is millisecond. The valid types are <tt>TIMER_REPEAT</tt>
+and <tt>TIMER_ONE_SHOT</tt>. A one-shot timer ends after the specified
+interval, while a repeat timer goes on and on until it is stopped by
+the <tt>stop() </tt>command. </p>
+<p>How does an application know that its timer has expired? The answer
+is when it receives an event. The <tt>Timer</tt> interface provides an
+event: </p>
+<pre>&nbsp; event result_t fired();</pre>
+An <b>event</b> is a function that the implementation of an interface
+will signal when a certain event takes place. In this case, the <tt>fired()</tt>
+event is signaled when the specified interval has passed. This is an
+example of a <b>bi-directional interface</b>: an interface not only
+provides <b>commands</b> that can be called <i>by users</i> of the
+interface, but also signals <b>events</b> that call handlers <i>in the
+user</i>. Think of an event as a callback function that the
+implementation of an interface will invoke. A module that <b>uses</b>
+an interface <i>must implement the events</i> that this interface uses.
+<p>Let's look at the rest of <tt>BlinkM.nc</tt> to see how this all
+fits together: </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>BlinkM.nc, continued</b>
+      <pre>implementation {<br><br>&nbsp; command result_t StdControl.init() {<br>&nbsp;&nbsp;&nbsp; call Leds.init();<br>&nbsp;&nbsp;&nbsp; return SUCCESS;<br>&nbsp; }<br><br>&nbsp; command result_t StdControl.start() {<br>&nbsp;&nbsp;&nbsp; return call Timer.start(TIMER_REPEAT, 1000) ;<br>&nbsp; }<br><br>&nbsp; command result_t StdControl.stop() {<br>&nbsp;&nbsp;&nbsp; return call Timer.stop();<br>&nbsp; }<br><br>&nbsp; event result_t Timer.fired()<br>&nbsp; {<br>&nbsp;&nbsp;&nbsp; call Leds.redToggle();<br>&nbsp;&nbsp;&nbsp; return SUCCESS;<br>&nbsp; }<br>}</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>This is simple enough. As we see the <tt>BlinkM</tt> module
+implements the <tt>StdControl.init()</tt>, <tt>StdControl.start()</tt>,
+and <tt>StdControl.stop()</tt> commands, since it provides the <tt>StdControl</tt>
+interface. It also implements the <tt>Timer.fired()</tt> event, which is
+necessary since <tt>BlinkM</tt> must implement any event from an
+interface it uses. </p>
+<p>The <tt>init()</tt> command in the implemented <tt>StdControl </tt>interface
+simply initializes the Leds subcomponent with the call to <tt>Leds.init()</tt>.
+The <tt>start()</tt> command invokes <tt>Timer.start()</tt> to create a
+repeat timer that expires every 1000 ms. <tt>stop()</tt> terminates the
+timer. Each time <tt>Timer.fired()</tt> event is triggered, the <tt>Leds.redToggle()</tt>
+toggles the red LED. </p>
+<p>You can view a graphical representation of the component
+relationships within an application. TinyOS source files include
+metadata within comment blocks that ncc, the nesC compiler, uses to
+automatically generate html-formatted documentation. To generate the
+documentation, type <tt>make &lt;platform&gt; docs</tt> from the
+application directory. The resulting documentation is located in <tt>docs/nesdoc/&lt;platform&gt;</tt>.<tt>docs/nesdoc/&lt;platform&gt;/index.html</tt>
+is the main index to all documented applications. <br>
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Compiling
+the Blink application</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>TinyOS supports multiple platforms. Each platform has its own
+directory in the <a href="../../tos/platform">tos/platform</a>
+directory. In this tutorial, we will use the mica platform as an
+example. If you are in the TinyOS source tree, compiling the <tt>Blink</tt>
+application for the Mica mote is as simple as typing </p>
+<pre>&nbsp; make mica</pre>
+in the <tt><a href="../../apps/Blink">apps/Blink</a></tt> directory. Of
+course this doesn't tell you anything about how the nesC compiler is
+invoked.
+<p>nesC itself is invoked using the <a href="../nesc/ncc.html"><tt>ncc</tt></a>
+command which is based on <tt>gcc</tt>. For example, you can type </p>
+<pre>&nbsp; ncc -o main.exe -target=mica Blink.nc</pre>
+to compile the <tt>Blink</tt> application (from the <tt>Blink.nc</tt>
+top-level configuration) to <tt>main.exe</tt>, an executable file for
+the Mica mote. Before you can upload the code to the mote, you use
+<pre>&nbsp; avr-objcopy --output-target=srec main.exe main.srec</pre>
+to produce <tt>main.srec</tt>, which essentially represents the binary <tt>main.exe</tt>
+file in a text format that can be used for programming the mote. You
+then use another tool (such as <tt>uisp</tt>) to actually upload the
+code to the mote, depending on your environment. In general you will
+never need to invoke <tt>ncc</tt> or <tt>avr-objcopy</tt> by hand, the
+Makefile does all this for you, but it's nice to see that all you need
+to compile a nesC application is to run <tt>ncc</tt> on the top-level
+configuration file for your application. <tt>ncc</tt> takes care of
+locating and compiling all of the different components required by your
+application, linking them together, and ensuring that all of the
+component wiring matches up. <br>
+&nbsp; <br>
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Programming
+the mote and running Blink</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+<p>Now that we've compiled the application it's time to program the
+mote and run it. This example will use the Mica mote and the
+parallel-port-based programming board (<span
+ style="font-family: monospace;">mib500</span>). Instructions on how to
+use the other programming boards are <a href="programmers.html">here</a>.
+To download your program onto the mote, place the mote board (or mote
+and sensor stack) into the bay on the programming board, as shown
+below. You can either supply a 3 volt supply to the connector on the
+programming board or power the node directly. The red LED (labeled D2)
+on the programming board will be on when power is supplied. If you are
+using batteries to power the mote, be sure the mote is switched on (the
+power switch should be towards the connector). </p>
+<p>Plug the 32-pin connector into the parallel port of a computer
+configured with the TinyOS tools, using a standard DB32 parallel port
+cable. </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" hspace="4">
+  <tbody>
+    <tr>
+      <td><img src="imgs/mica-offboard.jpg" height="240" width="320"></td>
+      <td><img src="imgs/mica-onboard.jpg" height="240" width="320"></td>
+    </tr>
+    <tr>
+      <td><i>Mica mote next to the programming board</i></td>
+      <td><i>Mica mote connected to the programming board</i></td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>Type: <tt>make mica install</tt>. If you get the error: </p>
+<pre>&nbsp; uisp -dprog=dapa --erase&nbsp;<br>&nbsp; pulse<br>&nbsp; An error has occurred during the AVR initialization.<br>&nbsp;&nbsp; * Target status:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Vendor Code = 0xff, Part Family = 0xff, Part Number = 0xff<br><br>&nbsp; Probably the wiring is incorrect or target might be `damaged'.<br>&nbsp; make: *** [install] Error 2</pre>
+check whether the power is on. You can also get this error message if
+the mote is low on batteries (if you are using batteries), or if the
+wrong version of the <tt>uisp</tt> programming utility is installed (be
+sure to use the version in the TinyOS distribution).
+<p>If you are using an IBM ThinkPad, it may be necessary to tell the
+tools to use a different parallel port. You can do this by adding the
+line </p>
+<pre>&nbsp; PROGRAMMER_EXTRA_FLAGS = -dlpt=3</pre>
+to the <tt>apps/Makelocal</tt> file (create it if it doesn't exist). 
+The <a href="buildenv.html"><tt>Makelocal</tt></a> file is for
+user-specific <tt>Makefile</tt> configuration.
+<p>If the installation is successful you should see something like the
+following: </p>
+<pre>&nbsp; compiling Blink to a mica binary<br>&nbsp; ncc -board=micasb -o build/mica/main.exe -Os -target=mica&nbsp; -Wall -Wshadow -DDEF_TOS_AM_GROUP=0x7d -finline-limit=200 -fnesc-cfile=build/mica/app.c&nbsp; Blink.nc -lm<br>&nbsp; avr-objcopy --output-target=srec build/mica/main.exe<br>&nbsp; build/mica/main.srec<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; compiled Blink to build/mica/main.srec<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; installing mica binary<br>&nbsp; uisp -dprog=dapa&nbsp; --erase&nbsp;<br>&nbsp; pulse<br>&nbsp; Atmel AVR ATmega128 is found.<br>&nbsp; Erasing device ...<br>&nbsp; pulse<br>&nbsp; Reinitializing device<br>&nbsp; Atmel AVR ATmega128 is found.<br>&nbsp; sleep 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp; uisp -dprog=dapa&nbsp; --upload if=build/mica/main.srec<br>&nbsp; pulse<br>&nbsp; Atmel AVR ATmega128 is found.<br>&nbsp; Uploading: flash<br>&nbsp; sleep 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp; uisp -dprog=dapa&nbsp; --verify if=build/mica/main.srec<br>&nbsp; pulse<br>&nbsp; Atmel AVR ATmega128 is found.<br>&nbsp; Verifying: flash</pre>
+You can now test the program by unplugging the mote from the
+programming board and turning on the power switch (if it's not already
+on). With any luck the red LED should light up every second -
+congratulations!
+<p>Typing <tt>make clean</tt> in the <tt>Blink</tt> directory will
+clean up the compiled binary files. </p>
+<p>If you are still having errors, then you need to check your TinyOS
+installation and check the Mica hardware. See <a href="verifyhw.html">System
+and Hardware Verification</a> for details. <br>
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Exercises</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>To test your new-found TinyOS programming skills, try out the
+following: </p>
+<ul>
+  <li> Modify <tt>Blink</tt> to display the lower three bits of a
+counter in the LEDs.</li>
+</ul>
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Conclusion</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+<p>This tutorial has just scratched the surface of nesC's syntax and
+features. Rather than document everything extensively, we refer the
+reader to the <a href="http://www.sourceforge.net/projects/nescc/">nesC
+Project Pages</a> as well as the documentation included with the nesC
+distribution in <tt>nesc/doc</tt>. These sources contain more complete
+documentation on the language. </p>
+<p>Hopefully this should be enough of a start to get you going on
+programming in this fun new language. </p>
+<p> </p>
+<hr><b><a href="lesson2.html">Next Lesson &gt;</a></b> |&nbsp; <b><a
+ href="index.html">Top</a></b>
+</body>
+</html>
+
+<!--  LocalWords:  TinyOS nesC nc async norace BlinkM FooM ncc SingleTimer Leds
+ -->
+<!--  LocalWords:  LedsC StdControl tos init TimerC redOn redOff uint redToggle
+ -->
+<!--  LocalWords:  metadata html nesdoc gcc exe avr objcopy srec uisp mib dprog
+ -->
+<!--  LocalWords:  towards dapa xff ThinkPad dlpt Makelocal micasb Wshadow DDEF
+ -->
+<!--  LocalWords:  finline fnesc cfile lm Atmel ATmega nesC's nesc
+ -->

@@ -1,0 +1,20 @@
+/BoardManager.nc/1.2/Mon Mar  5 07:29:19 2007//
+/BufferManagementDispatchM.nc/1.1/Wed Oct 25 15:03:52 2006//
+/ChannelManager.nc/1.2/Mon Mar  5 07:29:19 2007//
+/ChannelManagerM.nc/1.2/Mon Mar  5 07:29:19 2007//
+/ChannelParamsManager.nc/1.1/Wed Oct 25 15:03:52 2006//
+/ChannelParamsManagerM.nc/1.2/Mon Mar  5 07:29:19 2007//
+/DSPManager.nc/1.1/Wed Oct 25 15:03:52 2006//
+/SensorData.nc/1.2/Mon Mar  5 07:29:19 2007//
+/SensorDataInfo.nc/1.1/Wed Oct 25 15:03:52 2006//
+/SensorboardFrameworkC.nc/1.1/Mon Mar  5 07:29:19 2007//
+/SensorboardFrameworkM.nc/1.1/Mon Mar  5 07:29:19 2007//
+/TriggerManager.nc/1.2/Mon Mar  5 07:29:19 2007//
+/TriggerManagerM.nc/1.2/Mon Mar  5 07:29:19 2007//
+/channelParams.h/1.1/Wed Oct 25 15:03:52 2006//
+/frameworkconfig.h/1.1/Wed Oct 25 15:03:52 2006//
+/postprocessingFunctions.h/1.1/Wed Oct 25 15:03:52 2006//
+/sensorTypes.h/1.2/Mon Mar  5 07:29:19 2007//
+/triggerFunctions.h/1.1/Wed Oct 25 15:03:53 2006//
+/triggerOps.h/1.1/Wed Oct 25 15:03:53 2006//
+D

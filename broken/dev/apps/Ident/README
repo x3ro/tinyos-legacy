@@ -1,0 +1,23 @@
+To use the ident application, you need:
+- program one GenericBase for communication with the Ident motes
+- program at least one Ident mote
+- compile tools/java/net/tinyos/message using the Makefile in that directory
+- compile tools/java/net/tinyos/ident using the Makefile in that directory
+- run the serial forwarder
+- run the java ident applet with java net.tinyos.ident.Ident <group id>
+
+The Ident motes have an identity, stored in EEPROM. This identity can be
+cleared (for all Ident motes in radio range) by pressing the Clear IDs
+button in the Java applet. The identity of all motes in radio range is
+set by entering a string (up to 15 characters) in the box above the 
+Set ID button, then pressing Set ID (so this is best done with only one
+Ident mote on...).
+
+An Ident mote will have its red led on if it has no id, it will blink its
+green led every 10s if it does have an identity. The java applet will
+display the IDs of all motes it hears, along with the time (in milliseconds
+since 1970...) since it last heard them. A mote which isn't heard within
+approximately 20s is removed from the list.
+
+Note: if the applet doesn't work, check that you've used the right
+group id...

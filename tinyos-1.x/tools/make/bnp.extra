@@ -1,0 +1,56 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: bnp.extra,v 1.15 2005/07/28 22:57:50 jwhui Exp $
+
+DELUGE_DIR ?= %T/lib/Deluge
+TOSBOOT_DIR ?= $(TOSDIR)/lib/Deluge/TOSBoot/build
+
+ifeq ($(TINYOS_NP),BNP)
+
+  CFLAGS += -I$(DELUGE_DIR)
+
+  ifeq ($(TARGETS),mica2)
+    BOOTLOADER ?= $(TOSBOOT_DIR)/mica2/main.ihex
+    AVR_FUSE_H ?= 0xd8
+  endif
+
+  ifeq ($(TARGETS),mica2dot)
+    BOOTLOADER ?= $(TOSBOOT_DIR)/mica2dot/main.ihex
+    AVR_FUSE_H ?= 0xd8
+  endif
+
+  ifeq ($(TARGETS),micaz)
+    BOOTLOADER ?= $(TOSBOOT_DIR)/micaz/main.ihex
+    AVR_FUSE_H ?= 0xd8
+  endif
+
+  ifeq ($(TARGETS),pc)
+    CFLAGS += -I%T/lib/Flash
+    CFLAGS += -I%T/lib/Flash/STM25P
+    CFLAGS += -DDEFAULT_EEPROM_SIZE=0x100000
+  endif
+
+  ifneq ($(filter telos telosa,$(TARGETS)),)
+    ifeq ($(TELOS_REV),B)
+      TARGETS := telosb
+    else
+      ifeq ($(filter docs,$(GOALS)),)
+        CFLAGS += -Wl,--section-start=.text=0x1a00,--defsym=_reset_vector__=0x1100
+      endif
+      BOOTLOADER ?= $(TOSBOOT_DIR)/telos/main.ihex
+      ifeq ($(shell [ -f /bin/cygwin1.dll ] && echo cygwin),cygwin)
+        BOOTLOADER := $(shell cygpath -m $(BOOTLOADER))
+      endif
+    endif
+  endif
+
+  ifneq ($(filter telosb tmote,$(TARGETS)),)
+     ifeq ($(filter docs,$(GOALS)),)
+      CFLAGS += -Wl,--section-start=.text=0x4800,--defsym=_reset_vector__=0x4000
+    endif
+    BOOTLOADER ?= $(TOSBOOT_DIR)/telosb/main.ihex
+    ifeq ($(shell [ -f /bin/cygwin1.dll ] && echo cygwin),cygwin)
+      BOOTLOADER := $(shell cygpath -m $(BOOTLOADER))
+    endif
+  endif
+
+endif

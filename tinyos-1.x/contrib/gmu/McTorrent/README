@@ -1,0 +1,98 @@
+INTRODUTION
+===========
+
+McTorrent is a multi-channel data dissemination protocol for sensor networks. McTorrent shares many ideas with Deluge, however, by using multiple channels available on current generation sensor nodes, McTorrent greatly reduces dissemination latency and packet transmissions for large data objects and large networks.
+
+McTorrent can be used to disseminate both large application data objects or code images (i.e., network reprogramming). For network reprogramming, McTorrent takes advantage of the TinyOS bootloader used by Deluge, with a small modification on the code image verification at the boot time (see tos/lib/McTorrent/TOSBoot).
+
+The code is fully tested in TinyOS 1.1.14 on pc, mica2 and telosb platforms. With proper configuration, it should also work for TinyOS 1.x later than 1.1.14 and other platforms.
+
+
+DIRECTORY STRUCTURE
+===================
+
+apps
+|-- Erase: application to erase the data in EEPROM.
+|-- TestMcTorrent
+    |-- Basic: application that has only McTorrent running.
+    |-- McBlink: the blink application built with McTorrent.
+|-- Makefile: makefile that builds all applications and tools.
+|-- README: this file.
+|-- tools: 
+    |-- java: java tool to load code images to a sensor node. 
+|-- tos
+    |-- interfaces: interfaces used in McTorrent.
+    |-- lib
+        |-- McTorrent: the McTorrent component.
+    |-- platform: platform dependent components.
+        |-- mica2 
+        |-- pc
+        |-- telosb
+
+User should keep the directory structure, and move it as a whole if necessary. Running the provided Makefile builds all of the above applications and java tool:
+	make PLATFORM=mica2 (or telosb)
+Add tools/java directory to the $CLASSPATH environment variable so that the path does not have to be specified when running the java tool.
+
+
+BUILDING APPLICATION WITH MCTORRENT SUPPORT
+==========================================
+
+McTorrent is provided as a TinyOS component (tos/lib/McTorrent/McTorrentC.nc). To Build an application with McTorrent support, the StdControl interface of the Main component must be wired with the StdControl interface of McTorrentC:
+	Main.StdControl -> McTorrentC;
+
+The following two lines should also be added to the application's Makefile, before "include $(MAKERULES)":
+	MCTORRENT_ROOTDIR=../../..
+	include $(MCTORRENT_ROOTDIR)/tos/lib/McTorrent/Makefile.include
+where MCTORRENT_ROOTDIR should be set properly.
+
+Two example applications Basic and McBlink are given in apps/TestMcTorrent.
+
+
+NETWORK REPROGRAMMING WITH MCTORRENT
+===================================
+
+The following steps are used to load a new code image from the host PC to the sensor nodes and reboot the nodes with the new code image:
+
+(1) Format the EEPROM with $TOSROOT/apps/TestDeluge/FormatFlash, where $TOSROOT is the TinyOS installation directory in the system. If the EEPROM is already formatted and contains data, use apps/Erase to erase the data.
+
+(2) Build an application with McTorrent support (for example, apps/TestMcTorrent/Basic), and program each sensor node with the application manually.
+
+(3) For network reprogramming, build the new application with McTorrent support. With one sensor node still connected to the host PC and all other nodes turned on, use the provided java tool to load the new code image (assume the nodes are mica2's):
+	java net.tinyos.mctorrent.McTorrent <new_app>/build/mica2/main.ihex <objId>
+where <new_app> is the directory of the new application, and <objId> is an integer ranged from 1 to 65535. Note that <objId> for each new code image should be larger than previous ones. The new code image will be loaded to the sensor node connected to the host PC, and propagated to the other nodes wirelessly thereafter. Each node reboots with the new code image after receiving the entire image.
+
+
+PROTOCOL PARAMETERS
+===================
+
+A channel in McTorrent is identified as an 8-bit integer which denotes a specific radio frequency depending on the platform. The number of available channels, MC_MAX_CHANNELS, is specified in ChannelStateM.nc in each platform subdirectory: tos/platform/mica2 and tos/platform/telosb.For pc platform (TOSSIM), the number of available channels is 256.
+ 
+The number of channels used by McTorrent, MC_CHANNELS, is defined in McTorrent.h in tos/lib/McTorrent(MC_CHANNELS <= MC_MAX_CHANNELS). The first MC_CHANNELS channels of the total MC_MAX_CHANNELS available are used by McTorrent, where channel 0 is a common channel used for control messages and in idle state, and channels 1..(MC_CHANNELS-1) are used for data packets.
+
+
+MCTORRENT SIMULATION IN TOSSIM
+=============================
+
+To run simulation in TOSSIM, specify the number of pages, TOTAL_PAGES, in tos/lib/McTorrent/Makefile.include, and build (command: make pc) and run the Basic application (apps/TestMcTorrent/Basic). Turn on the "usr1" debug option (export DBG=usr1 in bash) for the output from McTorrent. 
+
+By default, only node 0 (as known as base station) has the entire object at the beginning. To  have more base stations, add node IDs to the BASE_IDS array in tos/lib/McTorrent/global.h. The simulation stops when every node receives the entire object.
+
+
+ACKNOWLEDGEMENT
+===============
+
+Some parts of the project, such as the TinyOS bootloader, are based on those from Deluge.
+
+
+CONTACT INFORMATION
+===================
+
+Leijun Huang
+Dept. of Computer Science
+George Mason University
+Email: lhuang2@gmu.edu
+
+
+
+
+

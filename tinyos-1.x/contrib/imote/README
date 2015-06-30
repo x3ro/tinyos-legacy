@@ -1,0 +1,105 @@
+The following installation steps assume a clean platform build.  Modifying
+the installation paths or relying on existing cygwin installations may require
+updating paths and environment variables, neither of which are covered here.
+
+In order to build and install executables for the Imote platform, you need to
+download and install the following pieces of code.  Details on each are
+provided below.
+
+    - TinyOS v1.1.7
+    - NesC v1.1.2
+    - Imote platform v1.1.7
+    - Gnu gcc cross compiler v3.2
+    - ADS tool chain v1.2
+
+
+TinyOS v1.1.7
+  While the imote platform will work with most versions of TinyOS, the current
+  release has been specifically tested using version 1.1.7.  If you have an
+  older version of TinyOS please upgrade before installing the Imote platform
+  code.  TinyOS v1.1.7 can be obtained from sourceforge or the TinyOS web site
+  at http://www.tinyos.net/download.html
+
+  Follow the install instructions on the web site to install TinyOS
+
+
+NesC v1.1.2
+  NesC v1.1.2 extends the multi-platform support using the .platform file.
+  This is required for the imote platform to properly compile and load its
+  executables.  If you have an older version of NesC, please upgrade to v1.1.2
+  The NesC upgrade is available via rpm.  You can down load the rpm from:
+
+  http://www.tinyos.net/dist-1.1.0/tinyos/windows/nesc-1.1.2a-1.cygwin.i386.rpm
+
+  Once you have the rpm, you can install it by switching to the download
+  directory in a cygwin window and executing the following command:
+
+  $ rpm -Uvh nesc-1.1.2a-1.cygwin.i386.rpm
+
+
+Imote platform v1.1.7
+  The imote platform is available from two sources, sourceforge or the TinyOS
+  web site.  Sourceforge will contain the latest released CVS tree, and the
+  TinyOS web site has a rpm for a recent release.  There have been access
+  problems when using sourceforge's CVS repository from behind a firewall so
+  cvs updates may not be possible from some locations.  The two methods for
+  obtaining the imote platform code are described below:
+
+
+  Method 1 - CVS from Sourceforge
+    You need to get two directory trees from Sourceforge.  Change directories to
+    the root of your TinyOS tree.  If you've followed the instructions to this
+    point that should be in /opt/tinyos-1.x
+
+    From the root, execute the following two commands:
+  
+    $ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/tinyos co tinyos-1.x/beta/platform/imote
+
+    $ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/tinyos co tinyos-1.x/contrib/imote
+
+
+  Method 2 - RPM from TinyOS web site
+    Download the contrib-imote rpm from the TinyOS web site.  Change to the
+    download directory and execute the following command:
+
+    http://www.tinyos.net/related/contrib-imote-1.1.7-1.cygwin.i386.rpm
+
+    $ rpm -ivh contrib-imote-1.1.7-1.cygwin.i386.rpm
+
+    This will install both the .../contrib/imote and .../beta/platform/imote
+    trees.
+
+  Note that the beta/platform/imote directory is similar to the tos/platform/*
+  directories in that it contains the platform specific code.
+
+
+Gnu gcc cross compiler v3.2
+  The gcc cross compiler used by NesC is available via rpm on the TinyOS web
+  site at 
+
+    http://www.tinyos.net/dist-1.1.0/tools/windows/arm-thumb-elf-gcc-3.2-1.cygwin.i386.rpm
+
+  This rpm contains the 3.2 version of gcc available from the gnu web
+  site configured to build an ARM executable on a x86 platform.  After you
+  have downloaded the rpm, change directories to the download directory and
+  execute the following command:
+
+  $ rpm -ivh arm-thumb-elf-gcc-3.2-1.cygwin.i386.rpm
+
+
+ADS tool chain v1.2
+  The final step of the build process requires use of the ADS tool chain's
+  linker.  A CD containing the ADS tool chain is available from the arm web
+  site at www.arm.com
+
+  Follow the directions for installing the ADS tool chain.
+
+You are now ready to build and install an imote executable.  Change directories
+to /opt/tinyos/contrib/imote/apps/Blink and execute the following command:
+
+make install imote
+
+This should build an imote executable which blinks the red LED at 1 second
+intervals.
+
+

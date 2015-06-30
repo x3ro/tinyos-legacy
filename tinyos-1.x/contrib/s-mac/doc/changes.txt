@@ -1,0 +1,184 @@
+This file logs the changes on the Communication Stack for Mica Motes developed
+at USC/ISI and UCLA. It includes a physical layer and S-MAC.
+
+May 15, 2004 by weiye
+
+  1) Fixed CTS timeout problem.
+  2) Separated RTS retry count and data re-tx count.
+  3) Fixed data re-Tx count through motenic.
+  4) Removed unnecessary PHY resets.
+  5) Fixed a bug on sequence numbers in fully active mode.
+  6) Fixed a bug on neighbor activity update.
+
+May 14, 2004 by thanos
+
+  1) Added 2 more counters in MACReport.
+
+May 12, 2004 by thanos
+
+  1) Added error codes to the Send() command.
+
+Apr 21, 2004 by weiye
+
+  1) Made SMAC_MAX_TX_MSG_TIME a user-configurable macro.
+
+Apr 6, 2004 by weiye
+
+  1) Added preventive reset after a mote boots. Sometimes Mica2's radio
+  can't be correctly initialized after booting on old programming board and
+  wall power. 
+
+Mar 31, 2004 by weiye
+
+  1. Added Tx reset (including radio) on tx data timeout and tx sync
+   timeout. 
+  2. Doubled the guard time for listening and schedule check.
+  3. Schedule update is based on average of my schedule and received
+   schedule. 
+  4. Fixed a bug in handling SYNC packets that could cause inconsistancy on
+   numSched and actual schedules when a node switches schedules.
+  5. Update neighbor list is now performed after SYNC tx is done to avoid
+   messing up SYNC tx.
+  6. re-implemented S-MAC's StdControl.start() and stop().
+  7. Debugging functions and macros are renamed for easy use.
+
+Mar 20, 2004 by weiye
+
+  1) Added master/slave configuration on picking up schedules. A slave 
+  will only adopt a schedule from other nodes.
+
+Mar 11, 2004 by thanos
+
+  1) Expanded MACReport
+
+Mar 4, 2004 by thanos
+
+  1)Added code for EmTOS.
+
+* Changes after version 1.1
+
+  1) Added link quality measurement. A new interface LinkState is provide.
+
+  2) Some internal changes are made to S-MAC packet formats to minimize the
+     added bytes for link quality measurement.
+     
+  3) apps/SMACTest/ now includes the test for link state measurement.
+  
+  4) Added optional time-stamping on outgoing packets for simple time sync.
+
+* Changes after version 1.1-alpha.
+
+  1) Fixed a bug in platform/mica2/ClockSMAC. It makes S-MAC do not work
+     well on Mica2 when using timer/counter1.
+ 
+  2) Fixed a bug in platform/mica2/PhyConst.h. It mistakenly set radio
+     listen time to be 38.4kbps, which is actually 19.2kbps, since we get
+     data from radio after its Machester decoding. This bug causes S-MAC to
+     double its carrier sense time. Sometimes a sender sends out even after a
+     receiver goes to sleep. This bug is Mica2 specific.
+
+  3) Some robustness improvement in handling neighbors' schedule
+     changes.
+
+  4) Some performance improvement in mica2/RadioControlM.nc.
+                                                                                
+  5) Provides connections with PowerManagement to put CPU into idle mode
+     when radio is in sleep.
+   
+  6) Fixed various small bugs.
+  
+* On 5/8/2003, version 1.1-alpha released. Changes after v1.0 includes:
+
+  1. New features:
+  
+   1) Works on Mica2 platform (with Chipcon CC1000 radio).
+   
+   2) Compatibility support to Berkeley's radio stack that comes from the
+      official TinyOS release.
+      
+   3) Improved neighbor list maintaining. If a neighbor is silent for long
+      time, it will be removed from my neighbor list.
+      
+  2. Bug fixes:
+  
+   1) Removed a few race conditions that can occur in both MAC layer and
+      the physical layer.
+      
+   2) Fixed potential timestamp error.
+   
+   3) Various improvement on robustness.
+
+* On 2/8/2003, version 1.0 released. Changes after version v0.1 includes:
+
+  1. New features:
+
+   1) This version is ported to nesC environment.
+    
+   2) Adaptive listen. If a node overhears a transmission from its neighbors,
+      it will wake up at the end of the transmission and listen for a short
+      time. During this adaptive listen time, nodes can start sending data.
+      Latency can be greatly reduced and throughput can be increased. If there
+      is no activity after the adaptive listen time, the nodes will go back to
+      sleep again.
+ 
+   3) Fully active mode. User can configure S-MAC at compile time to
+      completely disable the sleep cycles in S-MAC. In this mode, no SYNC
+      packets are sent. Nodes keep in idle state when there is no data
+      transmission. It is similar with IEEE 802.11 but with overhearing
+      avoidance and message passing.
+	   
+   4) Periodic search for new nodes. A node will periodically keep listen for 
+      the entire synchronization period (about 10s now). This allows two nodes
+      on completely different schedules to find each other and synchronize
+      together. The frequency of the neighbor search depends on whether a node
+      has any neighbor or not.
+	   
+   5) Schedule changes. Suppose a node has no neighbor and follows its own 
+      schedule. If later it finds a neighbor with a different schedule, it
+      will immediately switch to the new schedule.
+
+
+  2. Bug Fixes:
+    
+   1) Problem: If a node receives a broadcast packet at the start-up phase
+      before it choose a schedule, it goes into sleep that won't be waked up,
+      since there is no schedule timer now.
+ 
+      Fix: Each node chooses a tentative schedule as soon as it starts. But
+      it does not broadcast this schedule in the first listen period. If it
+      receives a new schedule from another node, it will switch to the new
+      one immediately.
+ 
+   2) Problem: Occassionally a node can receive a SYNC packet before all
+      components are correctly initialized, especially the clock. Sometimes
+      the clock time is only 2 ms when the first SYNC packet is received. 
+      However, the transmission time of a SYNC packet is about 10ms. This
+      will casue synchronization errors, since the new node thinks it follows
+      and existing schedule, but its setting of the schedule is actually
+      different.
+ 
+      Fix: Check the clock time when receive each SYNC packet. Make sure the
+      clock is correctly started. Otherwise don't use the SYNC packet.
+ 
+   3) Problem: The encoding table in CODEC_MANCHESTER (and CODEC_4B_6B) makes
+      the "make install.x mica" fail. This is  due to the limitation of the
+      'munge_srec' program, which requires the TOS_LOCAL_ADDRESS (defined in
+      MAIN.c) to be in a certain line in main.srec. However, if you declare
+      a large global variable (like the 16-byte encoding table) in a file 
+      whose name is before MAIN.c, the variable is put before 
+      TOS_LOCAL_ADDRESS, and will move TOS_LOCAL_ADDRESS to the second line.
+      For example the first letter in CODEC_xxxxx is 'C', which is before 
+      the 'M' in MAIN.c. Note this problem only occurs in the pre-nesC
+      environment.
+      
+      Fix: Moved the encoding table to the program memory (flash), instead of
+      using RAM. So the "make install.x mica" works now.
+ 
+   4) Problem: During the initialization of the radio in RADIO_CONTROL, the
+      initial value of SLAVE_PIN is not correctly set. It may cause problem
+      when logger is also used, which also uses SLAVE_PIN.
+	   
+      Fix: Set the correct initial value of the SLAVE_PIN.
+ 
+* Initial version (v0.1) released on Oct 2, 2002.
+	   

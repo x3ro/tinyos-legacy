@@ -1,0 +1,17 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: echelon.target,v 1.1 2004/04/23 05:41:03 cssharp Exp $
+
+ECHELONDIR ?= $(TOSDIR)/../contrib/echelon
+
+PLATFORM = echelon
+SENSORBOARD ?= echelon
+PROGRAMMER_PART ?= -dpart=ATmega128 --wr_fuse_e=ff
+PFLAGS += -finline-limit=100000 \
+  -I$(ECHELONDIR)/platform/echelon \
+  -I$(ECHELONDIR)/sensorboard/$(SENSORBOARD)
+
+$(call TOSMake_include_platform,avr)
+
+echelon: $(BUILD_DEPS)
+	@:
+

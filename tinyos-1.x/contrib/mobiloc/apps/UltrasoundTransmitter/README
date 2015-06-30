@@ -1,0 +1,22 @@
+UltrasoundTransmitter Application
+Author/Contact: Sarah Bergbreiter
+		Prabal Dutta
+
+This application sends out ranging chirps (radio msg + ultrasound beep) and
+is used both for testing purposes with the ultrasound sensor and will
+serve as the transmitter on the mobile object driving through the network.
+
+The Ultrasound board must be programmed separately using the code in
+tinyos-1.x/contrib/calamari/apps/ultrasoundBoardApp
+make atmega8 install.0x7e
+
+Code for the mica2dot to talk to the ultrasound board is in
+tinyos-1.x/contrib/calamari/apps/micaUltrasoundLib
+Code running on the ultrasound board is in
+tinyos-1.x/contrib/calamari/apps/omnisound
+
+Leds:
+
+green:	
+yellow:	 
+red:	

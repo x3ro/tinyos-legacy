@@ -1,0 +1,1 @@
+This is a null application but built with McTorrent library. Although doing nothing after installed with the application, the motes are ready to receive new code image over the air and to reboot to the new application after reception of the new code image.

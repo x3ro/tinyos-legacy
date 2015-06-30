@@ -1,0 +1,33 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: nucleus.extra,v 1.9 2005/08/18 22:43:34 gtolle Exp $
+
+NUCLEUS_GEN_PL ?= $(TOSDIR)/../contrib/nucleus/scripts/gen_nucleus
+BUILD_EXTRA_DEPS += nucleus_wiring
+POST_BUILD_EXTRA_DEPS += nucleus_schema
+CFLAGS += -I%T/../beta/Drip
+CFLAGS += -I%T/../beta/Drain
+CFLAGS += -I%T/../contrib/nucleus/tos/lib/Nucleus
+CFLAGS += -I%T/../contrib/nucleus/tos/lib/NucleusExamples
+PFLAGS += -I$(BUILDDIR)
+
+nucleus_wiring:
+	@echo
+	@echo "** Removing old generated files prior to compilation"
+	@echo
+	rm -f $(BUILDDIR)/AttrGenC.nc $(BUILDDIR)/EventGenC.nc
+	rm -f $(BUILDDIR)/nucleusSchema.xml
+	@echo
+	@echo "** Generating nesC interface dump for $(COMPONENT) on $(PLATFORM)"
+	@echo
+	$(NCC) -fsyntax-only -fnesc-dump=interfaces -fnesc-dump=tags $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc $(LIBS) $(LDFLAGS) > $(BUILDDIR)/nesc.xml
+	@echo
+	@echo "** Generating Nucleus wiring for $(COMPONENT) on $(PLATFORM)"
+	@echo
+	cd $(BUILDDIR);	perl $(NUCLEUS_GEN_PL) nesc.xml --mode=wiring
+
+nucleus_schema:
+	@echo
+	@echo "** Generating Nucleus schema for $(COMPONENT) on $(PLATFORM)"
+	@echo
+	cd $(BUILDDIR); perl $(NUCLEUS_GEN_PL) nesc.xml --mode=schema $(IDENT_FLAGS) --exe=main.exe
+

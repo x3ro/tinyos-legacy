@@ -1,0 +1,101 @@
+#!/usr/bin/perl -w
+use strict;
+
+#$Id: list_fileset,v 1.5 2005/06/14 19:37:48 cssharp Exp $
+
+use FindBin;
+use lib $FindBin::Bin;
+use FindInclude;
+use SlurpFile;
+
+my %Opts = ( verbose => 0 );
+
+
+my @aa = &FindInclude::parse_include_opts( @ARGV );
+@ARGV = ();
+while (@aa) {
+  my $opt = shift @aa;
+  if( $opt =~ /^-/ ) {
+    if( $opt eq "-v" ) { $Opts{verbose} = 1; }
+    else { die "ERROR, bad command line option $opt, aborting.\n"; }
+  } else {
+    push( @ARGV, $opt );
+  }
+}
+
+my %fileset = ();
+while(<>) {
+  next unless /\S/;
+  s/\s+$//;
+  my $fullpath = $_;
+  next if defined $fileset{$fullpath};
+
+  my $shortpath = $fullpath;
+  while( $shortpath =~ s{/[^./]+/\.\.}{}g ) { } # collapse /..'s
+  $shortpath =~ s{^.*/(tinyos-[^/]+)}{$1};
+
+  (my $filename = $shortpath) =~ s{^.*/}{};
+
+  my %file = (
+    fullpath => $fullpath,
+    shortpath => $shortpath,
+    filename => $filename,
+    id => get_file_id($_),
+  );
+
+  $fileset{$fullpath} = \%file;
+}
+
+
+my $fakeid = "Id";
+print "#\$$fakeid:\$\n";
+for my $file (sort { $a->{filename} cmp $b->{filename} } values %fileset) {
+  print "$file->{filename},$file->{id},$file->{shortpath}\n";
+}
+
+
+sub get_file_id {
+  my ($fullpath) = @_;
+  my $fh;
+  open $fh, "< $fullpath" or return "file open error";
+  my $id = undef;
+  while( <$fh> ) {
+    if( /\$(Id|Revision):\s*(.*?)\$/ ) {
+      my $tag = $1;
+      $id = $2;
+      $id =~ s/.*?,v\s*//;
+      $id =~ s/(\s+Exp)?\s*$//;
+      $id = "$tag $id";
+      last;
+    }
+  }
+  close $fh;
+  if( not defined $id ) {
+    $id = get_cvs_entry($fullpath);
+    $id = "CvsEntries $id" if defined $id;
+  }
+  $id = "no version info found" if not defined $id;
+  return $id;
+}
+
+sub get_cvs_entry {
+  my ($fullpath) = @_;
+  my $name = undef;
+  (my $cvsentries = $fullpath) =~ s{([^/]+)$}{$name=$1;"CVS/Entries"}e;
+  my $ver = undef;
+  if( -f $cvsentries ) {
+    my $fh;
+    open $fh, "< $cvsentries" or return undef;
+    while( <$fh> ) {
+      if( m{^/$name/(.*?)/} ) {
+        $ver = $1;
+        $ver =~ s{/}{ }g;
+        $ver =~ s/\s+$//;
+        last;
+      }
+    }
+    close $fh;
+  }
+  return $ver ? $ver : undef;
+}
+

@@ -1,0 +1,15 @@
+README for TestSounder
+Author/Contact: tinyos-help@millennium.berkeley.edu
+ 
+Description:
+ 
+TestSounder is a very simple application that buzz the sounder periodically.
+ 
+
+Tools:
+ 
+None
+ 
+Known bugs/limitations:
+ 
+None              

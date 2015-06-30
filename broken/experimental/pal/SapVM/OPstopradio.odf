@@ -1,0 +1,1 @@
+<FUNCTION name=stopradio opcode=stopradio numparams=0 returnval=FALSE desc="Turns the radio off until is is restarted with startradio(). WARNING: sending while radio is off may hang Mate!!!">

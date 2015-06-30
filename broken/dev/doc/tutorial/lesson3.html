@@ -1,0 +1,145 @@
+<title>Lesson 3: Introducing Tasks for Application Data
+Processing</title>
+</head>
+
+<body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%">
+<font face="tahoma,arial,helvetica"><b><big><big>
+Lesson 3:
+Introducing Tasks for Application Data Processing</big></big></b>
+<p>
+Last updated 1 August 2002
+</font>
+</td></tr>
+</table>
+
+<p>
+This lesson introduces the TinyOS notion of <b>tasks</b>, which 
+can be used to perform general-purpose "background" processing in an 
+application. This lesson makes use of the <tt>Sense2</tt> application, 
+which is a revision of the <tt>Sense</tt> application from the previous
+lesson.
+
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">Task creation and scheduling</font></b></nobr></td>
+</tr></table>
+
+<p>
+TinyOS provides a two-level scheduling hierarchy consisting of
+<b>tasks</b> and <b>events</b>. As we have seen, an event is a 
+generalization of an interrupt handler, a call that is made from
+a lower-level component to a higher-level component in response to some
+event. Events must only do a small amount of work before completing,
+because events always run to completion and cannot be preempted. 
+<b>Tasks</b> are used to perform longer processing operations, 
+such as background data processing, that can be preempted by events.
+
+<p>
+A task is declared in your implementation module using the syntax
+<pre>
+  task void taskname() { ... }
+</pre>
+where <tt>taskname()</tt> is whatever symbolic name you want to assign
+to the task. Tasks must return <tt>void</tt> and may not take any
+arguments. 
+
+<p>
+To dispatch a task for (later) execution, use the syntax
+<pre>
+  post taskname();
+</pre>
+A task can be posted from within a command, an event, or even another task.
+
+<p>
+The <tt>post</tt> operation places the task on an internal <b>task
+queue</b> which is processed in FIFO order. When a task is executed, it
+runs to completion before the next task is run; therefore, a task should
+not spin or block for long periods of time. Tasks do not preempt each
+other, but a task can be preempted by events. If you need to run a 
+series of long operations, you should dispatch a separate task for 
+each operation, rather than using one task that spins in a loop.
+
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">The Sense2 Application</font></b></nobr></td>
+</tr></table>
+
+<p>To illustrate tasks, we have modified the Sense application from
+Lesson 2, which is found in <a
+href="../../apps/Sense2"><tt>apps/Sense2</tt></a>.  The SenseM
+component maintains a circular data buffer that contains recent photo
+sensor samples; the <tt>putdata()</tt> function is used to insert a
+new sample into the buffer. The <tt>dataReady()</tt> event simply
+deposits data into the buffer and posts a task, called
+<tt>processData()</tt>, for processing.
+
+<p>
+<center>
+<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+<tr bgcolor="#e0e0e0">
+<td width="100%">
+<b>SenseM.nc</b>
+<pre>
+  // ADC data ready event handler
+  event result_t ADC.dataReady(uint16_t data) {
+    call Leds.yellowToggle();
+    putdata(data);
+    post processData();
+    return SUCCESS;
+  }
+</pre></td></tr></table></center>
+
+<p>Some time after the event completes (there may be other tasks 
+pending for execution), the <tt>processData()</tt> task will run. 
+It computes the sum of the recent ADC samples and displays the upper
+three bits of the sum on the LEDs.
+
+<p>
+<center>
+<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+<tr bgcolor="#e0e0e0">
+<td width="100%">
+<b>SenseM.nc, continued</b>
+<pre>
+  task void processData() {
+    int16_t i, sum=0;
+    call Leds.greenToggle();
+    for (i=0; i<maxdata; i++)
+      sum += (data[i] >> 7);
+    display(sum >> shiftdata);
+  }
+</pre></td></tr></table></center>
+
+<p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><nobr><b><font
+face="arial,helvetica">Exercises</font></b></nobr></td>
+</tr></table>
+
+<p>
+Try to break up the <tt>processData()</tt> task so that each invocation
+of the task only adds one element of the <tt>data</tt> array to the sum.
+<tt>processData()</tt> should then post itself to continue processing
+the complete sum, and display the LEDs when the final element of the
+array has been processed. Be careful of concurrency issues - since
+<tt>processData()</tt> is also posted from <tt>ADC.dataReady()</tt>,
+you might want to add a flag to prevent a new instance of the task from
+being started before the previous sum has been computed!
+</p>
+
+<p>
+<hr>
+<b><a href="lesson2.html">&lt; Previous Lesson</a></b> |
+<b><a href="lesson4.html">Next Lesson &gt;</a></b>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+rm -rf full mote remote
+mkdir full mote remote
+cd full
+../src/configure TARGET=motlle CFLAGS=-g
+cd ../remote
+../src/configure TARGET=smotlle CFLAGS=-g
+cd ../mote
+../src/configure --host=avr TARGET=tmotlle CFLAGS=-DMDBG

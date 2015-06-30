@@ -1,0 +1,48 @@
+This SerialCommandParser library is a transport independent command parser.
+It enables sensors to be configured, commanded, and controlled through 
+simple ASCII commands. The list of supported commands can be found 
+in SerialCommandParserM.nc.
+
+The SensorControl interface gives the command parser access to the particular
+app that is being controlled. The app being controlled needs to implement 
+this SensorControl interface.
+
+
+Command Parser Rules:
+--------------------
+The parser is case sensitive.
+
+All commands must start with BS.
+BS stands for "Body Sensor" as this feature was developed to control and
+configure body worn sensors.
+
+All commands must end with a carriage return <CR> character.
+
+The command interpreter needs to be turned on before commands will be 
+interpreted by the sensor. The command to put a body sensor into command 
+mode is "+++". NOTE: The parser is on by default at startup.
+
+The BS Response to the "+++" command is: <CR><LF>COMMAND MODE<CR><LF> 
+= success, <CR><LF>OK<CR><LF> = already in command mode, <CR><LF>ERROR<CR><LF>
+= BS cannot go into command mode at this time.
+
+The command to take the body sensor out of command mode is "---". 
+The BS Response to the "---" command is: <CR><LF>EXIT<CR><LF> - success, 
+<CR><LF>ERROR<CR><LF> = BS cannot exit command mode at this time.
+
+In general, if the particular command cannot be executed at this time 
+then the response from the command interpreter on the sensor will be 
+<CR><LF>ERROR<CR><LF>.
+
+If the command is interpreted correctly and no response is defined for 
+this particular command then the response from the command interpreter 
+on the sensor will be <CR><LF>OK<CR><LF>.
+
+If the command is interpreted correctly and a custom response is defined 
+for this command then once the command itself has executed in the background 
+the command interpreter response will be sent. If the command was successful 
+then the response will be preceded by <CR><LF>OK<CR><LF> and if there was a 
+problem then the response will be <CR><LF>ERROR<CR><LF>.
+
+Commands that are not recognized by the command interpreter will return 
+<CR><LF>?<CR><LF>.

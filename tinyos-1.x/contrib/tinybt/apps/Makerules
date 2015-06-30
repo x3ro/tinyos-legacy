@@ -1,0 +1,67 @@
+# Emacs, this is a -*- Makefile -*-
+# Makefile to be included by each application's Makefile for tinybt.
+# Based on tinydiffusion and S-MAC by Mohan Mysore
+#
+# $Id: Makerules,v 1.7 2006/02/03 13:48:15 hjernemadsen Exp $
+# 
+# $Log: Makerules,v $
+# Revision 1.7  2006/02/03 13:48:15  hjernemadsen
+# This is a major update of the TinyBT stack.
+#
+# The focus on improving the robustness of the code, making less error-prone when
+# being used with real-world applications.
+#
+# Also some of the changes (the moving of files), are done in order to make it
+# easier to share code between the three different btnode platforms.
+#
+# The modified stack is not source-compatible with the old one. A later patch
+# will update the old application examples.
+#
+# Revision 1.6  2004/10/07 16:12:44  beutel
+# first try to incorporate the BTnode3 platform into TinyOS
+#
+#
+
+# Cheating a bit here....
+REAL_TOSDIR := $(TOSDIR)
+
+TINYBT_TOSDIR = ../../tos
+#TINYBT_TOSDIR := $(TOSDIR)
+#TOSDIR:=../../tos
+
+
+#INCLUDE = -I. -I$(TINYBT_TOSDIR)/interfaces \
+#          -I$(TINYBT_TOSDIR)/system -I$(TINYBT_TOSDIR)/lib \
+#	  -I$(TINYBT_TOSDIR)/platform/$(PLATFORM) \
+#	  -I$(TINYBT_TOSDIR)/types/
+
+# Hey, we are running gnu make, right? Right?!
+
+LIBDIRS=$(wildcard $(REAL_TOSDIR)/lib/*/)
+
+testmig:
+	echo "LIBDIRS= $(LIBDIRS)"
+
+INCLUDE =	-I$(TINYBT_TOSDIR)/platform/$(PLATFORM) \
+		-I$(TINYBT_TOSDIR)/platform/btnode-common \
+		-I. -I$(TINYBT_TOSDIR)/interfaces \
+		-I$(TINYBT_TOSDIR)/system -I$(TINYBT_TOSDIR)/lib \
+		-I$(TINYBT_TOSDIR)/types/ $(addprefix -I,$(LIBDIRS))
+
+override PLATFORMS := btnode2_2 btnode3_1 btnode3_2 pc ged
+
+CFLAGS += $(INCLUDE) -Os
+
+PROGRAMMER_EXTRA_FLAGS = -v=2
+
+#include $(TOSDIR)/../apps/Makerules
+include $(REAL_TOSDIR)/../apps/Makerules
+
+ifeq ($(PLATFORM)_x, pc_x)
+INCLUDE := -include /home/madsdyd/DIKU/TinyOS/tinyos-1.x/contrib/tinybt/tos/platform/pc/hardware.nido.h -D__HARDWARE_NIDO_H_INCLUDED $(INCLUDE)
+#INCLUDE := -nostdinc $(INCLUDE) -I$(TOSDIR)/interfaces \
+#          -I$(TOSDIR)/system -I$(TOSDIR)/lib \
+#	  -I$(TOSDIR)/platform/$(PLATFORM) \
+#	  -I$(TOSDIR)/types/
+endif
+

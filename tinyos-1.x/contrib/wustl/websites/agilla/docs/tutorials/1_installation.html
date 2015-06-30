@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>Lesson 1: Agilla Installation</h1>
+<p>The following instructions assume you have a working version of
+          <a href="http://www.tinyos.net">TinyOS</a> installed on your machine.
+          If you do not, either follow the official instructions on the TinyOS
+          website, or view the instructions <a href="http://www.cs.wustl.edu/wsn/index.php?title=TinyOS_1.x_Installation">here</a>.</p>
+<h2>Step 1: Download</h2>
+<p>Download the tarball of Agilla's source code from <a href="../../download/index.html">here</a>. Alternatively, you
+can grab an older version of Agilla via the <a href="http://www.cs.wustl.edu/wsn/index.php?title=Download_Agilla_using_CVS">TinyOS
+1.x CVS repository</a>.</p>
+<h2> Step 2: Extract</h2>
+<p>Extract the files using the commands below. By default, the files go under
+  $TOSROOT. On a Windows XP/Cygwin system, $TOSROOT is by default /opt/tinyos-1.x.
+On a Linux or OSX machine, $TOSROOT is wherever you have installed TinyOS 1.x.</p>
+<pre>
+mv Agilla*.tar.gz $TOSROOT
+cd $TOSROOT
+tar zxvf Agilla*.tar.gz
+</pre>
+
+<p>Once you have extracted the tarball, Agilla's source code will be located
+  in the following directory:</p>
+<ul>
+  <li>$TOSROOT/contrib/wustl/agilla </li>
+</ul>
+<p>There are three subdirectories within Agilla's main directory:</p>
+<ul>
+  <li>$TOSROOT/contrib/wustl/agilla/nesc: Agilla's mote firmware</li>
+  <li>$TOSROOT/contrib/wustl/agilla/java: Agilla's AgentInjector application</li>
+  <li>$TOSROOT/contrib/wustl/agilla/script: Example Agilla mobile scripts</li>
+</ul>
+<h2> Step 3: Create Makefile.Agilla</h2>
+<p>Create a file called &quot;Makefile.Agilla&quot; that contains local settings
+  in $TOSROOT/contrib/wustl/agilla/nesc. To do this, you can simply copy the
+example file that comes with Agilla.</p>
+<ul>
+  <li>cd $TOSROOT/contrib/wustl/agilla/nesc</li>
+  <li>cp Example\ Makefile.Agilla Makefile.Agilla</li>
+</ul>
+<p>See $TOSROOT/contrib/wustl/agilla/nesc/README for details on how to
+  customize this file. </p>
+<h2> Step 4: Compile and Install Agilla on a Mote</h2>
+<p>Compile and install Agilla onto every mote including the one that is attached
+to the programming board. Be sure that every mote has a unique TinyOS address.</p>
+<ul>
+  <li>cd $TOSROOT/contrib/wustl/apps/Agilla/</li>
+  <li>make [platform]</li>
+  <li>make [platform] reinstall.[id][programming board],[port]</li>
+</ul>
+<p>The actual command may differ slightly between Windows XP and Linux/OSX platforms,
+  mostly because of the different ways serial ports are named. The following
+  example commands assume a Windows XP environment.</p>
+<p>Here's a command that will install Agilla on a TelosB mote on COM5 with TinyOS
+  address 0:</p>
+<ul>
+  <li>cd $TOSROOT/contrib/wustl/apps/Agilla/</li>
+  <li>make telosb</li>
+  <li>make telosb reinstall.0 bsl,4</li>
+</ul>
+<p>Here's a command that will install Agilla on a Mica2 mote on COM1 with TinyOS
+  address 1:</p>
+<ul>
+  <li>cd $TOSROOT/contrib/wustl/apps/Agilla/</li>
+  <li>make mica2</li>
+  <li>make mica2 reinstall.1 mib510,/dev/ttyS0</li>
+</ul>
+<h2> Step 5: Compile the AgentInjector</h2>
+<p>The AgentInjector is a Java application that enables users to inject mobile
+  agents into an Agilla WSN. It is located in $TOSROOT/contrib/wustl/tools/java/.
+  The main class is edu.wustl.mobilab.agilla.AgentInjector. In order to compile
+  the AgentInjector, $TOSROOT/contrib/wustl/tools/java must be in the classpath.
+View the classpath using the following command:</p>
+<ul>
+  <li>echo $CLASSPATH</li>
+</ul>
+<p>If it is not in the classpath, add it:</p>
+<ul>
+  <li>export CLASSPATH=$CLASSPATH:$TOSROOT/contrib/wustl/tools/java</li>
+</ul>
+<p>Once the classpath is set, create a file called &quot;Makefile.Agilla&quot; within
+  $TOSROOT/tools/java/edu/wustl/mobilab/agilla using the following command:</p>
+<ul>
+  <li>cd $TOSROOT/contrib/wustl/tools/java/edu/wustl/mobilab/agilla</li>
+  <li>cp Example\
+      Makefile.Agilla Makefile.Agilla</li>
+  <li>make</li>
+</ul>
+<p>This file defines the MIG variable, which specifies what type of target environment
+  the AgentInjector is connecting to. The default content of this file contains:</p>
+<ul>
+  <li>#MIG = mig -target=pc java</li>
+  <li>MIG = mig java</li>
+</ul>
+<p>If the AgentInjector is to connect to a real WSN, leave the default content
+  as it is. If it is going to be used with TOSSIM, uncomment the first line and
+  comment out the second line.</p>
+<p>Once you have configured Makefile.Agilla, compile the AgentInjector:</p>
+<ul>
+  <li>make</li>
+</ul>
+<p>This will generate all of Agilla's messages and compile the AgentInjector. </p>
+<h2> Step 6: Creating an agilla.properties file</h2>
+<p>Create a file called &quot;agilla.properties&quot; within $TOSROOT/contrib/wustl/tools/java/
+that contains local settings for the AgentInjector:</p>
+<ul>
+  <li>cd $TOSROOT/contrib/wustl/tools/java/</li>
+  <li>cp Example\ agilla.properties agilla.properties</li>
+</ul>
+<p> Step 7: Adding RMI Support</p>
+<p>This step is only required if you plan on remotely injecting agents using
+  Java RMI. To enable the RMI feature, create a file called &quot;java.policy&quot; in
+$TOSROOT/tools/java with the following text:</p>
+<pre>
+grant {
+   permission java.net.SocketPermission &quot;*:1024-65535&quot;,&quot;accept,connect,listen,resolve&quot;;
+   permission java.io.FilePermission &quot;&lt;&lt;ALL FILES&gt;&gt;&quot;,&quot;read,write,execute&quot;; 
+   permission java.util.PropertyPermission &quot;user.dir&quot;,&quot;read,write&quot;;
+};</pre>
+
+<h2>Step 8: Launch the AgentInjector
+</h2>
+<p>You are now ready to inject mobile agents into the WSN! See lesson 2 of the
+  tutorial on how to inject a mobile agent into the WSN. </p>
+<h2>Optional Step 1: Creating a Makelocal file </h2>
+<p>A Makelocal file is used by TinyOS to record settings that
+    are specific to the local platform. <a href="http://www.cs.wustl.edu/wsn/index.php?title=TinyOS_1.x_Installation_on_Windows_XP#Installing_TinyOS">Here</a> are
+instructions on how to install a Makelocal file.
+</p>
+
+<h2>Optional Step 2: Configuring Environment Variables</h2>
+
+<p>There are several environment variables that will make using Agilla
+        easier. They are not required, but provide shortcuts when performing
+        common tasks.
+    In a Windows XP/Cygwin environment, the following commands may be included
+    in a file called &quot;washu.sh&quot; located within /etc/profile.d/. In
+    a Linux or OSX environment, they can be included in ~/.bash_profile or ~/.bashrc
+    depending on your specific shell.
+    </p>
+</p>
+<pre>         export WUBASE=$TOSROOT/contrib/wustl
+         alias cdwu=&quot;cd $WUBASE&quot;
+         alias cdwuj=&quot;cd $WUBASE/tools/java&quot;
+         alias cdwua=&quot;cd $WUBASE/apps&quot;
+         alias runsf_pc=&quot;java net.tinyos.sf.SerialForwarder -comm tossim-serial &amp;&quot;
+         alias runsf_com1=&quot;java net.tinyos.sf.SerialForwarder -comm serial@COM1:mica2 &amp;&quot;</pre>
+      <pre>         export AGILLA=$WUBASE/apps/Agilla
+         alias cda=&quot;cd $AGILLA&quot;
+         alias cdaa=&quot;cd $WUBASE/apps/AgillaAgents&quot;
+         alias cdaj=&quot;cd $WUBASE/tools/java/edu/wustl/mobilab/agilla&quot;</pre>
+      <h2>Optional Step 3: Enabling direct serial communication between Mica2
+    and Imote2 motes</h2>
+      <p>In order for Mica2 and MicaZ motes to communicate with Cricket motes,
+        you need to change their UART ports to operate at 115.2kbps (the default
+        is 57.6kbps).
+    To change this, open $TOSROOT/tos/platforms/&lt;platform&gt;/HPLUART0M.nc
+    and change outp(15, UBRR0L); to outp(7, UBRR0L);.</p>
+      <h2>Optional Step 4: Configuring a Text Editor to Edit Agilla Agents</h2>
+      <p>For Windows users, I recommend using TextPad to edit NesC and Mobile
+        Agent files. Here are the color-syntax configurations for NesC and Agilla
+        Agent
+    files. Install them in &lt;Program Files&gt;\TextPad 4\system.</p>
+      <p> * <a href="../../download/nesc.syn">NesC</a><br>
+* <a href="../../download/ma.syn">Mobile Agent</a> </p>
+      <p>If you are using Linux, I recommend gEdit. Here are the syntax files. Install
+    them in /usr/share/gtksourceview-1.0/language-specs/</p>
+      <p> * <a href="../../download/ncc.lang">NesC</a><br>
+* <a href="../../download/ma.lang">Mobile Agent </a></p>
+      <p><em>This page was last Updated on
+              <!-- #BeginDate format:Am1a -->April 7, 2008 5:12 PM<!-- #EndDate -->
+        .</em></p>
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

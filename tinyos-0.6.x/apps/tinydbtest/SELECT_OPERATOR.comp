@@ -1,0 +1,20 @@
+TOS_MODULE SELECT_OPERATOR;
+
+#include "TinyDB.h"
+#include "SchemaAPI.h"
+
+ACCEPTS{
+	TinyDBError SELECT_OPERATOR_PROCESS_TUPLE(ParsedQuery *qs, Tuple *t, Expr *e);
+};
+
+SIGNALS{
+	TinyDBError SELECT_OPERATOR_PROCESSED_TUPLE(Tuple *t, ParsedQuery *q, Expr *e, bool passed);
+};
+
+HANDLES{
+};
+
+USES{
+	short SEL_OP_GET_FIELD_SIZE(ParsedQuery *q, char field);
+	CharPointer SEL_OP_GET_FIELD_PTR(ParsedQuery *q, Tuple *t, char field);
+};

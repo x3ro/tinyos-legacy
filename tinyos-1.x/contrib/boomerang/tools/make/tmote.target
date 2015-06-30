@@ -1,0 +1,92 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: tmote.target,v 1.1.1.1 2007/11/05 19:11:22 jpolastre Exp $
+
+PLATFORM ?= tmote
+
+SP ?= INCLUDE
+
+MOTEIV_DIR ?= /opt/moteiv
+
+# Moteiv's TinyOS tree depends on a fixed TinyOS 1.x tree.  The expected
+# behavior is that a particular exported version of TinyOS 1.x exists in
+# MOTEIV_DIR/tinyos-1.x.  If MOTEIV_DIR/tinyos-1.x does not exist, the TinyOS
+# 1.x tree pointed to by TOSDIR is used.  If the user wants to use a particualr
+# TinyOS 1.x tree even if MOTEIV_DIR/tinyos-1.x exists, MOTEIV_TOSDIR can be
+# used as an override.  Note these rules only apply to Moteiv Tmote targets.
+
+ifdef MOTEIV_TOSDIR
+  # If MOTEIV_TOSDIR is set, then set TOSDIR to MOTEIV_TOSDIR
+  TOSDIR = $(MOTEIV_TOSDIR)
+else
+  # If MOTEIV_TOSDIR is not set and MOTEIV_DIR/tinyos-1.x exists, then set
+  # TOSDIR to MOTEIV_DIR/tinyos-1.x.  Otherwise, leave TOSDIR unchanged.
+  ifeq ($(shell [ -d $$MOTEIV_DIR/tinyos-1.x ] && echo yes),yes)
+    TOSDIR = $(MOTEIV_DIR)/tinyos-1.x/tos
+  endif
+endif
+
+MSP_BSL_FLAGS = --telosb
+
+CFLAGS += \
+-I$(MOTEIV_DIR)/tos/platform/tmote \
+-I$(MOTEIV_DIR)/tos/platform/tmote/util/uartdetect \
+-I$(MOTEIV_DIR)/tos/platform/msp430/adc \
+-I$(MOTEIV_DIR)/tos/platform/msp430/dac \
+-I$(MOTEIV_DIR)/tos/platform/msp430/dma \
+-I$(MOTEIV_DIR)/tos/platform/msp430/resource \
+-I$(MOTEIV_DIR)/tos/platform/msp430/timer \
+-I$(MOTEIV_DIR)/tos/platform/msp430 \
+-I$(MOTEIV_DIR)/tos/lib/util/pool \
+-I$(MOTEIV_DIR)/tos/lib/util/button \
+-I$(MOTEIV_DIR)/tos/lib/util/null \
+-I$(MOTEIV_DIR)/tos/lib/util
+
+ifeq ($(SP), INCLUDE)
+  CFLAGS += \
+  -I$(MOTEIV_DIR)/tos/lib/MultiHopLQI \
+  -I$(MOTEIV_DIR)/tos/lib/netsync \
+  -I$(MOTEIV_DIR)/tos/lib/sp \
+  -I$(MOTEIV_DIR)/tos/lib/sp/cc2420
+endif
+
+CFLAGS += \
+-I$(MOTEIV_DIR)/tos/lib/timer \
+-I$(MOTEIV_DIR)/tos/lib/resource \
+-I$(MOTEIV_DIR)/tos/lib/sched \
+-I$(MOTEIV_DIR)/tos/lib/Deluge \
+-I$(MOTEIV_DIR)/tos/lib/Flash/STM25P \
+-I$(MOTEIV_DIR)/tos/lib/Flash \
+-I$(MOTEIV_DIR)/tos/lib/Spram \
+-I$(MOTEIV_DIR)/tos/interfaces \
+-I$(MOTEIV_DIR)/tos/lib/CC2420Radio \
+-I$(MOTEIV_DIR)/tos/system \
+-I$(TOSDIR)/lib/CC2420Radio \
+-I$(TOSDIR)/lib/Drip \
+-fnesc-scheduler=TinySchedulerC,TinySchedulerC.TaskBasic,TaskBasic,TaskBasic,runTask,postTask
+
+ifdef CC2420_CHANNEL
+CFLAGS += -DCC2420_DEF_CHANNEL=$(CC2420_CHANNEL)
+endif
+
+TINYOS_NP ?= BNP
+
+ifeq ($(TINYOS_NP),BNP)
+  DELUGE_NUM_IMAGES ?= 6
+  CFLAGS += -Wl,--section-start=.text=0x4800,--defsym=_reset_vector__=0x4000
+  CFLAGS += -DLIB_DELUGE
+  CFLAGS += -DDELUGE_NUM_IMAGES=$(DELUGE_NUM_IMAGES)
+  # set the deluge bootloader
+  BOOTLOADER ?= $(MOTEIV_DIR)/tos/lib/Deluge/TOSBoot/build/tmote/main.ihex
+  ifeq ($(shell [ -f /bin/cygwin1.dll ] && echo cygwin),cygwin)
+    BOOTLOADER := $(shell cygpath -m $(BOOTLOADER))
+  endif
+endif
+
+$(call TOSMake_include_platform,msp_moteiv)
+
+t: $(BUILD_DEPS)
+	@:
+
+tmote: $(BUILD_DEPS)
+	@:
+

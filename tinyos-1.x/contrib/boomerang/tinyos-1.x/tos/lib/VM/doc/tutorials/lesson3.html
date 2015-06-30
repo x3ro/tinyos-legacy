@@ -1,0 +1,329 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Mat&eacute; Tutorial: Lesson 3</title>
+    <LINK HREF="../mate.css" REL="stylesheet" TYPE="text/css">
+  </head>
+  
+  <BODY>
+    <CENTER>
+      <TABLE BGCOLOR=BLACK CELLPADDING=1>
+	<TR>
+	  <TD>
+	    <TABLE BGCOLOR=WHITE WIDTH=700 CELLPADDING=6>
+	      <TR>
+		<TD BGCOLOR=#BEBEBE>
+		  <IMG SRC="../img/banner.gif">
+		</TD>
+	      </TR>
+	      <TR>
+		<TD>
+		  <CENTER>
+		    <TABLE>
+		      <TR>
+			<TD>[<a href="index.html">Tutorial Home</A>]</TD>
+			<TD>[<a href="lesson1.html">Lesson 1</A>]</TD>
+			<TD>[<a href="lesson2.html">Lesson 2</A>]</TD>
+			<TD>[Lesson 3]</TD>
+			<TD>[<a href="lesson4.html">Lesson 4</A>]</TD>
+			<TD>[<a href="lesson5.html">Lesson 5</A>]</TD>
+			<TD>[<a href="lesson6.html">Lesson 6</A>]</TD>
+		      </TR>
+		      
+		    </TABLE>
+		    <HR>
+		  </CENTER>
+		</TD>
+	      </TR>
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <h3>Lesson 3: Networking</h3>
+		  <!-- Created: Wed Jun 16 16:09:01 PDT 2004 -->
+		    <!-- hhmts start -->
+Last modified: Sun Feb 13 16:22:03 PST 2005
+<!-- hhmts end -->
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  This lesson introduces networking in the Bombilla
+		  VM. In it, you'll send raw sensor readings up an
+		  ad-hoc collection tree, then use local VM
+		  communication to send spatially averaged sensor
+		  readings.
+		</TD>
+	      </TR>
+
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Introduction</b>
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  <p>In lesson 2, you learned the basics of TinyScript
+		  programming, including some basic language
+		  structure. You also learned how to sample sensor
+		  readings, send those readings over the UART, and
+		  read them on a PC. In this lesson, you will learn
+		  how to route data over a multihop network and how to
+		  program motes to communicate with one another.</p>
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Building a Collection Tree</b>
+		</TD>
+	      </TR>
+
+	      
+	      <TR>
+                <TD>
+
+		  <p><b>Note:</b> BombillaLight (for 2KB Teloi) does
+		  not support the <b>send</b> function. If you are
+		  using Teloi, then you can either skip to the
+		  Broadcast handler below, or go through this part of
+		  the tutorial with TOSSIM.</p>
+
+		    
+		  <p>Bombilla VMs automatically build and maintain an
+		  ad-hoc routing tree, which for micas uses the
+		  "MintRoute" algorithm implemented in
+		  <tt>tinyos-1.x/tos/lib/MintRoute</tt> and for Teloi
+		  uses the LQI-based algorithm in
+		  <tt>tinyos-1.x/contrib/ucb/tos/lib/MultiHopLQI</tt>. In
+		  both, the mote with address zero is the tree
+		  collection point, which forwards packets over the
+		  UART. To build a routing tree, install Bombilla on a
+		  few nodes and plug mote 0 (the base station) into
+		  your serial port. It will take a little while (a
+		  minute or two) for the nodes to discover one another
+		  and build the tree.</p>
+
+		  <p>A mote can route a buffer to the base station
+		  with a function that takes a buffer as a
+		  parameter. On mica nodes, the function is
+		  <tt>send</tt>; on Telos RevB nodes it is
+		  <tt>sendlqi</tt> (Telos RevA nodes do not have
+		  enough RAM to support collection routing in
+		  Mat&eacute;). Running VMBufferReader as in the
+		  previous lesson will allow you to see the data the
+		  motes route to the base station, which forwards it
+		  to the serial port. Stop Timer0 and Timer1, if they
+		  are running, with a Once handler. Then install this
+		  code as Timer0, and start it with a rate of 1Hz
+		  (<tt>setttimer0(10)</tt>):</p>
+		  
+		  <quote>
+		    <pre>
+private i;
+buffer buf;
+
+bclear(buf);
+for i=0 until bfull(buf)
+  buf[] = light();
+next i
+
+send(buf)   ! if TelosB, use sendlqi(buf)
+		    </pre>
+		  </quote>
+
+		  <p>This program fills a buffer with light readings
+		  and sends it. Make sure you sensor boards are
+		  attached. You should see output in VMBufferReader
+		  like this:</p>
+
+		  <quote>
+		    <pre>
+Received multihop buffer of type PHOTO, size 10 from mote 0
+  [131][1023][42][939][669][371][716][527][485][443]
+Received multihop buffer of type PHOTO, size 10 from mote 1
+  [218][892][538][260][807][183][632][499][710][93]
+		    </pre>
+		  </quote>
+
+		  <p>The above readings were generated from TOSSIM
+		  with a randomized sensor model: readings from real
+		  motes should be much more uniform.</p>
+
+		  <p>Once a mote passes a buffer to the ad-hoc routing
+		  subsystem with <tt>send</tt>, all of the routing
+		  occurs below the VM, in TinyOS code. If you want to
+		  make VMs communicate with one another, you need to
+		  use the Broadcast handler, which the next section
+		  introduces.
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Mat&eacute; Networking: The Broadcast Handler</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>Bombilla can broadcast a buffer over the radio
+		  with the <tt>bcast</tt> function. If Bombilla hears
+		  a broadcast packet, it triggers the Broadcast
+		  handler, which can retrieve the buffer with the
+		  <tt>bcastbuf</tt> function.</p>
+		  
+		  <p>You can use <tt>bcast</tt> to build a simple
+		  combination of the traditional TinyOS apps
+		  SenseToRfm and RfmToLeds. This program periodically
+		  samples the local sensor and broadcasts it; if it
+		  hears a sensor reading, it displays the top three
+		  bits on the leds. Write the following handlers and
+		  inject them:</p>
+
+		  <table>
+		    <TR>
+		      <TD WIDTH=300><CENTER><b>Timer0</b></CENTER></TD>
+		      <TD WIDTH=300><CENTER><b>Broadcast</b></CENTER></TD>
+		      <TD WIDTH=300><CENTER><b>Once</b></CENTER></TD>
+		    </TR>
+		    <TR>
+		      <TD VALIGN=TOP>
+			<pre>
+buffer buf;
+
+bclear(buf);
+buf[]= light();
+bcast(buf);
+			</pre>
+		      </TD>
+		      <TD VALIGN=TOP>
+			<pre>
+private val;
+buffer received;
+
+received = bcastbuf();
+val = int(received[0]);
+leds(val / 128);
+			</pre>
+		      </TD>
+
+		      <TD VALIGN=TOP>
+			<pre>
+settimer0(5);
+			</pre>
+		      </TD>
+		    </TR>
+		  </TABLE>		  
+
+		  <p>You can use the single-hop communication
+		  primitive to locally aggregate sensor readings. The
+		  following program periodically sends spatially
+		  averaged sensor readings up a routing tree:</p>
+
+		  <table>
+		    <TR>
+		      <TD WIDTH=300><CENTER><b>Timer0</b></CENTER></TD>
+		      <TD WIDTH=300><CENTER><b>Broadcast</b></CENTER></TD>
+		      <TD WIDTH=300><CENTER><b>Once</b></CENTER></TD>
+		    </TR>
+		    <TR>
+		      <TD VALIGN=TOP>
+			<pre>
+shared avg;
+shared avgCount;
+buffer buf;
+
+if (avgCount > 0) then
+  bclear(buf);  
+  buf[0] = avgCount;
+  buf[1] = avg;
+  send(buf);     ! TelosB, use sendlqi()
+end if
+
+avg = int(light());
+avgCount = 1;
+bclear(buf);
+buf[] = avg;
+bcast(buf);
+			</pre>
+		      </TD>
+		      <TD VALIGN=TOP>
+			<pre>
+shared avg;
+shared avgCount;
+buffer received;
+
+received = bcastbuf();
+avg = avg + received[0];
+avgCount = avgCount + 1;
+			</pre>
+		      </TD>
+
+		      <TD VALIGN=TOP>
+			<pre>
+shared avgCount;
+
+avgCount = 0;
+settimer0(20);
+			</pre>
+		      </TD>
+		    </TR>
+		  </TABLE>
+			    
+		  <p>The Once context has to set avgCount to 0 for
+		  the first time when Timer0 runs; otherwise it will
+		  have no type and the comparison (avgCount &gt;
+		  0) will throw a type error.</p>
+		  
+		  <p>This program has variables that several handlers
+		  share. The VM automatically schedules the handlers
+		  so these variables do not have race conditions. For
+		  example, in the above program a race condition could
+		  occur if the Broadcast and Timer0 handler were
+		  running concurrently. If Timer0 set <tt>avg</tt> to
+		  be a single reading, but Broadcast then reads both
+		  <tt>avg</tt> and <tt>avgCount</tt>, then it can read
+		  the new value for <tt>avg</tt> and the old value for
+		  <tt>avgCount</tt>, and produce erroneus values. In
+		  this case, the VM won't let the two handlers run
+		  concurrently. If a packet arrives while Timer0 is
+		  running, the Broadcast handler will wait until
+		  Timer0 completes, and if Timer0 fires while
+		  Broadcast is running, then Timer0 will wait until
+		  Broadcast completes.</p>
+
+		</TD>
+	      </TR>
+
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Conclusion</b>
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  <p>This concludes the tutorials on programming
+		  Bombilla in TinyScript. Lesson 4 deals with building
+		  your own VM, and lesson 5 deals with writing new
+		  functions or event handlers to incorporate into VMs.
+		  </p>
+
+		    <hr></hr>
+		    <CENTER>
+		    <b><a href="lesson2.html">&lt; Previous Lesson</a></b> |
+		    <b><a href="lesson4.html">Next Lesson ></a></b> |
+		    <b><a href="index.html">Top</a></b>
+		  </CENTER>
+		</TD>
+	      </TR>
+	    </TABLE>
+	  </TD>
+	</TR>
+      </TABLE>
+    </CENTER>
+  </body>
+</html>

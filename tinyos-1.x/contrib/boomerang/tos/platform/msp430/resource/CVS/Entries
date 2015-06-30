@@ -1,0 +1,18 @@
+/MSP430ArbiterTimerAC.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ArbiterUSART0C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ArbiterUSART1C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceConfigTimerAP.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceConfigUSART0C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceConfigUSART1C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceConfigUSARTP.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceI2C0C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceSPI0C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceSPI1C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceTimerAC.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceUART0C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceUART1C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceUSART0C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceUSART0P.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceUSART1C.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+/MSP430ResourceUSART1P.nc/1.1.1.1/Mon Nov  5 19:11:33 2007//
+D

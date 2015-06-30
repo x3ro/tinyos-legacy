@@ -1,0 +1,2 @@
+COMPONENT=ZoneApp
+include ../Makerules

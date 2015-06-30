@@ -1,0 +1,3 @@
+COMPONENT=TestTPSN
+include ../Makerules
+

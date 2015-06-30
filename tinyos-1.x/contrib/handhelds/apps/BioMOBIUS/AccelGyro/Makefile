@@ -1,0 +1,3 @@
+COMPONENT=AccelGyro
+
+include ../../Makerules

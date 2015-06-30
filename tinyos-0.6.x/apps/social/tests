@@ -1,0 +1,12 @@
+test1: register at 5s, watch id msgs change
+test2: register at 5s, receive some other ids at 10, 11 and 12s.
+       (observe msg_rate increasing)
+test3: same as test2, request data at 15s. observe counts of 05 and 02
+       for nodes 6 & 7
+test4: 2 nodes. id both, request data at 15s. observe a count of 08 from node 1
+test5: 2 nodes. same as test4, but:
+	at 15s, request last time 0 -> answered
+	at 16s, request last time 0 -> ignored (timing out send)
+	at 22.5s, request last time 0 -> answered
+	at 23.5s, request last time <from result of 22.5s req> -> clears data
+	at 35s, request last time <from result of 22.5s req> -> answered

@@ -1,0 +1,25 @@
+ifeq ($(MCCORD_ROOTDIR),)
+  $(error "MCCORD_ROOTDIR not specified.")
+endif
+
+PFLAGS += -I$(MCCORD_ROOTDIR)/tos/lib/McCORD -I$(MCCORD_ROOTDIR)/tos/interfaces
+
+# Determine platform from the make command. 
+SUPPORTED_PLATFORMS = pc telosb
+PLATFORM := $(filter $(SUPPORTED_PLATFORMS), $(MAKECMDGOALS))
+
+######## The following options are platform dependent ########
+
+ifeq ($(PLATFORM),pc)
+  PFLAGS += -DTOTAL_PAGES=5
+  PFLAGS += -I$(MCCORD_ROOTDIR)/tos/platform/pc \
+            -I$(MCCORD_ROOTDIR)/tos/platform/pc/RFMRadioMC 
+else
+  ifeq ($(PLATFORM),telosb)
+    PFLAGS += -I$(MCCORD_ROOTDIR)/tos/platform/telosb 
+  else
+    ifneq ($(MAKECMDGOALS),clean)
+      $(error "Platform not supported.")
+    endif
+  endif
+endif

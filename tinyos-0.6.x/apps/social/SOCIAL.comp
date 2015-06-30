@@ -1,0 +1,51 @@
+TOS_MODULE SOCIAL;
+
+ACCEPTS{
+	char INIT(void);
+	char START(void);
+};
+
+HANDLES{
+	void CHECKPOINT_INITIALISED(unsigned char cleared);
+	void CHECKPOINT_READ_DONE(unsigned char success, unsigned char *data);
+	void CHECKPOINT_WRITE_DONE(unsigned char success, unsigned char *data);
+
+	char REGISTERED(unsigned short id);
+
+	void SOCIAL_TIMER_EVENT(short port);
+
+	char MSG_SEND_DONE(TOS_MsgPtr msg);
+
+	TOS_MsgPtr SEND_ID2(TOS_MsgPtr val);
+	TOS_MsgPtr REQ_DATA(TOS_MsgPtr val);
+
+	TOS_MsgPtr SEND_SOCIAL_INFO(TOS_MsgPtr val);
+};
+
+USES{
+	void SOCIAL_LEDS(unsigned char led_action);
+
+	char CHECKPOINT_INIT(unsigned short eeprom_base, unsigned short data_length, unsigned char ndata_sets);
+	char CHECKPOINT_READ(unsigned char data_set, unsigned char *data);
+	char CHECKPOINT_WRITE(unsigned char data_set, unsigned char *data);
+
+	char IDENT_INIT(short port);
+	char IDENT_START(void);
+	char IDENT_SET_ID(unsigned char *id, short len);
+
+	char REGISTER_INIT(void);
+	char REGISTER_SET_ID(unsigned short id);
+	char REGISTER_CLEAR_ID(void);
+	unsigned short REGISTER_GET_ID(void);
+
+	void DEBUG_INIT(void);
+
+	char TIMER_REGISTER(char port, char interval);
+
+	char SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	void SUB_POT_INC(void);
+	void SUB_POT_DEC(void);
+};
+
+SIGNALS{
+};

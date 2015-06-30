@@ -1,0 +1,11 @@
+
+This program is an extension of gdi-norf.  However, when this program
+wakes up, it ATTEMPTS to (1) make three ADC measurements, (2) blinks
+the leds, (3) send a broadcast message, and (4) return to sleep.
+
+Unfortunately, this is incompatible with the radio stack.
+The stack and power management components need fixing.
+
+
+
+

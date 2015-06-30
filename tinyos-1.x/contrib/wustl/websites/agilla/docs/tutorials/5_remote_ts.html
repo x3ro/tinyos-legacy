@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>Lesson 5: Performing
+
+            Remote Tuplespace Operations</h1>
+          <p><em>Last Updated on
+              <!-- #BeginDate format:Am1a -->November 3, 2005 4:23 PM<!-- #EndDate -->
+.</em></p>
+          <p align="center"><img src="remote_ts.jpg" width="331" height="217"></p>
+          <p>An agent can access a remote node's tuplespace, even if the node
+            is multiple hops away. The instructions Agilla provides to accomplish
+            this are the remote out (<strong>rout</strong>), remote rdp (<strong>rrdp</strong>),
+            remote inp (<strong>rinp</strong>),
+            and remote group probe (<strong>rrdpg</strong>). All of these instructions
+            take a tuple or template and destination location as a parameter.
+            The top of the operand stack must be the destination location, followed
+            by
+            the
+            tuple or template. The tuple or template is pushed on the stack as
+            described in <a href="4_local_ts.html">Lesson 4: Using
+            the Local Tuplespace</a>. The location can be pushed onto the stack
+            using the <font face="Courier New, Courier, mono">pushloc</font> instruction.</p>
+          <p>All of the remote tuplespace operations are best effort in that
+            the initiating node sends a request to the destination (which may
+            be multiple hops away), and waits for a result. If the destination
+            node receives the request, it performs the request and sends back
+            a result. If the result arrives, the initiating node saves the result
+            in the initiating agent's opstack and sets the condition code (where
+            appopriate based on the instruction), and resumes the initiating
+            agent. If message loss occurs, the initiating agent times out and
+            resumes executing with the condition code set to 0.</p>
+          <p><font face="Courier New, Courier, mono">rrdpg</font> is unique in
+            that it operates on all one-hop neighbors by asking whether any of
+            them have a tuple matching a particular template. This instruction
+            determines the location of each neighbor that has a match and stores
+            the results on the heap (rather than the stack). Heap address 0 is
+            always the number of results (say <em>n</em>), and the <em>n</em> heap
+            addresses following heap address 0 contain the resulting locations.</p>
+          <p>Consider the dynamic fire detector located in &lt;agilla&gt;/Examples/Fire
+            Dynamic Spread/Dynamic Fire.ma:</p>
+          <p align="center"><img src="dynamic_fire.jpg" width="725" height="865"></p>
+          <p align="left">This agent models fire that epidemically spreads throughout
+            a network. Upon arrival at a node, it outs a tuple containing the
+            string &quot;fir&quot; into the local tuple space, then blinks the red LED
+            a certain number of times. It then chooses a random neighbor and
+            checks whether it is on fire using a <font face="Courier New, Courier, mono">rrdp</font> instruction.
+            If the neighbor is not on fire, it clones to it. Either way, it loops
+            back to blinking the red LED. This processes continues indefinately
+            until the entire network is saturated with fire agents.</p>
+          <p align="left">The rrdp instruction is used on line 35 of the above
+            agent. Notice that before it, on lines 30-33, a tuple containing
+            the string &quot;fir&quot; is pushed onto the stack, and that the location
+            is pushed onto the stack by the <font face="Courier New, Courier, mono">getvar
+            0 </font>instruction on line 34 (<font face="Courier New, Courier, mono">getvar
+            0</font> retrieves the variabled
+            stored on heap address 0, which is the chosen neighbor and is set
+            by the <font face="Courier New, Courier, mono">setvar 0</font> instruction on line 29).</p>
+          <h2 align="left">Return values</h2>
+          <p align="left">The remote tuplespace instructions differ in their
+            return values. </p>
+          <ul>
+            <li>rout - sets conditon=1 if success, 0 if fail. Does not push anything
+              onto the stack.</li>
+            <li>rinp and rrdp - sets conditon=1 if success, 0 if fail. Pushes
+              a matching tuple onto the stack if success.</li>
+            <li>rrdpg - sets conditon=1 if success, 0 if fail. Saves the resulting
+              locations on the heap as described above.</li>
+          </ul>
+          <p>&nbsp;</p>
+
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

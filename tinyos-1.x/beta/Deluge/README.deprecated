@@ -1,0 +1,10 @@
+$Id: README.deprecated,v 1.3 2005/07/22 18:03:19 jwhui Exp $
+
+Deluge 2.0 - TinyOS Network Programming
+
+- Project members/groups:
+    * Jonathan Hui <jwhui@cs.berkeley.edu>
+
+The Deluge files have been moved into the main tree.
+
+Refer to tinyos-1.x/doc/deluge-manual.pdf for more details.

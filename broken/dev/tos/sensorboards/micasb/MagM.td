@@ -1,0 +1,146 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000-2002 The Regents of the University  of California.  
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice, the following
+ * two paragraphs and the author appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ */
+/*									tab:4
+ *  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.  By
+ *  downloading, copying, installing or using the software you agree to
+ *  this license.  If you do not agree to this license, do not download,
+ *  install, copy or use the software.
+ *
+ *  Intel Open Source License 
+ *
+ *  Copyright (c) 2002 Intel Corporation 
+ *  All rights reserved. 
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are
+ *  met:
+ * 
+ *	Redistributions of source code must retain the above copyright
+ *  notice, this list of conditions and the following disclaimer.
+ *	Redistributions in binary form must reproduce the above copyright
+ *  notice, this list of conditions and the following disclaimer in the
+ *  documentation and/or other materials provided with the distribution.
+ *      Neither the name of the Intel Corporation nor the names of its
+ *  contributors may be used to endorse or promote products derived from
+ *  this software without specific prior written permission.
+ *  
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ *  PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE INTEL OR ITS
+ *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * 
+ */
+/*
+ *
+ * Authors:	Alec Woo, Su Ping
+ *
+ */
+
+includes sensorboard;
+module MagM {
+  provides interface StdControl;
+  provides interface MagSetting;
+  uses {
+    interface ADCControl;
+    interface StdControl as PotControl;
+    interface I2CPot;
+  }
+}
+implementation {
+
+  enum{IDLE=0,
+	 GAINADJUST=1};	 
+  char axis, state;
+
+  command result_t StdControl.init() {
+    call ADCControl.bindPort(TOS_ADC_MAG_X_PORT, TOSH_ACTUAL_MAG_X_PORT);
+    call ADCControl.bindPort(TOS_ADC_MAG_Y_PORT, TOSH_ACTUAL_MAG_Y_PORT);
+    TOSH_MAKE_MAG_CTL_OUTPUT();
+    TOSH_SET_MAG_CTL_PIN();
+    state = IDLE;
+    dbg(DBG_BOOT, "MAG initialized.\n");
+    return rcombine(call ADCControl.init(), call PotControl.init());
+  }
+  command result_t StdControl.start()
+  { 
+    TOSH_SET_MAG_CTL_PIN();
+    return SUCCESS;
+  }
+  command result_t StdControl.stop() {
+      TOSH_CLR_MAG_CTL_PIN();
+      return SUCCESS;
+  }
+
+  command result_t MagSetting.gainAdjustX(uint8_t val){
+    if (state == IDLE){
+      state = GAINADJUST;
+      axis = 1;
+      return call I2CPot.writePot(TOS_MAG_POT_ADDR, axis, val);
+    }
+    return FAIL;
+  }
+
+  command result_t MagSetting.gainAdjustY(uint8_t val){
+    if (state == IDLE){
+      state = GAINADJUST;
+      axis = 0;
+      return call I2CPot.writePot(TOS_MAG_POT_ADDR, axis, val);
+    }
+    return FAIL;
+  }
+
+  default event result_t MagSetting.gainAdjustXDone(bool result){
+    return SUCCESS;
+  }
+
+  default event result_t MagSetting.gainAdjustYDone(bool result){
+    return SUCCESS;
+  }
+
+  event result_t I2CPot.writePotDone(bool result){
+    if (axis == 0 & state == GAINADJUST) {
+      state = IDLE;
+      return signal MagSetting.gainAdjustYDone(result);
+    }if (axis == 1 & state == GAINADJUST){
+      state = IDLE;
+      return signal MagSetting.gainAdjustXDone(result);
+    }
+    return FAIL;
+  }
+  event result_t I2CPot.readPotDone(char data, bool result) {
+	/* do what ? */
+	return 1;
+  }
+
+
+
+}
+

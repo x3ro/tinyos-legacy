@@ -1,0 +1,92 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Wei Hong
+ *
+ *
+ */
+
+TOS_MODULE ATTR;
+
+#include "SchemaAPI.h"
+
+ACCEPTS{
+	char ATTR_INIT(void);
+	char ATTR_START(void);
+};
+
+HANDLES{
+	char ATTR_PHOTO_DATA_READY(short data);
+	char ATTR_TEMP_DATA_READY(short data);
+	char ATTR_VOLTAGE_DATA_READY(short data);
+	char ATTR_ACCELX_DATA_READY(short data);
+	char ATTR_ACCELY_DATA_READY(short data);
+};
+
+SIGNALS{
+	void ATTR_COMMAND_COMPLETE(CommandDescPtr commandDesc, char *resultBuf, SchemaErrorNo errorNo);
+};
+
+USES{
+	char SCHEMA_INIT();
+	char ATTR_PHOTO_INIT();
+	char ATTR_PHOTO_PWR(char val);
+	char ATTR_PHOTO_GET_DATA();
+	char ATTR_TEMP_INIT();
+	char ATTR_TEMP_PWR(char val);
+	char ATTR_TEMP_GET_DATA();
+	char ATTR_VOLTAGE_GET_DATA();
+	char ATTR_SUB_INIT();
+	char ATTR_ACCELX_GET_DATA();
+	char ATTR_ACCELY_GET_DATA();
+	short ATTR_MAGX_GET_DATA();
+	short ATTR_MAGY_GET_DATA();
+	char ATTR_MAGNET_STOP();
+	char ADD_ATTR(char *attrName, TOSType type, int1 attrLen, func_ptr getFunc, func_ptr setFunc);
+	char ADD_COMMAND(char *commandName, func_ptr commandFunc, TOSType retType, int1 retLen, int1 nargs, ...);
+	short GET_PARENT(void);
+	void SET_POT(char pot);
+	void FORCE_TOPOLOGY(char fanout);
+	void SET_CENTRALIZED(bool on);
+	void SELF_DESTRUCT();
+	void SET_FIXED_COMM(bool fixed);
+};
+
+INTERNAL{
+	char getTemp(CommandCallInfo *callInfo);
+	char getLight(CommandCallInfo *callInfo);
+	char getVoltage(CommandCallInfo *callInfo);
+	char getAccelX(CommandCallInfo *callInfo);
+	char getAccelY(CommandCallInfo *callInfo);
+	char getMagX(CommandCallInfo *callInfo);
+	char getMagY(CommandCallInfo *callInfo);
+	char getId(CommandCallInfo *callInfo);
+	char getParent(CommandCallInfo *callInfo);
+	char setCentralized(int1 *on, CommandCallInfo *callInfo);
+	char setTopology(int1 *fanout, CommandCallInfo *callInfo);
+	char setPot(int1 *pot, CommandCallInfo *callInfo);
+	char resetLog(int2 *line, CommandCallInfo *callInfo);
+	char dumpLog(int2 *reqLine, CommandCallInfo *callInfo);
+	char selfDestruct(CommandCallInfo *callInfo);
+	char useFixedComm(int1 *fix, CommandCallInfo *callInfo);	
+	char stopMag(CommandCallInfo *callInfo);
+};

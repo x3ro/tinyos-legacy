@@ -1,0 +1,31 @@
+Building TASK and TinyDB RPMS requires two steps: generating the source tarball
+and building the RPM.  The tarball is built using the extractor script
+(in the "release") directory, one level up from this RPM.
+
+You'll need to set up your environment to ensure that RPM can do its
+magic.  You may have set up your ".rpmmacros" file already in your
+home directory; if not, you should create one and point it at an RPM
+working directory.  Let's assume that's /home/madden/rpm.
+
+You're .rpmmacros file will then contain:
+
+%_topdir /home/madden/rpm
+
+You'll need to create the following directories in the
+/home/madden/rpm directory:
+
+SOURCES
+BUILD
+RPMS
+RPMS/nodeps
+
+Then, run the extractor script against the tinydb.files file in this
+directory; the syntax should be something like:
+
+../extractor <task-tinydb.files ../../.. > /home/madden/rpm/SOURCES/task-tinydb-1.1.0.tar.gz
+
+Now, you should be able to build the RPM with the command:
+
+rpmbuild -bb tinydb.spec
+
+Which will create the RPM file in /home/madden/rpm/RPMS/nodeps

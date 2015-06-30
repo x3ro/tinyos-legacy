@@ -1,0 +1,12 @@
+name kleen
+id 44
+in uint16_t num
+in uint8_t ding
+in uint32_t dong
+out uint16_t winged
+
+name gloon
+id 23
+in uint8_t jumm
+in uint8_t pong
+out uint8_t gleen

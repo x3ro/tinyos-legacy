@@ -1,0 +1,71 @@
+#!/usr/bin/perl -w
+use strict;
+#$Id: nqlist,v 1.2 2005/06/22 21:29:21 lakiolen Exp $
+
+my @attrs = ();
+my $hdr_type = "type";
+my $hdr_module = "module";
+my $hdr_name = "name";
+my $hdr_addr = "address";
+
+my $len_type = length $hdr_type;
+my $len_module = length $hdr_module;
+my $len_name = length $hdr_name;
+my $len_addr = length $hdr_addr;
+my $ram = 0;
+
+
+my ($r) = @ARGV;
+
+if ($r eq "-r") {
+  shift @ARGV;
+  $ram = 1;
+}
+
+while(<>) {
+  if ($ram) {
+    if( m{symbol (.*) />} ) {
+      my $text = $1;
+      my %a = ($text =~ m{(\S+)="([^\"]*)"}g);
+      push( @attrs, \%a );
+      $len_addr = length $a{address} if length $a{address} > $len_addr;
+      $len_name = length $a{name} if length $a{name} > $len_name;
+    }
+  }
+  else {
+    if( m{<attribute (.*) />} ) {
+      my $text = $1;
+      my %a = ($text =~ m{(\S+)="([^\"]*)"}g);
+      push( @attrs, \%a );
+      $len_type = length $a{type} if length $a{type} > $len_type;
+      $len_module = length $a{module} if length $a{module} > $len_module;
+      $len_name = length $a{name} if length $a{name} > $len_name;
+    }
+  }
+}
+
+my $fmt;
+if ($ram) {
+  $fmt = "  %${len_addr}s  %3s  %s\n";
+  printf( $fmt, "address", "len", "name" );
+  printf( $fmt, "-"x$len_addr, "---", "-"x$len_name );
+
+  for my $attr (@attrs) {
+    my %a = %{$attr};
+    printf( $fmt, $a{address}, $a{'length'}, $a{name} );
+  }
+}
+else {
+  $fmt = "  %${len_type}s%2s  %2s %3s  %${len_module}s %s\n";
+  printf( $fmt, "type", "[]", "rw", "len", "module", "name" );
+  printf( $fmt, "-"x$len_type, "--", "--", "---", "-"x$len_module, "-"x$len_name );
+
+  for my $attr (@attrs) {
+    my %a = %{$attr};
+    my $read = $a{'get-interface'} ? "r" : " ";
+    my $write = $a{'set-interface'} ? "w" : " ";
+    my $list = ($a{mode} eq "list") ? "[]" : "  ";
+    printf( $fmt, $a{type}, $list, "$read$write", $a{'length'}, $a{module}, $a{name} );
+  }
+}
+

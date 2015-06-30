@@ -1,0 +1,56 @@
+<html>
+<head>
+   <title>Johns Hopkins University</title>
+</head>
+<body TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EF" VLINK="#55188A" ALINK="#FF0000">
+<a href="http://tinyos.cvs.sourceforge.net/viewvc/tinyos/tinyos-2.x-contrib/jhu/
+">View CVS repository</a>
+
+<h1>Low Power Probing (LPP)</h1>
+
+<p>LPP is lower power technique which can be used to efficiently wake
+up a multi-hop network of motes. In the current implementation LPP is
+not a complete LPL replacement. The interface is similar with LPL but
+simpler and slightly different. More details can be found in
+<tt>lpp/README</tt>. In the same directory there two applications,
+<tt>TestLppNode</tt> and <tt>TestLppBasestation</tt> which demonstrate
+the intend use.</p>
+
+<h1><tt>tinyos.py</tt></h1>
+
+<p><tt>tinyos.py</tt> is a Python implementation of the T2 serial
+communication. An earlier version was included in the tools package of
+TinyOS 2.0.2 as part of the Deluge T2.</p>
+
+<h1>OneWire Bus</h1>
+<p>Framework for communication with devices over the Dallas OneWire
+protocol.  Each of the following should contain a README.txt file, and
+the nesdocs should be pretty comprehensive.  Much of this code was
+adapted from PeoplePower co's OSHAN distribution.  Please respect
+their copyright/license notices.
+</p>
+<ul>
+    <li><tt>tos/platforms/telosb</tt> modified to use ADC0 as the
+    external onewire data/power.  Change the wiring in
+    <tt>tos/platforms/telosb/hardware/onewire/PlatformOneWireInitC.nc</tt>
+    if you wish to use a different port. PLEASE NOTE: You *MUST* add a
+    pull-up resistor from the onewire bus pin to Vcc.  On a telosb, it
+    works fine with ~5k ohm.</li>
+
+    <li><tt>tos/lib/onewire</tt> generic driver code and
+    interfaces</li>
+
+    <li><tt>apps/PlatformTests/TestDs1825</tt> for testing with
+    multiple DS1825 temperature sensors. The Makefile in this
+    directory may be a good starting point for projects wishing to
+    include the JHU onewire code  </li>
+
+    <li><tt>apps/TestOneWireBus</tt> for testing the bus multiplexing
+    code with a DS1825 temperature sensor.  Please note that the
+    device type implementations under dummyOW contain device-specific
+    IDs for testing: you'll need to change these to match your
+    hardware if you use this app.</li>
+
+</ul> 
+</body>
+</html>

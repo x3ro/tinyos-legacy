@@ -1,0 +1,6 @@
+* Fix even number of TX byte problem in packet mode.
+* Currently we get an error when receiving a packet right after
+  a packet with crc error is received.
+* Test CCA and ED in stream mode.
+* Make interrupt handler reentrant below fast action, to make it possible
+  to react to lolock and timer interrupts, even when doing stream operations.

@@ -1,0 +1,50 @@
+TOS_MODULE VIBES_LOGGER;
+
+ACCEPTS{
+	char VIBES_LOGGER_INIT(void);
+	char VIBES_LOGGER_START(void);
+};
+
+HANDLES{
+	void VIBES_LOGGER_CLOCK_EVENT(void);
+
+	char VIBES_LOGGER_DATA_EVENT_2(int data);
+	char VIBES_LOGGER_DATA_EVENT_3(int data);
+
+	TOS_MsgPtr VIBES_LOGGER_RX_REQUEST(TOS_MsgPtr msgptr);
+
+	char VIBES_LOGGER_MSG_SEND_DONE(TOS_MsgPtr data);
+
+	char VIBES_LOGGER_APPEND_LOG_DONE(char success);
+	char VIBES_LOGGER_READ_LOG_DONE(char* packet, char success);
+};
+
+USES{
+	char VIBES_LOGGER_SUB_COMM_INIT(void);
+	char VIBES_LOGGER_SEND_MSG(short addr, char type, TOS_MsgPtr msg); 
+
+	char VIBES_LOGGER_CLOCK_INIT(char interval, char scale);
+
+	char VIBES_LOGGER_ADC_INIT();
+
+	char VIBES_LOGGER_LEDS_INIT(void);
+	
+	char VIBES_LOGGER_APPEND_LOG(char *data);
+	char VIBES_LOGGER_READ_LOG(int line, char *dest);
+	char VIBES_LOGGER_SUB_LOGGER_INIT();
+};
+
+SIGNALS{
+};
+
+
+
+
+
+
+
+
+
+
+
+

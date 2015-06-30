@@ -1,0 +1,7 @@
+# $Id: Makefile.component,v 1.1 2005/02/03 10:00:32 pipeng Exp $
+
+COMPONENT=XMEP410
+SENSORBOARD=mep401
+
+INCLUDES = -I$(TOSROOT)/tos/sensorboards/micawb
+

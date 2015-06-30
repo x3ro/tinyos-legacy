@@ -1,0 +1,5 @@
+Here is how to test Straw.
+1. Program a mote with TestStraw using node number 2.
+2. Program another mote with TOSBase, connect it to PC.
+3. Run java program. (nestfe/java/Straw/TestStraw)
+

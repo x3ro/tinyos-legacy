@@ -1,0 +1,351 @@
+================
+Radio Link Layer
+================
+
+:TEP: 105
+:Group: Core Working Group
+:Type: Documentary
+:Status: Draft
+:TinyOS-Version: 2.x
+:Author: Joe Polastre
+
+:Draft-Created: 13-Oct-2004
+:Draft-Version: $Revision: 1.5 $
+:Draft-Modified: $Date: 2005/02/14 20:28:18 $
+:Draft-Discuss: TinyOS Developer List <tinyos-devel at mail.millennium.berkeley.edu>
+
+.. Note::
+
+   This memo documents a part of TinyOS for the TinyOS Community, and
+   requests discussion and suggestions for improvements.  Distribution
+   of this memo is unlimited. This memo is in full compliance with
+   TEP 1.
+
+Abstract
+========
+
+This TEP covers the primitives addressed by the link layer
+and the architecture for composing services at the link layer
+
+Overview
+========
+
+TinyOS now has platforms with bit/byte/packet level interfaces.
+Link layers must be written to expose a common interface to the radio,
+provide feedback from the physical layer to services, but still expose
+critical information (data, timing, power) in an independent manner.
+This TEP proposes the HPL and HIL components of the link protocol stack.
+While a description of the HAL is provided, its implementation 
+and composition will vary widely from radio to radio.
+
+Hardware Presentation Layer (HPL)
+=================================
+
+  a. Implementation: platform dependent
+
+  b. Presentation: radio dependent (common HPL for same radio)
+
+  c. Mostly stateless, but may need to include some state to address race
+     conditions in event-driven operations and buffer swapping
+
+  d. HPL for control:
+       - Chipcon CC1000 register-based radios:
+         - read/write registers
+         - interrupts and timer capture events (general I/O)
+       - Chipcon CC2420 buffer-based radios:
+         - read/write registers
+         - read/write RAM
+         - interrupts and timer capture events (general I/O)
+
+    ::
+
+      interface HPLCC2420
+      {
+        async command uint8_t cmd(uint8_t addr);
+        async command uint8_t write(uint8_t addr, uint16_t data);
+        async command uint16_t read(uint8_t addr);
+      }
+     
+      // a subset of the capture provided by the hardware
+      interface HPLCC2420Capture
+      {
+        async command result_t enableCapture(bool low_to_high);
+        async event result_t captured(uint16_t val);
+        async command result_t disable();
+      }
+
+
+  e. HPL for data
+       - Chipcon CC1000 register-based radios:
+         - read/write byte
+       - Chipcon CC2420 buffer-based radios:
+         - read/write 128-byte FIFO
+
+     ::
+
+       interface HPLCC2420FIFO
+       {
+         async command cc2420_result_t readRXFIFO(uint8_t length, uint8_t *data);
+         async command cc2420_result_t writeTXFIFO(uint8_t length, uint8_t *data);
+         async event result_t RXFIFODone(uint8_t length, uint8_t *data, cc2420_result_t success);
+         async event result_t TXFIFODone(uint8_t length, uint8_t *data, cc2420_result_t success);
+       }
+
+  f. The HPL interfaces reside in the radio's "chips" directory while
+     the underlying HPL implementations (\*C, \*M) reside in 
+     a microcontroller or platform directory.
+
+Hardware Adaptation Layer (HAL)
+===============================
+
+  a. Implementation: microcontroller independent, radio dependent
+
+  b. Presentation: radio dependent
+
+  c. The HAL may be broken into a number of parts that communicate with
+     each other.  As we approach the radio's interface 
+     (whether it be bit, byte, or packet), translations may occur
+     on the data--coding, cryptography etc.
+     (see Figure 2 of RadioActive networks paper)
+
+     This PHY/MAC split currently exists in TinyOS with 
+     portions of the Mica high speed radio stack. (see tinyos-1.x/doc)
+     Note that the Mica high speed radio stack provides a horizontal
+     component as well for CSMA.  The same may exist for security
+     (ie: perform a translation on this packet for encryption).
+
+     The "MAC" is a separate configurable component that includes the
+     interfaces exposed to the AM/Comm layers.  The PHY/MAC do not do
+     any packet filtering (including CRC).
+
+Hardware Independent Layer (HIL)
+================================
+
+     The "MAC" provides the typical send and receive packet interfaces.
+     Additionally, the MAC provides control interfaces similar to B-MAC,
+     including the ability to turn on or off CSMA, acks, and low power
+     listening::
+
+       interface CSMAControl
+       {
+         async command result_t enableCCA();
+         async command result_t disableCCA();
+         async command result_t enableAck();
+         async command result_t disableAck();
+         async command TOSMsg* HaltTx();
+       }
+
+     The units of the CSMA Backoff are *SYMBOL PERIODS* of the radio.
+     See the RadioControl interface below to convert symbol periods into
+     normal time units::
+
+       interface CSMABackoff
+       {
+         async event int16_t initial(TOSMsg* m);
+         async event int16_t congestion(TOSMsg* m);
+       }
+
+     Low Power Listening provides additional challenges as the notation
+     used for LPL changes from radio to radio.  On an RFM, bit based
+     radio, LPL has no notion of long preambles.  On the CC1000, a long
+     preamble is used for LPL.  On the CC2420, cyclical packets must be
+     used for LPL (due to the HW constraints, long preambles are not an
+     option).  A proposal::
+
+        interface LowPowerListening
+        {
+          async command result_t SetMode(lpl_mode_t mode);
+          async command lpl_mode_t GetMode();
+          async command result_t SetListeningMode(lpl_mode_t mode);
+          async command lpl_mode_t GetListeningMode();
+          async command result_t SetTransmitMode(lpl_mode_t mode);
+          async command lpl_mode_t GetTransmitMode();
+        }
+
+     The lpl_mode_t values are mapped by the specific radio implementation
+     to identical idle listening cost across platforms (cost when there
+     is no traffic on the channel).  The TX cost may be higher, and must
+     be documented as to its value on each radio.
+
+     Additional HAL-level interface for Low Power Listening in a radio
+     dependent manner::
+
+        interface CC1000LowPowerListening
+        {
+          async command result_t SetPreambleLength(uint16_t bytes);
+          async command uint16_t GetPreambleLength();
+          async command result_t SetCheckInterval(uint16_t ms);
+          async command uint16_t GetCheckInterval();
+        }
+
+     The "mode" options provide a level of abstraction above the 
+     CC1000 specific preamble-length and check-interface functions.
+     A generic mode setting interface may be provided separately from the
+     radio specific parameters that may be set.
+
+     Support for Time Synchronization services
+     Currently we have RadioCoordinator, put in place by UCLA and Kamin
+     Whitehouse.  RadioCoordinator is renamed into an HIL interface
+     called RadioTimeStamping.  It provides the time that an event occurred
+     and the message buffer being received at that start of frame
+     delimiter.  The time value is always a 32768Hz 16-bit value .
+     CC1000RadioTimeStamping is an example of an expanded time HAL interface
+     specific to the CC1000 radio::
+
+        interface RadioTimeStamping
+        {
+          async event void SFD(uint16_t time, TOSMsg* msgBuff);
+        }
+
+     Each platform may be able to provide more information than just the
+     SFD timestamp.  These platforms will have their own HAL interfaces
+     with additional time information::
+
+        interface CC1000RadioTimeStamping
+        {
+          async event void startSymbol(uint8_t bitsPerBlock, uint8_t offset, TOSMsg* msgBuff);
+          async event void byte(TOSMsg* msg, uint8_t byteCount);
+          async event void blockTimer();
+        }
+
+     The 16-bit "time" field of TOSMsg is the 16-bit 32768Hz timer value
+     corresponding to the SFD event.  Upper layers are responsible for 
+     expanding the 16-bit 32768Hz value into a larger 32-bit or 64-bit
+     value for higher level services.
+
+     Being able to control the radio independent of the underlying hardware
+     is extremely important for cross-platform applications.  In the
+     RadioControl interface, we export a new notion of "TinyOS channels".
+     Each "TinyOS channel" is non-overlapping and the maximum number of
+     available channels on a platform are available through a command.
+     Likewise, output RF power is determined by a virtual scale from
+     0 to 255, where 0 is the radio's minimum output power and 255 is the
+     radio's maximum output power.  Simple conversion functions allow
+     the user to convert dB values into the virtual scale and vice versa.
+     Radio timing information, such as bit, byte, and symbol times are
+     provided through the RadioControl interface.  See the RadioControl
+     interface defintion in tinyos-2.x/tos/interfaces::
+
+        interface RadioControl
+        {
+          command result_t SetRFChannel(uint8_t channel);
+          command uint8_t GetRFChannel();
+          command uint8_t GetMaxChannels();
+        
+          command result_t SetRFPower(uint8_t power);
+          command uint8_t GetRFPower();
+        
+          command uint8_t RFtoDB(uint8_t power);
+          command uint8_t DBtoRF(int8_t dbm);
+        
+          command uint16_t getTimeBit();
+          command uint16_t getTimeByte();
+          command uint16_t getTimeSymbol();
+        }
+
+     The TOSMsg structure is created such that each radio implementation
+     may define its own header, footer, and metadata.  Since each
+     radio's layout will be distinct, common fields must be exposed
+     through a unified interface, known as RadioPacket.  
+     Platform indpendent services use RadioPacket to access common
+     message fields; whereas platform dependent services directly
+     access the TOSMsg fields as defined by that radio implementation::
+
+        interface RadioPacket
+        {
+          command uint8_t getLength(TOSMsg* msg);
+          command result_t setLength(TOSMsg* msg, uint8_t length);
+        
+          command uint8_t* getData(TOSMsg* msg);
+        
+          command uint16_t getAddress(TOSMsg* msg);
+          command result_t setAddress(TOSMsg* msg, uint16_t addr);
+        
+          command uint16_t getGroup(TOSMsg* msg);
+          command result_t setGroup(TOSMsg* msg, uint16_t group);
+        
+          command uint16_t getTime(TOSMsg* msg);
+        
+          command bool isAck(TOSMsg* msg);
+        }
+
+     The radio interfaces come together in the new RadioC module.
+     The interfaces described below are required by every RadioC module.
+     RadioC, for CSMA radios, is built above another configuration called
+     CSMARadioC to differentiate it from non-CSMA radios.  For most operations,
+     users will wire to CSMARadioC; however RadioC provides a more general
+     fallback for cross-platform application development.
+     The configurations look like the following, such as
+     in tos/chips/CC2420::
+
+        configuration RadioC 
+        {
+          provides 
+          {
+            // split phase startup and shutdown of the radio
+            interface SplitControl;
+            // change frequency, power, etc.
+            interface RadioControl;
+            // send a message
+            interface Send;
+            // receive a message
+            interface Receive;
+          }
+        }
+        implementation
+        {
+          components CSMARadioC as CC2420RadioC;
+        
+          SplitControl = CC2420RadioC;
+          RadioControl = CC2420RadioC;
+          Send = CC2420RadioC;
+          Receive = CC2420RadioC;
+        }
+
+     Then, if the radio supports CSMA, it also provides a
+     CSMARadioC configuration.  Services wire to RadioC to be
+     radio-agnostic, and CSMARadioC if they wish to use the CSMA
+     control functionality but restrict their service's portability
+     to CSMA radios::
+
+        configuration CSMARadioC
+        {
+          provides 
+          {
+            // split phase startup and shutdown of the radio
+            interface SplitControl;
+            // change frequency, power, etc.
+            interface RadioControl;
+            // send a message
+            interface Send;
+            // receive a message
+            interface ReceiveMsg as Receive;
+        
+            // enable/disable csma, acks
+            interface CSMAControl;
+            // change the backoff on a per-packet basis
+            interface CSMABackoff;
+            // duty cycle the radio with preamble sampling
+            interface LowPowerListening;
+          }
+        }
+        implementation {
+          components CC2420RadioM ...
+        }
+
+FUTURE WORK:
+============
+
+Address interrupts and timer captures in a hardware-independent manner.
+Allows elimination of HPLCC2420Capture and HPLCC2420Interrupt interfaces.
+
+6. Author's Address
+====================================================================
+
+| Joe Polastre
+| 467 Soda Hall
+| UC Berkeley
+| Berkeley, CA 94720
+|
+| email - polastre AT cs.berkeley.edu
+

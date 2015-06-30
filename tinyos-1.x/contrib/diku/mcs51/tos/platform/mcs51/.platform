@@ -1,0 +1,13 @@
+@opts = ("-gcc=sdcc",
+         "-mmcs51");
+#	 "-fnesc-target=keil",
+#	 "-fnesc-no-debug"
+
+
+@opts = ("-fnesc-target=keil",
+	 "-fnesc-no-debug");
+			   
+#push @opts, "-mingw-gcc" if $cygwin;
+			   
+#@commonplatforms = ("avrmote");
+

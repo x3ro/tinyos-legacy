@@ -1,0 +1,1020 @@
+/**
+ * Copyright (c) 2007, Institute of Parallel and Distributed Systems
+ * (IPVS), Universität Stuttgart. 
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ * 
+ *  - Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 
+ *  - Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ * 
+ *  - Neither the names of the Institute of Parallel and Distributed
+ *    Systems and Universität Stuttgart nor the names of its contributors
+ *    may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+options {
+//	DEBUG_PARSER = true;
+//	DEBUG_LOOKAHEAD = true;
+	STATIC = false;
+	JDK_VERSION = "1.5";
+}
+
+/*
+
+  C grammar defintion for use with JavaCC
+  Contributed by Doug South (dsouth@squirrel.com.au) 21/3/97
+
+  This parser assumes that the C source file has been preprocessed : all
+  #includes have been included and all macros have been expanded. I accomplish
+  this with "gcc -P -E <source file> > <output file>".
+
+  There is a problem with compiler specific types, such as __signed, __const,
+  __inline__, etc. These types can be added as typedef types before the parser
+  is run on a file. See main() for an example. I have also found a strange little
+  compiler specific "type" if you can call it that. It is __attribute__, but it
+  does not seem to be used as a type. I found that just deleting the __attribute__
+  and the following "offensive" code works.
+
+  This grammar also prints out all the types defined while parsing the file. This
+  is done via a call to printTypes() when the parser is complete. If you do not want
+  this, just comment out the printTypes() method call in the production rule
+  TranslationUnit(), which BTW is the root node for parsing a C source file.
+
+  I have not in anyway extensively tested this grammar, in fact it is barely tested,
+  but I imagine it is better to have a starting point for a C grammar other than from
+  scratch. It has not been optimized in anyway, my main aim was to get a parser that
+  works. Lookahead may not be optimum at choice points and may even be insufficient at
+  times. I choose to err on the side of not optimum if I made a choice at all.
+
+  If you use this grammar, I would appreciate hearing from you. I will try to maintain
+  this grammar to the best of my ability, but at this point in time, this is only a side
+  hobby (unless someone wants to pay me for doing JavaCC work!). In that regards, I am
+  interested in hearing bugs and comments.
+
+  TODO:
+
+    Insert the appropriate code to enable C source trees from this grammar.
+
+=============================================
+3/2/06: Modified by Tom Copeland
+- STRING_LITERAL now handles embedded escaped newlines, thanks to J.Chris Findlay for the patch
+- Works with JavaCC 4.0
+- Preprocessor directives are now simply SKIP'd, so no need to run C files through GCC first
+
+  */
+
+PARSER_BEGIN(NCUnitParser)
+
+package ncunit.parser;
+
+import java.util.*;
+import java.io.*;
+import ncunit.output.*;
+
+  public class NCUnitParser{
+
+    // Hastable for storing typedef types
+    private static Hashtable types = new Hashtable();
+
+    // Stack for determining when the parser
+    // is parsing a typdef definition.
+    private static Stack typedefParsingStack = new Stack();
+    
+    NCUnit codeGenerator;
+    private Set<String> assertInterfaces = new HashSet<String>();
+    private Set<String> uninlineFunctions = new HashSet<String>();
+    private String componentName = null;
+    
+    public NCUnitParser(NCUnit codeGenerator, InputStream inputStream, Set<String> assertInterfaces) {
+    	this(inputStream);
+
+    	// Hack to include type "special types"
+	    types.put("__signed__", Boolean.TRUE);
+	    types.put("__const", Boolean.TRUE);
+	    types.put("__inline__", Boolean.TRUE);
+	    types.put("__signed", Boolean.TRUE);
+	    types.put("result_t", Boolean.TRUE);
+	    types.put("uint8_t", Boolean.TRUE);
+	    types.put("uint16_t", Boolean.TRUE);
+	    types.put("uint32_t", Boolean.TRUE);
+	    types.put("int8_t", Boolean.TRUE);
+	    types.put("int16_t", Boolean.TRUE);
+	    types.put("int32_t", Boolean.TRUE);
+	    types.put("prog_uchar", Boolean.TRUE);
+	    types.put("TOS_Msg", Boolean.TRUE);
+	    types.put("TOS_MsgPtr", Boolean.TRUE);
+
+    	this.codeGenerator = codeGenerator;
+    	if (assertInterfaces != null) {
+    		this.assertInterfaces = assertInterfaces;
+    	}
+    }
+    
+    public Set<String> getUninlineFunctions() {
+    	return uninlineFunctions;
+    }
+
+    // Returns true if the given string is
+    // a typedef type.
+    private static boolean isType(String type){
+
+   	  if(types.get(type) != null){
+   		  return true;
+      }
+   	  return false;
+    }
+
+    // Add a typedef type to those already defined
+    private static void addType(String type){
+   	  types.put(type, Boolean.TRUE);
+    }
+
+    // Prints out all the types used in parsing the c source
+    private static void printTypes(){
+
+/*      Enumeration enumeration = types.keys();
+
+      while(enumeration.hasMoreElements()){
+        System.out.println(enumeration.nextElement());
+      }*/
+    }
+
+    // Run the parser
+    public static void main ( String args [ ] ) {
+      NCUnitParser parser ;
+      boolean isNesCFile = false;
+
+      if(args.length == 0){
+        System.out.println("NCUnit Parser Version 0.1Alpha:  Reading from standard input . . .");
+        parser = new NCUnitParser(System.in);
+      }
+      else if(args.length == 1){
+        System.out.println("NCUnit Parser Version 0.1Alpha:  Reading from file " + args[0] + " . . ." );
+      try {
+    	  isNesCFile = args[0].endsWith(".nc") || args[0].endsWith(".NC");
+        parser = new NCUnitParser(new java.io.FileInputStream(args[0]));
+      }
+      catch(java.io.FileNotFoundException e){
+        System.out.println("NCUnit Parser Version 0.1:  File " + args[0] + " not found.");
+        return ;
+        }
+      }
+      else {
+        System.out.println("NCUnit Parser Version 0.1Alpha:  Usage is one of:");
+        System.out.println("         java NCUnitParser < inputfile");
+        System.out.println("OR");
+        System.out.println("         java NCUnitParser inputfile");
+        return ;
+      }
+      try {
+    	if (isNesCFile) {
+    		parser.nesCFile();
+    	}
+    	else {
+            parser.TranslationUnit();
+    	}
+        System.out.println("NCUnit Parser Version 0.1Alpha:  Java program parsed successfully.");
+      }
+      catch(ParseException e){
+        System.out.println("NCUnit Parser Version 0.1Alpha:  Encountered errors during parse.");
+        e.printStackTrace();
+      }
+    }
+  }
+
+PARSER_END(NCUnitParser)
+
+SPECIAL_TOKEN :
+{
+  <WHITE_SPACE: " " | "\n" | "\r" | "\t">
+| <PREPROC: "#">: PREPROCESSOR_OUTPUT
+}
+
+SKIP : {
+  <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+|  <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+<PREPROCESSOR_OUTPUT> SPECIAL_TOKEN:
+{
+     "\n" : DEFAULT
+}
+
+<PREPROCESSOR_OUTPUT> MORE:
+{
+ "\\\n"
+ |
+ "\\\r\n"
+ |
+ < ~[] >
+}
+
+
+TOKEN : {
+ <INTEGER_LITERAL: <DECIMAL_LITERAL> (["l","L"])? | <HEX_LITERAL> (["l","L"])? | <OCTAL_LITERAL> (["l","L"])?>
+|  <#DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])*>
+|  <#HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+>
+|  <#OCTAL_LITERAL: "0" (["0"-"7"])*>
+|  <FLOATING_POINT_LITERAL: (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])? | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])? | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])? | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]>
+|  <#EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+>
+|  <CHARACTER_LITERAL: "\'" (~["\'","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"])) "\'">
+|  <STRING_LITERAL: "\"" ( ~["\"","\\","\n","\r"] | "\\" ( ["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])?  | ["0"-"3"] ["0"-"7"] ["0"-"7"] | ( ["\n","\r"] | "\r\n")))* "\"">
+}
+
+TOKEN : {
+	<CONTINUE: "continue"> |
+	<VOLATILE: "volatile"> |
+	<REGISTER: "register"> |
+	<UNSIGNED: "unsigned"> |
+	<TYPEDEF: "typedef"> |
+	<DFLT: "default"> |
+	<DOUBLE: "double"> |
+	<SIZEOF: "sizeof"> |
+	<SWITCH: "switch"> |
+	<RETURN: "return"> |
+	<EXTERN: "extern"> |
+	<STRUCT: "struct"> |
+	<STATIC: "static"> |
+	<SIGNED: "signed"> |
+	<WHILE: "while"> |
+	<BREAK: "break"> |
+	<UNION: "union"> |
+	<CONST: "const"> |
+	<FLOAT: "float"> |
+	<SHORT: "short"> |
+	<ELSE: "else"> |
+	<CASE: "case"> |
+	<LONG: "long"> |
+	<ENUM: "enum"> |
+	<AUTO: "auto"> |
+	<VOID: "void"> |
+	<CHAR: "char"> |
+	<GOTO: "goto"> |
+	<FOR: "for"> |
+	<INT: "int"> |
+	<IF: "if"> |
+	<DO: "do">
+}
+
+// nesC keywords
+TOKEN : {
+	<AS: "as"> |
+	<ATOMIC: "atomic"> |
+	<ASYNC: "async"> |
+	<CALL: "call"> |
+	<COMMAND: "command"> |
+	<COMPONENT: "component"> |
+	<COMPONENTS: "components"> |
+	<CONFIGURATION: "configuration"> |
+	<EVENT: "event"> |
+	<GENERIC: "generic"> |
+	<IMPLEMENTATION: "implementation"> |
+	<INCLUDES: "includes"> |
+	<INTERFACE: "interface"> |
+	<MODULE: "module"> |
+	<NEW: "new"> |
+	<NORACE: "norace"> |
+	<NX_STRUCT: "nx_struct"> |
+	<NX_UNION: "nx_union"> |
+	<POST: "post"> |
+	<PROVIDES: "provides"> |
+	<SIGNAL: "signal"> |
+	<TASK: "task"> |
+	<USES: "uses"> |
+	<ABSTRACT: "abstract"> |
+	<EXTENDS: "extends">
+}
+
+TOKEN : {
+ <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+|  <#LETTER: ["$","A"-"Z","_","a"-"z"]>
+|  <#DIGIT: ["0"-"9"]>
+}
+
+void TranslationUnit() : {}
+{
+	(ExternalDeclaration())+
+	{printTypes();}
+}
+
+void ExternalDeclaration() : {}
+{
+	( LOOKAHEAD( FunctionDefinition() ) FunctionDefinition() | Declaration())
+}
+
+void FunctionDefinition() : {}
+{
+	[LOOKAHEAD(DeclarationSpecifiers()) DeclarationSpecifiers()] Declarator() [Attributes()] [ DeclarationList() ]
+	CompoundStatement()
+}
+
+void Declaration() : {}
+{
+	DeclarationSpecifiers() [ InitDeclaratorList() ] ";"
+}
+
+void DeclarationList() : {}
+{
+	( LOOKAHEAD(Declaration()) Declaration() )+
+}
+
+void DeclarationSpecifiers() : {}
+{
+	  (StorageClassSpecifier() [ LOOKAHEAD(DeclarationSpecifiers())
+	        DeclarationSpecifiers() ]) |
+	  (TypeSpecifier()  [ LOOKAHEAD(DeclarationSpecifiers())
+	        DeclarationSpecifiers() ]) |
+	  (TypeQualifier() [ LOOKAHEAD(DeclarationSpecifiers())
+	        DeclarationSpecifiers() ]) |
+	  (<DFLT> DeclarationSpecifiers())
+}
+
+void StorageClassSpecifier() : {}
+{
+	( <AUTO> | <REGISTER> | <STATIC> | <EXTERN> | <COMMAND> | <EVENT> | <ASYNC> | <TASK> | <NORACE> | <TYPEDEF>
+	{
+		typedefParsingStack.push(Boolean.TRUE);
+	} )
+}
+
+void TypeSpecifier() : {}
+{
+	( <VOID> | <CHAR> | <SHORT> | <INT> | <LONG> | <FLOAT> | <DOUBLE> | <SIGNED> |
+	  <UNSIGNED> | StructOrUnionSpecifier() | EnumSpecifier() | LOOKAHEAD( { isType(getToken(1).image) } )TypedefName() )
+}
+
+void TypeQualifier() : {}
+{
+	( <CONST> | <VOLATILE> )
+}
+
+void StructOrUnionSpecifier() : {}
+{
+	{
+			typedefParsingStack.push(Boolean.FALSE);
+	}
+
+	(LOOKAHEAD(3) <STRUCT> "@" <IDENTIFIER> "{" StructDeclarationList() "}" |
+	(StructOrUnion() ( LOOKAHEAD(3) [ <IDENTIFIER> ] "{" StructDeclarationList() "}" | (<IDENTIFIER> [ Attributes() "{" StructDeclarationList() "}"]))))
+
+	{
+		typedefParsingStack.pop();
+	}
+}
+
+void StructOrUnion() : {}
+{
+	( <STRUCT> | <UNION> | <NX_STRUCT> | <NX_UNION>)
+}
+
+void StructDeclarationList() : {}
+{
+	(StructDeclaration())+
+}
+
+void InitDeclaratorList() : {}
+{
+	InitDeclarator() ("," InitDeclarator())*
+	{
+		// Finished with a typedefDeclaration??
+		if(!(typedefParsingStack.empty()) && ((Boolean)typedefParsingStack.peek()).booleanValue()){
+		   	typedefParsingStack.pop();
+	  }
+	}
+}
+
+void InitDeclarator() : {}
+{
+	Declarator() [Attributes()] [ "=" Initializer() ]
+}
+
+void StructDeclaration() : {}
+{
+	SpecifierQualifierList() StructDeclaratorList() ";"
+}
+
+void SpecifierQualifierList() : {}
+{
+	  TypeSpecifier() [ LOOKAHEAD(SpecifierQualifierList())
+	        SpecifierQualifierList() ]|
+	  TypeQualifier() [ LOOKAHEAD(SpecifierQualifierList())
+	        SpecifierQualifierList() ]
+}
+
+void StructDeclaratorList() : {}
+{
+	StructDeclarator() ( "," StructDeclarator() )*
+}
+
+void StructDeclarator() : {}
+{
+	( LOOKAHEAD(3) Declarator() [Attributes()] | [ Declarator() ] ":" ConstantExpression() [Attributes()] )
+}
+
+void EnumSpecifier() : {}
+{
+	<ENUM> ( LOOKAHEAD(3) [ <IDENTIFIER> ] "{" EnumeratorList() "}" | (<IDENTIFIER> [Attributes() "{" EnumeratorList() "}"]))
+}
+
+void EnumeratorList() : {}
+{
+	Enumerator() ("," Enumerator())*
+}
+
+void Enumerator() : {}
+{
+	<IDENTIFIER> [ "=" ConstantExpression() ]
+}
+
+void Declarator() : {}
+{
+	[ Pointer() ] DirectDeclarator()
+}
+
+void DirectDeclarator() : { Token t;}
+{
+	( (t = <IDENTIFIER> ["." <IDENTIFIER> ])   //TODO
+
+	{ if(!(typedefParsingStack.empty()) && ((Boolean)typedefParsingStack.peek()).booleanValue()){
+				addType(t.image);
+	  }
+	}
+	 | "(" Declarator() ")" )
+
+	( LOOKAHEAD(3) "[" [ ConstantExpression() ] "]" |
+	    LOOKAHEAD(3) "(" ParameterTypeList() ")" |
+	    "(" [ IdentifierList() ] ")" 
+	          | InstanceParameters() "(" ParameterTypeList() ")")*
+}
+
+void Pointer() : {}
+{
+	"*" [ TypeQualifierList() ] [ Pointer() ]
+}
+
+void TypeQualifierList() : {}
+{
+	(TypeQualifier())+
+}
+
+void ParameterTypeList() : {}
+{
+	ParameterList() ["," "..." ]
+}
+
+void ParameterList() : {}
+{
+	ParameterDeclaration() (LOOKAHEAD(2) "," ParameterDeclaration())*
+}
+
+void ParameterDeclaration() : {}
+{
+	DeclarationSpecifiers() ( LOOKAHEAD(Declarator()) Declarator() [Attributes()] | [ AbstractDeclarator() ] )
+}
+
+void IdentifierList() : {}
+{
+	<IDENTIFIER> ("," <IDENTIFIER>)*
+}
+
+void Initializer() : {}
+{
+	( AssignmentExpression() |
+	  "{" InitializerList() [","] "}" )
+}
+
+void InitializerList() : {}
+{
+	Initializer() (LOOKAHEAD(2) "," Initializer())*
+}
+
+void TypeName() : {}
+{
+	SpecifierQualifierList() [ AbstractDeclarator() ]
+
+}
+
+void AbstractDeclarator() : {}
+{
+	( LOOKAHEAD(3) Pointer() |
+	  [Pointer()] DirectAbstractDeclarator() )
+}
+
+void DirectAbstractDeclarator() : {}
+{
+	( LOOKAHEAD(2) "(" AbstractDeclarator() ")" |
+	               "[" [ConstantExpression()] "]" |
+	               "(" [ParameterTypeList()] ")" )
+
+	  ( "[" [ ConstantExpression() ] "]" | "(" [ ParameterTypeList() ] ")" )*
+}
+
+void TypedefName() : {}
+{
+	LOOKAHEAD(2) <IDENTIFIER> | (<IDENTIFIER> "." <IDENTIFIER>)
+}
+
+void Statement() : {}
+{
+	( LOOKAHEAD(2) LabeledStatement() |
+	  ExpressionStatement() |
+	  CompoundStatement() |
+	  SelectionStatement() |
+	  IterationStatement() |
+	  JumpStatement() |
+	  AtomicStatement() )
+}
+
+void AtomicStatement() :
+{}
+{
+	<ATOMIC> Statement()
+}
+
+void LabeledStatement() : {}
+{
+	( <IDENTIFIER> ":" Statement() |
+	  <CASE> ConstantExpression() ":" Statement() |
+	  <DFLT> ":" Statement() )
+}
+
+void ExpressionStatement() : {}
+{
+	[ Expression() ] ";"
+}
+
+void CompoundStatement() : {}
+{
+	"{" [ LOOKAHEAD(DeclarationList()) DeclarationList() ]
+	    [ StatementList() ]
+	"}"
+}
+
+void StatementList() : {}
+{
+	(Statement())+
+}
+
+void SelectionStatement() : {}
+{
+	( <IF> "(" Expression() ")" Statement() [ LOOKAHEAD(2) <ELSE> Statement() ] |
+	  <SWITCH> "(" Expression() ")" Statement() )
+}
+
+void IterationStatement() : {}
+{
+	( <WHILE> "(" Expression() ")" Statement() |
+	  <DO> Statement() <WHILE> "(" Expression() ")" ";" |
+	  <FOR> "(" [ Expression() ] ";" [ Expression() ] ";" [ Expression() ] ")" Statement() )
+}
+
+void JumpStatement() : {}
+{
+	( <GOTO> <IDENTIFIER> ";" |
+	  <CONTINUE> ";" |
+	  <BREAK> ";" |
+	  <RETURN> [ Expression() ] ";" )
+}
+
+void Expression() : {}
+{
+	AssignmentExpression() ( LOOKAHEAD(2) "," AssignmentExpression() )*
+}
+
+void AssignmentExpression() : {}
+{
+	  LOOKAHEAD(UnaryExpression() AssignmentOperator()) UnaryExpression() AssignmentOperator() AssignmentExpression() |
+	  LOOKAHEAD(3) ConditionalExpression()
+}
+
+void AssignmentOperator() : {}
+{
+	( "=" | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | "&=" | "^=" | "|=" )
+}
+
+void ConditionalExpression() : {}
+{
+	LogicalORExpression() [ "?" Expression() ":" ConditionalExpression() ]
+}
+
+void ConstantExpression() : {}
+{
+	ConditionalExpression()
+}
+
+void LogicalORExpression() : {}
+{
+	LogicalANDExpression() [ "||" LogicalORExpression() ]
+}
+
+void LogicalANDExpression() : {}
+{
+	InclusiveORExpression() [ "&&" LogicalANDExpression() ]
+}
+
+void InclusiveORExpression() : {}
+{
+	ExclusiveORExpression() [ "|" InclusiveORExpression() ]
+}
+
+void ExclusiveORExpression() : {}
+{
+	ANDExpression() [ "^" ExclusiveORExpression() ]
+}
+
+void ANDExpression() : {}
+{
+	EqualityExpression() [ "&" ANDExpression() ]
+}
+
+void EqualityExpression() : {}
+{
+	RelationalExpression() [ ( "==" | "!=" ) EqualityExpression() ]
+}
+
+void RelationalExpression() : {}
+{
+	ShiftExpression() [ ( "<" | ">" | "<=" | ">=" ) RelationalExpression() ]
+}
+
+void ShiftExpression() : {}
+{
+	AdditiveExpression() [ ( "<<" | ">>" ) ShiftExpression() ]
+}
+
+void AdditiveExpression() : {}
+{
+	MultiplicativeExpression() [ ( "+" | "-" ) AdditiveExpression() ]
+}
+
+void MultiplicativeExpression() : {}
+{
+	CastExpression() [ ( "*" | "/" | "%" ) MultiplicativeExpression() ]
+}
+
+void CastExpression() : {}
+{
+	( LOOKAHEAD("(" TypeName() ")" CastExpression() ) "(" TypeName() ")" CastExpression() |
+	  UnaryExpression() )
+}
+
+void UnaryExpression() : {}
+{
+	( LOOKAHEAD(3) PostfixCall() |
+			LOOKAHEAD(3) PostfixExpression() |
+	  "++" UnaryExpression() |
+	  "--" UnaryExpression() |
+	  UnaryOperator() CastExpression() |
+	  <SIZEOF> ( LOOKAHEAD(UnaryExpression() ) UnaryExpression() | "(" TypeName() ")" ) )
+}
+
+void UnaryOperator() : {}
+{
+	( "&" | "*" | "+" | "-" | "~" | "!" )
+}
+
+void PostfixExpression() : {}
+{
+	(/*LOOKAHEAD(PostFixCall()) PostfixCall() |*/
+	(PrimaryExpression() ( "[" ArgumentExpressionList() "]" |
+//	                      "(" [ LOOKAHEAD(ArgumentExpressionList() ) ArgumentExpressionList() ] ")" |
+	  					  "." <IDENTIFIER> |
+	  					  "->" <IDENTIFIER> |
+	  					  "++" |
+	  					  "--" )*))
+}
+
+void PostfixCall() :
+{
+	Token callToken = null;
+}
+{
+	([callToken=CallKind()] PostfixExpression() "(" [ LOOKAHEAD(ArgumentExpressionList() ) ArgumentExpressionList() ] ")")
+	{
+		if ((callToken != null) && (callToken.kind == CALL)) {
+			if (assertInterfaces.contains(callToken.next.image)) {
+				// call interface Dot command
+				Token commandToken = callToken.next.next.next;
+				Token stringToken = null;
+				// TODO is not completely correct if e.g. message names comes from function call
+				if ("assertCalls".equals(commandToken.image)) {
+					// command paren string
+					stringToken = commandToken.next.next;
+				}
+				else if ("assertCallsMsg".equals(commandToken.image)) {
+					// command paren string comma string
+					stringToken = commandToken.next.next.next.next;
+				}
+				if (stringToken != null) {
+					if (stringToken.kind == STRING_LITERAL) {
+						uninlineFunctions.add(stringToken.image.substring(1, stringToken.image.length() - 1));						
+					}
+					else {
+						throw new ParseException("Can only monitor functions given as string literal: "+stringToken.image);
+					}
+				}
+			}
+		}
+	}
+}
+
+Token CallKind() :
+{
+	Token result;
+}
+{
+	(result=<CALL> | result=<SIGNAL> | result=<POST>)
+	{
+		return result;
+	}
+}
+
+void PrimaryExpression() : {}
+{
+	( <IDENTIFIER> |
+	  Constant() |
+	  "(" Expression() ")" )
+}
+
+void ArgumentExpressionList() : {}
+{
+	AssignmentExpression() ( "," AssignmentExpression() )*
+}
+
+void Constant() : {}
+{
+ <INTEGER_LITERAL> | <FLOATING_POINT_LITERAL> | <CHARACTER_LITERAL> | <STRING_LITERAL>
+}
+
+TokenList nesCFile() :
+{
+	Token head;
+	Token eofToken;
+}
+{
+	{ 
+		head = getToken(1); 
+	}
+	[TranslationUnit()] (InterfaceDefinition() | Component()) eofToken=<EOF>
+	{
+	    return new TokenList(head, eofToken);
+	}
+}
+
+void InterfaceDefinition() :
+{}
+{
+	<INTERFACE> <IDENTIFIER> [TypeParameters()] [Attributes()] "{" DeclarationList() "}" 
+}
+
+void TypeParameters() :
+{}
+{
+	"<" TypeParameterList() ">"
+}
+
+void TypeParameterList() :
+{}
+{
+	<IDENTIFIER> [Attributes()] ("," <IDENTIFIER> [Attributes()])*
+}
+
+void Component() :
+{
+	Token compNameToken;
+}
+{
+	(CompKind() compNameToken=<IDENTIFIER> 
+	{
+		componentName = compNameToken.image;
+	}
+	[CompParameters()] [Attributes()]  ComponentSpecification() [Implementation()]) 
+}
+
+void CompKind() :
+{}
+{
+	<MODULE>
+	| <COMPONENT>
+	| <CONFIGURATION>
+	| LOOKAHEAD(2) (<GENERIC> <MODULE>)
+	| (<GENERIC> <CONFIGURATION>)
+}
+
+void Implementation() :
+{}
+{
+	LOOKAHEAD(3) ModuleImplementation()
+	| ConfigurationImplementation()
+}
+
+void CompParameters() :
+{}
+{
+	"(" ComponentParameterList() ")"
+}
+
+void ComponentParameterList() :
+{}
+{
+	ComponentParameter() ("," ComponentParameter())*
+}
+
+void ComponentParameter() :
+{}
+{
+	LOOKAHEAD(3) ParameterDeclaration()
+	| (<TYPEDEF> <IDENTIFIER> [Attributes()])
+}
+
+void ModuleImplementation() :
+{
+	Token rToken;
+}
+{
+	<IMPLEMENTATION> "{" TranslationUnit() rToken="}" 
+	{
+		if (codeGenerator != null) {
+			rToken.image = codeGenerator.generateTestCalls()+rToken.image;
+		}
+	}
+}
+
+void ConfigurationImplementation() :
+{}
+{
+	<IMPLEMENTATION> "{" [ConfigurationElementList()] "}"
+}
+
+void ConfigurationElementList() :
+{}
+{
+	(ConfigurationElement())+
+}
+
+void ConfigurationElement() :
+{}
+{
+	Components()
+	| LOOKAHEAD(3) Connection()
+	| Declaration()
+}
+
+void Components() :
+{}
+{
+	<COMPONENTS> ComponentLine() ";"
+}
+
+void ComponentLine() :
+{}
+{
+	ComponentRef() [InstanceName()] ("," ComponentRef() [InstanceName()])*
+}
+
+void InstanceName() :
+{}
+{
+	<AS> <IDENTIFIER>
+}
+
+void ComponentRef() :
+{}
+{
+	<IDENTIFIER>
+	| (<NEW> <IDENTIFIER> "(" ComponentArgumentList() ")")
+}
+
+void ComponentArgumentList() :
+{}
+{
+	ComponentArgument() ("," ComponentArgument())*
+}
+
+void ComponentArgument() :
+{}
+{
+	LOOKAHEAD(3) Expression()
+	| TypeName()
+}
+
+void Connection() :
+{}
+{
+	Endpoint() ("=" | "->" | "<-") Endpoint() ";"
+}
+
+void Endpoint() :
+{}
+{
+	IdentifierPath() ["[" ArgumentExpressionList() "]"]
+}
+
+void IdentifierPath() :
+{}
+{
+	<IDENTIFIER> ("." <IDENTIFIER>)*
+}
+
+void ComponentSpecification() :
+{
+	Token rToken;
+}
+{
+	"{" UsesProvidesList() rToken="}"
+	{
+		rToken.image =  "provides interface TestStarter;" + rToken.image;
+	}
+}
+
+void UsesProvidesList() :
+{}
+{
+	(UsesProvides())*
+}
+
+void UsesProvides() :
+{}
+{
+	(<USES> SpecificationElementList())
+	| (<PROVIDES> SpecificationElementList())
+	| Declaration()
+}
+
+void SpecificationElementList() :
+{}
+{
+	SpecificationElement()
+	| ("{" SpecificationElements() "}")
+}
+
+void SpecificationElements() : 
+{}
+{
+	(SpecificationElement())+
+}
+
+void SpecificationElement() :
+{}
+{
+	Declaration()
+	| (InterfaceType() [InstanceName()] [InstanceParameters()] [Attributes()] ";")
+}
+
+void InterfaceType() :
+{}
+{
+	<INTERFACE> <IDENTIFIER> [TypeArguments()]
+}
+
+void TypeArguments() :
+{}
+{
+	"<" TypeArgumentList() ">"
+}
+
+void TypeArgumentList() :
+{}
+{
+	TypeName() ("," TypeName())*
+}
+
+void InstanceParameters() :
+{}
+{
+	"[" ParameterTypeList() "]"
+}
+
+void Attributes() :
+{}
+{
+	(Attribute())+
+}
+
+void Attribute() :
+{}
+{
+	"@" <IDENTIFIER> "(" [InitializerList()] ")"
+}
+

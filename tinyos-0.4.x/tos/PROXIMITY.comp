@@ -1,0 +1,25 @@
+
+TOS_MODULE PROXIMITY;
+
+ACCEPTS{
+	char PROXIMITY_INIT(void);
+	char PROXIMITY_START(void);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	void PROXIMITY_CLOCK_EVENT(void);
+	char PROXIMITY_SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr PROXIMITY_BEACON_MSG(TOS_MsgPtr data);
+	TOS_MsgPtr PROXIMITY_START_MSG(TOS_MsgPtr data);
+	TOS_MsgPtr PROXIMITY_STOP_MSG(TOS_MsgPtr data);
+};
+
+USES{
+	char PROXIMITY_SUB_INIT(void);
+	char PROXIMITY_SUB_CLOCK_INIT(char interval, char scale);
+	char PROXIMITY_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+};
+

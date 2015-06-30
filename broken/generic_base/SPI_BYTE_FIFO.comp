@@ -1,0 +1,51 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Jason Hill
+ *
+ * This is a Byte level encoding component that perform forward error correction.
+ * Each byte is automatically simultaneously DC balance and SEC_DED encoded.  
+ * When a byte is received, a single bit error can be corrected and a two bit
+ * error can be detected.  Currently, the correctable errors are fixed and the 
+ * other are passed through.
+ *
+ */
+
+
+TOS_MODULE SPI_BYTE_FIFO;
+
+
+ACCEPTS{
+	char SPI_IDLE(void);
+	char SPI_START_READ_BYTES(short timing);
+	char SPI_SEND_DATA(char mode);
+};
+SIGNALS{
+	char SPI_DATA_SEND_READY(char data);
+};
+USES{
+	char SPI_SLAVE_PIN_HIGH();
+	char SPI_SLAVE_PIN_LOW();
+};
+HANDLES{
+	char SPI_SLAVE_NOTIFY();
+};

@@ -1,0 +1,14 @@
+MultiTimer is a component multiplexing both MicroTimer (i.e. timers down to
+the resolution of the clock) and SysTime functionality onto the same
+MSP430/AtMega128 timer.
+
+I'm not sure we need the fine-grained timing capability here, but FTSP wants
+the high-resolution timers.  At least for now.  We may back up to using the
+32kHz oscillator as that may provide us with plenty of resolution.  We'll
+see.  For now this is here.  It provides two interfaces: MicroTimer (included
+in this directory) and SysTime, defined in the standard TinyOS tree.
+
+12 May 2005 : GWA : Dummy SysTimeM.nc component added to eliminate compiler
+errors associated with redefining the interrupt.
+
+25 May 2005 : GWA : Added IFDEF's for TelosB.

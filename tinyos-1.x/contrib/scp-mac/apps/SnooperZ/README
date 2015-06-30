@@ -1,0 +1,34 @@
+1. INTRODUCTION
+
+   The snooper listens to all packets and sends them to UART. So you can use
+   tools/snoop.c to receive and display the packet contents on PC.
+
+2. FUNCTIONALITY
+
+   The snooper streams packets received to the UART. When it is
+   connected with the PC through the programming board and the serial
+   port, you can display each packet on PC by using
+   tools/snoop.c.
+
+3. HOW TO USE
+
+   Simply type 'make micaz' and/or 'make install micaz'.
+
+4. NOTES
+
+   In this version of the Snooper, we include two buffers for
+   supporting (some level) of bursty traffic (e.g. packet and
+   immediate ack). This is necessary as the radio speed is greater
+   than the UART speed and losses will occur.
+
+   Also, because of filtering occuring in the z-physical layer, users
+   will not see tones in the snooper (it is a one-line code change in
+   PhyRadioM.nc to change this behavior). In addition, for the same
+   reason, users will not see failed crc packets on the snooper. The
+   PC client snoop program should always be executed with the '-c'
+   flag (for disabling crc checking), otherwise all packets will show
+   as failing the CRC check (due to the fact that the CC2420 radio
+   changes the CRC bytes -- the last 2 bytes in the packet -- removing
+   the radio-calculated CRC and substituting those two bytes with RSSI
+   and LQI information -- which can be see on the snooper output).
+

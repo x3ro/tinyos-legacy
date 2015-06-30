@@ -1,0 +1,105 @@
+(ExpressProject "Design6"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (NoModify)
+    (File "C:\Cadence\PSD_14.0\Capture\Samples\design6.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x"))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (LastUsedLibraryBrowseDirectory "C:\Cadence\PSD_14.0\Capture\Library")
+  (PartMRUSelector
+    (VCC_ARROW
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (GND
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (ANTENNA
+      (FullPartName "ANTENNA.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (BEAD
+      (FullPartName "BEAD.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (INDUCTOR
+      (FullPartName "INDUCTOR.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (C
+      (FullPartName "C.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (R
+      (FullPartName "R.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.0\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (DS1804
+      (FullPartName "DS1804.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    (TR1000
+      (FullPartName "TR1000.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    (24LC256
+      (FullPartName "24LC256.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    (AT90LS2343
+      (FullPartName "AT90LS2343.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0"))
+    (AT90LS8535
+      (FullPartName "AT90LS8535.Normal")
+      (LibraryName "P:\ORCAD\WINLAB1.OLB")
+      (DeviceIndex "0")))
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources"
+         "C:\Cadence\PSD_14.0\Capture\Samples\design6.dsn")
+      (Path "Design Resources"
+         "C:\Cadence\PSD_14.0\Capture\Samples\design6.dsn" "MOTE")
+      (Select "Design Resources"
+         "C:\Cadence\PSD_14.0\Capture\Samples\design6.dsn"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 0 200 0 386"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 106 948 18 580")
+        (Scroll "9 216")
+        (Zoom "100")
+        (Occurrence "/"))
+      (Path "C:\Cadence\PSD_14.0\Capture\Samples\Design6.dsn")
+      (Schematic "MOTE")
+      (Page "PROCESSORS"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 97 966 6 571")
+        (Scroll "0 0")
+        (Zoom "69")
+        (Occurrence "/"))
+      (Path "C:\Cadence\PSD_14.0\Capture\Samples\Design6.dsn")
+      (Schematic "MOTE")
+      (Page "CONNECTORS"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 85 947 1 571")
+        (Scroll "0 0")
+        (Zoom "70")
+        (Occurrence "/"))
+      (Path "C:\Cadence\PSD_14.0\Capture\Samples\Design6.dsn")
+      (Schematic "MOTE")
+      (Page "RADIO"))))

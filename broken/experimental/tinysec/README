@@ -1,0 +1,9 @@
+
+quick usage:
+
+All code is now integrated into the tinyos-1.x branch. To use: 
+
+make mica TINYSEC=true
+
+and use SecureGenericComm instead of GenericComm. 
+

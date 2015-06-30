@@ -1,0 +1,43 @@
+README for tinyos-1.x/contrib/ucbRobo/apps/cotsbot Directory
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+
+
+Description:
+************
+This directory contains the applications meant to be run on the robots
+on the 330 Cory Testbed.  The goal of the testbed is to monitor and
+better understand control algorithms that close the loop around sensor
+networks.  The target application is a Pursuit Evasion Game (PEG),
+where a team of pursuer robots chase after a team of evader robots,
+using the sensor network as "eyes" to see where the evaders are
+located.
+
+Further documentation can be found under each directory.
+
+SenseAndNavigate	basic application for relaying message from the 
+			network to the basestation and moving the
+			robot based on commands from the basestation
+TestCtrlBots	simple test program for mote to control COTSBOTS
+
+
+
+Other Tools:
+************
+see tinyos-1.x/contrib/ucbRobo/tools/matlab/controlBot
+see tinyos-1.x/contrib/ucbRobo/tools/java/net/tinyos/RobotTB
+
+
+
+Other Useful Directories/Websites:
+**********************************
+tinyos-1.x/contrib/cotsbots	for the robot platform we are using
+
+Sastry NEST page
+http://www.eecs.berkeley.edu/~phoebusc/330NEST/welcome.html
+
+
+
+Known bugs/limitations:
+***********************
+Tool SenseAndNavigate is still under development

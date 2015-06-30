@@ -1,0 +1,500 @@
+\documentclass[11pt,onecolumn]{article}
+\usepackage{times}
+\usepackage{verbatim}
+
+%\usepackage{draftcopy}
+
+\addtolength{\topmargin}{-.5in}        % repairing LaTeX's huge margins...
+\addtolength{\textheight}{1.5in}        % more margin hacking
+\addtolength{\textwidth}{1in}
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+
+%\newenvironment{sh_out}{\begin{small}\begin{verbatim}}{\end{verbatim}\end{small}}
+
+\begin{document}
+\title{TinyDiffusion HOWTO\\version 1.0}
+
+\author{Vladimir Bychkovskiy\\vladimir@lecs.cs.ucla.edu}
+\date{}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+This HOWTO is for people who are interested in wireless embedded
+sensor network data communication/coordination algorithms. This
+document is a practical introduction into the internals of a Directed
+Diffusion\cite{diffpaper} implementation on a low-end wireless sensor
+node, UCB Mote running TinyOS\cite{tinyos}.
+
+\subsection{Target Audience}
+This document is meant for people who are interested in
+exploring, using, and extending our implementation of Directed
+Diffusion. Therefore it assumes a fair degree of familiarity with the
+concepts of Directed Diffusion. The reader is also assumed to at least
+have some experience with UCB Motes and TinyOS\cite{tinyos}. If you
+are not yet familiar with TinyOS, it is recommended to suspend
+reading of this document and come back to it after getting acquainted
+with the aforementioned software and hardware\cite{tinyoswebsite}.
+
+\subsection{\label{background}Background and Related Work}
+Directed Diffusion\cite{diffpaper} is a scalable coordination
+algorithm for wireless sensor networks. Initially, Directed Diffusion
+was implemented\footnote{Implemented by Fabio Silva and et.\ al at
+USC/ISI.} under Linux running on emmbedded PCs\cite{fabiocode}.It also
+runs under Linux on iPAQ (StrongARM-based handheld) platform. Code and
+memory limitation of motes have forced a complete re-implementation of
+Directed Diffusion. The result, TinyDiffusion, is described
+here\footnote{The very first implementation of TinyDiffusion was done
+by Deepak in April 2001.}. One of the reasons for this implementation
+of Directed Diffusion is proof of concept. Therefore, it is not yet
+implemented as a library. In the future we plan to make it more
+flexible (see section~\ref{futurework} on page~\pageref{futurework}).
+
+\subsection{Features}
+The feature set of the current version of TinyDiffusion is somewhat
+limited for the reasons outlined above.
+
+\begin{itemize}
+\item{Algorithm}
+	\begin{itemize}
+		\item Initial \emph{interests} are distributed by flooding.
+		\item All data messages are \emph{broadcasted}
+		\item Only \emph{one path} is reinforced 
+	\end{itemize}
+\item{Attributes}
+	\begin{itemize}
+		\item A total of 250 data types are available to users
+		\item Data is limited to 1-byte integer type
+	\end{itemize}
+\end{itemize}
+
+Out of the box TinyDiffusion is able to route queries and provide data
+from light and temperature sensors. It should be easy to extend
+TinyDiffusion to provide data from other sensors, if such sensors are
+available. See section~\ref{extend} on page~\pageref{extend} for more
+information.
+
+\subsection{Prerequisites}
+In order to use TinyDiffusion you need
+\begin{itemize}
+	\item[-] at least 4-5 MICA\footnote{Current version of
+	TinyDiffusion can run on rene163 as well, but it is not
+	recommended.} motes 
+	\item[-] a working TinyOS environment and
+	AVR-GCC toolchain (see \cite{tinyos} for more information)
+	\item[-] Motenic application, \emph{moted} driver, \emph{kfusd}
+	kernel module (all of the above can be obtained from the SCADDS CVS
+	repository\cite{scadds}\footnote{At the time of writing these
+	drivers are only available for Linux kernel 2.4+, so you need an
+	appropriate workstation})
+	\item[-] TinyDiffusion source code. The latest version of the code
+	can be obtained from \cite{scadds}, in
+	\emph{microteers/mote/tos/nest/apps/diffusion\_sensor} subdirectory 
+	\item[-] TinyDiffusion host side tools. A corresponding version of
+	the source code is contained in the
+	\emph{difftools} subdirectory in the TinyDiffusion source tree.
+\end{itemize}
+
+\section{Getting Started}
+In this section you will learn how to set up a simple sensor
+network and how to get sensor data out of it.
+
+\subsection{Compilation and Building}
+Before you proceed any further, you need to learn how to compile and
+load TinyDiffusion and Motenic on the motes and how to set up host
+side tools.
+
+\subsubsection{\label{motenic}MoteNIC}
+In order to be able to interact with TinyDiffusion you need a gateway
+into your network. MoteNIC stands for Mote Network Interface Card. It
+was originally developed by Jeremy Elson in the LECS at UCLA. MoteNIC
+comes with a userspace device driver \emph{moted} for Linux v2.4+. In
+order to use this driver you will also need to install
+\emph{kfusd}\footnote{This is a framework for developing userspace
+drivers, written by Jeremy Elson}. \emph{Kfusd} and moted can be found
+in\cite{scadds} (see \emph{microteers/fusd} and
+\emph{microteers/mote/driver/}).  In order to make MoteNIC do the
+following:
+
+\begin{verbatim}
+ $cd (SCADDS CVS)/microteers/mote/tos/nest/apps/transceiver
+ $make install mica
+\end{verbatim}
+
+This should produce a mote that is capable of sending and receiving
+messages. You need to connect this mote to a serial port of
+the computer that has \emph{moted} installed on it.
+
+Before you proceed any further you need to test your MoteNIC. Program
+a second mote with MoteNIC in the same way as above. Connect the
+second mote to another serial port. Note that you could use serial
+ports of the same or different computers; to simplify further
+description, I will assume that you are using two serial ports of a
+single computer. Run \emph{moted} for each MoteNIC. To increase
+probability of packet delivery increase the transmission power:
+\begin{verbatim}
+ $echo `pot=5' > /dev/mote/1/command
+\end{verbatim}
+%$
+Do the following the to test their
+ability to communicate in the following way:
+
+For motenic 1 do:
+\begin{verbatim}
+ $cat /dev/mote/0/frag
+\end{verbatim}
+
+For motenic 2 do:
+\begin{verbatim}
+ $echo `Hello there!' > /dev/mote/1/frag
+\end{verbatim}
+%$
+(note that mote device numbers depend on the parameters that you have
+used to run \emph{moted})
+
+If everything worked, the output \emph{Hello there!} should appear in the
+first window. If the output does not appear after multiple
+\emph{echo} commands, you may need to go back
+and check your setup.
+
+\subsubsection{TinyDiffusion}
+\label{tinydiffusion}
+To compile TinyDiffusion, do the following:
+\begin{verbatim}
+ $cd (SCADDS CVS)/microteers/mote/tos/nest/apps/diffusion_sensor
+ $make install mica
+\end{verbatim}
+Program as many of these nodes as you need.
+ 
+\subsubsection{Host Tools}
+Before you can test TinyDiffusion, you need to compile the host side
+tools. These tools reside in the \emph{diffcntl} subdirectory of
+\emph{diffusion\_sensor} directory.
+
+\begin{verbatim}
+ $cd diffcntl
+ $make 
+\end{verbatim}
+%$
+Now lets test your setup again. Open a new terminal window and run
+\emph{diffdump} from \emph{diffcntl} directory. This program will
+parse all TinyDiffusion and related messages that MoteNIC was able to
+receive and present them in a human readable form.
+\begin{verbatim}
+ $./diffdump 
+\end{verbatim}%$
+
+Note: \emph{diffdump} displays no output if there are no messages coming
+from MoteNIC and the only way to terminate it is Ctrl-C.
+ 
+In another terminal window set the transmission power of all the motes to maximum
+\begin{verbatim}
+ $./txpower -1 5
+\end{verbatim}
+%$
+At this point you should see a few responses in the diffdump window.
+% should I insert a output here?
+If messages are being transmitted by the TinyDiffusion nodes, they
+change the state of the red led. MoteNIC signals transmission with a
+state change in the yellow led; it signals reception with the green
+led. Use this information to verify your set up and to detect problems.
+
+\subsection{Preparation}
+Before you can use TinyDiffusion you need to assign IDs and
+coordinates to the nodes. You also need to set an appropriate
+transmission power in order to run multi-hop experiments.
+
+\subsubsection{ID assignment}
+\label{idassign}
+In the current implementation of TinyDiffusion each node needs to have
+a unique ID (a MAC address). \emph{Please note that, these IDs are
+stored in RAM.\footnote{On RENE motes this enabled parallel programming
+of nodes since the same FLASH image is used by everyone.} ID needs to
+be reset every time the TinyDiffusion node is powered on.} Another piece
+of unique information that is necessary for correct operation of
+TinyDiffusion is the location of a node. Locations are derived from ID
+using the following formulae:\\
+\begin{math}
+ x = ID mod 100\\
+ y = ID / 100\\
+\end{math}
+Note: \(x\) and \(y\) are integers
+
+Use the following procedure to assign IDs to all of the nodes:
+
+\begin{enumerate}
+	\item Turn off all of the diffusion nodes 
+	\item Turn on one of the turned off nodes
+	\item Set its ID by running:
+	\begin{verbatim}
+	 $./txid <id>
+	\end{verbatim}
+	%$
+	You may not see a response, in the \emph{diffdump}
+	window\footnote{Node will only respond once.}, but you should see
+	the change of state of the red led.
+	\item If there are turned off motes, go back to step 2
+\end{enumerate}
+
+It is time for another, more interesting, test. This time you are
+going to send a very simple query. Lets assume that you have a
+diffusion node with ID 0101 and coordinates (1,1). Use the
+\emph{interest} program to send an exploratory interest message:
+
+\begin{verbatim}
+	$./interest 
+	Creating a new interest (Ctrl-C to exit) :
+	Enter the region (lower left and upper right: x1,y1,x2,y2):1,1,1,1
+	Enter the type:1
+	Enter the interval:0
+	Enter the expiration:100
+	Enter the send address:12
+	Enter the dest. address (-1 for broadcast == exploratory):-1
+	Sending the following interest:
+	[INTEREST] dest:65535 type:1 (1,1)-(1,1) interval:0 expiration:100 sender:12
+\end{verbatim}
+%$
+(meanings of all fields will be explained in a later section)
+
+You may need to send this \emph{interest} multiple times due to packet
+loss. Responses should appear in \emph{diffdump} window. All nodes
+should rebroadcast the exploratory \emph{interest}; node 0101 should
+responds with data from it's light sensor (because we have specified
+type $1$ above).
+
+\subsubsection{The Hard Part: Setting Up A Communication Topology}
+The last and the hardest step in preparation is setting up the network
+topology. Use \emph{txpower} program to set and test the level of the
+power of each of the nodes in the network. \emph{The good news is that
+this setup need to be done only once, because power setting is stored
+in the EEPROM.} General procedure for setting up a multi-hop topology is
+the following\footnote{We have attempted to automate this
+process. Take a look at \emph{calibrate} program in
+\emph{diffcntl}. However it may need a little tuning.}:
+\begin{itemize}
+	\item Arrange all nodes on a 2D plane
+	\item For each node
+	\begin{itemize}
+		\item Place MoteNIC next to the geometrically furthest node
+		that \emph{should} be able to receive and pick a lowest power
+		level at which such reception is possible
+
+		\item Place MoteNIC next to the geometrically closest node
+		that \emph{should not} be able to receive and increase the
+		power level just below the level at which this node is able to
+		receive 
+	\end{itemize}
+\end{itemize}
+
+We have found it very hard to create more than 2-3 hop topologies
+within a small area (4x4 sq. ft.). The potentiometer on the mote may not provide
+sufficient granularity to establish good topologies at these small
+scales\footnote{This problem is not specific to our application. It is
+a hardware problem.}. You may need to rearrange nodes to achieve
+desired connectivity.
+
+Asymmetric links is another problem that arises when transmit power is
+tuned down. As the time of writing we have not found an elegant
+solution to this problem. The best approximations so far have been 
+neighbor list based techniques\footnote{Link layer component that
+implements this technique is available in SCADDS CVS, but has not been used
+with TinyDiffusion}.
+
+\subsection{Running Diffusion Queries}
+After all the preparation and testing you are ready to use your
+wireless sensor network to run some queries. As you already know
+querying process in Directed Diffusion consists of two steps:
+discovery, and reinforcement.
+
+\subsubsection{Discovery}
+Before you can retrieve sensor data from a sensor network you need to
+find a path to the appropriate sensors. This is accomplished by
+sensing and exploratory \emph{interest}. You already have experience
+with sending interest from section~\ref{idassign}. Lets take a more
+detailed look at interest sending:
+
+\begin{verbatim}
+	$./interest 
+	Creating a new interest (Ctrl-C to exit) :
+	Enter the region (lower left and upper right: x1,y1,x2,y2):0,0,10,10
+\end{verbatim}%$
+Here you specify a \emph{geographical region} for your query. 
+
+\begin{verbatim}
+	Enter the type:2
+\end{verbatim}
+\emph{Type} denotes the type of data of your query. 1 -- light, 2 --
+temperature\footnote{These types are defined in DIFFNODE.inc}.
+\begin{verbatim}
+	Enter the interval:4
+	Enter the expiration:100
+\end{verbatim}
+\emph{Interval} and \emph{expiration} denote time interval between
+samples and total active time of query, respectively. The time unit is
+1 second\footnote{Timing can be adjusted by changing the value of
+CLOCK\_DIV in DIFFNODE.inc.}. Note that interval of 0 implies 1 second
+delay between samples (delay b/w samples = interval + 1) . Exploratory
+interests usually specify low data rates.
+\begin{verbatim}
+	Enter the send address:12
+\end{verbatim}
+\emph{Send address} denotes the address from which your message is going to
+appear to be. This could be a virtual address that you assign to your
+base station (MoteNIC). In general, it is recommended to use a unique
+node address\footnote{For debugging purposes it may useful to
+\emph{fake} a message from one of the nodes of the network, but you
+must know what you are doing.}.
+\begin{verbatim}
+	Enter the dest. address (-1 for broadcast == exploratory):-1
+\end{verbatim}
+\emph{Destination address} is the destination of the interest. In the
+current implementation of TinyDiffusion, \emph{exploratory} is it
+broadcasted\footnote{Alternatively, scoped flooding or geographic
+routing could be used.} to all of the neighbors. If you want to
+reinforce and particular path, the destination address would be set to
+the address of that node.
+\begin{verbatim}
+	Sending the following interest:
+	[INTEREST] dest:65535 type:2 (0,0)-(10,10) interval:4 expiration:100 sender:12
+\end{verbatim}
+This line simply restates all the input values provided by you.
+
+After you send this interest you should see rebroadcasted interests
+from other nodes in diffdump window. After interest reaches the
+destination region, the data should start flowing back.
+
+\subsubsection{Reinforcement}
+After you see a few data messages directed to the base state
+(destination address == 12) in the diffdump window, you can choose to
+increase the data rate and expiration one or more data sources. This
+process is called reinforcement in Directed Diffusion. You can send
+\emph{reinforcements} using the same interest program as you used to
+send initial \emph{interest}. If you want to reinforce temperature
+data from a node at location (3,4) and the shortest
+path\footnote{Based on the hops to source field in exploratory data
+messages} lies through node with address 31, your interaction with
+interest program would look as following:
+\begin{verbatim}
+	$./interest 
+	Creating a new interest (Ctrl-C to exit) :
+	Enter the region (lower left and upper right: x1,y1,x2,y2):3,4,3,4
+	Enter the type:2
+	Enter the interval:0
+	Enter the expiration:200
+	Enter the send address:12
+	Enter the dest. address (-1 for broadcast == exploratory):31
+	Sending the following interest:
+	[INTEREST] dest:31 type:1 (3,4)-(3,4) interval:0 expiration:200 sender:12
+\end{verbatim}
+%$
+Note that region includes only one point and destination address is
+set to the address of the node that has the shortest path. Interval is
+set to zero for the highest possible data rate of one sample per second.
+
+\section{Extending TinyDiffusion}
+\label{extend}
+Now that you have experienced basic capabilities of TinyDiffusion, you
+are ready to build you own applications. Before you start building
+your application, you need to learn how TinyDiffusion code is structured.
+
+\subsection{Code Structure}
+Most of the TinyDiffusion logic and application code is located in
+DIFFNODE.c. This file includes message handlers and timer event
+handler. These handlers heavily relay on libraries that implement
+diffusion data structure construction and access methods. The
+libraries are located in DiffNodeInc directory.
+
+TinyDiffusion data structures include \emph{interest table},
+\emph{gradient table}, \emph{location table} and \emph{data
+cache}\footnote{By reusing common attributes as much as possible we
+save RAM.}. Type information is stored in interest table, location
+information is stored, respectively, in the location table. The
+gradient table refers to interest and location tables to specify
+gradient attributes. In addition to that, the gradient table contains
+rate and expiration information for each gradient. Each interest entry
+caches the highest rate gradient to avoid extensive lookup on every
+timer event.  Attribute information in the location and the interest
+tables is matched for incoming messages.
+
+The data cache is used to store incoming data messages. Note that
+reinforcement policy is directly related to the data caching
+policy. In order to reinforce a path TinyDiffusion node simply finds a
+data with matching attributes and sends reinforcement to the
+sender of the data.
+
+Some configuration parameters of TinyDiffusion as contained in
+DIFFNODE.inc. Table sizes are defined in DiffTable.inc and
+DataCache.inc\footnote{TinOS make scripts remove  *.h files. That is
+why we used *.inc for header files.}.
+
+\subsection{How to Build Your Own Application}
+In this section you will find general guidelines on building your
+application on top of TinyDiffusion; study the code to get more
+information.
+
+It is very easy to extend TinyDiffusion to use new data types. In
+DIFFNODE.c do the following:
+\begin{enumerate}
+	\item add a new variable to the frame (ex: supersensorData)
+	\item modify ClockTickTask, add sampling of your sensor
+	\item modify produceData function
+	\item add an ADC callback (see DIFFNODE\_SUB\_ADC\_PHOTO\_DATA). This
+		  is the biggest change, because it requires changing
+		  DIFFNODE.comp and diffnode.desc files.
+\end{enumerate}
+
+If you want to modify reinforcement policy, read notes in the source
+code for data message handler(DIFFNODE\_RX\_DATA\_MSG). For more complex
+modification you need to study source code. \emph{Note that
+we a planning to make some large scale changes to TinyDiffusion, see
+section~\ref{futurework} for more}
+
+\section{Future Work}
+\label{futurework}
+In the future we plan to develop a simplified publish/subscribe API
+that would enable building applications on top of the TinyDiffusion. We
+believe that this will make TinyDiffusion easier to use. TinyDiffusion
+would be a layer in the protocol stack. Applications will still be
+able to bypass this layer. This arrangement will also allow to use
+different routing mechanisms, such as geographic and/or energy-aware
+routing, to be decoupled from application logic.
+
+The main penalty for publish/subscribe implementation of TinyDiffusion
+will be the increase in the code and RAM footprint. Since we also intend
+to switch to an XML style\footnote{Very, very simplified!} data
+representation, this will increase message size.
+
+%-------------- Bibliography ----------------
+
+\begin{thebibliography}{9}
+\bibitem{diffpaper}
+    C. Intanagonwiwat, R. Govindan and D. Estrin, "Directed Diffusion:
+    A Scalable and Robust Communication Paradigm for Sensor
+    Networks," ACM/IEEE International Conference on Mobile Computing
+    and Networks (MobiCom 2000), August 2000, Boston, Massachusetts.
+\bibitem{tinyoswebsite}
+	TinyOS: An Operating System for Networked Sensors\\
+	http://tinyos.millennium.berkeley.edu
+
+\bibitem{scadds}
+    SCADDS CVS repository.\\
+    http://hey.isi.edu/viewcvs
+
+\bibitem{tinyos}
+    TinyOS Sourceforge repository\\
+    http://sourceforge.net/projects/tinyos	
+
+\bibitem{fabiocode}
+    Linux-based implementation of Directed Diffusion.\\
+    Source code: http://www.isi.edu/scadds/testbeds.html
+
+\end{thebibliography}
+
+
+	
+
+\end{document}
+

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+scp motes.txt build/mica2dot/main.exe get@smote.cs.berkeley.edu:~/tb-smote

@@ -1,0 +1,3 @@
+#!/bin/sh
+langs=`ncc -print-tosdir`/lib/VM/languages
+$langs/motlle/full/motlle 2>&1

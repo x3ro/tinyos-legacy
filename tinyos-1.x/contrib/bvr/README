@@ -1,0 +1,38 @@
+This is beta code for Beacon Vector Routing, v0.5
+
+The BVR algorithm is described in 
+
+  Rodrigo Fonseca, Sylvia Ratnasamy, Jerry Zhao, Chang Tien Ee, David Culler,
+  Scott Shenker, and Ion Stoica. "Beacon Vector Routing: Scalable Point-to-point
+  routing in Wireless Sensor Networks", in Proceedings of the 2nd Symposium on
+  Networked Systems Design and Implementation (NSDI'05), pages 329-342. Boston,
+  May 2005.
+
+
+To read, "install", and use the code, please read 'doc/html/BVR.html'
+
+This is currently research code. I can't guarantee full time support, although
+I am willing to help you if you want to use the code! 
+
+Changelog:
+   2005/11/18 - Some interesting changes
+      - Before routing only worked to (dest_id, coords). Now if you specify
+        dest_id to be TOS_BCAST_ADDR, the message is anycast to any node that
+        has distance 0 to the dest's coordinates. Can be used to route to
+        beacons.
+        A test was added for that.
+      - Added a parametrized interface to BVRRouter (BVRRouterP). It defines a
+        slot parameter that allows multiplexing of different applications on
+        BVR routing.
+      - Fixed an app_msg_id hack in the BVRRouter code. Now BVRRouter itself
+        has a msg_id field that allows for unique identification of the node's
+        messages.
+   2005/06/15 - Initial checkin into Sourceforge.
+      - BVR tested on mica2/mica2dot motes
+      - currently assumes sender knows the coordinates of the receiver
+      - TODO: finish implementation of the location database
+
+
+
+
+

@@ -1,0 +1,28 @@
+/*
+ * Sarah Bergbreiter
+ * 6/21/2001
+ * COTS-BOTS Project
+ *
+ * This component provides an interface to the Mini-Z platform (i.e.
+ * it provides outputs specific to the Mini-Z).
+ *
+ * History:
+ * 6/21/2001 - created.
+ *
+ */
+
+TOS_MODULE MZ;
+JOINTLY IMPLEMENTED_BY MZ;
+
+ACCEPTS{
+	char MZ_INIT(void);
+	char MZ_SETSPEED(unsigned char speed);
+	char MZ_SETDIR(char direction);
+	char MZ_TURN(char turn);
+};
+USES{
+	char MZ_MOTOR_INIT(void);
+	char MZ_MOTOR_SETSPEED(unsigned char speed);
+	char MZ_MOTOR_SETDIR(char direction);
+	char MZ_SERVO_SET_DIRECTION(char direction);
+};

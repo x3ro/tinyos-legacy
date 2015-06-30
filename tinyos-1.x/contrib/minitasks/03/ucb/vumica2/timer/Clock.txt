@@ -1,0 +1,60 @@
+README for real time Clock
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+Here you will find a high precision real time clock (with 1/32768 sec 
+resolution). It extends the functionality of the native Clock component in 
+TinyOS 1.x. To use this implementation, simply copy the 4 files named Clock* 
+and the LocalTime.nc interface to your directory where you compile your 
+application. The NesC compiler will find and use these files instead of the ones 
+in the library. Existing components should not be affected. Note, that the Clock 
+must be started to get access to the real time clock. This can be accomplished 
+by using the Timer component (or the GenericComm which automatically starts the 
+Timer). Note, this implementation works only on the MICA platform (ATmega103 or ATmega128).
+
+FILES:
+
+The Clock interface (Clock.nc) has been extended to support the setting and 
+retrieval of the current (actual) clock rate in 1/32768 seconds units.
+
+The Clock header file (Clock.h) containing predefined rates has been updated. It 
+contained a few incorrect values. Specifically, if the scaling is 1 and the 
+interval is N, then the interrupt actually occurs at every (N+1)/32768 seconds. 
+Other predefined values have been modified to get higher resolution of the real 
+time clock (Like Ted Herman suggested).
+
+The LocalTime interface (LocalTime.nc) has been included to set and retrieve the 
+current time. This file is copied from Ted Herman's TsyncM service.
+
+The Clock module (ClockM.nc and ClockC.nc) implements both the original Clock 
+interface and the LocalTime interface. It has functions to convert clock rates 
+between the formats (scale + interval) and rate in 1/32768 second. Time is 
+guaranteed to be monotonic. The internal functions access and update the current 
+time atomically and take into account the quirks of the hardware.
+
+WARNING:
+
+There is a bug in the tinyos-1.0 release in RadioTimingC.nc which makes the Clock 
+component to miss interrupts. You should get the latest version from the CVS. 
+If RadioTimingC.nc line 76 reads "sbi(TIFR, ICF1);" then you have the buggy version.
+
+TESTING:
+
+Two testing components have been included. VerifyClock1 is used to verify the 
+actual interrupt rates for various (scale + interval) pairs. The TestClock1 
+component is used to verify that the real time clock is monotonic and is 
+accurate.
+
+LIMITATIONS:
+
+If the Clock is not started, then the current time counter is not advanced.
+
+To get high precision (1/32768 sec), the Clock component must be started with 
+scaling of 1. The native implementation of Timer in TinyOS-1.x does start the 
+Clock, but not necessarily in the highest resolution. Specifically, the 
+GenericComm component uses one Timer to gather network traffic statistics. The 
+interrupt rate for that is only 1 per second, which does not yield the best 
+resolution for the real time clock. One can help this by using a dummy Timer 
+with high enough interrupt rate.

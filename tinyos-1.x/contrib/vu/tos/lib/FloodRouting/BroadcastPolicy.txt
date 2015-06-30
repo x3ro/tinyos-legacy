@@ -1,0 +1,16 @@
+BroadcastPolicy:
+
+Author/Contact: Miklos Maroti, ISIS, Vanderbilt
+		Brano Kusy, kusy@isis.vanderbilt.edu	
+
+DESCRIPTION:
+
+The BroadcastPolicy module is the most simple policy. It resends every message
+it heard exactly once. It remembers the packet for 5 seconds till it last heard 
+it. This ensures that same data packet is not resent if it has already 
+passed through this node.
+
+This particular implementation does not wait before resending, but it trivial to 
+modify it in such a way that it waits up to a second before resending the packet. 
+This would make collisions less likely. However, the default implementation seems 
+to work, which just shows that the radio collision avoidance works.

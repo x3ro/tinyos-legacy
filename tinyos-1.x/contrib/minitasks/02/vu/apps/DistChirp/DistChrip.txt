@@ -1,0 +1,11 @@
+DistChirp:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+This is a small demo of the timesync component. You have to program 8 motes with
+node ids 1,2,3,4,5,6,7,8. Put them in a small circle. They should blink the red LED
+in order and in circle. When they blink, they also chirp, which make easy to verify
+that nothing is wrong.
+

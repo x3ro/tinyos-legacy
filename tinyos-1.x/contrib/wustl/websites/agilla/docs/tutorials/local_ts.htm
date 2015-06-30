@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+<table width="95%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><p>&nbsp;</p>
+      <table width="100%" border="1" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80%">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><!-- InstanceBeginEditable name="MainText" -->
+
+          <h2><font face="Verdana, Arial, Helvetica, sans-serif">Lesson 4: Using the
+
+            Local Tuplespace</font></h2>
+
+          <p>Each mote has its own independent tuple space. Agilla provides 6
+            <a href="../../isa.html#LocalTS">instructions</a> for
+            accessing the local tuple space. They are:</p>
+          <ol>
+            <li>out -- insert a tuple into the local tuple space</li>
+            <li>inp -- remove a tuple from the local tuple space, do not block
+              if no match is present</li>
+            <li>rdp -- copy a tuple from the local tuple space, do not block
+              if no match is present</li>
+            <li>in -- remove a tuple from the local tuple space, block if no
+              match is present</li>
+            <li>rd --  copy a tuple from the local tuple space, block if no match
+              is present</li>
+            <li>tcount -- count the number of tuples in the local tuple space
+              matching a particular template</li>
+            <li>regrxn -- register a reaction</li>
+            <li>deregrxn -- deregister a reaction</li>
+          </ol>
+          <p>Agilla agents use a stack architecture. Tuples and templates are
+            created by pushing their values onto the stack, followed by the number
+            of fields. The order of the values on the stack represents the order
+            they appear in the tuple. For example, suppose you want to create
+            a tuple &lt;int:1, int:2, string:&quot;abc&quot;, loc:(1,1)&gt;, and insert it into
+            the local tuple space. Here's the code:</p>
+          <p align="center"><img src="outlocalts.jpg" width="502" height="173"></p>
+          <p>Note that you push the last field of the tuple first. Note also
+            that despite the fact that the agent dies immediately after performing
+            the OUT instruction, the tuple it inserted in the local tuple space
+            remains.</p>
+          <p>The maximum number of fields a tuple can have is limited by the
+            maximum size of the tuple, which is by default 25 bytes as defined
+            by AGILLA_MAX_TUPLE_SIZE within &lt;agilla&gt;/types/TupleSpace.h. This
+            value
+            was chosen to ensure
+            a tuple can fit within a single 36 byte TinyOS message. The size
+            of a tuple or template's field is the size of the variable within
+            the
+            field
+            +
+            1. Variables sizes are given <a href="../variables.htm">here</a>.
+            The extra byte within every field is used to indicate the variable
+            type. For example, the tuple in the example above would contains
+            3+3+3+5=14 bytes.</p>
+          <p>To retrieve a tuple from the local tuple space, you need to supply
+            a template that matches the tuple. A template is the same as a tuple
+            except some of its fields may contain types (also known as wild cards).
+            A match occurs when the template and tuple have the same number of
+            fields, and each field within the tuple matches that of a template.
+            If the template's field is a non-type variable, the tuple's field
+            must match exactly. This form of matching is called &quot;<em>match
+            by value</em>.&quot;
+            However, if the template's field is a type variable, then the tuple's
+            field
+            must
+            simply be of
+            the
+            same
+            type.
+            This form of matching is called &quot;<em>match by type</em>.&quot; Note
+            that a type-variable may match &quot;ANY&quot; other type, in which case a
+            match
+            always occurs. The template may contain any mix of match-by-value
+            and match-by-type fields. For example, all of the following templates
+            match the tuple above:</p>
+          <p>The following template is the exact same as the tuple, it matches
+            by value in all fields. If this agent executes on the same node as
+            the
+            agent
+            above, the green LED will light up.</p>
+          <p align="center"><img src="ltstemp1.jpg" width="461" height="230"></p>
+          <p align="left">The following template matches every field by value.
+            If this agent executes on the same node as the
+            agent
+            above, the green LED will light up.</p>
+          <p align="center"><img src="ltstemp2.jpg" width="524" height="271"></p>
+          <p>The following template matches some fields by value and others by
+            type. If this agent executes on the same node as the agent above,
+            the green
+            LED
+            will
+            light up.</p>
+          <p align="center"><img src="ltstemp3.jpg" width="524" height="271"></p>
+          <p align="left">The following template does NOT match the tuple since
+            it's first field does not match.</p>
+          <p align="center"><img src="ltstempbad.jpg" width="537" height="230"></p>
+          <p align="left">An agent can also register <em>reactions</em> on its
+            local tuple space. A reaction allows an agent to immediately respond
+            to the presence
+            of a tuple in the local tuple space and helps prevent the agent from
+            having to poll for a tuple. Reactions consist of a template
+            and an
+            address. When a tuple matching the template appears, the middleware
+            immediately jumps the agent to the specified address in its instruction
+            memory. The tuple and return address are stored on top of the stack.
+            To register a reaction, the agent first pushes a template, then an
+            address, onto the stack. It then calls <strong>regrxn</strong> to register the reaction.
+            Here's an example.</p>
+          <p align="center"><img src="lt_rxn_ex.jpg" width="520" height="269"></p>
+          <p align="left">The  &quot;reaction&quot; agent above registers a reaction using
+            template &lt;type:value&gt; and
+            address BLINKRED. Thus, whenever a tuple containing a single value
+            appears in the local tuple space, it will jump to BLINKRED and toggle
+            the red LED. The agent is programmed to continuously blink the green
+            LED, and only blink the RED led when its reaction fires. The reaction's
+            code is on lines 10-14, as denoted by BLINKRED. Note that the first
+            two instruction on lines 10-11 are both pop. This is necessary because
+            the tuple that caused the reaction to fire is stored on the agent's
+            stack. The top of the stack is a value that indicates the number
+            of fields in the tuple which in this case it 1. The second variable
+            in the stack is the value field within the tuple. </p>
+          <p align="left">The following &quot;instigator&quot; agent can be used to cause
+            the above agent's reaction to fire, assuming the above agent is injected
+            onto
+            node (1,1).</p>
+          <p align="center"><img src="lt_rxn_inst.jpg" width="493" height="181"></p>
+          <p align="left">If the instigator agent is injected onto node (0,0),
+            while the reaction agent is injected onto node (1,1), the reaction
+            agent will react to the tuple and toggle its red LED. </p>
+          <p align="left">Unlike tuples in a tuple space, reactions belong to
+            the agent that registered it and remains with the agent across strong
+            migrations and clones. Reactions can be explicitly deregistered using
+            the <strong>deregrxn</strong> instruction, which takes in the template
+            of the reaction that should be deregistered.</p>
+          <p>Note: One limitation of Agilla's reaction mechanism is that an agent
+            can only register one reaction per template. That is, it can only
+            register multiple reactions when the reactions contain different
+            templates.</p>
+          <!-- InstanceEndEditable --></td>
+        </tr>
+        <tr>
+          <td width="80%" cellpadding="2" cellspacing="2" bgcolor="#990000">&nbsp;           </td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

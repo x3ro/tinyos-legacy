@@ -1,0 +1,7 @@
+This app directory differs from TestBVRSimple in that it tests the BVRRouterP
+module, which provides a parametrized interface for BVRRouter. This comes at
+the cost of a uint8_t extra field in the packet, so may not always be
+desirable. Hence the current code duplication between BVRRouter and
+BVRRouterP. 
+
+

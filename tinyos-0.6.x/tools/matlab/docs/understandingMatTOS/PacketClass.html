@@ -1,0 +1,307 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=FrontPage.Editor.Document>
+<meta name=Generator content="Microsoft FrontPage 5.0">
+<meta name=Originator content="Microsoft Word 10">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"Lucida Console";
+	panose-1:2 11 6 9 4 5 4 2 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-2147482993 6144 0 0 31 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman"; margin-left:0in; margin-right:0in; margin-top:0in}
+h1
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	mso-font-kerning:16.0pt;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman"}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h1>Using the Packet Class</h1>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>The packet class is pretty simple, conceptually.<span
+style='mso-spacerun:yes'> </span>Following the tutorial below will allow you
+to use the packet class, and any additional functionality you need can easily
+be added as an addition member function of the class.</p>
+
+<p class=MsoNormal><span style='mso-spacerun:yes'> </span></p>
+
+<p class=MsoNormal>To learn how to register your packet headers on an AM number
+so that incoming active messages are automatically parsed using them, see <a
+href="ApplicationEnvironments.html">defining application environments</a></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>To follow this tutorial, just type in all these
+commands.<span style='mso-spacerun:yes'>  </span>The bold text explains what
+you are doing.&nbsp; </p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>(Actually, this is for the old packet class and I haven't had 
+a chance to update the documentation.&nbsp;&nbsp; However, you get the idea of 
+what you should be able to do: addfields, insertfields, removeFields, print the 
+packet, print it as hex bytes, print it as decimal bytes, parse a string of 
+bytes with it, etc.&nbsp; It still does this, but using a slightly differerent 
+interface.&nbsp; The new interface defines the fields as name, values, and value 
+sizes.&nbsp;&nbsp; Otherwise, it is identical.&nbsp; Watch this page for 
+documentation updates)</p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Create a new packet
+object.<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p = packet<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Add a field to your
+packet (is always entered at the position before the ‘data’ field).<span
+style='mso-spacerun:yes'>  </span>Specify the label of the field, the size in
+bytes, and an optional value.<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p = addField(p,
+‘address’,2)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p = addField(p,
+‘groupID’,1, 99)<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Insert a field into
+your packet at a specific position<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p =
+insertField(p, ‘AM’,1, 2)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p =
+insertField(p, ‘CRC’,2, 5, 472)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Assign values to your
+fields<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p = set(p,
+‘address’,126)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p = set(p,
+‘AM’,8)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p = set(p,
+‘data’,[1 2 3 4 5])<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Display the packet as
+bytes or hexadecimal bytes<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>displayBytes(p)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>displayHexBytes(p)<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Change the endianness<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>BIG_ENDIAN = 0;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>displayHexBytes(p)<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Convert the packet to
+an array of bytes or a string of hexadecimal bytes<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>toBytes(p)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>toHexBytes(p)<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Decrease the size of
+data field by 20<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p =
+setDataSize(p, getDataSize(p)-20)<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Remove a field<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p =
+removeField(p, ‘groupID’)<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Create a field
+structure (useful for defining your packet type)<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>myHeaders(1).label
+= ‘moteID’;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>myHeaders(1).size
+= 2;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>myHeaders(2).label
+= ‘sensorValue’;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>myHeaders(2).size
+= 2;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Add a field to the
+packet using a structure<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>P = addField(p,
+myHeaders,[100 353])<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Create a new packet
+object using structures<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(1).label='address';<span
+style='mso-spacerun:yes'>  </span>%tosHeader is a group of headers in the
+general TOS packet.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(1).size
+= 2;<span style='mso-spacerun:yes'>         </span>%It can of course be changed
+or replaced.<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(2).label='AM';<span
+style='mso-spacerun:yes'>       </span>%To replace, define a new header class
+and tell the <o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(2).size
+= 1;<span style='mso-spacerun:yes'>         </span>%bytes2packet function to
+use the new class of headers<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(3).label='groupID';<span
+style='mso-spacerun:yes'>  </span>%by setting the packetType variable of the
+packetPort object<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(3).size=1;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(4).label='data';<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(4).size=30;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(5).label='CRC';<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>tosHeader(5).size=2;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>clear p<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p =
+packet(tosHeader)<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Create a new packet
+with a byte array as the data (useful for parsing incoming data)<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>bytes = [126 0 8
+137 1 0 2 0 3 0 4 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 234 7];<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>clear p<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p =
+packet(tosHeader, bytes)<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Create a new packet,
+and then assign it a new byte array. (Useful for creating new packet objects
+from a couple of headers and parsing incoming data)<o:p></o:p></b></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>clear p<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p =
+packet(tosHeader)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p =
+addField(myHeaders)<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Lucida Console"'>p = setField(p,
+‘data’, bytes)<o:p></o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
+
+</div>
+
+</body>
+
+</html>

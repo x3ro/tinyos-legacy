@@ -1,0 +1,113 @@
+To install TinyOS (mostly) from source code (e.g., if you can't use the
+provided RPMs), do the following:
+
+A) REMOVE ALL TRACES OF PREVIOUS TOOLS (they will only cause problems), i.e.
+   remove:
+   - cygwin (on Windows) (but don't destroy your own files!!!)
+   - avr-gcc, avr-binutils, avr-libc (possibly the WinAVR package, possible
+     some rpms)
+   - previous versions of nesC
+   - previous versions of uisp
+   - previous tinyos installs (again, don't desttou your work ;-))
+
+B) Follow the installation directions for Windows and Linux below.
+
+On Windows (Win 2k and XP):
+
+- download and install Sun's 1.4 JDK, from http://java.sun.com
+- download our cygwin package from 
+  http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/tinyos-cygwin-1.1.zip
+  unzip this, and run the install.bat script
+- download Sun's javax.comm package from 
+  http://java.sun.com/products/javacomm/
+  and install it as follows (instructions for a cygwin shell), assuming
+  you install JDK in c:\Program Files\jdk:
+    unzip javacomm20-win32.zip
+    cd commapi
+    cp win32com.dll "c:\Program Files\jdk\jre\bin"
+    chmod 755 "c:\Program Files\jdk\jre\bin\win32com.dll"
+    cp comm.jar "c:\Program Files\jdk\jre\lib\ext"
+    cp javax.comm.properties "c:\Program Files\jdk\jre\lib"
+  
+- download graphviz from
+  http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/windows/graphviz-1.10.exe
+  and install it by executing it
+
+- proceed to the common source part
+
+On Linux:
+
+- download and install IBMs 1.4 JDK and javax.comm rpms,
+  currently at https://www6.software.ibm.com/dl/lxdk/lxdk-p
+  (http://www.ibm.com/developerworks/java/jdk/ is a good starting point to
+   find this)
+  select the IBM SDK for 32-bit xSeries (Intel compatible)
+  you will have to register
+  download the IBMJava2-SDK and IBMJava2-JAVACOMM rpms, and install them
+
+- You should probably also change the permissions on /dev/ttyS<n> to 666
+  for all serial ports that you will use, and on /dev/parport0 if you're
+  programming via the parallel port. This will allow you to access these
+  devices, and hence run uisp and SerialForwarder, as a normal user.
+
+- proceed to the common source part
+
+
+
+Common Installation (Linux and Windows)
+
+- Compile and install tools: Download the contents of the 
+    http://webs.cs.berkeley.edu/tos/dist-1.1.0/tools/source/
+  directory. Extract all the tarballs there. You should have versions of
+  avarice, binutils, gcc, insight (aka gdb) and avr-libc.
+
+  You need to ensure that you have libbfd.a and libiberty.a. If you can't
+  find them (normally in /usr/lib), find the package that contains them
+  and install it (on debian, it's binutils-dev, on Redhat it's binutils 
+  which you will have if you're attempting to compile anything...).
+
+  For each of these tools, except avarice and avr-libc, cd into the directory
+  and execute the <toolname>.conf file from the download directory, then do
+    make
+    make install # (On Linux, do this as root)
+
+  For avr-libc, you should execute the avr-libc*.conf script, then
+    cd build
+    make
+    make install # (On Linux, do this as root)
+
+  Before compiling avarice, you should remove the following files (they may
+  cause problems with avarice, and probably other stuff too...):
+    /usr/local/lib/libiberty.a
+    /usr/local/lib/libmmalloc.a
+  Once this is done, compile and install avarice like you did the other tools.
+
+- Compile and install nesC, and the TinyOS tools: Download nesC and TinyOS from
+    http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/source/
+  directory. Extract the tinyos tarball where you wish tinyos to live,
+  extract the nesC tarball inside the newly extracted tinyos-1.x directory.
+  Alternately, you can fetch the tinyos-1.x tree from CVS on sourceforge (see
+  install-cvs.txt for details).
+
+  Compile nesC with:
+    cd <nesc directory>
+    ./configure
+    make
+    make install # (On Linux, do this as root)
+
+ Then, change back to the tinyos-1.x directory, and install the tinyos tools:
+    make 
+    make install # (On Linux, do this as root)
+
+ If you use bash, copy the tinyos-1.x/tools/scripts/tinyos.sh.in to
+ /etc/profile.d/tinyos.sh, and edit to contain the correct value for TOSROOT
+ (this assumes your setup runs the scripts in /etc/profile.d, if not, place
+ the contents of tinyos.sh in your shell startup scripts)
+
+ If you use tcsh, edit your startup scripts to do the same things as tinyos.sh
+ does for bash.
+
+- Finally, compile the java tools: first, create a new shell (to get the
+  correct environment), then change to the tinyos-1.x directory, and do:
+    cd tools/java
+    make

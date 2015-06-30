@@ -1,0 +1,1 @@
+<FUNCTION name=solaroff opcode=solaroff numParams=0 returnVal=FALSE desc="Disables solar recharging." schedpoint=true>

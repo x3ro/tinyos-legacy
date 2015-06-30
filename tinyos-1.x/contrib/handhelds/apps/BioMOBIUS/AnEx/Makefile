@@ -1,0 +1,3 @@
+COMPONENT=AnEx
+
+include ../../Makerules

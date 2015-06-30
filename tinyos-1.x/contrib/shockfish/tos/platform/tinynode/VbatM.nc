@@ -1,0 +1,103 @@
+/* 
+ * Copyright (c) 2005, Ecole Polytechnique Federale de Lausanne (EPFL)
+ * and Shockfish SA, Switzerland.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * - Redistributions of source code must retain the above copyright notice,
+ *   this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ * - Neither the name of the Ecole Polytechnique Federale de Lausanne (EPFL) 
+ *   and Shockfish SA, nor the names of its contributors may be used to 
+ *   endorse or promote products derived from this software without 
+ *   specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * ========================================================================
+ */
+
+module VbatM {
+  provides {
+    interface StdControl;
+    interface ADC;
+  }
+  uses {
+    interface ADCControl;
+    interface ADC as VbatADC;
+    interface Timer;
+  }
+}
+
+implementation {
+  enum {
+	ADC_ENABLE_DELAY = 2  // 2ms delay to stabilize voltage and enable ADC channel; 
+   };
+
+  command result_t StdControl.init()
+  {
+    TOSH_SET_NVSUPE_PIN();
+    TOSH_MAKE_NVSUPE_OUTPUT();
+
+    return SUCCESS;
+  }
+
+  command result_t StdControl.start()
+  {
+    result_t ok1, ok2;
+    ok1 = call ADCControl.init();
+    ok2 = call ADCControl.bindPort(TOS_ADC_VSUP_PORT, TOSH_ACTUAL_ADC_VSUP_PORT);
+    return rcombine(ok1, ok2);
+  }
+
+  command result_t StdControl.stop()
+  {
+    TOSH_SET_NVSUPE_PIN();
+    return SUCCESS;
+  }
+  
+  task void EnableTimer() {
+  	call Timer.start(TIMER_ONE_SHOT,ADC_ENABLE_DELAY);
+  }
+  
+  // power-up and launch timer for ADC conversion
+   async command result_t ADC.getData() {
+      TOSH_CLR_NVSUPE_PIN();
+      if(!post EnableTimer())
+      		return FAIL;
+
+      return SUCCESS;
+  }
+
+  event result_t Timer.fired() {
+      return call VbatADC.getData();  
+  }
+
+  async command result_t ADC.getContinuousData() {
+      TOSH_CLR_NVSUPE_PIN();
+      return call VbatADC.getContinuousData();
+  }
+  
+  // signal new data asynchronously and power down
+  async event result_t VbatADC.dataReady(uint16_t data) {
+  	  signal ADC.dataReady(data);
+
+      TOSH_SET_NVSUPE_PIN();
+      return SUCCESS;
+  }      
+}
+

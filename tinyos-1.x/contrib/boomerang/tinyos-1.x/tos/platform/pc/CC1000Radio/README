@@ -1,0 +1,10 @@
+This is a port of the CC1000 Radio stack to TOSSIM.  It was done by
+taking the mica2 version and taking out all the hardware specific
+stuff.  This means that this version does not correctly simulate all
+the CSMA timing, etc.  However, it does allow simulation of programs
+that use CC1000 specific features, such as changing transmission power.  
+
+TODO: Make the radio model actually change when a mote varies
+transmission power.
+
+Email shnayder at eecs.harvard.edu with any questions.

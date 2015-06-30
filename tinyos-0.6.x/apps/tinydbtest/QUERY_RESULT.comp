@@ -1,0 +1,23 @@
+TOS_MODULE QUERY_RESULT;
+
+#include "TinyDB.h"
+#include "SchemaAPI.h"
+
+ACCEPTS{
+	TinyDBError QUERY_RESULT_FROM_TUPLE(QueryResult *qr, ParsedQuery *q, Tuple *t);	
+	TinyDBError QUERY_RESULT_TO_TUPLE_PTR(QueryResult *qr, ParsedQuery *q, Tuple **t);
+	TinyDBError QUERY_RESULT_TO_BYTES(QueryResult *qr, ParsedQuery *q, char *bytes);
+	TinyDBError QUERY_RESULT_FROM_BYTES(char *bytes, QueryResult *qr, ParsedQuery *q);
+	short QUERY_RESULT_QUERY_ID(char *bytes);
+	short QUERY_RESULT_SIZE(QueryResult *qr, ParsedQuery *q);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+};
+
+USES{
+	short QR_TUPLE_SIZE(ParsedQuery *q);
+};

@@ -1,0 +1,322 @@
+
+Explain:
+
+** Nested type structure for network stack.
+
+Single types for sets of nested headers vs. Hierarchical types within
+nested headers
+
+The first is more space-efficient, the second allows nested dispatch
+and more independence between layers. Hierarchy should not get too
+deep, and careful attention must be paid to layering.
+
+New Java-side dispatch code: nested messages get nested components.
+Real stack on the Java-side, instead of application-specific
+next-header processing.
+
+** More nuanced naming
+
+Protocol classes: 0-127 are unnamed protocols, 128-255 are named protocols.
+
+Unnamed protocols:
+
+| Type | Length | Data ... 
+
+Named protocols:
+
+| Type | Length | Source Addr | Dest Addr | Data ...
+
+Messages can be addressed to more than just BCAST_ADDR or a specific
+recipient. Group ID is like a statically-assigned prefix of a name.
+
+General mechanism: CIDR-inspired naming
+
+Transmitted messages contain a name and the length of the prefix that
+must be matched. Sending to 0xffff should be received by every node in
+range. Sending to 0xabff should be received by all nodes whose first
+byte is 0xab (analog to group id). Sending to 0xab08 should be
+received by node 0x08 with prefix 0xab. This allows for flexible
+discrimination between statically-assigned multiple-node prefixes like
+group ID, statically-assigned single-node names, and even
+dynamically-assigned names. Filtering can happen in the "name stack"
+above AM, and should also be modifiable by the same prefix scheme.
+Each listener for named packets should register an address and a
+prefix length to be used for matching. 
+
+Current approach uses 1 byte for group ID and 2 bytes for node ID. To
+contain this structure, our unified names must be longer than 2 bytes.
+How long should we make our names? 2 bytes? IP-style 4 bytes?
+IPv6-style 8 bytes? Space and bandwidth tradeoffs, of course.
+
+** Reliable dissemination TinyOS API.
+
+API structure: ReceiveMsg plus extra
+
+Reliably disseminated messages vs. reliably disseminated items
+
+Keying the reliable unit with a protocol ID makes the reliability
+layer look like a standard transport layer. But, the keyspace is too
+small to support separate reliable delivery for each configurable
+attribute. Thus, each component must marshall all configurable
+attributes into messages, and configurers must build these packed
+messages as well. Alternately, the programmer could forego independent
+reliable delivery for all values. By placing only a single key-value
+pair in the reliable message, the value will only be changed reliably
+until some other value in the same reliable channel is changed, at
+which time the first change will be superseded and no longer reliably
+delivered. 
+
+** Dynamic tree construction and maintenance for MultiHopRSSI.
+
+Tree sequence numbers vs. aging
+Host-initiated flooded tree-construction beacons with sequence numbers
+State tradeoff: Number of maintained parents: 1 or multiple
+Cycle damage limitation with TTL, single-hop cycle prevention,
+State tradeoff: multihop cycle detection?
+Explicit exchange of link quality information vs. implicit
+bidirectional estimation through message ACKs.
+
+** Support for multiple trees with different roots.
+
+Tree identifiers, parent switching.
+
+** TOSBase vs. magically-numbered bridging mote. 
+
+Simplified TinyOS code
+Full participation in the protocols by PC-based code.
+Maintains addresses across the bridge
+Link-layer acks require remote management of TOSBase name.
+On-mote sequence number incrementing: special seqno 0.
+
+** Namespace decisions and marshalling
+
+Hierarchical, static namespace vs. flat, dynamic namespace
+
+The first is the SNMP MIB approach. Each manageable attribute is
+assigned a value unique within a container, which could be assigned to
+a component, or in the MIB-II case, a protocol. This requires sizing
+the key to include all possible attributes, instead of just the ones
+available within the specific manageable node. Larger keys can waste
+communications bandwidth, and programmer effort is needed to manage
+the keyspace. In the second approach, each manageable attribute is
+assigned a numeric identifier at compile time. The mapping between
+attribute and identifier is only maintained for as long as that
+particular compilation of the program is executing, and may change
+when the composition of the program changes. This prevents the
+management console from storing these mappings. To solve this, we use
+a dynamically-generated schema file, containing a human-readable
+string for each dynamic identifier. This is stored with the program,
+and is remotely accessible. The string, in effect, becomes the static
+name of the attribute, and managing a set of hierarchical strings is
+much more natural for a group of programmers than maintaining a tree
+of numbers. The management console is expected to use the string as
+the query key, and then a glue layer is expected to acquire the schema
+file for the node to be queried and transform the string into the
+compile-time identifier. We choose the second.
+
+Abstract class names vs. specific programmer-assigned names
+
+Class names (DiagMsg, TinyDB) are likely to not provide enough
+coverage, or not be specific enough for all desired attributes.
+Programmer-assigned names do not reveal implicit class relationships.
+We choose programmer-assigned names.
+
+Read-only attributes vs. read-write attributes
+
+Read-only attributes support performance management and fault
+managment. They only support half of configuration management. Does it
+make sense to combine read-only attributes and read-write attributes
+into the same framework, or conceptually and programmatically separate
+them? 
+
+** Query System
+
+Single-item queries vs. Multi-item queries
+Single-item responses vs. Multi-item responses
+
+Config uses the first two. This is nice, in that the size of a key is
+bounded only by the packet size, and the size of the response is
+similarly bounded. But, when attributes are small, the packet overhead
+becomes more wasteful. Multi-item queries require either a fixed
+keysize, or more complex packing structures that use length fields or
+key classes. Multi-item responses require self-describing data
+messages that include the length of each item as part of the message,
+or the key class, or require the query to be stored on the console and
+used to determine the lengths of each value in the message. Because a
+fixed keysize makes more sense when the flat-dynamic approach is used,
+and the query is already available on the console, we choose the
+second two.
+
+Continuous queries vs. one-shot queries
+
+Continuous queries require less query traffic, provide a natural
+node-generated sequence number, and provide a stronger guarantee on
+results returning from all nodes. But, continuous queries default the
+node into an "always-on" state, and if the cancellation message is
+missed, or not sent, the node will send results for longer than
+intended, causing wasteful traffic. We make both available.
+
+** Logging/Notification System
+
+Log playback vs. log query
+
+Playback is the simplest approach, and requires no embedded semantic
+knowledge about log entries. Node-local log query for specific types
+of log entries is possible with a flat keyspace, but log query for
+"all entries produced by component x" requires in-program
+understanding of a hierarchical keyspace, or transparent keys. If we
+can generate hierarchical identifiers and embed them within the
+program at compile-time, the program could use prefix matching for
+on-node queries.
+
+
+
+
+---
+
+1: AM_HELLOMSG
+2: AM_HELLOREQMSG
+127: AM_BEACONMSG
+
+128: AM_FLOODMSG
+     1: AM_EVENTLOGGERCMDMSG
+
+129: AM_DRIPMSG
+     1: AM_MGMTQUERYMSG
+     2: AM_MGMTQUERYMSG
+    
+130: AM_MULTIHOPLAYERMSG
+     1: AM_MGMTQUERYRESPONSEMSG
+     2: AM_LOGENTRY
+     
+---
+
+Codify the network stack: 
+- Neighborhood local
+  -> Send
+  <- Receive
+- Reliable dissemination
+  -> Send (a signal that the data has changed)
+  <- IntermediaryQuery (-> forward this/don't forward this)
+  <- CacheSet
+  <- CacheGet (-> a full buffer)
+  <- EndpointQuery (-> this is/is not destined for me)
+  <- Receive
+- Converge-cast collection
+  -> Send (-> a full buffer)
+  <- IntermediaryQuery (-> forward/don't forward)
+  <- EndpointQuery (-> this is/is not destined for me)
+  <- Receive
+
+Receive a packet
+Dispatch on AM ID
+
+1. Neigborhood Local
+   signal EndpointQuery(packet*, payload*) -> endpoint
+   if (endpoint)
+     signal Receive(packet*, payload*)
+
+2. Dissemination
+   signal IntermediaryQuery(packet*, payload*) -> forward
+   if (forward)
+     Update seqno
+     signal CacheSet(packet*, payload*)
+     start to periodically signal CacheGet(payload*)
+                           call AM.Send(packet*)
+   signal EndpointQuery(packet*, payload*) -> endpoint
+   if (endpoint)
+     signal CacheGet(payload*)
+     signal Receive(packet*, payload*)
+
+3. Collection
+   signal IntermediaryQuery(packet*, payload*) -> forward
+   if (forward)
+     call AM.Send(packet*)
+   signal EndpointQuery(packet*, payload* -> endpoint
+   if (endpoint)
+     signal Receive(packet*, payload*)
+
+** Network Headers
+
+1. dispatch type
+2. dispatch type | sequence number
+3. dispatch type | ttl
+
+** Naming Headers
+
+1. destination address
+2. (null)
+3. destination address
+
+Neighborhood Local:
+EndpointQuery()
+  if (addr == TOS_LOCAL_ADDR || addr == TOS_BCAST_ADDR)
+    return TRUE;
+
+Dissemination:
+IntermediaryQuery()
+  return TRUE;
+EndpointQuery()
+  return TRUE;
+
+Collection:
+IntermediaryQuery()
+  if (addr == TOS_LOCAL_ADDR)
+    return TRUE;
+EndpointQuery()
+  return FALSE;
+
+Header pushing on the way back up.
+
+Have a 2 hour tutorial meeting next friday: Jon, Gil, Phil. 11-1. 
+Email Sukun.
+
+---
+
+15.4 includes optional addressing as the first header, but no dispatch
+type. 
+
+Length | FCF | Seqno | <Addressing> | <Payload>
+
+Berkeley-AM includes mandatory addressing
+
+DestAddr | Dispatch | Group | Length | <Payload>
+
+Both can use a 2-byte destination address.
+15.4 can use a 2-byte group address, 1-byte group address for BAM.
+
+(Ethernet)
+
+DestAddr | SrcAddr | Length |  
+
+---
+
+Packets without addresses should be treated as broadcast packets. 
+
+15.4 cannot have address-free packets. 
+A packet without a destination address must have a source PAN ID, and
+is assumed to be directed to the PAN coordinator with PAN ID equal to
+that in the source field.
+A packet without a source address must have a destination PAN ID, and
+is assumed to have been sent by the PAN coordinatior with PAN ID equal
+to that in the destination field.
+
+---
+
+A basic packet should have a dispatch field, and should let the next
+layer choose whether to handle addressing. Most likely, that next
+layer won't handle it. It will implement a traffic pattern, like
+collection or dissemination. The traffic layer will ask whether to act
+as an Intermediary, an Endpoint, or both, by making an upcall. This
+upcall will activate a higher-level layer that MAY use naming. The
+traffic layer MAY then pass the payload to the application layer,
+depending on the decision of the naming layer. Thus, a packet will
+look like this:
+
+(Dispatch) | (Traffic Pattern) | (Naming & Scoping) | (Payload)
+
+Local Link:
+Dissemination:
+Collection:
+Point-To-Point:
+

@@ -1,0 +1,29 @@
+Simple smoketest, checks basic RX/TX functionality.
+
+The commands below should be run from the PingPong directory.
+
+
+
+1. Program a node (that is known to be working) by entering:
+
+mkslave hostname
+
+[ where hostname is a machine running gdbproxy, on which the working node is attached ]
+
+
+2. Once the above command has programmed the working node, enter 'continue' at the 
+msp-gdb prompt to start it. This node is the 'slave', ie it simply pongs every ping 
+it receives from the master.
+After this step, the slave node does not normally need to be started/stopped/reprogrammed anymore.
+
+3. Launch the test node by entering
+
+./smoketest/mktestmaster hostname
+
+[ where hostname is a machine running gdbproxy, on which the test node is attached ]
+
+This command will program the test node, start it, and if everything goes ok it will exit with a "ok" message.
+
+
+4. Repeat step 3 with a new test node.
+

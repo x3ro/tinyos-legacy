@@ -1,0 +1,24 @@
+README for TestBombilla
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+TestBombilla is a test application for Bombilla, the TinyOS
+communication-centric bytecode interpreter. It includes the VM and all
+of its subcomponents. Installing this application on a mote will
+install Bombilla, which by default has a program similar to
+CntToLedsAndRFM. new programs can be installed on motes over the
+network. A Bombilla tutorial and reference are provided in the TinyOS
+release, outlining its capabilities and uses.
+
+Tools:
+
+net.tinyos.bombilla.ProgramInjector
+
+This class interfaces to SerialForward. Users type assembly-style
+Bombilla programs into the GUI, which are then translated into
+bytecodes and injected into the network.
+
+Known bugs/limitations:
+
+ProgramInjector is not yet written.

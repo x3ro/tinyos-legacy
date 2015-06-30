@@ -1,0 +1,33 @@
+# $Id: Makefile.mica2dot,v 1.2 2005/02/19 01:14:11 mturon Exp $
+
+include Makefile.component
+
+all: mica2dot
+
+mica2dot: 315_hp 315_lp 433_hp 433_lp 903_hp 903_lp
+
+315_hp:
+	make mesh,HP freq,315 mica2dot
+	cp build/mica2dot/main.exe build/mica2dot/$(COMPONENT)_$@.exe
+
+315_lp:
+	make mesh,LP freq,315 mica2dot
+	cp build/mica2dot/main.exe build/mica2dot/$(COMPONENT)_$@.exe
+
+433_hp:
+	make mesh,HP freq,433 mica2dot
+	cp build/mica2dot/main.exe build/mica2dot/$(COMPONENT)_$@.exe
+
+433_lp:
+	make mesh,LP freq,433 mica2dot
+	cp build/mica2dot/main.exe build/mica2dot/$(COMPONENT)_$@.exe
+
+903_hp:
+	make mesh,HP freq,903 mica2dot
+	cp build/mica2dot/main.exe build/mica2dot/$(COMPONENT)_$@.exe
+
+903_lp:
+	make mesh,LP freq,903 mica2dot
+	cp build/mica2dot/main.exe build/mica2dot/$(COMPONENT)_$@.exe
+
+

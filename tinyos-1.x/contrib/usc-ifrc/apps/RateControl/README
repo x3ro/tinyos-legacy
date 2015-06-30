@@ -1,0 +1,34 @@
+Global.h
+   - Setting of all the global parameters. 
+   
+Appl.h ApplM.nc Appl.nc 
+  - Application layer of the program 
+    
+SendReady.nc 
+    - Interface that consist of the event the RateControl
+      module signal to the application specifying when to
+      send data. 
+
+
+RateControl.h RateControlM.nc RateControl.nc
+   - The Congestion Control module. All functionality goes
+     here. Code is well-commented to explain the design. 
+     
+UpdateHdr.nc
+   - Interface consisting of the event that the Queue Module
+     signals to the RateControl layer before transmitting
+     the packet. This is meant to update control information
+     in the packet. 
+
+
+ Some of the parameters are not defined in the .h files.
+ These parameters need to be defined via -D argument during
+ compilation. See Makefile for these parameters.
+
+
+
+
+
+
+
+

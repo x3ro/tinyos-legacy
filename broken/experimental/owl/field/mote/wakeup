@@ -1,0 +1,2 @@
+#!/bin/sh
+msend ff ff 78 7d 2 7e 00

@@ -1,0 +1,7 @@
+#
+
+COMPONENT=AudioTransducer
+
+include ../Makerules
+
+

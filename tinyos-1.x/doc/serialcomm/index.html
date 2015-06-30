@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+  <meta name="ProgId" content="FrontPage.Editor.Document">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=windows-1252">
+  <title>Serial-line communication in TinyOS-1.1</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"> <font face="tahoma,arial,helvetica"><b><big><big>Serial-line
+communication in TinyOS-1.1</big></big></b> </font>
+      <p> <font face="tahoma,arial,helvetica">Last updated 03 Sep 2003 </font> </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><font face="arial,helvetica">Overview</font></b></td>
+    </tr>
+  </tbody>
+</table>
+<p>Serial-line communication forms the primary channel for wired
+communication between a TinyOS device and a backend device, such as a
+PC. TinyOS-1.0 provided only primitive serial communication over a
+UART serial link that was abstracted in the <tt>UARTNoCRCPacket</tt>
+component. This component was used in conjunction with the <tt>GenericBase</tt>
+application to provide a simple pipe between the serial and wireless
+channels. On the PC, a simple java application (<tt>SerialForward</tt>)
+provided a relay between the serial data over a TCP/IP socket
+connection. None of these mechanisms provided for any level of
+synchronization or reliability. </p>
+<p>The TinyOS-1.1 incorporates a new suite of components, applications
+and PC tools to provide more robust and flexible serial communication.
+They incorporate a framing protocol that provides for synchronization
+and flow control and the ability to select from multiple different
+types of data sources including legacy and simulator based. This
+document provides a  usage instructions for the serial communication
+suite. </p>
+<p><a href="description.html">Developer details for using TinyOS-1.1
+serial communications components</a>.</p>
+<table border="0" hspace="4" cellspacing="2" width="100%"
+ cellpadding="3" height="23">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%" height="15"><b><font face="arial,helvetica">Usage</font></b></td>
+    </tr>
+  </tbody>
+</table>
+<p><b><tt>UARTFramedPacket</tt></b></p>
+<p>The configuration component <tt>UARTFramedPacket</tt> provides the
+same interface and semantics as <tt>UARTNoCRCPacket</tt>. The
+configuration wires <tt>FramerM</tt> and <tt>FramerAckM</tt> together
+for generic, synchronized serial communication service. For existing
+applications that use <tt>UARTNoCRCPacket</tt>, simply replace the
+component name in the configuration or use an 'as' alias.</p>
+<p><b><tt>TOSBase/TransparentBase</tt></b></p>
+<p>To build: change to the <tt>apps/TOSBase</tt> or <tt>apps/TransparentBase</tt>
+directories and type <tt>'make &lt;platform&gt;'</tt>&nbsp; (for the
+mica2/mica2dot series, remember to also <a
+ href="../mica2radio/CC1000.html">specify the desired frequency</a>).
+For <tt>TOSBase</tt>, be sure to define the variable <tt>DEF_TOS_AM_GROUP</tt>
+according to the configuration of your network.</p>
+<p>Install this application onto the device as you normally would.</p>
+<p><b>Java Tools</b></p>
+<p>The java tools receive/send information from/to <i>packet sources</i>.&nbsp;
+A packet source is specified by the syntax </p>
+<p align="center"><b><tt>&lt;source&gt;[@parameters]</tt></b></p>
+<p>Table 2 lists all the sources understood by the java tools</p>
+<table border="1" cellpadding="0" cellspacing="0"
+ style="border-collapse: collapse;" bordercolor="#111111" width="100%"
+ id="AutoNumber2">
+  <tbody>
+    <tr>
+      <td width="49%" align="center"><b>Specification</b></td>
+      <td width="51%" align="center"><b>Description</b></td>
+    </tr>
+    <tr>
+      <td width="49%"><tt>sf@HOSTNAME:PORTNUMBER</tt></td>
+      <td width="51%">a serial forwarder at <tt>HOSTNAME</tt> and TCP <tt>PORTNUMBER</tt></td>
+    </tr>
+    <tr>
+      <td width="49%"><tt>serial@SERIALPORT:BAUDRATE</tt></td>
+      <td width="51%">a TinyOS device directly connect via a local
+serial port that uses the framed communication protocol. <tt>SERIALPORT</tt>
+is the name of the serial port using DOS semantics (e.g. <tt>COM1, COM2,</tt>
+etc...) and <tt>BAUDRATE</tt> is the speed in baud (e.g. 19200, 57600). <span
+ style="font-family: monospace;">BAUDRATE</span> can also be a mote name
+(<span style="font-family: monospace;">mica</span>, <span
+ style="font-family: monospace;">mica2</span>, <span
+ style="font-family: monospace;">mica2dot</span>) to pick the standard
+baudrate for that mote.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="49%"><tt>network@HOSTNAME:PORTNUMBER</tt></td>
+      <td width="51%">a TinyOS device connected via a network at <tt>HOSTNAME</tt>
+and TCP <tt>PORTNUMBER</tt>. This option is typically used with
+remote programmers such     as the <a
+ href="http://berkeley.intel-research.net/pbuonado/EPRB">EPRB</a>. </td>
+    </tr>
+    <tr>
+      <td width="49%"><tt>old-serial@SERIALPORT[:BAUDRATE][,PACKET_SIZE]</tt></td>
+      <td width="51%">a TinyOS device directly connected via a local
+serial port,     but does NOT use any framing or ACK protocols. This
+is the legacy     implementation. Since there is no framing, an
+optional <tt>PACKET_SIZE</tt> may     be specified (default is 36)</td>
+    </tr>
+    <tr>
+      <td width="49%"><tt>old-network@HOSTNAME:PORTNUMBER</tt></td>
+      <td width="51%">a TinyOS device connected via a network without
+framing or     ACK protocols. The <tt>HOSTNAME and </tt>PORTNUMBER
+parameters are as in the     '<tt>network</tt>' source</td>
+    </tr>
+    <tr>
+      <td width="49%"><tt>dummy</tt></td>
+      <td width="51%">a dummy packet sink and source</td>
+    </tr>
+    <tr>
+      <td width="49%"><tt>tossim-serial[@HOSTNAME]</tt></td>
+      <td width="51%">a virtual serial port for node 0 in TOSSIM. <tt>HOSTNAME</tt>
+is the     name of the node running the TOSSIM instance</td>
+    </tr>
+    <tr>
+      <td width="49%"><tt>tossim-radio[@HOSTNAME]</tt></td>
+      <td width="51%">the radios of TOSSIM nodes. <tt>HOSTNAME</tt> is
+the name of the node     running the TOSSIM instance</td>
+    </tr>
+  </tbody>
+</table>
+<p align="center"><b>Table 2: Known Packet Sources</b></p>
+<p>For the <tt>net.tinyos.PacketSource</tt> and <tt>net.tinyos.PhoenixSource</tt>,
+the packet source can be specified either</p>
+<ol>
+  <li>When creating the object using the appropriate constructor/method
+call.</li>
+  <li>Defining the environment variable <tt>MOTECOM</tt> to be the
+desired source.&nbsp;&nbsp; Example:<br>
+    <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bash% export
+MOTECOM=serial@COM1:19200 </tt><br>
+For this to work with the newer versions of the JVM, you must install a
+JNI shim that gives java access to platform environment variables.
+Change to '<tt>tools/java/jni</tt>'   and execute '<tt>make install</tt>'
+to install the shim</li>
+</ol>
+<p>Most applications, except <span style="font-family: monospace;">SerialForwarder</span>,
+use the <span style="font-family: monospace;">MOTECOM</span>
+environment variables. For the <tt>SerialForwarder</tt> tool, you may
+specify the packet source<br>
+</p>
+<ol>
+  <li>via the '<tt>-comm</tt>' option when starting the program. Invoke
+the program with the '<tt>-help</tt>' option for a list of other
+options.</li>
+  <li>by changing the source in the dialog box in the GUI.&nbsp; Click
+the '<b>Stop Server'</b> button, change the source specifier and click '<b>Start
+Server</b>'. </li>
+</ol>
+</body>
+</html>

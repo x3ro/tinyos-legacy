@@ -1,0 +1,53 @@
+#-*-Makefile-*- 
+#$Id: tinynode.target,v 1.7 2005/10/12 09:57:40 henridf Exp $
+
+PLATFORM = tinynode
+
+ifndef TOSDIR
+TOSDIR := $(shell ncc -print-tosdir)
+endif
+
+ifndef TN_CONTRIBDIR
+TN_CONTRIBDIR := $(TOSDIR)/../contrib/shockfish
+endif
+
+ifndef LCAV_CONTRIBDIR
+LCAV_CONTRIBDIR := $(TOSDIR)/../contrib/epfl/lcav
+endif
+
+OPTFLAGS += -O2
+
+# Disable MSP430 hardware multiply because it makes MSPGCC die
+PFLAGS += -mdisable-hwmul
+PFLAGS += -mstrict-align
+
+PFLAGS += \
+-I$(TN_CONTRIBDIR)/tos/platform/tinynode \
+-I$(TN_CONTRIBDIR)/tos/lib/XE1205Radio \
+-I$(LCAV_CONTRIBDIR)/tos/lib/XE1205Radio \
+-I$(TOSDIR)/platform/telos \
+-I$(TOSDIR)/lib/CC2420Radio \
+-I$(TOSDIR)/platform/msp430 \
+-I$(TOSDIR)/lib/Flash \
+-I$(TOSDIR)/lib/Flash/AT45DB
+
+ifdef TINYOS_NP
+  ifeq ($(TINYOS_NP),BNP)
+  #deluge 2.0
+    CFLAGS += -I$(TN_CONTRIBDIR)/tos/lib/Deluge
+    CFLAGS += -I%T/lib/Deluge
+    PFLAGS += -Wl,--section-start=.text=0x4800,--defsym=_reset_vector__=0x4000
+
+    BOOTLOADER ?= $(TN_CONTRIBDIR)/tos/lib/Deluge/TOSBoot/build/tinynode/main.ihex
+    ifeq ($(shell [ -f /bin/cygwin1.dll ] && echo cygwin),cygwin)
+      BOOTLOADER := $(shell cygpath -m $(BOOTLOADER))  
+    endif
+  endif
+endif
+
+$(call TOSMake_include_platform,tinynode)
+$(call TOSMake_include_platform,msp)
+
+tinynode: $(BUILD_DEPS)
+	@:
+

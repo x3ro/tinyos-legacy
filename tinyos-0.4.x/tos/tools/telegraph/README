@@ -1,0 +1,18 @@
+TeleSensorProxy looks for motes with a MOTEINFO layer and adds them
+as sources to Telegraph.
+
+The setup of this directory is a little broken -- it requires a copy
+of the following .java files to exist at the same level at TeleSensorProxy
+and RemoteSource (these files are currently
+checked in one layer higher).  Since no tos java files have packages
+(why, I don't know), it's not really possible to import from the higher
+level directory.
+
+Required files:
+
+AMInterface.java
+AMHandler.java
+Schema.java
+SchemaField.java
+SensorTracker.java
+

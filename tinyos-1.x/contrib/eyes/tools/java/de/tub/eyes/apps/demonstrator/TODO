@@ -1,0 +1,17 @@
+EYES Demonstrator PS_V2 - TODO
+==============================
+changed: twimmer 09-dec-2005
+
+- Subscription: Handling of limited subscription IDs (<= 100)
+
+- Unsubscribed subscriptions should stay in the table w/ "unsubscribed" flag
+
+- Message/attribute handling: Broadcast/mulithop rx/tx
+
+- Message/attribute handling: logging component
+
+(- General: better resizing behaviour) 09-dec-2005: olmost ok
+
+- Oscope: Ability to display several attributes at the same time
+
+- Network view: Replacement for NodeBeanInfo

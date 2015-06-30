@@ -1,0 +1,21 @@
+YesNoRecognition:
+
+Authors/Contact: bogyom@isis-server.isis.vanderbilt.edu (Gyorgy Balogh, ISIS)
+  and miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+This component recognizes "YES" and "NO" audio commands. Hearing a "YES" it will
+turn on the green LED and turn off the red LED. Hearing a "NO" it will turn on
+the red LED and turn off the green LED. It is constantly listening, if it hears a 
+big enough noise then it turns on the yellow LED for approximately 0.7 seconds and
+starts analyzing the voice signal.
+
+This component uses the ZeroCrossings component which we use for other purposes too,
+for example to distinguish different types of weapons. That component automatically 
+turns off and on the radio stack, even though the YesNoRecognition application 
+does not need this feature. Thus you have to copy the RadioSuspend.nc and 
+RadioSuspendC.nc files to this directory (or put them into the ../RadioSuspend 
+directory) before you can compile this application.
+
+The algorithm uses a very simple zero crossing histogram analysis.

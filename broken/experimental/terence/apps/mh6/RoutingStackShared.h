@@ -1,0 +1,15 @@
+enum {
+  RS_DATA_TYPE = 1,
+  RS_ROUTE_TYPE = 2,
+  RS_DB_TYPE = 3,
+  RS_STATISTIC_INTERNAL_TYPE = 255,
+  RS_COMMAND_TYPE = 5,
+  RS_ESTIMATOR_DEBUG = 12,
+  RS_TABLE_PACKET_TYPE = 6,
+  DATA_FREQ = 10000 // 1000 good for 4 hop
+
+};
+
+
+
+

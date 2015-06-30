@@ -1,0 +1,431 @@
+README for Heterogeneous Sensor Routing (HSN) Stack
+Contact: Mark Yarvis at mark.d.yarvis@intel.com
+
+1. Introduction
+
+   The HSN routing stack implements two routing protocols:
+   Destination-Sequenced Distance-Vector (DSDV) and Flood.  A TraceRoute
+   module provides both an example protocol that can be implemented on top
+   of either DSDV or Flood and a convenient way to visualize the network
+   topology.  The GenericSettingsHandler module provides a mechanism for
+   dynamically configuring the parameters of these protocols.  Finally,
+   the TinyDBShim module provides a glue layer that integrates GSK/TinyDB
+   with the HSN routing stack.
+
+2. DSDV
+
+ 2.1. Introduction
+
+      The DSDV routing layer provides the implementation of the
+      Destination-Sequenced Distance Vector protocol to multi-hop packets
+      back to a sink node.  The current implementation provides
+      many-to-one routing for one destination at a time. It includes
+      a hop-count metric, a reliability metric, an energy metric, and an HSN
+      (Sphere of Influence or SoI) metric, and it can be extended to support
+      additional metrics.
+      To support the reliability metric, this package provides a generic
+      mechanism for tracking the unidirectional and/or bidirectional link
+      quality between neighboring nodes.
+
+ 2.2. Functionality
+
+      The implementation maintains one destination (sink node) and can be
+      compiled with different routing metrics to calculate the cost based
+      on different criteria. The available routing metrics are:
+
+         Hop Count Metric:
+            The hop count metric is incremented by one at each hop.  Thus, it
+            tends to identify least-hop paths.
+  
+         Reliability Metric:
+            This metric utilizes the neighbor quality tracking module
+            (included in this distribution) to identify paths with the
+            highest end-to-end delivery success rate.  The neighbor
+            quality tracking module uses a sequence number on every
+            packet to estimate the bidirectional success rate of the
+            link to each neighbor.  The cost of each hop is taken to
+            be the estimate of the success rate of that link projected
+            into the log domain.  Thus, the total cost of a path is an
+            estimate of the end-to-end success rate.
+         
+         Energy Metric:
+            This metric calculates the estmated end-to-end cost in terms
+            of amount of energy that is needed to transmit a packet. The 
+            energy metric is based on the end-to-end delivery success rate, 
+            number of packets transmitted and received, and the total 
+            number of neighbors (synchronization cost). The model to
+            calculate the energy cost is based on a sleep-and-wake-up protocol
+            called Resync. The end-to-end cost is computed by adding up the
+            one hop cost through a particular path.
+
+         HSN Metric:
+            This metric is similar to the reliability metric except it can get
+            an adjuvant value input from the layer above or through the
+            Settings message to boost a "Special" node's routing metric to
+            form a Sphere of Influence (SoI) within the surrounding area.
+
+      A toggle of the green LED indicates the mote attempted to send
+      a packet.  A toggle of the red LED indicates the mote has received
+      a packet.
+
+ 2.3. How to use DSDV
+
+  2.3.1. Installation
+
+      1) Applications should use DSDV.nc (HopCount Metric) or DSDV_Quality.nc
+         (Reliability Metric) or DSDV_SoI.nc (HSN Metric). The sender uses the
+         Send interface to send packets to the sink node. The sink node
+         receives packets using the Receive interface. All the intermediate
+         nodes (along the multihop path) can see and/or modify the packet
+         through the Intercept interface.
+      2) Include hsn/apps/MakeHSN inside Makefile; refer to hsn/apps/README
+         for details.
+      3) Compile sink node by 'make SINK_NODE=1 mica install.0'
+      4) Compile the rest of the nodes by 'make mica install.x' where
+         x is the node ID (must be unique and other than 0).
+
+  2.3.2. Compilation Flags
+
+      The commonly used compilation flags are defined in MakeHSN. You can also
+      alter the default value in steps 3 and 4 above while compiling the motes.
+
+      SINK_NODE
+         Set to 1 to compile the sink node. Default is 0.
+
+      NO_UART_FRAMED
+         When the sink node sends data to the UART, it does not add the framing
+         header for each packet. As a result, it is compatible
+         with the SerialForwarder.  Default is 0, which results in a
+         gateway compatible with the uartserver (included in tools).
+
+      DSDV_BI_DIR_QUALITY
+         Causes the DSDV_Quality module to consider bidirectional link
+         quality to calculate the cost between two nodes. Default is 1.
+         When set to 0, only outbound quality is considered.
+
+      ENERGY_METRIC
+         Causes the DSDV_Quality or DSDV_SoI module to use the energy metric
+         described above in addition to the sequence-number based reliability
+         metric.
+
+      DSDV_PERSISTANCE
+         This flag causes DSDV packet forwarding to be persistent 
+         if the radio send fails.  In this case, it will try
+         to resend the packet until it succeeds or until the maximum number of
+         retries is reached (the default MAX_RETRYS is 10). Default is
+         1 (Enable).
+
+      DSDV_PASSIVE_ACK
+         When enabled, this flag enables a retransmission mechanism based
+         on passive acknowledgment.  When forwarding a packet to a node that
+         is not the sink, a mote expects the next hop to forward the packet
+         in turn.  If this retransmission is not overheard before a timeout,
+         the packet will be retransmitted.  The maximum number of retries
+         is set by PASSIVE_ACK_MAX_RETRIES. Default is 1 (Enable).
+
+      DSDV_RUPDATE_DEFAULT
+         Specifies the default interval between successive route update
+         messages, in seconds.  Default is 30.
+
+      FAST_START_DSDV
+         When the sink node starts, it queries the network to determine
+         the current sequence number.  By default, three queries occur,
+         one per route update interval.  The flag decreases this startup time
+         to three seconds.  Default is 1 (Enable).
+
+      RUPDATE_RANDOMIZE
+         Set a random delay in route update forwarding.  This
+         randomization improves route discovery by reducing the packet
+         storm created during route update flooding.  Default is 1 (Enable).
+
+      PASSIVE_ACK_MAX_RETRIES
+         Described above in DSDV_PASSIVE_ACK.
+
+      NEIGHBOR_AGE_CACHE_TIMEOUT
+         Sets the number of update intervals after which a neighbor will be
+         discarded from the neighbor list if it is not heard from.  If not
+         set, neighbors are never discarded.  If it is set, the number times
+         the update interval (which is 10 seconds, defined in
+         lib/neighborhood/NeighborList.h) is the timeout period.
+         Default is not set (Disable).
+
+      USE_SYNC_ACK
+         When set, this flag causes the DSDV packet forwarding mechanism to
+         check the "ack" flag in a packet to determine whether the packet
+         was successfully received downstream.  Default is 0 (Disable).
+
+      TXRES_VAL
+         Sets the value of the radio strength potentiometer (0 - 100). 0 is
+         largest, default is 70.
+
+      Many of these parameters are dynamically configured using the
+      settings control mechanism.  See Section 5 and tools/packet_tools/README
+      for more details.
+
+ 2.4. Notes
+
+      DSDV signals the Intercept interface on all incoming packets even though
+      the mote itself is the sink node. The sink node should return SUCCESS
+      if the Intercept interface is wired. Otherwise the packet will be dropped
+      and the packet won't be delivered by the Receive interface.
+
+3. Flood
+
+ 3.1. Introduction
+
+      The Flood module implements a flooding mechanism to send packets
+      to every node or a specific node in the network.
+
+ 3.2. Functionality
+
+      The Flood module broadcasts an incoming packet to its neighborhood
+      if the packet was not received before and the TTL is greater than 0.
+
+      For flooding packets to the entire network, every node in the network
+      gets signaled by the Intercept interface followed by the Receive
+      interface. 
+
+      For flooding packets to a specific node ID, every node in the network
+      gets signaled by the Intercept interface, but only the recipient
+      gets signaled by the Receive interface.
+
+      Each node should receive the same packet once from each of its one-hop
+      neighbors, but only forward it once.
+
+      A mote can stop forwarding by returning FALSE in the Intercept event.
+      However, since other nodes may forward the packet, this may have little
+      effect.
+
+      A toggle of the green LED indicates the mote attempted to send a
+      packet; the red LED indicates the mote received a packet.
+
+ 3.3. How to use Flood
+
+      1) Applications should use Flood.nc. The sender uses the Send interface
+         to flood the packets to the whole network and uses SendMHopMsg
+         to send to a specific node in the network.  Every node
+         (including sender) receives packets from the Intercept interface
+         (if wired).  Intended recipients also receive the packet through the
+         Receive interface. When flooding the packet to the entire network,
+         intended recipients are every mote in the network except the sender.
+      2) Include hsn/apps/MakeHSN inside the Makefile; refer to hsn/apps/README
+         for details.
+      3) Compile sink node by 'make SINK_NODE=1 mica install.0'
+      4) Compile the rest of the nodes by 'make mica install.x' where
+         x is the node ID (must be unique and other than 0).
+
+ 3.4. Notes
+
+      1) For flood messages going to the entire network, the sender of the
+         flood message gets the sendDone event only, it does not receive the
+         Receive event for the same data it sends out. However, it can still
+         get the packet by the Intercept interface.
+      2) For flood messages going to the entire network, on every mote
+         (except the sender) flood only signals the Receive interface after a
+         successful forward.
+      3) The size of the flood packet cache, which is used to identify
+         duplicate packets, is defined in Flood.h. The default cache
+         size is 30.
+      4) The TTL is hard-coded to be 12 in FloodM.nc.
+
+4. TraceRoute
+
+ 4.1. Introduction
+
+      TraceRoute is a module that can be wired with applications to
+      visualize the actual route the packets take.
+
+ 4.2. Functionality
+
+      By default, each node sends out a traceroute packet every 5 seconds
+      (configurable). An application can define the TR_PIGGYBACK_LEN
+      (Piggyback interface) and TR_PLUGIN_LEN (Intercept interface)
+      to attach additional information to the traceroute packet.
+      The piggyback is intended to allow delivery of data from the source
+      to the sink.  The plugin is intended to allow data to be modified
+      by nodes along the path from the source to the sink (through the
+      Intercept interface).
+
+      Nodes along the path from the source to the sink append their
+      node ID into the trace route payload and signal the Intercept
+      interface for the application to alter the plugin bytes (the size
+      is defined by TR_PLUGIN_LEN inside the Makefile).
+
+      The sink node uses UART_Gateway to send the trace route packet to
+      the UART. For the complete header format, refer to the architecture
+      document in hsn/doc/hsn_arch.pdf.
+
+ 4.3. How to use TraceRoute
+
+      Steps 2, 3 and 4 are optional, depending on your application. Refer to 
+      hsn/apps/TraceRouteTest or hsn/apps/TraceRouteSoI for a simple example.
+
+      1) Depending on the routing metric, the application should use
+         TraceRoute_DSDV.nc or TraceRoute_DSDV_SoI.nc to provide the basic
+         trace route functionality.
+      2) Wire GenericSettingsHandler with the TraceRoute_DSDV(_SoI) Settings
+         interface to allow dynamic control of the protocol behavior.
+      3) Wire TraceRoute_DSDV(_SoI) Piggyback with GenericSettingsHandler to
+         provide the ability to retrieve the current setting by piggyback
+         to the trace route message sent to the sink node.
+      4) For TraceRoute_DSDV_SoI, wire the SoIIntercept with the Intercept
+         interface to provide the ability to retrieve the adjuvant node bits
+         right before the settings piggyback.
+
+      Compilation Flags:
+ 
+      TR_SEND_RATE
+         Sets the transmit interval of traceroute packets, in seconds.
+
+      TR_PIGGYBACK_LEN
+         The TraceRoute module can attach the piggyback to each traceroute
+         packet (step 3 above).  This flag controls the size of the
+         piggyback.  Since the packet size is fixed, this setting also
+         affects the maximum length of the traceroute data.
+
+      TR_PLUGIN_LEN
+         An application can define the plugin length to attach plugin
+         information right before the piggyback bytes. This flag controls
+         the size of the plugin length.  Since the packet size is fixed,
+         this setting also affects the maximum length of the traceroute
+         data.
+
+      HOPCOUNT_METRIC
+         Causes the TraceRoute module to use the hop-count metric described above
+         instead of the default reliability metric.
+
+ 4.4. Notes
+
+      The TraceRoute module uses the UART_Gateway, which wires the entire
+      UART at the sink node. Be careful to avoid double wiring the UART.
+
+5. GenericSettingsHandler
+
+ 5.1. Introduction
+
+      GenericSettingsHandler allows the user to dynamically alter the
+      behavior of the HSN routing stack.
+
+ 5.2. Functionality
+
+      GenericSettingsHandler uses a parameterized Settings interface
+      to allow components to wire their component-specific settings
+      using the Settings ID defined in WSN_Settings.h.  Settings are
+      delivered using a flood message, which is intercepted by the
+      GenericSettingsHandler at each node.  A settings message can be
+      constructed by the Settings GUI and forwarded by the sink node
+      through the UART_Gateway.  When a settings message is received, the
+      GenericSettingsHandler decodes each individual setting and signals
+      the wired components.  Each client then updates its settings
+      accordingly and returns the number of bytes used by that setting,
+      allowing the GenericSettingsHandler to locate the starting position
+      for the next setting.
+
+      A toggle of the yellow LED indicates it received a settings message.
+
+      GenericSettingsHandler also allows the current settings to
+      be attached to packets.  It exposes a piggyback interface to
+      provide the application with feedback from the piggybacked settings. It
+      fills in the settings specified by the feedback list (see
+      tools/packet_tools/README) until the piggybck buffer is full or
+      the end of the feedback list is reached.
+
+      The GenericSettingsHandler provides six Settings internally:
+
+      ProgramVersion
+         To provide the update and piggyback of the current program version,
+         which can be compiled by the PROGVER flag at the compile time.
+
+      SettingsVersion
+         A user-specified settings version number.
+
+      PotSet
+         Sets the radio strength potentiometer.
+ 
+      BuildDate
+         The month, day, and year that the application was built.
+
+      FeedbackList
+         The list of settings that should be delivered in the settings feedback.
+
+      FeedbackID
+         A user-specified version number for the feedback list.  This ID number
+         should be included in the settings feedback to allow the recipient to
+         interpret the contents of the feedback data.
+
+ 5.3. How to use GenericSettingsHandler
+
+      Steps 1 and 2 are optional, depending on your specific usage.
+
+      1) Write your component to provide the Settings interface for the
+         local settings. Wire your Settings interface with the parameterized
+         Settings in GenericSettingsHandler to receive the settings message
+         from the network.
+      2) Wire your application to use the Piggyback interface for providing
+         the piggyback buffer and length to the GenericSettingsHandler. Wire
+         your Piggyback interface with GenericSettingsHandler to provide a
+         starting point for the piggyback location.
+
+ 5.4. Notes
+
+      GenericSettingsHandler uses the Intercept instead of the Receive interface
+      provided by the Flood module.  This allows the sender of the settings
+      message (could be the sink node or a gateway node that wires with
+      UART_Gateway and connects to the PC Settings GUI) to also receive
+      the settings. See Flood Notes (1) for more details.
+
+6. TinyDBShim
+
+ 6.1. Introduction
+
+      TinyDBShim allows TinyDB to utilize the HSN routing stack.
+
+ 6.2. Functionality
+
+      TinyDBShim wires TinyDB with the DSDV routing layer and Flood
+      module.  TraceRoute can optionally be included to allow the network
+      topology to be monitored.  In this release the TinyDBShim provides
+      the DSDV reliability or HSN routing, and delivers packets to TinyDB on
+      every node (DSDV) or selective high-end node (HSN). This allows TinyDB to
+      perform in-network aggregation on every node (DSDV) or only on high-end
+      nodes (HSN).
+
+      In the DSDV case, TinyDB only aggregates packets that happen to go
+      through a given node; in the HSN case, the selected high-end node
+      attracts the packets based on the given adjuvant value and the
+      in-network processing only happens on the high-end nodes.
+
+      For the architecture diagram, please refer to hsn/doc/hsn_arch.pdf
+
+ 6.3. How to use TinyDBShim
+
+      TinyDBShim replaces the NetworkMultiHop routing layer in the
+      existing GSK/TinyDB application provided by TinyOS-1.x. Refer to 
+      hsn/apps/GSK/README to swap it with the HSN routing stack and the detail
+      of the application setup.
+
+      For information about setting up and using the GSK/TinyDB environment, please refer to
+      TinyOS-1.x/doc/tinydb.pdf.
+
+ 6.4. Notes
+
+      In this release, settings messages cannot be sent through the
+      TinyDB application on the DSDV reliability metric, but it can do so on
+      the HSN SoI metric.  However, it should be possible to inject settings
+      messages using the GenericBase application.
+
+7. Known Issues
+
+   - The Parse & Print tool can only parse one byte of the Settings Feedback.
+     Refer to tools/packet_tools/README for details.
+   - TinyDBShim requres a local patch to compile with the latest tip of
+     SourceForge CVS. Refer to apps/GSK/README for details.
+   - The Settings GUI allows access to unsupported variables. Refer to
+     tools/packet_tools/README for details.
+   - The Settings GUI allows values to be set greater than maximum; these values
+     will not be transmited to the motes. Refer to tools/packet_tools/README
+     for the value range.
+   - The Sensor Mesh simulator hangs after 1-2 hours of continues operation
+     in a 25 node network using MICA motes. Refer to SensorMesh readme for
+     details.
+

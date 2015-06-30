@@ -1,0 +1,15 @@
+//Module for searching sending and receiving active
+//messages.
+
+TOS_MODULE GENERIC_COMM_STRENGTH;
+IMPLEMENTED_BY GENERIC_COMM_STRENGTH;
+
+ACCEPTS{
+    	char GENERIC_COMM_STRENGTH_INIT(void);
+        void GENERIC_COMM_STRENGTH_POWER(char mode);
+        char GENERIC_COMM_STRENGTH_SEND_MSG(short addr, char type, char* data);
+};
+SIGNALS{
+         char GENERIC_COMM_STRENGTH_MSG_REC(char type, char* data);
+         char GENERIC_COMM_STRENGTH_MSG_SEND_DONE(char success);
+};

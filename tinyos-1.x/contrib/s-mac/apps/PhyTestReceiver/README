@@ -1,0 +1,48 @@
+1. INTRODUCTION
+
+   This application tests the Physical Layer (PHY) developed at USC/ISI and
+UCLA. The primary component of the physical layer that provides the interface
+to upper layer is PHY_RADIO. The mote programmed by this application is a
+receiver that counts the number of succesfully received packets and packets
+that are received with errors.
+
+   The transmitter part is at apps/PhyTestSender/.
+
+2. FUNCTIONALITY
+
+   The receiver records the following values, and toggle LEDs when a packet is
+successfully received.
+
+* Number start symbol detections
+* Number of 'length' (the first field in a packet) errors
+* Number of CRC errors
+* Number of received packets without any errors
+
+   At the end of each group of packets sent by the sender, the receiver sends
+out a packet to report its above results.
+   
+3. HOW TO USE
+
+   To use all the default parameters, simply type 'make mica' and/or 'make
+install mica'.
+
+   The following parameters can be defined in the config.h file. If not 
+defined, their default values will be used.
+   
+ Parameter               Description                    Default Value
+ 
+PHY_MAX_PKT_LEN  Maximum pkt length allowed by PHY         100 bytes
+TST_NUM_PKTS     Number of pkts being sent in each group   100
+
+
+4. NOTES
+
+1) This application is to be used with a transmitter part, which is at
+apps/PhyTestSender/.
+
+2) You can use a snooper (at apps/Snooper/) to see the contents of each packet
+sent by the sender as well as the report packet sent by the receiver at the end
+of each group.
+
+
+

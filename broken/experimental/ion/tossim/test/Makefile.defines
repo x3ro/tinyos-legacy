@@ -1,0 +1,42 @@
+# -*- makefile -*-
+#
+# Any variable beginning with "LOCAL_" is defined in the
+# per-subdirectory Makefile.
+
+SOURCES     = $(NAMES:%=%.cc)
+OBJECTS     = $(NAMES:%=%.o)
+DOCUMENTS   = $(NAMES:%=%.doc)
+EXECUTABLE  = $(MODULE)
+ARCHIVE     = lib$(MODULE).a
+LIBRARY     = lib$(MODULE).so
+MAIN        = $(EXECUTABLE:%=%.o)
+
+# Compiling
+CXX         = /usr/bin/g++
+CXXFLAGS    = $(LOCAL_CXXFLAGS) -Wall
+CXXFLAGS_DLL = -fPIC
+
+# Linking
+AR          = /usr/bin/ar cru
+LINKFLAGS   = $(LOCAL_LINKFLAGS) $(CXXFLAGS)
+LINKFLAGS_DLL = -shared
+
+# Headers
+INCLUDEPATH_CXX = /usr/include/c++/3.3.3
+INCLUDEPATH = $(LOCAL_INCLUDEPATH) $(ROOT)/include/test $(ROOT)/include/src /usr/local/include/boost /usr/local/include $(INCLUDEPATH_CXX)
+IPATH       = $(INCLUDEPATH:%=-I%)
+
+# Static libraries
+LIBRARYPATH = $(LOCAL_LIBRARYPATH) $(ROOT)/lib /usr/local/lib
+LPATH       = $(LIBRARYPATH:%=-L%)
+LIBRARIES   = $(LOCAL_LIBRARIES) cppunit pthread dl
+LIBS        = $(LIBRARIES:%=-l%)
+
+# Dynamic libraries
+DLLPATH     = $(LOCAL_DLLPATH) $(ROOT)/lib /usr/local/lib
+DPATH       = $(DLLPATH:%=-Wl,%)
+
+# makedepend
+DEPEND_FILE = Makefile.depend
+INCLUDEPATH_DEPEND = $(INCLUDEPATH) /usr/include/c++/3.3.3/i386-redhat-linux
+IPATH_DEPEND = $(INCLUDEPATH_DEPEND:%=-I%) -Y

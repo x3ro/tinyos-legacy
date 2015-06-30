@@ -1,0 +1,20 @@
+This program is a simple test application that introduces a lot of the
+different parts of setting up the Bluetooth module in a TinyBT
+application. The application will output status information throughout
+the entire process on the free UART (UART1).
+
+The application will start and initialize the Bluetooth module,
+perform a scan in order to find other Bluetooth hardware around, and
+enable page scan and inqury scan on the module (making it discoverable
+and connectable).
+
+Then the application will wait for a connection. When a connected is
+initated, the application will accept it, and try to print the packets
+it receive through the connection (so it is good if the packets
+include a zero-terminated string).
+
+None of this involves the higher-level Bluetooth protocols (such as
+RFCOMM and L2CAP). So an application that wishes to send to this test
+application must use ACL to communicate with the node.
+
+

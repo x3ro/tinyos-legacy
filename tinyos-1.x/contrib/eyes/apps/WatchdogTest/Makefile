@@ -1,0 +1,2 @@
+COMPONENT=WatchdogTest
+include ../MakeEyes

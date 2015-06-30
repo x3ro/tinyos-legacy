@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ ! -f .dates-set ]; then
+  . ./set-dates
+  touch .dates-set
+  ./configure
+fi
+
+gnumake || gmake || make

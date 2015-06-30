@@ -1,0 +1,21 @@
+
+TOS_MODULE RF_WAKE_UP;
+
+ACCEPTS{
+	char RF_WAKE_UP_INIT(void);
+};
+
+HANDLES{
+};
+
+USES{
+	char RF_WAKE_UP_SUB_INIT();
+	void RF_WAKE_UP_SLEEP(char);
+	void RF_WAKE_UP_POT_DEC();
+	void RF_WAKE_UP_POT_INC();
+
+};
+
+SIGNALS{
+};
+

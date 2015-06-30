@@ -1,0 +1,29 @@
+# Matlab setup notes
+# Author: Phoebus Chen
+# Thu Oct 14 17:15:30 PDT 2004
+
+
+These notes are meant to supplement those in the 
+tinyos-1.x/tools/matlab directory.
+More info specific to ucbRobo can be found in
+tinyos-1.x/contrib/ucbRobo/tools/matlab/README.matlab
+
+- Getting MATLAB R13 License Server to recognize startup.m
+  * put startup.m in ~/matlab (~ is your home directory)
+
+- Getting MATLAB R13 License Server to recognize local classpath.txt
+  (not using the server copy of classpath.txt)
+  * Start up matlab from the directory containing your local classpath.txt
+
+- As of Thu Oct 14 17:15:30 PDT 2004, stopReceiving.m in 
+  tinyos-1.x/tools/matlab is still broken (check for misspelling of varargin
+  as varagin)
+  * Use the one in ucbRobo/doc/fixes until it is fixed.
+
+
+TROUBLESHOOTING
+---------------
+- If you get errors of the sort
+  function printMagReportMsg_MagLocalAggRpt does not take type 'double'
+  Make sure that printMagReportMsg_MagLocalAggRpt.m is actually define!
+  (in this case, we were suppose to use printMagReportMsg_MagDirectBot)

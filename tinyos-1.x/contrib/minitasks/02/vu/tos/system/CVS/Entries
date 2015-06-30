@@ -1,0 +1,23 @@
+/ADCC.nc/1.1/Wed May 21 18:21:38 2003//
+/ADCM.nc/1.1/Wed Apr 23 14:49:46 2003//
+/Clock.nc/1.1/Wed Apr 23 14:49:46 2003//
+/Clock.txt/1.1/Wed Apr 23 14:49:46 2003//
+/ClockC.nc/1.1/Wed Apr 23 14:49:46 2003//
+/GenericComm.nc/1.2/Thu Aug 28 23:18:00 2003//
+/HPLADC.nc/1.1/Wed Apr 23 14:49:46 2003//
+/LocalTime.nc/1.1/Wed Apr 23 18:19:44 2003//
+/MsgList.h/1.3/Wed May 21 18:22:05 2003//
+/MsgList.nc/1.2/Tue May 27 16:04:35 2003//
+/MsgListC.nc/1.1/Wed May 21 18:22:05 2003//
+/MsgListM.nc/1.3/Mon Jun  9 17:05:40 2003//
+/RadioSuspend.nc/1.1/Wed Apr 23 14:49:46 2003//
+/RadioSuspend.txt/1.1/Wed Apr 23 14:49:46 2003//
+/SyncedCRCPacket.nc/1.1/Sun Jul 27 06:36:01 2003//
+/SyncedCRCPacket.txt/1.1/Sun Jul 27 06:36:01 2003//
+/Timer.h/1.4/Sun Jul 27 06:35:29 2003//
+/Timer.nc/1.2/Sun Jul 27 06:35:29 2003//
+/Timer.txt/1.2/Wed May 21 18:20:47 2003//
+/TimerC.nc/1.1/Wed Apr 23 14:49:46 2003//
+/TimerM.nc/1.4/Sun Jul 27 06:35:29 2003//
+/UARTSyncedCRCPacket.nc/1.1/Sun Jul 27 06:36:01 2003//
+D

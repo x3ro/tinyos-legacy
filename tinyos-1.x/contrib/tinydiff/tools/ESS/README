@@ -1,0 +1,22 @@
+This is a set of tools that run over moted that serve as the 
+sink and sink-side applications for a deployment of TinyDiffusion.
+
+So, these can run only on linux.  Installations istructions can be found at
+http://www.cens.ucla.edu/~mmysore/Design/OPP/installation-instructions.html
+
+Later versions will include programs that can use GenericBase to
+communicate with the sensor nodes.
+
+The current commandline options are minimalistic.  Later versions will have
+more flexible and comprehensive options.
+
+For diffsink and diffdump:
+
+-i : used to specify the id of the sink to used to participate in
+     TinyDiffusion (for diffsink) or to allow listening in on data packets
+     that are destined for the specified sink (for diffdump)
+
+-m : used in conjunction with the -i option so that only packet destined
+     for the specified sink id are printed out
+
+

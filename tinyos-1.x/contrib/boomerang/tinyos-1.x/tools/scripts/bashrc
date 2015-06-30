@@ -1,0 +1,31 @@
+# ~/.bashrc
+
+#
+# Initial .bashrc customized for TinyOS
+# $Id: bashrc,v 1.1.1.1 2007/11/05 19:08:59 jpolastre Exp $
+#
+
+# Workaround for the fact that tinyos is installed by InstallShield and 
+# InstallShield uses DOS directory format yet nesc wants to see Unix-style
+# directory names for TOSDIR. For example, an InstallShield wizard can set
+# a system-wide environment variable TOSDIR to 
+# <appropriate-drive-letter>:\tinyos-1.x\tos\. In cygwin, you could then cd to
+# $TOSDIR, but nesc can't parse it. Nesc expects something like 
+# /cygdrive/<appropriate-drive-letter>/tinyos-1.x/tos/.
+
+cd $TOSROOT
+export TOSDIR=`pwd`/tos
+cd $HOME
+
+# Historically, users have had difficulty keeping up with the CLASSPATH 
+# requirements for TinyOS which, especially since 1.0.0, have increased 
+# rapidly. `javapath` is a script that will determine what the CLASSPATH 
+# should be.
+
+cd $TOSROOT; cd tools/java
+export CLASSPATH=`./javapath`
+cd $HOME
+
+
+
+

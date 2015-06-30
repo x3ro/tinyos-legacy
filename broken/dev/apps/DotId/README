@@ -1,0 +1,25 @@
+README for DotID
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+DotID takes a mote's ID and writes it to a predefined location in
+non-volatile storage. This ID can then later be loaded at boot to
+maintain a consistent mote ID over multiple program installations; the
+mote ID does not have to be hardcoded into each program image. The ID
+installed is the one hardcoded into the DotID image.
+
+DotID turns the red LED on when the ID is written to EEPROM, then
+turns the yellow LED on when the ID is read out of the EEPROM. The
+read ID is then sent in an AM broadcast message of type 16. When this
+message send is completed, DotID turns the green LED on.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+Mote programs do not load the mote ID from EEPROM by default.  DotID
+does not currently use the ByteEEPROM component to allocate its EEPROM
+region.

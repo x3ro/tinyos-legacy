@@ -1,0 +1,30 @@
+Package: net.tinyos.widgets
+Description: Provides a GUI which periodically displays a scaled value of the baseband 
+	     signal strength of the radio.
+Author: Deepak Ganesan <deepak@cs.ucla.edu>
+        Alec Woo <awoo@cs.berkeley.edu>
+
+The program expects a stream of packets from the standard input with each 
+byte in the packet represented as hex values, separated by the ',' character.
+The normal tools/listen.c can be used to generate such input format.
+The output displays a bar graph representing the signal strength value.
+
+Executable:  net.tinyos.widgets.SignalStrength
+
+usage:  ./listen | java net/tinyos/widgets/SignalStrength l h
+
+	where l and h are the positions of the low and high byte of the signal strength
+	value in the packet.
+
+	For example, if the signal strength value inside the packet is at byte 5 and 6,
+	where byte 5 is the lower 8 bit of the signal strength value, then we run the 
+	program wit the following command line:
+
+	./listen | java net/tinyos/widgets/SignalStrength 5 6
+
+Classes:
+
+SignalStrength.java	process incoming packet streams from standard input and extract
+	                the signal strength value from the format.
+
+Proximity.java          scales and displays the signal strength value on the GUI

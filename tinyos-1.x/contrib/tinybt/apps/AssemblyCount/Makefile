@@ -1,0 +1,3 @@
+COMPONENT=Count
+include ../Makerules
+

@@ -1,0 +1,33 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: docs.extra,v 1.4 2005/04/30 08:47:06 cssharp Exp $
+
+# "docs,here" creates documentation in doc/ in the current app dir.
+# You can make this the default with "export DOCS=here" in your shell
+# or with "DOCS=here" in Makelocal.
+ifeq ($(DOCS),here)
+DOCDIR = doc
+endif
+
+# The output directory for generated documentation
+DOCDIR ?= $(TOSDIR:%/tos=%)/doc/nesdoc
+
+# TOPDIR defines how nesdoc deduces "package" names.  The primary, default
+# TOPDIR is essentially $TOSDIR/.. .  But, if the application isn't under that
+# tree, nesdoc FAILS.  This is bad.  Add two more topdirs to help nesdoc
+#
+#   1) The user's home directory
+#   2) The system root
+#
+# 2) ensures that nesdoc will always succeed, possibly with "ugly" package
+# names.  1) tries to make the common case of working in the user's home
+# directory but not $TOSDIR/.. a little more pretty.  The user is also free to
+# define additional directories in NESDOC_TOPDIRS, which will take precendence.
+NESDOC_TOPDIRS += "$(HOME)"
+NESDOC_TOPDIRS += /
+
+BUILD_DEPS = docs_
+
+docs_: FORCE
+	@echo "    Making documentation for $(COMPONENT) on $(PLATFORM)"
+	nesdoc $(DOCDIR)/$(PLATFORM) $(addprefix -topdir=,$(NESDOC_TOPDIRS)) -fnesc-is-app $(NESDOC_FLAGS) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc
+

@@ -1,0 +1,61 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: hc08.rules,v 1.4 2006/02/07 17:45:24 idgay Exp $
+
+define HC08_HELP
+
+ HC08 extras:
+
+   none yet
+
+ Programmer options:
+
+   pemicro : (default) use pemicro programmer
+
+endef
+HELP += $(HC08_HELP)
+
+SET_ID = $(shell if type tos-set-symbols >/dev/null 2>/dev/null; then echo tos-set-symbols; else echo set-mote-id; fi)
+HC08_PATH = $(TINYOS_MAKE_PATH)/hc08
+
+BUILDDIR = build/$(PLATFORM)
+APP_EXE = $(BUILDDIR)/app.exe
+MAIN_EXE = $(BUILDDIR)/main.exe
+
+ifndef DEFAULT_PROGRAM
+DEFAULT_PROGRAM = pemicro
+endif
+
+BUILDLESS_DEPS += bytes
+
+# Use the 'if' function instead of the 'ifdef' construct because ifdef freaks
+# out with call in there.  I don't know why.
+$(if $(PROGRAM),,$(call TOSMake_include,hc08/$(DEFAULT_PROGRAM).extra))
+
+ifndef BUILD_DEPS
+  ifeq ($(filter $(BUILDLESS_DEPS),$(GOALS)),)
+    BUILD_DEPS = exe0
+  endif
+endif
+
+
+export PFLAGS CFLAGS DEFAULT_LOCAL_GROUP TOSDIR
+export TELOSPATH CWPATH PEMICROPATH HC08_PATH FORCE_HC08 CHC08_OPTS NESC
+
+
+setid: FORCE
+	@cmd () { echo "$$@"; $$@; }; if [ x = x$(NODEID) ]; then cmd cp $(APP_EXE) $(MAIN_EXE); else cmd $(SET_ID) --exe $(APP_EXE) $(MAIN_EXE) $(NODEID); fi
+
+srec: exe FORCE
+	@:
+
+exe: exe0 FORCE
+	@:
+
+exe0: FORCE
+	@echo "    compiling $(COMPONENT) to a $(PLATFORM) binary"
+	NESC=1 $(HC08_PATH)/MakeTelos.sh $(COMPONENT).nc
+	@echo "    compiled $(COMPONENT) to $(MAIN_EXE)"
+
+builddir: FORCE
+	mkdir -p $(BUILDDIR)
+

@@ -1,0 +1,3 @@
+PFLAGS += -I$(SPAULDINGSRC)/realTimeSamples/
+PFLAGS += -I$(SPAULDINGSRC)/lib/ 
+PFLAGS += -I$(SPAULDINGSRC)/sampling/

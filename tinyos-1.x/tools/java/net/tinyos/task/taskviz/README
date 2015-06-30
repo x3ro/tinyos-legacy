@@ -1,0 +1,5 @@
+This directory contains the files for the TASK client GUI tool for the
+Tiny Application Sensor Kit (TASK).
+
+To run (from tools/java): 
+java net.tinyos.task.taskviz.TASKVisualizer <TASK server host name>

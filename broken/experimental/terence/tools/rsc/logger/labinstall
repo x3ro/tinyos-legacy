@@ -1,0 +1,336 @@
+#!/bin/bash
+#/* $Id: labinstall,v 1.14 2003/06/10 01:53:41 wetoasis Exp $ */
+#/*////////////////////////////////////////////////////////*/
+#/**
+# * Author: Terence Tong, Alec Woo
+# */
+#/*////////////////////////////////////////////////////////*/
+
+
+MOTES="c62b262
+c62b27a
+c62b267
+c62b257
+c62b255
+c62b260
+c62b27c
+c62b279
+c627f34
+c62b27e
+c62b263
+c62b26b
+c62b264
+c62b261"
+
+EXTRA_PARAM="-dprog=stk500 -dpart=ATmega128"
+
+
+
+FINAL_LIST=$MOTES
+
+# address, node id
+function download() {
+	HOSTNAME=$1.research.intel-research.net
+	
+	echo ">>> Programming mote $HOSTNAME ..."
+	echo ">>> Setting Fuse Bit ..."
+	uisp -v=0 $EXTRA_PARAM -dhost=$HOSTNAME --wr_fuse_e=fd
+	sleep 1
+	echo ">>> Setting Mote Id To $2 ..."
+	set-mote-id build/mica/main.srec build/mica/main.srec.out $2
+	sleep 1
+	echo ">>> Erasing ..."
+	uisp $EXTRA_PARAM -dhost=$HOSTNAME --erase
+	sleep 1
+	echo ">>> Loading ...."
+	uisp $EXTRA_PARAM -dhost=$HOSTNAME --upload if=build/mica/main.srec.out 
+
+}
+
+
+function downloadAll() {
+    COUNTER=1
+    for MOTE in $FINAL_LIST
+    do
+	download $MOTE $COUNTER
+	let "COUNTER+=1"
+    done
+}
+
+
+function download2() {
+	HOSTNAME=$1.research.intel-research.net
+	
+	echo ">>> Programming mote $HOSTNAME ..."
+	echo ">>> Setting Fuse Bit ..."
+	uisp -v=0 $EXTRA_PARAM -dhost=$HOSTNAME --wr_fuse_e=ff
+	sleep 1
+	echo ">>> Setting Mote Id To $2 ..."
+	set-mote-id build/mica2/main.srec build/mica2/main.srec.out $2
+	sleep 1
+	echo ">>> Erasing ..."
+	uisp $EXTRA_PARAM -dhost=$HOSTNAME --erase
+	sleep 1
+	echo ">>> Loading ...."
+	uisp $EXTRA_PARAM -dhost=$HOSTNAME --upload if=build/mica2/main.srec.out 
+
+}
+
+function downloadAll2() {
+    COUNTER=1
+    for MOTE in $FINAL_LIST
+    do
+	download2 $MOTE $COUNTER
+	let "COUNTER+=1"
+    done
+
+
+}
+
+
+# start node id
+function downloadPartial() {
+    COUNTER=1
+    for MOTE in $FINAL_LIST
+    do
+	if (("$COUNTER" >= "$1"))
+	then
+	    download $MOTE $COUNTER
+	fi
+	let "COUNTER+=1"
+    done
+
+
+}
+
+
+
+# address
+function ping() {
+	HOSTNAME=$1.research.intel-research.net
+	echo ">>> Pinging $HOSTNAME ..."
+        /cygdrive/c/WINDOWS/system32/ping -n 1 $HOSTNAME
+}
+
+function pingAll() {
+    for MOTE in $FINAL_LIST
+    do
+	ping $MOTE
+    done
+}
+
+# address
+function erase() {
+	HOSTNAME=$1.research.intel-research.net
+	echo ">>> Erasing $HOSTNAME ..."
+	uisp $EXTRA_PARAM -dhost=$HOSTNAME --erase
+}
+
+
+function eraseAll() {
+    for MOTE in $FINAL_LIST
+    do
+	erase $MOTE
+    done
+}
+
+# start node id
+function erasePartial() {
+    COUNTER=1
+    for MOTE in $FINAL_LIST
+    do
+	if (("$COUNTER" >= "$1"))
+	then
+	    erase $MOTE
+	fi
+	let "COUNTER+=1"
+    done
+}
+
+
+# tablename, address
+function listen() {
+    echo ">>> Forking Receiver For $MOTE ..."
+    java Receiver network $1 $2 $3&
+}
+
+# table name llike exp2 time
+function listenAll() {
+    COUNTER=1
+    for MOTE in $FINAL_LIST
+    do
+	echo ">>> listening $MOTE (node id = $COUNTER) to table $1_n$COUNTER ... "
+	listen $1_n$COUNTER $MOTE $2
+	let "COUNTER+=1"
+    done
+}
+
+
+# table name like exp2, start node id
+function listenPartial() {
+    COUNTER=1
+    for MOTE in $FINAL_LIST
+    do
+	if (("$COUNTER" >= "$2"))
+	then
+	    echo ">>> listening $MOTE (node id = $COUNTER) to table $1_n$COUNTER ... "
+	    listen $1_n$COUNTER $MOTE
+	fi
+	let "COUNTER+=1"
+    done
+}
+
+
+# table name like exp2, start node id
+function listenNode() {
+    COUNTER=1
+    for MOTE in $FINAL_LIST
+    do
+	if (("$COUNTER" == "$2"))
+	then
+	    echo ">>> listening $MOTE (node id = $COUNTER) to table $1_n$COUNTER ... "
+	    listen $1_n$COUNTER $MOTE $3
+	fi
+	let "COUNTER+=1"
+    done
+}
+
+
+
+function createTableAll() {
+    COUNTER=1
+    for MOTE in $FINAL_LIST
+    do
+	echo ">>> Creating Table $1_n$COUNTER for $MOTE (node id = $COUNTER)" 
+	./createtable $1_n$COUNTER
+	let "COUNTER+=1"
+    done
+
+}
+
+function killReceiver(){
+    PIDS=`ps -a | grep java | sed -e "s/.*killp.*//" -e "s/ *\([0-9]\{1,6\}\) .*/\1/" | grep -v "^$"`
+    echo "Killing Process $PIDS"
+    kill -9 $PIDS
+    echo "Done"
+}
+
+# address, node id
+if [ "$1" = "download" ]
+then
+    download $2 $3
+fi
+
+if [ "$1" = "downloadAll" ]
+then
+    downloadAll
+fi
+
+# address, node id
+if [ "$1" = "download2" ]
+then
+    download2 $2 $3
+fi
+
+if [ "$1" = "downloadAll2" ]
+then
+    downloadAll2
+fi
+
+
+
+# start node id
+if [ "$1" = "downloadPartial" ]
+then
+    downloadPartial $2
+fi
+
+# address
+if [ "$1" = "ping" ]
+then
+    ping $2
+fi
+
+if [ "$1" = "pingAll" ]
+then
+    pingAll
+fi
+
+# address
+if [ "$1" = "erase" ]
+then
+    erase $2
+fi
+
+if [ "$1" = "eraseAll" ]
+then
+    eraseAll
+fi
+
+# node id
+if [ "$1" = "erasePartial" ]
+then
+    erasePartial $2
+fi
+
+# table, address
+if [ "$1" = "listen" ]
+then
+    listen $2 $3 $4
+fi
+
+# table name like exp2
+if [ "$1" = "listenAll" ]
+then
+    listenAll $2 $3
+fi
+
+
+# table like exp3
+if [ "$1" = "createTableAll" ]
+then
+    createTableAll $2
+fi
+
+# table like exp3
+if [ "$1" = "listenPartial" ]
+then
+    listenPartial $2 $3
+fi
+
+# table like exp3
+if [ "$1" = "listenNode" ]
+then
+    listenNode $2 $3 $4
+fi
+
+# 
+if [ "$1" = "killReceiver" ]
+then
+    killReceiver
+fi
+
+
+if [ "$1" = "help" ]
+then
+    echo "All means for each node we do something to it"
+    echo "Partial means start from node x to the end"
+    echo ""
+    echo "listenNode exp3 3 1000"
+    echo "listenPartial exp3 2"
+    echo "createTableAll exp3"
+    echo "listenAll exp3 1000"
+    echo "listen exp3_n1 c62b262 1000"
+    echo "erasePartial 3"
+    echo "eraseAll"
+    echo "erase c62b262"
+    echo "pingAll"
+    echo "ping c62b262"
+    echo "downloadPartial 3"
+    echo "downloadAll"
+    echo "download c62b262 3"
+    echo "killReceiver"
+    echo "downloadAll2"
+    echo "download2 c62b262 3"
+fi
+

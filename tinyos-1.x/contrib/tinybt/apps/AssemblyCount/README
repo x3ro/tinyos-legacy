@@ -1,0 +1,29 @@
+This directory contains the Count application (which does a little
+bit more than counting) and associated components. 
+
+The most interessting components is the "Assembly" component. This
+component implements the Assembly interface, which is an interface
+applications can use to abstract away some of the nitty-gritty details
+on running a sensor node with two bluetooth interfaces as the
+communication channels. 
+
+The component is part of this directory, because it uses modified
+bluetooth and Uart components, which are also part of this
+directory. Technically it could be modified to always use the one in
+the main directories and just copy and modify this to get two stacks,
+but the approach with two complete copies have been choosen to make
+this application less dependent on the changes in the main
+directories.
+
+A couple of scripts are provided to make it easier to get the
+modifications from the main directories into this:
+
+diff_to_tos -       diffes one set of bluetooth files against the ones
+                    in the main directories
+modules_0_to_1.sh - Converts from 0 files to 1 files. Some issues needs
+                    to be handled manually for HCIPacket1M.nc
+
+See also the modules themselves - make the docs for further
+explanations. Especially the CountM documentation.
+
+Mads Bondo Dydensborg, madsdyd@diku.dk, 2003.

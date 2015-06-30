@@ -1,0 +1,3 @@
+COMPONENT=TestOneHzClock
+include ../Makerules
+

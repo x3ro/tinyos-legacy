@@ -1,0 +1,43 @@
+README for Surge
+Author/Contact: tinyos-help@millennium.berkeley.edu
+$Revision: 1.3 $
+
+Description:
+
+Surge is an example application that uses MultiHop ad-hoc routing.  It
+is designed to be used in conjunction with the Surge java tool. Each
+Surge node takes temperature readings and forwards them to a base station.
+The node can also respond to broadcast commands from the base.
+
+This version of surge in contrib/ucb/SurgeTelos only supports
+(and has been tested on) the Telos platform.  Please do not try to run
+this version of Surge on any other platform.  Other platforms may use
+Surge in tinyos-1.x/apps/Surge
+
+Tools:
+
+net.tinyos.surge.MainClass
+
+This class processes sensor data from Surge programmed nodes via a
+GenericBase station.  The java applet snoops the multihop headers to
+provide a graphical view of the logical network topology.  It also
+permits variation of the sample rates and sending pre-defined commands
+to the surge nodes.
+
+In tinyos-1.x/tools/java/net/tinyos/surge, you must recompile the java
+classes based on this version of Surge:
+
+    cd $TOSDIR/../tools/java/net/tinyos/surge
+    make clean
+    SURGE_PLATFORM=telos make
+
+This creates classes from Surge.h and SurgeCmd.h in contrib/ucb/apps/Surge
+and Multihop.h from contrib/ucb/tos/lib/MultiHopLQI.
+
+Now you can run Surge with
+
+    java net.tinyos.surge.MainClass 0x7D
+
+Make sure SerialForwarder is connected to Telos before running the Surge
+java GUI.
+

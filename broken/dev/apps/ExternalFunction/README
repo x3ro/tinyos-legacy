@@ -1,0 +1,23 @@
+README for ExternalFunction
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+ExternalFunction is an application that collects different
+functionalities of a mote into a single command/execute interface.
+ExternalFunction takes as input a cmd_bfr, as defined in
+ExternalFunctionMsg.h, and depending on the fields set in the cmd_bfr,
+it will perform a variety of operations such as displaying a 3 bit
+number on the LEDS, start/stop the OSCOPE, turn on/off the SOUNDER,
+jam the radio by transmitting a 1 bit, start the LOGGER, adjust the
+clock rate of the ATMega processor.
+
+Tools:
+
+Known bugs/limitations:
+
+Some features have not been implemented:
+     LOGGER control
+     SOUNDER control
+
+OSCOPE control requires debugging

@@ -1,0 +1,15 @@
+#catalog is a list of attributes that are avaialble
+#to the query processing module in net/tinyos/tinydb/QueryFrame.java
+nodeid
+light
+temp
+parent
+accel_x
+accel_y
+mag_x
+mag_y
+noise
+tones
+voltage
+rawtone
+rawmic

@@ -1,0 +1,402 @@
+%%% netprog.tex --- 
+
+%% Author: szewczyk@cs.berkeley.edu
+%% Version: $Id: netprog.tex,v 1.2 2002/01/28 19:51:29 jpolastre Exp $
+
+
+\documentclass[12pt,fullpage]{article}
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+ \pdffalse
+\else
+ \pdfoutput=1
+ \pdftrue
+\fi
+
+\ifpdf
+ \usepackage[pdftex]{graphicx}
+ \pdfcompresslevel=9
+ \DeclareGraphicsExtensions{.pdf,.jpg }
+\usepackage{thumbpdf}
+\else
+ \usepackage{graphics}
+ \DeclareGraphicsExtensions{.eps,.jpg}
+\fi
+\setlength{\oddsidemargin}{0 in}
+\setlength{\evensidemargin}{0 in}
+\setlength{\topmargin}{-1 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{9 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{booktabs}
+\usepackage{epic}
+\usepackage{eepic}
+
+\usepackage{units}
+
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{alltt}
+\hypersetup{bookmarks=true, 
+  bookmarksnumbered=true,
+  bookmarksopen=true,
+  backref=true,
+  colorlinks=false,
+  pdftitle={Network Programming for TinyOS},
+  pdfkeywords={sensor,network,mote,active networks},
+  pdfauthor={ Robert Szewczyk}}
+
+%\ifx\pdfoutput\undefined\relax
+%\else
+%  \usepackage{thumbpdf}
+%\fi
+
+\newcommand{\rene}{ Ren{\'e}\xspace}
+\newcommand{\wec}{ WeC\xspace}
+\newcommand{\mica}{ Mica\xspace}
+\newcommand{\component}[1]{{\tt #1}}
+\newcommand{\application}[1]{{\tt #1}}
+\newcommand{\nest} {NEST\xspace}
+\makeatletter
+%%\usepackage[debugshow,final]{graphics}
+\title{Network Programming for TinyOS}
+\author{Robert Szewczyk}
+
+
+%%\revision$Header: /cvsroot/tinyos/tinyos-0.6.x/doc/tex/netprog.tex,v 1.2 2002/01/28 19:51:29 jpolastre Exp $
+
+\begin{document}
+\maketitle
+
+
+
+%%%%##########################################################################
+
+\section*{Network Programming Overview}
+
+A big advantage of ``smart'' sensor networks over the more traditional sensors
+is the placement of intelligence.  The traditional sensors merely report the
+measurements to some data acquisition system, whereas the sensor nodes offer
+local computation ability.  This feature of sensor networks is exploited only
+when we have the ability to reprogram the nodes in the sensor network.  In
+most application scenarios, it is either impractical or impossible to manually
+reprogram each sensor; consequently it is necessary that we provide a
+mechanism for reprogramming the sensors over the air.  In this document we
+focus on remotely replacing the entire image of the running system.  This
+approach allows us to experiment with arbitrary components of the system. 
+
+The entire family of UCB motes has been designed with network programming in
+mind.  \wec, \rene and \mica motes use a processor which cannot write to its
+own flash. 
+
+\section*{The User's View}
+
+In this section we'll describe how a mote is rendered network reprogrammable
+from the user's point of view. 
+
+\subsection*{Mote Startup}
+
+There are several steps one must take in order to make the mote network
+programmable. 
+\begin{itemize}
+\item{\bf Program the ``Little Guy''.} To do that, plug the mote being
+programmed into the programming board, and set the switch on the programming
+board to the ``Little Guy'' position as shown in
+Figure~\ref{prog_board}.  From your \nest directory, execute:
+\begin{small}
+\begin{verbatim}
+[szewczyk@okocim nest]$ cd tos/platform/littleguy/
+[szewczyk@okocim littleguy]$ make install
+avr-gcc  -c -Os -Wall -I/usr/local/avr/include -I. -mmcu=at90s2343 -o I2CSPI.o
+I2CSPI.c
+In file included from hardware.h:45,
+                 from I2CSPI.c:2:
+/usr/local/avr/include/signal.h:7:2: warning: #warning "please include
+sig-avr.h instead"
+avr-gcc -mmcu=at90s2343 -o I2CSPI I2CSPI.o
+avr-objcopy --output-target=srec I2CSPI I2CSPI.srec
+sleep 1
+uisp -dprog=dapa   -dno-poll --erase
+Atmel AVR AT90S2343 is found.
+Erasing device ...
+Reinitializing device
+Atmel AVR AT90S2343 is found.
+sleep 1
+uisp -dprog=dapa   --upload if=I2CSPI.srec
+Atmel AVR AT90S2343 is found.
+Uploading: flash
+sleep 1
+uisp -dprog=dapa   -dno-poll --verify if=I2CSPI.srec
+Atmel AVR AT90S2343 is found.
+Verifying: flash
+\end{verbatim}
+\end{small}
+\item{\bf Load primordial network programming stack.} The \nest distribution
+provides a sample application which contains just the programming
+stack. Flip the switch on the programming board to the ``Big Guy'' position,
+and load the netprog application from the distribution:
+\begin{small}
+\begin{verbatim}
+[szewczyk@okocim nest]$ cd apps/netprog/
+[szewczyk@okocim netprog]$ make rene install
+Makefile:4: warning: overriding commands for target `all'
+../Makeinclude:161: warning: ignoring old commands for target `all'
+make: Nothing to be done for `rene'.
+uisp -dprog=dapa -dno-poll  --erase
+Atmel AVR AT90S8535 is found.
+Erasing device ...
+Reinitializing device
+Atmel AVR AT90S8535 is found.
+sleep 1
+uisp -dprog=dapa -dno-poll  --upload if=binrene/main.srec
+Atmel AVR AT90S8535 is found.
+Uploading: flash
+sleep 1
+uisp -dprog=dapa -dno-poll  --verify if=binrene/main.srec
+Atmel AVR AT90S8535 is found.
+Verifying: flash
+\end{verbatim}
+\end{small}
+
+Remove the mote from the programming board and power cycle it.
+
+\item{\bf Set the mote id.} In many applications it is useful to assign a
+persistent mote id to every mote. For this purpose, we reserved a piece of the
+EEPROM to store per node, non-volatile data that should persist across the
+reprogramming of the mote.  To do this part, you'll need a
+mote with \application{generic\_base} programmed onto it, in addition to your
+network programmable node. Plug in your
+\application{generic\_base} into a programming board and make sure that the
+whole subsystem is plugged into the serial port of your computer.  Now, that a
+node is network programmable, we'll interact with it primarily over the
+radio.  The {\tt CodeInjector} application will allow you to remotely set an
+ID of a mote.  {\em Make sure that only your base station and the mote  being
+programmed are on.} 
+
+\begin{small}
+\begin{verbatim}
+[szewczyk@okocim nest]$ cd tools/
+[szewczyk@okocim nest]$ make
+make: Nothing to be done for `all'.
+[szewczyk@okocim tools]$ java net.tinyos.SerialForwarder.SerialForward  &
+[1] 3181
+Initializing SerialForwarder Server 1.1
+Starting in GUI mode
+[szewczyk@okocim tools]$ java net.tinyos.codeGUI.CodeInjector id
+\end{verbatim}
+\end{small}
+
+At this point, the yellow light on remote mote should go on, and you should
+see an output which might look like this:
+\begin{small}
+\begin{verbatim}
+7e 0 31 7d 0 0 c0 7f 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 85 e1 7e 0 31 7d 0
+ 0
+Node ID: 0
+Next Program ID: 0
+Next Program Length: 0
+\end{verbatim}
+\end{small}
+
+If you see multiple entries, that indicates that there are multiple network
+programmable nodes in the vicinity; you should turn off all the nodes except
+for the base station and the single remote node. Now, you can set the ID by
+executing: 
+\begin{small}
+\begin{verbatim}
+[szewczyk@okocim tools]$ java net.tinyos.codeGUI.CodeInjector setid 162
+ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff f
+f ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ ff ff ff ff ff ff ff ff ff ff ff
+++++ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff f
+f
+ff ff ff ff ff ff ff ff ff ff ff ff
+++++ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff f
+f
+ff ff ff ff ff ff ff ff ff ff ff ff
+++++
+\end{verbatim}
+\end{small} 
+
+The yellow LED on the remote node should be off, and the green LED should be
+on. At this point, power cycle the remote, and recheck its ID:
+
+\begin{small}
+\begin{verbatim}
+[szewczyk@okocim tools]$ java net.tinyos.codeGUI.CodeInjector id
+.7e 0 31 7d 0 0 c0 7f a2 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 8f e
+4
+
+Node ID: 162
+Next Program ID: 1
+Next Program Length: 0
+\end{verbatim}
+\end{small}
+\end{itemize}
+
+At this point, the node is fully network programmable, and we can test this
+functionality on a sample application.
+
+\subsection*{Remote programming}
+
+In order to keep the mote continually network reprogrammable, we must ensure
+that the application loaded onto the mote contains the \component{PROG\_COMM}
+component\footnote{We're actually planning to lift this restriction in the
+future versions of the network programming subsystem. That will be accomplished
+by periodically resetting the node with the primordial stack.}  From the
+user's point of view the network programming stack looks like a
+\component{GENERIC\_COMM} combined with \component{LOGGER}.  As a short
+example, let's consider how to turn a simple application, like
+\application{cnt\_to\_leds} into a network reprogrammable entity. 
+
+If you look at the description file for \application{cnt\_to\_leds}, you'll
+note that it does not use a communication module.  To add the
+\component{PROG\_COMM} we need to add four lines to the description file (new
+lines are highlighted in red):
+\begin{small}
+\begin{alltt}
+include modules{
+MAIN;
+COUNTER;
+INT_TO_LEDS;
+CLOCK;
+\textcolor{red}{PROG_COMM;}
+};
+
+MAIN:MAIN_SUB_INIT COUNTER:COUNTER_INIT
+\textcolor{red}{MAIN:MAIN_SUB_INIT PROG_COMM:PROG_COMM_INIT}
+MAIN:MAIN_SUB_START COUNTER:COUNTER_START
+\textcolor{red}{MAIN:MAIN_SUB_START PROG_COMM:PROG_COMM_START}
+
+COUNTER:COUNTER_CLOCK_EVENT CLOCK:CLOCK_FIRE_EVENT
+COUNTER:COUNTER_SUB_CLOCK_INIT CLOCK:CLOCK_INIT
+
+COUNTER:COUNTER_SUB_OUTPUT_INIT INT_TO_LEDS:INT_TO_LEDS_INIT
+COUNTER:COUNTER_OUTPUT INT_TO_LEDS:INT_TO_LEDS_OUTPUT
+
+\textcolor{red}{PROG_COMM:PROG_COMM_MSG_SEND_DONE MAIN:MAIN_SUB_SEND_DONE}
+\end{alltt}
+\end{small}
+\application{cnt\_to\_leds\_prog} already incorporates these changes. Now,
+lets build the binary to be downloaded to the mote: 
+\begin{small}
+\begin{verbatim}
+[szewczyk@okocim nest]$ cd apps/cnt_to_leds_prog/
+[szewczyk@okocim cnt_to_leds_prog]$ make rene binrene/main.srec
+make: Nothing to be done for `rene'.
+avr-objcopy --output-target=srec binrene/main.exe binrene/main.srec
+\end{verbatim}
+\end{small}
+The next step is to send that binary to the mote. We'll assume that the
+{\tt SerialForwarder} is already running. The downloading of the program to
+the remote mote has 3 steps: 
+
+\begin{itemize}
+\item Inform the mote that a new program is available. That is done with 
+\begin{alltt} 
+java net.tinyos.codeGUI.CodeInjector new {\em srec\_file} {\em destination}
+\end{alltt}
+where {\em srec\_file} is the file you're about to download to the mote, and
+the destination is the address of the remote mote.  In most cases you'll want
+to use the broadcast destination, $-1$. Here is what you might expect to see:
+\begin{small}
+\begin{verbatim}
+[szewczyk@okocim tools]$ java net/tinyos/codeGUI/CodeInjector new ../apps/cnt_t
+o_leds_prog/binrene/main.srec -1
+Program ID:5FC5
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 ff ff ff ff ff ff ff ff ff ff ff
+++++
+\end{verbatim}
+\end{small}
+
+At this point the remote mote should have a green LED on. Note that this
+command is idempotent, so it is safe to repeat it multiple times, in fact it
+is a good idea to repeat this command when programming multiple motes.
+\item Broadcast the actual packets. The {\tt CodeInjector} class provides you
+with several ways of doing that, depending on the actual scenario:
+\begin{alltt}
+java net.tinyos.codeGUI.CodeInjector write {\em srec_file} {\em destination}
+\end{alltt}
+will perform a single unreliable broadcast of the program contained in the
+{\em srec\_file} to {\em destrination} motes. Again, you may find it useful to set
+the {\em destination} to the broadcast address. 
+\begin{alltt}
+java net.tinyos.codeGUI.CodeInjector check {\em srec_file} {\em destination}
+\end{alltt}
+This invocation of {\tt CodeInjector} will perform reliable point-to-point
+transmission of {\em srec\_file} to the {\em destination}. In this case, the
+{\em destination} field should not be set to the broadcast address.
+\begin{alltt}
+java net/tinyos/codeGUI/CodeInjector multicheck {\em srec_file} {} {}
+\end{alltt}
+
+If you're programming a single mote, you may see a sequence like:
+
+\begin{scriptsize}
+\begin{verbatim}
+[szewczyk@okocim tools]$ java net/tinyos/codeGUI/CodeInjector write ../apps/cnt
+_to_leds_prog/binrene/main.srec 162
+Program ID:5FC5
++
++!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++
++++++++++++++++++++++++++++++++++++++++++++++++++!+++++++++++++++++++++++++++++
+++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!+++++++++++++
+++
++++++++++++++++++++++++
+[szewczyk@okocim tools]$ java net/tinyos/codeGUI/CodeInjector check ../apps/cnt
+_to_leds_prog/binrene/main.srec 162
+Program ID:5FC5
+++.7e 0 31 7d c5 5f 0 20 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 0 0 0
+0 0 0 0 0 0 0 bc 18
+++.7e 0 31 7d c5 5f 0 20 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 0 0 0
+0 0 0 0 0 0 0 bc 18
+++.7e 0 31 7d c5 5f 20 20 ff ff bf df ff ff ff ff ff 7f ff ff ff ff ff ff 0 0 0
+ 0 0 0 0 0 0 0 31 4b
++.7e 0 31 7d c5 5f 20 20 ff ff bf df ff ff ff ff ff 7f ff ff ff ff ff ff 0 0 0
+0 0 0 0 0 0 0 31 4b
+Missing packets:278 285 335
+[szewczyk@okocim tools]$ java net/tinyos/codeGUI/CodeInjector check ../apps/cnt
+_to_leds_prog/binrene/main.srec 162
+Program ID:5FC5
+++.7e 0 31 7d c5 5f 0 20 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 0 0 0
+ 0 0 0 0 0 0 0 bc 18
++.7e 0 31 7d c5 5f 10 20 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 0 0 0
+ 0 0 0 0 0 0 0 be 71
++.7e 0 31 7d c5 5f 20 20 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 0 0 0
+ 0 0 0 0 0 0 0 b8 ca
++.7e 0 31 7d c5 5f 30 20 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 0 0 0
+ 0 0 0 0 0 0 0 ba a3
+\end{verbatim}
+\end{scriptsize}
+\item Issue the reprogramming command. This command will reset the mote, erase
+the currently running program, and transfer the new program into memory. The
+mote will be unresponsive for about 2 minutes. To perform this task, you
+should invoke:
+\begin{alltt}
+java net/tinyos/codeGUI/CodeInjector start {\em srec_file} {\em destination}
+\end{alltt}
+\end{itemize}
+
+
+
+\section*{Gory Details}
+
+Now we 
+
+
+%%%%##########################################################################
+
+\end{document}

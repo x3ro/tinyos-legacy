@@ -1,0 +1,58 @@
+README for HFS
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+
+Description:
+
+HighFrequencySampling(HFS) is an application, which supports high frequency sampling. When command message is received, Sample component do actual sampling using MicroTimer and BufferedLog components.
+
+
+To sample:
+- program a mote with HFS, and place a standard mica sensor board on it
+- program a mote with TOSBase
+- compile the java code with make -f jmakefile
+- collect some samples:
+  run a serial forwarder that talks to your TOSBase
+  connect the TOSBase mote to your serial port
+  execute
+    java Sample.class 200 20000
+  This will collect 4s of 5kHz acceleremoter data. When the yellow led
+  lights on the HFS mote, shake it, drop it, etc (we disclaim all 
+  responsability for broken motes)
+- recover the sampled data:
+  connect the HFS mote to your serial port
+  execute
+    java GetData.class 20000 >mydata
+  (this will take a while)
+  plot the data in mydata, e.g., on Linux, in gnuplot
+    gnuplot> plot "mydata" with lines
+
+To learn more about how to use this in your application:
+- Read the comments at the start of HFS.nc
+- Read the code and comments in the modules you're interested in...
+
+With the default ADC clocks, the current minimum intervals are:
+- mica: 215 us (4.65kHz) (the default ADC clock is 250kHz, which is out
+  of spec for best precision)
+- mica2: 283 us (3.53kHz) (the default ADC clock is 113kHz)
+
+If you want higher sampling rates, try setting the ADC clock to a higher
+value (you can only choose power-of-2 divisions of the system clock), via
+the ADCControl interface. Note that rates above 200kHz reduce the ADC
+precision. For instance, on the mica2 with an ADC clock at 452kHz, you can
+get 118us, i.e., 8.47kHz.
+
+
+
+Tools:
+
+GetData (included in the same directory)
+Sample (included in the same directory)
+
+
+Known bugs/limitations:
+
+None
+
+
+See Also:

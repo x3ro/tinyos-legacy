@@ -1,0 +1,8 @@
+- External files:
+
+Currently some files are replicated from telos and/or CC2420Radio dirs - 
+need to clean this up.
+
+shockfish/tos/platform/tinynode/HPLFlashM.nc        tos/platform/telos
+shockfish/tos/platform/tinynode/HPLFlashC.nc        tos/platform/telos
+shockfish/tos/platform/tinynode/HPLUARTC.nc         tos/platform/telos

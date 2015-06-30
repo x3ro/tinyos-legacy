@@ -1,0 +1,8 @@
+README for nest/broken
+Philip Levis <pal@cs.berkeley.edu>, 6/21/2002
+
+The broken/ directory of the nest CVS tree is software that the TinyOS
+group does not support in any way. It is for our own experimental and
+temporary use. Please do not mail us with questions about it.
+
+

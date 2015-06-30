@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>Agent Abstraction</h1>
+
+          <p>Agilla is a middleware that enables users to inject mobile
+
+              agents in to a pre-deployed network. Its architcture is shown below.</p>
+
+          <p align="center"><strong><img src="agilla_arch.jpg" width="400" height="217"></strong></p>
+
+          <p>Agilla runs on top of TinyOS, and supports multiple agents per node.
+
+            Each node has a tuplespace that is shared by all agents residing
+
+            on the node, and is accessible by other agents remotely. Agents do
+
+            not communicate directly with each other, but rather through the
+
+            tuplespaces. This ensures each agent remains autonomous and decoupled,
+
+            which simplifies application development. For each node, Agilla performs
+
+            neighbor discovery and maintains a neighbor list that is accessible
+
+            to agents
+
+            residing on the node. Agents can query this list to determine what
+
+            nodes are within range. Pre-2.0 versions of Agilla did not
+            use beacons
+
+            for neighbor discovery. They instead assumed the existance of
+            the neighbors
+
+            based on the Grid Topology. Agilla 2.0 and beyond use beacons to
+            discover neighbors.</p>
+
+          <p>An Agilla agent contains it's own code,
+
+              heap, opstack, and program counter. It is shown below.</p>
+
+          <p align="center"><img src="agent_arch.jpg" width="400" height="179"></p>
+
+          <p>Each agent has a 50 byte stack that is dynamically allocated based
+
+            on the size of the <a href="variables.html">data variables</a>. Note
+
+            that the agent's instructions are not stored within the agent but
+
+            rather is managed within the Agilla middleware.          </p>
+
+          <p>&nbsp;</p>
+
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

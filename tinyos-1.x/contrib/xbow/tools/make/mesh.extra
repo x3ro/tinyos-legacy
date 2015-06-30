@@ -1,0 +1,150 @@
+#
+# FILE:    xmesh.extra
+# AUTHOR:  Martin Turon
+# DATE:    January 12, 2004
+#
+# Simplifies the compilation of XMesh application binaries in various
+# configurations.  By passing flags to the make tool, features can be
+# compiled into the final image.
+#
+# Usage:
+# 	make mica2 XMESH=LP XFREQ=433 	// makes a low-power 433MHz image
+#
+# 	XMESH=<stack>	where stack is one of:
+#		HP	Reliable High Power	[default]
+#		LP	Low Power Time Sync
+#		LPL	Low Power Listening
+#		LPZ	MicaZ Low Power	(Time Sync)
+#		HPZ	MicaZ High Power (Reliable)
+#		MINT	Mint Route
+#
+# Copyright (c) 2004-2005 Crossbow Technology, Inc.  All Rights Reserved.
+#
+# $Id: mesh.extra,v 1.2 2005/04/04 09:52:34 husq Exp $
+#
+
+ifndef $(XBOWROOT)
+XBOWROOT=%T/../contrib/xbow/tos
+endif
+ifndef $(XBOWBETAROOT)
+XBOWBETAROOT=%T/../contrib/xbow/beta/tos
+endif
+
+ifeq ($(MESH),)
+MESH=HP
+endif
+
+ifeq ($(MESH), HP)
+# ** Reliable Route [Default] High Power, always on
+# make mica2
+PFLAGS = -I$(XBOWROOT)/platform/$(PLATFORM)
+PFLAGS += -I$(XBOWROOT)/CC1000RadioAck
+PFLAGS += -I$(XBOWROOT)/lib/ReliableRoute
+PFLAGS += -I%T/lib/Queue
+PFLAGS += -DTEN_X
+endif
+
+ifeq ($(MESH), MINT)
+# use AWoo's MintRoute as routing layer
+# make mica2 MESH=MINT
+PFLAGS = -I$(XBOWROOT)/platform/$(PLATFORM)
+PFLAGS += -I%T/lib/MintRoute -DMULTIHOPROUTER=WMEWMAMultiHopRouter
+PFLAGS += -I%T/lib/Queue
+PFLAGS += -DTEN_X
+endif
+
+ifeq ($(MESH), LPL)
+# ** Reliable Low Power Listening 
+# make mica2 MESH=LPL
+PFLAGS = -I$(XBOWROOT)/platform/$(PLATFORM)
+PFLAGS += -I$(XBOWROOT)/CC1000RadioPulse
+PFLAGS += -I$(XBOWROOT)/lib/ReliableRoute_Low_Power
+PFLAGS += -I%T/lib/Queue
+PFLAGS += -I%T/lib/Broadcast
+endif
+
+ifeq ($(MESH), LP)
+# ** Reliable Route Time Sync
+# make mica2 MESH=LP
+#include ../Makefile.lp
+#$(error mesh is LP")
+PFLAGS =  -I$(XBOWROOT)/platform/$(PLATFORM)
+PFLAGS += -I$(XBOWROOT)/CC1000RadioSync
+PFLAGS += -I$(XBOWROOT)/lib/ReliableRoute_Sync
+PFLAGS += -I%T/lib/Queue
+PFLAGS += -I$(XBOWROOT)/lib/TimeSync
+endif
+
+ifeq ($(MESH), HPZ)
+#  ** Reliable Route for micaz
+# make micaz MESH=HPZ
+PFLAGS = -I$(XBOWBETAROOT)/lib/CC2420RadioAck
+PFLAGS += -I$(XBOWBETAROOT)/platform/micazack
+PFLAGS += -I$(XBOWROOT)/lib/ReliableRoute
+PFLAGS += -I%T/lib/Queue 
+PFLAGS += -DTEN_X
+endif
+
+ifeq ($(MESH), LPZ)
+#  ** Reliable Route Time Sync for micaz
+# make mica2 MESH=LPZ
+PFLAGS = -I$(XBOWBETAROOT)/platform/micazack
+PFLAGS += -I$(XBOWBETAROOT)/lib/CC2420RadioAck
+PFLAGS += -I$(XBOWBETAROOT)/lib/XMesh
+PFLAGS += -I%T/lib/Queue -DROUTE_UPDATE_INTERVAL=15000 -DMESHSYNC
+endif
+
+ifeq ($(MESH), XP)
+# ** XMesh -- extreme low-power MICA2 stack
+PFLAGS =  -I$(XBOWBETAROOT)/platform/$(PLATFORM)
+PFLAGS += -I$(XBOWROOT)/XStack 
+PFLAGS += -I$(XBOWROOT)/lib/XMesh 
+PFLAGS += -I%T/lib/Queue -I%T/lib/Broadcast -I$(XBOWROOT)/lib/TimeSync  
+#PFLAGS += -DROUTE_UPDATE_INTERVAL=16000 -DINITIAL_TIMER_RATE=8000
+endif
+
+ifeq ($(MESH), ELP)
+# ** XMesh -- extreme low-power MICAZ stack
+PFLAGS =  -I$(XBOWBETAROOT)/platform/micazack  
+PFLAGS += -I$(XBOWBETAROOT)/lib/CC2420RadioAck 
+PFLAGS += -I$(XBOWROOT)/lib/XMesh -I$(XBOWROOT)/lib/TimeSync 
+PFLAGS += -I%T/lib/Queue -I%T/lib/Broadcast
+#PFLAGS += -DROUTE_UPDATE_INTERVAL=15000 -DINITIAL_TIMER_RATE=8000
+endif
+
+
+#
+# FILE:    Makefile.xlib
+# AUTHOR:  Martin Turon
+# DATE:    January 12, 2004
+#
+# Simplifies the compilation of XMesh application binaries in various
+# configurations.  By passing flags to the make tool, features can be
+# compiled into the final image.
+#
+# Usage:
+# 	make mica2 MESH=LP XFREQ=433 	// makes a low-power 433MHz image
+#
+#	DELUGE=1	enables Deluge over-the-air programming
+#	XEE=1		enables XEE mote configuration
+#
+# Copyright (c) 2004-2005 Crossbow Technology, Inc.  All Rights Reserved.
+#
+# $Id: mesh.extra,v 1.2 2005/04/04 09:52:34 husq Exp $
+#
+
+# ******* Standard includes ************
+PFLAGS += -I$(XBOWROOT)/interfaces -I$(XBOWROOT)/system -I$(XBOWROOT)/lib
+PFLAGS += -I$(XBOWROOT)/sensorboards/$(SENSORBOARD) 
+
+# ======= XLib application framework ====
+PFLAGS += -I%T/lib/Broadcast -I$(XBOWROOT)/lib/XLib 
+
+# ======= XEE RecoverParams support ====
+ifeq ($(XEE), 1)
+PFLAGS += -I$(XBOWROOT)/lib/Xee -DFEATURE_XEE_PARAMS=1
+endif
+
+# Add extra modules from Makefile.component
+PFLAGS += $(INCLUDES)
+

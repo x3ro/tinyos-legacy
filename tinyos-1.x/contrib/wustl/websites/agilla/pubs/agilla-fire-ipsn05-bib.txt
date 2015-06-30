@@ -1,0 +1,10 @@
+@InProceedings{fok:agillafire,
+  author        = "C.-L. Fok and G.-C. Roman and C. Lu",
+  title         = "Mobile Agent Middleware for Sensor Networks: An Application Case Study",
+  booktitle   	= "Proc. of the 4th Int. Conf. on Information Processing in Sensor Networks (IPSN'05)",
+  pages		= "382--387",
+  publisher	= "IEEE",
+  month		= "April",
+  year          = "2005",
+  location      = "Los Angeles, CA, USA"
+}

@@ -1,0 +1,44 @@
+Introduction
+
+Interface
+
+Brief Component Overview
+
+Collect Data,
+MHDispatcher,
+MHSender,
+Virtual Comm,
+Routing,
+Comm
+
+
+Decisions
+Type
+different application can send message at the same time,
+	cannot push everythign to virtual comm, so mhsender has to handle it
+
+mhsender (instead of having a array which would be expensive if for example there is only one application) so use a fifoqueue
+
+implementation 1: use real type
+mhsender send one thing at a time, using real type
+virtual comm come back with send done, mhdispatcher forward to mhsender
+mhsender, see if it is a forward message, or data messge, then ask mhdispachter to signal the right applicaiton
+receive (will be fanout by comm), mhdispatch need to determine if this is the right type that we responsible for. if yes, put it in forward queue or signal up to application (if basestation)
+
+		 implementation 2: use internal type
+mhsender use THE data type to send to vitual comm while having the intenal type in the payload
+mhsender could figure out if this is forward message or data message, ask mhdispath to signal application accordingly
+receive mhdispatch will know this is the data message, 
+
+type traffic control
+faiil automatic retransmit
+retransmit in vc / moveon next packet
+go through mhdispatcher
+congestion control
+forward fifo queue in mhsender / freelist
+routin snife throught everything
+
+
+
+
+

@@ -1,0 +1,14 @@
+
+
+
+TOS_MODULE SLAVE_PIN;
+
+
+ACCEPTS{
+	char SLAVE_PIN_INIT(void);
+	char SLAVE_PIN_HIGH(void);
+	char SLAVE_PIN_LOW(void);
+};
+SIGNALS{
+	char SLAVE_PIN_NOTIFY();
+};

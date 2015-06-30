@@ -1,0 +1,94 @@
+#!/usr/bin/perl -w
+use strict;
+#$Id: perlncpp,v 1.4 2005/02/11 01:50:03 cssharp Exp $
+
+# "Copyright (c) 2000-2003 The Regents of the University of California.  
+# All rights reserved.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose, without fee, and without written agreement
+# is hereby granted, provided that the above copyright notice, the following
+# two paragraphs and the author appear in all copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+# DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+# OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY
+# OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+# ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+
+# @author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+my %Opts = (
+  odir => "build",
+  check_includes => "no",
+  verbose => 0,
+  filter => 0,
+);
+
+use FindBin;
+($Opts{PerlNescDir} = $FindBin::Bin) =~ s{/[^/]+$}{};
+
+use lib "$FindBin::Bin/../lib";
+use PerlNesc;
+use FindInclude;
+use SlurpFile;
+
+push( @ARGV, "-I$Opts{PerlNescDir}/include", "-I." );
+@ARGV = parse_opts( FindInclude::parse_include_opts( @ARGV ) );
+$Opts{verbose} = 1 if !defined $Opts{verbose};
+
+if( @ARGV < 1 ) {
+  print "usage: perlncpp -odir=[dir] -check_includes=[no|warn|die] [-I...] myapp.nc\n";
+  exit 0;
+}
+
+my $opts = join( "|", sort keys %Opts );
+my @bad_opts = grep { !/^($opts)$/i } sort keys %Opts;
+if( @bad_opts ) {
+  print STDERR "perlncpp, unknown command line option: " . join(" ",@bad_opts) . ", aborting.\n";
+  exit 1;
+}
+
+$Opts{odir} = "." unless defined $Opts{odir};
+
+my $pnc = PerlNesc->new( name => "perlnesc.h", opts => \%Opts );
+for my $inc (@ARGV) { $pnc->include( $inc ); }
+$pnc->reprocess("last");
+
+if( $Opts{check_includes} =~ /^die$/ ) {
+  $pnc->check_files_not_found();
+} elsif( $Opts{check_includes} =~ /^warn$/ ) {
+  eval { $pnc->check_files_not_found(); };
+  warn "warning, $@" if $@;
+}
+
+if( !$Opts{filter} ) {
+  $pnc->save_modified_files();
+  $pnc->process_accounting();
+} else {
+  print $pnc->{files}->get_file($ARGV[0])->{text};
+}
+
+### ---
+### ---
+### ---
+
+sub parse_opts {
+  my @args_in = @_;
+  my @args_out = ();
+  while (@args_in) {
+    my $arg = shift @args_in;
+    if( $arg =~ /^-([^=]+)(?:=(.*))?$/ ) {
+      $Opts{$1} = $2;
+    } else {
+      push( @args_out, $arg );
+    }
+  }
+  return @args_out;
+}
+

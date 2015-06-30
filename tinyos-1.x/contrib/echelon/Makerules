@@ -1,0 +1,14 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: Makerules,v 1.1 2004/04/23 05:41:03 cssharp Exp $
+
+ifndef TOSDIR
+TOSDIR := $(shell ncc -print-tosdir)
+endif
+
+ECHELONDIR ?= $(TOSDIR)/../contrib/echelon
+MAKERULES ?= $(TOSDIR)/../beta/make/Makerules
+
+TOSMAKE_PATH += $(ECHELONDIR)/make
+
+include $(MAKERULES)
+

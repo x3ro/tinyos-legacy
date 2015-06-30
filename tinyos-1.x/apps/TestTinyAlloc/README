@@ -1,0 +1,27 @@
+README for TestTinyAlloc
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+TestTinyAlloc tests the TinyAlloc dynamic memory allocator. It
+allocates three chunks of memory, frees one of them, reallocates
+(resizes) another, then compacts the allocated chunks, checking that
+data hasn't been corrupted.
+
+The red LED toggling denotes a clock heartbeat, from which all of the
+operations occur. The green LED togging denotes correct operation; if
+running properly, the red and green leds should toggle together. The
+yellow LED denotes an error occuring.
+
+Correct operation should have the green and red leds toggle five times
+together, after which the red continues to toggle but the green
+stops. The final state of the mote should be with the green LED on and
+the red LED blinking at 1Hz.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+None.

@@ -1,0 +1,43 @@
+#
+# Makefile to be included by each application's Makefile for S-MAC
+# Author: Wei Ye
+#
+
+ifndef TOSDIR
+$(error TOSDIR is not defined)
+endif
+
+ifndef SMACDIR
+SMACDIR := ../../tos
+$(warning SMACDIR is not defined, assuming $(SMACDIR).)
+endif
+
+INCLUDE := -I.
+
+PLATALL = mica mica2 mica2dot emstar
+PLATFORM = $(filter $(PLATALL), $(MAKECMDGOALS))
+
+ifeq ($(PLATFORM),mica)
+   INCLUDE += -I$(SMACDIR)/platform/mica
+else
+ifeq ($(PLATFORM),mica2)
+   INCLUDE += -I$(SMACDIR)/platform/mica2
+else
+ifeq ($(PLATFORM),mica2dot)
+   INCLUDE += -I$(SMACDIR)/platform/mica2dot -I$(SMACDIR)/platform/mica2
+else
+ifeq ($(PLATFORM),emstar)
+   INCLUDE += -I$(SMACDIR)/platform/emstar
+endif
+endif
+endif
+endif
+
+INCLUDE += -I$(SMACDIR)/interfaces -I$(SMACDIR)/system
+
+CFLAGS += $(INCLUDE)
+
+#disable nesC warning messages
+NESC_FLAGS = -Wall
+
+include $(TOSDIR)/../apps/Makerules

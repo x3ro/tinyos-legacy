@@ -1,0 +1,72 @@
+README for MetricsTools
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+TinyOS programs that serve as tools to help characterize the
+performance of a sensor network.
+
+MarkSeq		"Remote control" counter for walking targets
+MetricsMote	Send constant stream of packets
+		Respond to Ping (like PingPong)
+		Remotely configurable radio transmission power
+TOSBaseTS	TOSBase modified for timestamping on packets used by 
+		MetricsMote
+
+
+
+Description:
+
+The programs are developed particularly for characterizing the
+performance of the NESTFE Multiple Target Tracking Application running
+on top of TestDetectionEvent.  There are three main categories of
+experiments:
+1) network performance
+2) sensor characterization
+3) algorithm performance analysis
+These tools are mostly for helping mark target locations in time,
+measuring latency (request time), measuring maximum throughput, and
+changing simulated node density by changing radio transmission power.
+The first task is done by MarkSeq, while the last three tasks are done
+by MetricsMote.
+
+Note that some of the functionality of MetricsMote is in the
+KrakenMetrics module in nestfe/necs/lib/Metrics, and thus can be used
+by programs like TestDetectionEvent.
+
+
+
+Usage:
+See the comments in the respective source files for details on
+their functionality and instructions.
+
+If you wish to change the default radio channel and TOS group, do so in the
+Makefile (ex. setting CC2420_CHANNEL at the command line will not work).
+
+Also, it is important when using TOSBaseTS that the AM message types
+of different types of messages you expect to receive do not collide
+with the ones being timestamped.  Otherwise, you will be overwriting
+data from packets received over the radio with the timestamp.
+
+
+
+Tools:
+contrib/nestfe/python/MetricsTools.py 	PyTOS script for tools to
+					interact with the motes
+contrib/nestfe/python/MetricsShell.py 	
+	PyTOS script to load up multiple PyTOS scripts automatically
+	(including MetricsTools.py, KrakenTools.py, TestDetectionEvent.py)
+contrib/nestfe/scripts/metrics.sh	Script to start up Windows
+					Python with MetricsShell.py
+contrib/nestfe/scripts 		directory contains scripts that can
+		       		be used to interact with these programs.
+
+
+
+Known bugs/limitations:
+
+MetricsTools.py has comments at the top of the file describing
+limitations.  Particularly important are the comments describing
+issues with polling too slowly/quickly.
+
+TOSBase with variable radio transmission power has not been
+implemented, because TOSBase already defaults to transmission at full
+radio power.

@@ -1,0 +1,279 @@
+<!-- $Id: grouping.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="Grouping">
+
+<p>
+Below is a preliminary API for group management services in NEST (MIT,
+OSU, UVa).
+</p>
+
+<p>
+The whole picture of definition is
+</p>
+
+<code>
+  module GroupManagementM{
+    provides{
+      interface StdControl;
+
+      interface GroupManagementGlobal as GMGlobal;
+      interface GroupManagementNeighbor as GMNeighbor;
+      interface GroupManagementTracking as GMTracking;
+    }
+    uses{
+      .;
+    }
+  }
+</code>
+
+<p>
+The group management component produces a suite of services with three
+different functionalities, described below.
+</p>
+
+
+<section name="The Global Broadcast/Multicast service">
+
+<p>
+This service exports these calls:
+</p>
+
+<code>
+Interface GroupManagementGlobal{
+  command result_t multicast(uint8_t type, char *msg);
+  event result_t receiveMulticast(uint8_t type, char *msg);
+  event result_t leader(uint8_t type, uint8_t on_off);
+}
+</code>
+
+<p>
+The multicast primitive communicates a message efficiently to all
+destinations within the given radius configured into the service or
+indicated in the message header. The type parameter is used to distinguish
+different types of multicast services described in this document. This
+service has type LOCATION. The implementation transparently uses the MIT's
+location-dependent group formation protocol. receiveMulticast is an event
+raised to inform an application that a multicast message has been
+received.  The underlying routing scheme uses a leader election protocol.
+The nodes that are elected leaders are notified using the leader event
+when they become and when cease to be leaders in this protocol. The
+application can ignore that event or utilize it for application-level
+functions that need to be performed at selected nodes in the network.
+Check MITs group formation documentation for more info on how leaders are
+elected and what properties they have.
+</p>
+
+</section>
+
+
+<section name="Neighborhood Maitenance Component">
+
+<code>
+interface GroupManagementNeighbor{
+  command result_t getNeighborhoodInfo();
+}
+</code>
+
+<p>
+The main call expored is getNeighborhoodInfo().
+</p>
+
+<p>
+It returns a data structure with information regarding neighborhood
+health.
+</p>
+
+<ul>
+<li>
+Why?
+
+  <p>
+  Berkeley reports that the "raw" connectivity information in motes
+  network may not necessarily be suitable for routing and other reliable
+  communication and infrastructure tasks:
+  </p>
+
+  <ul>
+  <li>
+     a link may be asymmetric so the communication can be reliable done
+     only one way
+  </li>
+  <li>
+     a link may be unreliable (so it would be easier to use
+     two hop communication with two reliable links to bypass one
+     unreliable link), a link may be "long", don't have enough
+     bandwidth, etc.
+  </li>
+  <li>
+     a node may have too many neighbors and thus may be potentially
+     overloaded, a node may be just overloaded or run low on power
+     so it should be avoided for routing and (transit) communication
+  </li>
+  </ul>
+
+<li>
+What to do?
+
+  <p>
+  create Neighborhood Maintenance Component that depending
+  on the application gives an "improved" neighborhood information.
+  This "improved" information preserves the cardinal features of
+  "raw" info such as connectivity.
+  </p>
+
+  <p>
+  notice that it is not necessarily immediate neighborhood but
+  possibly extended to 2-3 hops from a node.
+  </p>
+
+  <p>
+  OSU has a few schemes how this can be done efficiently, locally
+  and with great degree of fault tolerance.
+  </p>
+</li>
+
+<li>
+Can't this be done by localization component (the component
+that establishes mote's relative coordinates in physical space)?
+
+  <p>
+  no, multiple reasons:
+  </p>
+
+  <ul>
+  <li>
+    geographic proximity does not immediately translate into link
+    quality
+  </li>
+  <li>
+    there may be other factors besides link quality that influence
+    topology maintenance:
+        cluster size, node load, remaining battery life, etc.
+  </li>
+  <li>
+    the information about neighbors still needs to be maintained
+  </li>
+  </ul>
+
+</li>
+<li>
+  Can't this be done as a part of routing component?
+  possibly, but better if neighborhood is maintained as a separate
+  component:
+
+  <ul>
+  <li>
+          neighborhood maintenance can be done locally and independently
+          of routing (using messages from other components or their own).
+  </li>
+  <li>
+          neighborhood info can be used by components other than
+          routing
+  </li>
+</li>
+</ul>
+
+
+<p>
+Interface Specification
+</p>
+
+<ul>
+<li>
+  this component accepts messages to send from
+  upper layer components and delivers received messages to them.
+  Essentially it acts as a filter in the network stack (accepting
+  messages from upper layers and sending them to lower layer)
+</li>
+<li>
+  exports the neighborhood topology information (and possibly neighbor
+  resources such as battery power, etc)
+</li>
+</ul>
+
+</section>
+
+<section name="Entity Tracking Service">
+
+<p>
+The interface is:
+</p>
+
+<code>
+interface GroupManagementTracking{
+  command result_t join(uint8_t target_signature);
+  command result_t leave (uint8_t target_signature);
+  command result_t setState (char state);
+  command result_t getState(char state);
+  event result_t leader(uint8_t type, uint8_t on_off);
+}
+</code>
+
+<p>
+The main abstraction exported by the service is that of tracking groups.
+A tracking group is formed among all nodes sensing the target, as
+defined by a given sensory signature. The unique group name unambiguously
+labels each target. As the target moves, the membership of the group
+changes, but group identity remains the same. Hence, proximity-based
+groups will help identify and track different evaders. The main API is:
+</p>
+
+<code>
+  command result_t join (uint8_t target_signature)
+</code>
+
+<p>
+The call specifies the detected target signature.  The call is executed
+when a node senses a target of that particular signature. The call
+*returns* a group id specifying *which* target of that signature is
+currently in the proximity of the joining node as maintained by the group
+management service. Hence, a node's code might like something like:
+</p>
+
+<code>
+if (target_signature is detected) {
+  target_id = join (target_signature)
+  tell pursuer that I see target_id at my_location.
+}
+</code>
+
+<p>
+Observe that in the absence of tracking groups the node would not be able
+to immediately identify which target it is seeing (e.g., whether it is
+seeing the evader or one of the pursuers. Identifying the target locally
+is the main advantage of tracking groups. Other API calls are:
+</p>
+
+<code>
+  command result_t leave (target_signature)
+</code>
+
+<p>
+The leave call specifies that the target can no longer be locally sensed
+by this node. The service also supports the calls:
+</p>
+
+<code>
+  event result_t leader(type, on_off)
+  command result_t setState (state)
+  command result_t getState(state)
+</code>
+
+<p>
+As before, the leader call notifies the application when its node becomes
+or ceases to be leader, except that when type=TRACKING, the event refers
+to the leader of the tracking group. This leader changes as the group
+migrates. The invariants maintained are the group id and the fact that the
+leader is always within sensory horizon from the target tracked by this
+specific group. setState and getState is used to save and restore state
+that the algorithm maintains persistently across different leaders.
+Hence, when a node becomes leader is can getState and resume computation
+from where the last leader left it. The node would periodically checkpoint
+the computation using setState. 
+</p>
+
+</section>
+
+</section>
+
+

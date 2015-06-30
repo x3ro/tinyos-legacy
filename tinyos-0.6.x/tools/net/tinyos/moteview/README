@@ -1,0 +1,23 @@
+Package: net.tinyos.moteview
+Description: graphical network reprogramming
+Author: Bret Hull <bwhull@uclink4.berkeley.edu>
+
+This application allows the user to see what motes
+are available and what programs (id) are installed on
+them (provided network reprogramming has been enabled). 
+This program is heavily based on the Surge framework
+developed by Kamin Whitehouse. 
+
+
+Executables: none
+
+Program: moteview
+
+net.tinyos.moteview.MainClass
+        usage: java net.tinyos.moteview.MainClass
+
+
+
+
+
+

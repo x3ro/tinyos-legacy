@@ -1,0 +1,5 @@
+TOS_MODULE NDEBUG;
+
+ACCEPTS{
+    	void NLEDS(unsigned char led_action);
+};

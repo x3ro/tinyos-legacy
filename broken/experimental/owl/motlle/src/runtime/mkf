@@ -1,0 +1,33 @@
+OBJS=  basic.mo arith.mo bool.mo symbol.mo runtime.mo io.mo string.mo list.mo \
+       vector.mo support.mo bitset.mo debug.mo files.mo float.mo bigint.mo pattern.mo
+
+CFLAGS=-Wall -Wshadow -Wnested-externs -Wno-char-subscripts -Wno-parentheses -Wno-unused -I.. -I../../pcre -I../../gmp -g -DUSE_PCRE
+CC=gcc
+MAKEDEPEND=gcc -MM
+
+all: librun.ma
+
+clean:
+	rm -f *.mo librun.ma
+
+librun.ma: $(OBJS)
+	-rm librun.ma
+	ar r librun.ma $(OBJS)
+	-ranlib librun.ma
+
+%.mo: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+dep depend:
+	$(MAKEDEPEND) $(CFLAGS) -I../.. *.c > .depend
+
+lsimple.c: simple.l
+	flex -F -Psimple simple.l
+	mv lex.simple.c lsimple.c
+
+psimple.c psimple.h: simple.y
+	bison -b psimple -d -p simple -t -v simple.y
+	mv psimple.tab.c psimple.c
+	mv psimple.tab.h psimple.h
+
+-include .depend

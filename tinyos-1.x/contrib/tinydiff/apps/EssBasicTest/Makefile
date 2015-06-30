@@ -1,0 +1,3 @@
+COMPONENT=EssBasicTest
+include ../Makerules
+

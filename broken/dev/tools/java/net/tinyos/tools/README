@@ -1,0 +1,46 @@
+Package: net.tinyos.tools
+Description: Simple java tools for interacting with motes.
+Author: TinyOS team
+
+This package contains small applications that allow a user to interact
+with motes in a simple way. For example, applications that print out
+what data a mote is sending out over the UART belong here, as well as
+simple message injection programs.
+
+Executables: BcastInject, ForwarderListen
+
+net.tinyos.tools.BcastInject
+        usage: java net.tinyos.packet.AMPacket [addr port] group_id command
+
+        descr: Given the internet address and port of a
+        SerialForwarder process, inject a broadcast packet with the
+        specified group_id and command. Command is one of:
+               o yellow_led_on
+               o yellow_led_off
+               o green_led_on
+               o green_led_off
+               o red_led_on
+               o red_led_off
+               o radio_quieter
+               o radio_louder
+
+net.tinyos.tools.ForwarderListen <addr> <port> [msg-len (default 36)]
+	usage: java.net.tinyos.tools.ForwarderListen
+
+        descr: Connects to a SerialForwarder and prints out data
+        received by that forwarder on the serial port, printing it to
+        standard out.
+
+Test Programs: None
+
+
+Classes:
+
+BcastInject.java:
+
+Implements the broadcast injection application.
+
+ForwarderListen:
+
+Implements the application that listens to UART data received by a
+SerialForwarder.

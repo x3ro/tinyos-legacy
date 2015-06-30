@@ -1,0 +1,17 @@
+motefield ID=0 BackgroundFile=church.jpg Screen1X=220 Screen1Y=40 World1X=0 World1Y=0 Screen2X=570 Screen2Y=350 World2X=50 World2Y=30 MoteSize=1.0 IconSize=3 TrackThrow=5.0 TrackDelta=0.5 UnitDistanceScaleX=12.5 UnitDistanceScaleY=15.0
+mote ID=0 X=0.0 Y=0.0 pot=9 edge=1 MoteType=5 Name=
+mote ID=1 X=12.5 Y=0.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=2 X=25.0 Y=0.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=3 X=37.5 Y=0.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=4 X=50.0 Y=0.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=5 X=0.0 Y=15.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=6 X=12.5 Y=15.0 pot=9 edge=0 MoteType=1 Name=
+mote ID=7 X=25.0 Y=15.0 pot=9 edge=0 MoteType=1 Name=
+mote ID=8 X=37.5 Y=15.0 pot=9 edge=0 MoteType=1 Name=
+mote ID=9 X=50.0 Y=15.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=10 X=0.0 Y=30.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=11 X=12.5 Y=30.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=12 X=25.0 Y=30.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=13 X=37.5 Y=30.0 pot=9 edge=1 MoteType=1 Name=
+mote ID=14 X=50.0 Y=30.0 pot=9 edge=1 MoteType=1 Name=
+tag ID=25 TagType=4

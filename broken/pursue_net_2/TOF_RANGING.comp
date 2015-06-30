@@ -1,0 +1,71 @@
+/*									tab:4
+ *  TOF_RANGING.comp
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Kamin Whitehouse 6/02/02 
+ *
+ */
+
+TOS_MODULE TOF_RANGING;
+JOINTLY IMPLEMENTED_BY TOF_RANGING;
+
+ACCEPTS{
+	char TOF_RANGING_INIT(void);
+	char TOF_RANGING_START(void);
+	char TOF_RANGING_SET_MIC_GAIN(char gain);
+	char TOF_RANGING_CHIRP(void);
+	char TOF_RANGING_SET_CALIBRATION(short sounder_offset, short sounder_scale, short mic_offset, short mic_scale);
+	char TOF_RANGING_PROCESS_RANGING_INFO(short src_ID, short calib_offset, short calib_scale, short TOF)
+	char TOF_RANGING_PROCESS_CALIBRATION_INFO(short src_ID, short calib_offset, short calib_scale, short TOF)
+	short TOF_RANGING_FILTER_TOF_BUFFER(short calib_offset, short calib_scale)
+};
+
+HANDLES{
+	void TOF_RANGING_CLOCK_EVENT(void);
+	char TOF_RANGING_DATA_SEND_DONE(TOS_MsgPtr data);
+	TOS_MsgPtr TOF_RANGING_RECV_CHIRP(TOS_MsgPtr data);
+	TOS_MsgPtr TOF_RANGING_RECV_DATA_MSG(TOS_MsgPtr data);
+};
+
+USES{
+	char TOF_RANGING_SUB_CLOCK_INIT(char interval, char scale);
+	char TOF_RANGING_SET_SOUNDER_LENGTH(char numBytes);
+	char TOF_RANGING_MIC_INIT();
+	char TOF_RANGING_MIC_TONE_INTR(char enable);
+	char TOF_RANGING_MIC_PWR(char mode);
+	char TOF_RANGING_MIC_MUX_SEL(char select);
+	char TOF_RANGING_POT_ADJUST(char data);
+	char TOF_RANGING_SEND_DATA(short id, char handler, TOS_MsgPtr data);
+        char TOF_RANGING_LEDy_on();
+        char TOF_RANGING_LEDy_off();
+	char TOF_RANGING_LEDy_TOGGLE();
+        char TOF_RANGING_LEDr_on();
+        char TOF_RANGING_LEDr_off();
+        char TOF_RANGING_LEDr_TOGGLE();
+        char TOF_RANGING_LEDg_on();
+        char TOF_RANGING_LEDg_off();
+        char TOF_RANGING_LEDg_TOGGLE();
+};
+
+SIGNALS{
+	char TOF_RANGING_RANGING_DATA_READY(short neighborID, short distance); 
+};
+

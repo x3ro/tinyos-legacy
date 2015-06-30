@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+
+DBG=led,packet,error,uart,usr1,usr2
+#DBG=led,error,packet,simradio,sched
+COUNT=2
+WAIT=1
+
+all:
+	 DBG=$(DBG) build/pc/main.exe -b=$(WAIT) $(COUNT)
+
+debug:
+	 DBG=$(DBG) gdb build/pc/main.exe
+
+build: RadioTestM.nc RadioTest.nc
+	make pc 2>&1
+
+.PHONY: debug run build

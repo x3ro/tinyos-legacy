@@ -1,0 +1,2 @@
+Test hints:
+./xee -iparameters.ini -oout.ini -s=/dev/ttyS0 -r -p -c

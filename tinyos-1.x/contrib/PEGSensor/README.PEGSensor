@@ -1,0 +1,109 @@
+
+PEGSensor README
+$Id: README.PEGSensor,v 1.2 2003/10/23 23:31:03 cssharp Exp $
+
+Created on October 20, 2003 by Cory Sharp
+Updated on October 23, 2003 by Cory Sharp
+Updated on ... by ...
+etc
+
+
+1. INTRODUCTION
+
+PEG stands for Pursuit-Evasion Game where one or more evaders avoids capture
+from one or more pursuers.  A demonstration was shown in mid-July of 2003 at
+the Richmond Field Station near Berkeley, California for the NEST project
+funded by DARPA.  In that demo, a human-controlled robotic evader moved around
+in a 20m by 20m field containing 100 motes.  The motes passively detected and
+estimated the position of the evader using magnetometer readings.  An
+autonomous robotic pursuer coordinated with the motes to navigate to and
+capture the evader.  The demo was a success.
+
+In this PEGSensor tree (and SystemC tree), you will find the code that was
+installed on each of the 100 motes in that PEG playing field.  This document
+will help you get started with the PEG code base.
+
+
+2. PREREQUISITES
+
+- Installed and working TinyOS 1.1.0 distribution [2.1].
+
+  [2.1] http://webs.cs.berkeley.edu/tos/
+
+- Current TinyOS 1.x CVS tree [2.2] in the TinyOS project on SourceForge for,
+  among other things, PEGSensor [2.3] and SystemC [2.4].
+
+  [2.2] http://sourceforge.net/projects/tinyos
+  [2.3] tinyos-1.x/contrib/PEGSensor/
+  [2.4] tinyos-1.x/contrib/SystemC/
+
+- Current minitasks/03/ucb/ tree in the TinyOS project on SourceForge for the
+  GenericBase [2.5] customized for PEGSensor and SystemC.
+
+  [2.5] minitasks/03/ucb/GenericBase/
+
+- Matlab 6.5 (R13) [2.6] for running the PEG command-line front-end [2.7].
+
+  [2.6] http://www.mathworks.com/
+  [2.7] tinyos-1.x/contrib/SystemC/matlab/
+
+
+3. QUICK START
+
+3.1. Make and install the PEGSensor application on some number of mica2 or
+mica2dot motes:
+
+    cd tinyos-1.x/contrib/PEGSensor
+    make mica2dot
+    make mica2dot reinstall.0x200
+
+To avoid localization, the motes can use their network address to deduce their
+location, where some location (X,Y) corresponds to network address 0x2XY with
+X and Y expressed in hex (for at most a 16x16 field).  This is important to
+keep in mind as you program your motes.  Though, an arbitrary affine
+transformation (defaulting to the identity) can be remotely applied to
+transform those network coordinates to "world" coordinates.
+
+3.2. Make and install minitasks/03/ucb/GenericBase/ to a mica2 mote:
+
+    cd minitasks/03/ucb/GenericBase/
+    make mica2 install.1
+
+3.3. Run the old SerialForwarder:
+
+    java net.tinyos.sf.old.SerialForward -sync-uart -baud 57600
+
+3.4. Compile RawReceiver, RawTOSMsg, and SerialStubThread in SystemC/matlab/:
+
+    cd tinyos-1.x/contrib/SystemC/matlab
+    javac *.java
+
+3.5. Add tinyos-1.x/contrib/SystemC/matlab/ to Matlab's classpath.txt.  Run
+Matlab, type "edit classpath.txt", then add to the end of that file the fully
+qualified path to tinyos-1.x/contrib/SystemC/matlab/.  While you're at it,
+verify that the fully qualified path to tinyos-1.x/tools/java/ is also in
+classpath.txt.  After saving these changes, restart Matlab.
+
+3.6. Run Matlab 6.5, go to the SystemC/matlab/ directory, set the active group
+ID, and bring the motes out of their sleep state.  When a mote wakes up, it
+turns on its LEDS for 1 second.
+
+    (these commands executed from inside Matlab 6.5)
+    cd tinyos-1.x/contrib/SystemC/matlab
+    peggroup(221)
+    peg all on
+
+3.7. Here are some other PEG commands to try
+
+    peg all ident
+    peg all service(3)
+    peg all blink(40)
+    peg all blink(1000)
+    peg all reset
+
+"ident" is like a ping command that returns the installed program name and
+compilation time.  "service(3)" runs a simple blink application.  "blink(40)"
+and "blink(1000)" set the toggle frequency in milliseconds for the blink
+application.  "reset" reboots the motes back into their sleep state (also try
+"peg all off").
+

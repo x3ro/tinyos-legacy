@@ -1,0 +1,90 @@
+<!-- $Id: demo.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="Demo Description">
+
+<section name="Game Outline">
+
+<p> To start the game, the motes comprising the sensor network are deployed
+onto the playing field in a sleep state.  An external node broadcasts a begin
+signal to the sensor network to indicate the start of global time.  The
+pursuers and evaders then enter the playing field and remain within the field
+for the duration of the game.  The sensor network provides a variety of
+services to both pursuers and other sensor motes: time synchronization,
+localization, critter (moving object: pursuer or evader) estimation, etc.  For
+the purpose of the game, the sole goal of these services is to produce
+estimates on the positions, velocity, and identity of critters in the playing
+field.  This information is time stamped and routed to all pursuers in the
+playing field.  The pursuers have onboard computation facilities comparable to
+a laptop computer and may optionally communicate through a separate robust
+channel to coordinate to capture the evader.  When all evaders are captured (a
+capture occurs when a pursuer is "close enough" to it), the game ends.  A base
+station is outside the playing area and provides logging and visualization
+services. </p>
+
+</section>
+
+<section name="Demo Implementation">
+
+<ul>
+<li> *Location* - Richmond Field Station </li>
+<li> *Playing* *Field* - 20m x 20m </li>
+<li> *Coordinate* *System* - Aligned with the GPS coordinate system with origin
+at the southeast corner of the field </li>
+<li> *Sensor* *Network* - 100-400 motes with sensor boards dropped from
+helicopter on a grid spacing of 1-2m </li>
+<li> *Evader* - 1 Pioneer robot </li>
+<li> *Pursuer* - 2-3 Pioneer robots </li>
+</ul>
+
+</section>
+
+<section name="Functional Outline">
+
+<p> Pursuers </p>
+
+<ol>
+<li> Initialize </li>
+<li> Listen for updates from the sensor network </li>
+<li> Communicate, coordinate with the other pursuers if necessary </li>
+<li> Actuate to capture the evader </li>
+<li> Debugging/logging output </li>
+<li> Go to Step 2 if evader has not been caught </li>
+<li> Done </li>
+</ol>
+
+<p> Mote Sensors </p>
+
+<ol>
+<li> Initialize and calibrate </li>
+<ol>
+<li> Position and velocity estimates require the sensor motes to have self-localization </li>
+<li> ... and time synchronization </li>
+<li> Robust routing protocols may require initial network measurements </li>
+</ol>
+<li> Estimate the position and velocity of pursuers and evaders </li>
+<ol>
+<li> Filtering and sensor data reduction at each mote </li>
+</ol>
+<li> Send estimates to pursuers </li>
+<li> Debugging/logging output </li>
+<li> Go to Step 2 until "Stop" </li>
+<li> Done </li>
+</ol>
+
+<p> Evaders </p>
+
+<ol>
+<li> Human controlled </li>
+<li> Smart mote evaders get some subset of </li>
+<ol>
+<li> Listens to the network traffic </li>
+<li> Knows the pursuit algorithms </li>
+<li> Knows the pursuer dynamics </li>
+</ol>
+<li> Smart evaders maximally exploit any data they gather </li>
+</ol>
+
+</section>
+
+</section>
+

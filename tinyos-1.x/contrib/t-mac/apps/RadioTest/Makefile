@@ -1,0 +1,15 @@
+COMPONENT=RadioTest
+
+#CFLAGS+= -v
+
+OPTFLAGS += -Os 
+#OPTFLAGS += -O0 -gstabs+
+PFLAGS += -I%T/lib/MintRoute
+PFLAGS += -I%T/lib/Queue
+PFLAGS += -DDEFAULT_LOCAL_GROUP=0x42
+#OPTFLAGS += -DDONT_REALLY_SLEEP -DTMAC_DEBUG
+OPTFLAGS += -DTMAC_DEBUG
+PFLAGS += -DNO_LEDS
+
+include ../Makerules
+

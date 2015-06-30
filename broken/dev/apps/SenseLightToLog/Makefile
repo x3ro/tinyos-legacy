@@ -1,0 +1,3 @@
+COMPONENT=SenseLightToLog
+include ../Makerules
+

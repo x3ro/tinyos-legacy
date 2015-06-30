@@ -1,0 +1,18 @@
+/Adc.h/1.4/Tue Dec 12 18:23:03 2006//
+/AdcP.nc/1.6/Thu Jun 26 04:39:03 2008//
+/AdcReadClientC.nc/1.4/Tue Dec 12 18:23:03 2006//
+/AdcReadNowClientC.nc/1.4/Tue Dec 12 18:23:03 2006//
+/AdcReadStreamClientC.nc/1.4/Tue Dec 12 18:23:03 2006//
+/AdcStreamP.nc/1.12/Mon Jun 23 23:38:28 2008//
+/Atm128Adc.h/1.6/Tue Jun 29 22:07:43 2010//
+/Atm128AdcC.nc/1.7/Tue Jun 29 22:07:43 2010//
+/Atm128AdcConfig.nc/1.4/Tue Dec 12 18:23:03 2006//
+/Atm128AdcMultiple.nc/1.6/Tue Jun 29 22:07:43 2010//
+/Atm128AdcP.nc/1.8/Tue Jun 29 22:07:43 2010//
+/Atm128AdcSingle.nc/1.6/Tue Jun 29 22:07:43 2010//
+/HplAtm128Adc.nc/1.6/Tue Jun 29 22:07:43 2010//
+/HplAtm128AdcC.nc/1.7/Tue Jun 29 22:07:43 2010//
+/HplAtm128AdcP.nc/1.9/Tue Jun 29 22:07:43 2010//
+/WireAdcP.nc/1.4/Tue Dec 12 18:23:03 2006//
+/WireAdcStreamP.nc/1.4/Tue Dec 12 18:23:03 2006//
+D

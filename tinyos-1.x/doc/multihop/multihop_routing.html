@@ -1,0 +1,139 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Multihop Routing</title>
+</head>
+
+<body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%">
+<font face="tahoma,arial,helvetica"><b><big><big>Multihop Routing</big></big></b>
+<p>
+Last updated 03 Sep 2003
+</font>
+</td></tr>
+</table>
+<br>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">Overview</font></b></td>
+</tr></table>
+
+<p>The TinyOS-1.1 release and later include library components that provide 
+ad-hoc multi-hop routing for sensor sensor network applications.&nbsp; The 
+implementation uses a shortest-path-first algorithm with a single destination 
+node (the root) and active two-way link estimation. The data movement and route 
+decision engines are split into separate components with a single interface 
+between them to permit other route-decision schemes to be easily integrated in 
+the future. Use the multi-hop router is essentially transparent to applications 
+(provided they correctly use the interface).</p>
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">Description</font></b></td>
+</tr></table>
+
+<p>The multi-hop implementation consists of two core modules, <tt>MultiHopEngineM</tt> 
+and <tt>MultiHopLEPSM</tt>, wired together in a single configuration, <tt>MultiHopRouter</tt>. 
+Figure 1 provides an overview of the configuration.</p>
+<p align="center"><a href="MultiHopRoute.jpg">
+<img border="2" src="MultiHopRoute_small.jpg" xthumbnail-orig-image="MultiHopRoute.jpg" width="100" height="75"></a><br>
+<b>Figure 1: <tt>MultiHopRouter</tt> configuration. Direction of arrows indicates
+<br>
+interface provider/user relationships NOT data flow direction.</b></p>
+<p><b><i>Interface Description:</i></b>&nbsp; </p>
+<p>The component configuration exports 6 interfaces.&nbsp; A '[ ]' after the 
+interface name indicates the interface is parameterized. For more information on 
+the specifics of the interface, consult the associated '.nc' interface 
+definition files.</p>
+<ul>
+  <li><tt>StdControl</tt> - The standard control interface</li>
+  <li><tt>RouteControl</tt> - A special interface for controlling monitoring 
+  router 
+  operation. See the '<tt>RouteControl.nc</tt>' interface description file for more 
+  information.</li>
+  <li><tt>Receive[]</tt> - In this implementation, the base station is the only implicit 
+  destination for packets. This interface exists only as a stub and is not 
+  implemented. </li>
+  <li><tt>Send[]</tt> - The port to use for locally originated packets.</li>
+  <li><tt>Intercept[]</tt> - This port is used when a packet is received that WILL be 
+  forwarded. It provides a means for an application to examine forwarded 
+  traffic and, depending on the value returned, suppress the forwarding 
+  operation.</li>
+  <li><tt>Snoop[]</tt> - The <tt>Snoop</tt> port uses the '<tt>Intercept</tt>' interface definition, but 
+  with different semantics. It is signaled when a packet is received that WILL 
+  NOT be forwarded. This interface is useful for passive monitoring of 
+  traffic for replication purposes.</li>
+</ul>
+<p><b><i>Component Description:</i></b></p>
+<p><tt>MultiHopEngineM</tt> - Provides the overall packet movement logic for 
+multi-hop functionality. Using the <tt>RouteSelect</tt> interface, it determines the 
+next-hop path forwards them out the parameterized SendMsg port. The mechanics of 
+this module are independent of route selection. It only requires that the <tt>RouteSelect</tt> 
+and <tt>RouteControl</tt> interfaces be available from the algorithmic component. </p>
+<p><tt>MultiHopLEPSM</tt> - Provides the Link Estimation and Parent Selection (LEPS) 
+mechanisms for the multi-hop implementation. The module monitors all traffic 
+received at the node (via the Snoop port) and directly receives single-hop route 
+update messages (<tt>AM_MULTIHOPMSG</tt>) that may be sent from neighbors within the 
+single hop range. Internally, this module manages the nearest available 
+neighbors and decides the next hop destination based on shortest path semantics.&nbsp; 
+Presently, the destination is identified as the node with <tt>TOS_LOCAL_ADDRESS</tt> set 
+to 0. By default, the module sends a route update message once every 10 seconds and 
+re-computes after 50 seconds (5 route update messages). <tt>MultiHopLEPSM</tt> may 
+be interchanged with other modules that implement different selection 
+algorithms.&nbsp; </p>
+<p><tt>MultiHopRouter</tt> - This configuration connects <tt>MultiHopEngineM</tt>, <tt>MultiHopLEPSM</tt> 
+with other necessary components. The configuration exports the <tt>Receive</tt>, <tt>Send</tt>, 
+and <tt>Intercept</tt> and <tt>Snoop</tt> (as <tt>Intercept</tt>) ports to applications. The <tt>SendMsg</tt> 
+port of <tt>MultiHopEngineM</tt> is wired to the <tt>QueuedSend</tt> library components for 
+queuing outbound packets (both forwarded and locally originated). The <tt>ReceiveMsg</tt> 
+and <tt>SendMsg</tt> ports of <tt>MultiHopLEPSM</tt> are wired to the <tt>AM_MULTIHOPMSG</tt> parameter of 
+the communication provider for the purpose of exchanging single-hop route 
+updates with neighbors.</p>
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">Usage</font></b></td>
+</tr></table>
+
+<p>Use of the multi-hop library component is mostly transparent to the 
+application. Any application that uses the Send interface can be connected 
+to this component to achieve multi-hop functionality. One limitation of 
+multi-hop, however, is the aggregate data rate. Applications should 
+maintain average message frequency at or below one message every 2 seconds. 
+Higher rates can lead to congestion and or overflow of the communication queue.</p>
+
+<p><i><b>Surge</b></i></p>
+
+<p>The Surge application, in <tt>apps/Surge</tt>, is a simple example of a mutlihop application.&nbsp; 
+Surge takes light sensor readings and sends them over the mesh to the base node 
+(Node 0). Accompanying this application is a Java program that can be used to 
+visualize the logical network topology and the sensor readings. Users are 
+encouraged to review the application, <tt>SurgeM.nc</tt>, and it's configuration, 
+<tt>Surge.nc</tt>, to better understand how to use the multi-hop tools.</p>
+
+<p>To build the Surge mote application, change to the <tt>apps/Surge</tt> directory and 
+issue a '<tt>make &lt;platform&gt;</tt>' where <tt>platform</tt> is the name of your target mote type. 
+To build the java tools, change to the <tt>tools/java/net/tinyos/surge</tt> director and 
+issue '<tt>make</tt>'</p>
+
+<p>Install the application onto the target nodes, giving each node a unique 
+address. Remember, the node with address 0 will be the base station. This node 
+should be connected to a PC via a serial or network link.</p>
+
+<p>To run the java application, first start the necessary serial forwarder 
+helpers needed to link the base node and the PC. Start the java tool, i.e&nbsp; 
+'<tt>java net.tinyos.surge.MainClass &lt;GroupId&gt;</tt>', where <tt>GroupId</tt> is the AM group id 
+used when compiling the mote application. When the application starts, you 
+should immediately see the base node reporting sensor values. After about 
+1 minute, other nodes should appear as the network topology builds. </p>
+
+</body>
+
+</html>

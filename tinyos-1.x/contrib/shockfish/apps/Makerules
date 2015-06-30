@@ -1,0 +1,9 @@
+#-*-Makefile-*- 
+
+#  If any SENSORBOARD has been defined, include the right path
+
+ifdef SENSORBOARD
+PFLAGS += -I$(shell ncc -print-tosdir)/../contrib/shockfish/tos/sensorboards/${SENSORBOARD}
+endif
+
+include $(shell ncc -print-tosdir)/../tools/make/Makerules

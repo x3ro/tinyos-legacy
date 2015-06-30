@@ -1,0 +1,5 @@
+#!/bin/sh
+for i in `java net.tinyos.matchbox.tools.Dir`; do
+  echo Deleting $i
+  java net.tinyos.matchbox.tools.Delete $i
+done

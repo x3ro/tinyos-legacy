@@ -1,0 +1,71 @@
+#-*-Makefile-*-
+######################################################################
+#
+# Makefile for TinyOS call graph constraint checks. This file
+# builds the resource lists necessary for performing the checks, then
+# invokes Makefile.check, which checks the application call graph.
+#
+# This Makefile is shared by all applications and is included by
+# Makefile.qual in application directories.
+#
+# When run (all), a subdirectory cqual/ is created. The application .desc
+# file is then parsed, producing the file cqual/cqual.objs. This file contains
+# three variable definitions: CQUAL_OBJS, the list of preprocessed source files
+# that cqual will be run on; CQUAL_FILES.c, the list of source files that
+# will be needed; CQUAL_FILES.h, the list of header files that will be
+# needed.
+#
+# The requisite generated header files (super.h, am_dispatch.h) are also
+# created.
+#
+# Once cqual.objs has been built, Makefile.check is invoked. This
+# uses the file lists to make copies of source files, annotates the copies
+# with qualifiers, generates annotated header files, preprocesses the
+# source files, then runs cqual on them.
+#
+# Created: 1/19/2002,  Philip Levis <pal@cs.berkeley.edu>
+#
+######################################################################
+
+BASEDIR = ../..
+TOOLS   = $(BASEDIR)/tools
+TOS     = $(BASEDIR)/tos
+SYSTEM  = $(TOS)/system
+SHARED  = $(TOS)/shared
+AM_DISPATCH_MAP = $(TOS)/include/AM_DISPATCH.mapping
+CDIR    = cqual
+
+PLATFORM_DIR = $(TOS)/platform/pc
+INCLUDE = -I. -I$(CDIR) -I$(TOS)/include -I$(PLATFORM_DIR) -I$(PLATFORM_DIR)/include -I$(SYSTEM) -I$(SHARED)
+
+######################################################################
+######################################################################
+##                                                                  ##
+##                      Begin main rules                            ##
+##                                                                  ##
+######################################################################
+######################################################################
+
+all: $(CDIR)/dir qual
+	make -s -f Makefile.check
+
+qual: $(CDIR)/cqual.objs
+
+$(CDIR)/cqual.objs: $(DESC) $(CDIR)/am_dispatch.h
+	$(TOOLS)/desc2cqual-objs $(DESC) $(PLATFORM_DIR) $(SYSTEM) $(SHARED) > $@
+	$(TOOLS)/desc2files ".c" $(DESC) $(PLATFORM_DIR) $(SYSTEM) $(SHARED) >> $@
+	$(TOOLS)/desc2files ".h" $(DESC) $(PLATFORM_DIR) $(SYSTEM) $(SHARED) >> $@
+
+$(CDIR)/am_dispatch.h: $(CDIR)/dir $(CDIR)/super.h
+	$(TOOLS)/mk_amdisp $(AM_DISPATCH_MAP) $(INCLUDE) > $@
+
+$(CDIR)/super.h: $(CDIR)/dir $(DESC) 
+	$(TOOLS)/mksuper_desc $(DESC) $(SYSTEM) $(PLATFORM_DIR) $(SHARED) > $@
+
+
+$(CDIR)/dir:
+	mkdir -p cqual
+	touch cqual/dir
+
+clean:
+	\rm -Rf cqual

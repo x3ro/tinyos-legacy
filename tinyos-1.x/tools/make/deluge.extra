@@ -1,0 +1,14 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: deluge.extra,v 1.3 2005/07/28 22:12:05 jwhui Exp $
+
+PROGRAM = deluge
+BUILD_DEPS = tosimage $(POST_BUILD_EXTRA_DEPS) bytes program 
+
+ifndef DELUGE
+$(error No Deluge image number specified)
+endif
+
+program: FORCE
+	java net.tinyos.tools.Deluge -f -i -in=$(DELUGE) -ti=$(BUILDDIR)/tos_image.xml
+	java net.tinyos.tools.Deluge -f -r -in=$(DELUGE)
+

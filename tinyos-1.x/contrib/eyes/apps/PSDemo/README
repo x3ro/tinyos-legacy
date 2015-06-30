@@ -1,0 +1,19 @@
+
+                               +++ PSDemo +++
+
+PSDemo is an application to demonstrate the publish/subscribe middleware
+located tinyos-1.x/contrib/eyes/tos/lib/PublishSubscribe.
+It is to be used in combination with the Eyes Demonstrator GUI in 
+contrib/eyes/tools/java/de/tub/eyes/apps/demonstrator.
+TOSBase needs to be programmed on the gateway node, PSDemo on all others.
+Check tinyos-1.x/contrib/eyes/doc/pstutorial.pdf.
+
+
+Meaning of the LEDs:
+  First LED = toggles when the node has received a subscription
+  Second LED = toggles when the node start gathering data
+  Third LED = toggles when a notification has been sent
+  Fourth LED = toggles when Drip is active
+
+
+

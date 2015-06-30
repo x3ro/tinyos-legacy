@@ -1,0 +1,367 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>TinyOS Lesson 4: Composing Components to Send and Receive Messages</title>
+</head>
+<body>
+
+<h1>
+Lesson 4: Composing Components to Send and Receive Messages</h1>
+This lesson introduces two concepts: hierarchical descriptions of component
+graphs and how to form distributed applications that send and receive messages.&nbsp;
+The applications that we will consider are <a href="../../apps/cnt_to_leds_and_rfm/cnt_to_leds_and_rfm.desc">apps/cnt_to_leds_and_rfm.desc
+</a>and
+<a href="../../apps/rfm_to_leds/RFM_TO_LEDS.c">apps/rfm_to_led/rfm_to_leds.desc</a>.&nbsp;
+cnt_to_leds_and_rfm is essentially the counting variant of blink except
+that it is structured to use a generic output device.&nbsp; Using the desc
+file, we can fan out the output to two devices - the LEDS and the Radio.&nbsp;
+Down inside of the radio device, we see our messages are sent.&nbsp; rfm_to_leds
+illustrates how messages are received; it takes a value that comes in from
+a packet and displays it on the LEDS, so the two function like a distributed
+display.&nbsp; You could change the count application to something like
+sense and you would have a wireless sensor!
+<br>&nbsp;
+<h2>
+CNT_TO_LEDS_AND_RFM</h2>
+The cnt_to_leds_and_rfm application is essentially an extension of BLINK,
+although it is structured to provide a more flexible composition.&nbsp;&nbsp;&nbsp;
+The entire cnt_to_leds_and_rfm application description includes five components:
+<p><tt>include modules{</tt>
+<br><tt>&nbsp; MAIN;</tt>
+<br><tt>&nbsp; COUNTER;</tt>
+<br><tt>&nbsp; INT_TO_LEDS;</tt>
+<br><tt>&nbsp; INT_TO_RFM;</tt>
+<br><tt>&nbsp; CLOCK;</tt>
+<br><tt>};</tt>
+<p><tt>As you've seen before, MAIN</tt> is a generic prelude system component
+used in most applications.
+<tt>CLOCK</tt> is a system component that accepts
+an INIT command to set its event frequency and signals a periodic clock
+event once initialized.
+&nbsp; You may notice that none of these components
+are in the application directory, they are all shared among several application.&nbsp;
+The logic is convey by the way they are wired together.&nbsp; You may also
+notice the LEDS does not even appear.&nbsp; This illustrates how description
+files may be used to introduce multicomponent abstractions - they are hierarchical.
+<h3>
+COUNTER</h3>
+The <tt><a href="../../tos/shared/COUNTER.c">tos/shared/COUNTER.c</a></tt>
+component is the "guts" of the application.
+<p>COUNTER uses a TOS_FRAME to hold a counter state variable.
+<br><tt>#define TOS_FRAME_TYPE COUNTER_frame</tt>
+<br><tt>TOS_FRAME_BEGIN(COUNTER_frame) {</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; <font color="#009900">char state</font>;</tt>
+<br><tt>}</tt>
+<br><tt>TOS_FRAME_END(COUNTER_frame);</tt>
+<p>It accepts INIT and START commands from main to initialize its operation.
+<p><tt>char TOS_COMMAND(<font color="#009900">COUNTER_INIT</font>)(){</tt>
+<br><tt>&nbsp; VAR(state) = 0; /* initialize output component */</tt>
+<br><tt>&nbsp; return TOS_CALL_COMMAND(COUNTER_SUB_OUTPUT_INIT)();</tt>
+<br><tt>}</tt>
+<p><tt>char TOS_COMMAND(<font color="#009900">COUNTER_START</font>)(){</tt>
+<br><tt>&nbsp; /* initialize clock component and start event processing
+*/</tt>
+<br><tt>&nbsp; return TOS_CALL_COMMAND(COUNTER_SUB_CLOCK_INIT)(tick4ps);</tt>
+<br><tt>}</tt>
+<h3>
+COUNTER's Output</h3>
+Rather than render the output directly to the LEDS, as in BLINK, COUNTER
+calls a command in a generic output device.
+<p><tt>void TOS_EVENT(COUNTER_CLOCK_EVENT)(){</tt>
+<br><tt>&nbsp; VAR(state) ++;</tt>
+<br><tt>&nbsp; TOS_CALL_COMMAND<font color="#009900">(COUNTER_OUTPUT)(VAR(state))</font>;</tt>
+<br><tt>}</tt>
+<p>The first novel aspect of COUNTER is that COUNTER_OUTPUT is wired into
+two output components: <a href="../../tos/shared/INT_TO_LEDS.c">tos/shared/INT_TO_LEDS.c
+</a>and
+<a href="../../tos/shared/INT_TO_RFM.c">tos/shared/INT_TO_RFM.c</a>.
+<p>INT_TO_LEDS is a simple output device, which places the lower three
+bits of the integer value onto the LEDS.&nbsp; This gives us the behavior
+of the countig variant of BLINK.
+<p><tt>COUNTER:COUNTER_OUTPUT INT_TO_LEDS:INT_TO_LEDS_OUTPUT INT_TO_RFM:INT_TO_RFM_OUTPUT</tt>
+<p><i><font color="#FF0000">A description file may fanout commands or events
+to multiple components.&nbsp; The program generation tools handle the actual
+fanout.</font></i>
+<p>If&nbsp; you examine&nbsp; <a href="../../tos/shared/INT_TO_LEDS.comp">tos/shared/INT_TO_LEDS.comp</a>&nbsp;
+you will see a new construct:
+<p>TOS_MODULE INT_TO_LEDS;
+<br>JOINTLY IMPLEMENTED_BY INT_TO_LEDS;
+<p><font color="#FF0000">A component may be the root of a subgraph, described
+by the associated description file.&nbsp; This is declared in the comp
+file using</font>
+<br><tt><font color="#FF0000">JOINTLY IMPLEMENTED BY <i>name</i></font></tt><font color="#FF0000">;&nbsp;
+The named file provides the subgraph rooted at the component.</font>
+<p>Here&nbsp;&nbsp; <a href="../../tos/shared/INT_TO_LEDS.desc">tos/shared/INT_TO_LEDS.desc</a>&nbsp;
+brings in one subcomponent, LED, and provides all the wiring to the primitive
+LED functions.
+<p>COUNTER also handles the event generated by asynchronous output devices
+upon completion.
+<p>COUNTER:COUNTER_OUTPUT_COMPLETE INT_TO_RFM:INT_TO_RFM_COMPLETE
+<p><tt>/* Output Completion Event Handler</tt>
+<br><tt>&nbsp;&nbsp; Indicate that notification was successful */</tt>
+<br><tt>char TOS_EVENT(<font color="#009900">COUNTER_OUTPUT_COMPLETE</font>)(char
+success)</tt>
+<br><tt>{</tt>
+<br><tt>&nbsp;&nbsp; return 1;</tt>
+<br><tt>}</tt>
+<br>&nbsp;
+<h3>
+INT_TO_RFM: sending a message</h3>
+
+<p><br>INT_TO_RFM&nbsp; ( <a href="../../tos/shared/INT_TO_RFM.c">tos/shared/INT_TO_RFM.c
+) </a>is the real point of this lesson - now nicely abstracted from the
+higher level application.&nbsp; It's job is to send a packet&nbsp; containing
+the output value to message handlers on all neighboring nodes.
+<p>Messages in TinyOS&nbsp; follow the Active Message (AM) model, so when
+a packet is injected into the network it names a handler that will be invoked
+on the recipient nodes.&nbsp; This fits especially nicely in the TinyOS
+event-driven environment, because message arrival is just another kind
+of event.
+<p>In any messaging layer, there are 5 aspects involved in successful transmission
+and reception (1) specifying what message is to be sent, (2) specifying
+who is to receive it, (3) determining when the storage associated with
+the source message can be reused, (4) providing buffering for the incoming
+message, and (5) processing the message.&nbsp; Tiny Active Messages are
+no exception, however, the storage management is more constrained than
+is typical and the events are more natural.
+<p><font color="#FF0000">TOS message buffers are contained in frames and
+must be declared using the declaration type TOS_Msg.&nbsp; This provides
+a clean way to perform encapsulation as the packet moves through the stack
+without copying.</font>
+<p>INT_TO_RFM declares a TOS_Msg type variable called, data, inside the
+application frame.
+<p><tt>#define TOS_FRAME_TYPE INT_TO_RFM_frame</tt>
+<br><tt>TOS_FRAME_BEGIN(INT_TO_RFM_frame)</tt>
+<br><tt>{</tt>
+<br><tt><font color="#009900">&nbsp; char pending;</font></tt>
+<br><tt><font color="#009900">&nbsp; TOS_Msg data;</font></tt>
+<br><tt>} TOS_FRAME_END(INT_TO_RFM_frame);</tt>
+<p>The TOS_Msg structure, defined in <a href="../../tos/include/MSG.h">tos/include/MSG.h
+</a>,
+has a field "data", which is a character pointer pointing to the beginning
+of the message's payload.&nbsp; The payload is currently standardized to
+be 30 bytes long, although this is a configuration parameter.
+<p>You can bang away at the character string and produce unreadable message
+processing code, but a much better way is to let the compiler deal with
+all the packaging.&nbsp;&nbsp; Use a C structure such as <tt>int_to_led_msg
+</tt>to describe the format of the packet payload.
+<p><tt>typdef struct{</tt>
+<br><tt>&nbsp;char val;</tt>
+<br><tt>&nbsp;int src;</tt>
+<br><tt>}<font color="#009900">int_to_led_msg</font>;</tt>
+<p>INT_TO_RFM constructs and sends a message when an upper component such
+as COUNTER, issues a command.
+<p><tt>char TOS_COMMAND(<font color="#009900">INT_TO_RFM_OUTPUT</font>)(int
+val)</tt>
+<br><tt>{</tt>
+<br><tt>&nbsp; ...</tt>
+<br><tt>&nbsp; return 0;</tt>
+<br><tt>}</tt>
+<p>To place the data into the payload, we first declare a <tt><font color="#009900">int_to_led_msg
+</font></tt>pointer variable, assign it to the address of the start of
+the payload, and fill in the value of each field.
+<p><tt>int_to_led_msg* message = (int_to_led_msg*)VAR(data).data;</tt>
+<br><tt>...</tt>
+<br><tt>message->val = val;</tt>
+<br><tt>message->src = TOS_LOCAL_ADDRESS;</tt>
+<br><tt>...</tt>
+<p>To send out the packet, we call a SEND_MSG command specifying the destination
+node address, the handler id on the destination and the source message
+buffer (the buffer, not the payload).
+<p><tt>if (<font color="#009900">TOS_COMMAND(INT_TO_RFM_SUB_SEND_MSG)(TOS_BCAST_ADDR,
+AM_MSG(INT_READING), &amp;VAR(data))</font>)</tt><tt></tt>
+<p>This command is a split-phase request, like acquiring sensor data; it
+starts the process of sending a message and runs concurrently with the
+caller.&nbsp; Notice that the command may fail (like any other); this means
+that the messaging component didn't even accept the request.&nbsp; If it
+succeeds, it is working on the send.
+<p>TOS_BCAST_ADDR is a special address signifying that any node that hears
+the message will handle it.&nbsp; This is the native mode of radio operation.&nbsp;
+Alternatively, you can specify a particular node and all other that hear
+the message will discard it.
+<p><tt><font color="#FF0000">The handler that will process the message
+on the specfied recipient nodes is specified using AM_MSG(<i>handler_name</i>).</font><font color="#000000">
+</font><font color="#FF0000">The handler will be declared as TOS_MSG_EVENT(handler_name).</font></tt>
+<p><font color="#000000">In this case</font><tt><font color="#009900">
+AM_MSG(INT_READING) </font></tt><font color="#000000">specifies the handler.&nbsp;
+Most of the time yu will find that messages are sent to similar conponents
+on other nodes, so it make sense to specify the handler on the sending
+side.&nbsp; This example is a little unusual as we will build a recipient
+application that is different.&nbsp; It will be register in a compatible
+fashion.</font><tt><font color="#000000"></font></tt>
+<p><font color="#FF0000">TinyOS message buffers follow a strict alternating
+ownership protocol to avoid expensive memory management while allowing
+concurrent operation.&nbsp; If the message layer accepts the send command,
+it owns the send buffer and the requesting component should not touch it
+until the send is complete, as indicated by a send_done event.&nbsp; The
+requesting component may use any method to track the status of the buffer.</font>
+<br><font color="#FF0000">The only time pointers are carried across component
+boundaries is pointers to TOS_MSGs.</font>
+<p>Here we use a pending flag to keep track of the status of the buffer.&nbsp;
+If the previous message is still being sent, we cannot touch the buffer,
+so we drop this output operation.&nbsp; If the send buffer is available,
+we can modify it and request it to be sent.&nbsp; If the send request fails,
+we clear the flag, so we can try another one later.&nbsp; (Notice there
+is no race condition in the use of the flag.)
+<br>&nbsp;
+<p><tt>char TOS_COMMAND(INT_TO_RFM_OUTPUT)(int val){</tt>
+<br><tt>&nbsp; ...</tt>
+<br><tt>&nbsp; if (<font color="#009900">!VAR(pending</font>)) {</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; VAR(pending) = 1;</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; message->val = val;</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; message->src = TOS_LOCAL_ADDRESS;</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; if (<font color="#009900">TOS_COMMAND(INT_TO_RFM_SUB_SEND_MSG)(TOS_BCAST_ADDR,</font></tt>
+<br><tt><font color="#009900">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AM_MSG(INT_READING), &amp;VAR(data))</font>) {</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 1;</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; } else {</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VAR(pending) = 0; /* request failed,
+free buffer */</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; }</tt>
+<br><tt>&nbsp; }</tt>
+<br><tt>&nbsp; return 0;</tt>
+<br><tt>}</tt>
+<br>&nbsp;
+<h3>
+GENERIC_COMM network stack</h3>
+
+<p><br>In <a href="../../tos/shared/INT_TO_RFM.desc">tos/shared/INT_TO_RFM.desc</a>,
+INT_TO_RFM is wired to <a href="../../tos/shared/GENERIC_COMM.comp">tos/shared/GENERIC_COMM.comp</a>,
+which is the component providing the generic network stack.&nbsp; This
+is a much more substantial use of hierarchical description files.&nbsp;
+If we look inside the joint description,&nbsp;&nbsp;&nbsp; <a href="../../tos/shared/GENERIC_COMM.desc">tos/shared/GENERIC_COMM.desc</a>,
+we see that it contains six additional components, from the high level
+messaging component all the way down to modulation of individual bits on
+the radio link.&nbsp; Many of these components exist in numerous versions
+for different application contexts, but this is nicely abstracted.
+<br>&nbsp;
+<p>The <font color="#009900">TOS_CALL_COMMAND(INT_TO_RFM_SUB_SEND_MSG)(TOS_BCAST_ADDR,</font>
+<br><font color="#009900">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AM_MSG(INT_READING), &amp;VAR(data))</font>
+<p>directly links to
+<p><tt>char COMM_SEND_MSG(short addr, char type, TOS_Msg* data)</tt> in
+GENERIC_COMM.
+<p>The COMM_SEND_MSG command returns a value to indicate whether it accepts
+the request or not. Return value of 1 indicates request is accepted while
+a return value of 0 indicates rejection.
+<p>The destination handler is wired to a specific Active Message handler.&nbsp;
+The AM component will dispatch incoming message to many different components
+that send messages within an application.
+<p>Here the INT_TO_RFM:INT_READING message handler is wired to 
+GENERIC_COMM:GENERIC_COMM_MSG_HANDLER_4.&nbsp;
+GENERIC_COMM provides the mapping from handler name to handler identifier (here
+4).&nbsp; An application specific register of handler types is maintained
+in the release.
+<p><font color="#FF0000">When transmission of a message is completed, GENERIC_COMM
+will signal a COMM_SEND_DONE event to all components that are registered
+with the Active Message component.&nbsp; A pointer to the buffer sent is
+provided as an argument to the event.</font>
+<p>Here this is wired to INT_TO_RFM_SUB_MSG_SEND_DONE event handler.&nbsp;
+It checks if the buffer is its own and, if so, clears the pending flag
+and signals COUNTER:COUNTER_OUTPUT_COMPLETE.
+<p><tt>char TOS_EVENT(INT_TO_RFM_SUB_MSG_SEND_DONE)(TOS_MsgPtr sentBuffer){</tt>
+<br><tt>&nbsp; if (VAR(pending) &amp;&amp; sentBuffer == &amp;VAR(data))
+{</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; VAR(pending) = 0;</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; TOS_SIGNAL_EVENT(INT_TO_RFM_COMPLETE)(1);</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; return 1;</tt>
+<br><tt>&nbsp; }</tt>
+<br><tt>&nbsp; return 0;</tt>
+<br><tt>}</tt>
+<p>This event is broadcast to all potential senders because other components
+may have failed to send a previous message and be waiting for the message
+layer to become available.&nbsp; We don't want them to spin consuming precious
+resources, so the notification is provided.
+<p>On the receiving side, the INT_READING msg event will be signaled.&nbsp;
+In this case, we will use a different application to handle that.
+<br>&nbsp;
+<h2>
+Receiving Messages with RFM_TO_LEDS</h2>
+<a href="../../apps/rfm_to_leds/rfm_to_leds.desc">apps/rfm_to_leds/rfm_to_leds.desc</a>
+is the application that receives the message from&nbsp; CNT_TO_LEDS_AND_RFM,
+and displays the least significant 3 bits of the integer from the packet
+on the LEDs.&nbsp; Similar to CNT_TO_LEDS_AND_RFM,&nbsp; this application
+is also a composition of different components.
+<p><tt>include modules{</tt>
+<br><tt>&nbsp; MAIN;</tt>
+<br><tt>&nbsp; RFM_TO_LEDS;</tt>
+<br><tt>};</tt>
+<p>The RFM_TO_LEDS compoent in tos/shared/RFM_TO_LEDS.desc uses GENERIC_COMM
+to receive messages,and INT_TO_LEDS as its output device.
+<p><tt>include modules{</tt>
+<br><tt>&nbsp; GENERIC_COMM;</tt>
+<br><tt>&nbsp; INT_TO_LEDS;</tt>
+<br><tt>};</tt>
+<p>In <a href="../../tos/shared/RFM_TO_LEDS.desc">tos/shared/RFM_TO_LEDS.desc</a>,&nbsp;
+wiring to the GENERIC_COMM for receiving messages, and INT_TO_LEDS for
+outputing the value on the LEDs are shown below
+<p>RFM_TO_LEDS:<font color="#009900">INT_READING</font> <font color="#3366FF">GENERIC_COMM:GENERIC_COMM_MSG_HANDLER_4</font>
+<br>RFM_TO_LEDS:RFM_TO_LEDS_LED_OUTPUT INT_TO_LEDS:<font color="#009900">INT_TO_LEDS_OUTPUT</font>
+<p>Recall that <font color="#009900">INT_TO_RFM:INT_READING </font>has
+an Active Message handler type that equals <b>4</b>. RFM_TO_LEDS should also
+wire its INT_READING handler to have the same Active Message type equals
+<b>4</b>.
+<p><font color="#FF0000">Storage management of the receiving side is inherently
+dynamic.&nbsp; A message arrives and fills a buffer.&nbsp; The Active Message
+layer decodes the handler type and dispatches it.&nbsp; It gives the buffer
+to the application component when it does so, but the application must
+return a pointer to a free buffer upon completion.</font>
+<p>All GENERIC_COMM handlers have the following interface that application handler
+for incoming messages:.
+<p><font color="#3366FF">TOS_MsgPtr GENERIC_COMM_HANDLER_X(TOS_MsgPtr data);</font>
+<p>where data is the TOS_Msg pointer pointing to the incoming message.
+<p>In RFM_TO_LEDS, this is the <font color="#33CC00">INT_READING</font>
+message handler:
+<br><tt>/* Active Message handler</tt>
+<br><tt>&nbsp; Pull out the data and send it to the output. */</tt>
+<p><tt>TOS_MsgPtr TOS_MSG_EVENT(INT_READING)(TOS_MsgPtr msg){</tt>
+<br><tt>&nbsp; int_to_led_msg* message = (int_to_led_msg*)msg->data;</tt>
+<p><tt>&nbsp; TOS_CALL_COMMAND(RFM_TO_LEDS_LED_OUTPUT)(<font color="#33CC00">message->val</font>);</tt>
+<br><tt>&nbsp; return msg;</tt>
+<br><tt>}</tt>
+<p>Observe that the event process the data within the packet and returns
+the buffer it was provided.
+<p>A clean way to extract the data from the payload is to use the same
+<tt><font color="#33CC00">int_to_led_msg</font></tt>
+structure that we used in INT_TO_RFM.&nbsp;&nbsp; The integer value can&nbsp;
+then be retrieved by the expression, <tt>message->val</tt>.&nbsp; The value
+is then passed&nbsp; as an argument to the command RFM_TO_LEDS_LED_OUTPUT,
+which displays the least significant 3 bits of the integer on the LEDs.
+<br>&nbsp;
+<h2>
+Underlying details</h2>
+Each message contains a header containing system specific information.&nbsp;
+In order to allow multiple, logically distinct networks to share the channel,
+collections of communicating nodes carry a group id.
+<p><b><font size=+1>In this lab setting, you will want a unique group id.&nbsp;
+Edit apps/Makeinclude and change the line DEFAULT_LOCAL_GROUP = 0x7D to
+be the number on your programming board.</font></b>
+<p>In addition, the header carries the destination node number (which may
+be BCAST_ADDR or the special UART address) and the handler id.
+<p>We have standardized our message size to be 36 bytes, where 4 bytes
+are allocated for the header (2 bytes for destination, 1 byte for type,
+and 1 byte for GROUP_ID), 30 bytes are allocated for application data payload,
+and 2 bytes are allocated for 16-bit CRC checksum.&nbsp;&nbsp; It is important
+to note that there are two addresses that have special purposes. TOS_BCAST_ADDR
+(0xffff) is used as a broadcast address while TOS_UART_ADDR (0x7e) is for
+messages destined to the serial port directly. Finally, TOS_LOCAL_ADDRESS
+is the address of the current node.
+<h4>
+Exercise:</h4>
+Question, what would happen if you built multiple cnt_to_leds_and rfm nodes
+and turned them on?
+<p>Compile and run both <tt><a href="../../apps/cnt_to_leds_and_rfm/cnt_to_leds_and_rfm.desc">apps/cnt_to_leds_and_rfm.desc</a></tt>
+and&nbsp; <tt><a href="../../apps/rfm_to_leds/rfm_to_leds.desc">apps/rfm_to_leds/rfm_to_leds.desc.
+</a></tt>When you turn on cnt_to_leds_and_rfm you should see the count
+displayed on the rfm_to_leds device.&nbsp; Congratulations&nbsp; you are
+doing wireless networking.&nbsp;&nbsp; Can you change this to provide a
+wireless sensor?&nbsp; (hint: SENS_TO_RFM).
+<p>
+<hr>
+<b><font size=4><a href="lesson3.html">&lt; Previous Lesson</a></font></b> |
+<b><font size=4><a href="lesson5.html">Next Lesson &gt;</a></font></b>
+
+</body>
+</html>

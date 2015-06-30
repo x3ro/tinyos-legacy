@@ -1,0 +1,11 @@
+<SEARCH PATH="../../../sensorboards/micasb">
+<SEARCH PATH="../sensorboards/sensors">
+<FUNCTION NAME="soff">
+<FUNCTION NAME="son">
+<FUNCTION NAME="light">
+<FUNCTION NAME="temp">
+<FUNCTION NAME="mic">
+<FUNCTION NAME="accelX">
+<FUNCTION NAME="accelY">
+<FUNCTION NAME="magX">
+<FUNCTION NAME="magY">

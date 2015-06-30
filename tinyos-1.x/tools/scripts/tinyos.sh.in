@@ -1,0 +1,15 @@
+# script for profile.d for bash shells, adjusted for each users
+# installation by substituting @prefix@ for the actual tinyos tree
+# installation point.
+
+TOSROOT="@prefix@/tinyos-1.x"
+export TOSROOT
+TOSDIR="$TOSROOT/tos"
+export TOSDIR
+CLASSPATH=`$TOSROOT/tools/java/javapath`
+export CLASSPATH
+
+# Extend path for java
+type java >/dev/null 2>/dev/null || PATH=`/usr/local/bin/locate-jre --java`:$PATH
+type javac >/dev/null 2>/dev/null || PATH=`/usr/local/bin/locate-jre --javac`:$PATH
+echo $PATH | grep -q /usr/local/bin ||  PATH=/usr/local/bin:$PATH

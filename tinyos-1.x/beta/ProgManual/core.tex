@@ -1,0 +1,38 @@
+\section{\tinyos Concepts}
+
+Before one can understand how to customize components or place 
+components together to form an application, some central TinyOS concepts  
+must first be explained.\footnote{The 
+information found in this section is covered in detail in \cite{jhill-thesis}.} 
+
+\subsection{The Execution Model}
+
+Most modern operating systems support a multi-tasking model where the
+processing is switched between tasks either because a task is waiting 
+on a resource or because the task has used its allocated time quota. This
+common model would not be ideal for the network sensor regime because
+of the severe hardware restrictions and the near realtime requirements
+of the sensor hardware. For example, managing separate stacks for
+multiple threads of execution would waste precious precious memory and
+time. Additionally, mote applications usually need to support fine-grained
+concurrency that would exacerbate the expense of context switching. For
+example, a mote application would like to quickly sample input from a
+sensor, read a bit from the radio, and return to sampling input or
+perhaps storing sensor data in onboard EEPROM.
+
+\tinyos has a two-pronged execution model better suited to this 
+workload: a high-priority event queue with a lower-priority task queue
+allowed to run whenever the event queue is empty. \emph{Event handlers} 
+are short snippets of code that run in response to an \emph{event} or 
+
+\subsubsection{\nesc support for the execution model}
+
+async / sync
+
+\subsection{The Component Model}
+
+\subsubsection{\nesc support for the component model}
+
+\subsection{The Hardware Presentation Layer (HPL)}
+
+

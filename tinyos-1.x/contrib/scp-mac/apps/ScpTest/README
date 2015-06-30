@@ -1,0 +1,102 @@
+1. INTRODUCTION
+
+This application tests the basic functionality of the SCP-MAC. With
+scheduled channel polling (SCP), each node periodically polls channel
+activity like LPL. Unlike LPL, nodes with SCP synchronize their polling
+time and use a short wakeup tone to wake up a receiver.
+
+This application tests various SCP-MAC functionalities with user
+configurable options. This application utlizes the common MAC test program
+in apps/MacTest/. It provides wiring to SCP-MAC and configuration
+parameters specific to SCP-MAC.  
+ 
+
+2. FUNCTIONALITY
+
+This application tests the following functions of SCP-MAC.
+
+- Sleep/wakeup schedule setup and synchronization
+  - Initial schedule setup (boot)
+  - Periodic SYNC packet exchange
+  - Piggybacking SYNC info on broadcast data
+
+- Packet transmission and reception
+  - Source: broadcast, unicast, or both
+  - Sink: receive only
+  - Variable transmission power
+
+- Radio energy measurement
+  - Measure the fraction of time that the radio stays in each state
+
+The major output of the test is the LED activities and the transmitted
+packets from all nodes, which will be captured by the snooper node.
+
+3. HOW TO USE
+
+If you have not used SCP-MAC before, you should first look at some general
+information about how to use SCP-MAC stack, available at
+
+http://www.isi.edu/ilense/software/scpmac/guide.html
+
+The default setting assumes that you have 3 nodes and a snooper. The
+snooper (apps/Snooper/) passively captures all packets in the channel, and
+you can display the packets on your PC with tools/snoop.c.
+
+To configure each node to perform different test, use the config.h file.
+With the default configuration, each node will alternately sends a
+broadcast packet and a unicast packet. For unicast packet, node 1 -> node
+2, node 2 -> node 3, and node 3 -> node 1.
+
+Before nodes start sending data packets, there is a boot process to set up
+the sleep/wakeup schedule. Currently there are two ways to boot. The first
+is with a boot protocol, where nodes automatically initiate a schedule or
+discover/follow an existing schedule. This is the default boot process.
+Another way is to manually boot nodes by configuring them as a master and
+slaves. Slaves must start first, and they wait for the master to broadcast
+a schedule.
+
+After setting up the schedule, you can observe packet transmissions and
+receptions, from both LEDs and the snooper. In the default configuration,
+the yellow LED shows radio sleep/wakeup, red shows packet transmission,
+and green shows packet reception.
+
+To use the default configuration of this test program, follow these steps: 
+
+  1) Compile application
+      
+     make mica2
+
+  2) Install application on each mote through the parallel port
+     
+     make reinstall.x mica2
+     
+     where x is the node ID. If you are using MIB510 programming board
+     through the serial port, use
+     
+     MIB510=/dev/ttyS0 make reinstall.x mica2
+  
+  3) Turn on your snooper and all the application nodes.
+   
+If you want to configure nodes with different parameters, you can do so by
+editing the config.h file. Look at this file for detailed description of
+each parameter.
+
+4. KNOWN ISSUES
+
+1) First, make sure the boot loader is disabled by checking/setting the 
+fuse bytes. For details look at the top-level commstack/README file or the
+following guide:
+
+http://www.isi.edu/ilense/software/scpmac/guide.html
+
+2) Current implementation on MicaZ is still preliminary. The following 
+configurations on MicaZ do not fully work:
+
+  - adaptive channel polling
+  - CPU sleep
+  - automatic boot (works for two nodes, not stable for more)
+  - unicast only (not stable)
+
+If any of these options is selected, a warning message will be displayed
+during compile time. The option will be either automatically disabled, or
+suggested with a different parameter.

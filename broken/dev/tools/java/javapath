@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+$base = $0;
+$base =~ s/\/javapath$//;
+$base = `cd $base;pwd;`;
+chop $base;
+
+opendir JARS, "$base/jars";
+@add = grep(-f "$_" && /\.jar$/, map "$base/jars/$_", readdir JARS);
+closedir JARS;
+
+unshift @add, $base;
+
+$sys = `uname`;
+if ($sys =~ /^CYGWIN/) {
+    @add = map { $f = `cygpath -w $_`; chop $f; $f; } @add;
+    $sep = ";";
+}
+else {
+    $sep = ":";
+}
+
+$oldpath = $ENV{"CLASSPATH"};
+$addpath = join($sep, @add);
+
+if ($oldpath) {
+    print "$addpath:$oldpath\n";
+}
+else {
+    print "$addpath\n";
+}
+

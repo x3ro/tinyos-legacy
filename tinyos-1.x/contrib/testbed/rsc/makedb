@@ -1,0 +1,33 @@
+#!/bin/bash
+## Written by Terence Tong
+## To Initialise RSC Database
+
+## start share memory support
+
+if [ "$HOME" == "" ];
+then
+  echo "Define your HOME directory. Damn it! Don't make me yell at you again"
+fi
+
+IPC_RUNNING=`ps | grep 'ipc-daemon2'`
+if [ -z "$IPC_RUNNING" ]; then
+  ipc-daemon2 &
+fi
+
+# delete old crap
+PGDATA_PATH=$HOME/pgdata
+if [ -d $PGDATA_PATH ]; then
+  rm -rf $PGDATA_PATH
+fi
+
+# call postgresql script to initialise database
+initdb -W -D $PGDATA_PATH 2> /dev/null
+
+# postgresql starting up
+./startdb
+
+# write sometable
+createdb rsc
+
+
+

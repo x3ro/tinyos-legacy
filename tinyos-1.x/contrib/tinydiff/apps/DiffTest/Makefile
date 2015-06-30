@@ -1,0 +1,5 @@
+COMPONENT=DiffTest
+
+CFLAGS+=-DENABLE_GRADIENT_OVERRIDE
+
+include ../Makerules

@@ -1,0 +1,19 @@
+--- build/TuplePublisherM.nc	2003-02-06 15:59:16.000000000 -0800
++++ TuplePublisherM.nc	2003-01-24 11:54:45.000000000 -0800
+@@ -5,8 +5,10 @@
+ // ***                                                                     ***
+ // *** WARNING ****** WARNING ****** WARNING ****** WARNING ****** WARNING ***
+ 
++//!! Config 3 { uint8_t tuple_mag_retries = 0; }
++
+ includes cqueue;
+ includes SchemaType;
+ includes Command;
+ includes NestArch;
+
+@@ -285,4 +302,5 @@
+         if( (msgdata = initRoutingMsg( &m_msg, sizeof(MagHood_t) )) == 0 )
+ 	  return;
+ 	*(MagHood_t*)msgdata = nn->mag;
++	m_msg.ext.retries = G_Config.tuple_mag_retries;
+ 	break;

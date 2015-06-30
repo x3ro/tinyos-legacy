@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exe4j version="2.2">
+  <directoryPresets config="C:/tinyos/cygwin/opt/tinyos-1.x/contrib/xbow/tools/java/net/tinyos" />
+  <application name="XbowSurge" distributionSourceDir="C:/tinyos/cygwin/opt/tinyos-1.x/contrib/xbow/tools/java/net/tinyos/surge" />
+  <executable name="XbowSurge" type="2" iconSet="false" iconFile="" executableDir="." redirectStderr="false" stderrFile="error.log" redirectStdout="false" stdoutFile="output.log" failOnStderrOutput="true" executableMode="2" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" jreLocation="" jreUncompressedSize="0">
+    <messageSet language="English" />
+    <versionInfo include="false" fileVersion="" companyName="" fileDescription="" legalCopyright="" productVersion="" internalName="" />
+  </executable>
+  <splashScreen show="false" autoOff="false" alwaysOnTop="false" width="550" height="400" bitmapFile="C:/tinyos/cygwin/opt/tinyos-1.x/contrib/xbow/tools/java/net/tinyos/surge/images/Splash.jpg">
+    <text>
+      <statusLine x="20" y="20" text="" font="Arial" fontSize="8" fontColor="0,0,0" fontWeight="500" />
+      <versionLine x="20" y="40" text="version %VERSION%" font="Arial" fontSize="8" fontColor="0,0,0" fontWeight="500" />
+    </text>
+  </splashScreen>
+  <java mainClass="net.tinyos.surge.MainClass" vmParameters="" arguments="" allowVMPassthroughParameters="true" minVersion="1.4" maxVersion="" preferredVM="">
+    <searchSequence>
+      <registry />
+      <envVar name="JAVA_HOME" />
+      <envVar name="JDK_HOME" />
+    </searchSequence>
+    <classPath>
+      <archive location="./XbowSurge.jar" failOnError="true" />
+    </classPath>
+    <nativeLibraryDirectories />
+  </java>
+  <includedFiles />
+</exe4j>
+

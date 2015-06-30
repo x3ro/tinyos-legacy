@@ -1,0 +1,233 @@
+options {
+    STATIC = false;
+}
+
+PARSER_BEGIN(DescParser)
+package net.tinyos.descparser;
+
+import java.util.*;
+
+public class DescParser {
+
+    public static class Pinout {
+        private String module, name;
+
+        public Pinout(String module, String name) {
+            this.module = module;
+            this.name = name;
+        }
+
+        public String getModule() {
+            return module;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String toString() {
+            return module + ":" + name;
+        }
+    }
+
+    public static class Description {
+        private Vector modules, connections;
+
+        public Description(Vector modules, Vector connections) {
+            this.modules = modules;
+            this.connections = connections;
+        }
+
+        public Vector getModules() {
+            return modules;
+        }
+
+        public Vector getConnections() {
+            return connections;
+        }
+
+        public String toString() {
+            String s = "MODULES:\n";
+
+            Iterator iter;
+
+            iter = modules.iterator();
+            while (iter.hasNext()) {
+                String module = (String)iter.next();
+                s += "\t" + module + "\n";
+            }
+
+            s += "\nCONNECTIONS:\n";
+
+            iter = connections.iterator();
+            while (iter.hasNext()) {
+                Pinout conn = (Pinout)iter.next();
+                s += "\t" + conn + "\n";
+            }
+
+            return s;
+        }
+    }
+
+    public static void main(String args[]) {
+        DescParser parser;
+
+        if(args.length == 0){
+            System.out.println("Desc Parser Version 0.1Alpha:  Reading from standard input . . .");
+            parser = new DescParser(System.in);
+        }
+        else if(args.length == 1){
+            System.out.println("Desc Parser Version 0.1Alpha:  Reading from file " + args[0] + " . . ." );
+            try {
+                parser = new DescParser(new java.io.FileInputStream(args[0]));
+            }
+            catch(java.io.FileNotFoundException e){
+                System.out.println("Desc Parser Version 0.1:  File " + args[0] + " not found.");
+                return ;
+            }
+        }
+        else {
+            System.out.println("Desc Parser Version 0.1Alpha:  Usage is one of:");
+            System.out.println("         java DescParser < inputfile");
+            System.out.println("OR");
+            System.out.println("         java DescParser inputfile");
+            return ;
+        }
+        try {
+            parser.File();
+            System.out.println("Desc Parser Version 0.1Alpha:  Java program parsed successfully.");
+        }
+        catch(Exception e){
+            System.out.println("Desc Parser Version 0.1Alpha:  Encountered errors during parse.");
+            e.printStackTrace();
+        }
+    }
+}
+
+PARSER_END(DescParser)
+
+SKIP : {
+" "
+| "\t"
+| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+| <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+TOKEN : {
+<INCLUDE: "include">
+| <MODULES: "modules">
+| <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+| <#LETTER: ["$","A"-"Z","_","a"-"z"]>
+| <#DIGIT: ["0"-"9"]>
+}
+
+TOKEN : {
+<EOL: ("\n" | "\r" | "\r\n")>
+}
+
+Description File() : 
+{
+    Vector modules = null, connectionList = null, connections = null;
+}
+{
+    {
+        connections = new Vector();
+    }
+
+    ( LOOKAHEAD(2) <EOL> )*
+    [ modules=IncludeDecl() ]
+    ( <EOL>
+    | connectionList=ConnectionList()
+        {
+            connections.add(connectionList);
+        }
+    )*
+    {
+        return new Description(modules, connections);
+    }
+}
+
+Vector IncludeDecl() :
+{
+    Vector incList = null;
+}
+{
+    <INCLUDE> (<EOL>)? <MODULES> (<EOL>)? "{"  (LOOKAHEAD(2)<EOL>)?
+        [ incList=IncludeList() ]
+    (<EOL>)? "}" (<EOL>)? ";" (LOOKAHEAD(2)<EOL>)?
+    {
+        return incList;
+    }
+}
+
+Vector IncludeList() :
+{
+    String module;
+    Vector incList;
+}
+{
+    {
+        incList = new Vector();
+    }
+    (module=Module()
+        {
+            incList.add(module);
+        }
+    )+
+    {
+        return incList;
+    }
+}
+
+String Module() :
+{
+    Token t;
+}
+{
+    t=<IDENTIFIER> ";" (LOOKAHEAD(2)<EOL>)?
+    {
+        return t.image;
+    }
+}
+
+Vector ConnectionList() :
+{
+    Pinout po;
+    Vector connList;
+}
+{
+    {
+        connList = new Vector();
+    }
+    (LOOKAHEAD(4) po=Connection()
+        {
+            connList.add(po);
+        }
+    )+ 
+    ( <EOL> | <EOF> )
+    {
+        return connList;
+    }
+}
+
+Pinout Connection() :
+{
+    Token module, pin;
+}
+{
+    module=<IDENTIFIER> ":" pin=<IDENTIFIER>
+    {
+        return new Pinout(module.image, pin.image);
+    }
+}
+
+Pinout ConnectionEnd() :
+{
+    Token module, pin;
+}
+{
+    module=<IDENTIFIER> ":" pin=<IDENTIFIER> ( <EOL> | <EOF> )
+    {
+        return new Pinout(module.image, pin.image);
+    }
+}

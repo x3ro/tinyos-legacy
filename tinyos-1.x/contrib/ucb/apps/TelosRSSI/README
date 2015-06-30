@@ -1,0 +1,12 @@
+This code allows you to collect RSSI and LQI readings from a number of nodes in a batch fashion.
+
+This code is basically a version of ../ChipconRSSI ported to the CC2420 with the telos mote.
+
+Install the code on a number teloses nodes with increasing node numbers, e.g. 1-16.
+
+Then, make sure you have a generic base on your serial port.  you will probably have to use the "-baud 57600" option with your serialForward program.
+
+Finally, run the tools/matlab/contrib/kamin/chipconRSSI.m matlab application as described in the README there.  
+
+Instead of collecting your own data, you could just use the data and analysis also in that contrib/kamin directory.
+

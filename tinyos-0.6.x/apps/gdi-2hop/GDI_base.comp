@@ -1,0 +1,23 @@
+TOS_MODULE GDI_base;
+
+ACCEPTS{
+    char GDI_INIT(void);
+    char GDI_START(void);
+};
+
+HANDLES{
+    char GDI_SEND_DONE(TOS_MsgPtr msg);
+    TOS_MsgPtr GDI_UPDATE_MSG(TOS_MsgPtr data);
+    TOS_MsgPtr GDI_TIMESYNC_SEND_MSG(TOS_MsgPtr data);
+    TOS_MsgPtr GDI_TIMESYNC_RECV_MSG(TOS_MsgPtr data);
+    void GDI_CLOCK_EVENT();
+};
+
+USES{
+    void GDI_SUB_SET_POT_POWER(char val);
+    char GDI_SUB_SEND_MSG(short addr, char type, TOS_MsgPtr msg);
+    char GDI_CLOCK_INIT(char interval, char scale);
+};
+
+SIGNALS{
+};

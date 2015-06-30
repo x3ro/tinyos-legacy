@@ -1,0 +1,3 @@
+#!/bin/sh
+DBG=route build/pc/main.exe -r=lossy $* -rf=./lossy.nss 5
+#eof

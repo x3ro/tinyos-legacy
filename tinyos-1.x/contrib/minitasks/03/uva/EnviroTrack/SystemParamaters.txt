@@ -1,0 +1,31 @@
+
+  MAX_GROUPS = 3
+40 G_Config.UVA_MaxGroups
+  
+  DEFAULT_GridX = 5
+41 G_Config.UVA_GridX
+
+  DEFAULT_GridY
+42 G_Config.UVA_GridY
+
+  DEFAULT_SENSE_CNT_THRESHOLD
+43 G_Config.UVA_SenseCntThreshold
+
+  DEFAULT_SEND_CNT_THRESHOLD
+44 G_Config.UVA_SendCntThreshold
+
+  DEFAULT_MagThreshold
+45 G_Config.UVA_Magthreshold
+
+  DEFAULT_RECRUIT_THRESHOLD
+46 G_Config.UVA_RecruitThreshold
+
+  DEFAULT_EVENTS_BEFORE_SENDING
+47 G_Config.UVA_EventsBeforeSending
+
+  DEFAULT_BEACON_INCLUDED
+48 G_Config.UVA_BeaconIncluded
+
+  DEFAULT_SENSOR_DISTANCE
+49 G_Config.UVA_SensorDistance
+

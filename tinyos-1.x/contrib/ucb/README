@@ -1,0 +1,3 @@
+This directory is for files developed at Berkeley, but which are not a core
+part of TinyOS. The structure of this directory mirrors that of the main
+distribution (with tools, tos and apps subdirectories).

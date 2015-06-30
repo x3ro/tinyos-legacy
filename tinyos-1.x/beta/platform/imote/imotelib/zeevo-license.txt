@@ -1,0 +1,64 @@
+LICENSE TERMS FOR ZEEVO SOFTWARE
+
+The license terms described herein apply to your use of the Zeevo software 
+identified below (the "Zeevo Software").  Your use of the Zeevo Software 
+indicates your agreement to these terms. If you do not agree to these terms, 
+you may not use the Zeevo Software.
+
+The Zeevo Software is licensed for use only in connection with Zeevo's TC2001 
+and/or ZV4002 integrated circuits (the "Zeevo Chips"). You may not distribute 
+copies of the Zeevo Software except as authorized in writing by Zeevo Inc. 
+<http://www.zeevo.com>. You may not modify or otherwise create derivative works 
+of the Zeevo Software, except in connection with compiling code.  You may not 
+reverse engineer any Zeevo Software delivered in object code or executable form.
+  
+This license is granted to you by Intel Corporation, in accordance with an 
+agreement between Intel and Zeevo.  Zeevo, Inc. is a third party beneficiary 
+of this agreement.
+
+THE ZEEVO SOFTWARE IS PROVIDED "AS IS." INTEL AND ZEEVO EACH DISCLAIM ANY AND 
+ALL WARRANTIES AND GUARANTEES, EXPRESS, IMPLIED OR OTHERWISE, INCLUDING BUT 
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, NONINFRINGEMENT, OR FITNESS 
+FOR A PARTICULAR PURPOSE.  Neither Intel or Zeevo warrants or assumes 
+responsibility for the accuracy or completeness of any information, text, 
+graphics, links or other items contained within the Zeevo Software.  You 
+assume all liability, financial or otherwise, associated with the use, 
+distribution or other disposition of the Zeevo Software.
+
+This license constitutes the entire agreement between you and Intel concerning 
+the Zeevo Software.  Any addition or modification to these terms must be in a 
+written agreement signed by both parties.  This license agreement will be 
+governed by Delaware law.  If you are an individual acting on behalf of a 
+company or other business entity, you represent that you have the authority to 
+bind such entity to these terms, and this agreement is binding upon such entity.
+
+The Zeevo Software includes the following files:
+
+\tinyos-1.x\beta\platform\imote\imotelib\AppDynamicConfig.h
+\tinyos-1.x\beta\platform\imote\imotelib\AppDynamicScript.sp
+\tinyos-1.x\beta\platform\imote\imotelib\ArmStub.o
+\tinyos-1.x\beta\platform\imote\imotelib\ArmStublib.a
+\tinyos-1.x\beta\platform\imote\imotelib\BP_BufferSramVar.o
+\tinyos-1.x\beta\platform\imote\imotelib\BP_DummyXramVar.o
+\tinyos-1.x\beta\platform\imote\imotelib\Dfu_JumpTbl.sym
+\tinyos-1.x\beta\platform\imote\imotelib\DynamicScriptConverter.exe
+\tinyos-1.x\beta\platform\imote\imotelib\GCCStub.o
+\tinyos-1.x\beta\platform\imote\imotelib\PreV3FlashManager_115200
+\tinyos-1.x\beta\platform\imote\imotelib\PreV3FlashManager_921600
+\tinyos-1.x\beta\platform\imote\imotelib\RM_Rom1.sym
+\tinyos-1.x\beta\platform\imote\imotelib\RM_Rom2.sym
+\tinyos-1.x\beta\platform\imote\imotelib\SU_FlashBoot.o
+\tinyos-1.x\beta\platform\imote\imotelib\SU_PatchVects.sym
+\tinyos-1.x\beta\platform\imote\imotelib\ScatterFile.txt
+\tinyos-1.x\beta\platform\imote\imotelib\TOSStub.c
+\tinyos-1.x\beta\platform\imote\imotelib\TOSUart.o
+\tinyos-1.x\beta\platform\imote\imotelib\TOSlib.a
+\tinyos-1.x\beta\platform\imote\imotelib\UartFlashManager
+\tinyos-1.x\beta\platform\imote\imotelib\ZV_Exe_Dfu
+\tinyos-1.x\beta\platform\imote\imotelib\ZvDosFlashTool.exe
+\tinyos-1.x\beta\platform\imote\imotelib\ZvDynamicConfig.h
+\tinyos-1.x\beta\platform\imote\imotelib\ZvDynamicScript.sp
+\tinyos-1.x\beta\platform\imote\imotelib\ZvWinFlashTool.exe
+\tinyos-1.x\beta\platform\imote\imotelib\motelib.a
+\tinyos-1.x\beta\platform\imote\imotelib\motelib.h
+

@@ -1,0 +1,99 @@
+README for IvyNet
+Author/Contact: Barbara Hohlt <hohltb@cs.berkeley.edu>
+
+Description:
+
+IvyNet is the configuration file which calls the MultiHop 
+routing component.
+
+Ivy sensor networks separate network functionality from application
+functionality. Ivy network motes route packets and Ivy application
+motes sense data and send messages to Ivy network motes.
+
+This is the code for Ivy network motes. 
+
+NOTE: To run in Nido (TOSSIM), set NidoHack = TRUE  and
+IVY_BASE_STATION_ADDR = 0x00 in IvyNet.h. Nido runs only one program 
+at a time, so this flag allows the network motes to run with one acting as
+a proxy Ivy base station. 
+
+NOTE: To run live on motes, set NidoHack = TRUE  and
+IVY_BASE_STATION_ADDR = 0x42 in IvyNet.h. This allows one mote
+to act as a proxy Ivy base station. Otherwise, the GenericBase component
+would need to be modified. 
+
+
+GEOGRAPHIC INFORMATION
+Most multihop algorithms rely on some kind of geographic information
+like GPS. Ivy network motes only need to know how many hops they
+are from the nearest base station. Modify PowerScheduler.staticHops() 
+to reflect how many hops from the base station Ivy network motes are. 
+
+MultiHop Component:
+1. PowerScheduler 
+	This module listens to advertisements from Ivy network motes
+	and selects a parent. It maintains a schedule of NUM_SLOTS
+	time slots which can be in one of six states (T,TP,R,RP,A,I).
+	Every SLOT_FREQ it changes state and notifies MultiHopSend
+	when there is a TRANSMIT (T) state. 
+	
+	Every cycle (ie NUM_SLOTS) it either advertises new reservations
+	in its schedule for children motes or responds to advertisements
+	from motes closer to the base station.
+
+	Every SYNCH_FREQ:
+	  - re-synchs with parent 
+	  - if it cannot hear its parent it optionally reroutes to a 
+		new parent while preserving its children
+
+	During IDLE time slots it turns the radio off.
+
+2. MultiHopSend
+	This module receives messages from MultiHopRoute and
+	puts them on a queue.  When it is notified by the PowerScheduler 
+	of a TRANSMIT state it sends one message and returns the
+	message buffer to the free list in MultiHopRoute. 
+
+3. MultiHopRoute
+	This module receives messages from GenericComm and 
+	puts them on the transmit queue in MultiHopSend. It
+	maintains a free list of buffers to return to GenericComm. 
+	Upon receipt of a message from an application mote one hop away, 
+	it sets myapp_id and mymote_id to itself in the message.
+	This indicates which Ivy network received the first packet
+	from an application mote. 
+
+	TBD: If a RECEIVE slot is not used after X cycles, then
+	     that RECEIVE slot is recyled.
+		
+4. SlackerQueueM
+	This is a circle buffer queue of type TOS_MsgPtr. It is
+	used by MultiHopSend as a transmit queue and MultiHopRoute
+	as a free list.
+
+Tools: 
+
+net.tinyos.sf.SerialForward
+net.tinyos.tools.ForwarderListen
+
+Known bugs/limitations:
+  1. In PowerScheduler::sendReq()
+
+	TOSH_uwait(REQ_WAIT); 
+
+  this command causes a wait before sending the
+  reservation REQ. This allows the radio receiver 
+  of the destination mote to warm up. This is
+  radio specific. 
+  Make sure REQ_WAIT and SLOT_FREQ are set appropriately.
+
+  2. In PowerScheduler::pickIdleSlot()
+	Make sure the values for BITSHIFT and BITMASK make
+	sense. BITMASK is related to NUM_SLOTS.
+
+  3. TBD: Decrease demand. Coming soon. 
+     Currently, demand only increases and does not decrease.
+     That translates into, if the application motes are mobile
+     their reservations remain after they have moved away 
+     from their parent network mote.
+	

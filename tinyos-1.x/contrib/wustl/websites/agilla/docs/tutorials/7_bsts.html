@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>Lesson 7: Accessing
+
+            the Base station's Tuple Space from the Laptop</h1>
+          <p><em>Last Updated on
+              <!-- #BeginDate format:Am1a -->November 3, 2005 4:23 PM<!-- #EndDate -->
+.</em></p>
+          <p>The laptop runs a Java application called AgentInjector that provides
+            a TupleSpace object. This object serves two purposes: 1) it serves
+            as a local tuple space on the laptop, and 2) it allows an application
+            to perform operations on tuple spaces belonging to
+            nodes within
+            the sensor network.</p>
+          <p>The tuple space object is obtained by calling &quot;injector.getTS()&quot;
+            from within AgentInjector. The tuple space provides the following
+            operations that operate on the local tuple space:</p>
+          <ol>
+            <li>out(Tuple t) </li>
+            <li>inp(Tuple t) </li>
+            <li>rdp(Tuple t)</li>
+            <li>in(Tuple template)</li>
+            <li>rd(Tuple template)</li>
+</ol>
+          <p>These local operations have the same semantics as those within a
+            mote's tuple space, as described <a href="tutorials/local_ts.htm">here</a>.</p>
+          <p>The tuple space also provides the following remote tuple space operations:</p>
+          <ol>
+            <li>rout(Tuple t, AgillaLocation dest)</li>
+            <li>rinp(Tuple template, AgillaLocation dest)</li>
+            <li>rrdp(Tuple template, AgillaLocation dest)</li>
+</ol>
+          <p>These remote tuple space operations have the same semantics as those
+            within a mote's tuple space, as described <a href="remote_ts.htm">here</a>.</p>
+          <p>&nbsp;</p>
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

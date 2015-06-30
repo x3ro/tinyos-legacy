@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Agilla</title>
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+<!-- InstanceBeginEditable name="MainText" -->
+<h1>Lesson 10: Adding Custom Instructions to Agilla</h1>
+<p><em>Last Updated on
+      <!-- #BeginDate format:Am1a -->May 16, 2006 9:03 PM<!-- #EndDate -->
+  .</em></p>
+<p>Adding new instructions to Agilla is easy. This tutorial describes
+  the process.</p>
+<p>For this example, we will create a new instruction, <code>findmatch</code>, that takes
+  a variable as a parameter, and searches through the heap to find an equivalent
+  variable. If it finds a match, it stores the index on the opstack and sets
+  the condition code equal to 1, otherwise it sets the condition code equal to
+  1.</p>
+<h2>Adding the Instruction to the Firmware</h2>
+<p>The built-in Agilla instructions are located in <code>&lt;agilla&gt;/opcodes</code>. All
+  instructions must provide interface BytecodeI, which is located in <code>&lt;agilla&gt;/interfaces/BytecodeI.nc</code>.
+  ByteCodeI defines a single command:</p>
+<pre class="screen">command result_t execute(uint8_t instr, AgillaAgentContext* context);</pre>
+<p>This command is called when the instruction is executed.
+  It is passed the instruction's byte code to allow a single component to implement
+  multiple instructions. It is also passed the context of the agent that executed
+  the instruction. </p>
+<p>Usually, an instruction is implemented using a configuration and a  module.
+    Here is the implementation of findmatch:</p>
+<p><a href="OPfindMatch.nc">Configuration</a>:</p>
+<pre class="screen">configuration OPfindMatch{<br>  provides interface BytecodeI;<br>}<br>implementation {<br>  components OPfindMatchM, OpStackC, TupleUtilC, ErrorMgrProxy;  <br>  BytecodeI = OPfindMatchM;  <br>  OPfindMatchM.OpStackI -&gt; OpStackC;<br>  OPfindMatchM.TupleUtilI -&gt; TupleUtilC;<br>  OPfindMatchM.Error -&gt; ErrorMgrProxy;  <br>}</pre>
+<p><a href="OPfindMatchM.nc">Module</a>:</p>
+<pre class="screen">includes Agilla;
+
+/**
+ * Searches through the heap to find the index of a matching variable.
+ */
+module OPfindMatchM {
+  provides interface BytecodeI;
+  uses {
+    interface OpStackI;
+    interface TupleUtilI;   // For comparing variables
+    interface ErrorMgrI as Error;
+  }
+}
+implementation {
+
+  command result_t BytecodeI.execute(uint8_t instr, 
+  	AgillaAgentContext* context) 
+  {
+    AgillaVariable arg; // the variable to search for    
+    dbg(DBG_USR1, "VM (%i:%i): Executing findMatch\n", 
+		context->id.id, context->pc-1);
+    if (call OpStackI.popOperand(context, &arg)) 
+    {
+      int16_t i;
+      for (i = 0; i < AGILLA_HEAP_SIZE; i++) 
+      {
+        if (context->heap.pos[i].vtype != AGILLA_TYPE_INVALID)
+        {
+          if (call TupleUtilI.fEquals(&arg, &context->heap.pos[i]))
+          {
+            call OpStackI.pushValue(context, i); // save index on stack
+            context->condition = 1; // indicate match found
+            return SUCCESS;
+          }
+        }
+        
+      }
+      context->condition = 0; // indicate no match found
+      return SUCCESS;
+    } else
+    return FAIL;    
+  }
+}</pre>
+
+<p>Next choose a bytecode for your instruction.  Open &lt;Agilla&gt;/AgillaOpcodes.h.
+  This file contains enumerations of all instructions in Agilla. The main enumeration
+  is BasicInstruction. These are the primary instructions in Agilla that are
+  listed
+    <a href="../../isa.html">here</a>. Since all of the bytecodes in the Basic
+    instruction set are used, Agilla provides 13 extended instruction sets, each
+    of which can
+  contain an additional 256 instructions. In this case, we will assign findmatch
+  bytecode 0x1c within enumeration ExtendedISA1.</p>
+<pre class="screen">typedef enum {
+	...
+	IOPfindMatch = 0x1c,
+	...
+} ExtendedISA1;</pre>
+
+<p>Now open &lt;Agilla&gt;/Agilla.nc and wire the opcode to  AgillaEngineC.</p>
+
+<pre class="screen">implementation {
+	...
+	components OPfindMatch;
+	...
+	AgillaEngineC.ExtendedISA1[IOPfindMatch] -&gt; OPfindMatch;
+	...
+}</pre>
+
+<p>You now have to recompile and install the Agilla firmware on the motes.
+  
+</p>
+<h2>Adding the instruction to the Agilla Assembler (Java)</h2>
+<p>The final step is to modify the AgentInjector to recognize the new instruction.
+  Go into edu.wustl.mobilab.agilla.opcodes and open the opcode class that the
+  new instruction is part of (in this case ExtendedOpcodes1.java). Add the following
+  line to it:</p>
+<pre class="screen">public static final short OPfindMatch = 0x1c;</pre>
+
+<p>This specifies the instruction and its opcode to the Agilla assembler.  </p>
+<p>If the instruction contains embedded operands, you need to specify the number
+  operands and the number of bits dedicated
+  to it using:</p>
+  
+<pre class="screen">public static final int ArgNumOP&lt;opcode&gt; = &lt;num operands&gt;;
+public static final int ArgNumOP&lt;opcode&gt; = &lt;num bits&gt;; </pre>
+<p>Sometimes instructions have predefined arguments. For example, you can <code>pushc
+  photo</code>. To specify this, create a two-dimensional array where each row
+  contains the argument and its corresponding value. For example, the specification
+  for pushc is as follows:</p>
+  
+<pre class="screen">	public static final String[][] ArgValOPpushc = new String[][] {
+		{"temperature", "1"},
+		{"temp", "1"},
+		{"photo", "2"},
+		{"mic", "3"},
+		{"microphone", "3"},
+		{"magx", "4"},
+		{"magnetometerx", "4"},
+		{"magy", "5"},
+		{"magnetometery", "5"},
+		{"accelx", "6"},
+		{"accelerometerx", "6"},
+		{"accely", "7"},
+		{"accelerometery", "7"},
+		
+		// the following are for changing an agent's description
+		{"unknown", "3"},
+		{"unspecified","0"},
+		{"cargo","1"},
+		{"fire","2"}
+	};</pre>
+<p>&nbsp;</p>
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

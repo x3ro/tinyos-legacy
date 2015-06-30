@@ -1,0 +1,97 @@
+#!/usr/bin/perl -w
+
+# Hack to set the mote id based on information from a map file, it is
+# hacked into a .s19 file
+
+# Set up default paths.
+$basepath = "build/evb13192/app.";
+$mapfile = $basepath."map";
+$sin = $basepath."s19";
+$sout = $sin.".";
+
+
+# Check arguments
+$id = shift(@ARGV);
+if (!defined $id || $id eq "") {
+    print STDERR "Usage: $0 <id>\n";
+    print STDERR "Note: <id> must be >=0 and <=255\n";
+    exit -1;
+}
+$sout .= $id;
+
+# Locate TOS_LOCAL_ADDRESS in map file
+open(MAP, "<$mapfile") || die "Could not open $mapfile";
+$lastread = "";
+$tos_local_address = "";
+while(<MAP>) {
+    if (m/Name of initialized Object : TOS_LOCAL_ADDRESS/) {
+	if ($lastread =~ m/ROM-ADDRESS: 0x([0-9A-Fa-f]{4})/) {
+	    #print "Got TOS_LOCAL_ADDRESS at 0x$1\n";
+	    $tos_local_address = $1;
+	    last;
+	} else {
+	    print STDERR "TOS_LOCAL_ADDRESS present, but no ROM-ADDRESS\n";
+	    exit -1;
+	}
+    }
+    $lastread = $_;
+}
+close(MAP);
+
+# Check that TOS_LOCAL_ADDRESS was found
+if ("" eq $tos_local_address) {
+    print STDERR "Unable to locate TOS_LOCAL_ADDRESS\n";
+    exit -1;
+}
+$tos_local_address = hex($tos_local_address);
+
+# Update an S19 file, based on this.
+open(SIN, "<$sin") || die "Could not open $sin";
+open(SOUT, ">$sout") || die "Could not open $sout";
+$address = 0;
+$mychk = 0;
+while(<SIN>) {
+    if (m/S1([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})(.+)([0-9A-Fa-f]{2})/) {
+	# print "Found address ".$2.$3." with ".hex($1)." records\n";
+	# Check if the TOS_LOCAL_ADDRESS is in range here.
+	# Note, we substract 3 from the number of bytes, because
+	# s19 counts the address field and chksum too!
+	if (hex($2.$3) <= $tos_local_address 
+	    && $tos_local_address < hex($2.$3) + hex($1) - 3) {
+	    # printf "Updating in %s to (not inclusive) %X\n", $2.$3, hex($2.$3) + hex($1) - 3;
+	    # Gotta change it.
+	    $address_h = hex($2);
+	    $address_l = hex($3);
+	    $address = hex($2.$3);
+	    $size = $1;
+	    $bytes = $4;
+	    # print "Bytes: $bytes\n";
+	    #$chksum = $5;
+	    $mychk = hex($size) + $address_h +$address_l;
+	    @chars = split //, $bytes;
+	    print SOUT "S1$size$2$3"; 
+	    while(@chars) {
+		$high = shift(@chars);
+		$low = shift(@chars);
+		if ($address == $tos_local_address) {
+		    $byte = sprintf("%02X", $id);
+		} else {
+		    $byte = $high.$low;
+		}
+		# print "$address = $byte\n";
+		print SOUT $byte;
+		$mychk += hex($byte);
+		$address++;
+	    }
+	    printf SOUT "%02X\n", 255-(0xFF & $mychk);
+	} else {
+	    # Not the line with TOS_LOCAL_ADDRESS
+	    print SOUT $_;
+	}
+    } else {
+	# Not S1 record.
+	print SOUT $_;
+    }
+}
+close(SIN);
+close(SOUT);

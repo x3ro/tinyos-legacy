@@ -1,0 +1,5 @@
+#!/bin/sh
+if test $OSTYPE = "cygwin"; then \
+echo "Cygwin!"; \
+else echo "Linux";
+fi

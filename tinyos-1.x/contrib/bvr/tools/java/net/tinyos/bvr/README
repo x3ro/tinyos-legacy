@@ -1,0 +1,3 @@
+To generate the java classes corresponding to the message types in BVR, run tools/util/mig_create_messages.pl
+
+

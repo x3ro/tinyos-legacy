@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# handle symbolic links
+SCRIPT=$0
+if [ -L "$SCRIPT" ]; then
+	SCRIPT=`/bin/ls -l $SCRIPT | sed 's/.*-> //'`
+fi
+
+BASE="${SCRIPT%/*}"
+
+which cygpath 2>/dev/null >/dev/null && BASE="`cygpath -m "$BASE"`"
+
+java -Dpython.cachedir=/tmp/jython.cache -DDBG=$DBG -DSIMDBG=$SIMDBG \
+	net.tinyos.sim.TinyViz "$@"
+

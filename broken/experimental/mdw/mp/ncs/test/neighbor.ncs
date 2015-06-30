@@ -1,0 +1,27 @@
+extern void dbg();
+extern blocking void getadc();
+
+mirrored onehop int readings[];
+
+void init() {
+  dbg(DBG_USR1, "init() called\n");
+}
+
+void start() {
+  dbg(DBG_USR1, "start() called\n");
+}
+
+void stop() {
+  dbg(DBG_USR1, "stop() called\n");
+}
+
+periodic(1000) {
+  uint16_t my_value, other_value;
+
+  my_value = getadc();
+  dbg(DBG_USR1, "my reading is %d\n", my_value);
+
+  other_value = readings[3];
+  dbg(DBG_USR1, "other reading is %d\n", other_value);
+
+}

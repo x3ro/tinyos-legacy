@@ -1,0 +1,16 @@
+#!/usr/bin/perl
+use strict;
+
+my $tmpfile = "/tmp/mk_amdisp.$$";
+my $mapfile = shift;
+my $include = join(' ', @ARGV);
+
+#print (STDERR "cpp $include $mapfile 2>/dev/null | grep ^AM_ | grep -v NULL_FUNC > $tmpfile");
+system("cpp $include $mapfile 2>/dev/null | grep ^AM_ | grep -v NULL_FUNC > $tmpfile");
+open(FILE, "$tmpfile") or die "file not found";
+while(<FILE>){
+    /\w+\s+(\w+)\s+(\d+)/;
+    print "#define ". $1 . "__AM_DISPATCH " . $2 . "\n";
+}
+unlink($tmpfile);
+exit(0);

@@ -1,0 +1,30 @@
+# -*- makefile -*-
+TARGET ?= docs
+
+all:    $(TARGET)
+
+
+docs:   $(DOCCONF) $(DOCUMENTS)
+        $(DOXYGEN) $(DOCCONF)
+#        cp doc/design.html doc/html
+#        cp doc/style.html doc/html
+#        cp doc/todo.html doc/html
+        @echo HTML documentation generated in doc/html
+
+# This rule isn't every effective: Doxygen always scans all the files
+# whether a source file has changed or not.
+#%.doc: %.cc
+#       @echo $< has changed, and $@ has not been updated.
+#       @echo Run 'make docs' to re-build documentation
+
+%.doc:
+
+# Make a Doxygen template if there isn't one already.
+$(DOCCONF):
+        $(DOXYGEN) -g $@
+
+
+# Get rid of binaries
+clean:  tidy
+	rm -rf html
+

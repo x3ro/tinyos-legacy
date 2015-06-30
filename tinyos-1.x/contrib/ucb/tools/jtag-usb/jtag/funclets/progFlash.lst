@@ -1,0 +1,54 @@
+
+progFlash.elf:     file format elf32-msp430
+
+Disassembly of section .text:
+
+00000200 <start>:
+ 200:	00 02       	.word	0x0200;	????
+ 202:	0c 02       	.word	0x020c;	????
+ 204:	68 02       	.word	0x0268;	????
+
+00000206 <srinit>:
+	...
+
+00000208 <addr>:
+	...
+
+0000020a <length>:
+	...
+
+0000020c <main>:
+ 20c:	b2 40 80 5a 	mov	#23168,	&0x0120	;#0x5a80
+ 210:	20 01 
+ 212:	32 c2       	dint			
+ 214:	12 40 f0 ff 	mov	0xfff0,	r2	;PC rel. 0x0206
+ 218:	b2 43 72 01 	mov	#-1,	&0x0172	;r3 As==11
+ 21c:	b2 40 41 a5 	mov	#-23231,&0x012a	;#0xa541
+ 220:	2a 01 
+ 222:	b2 40 00 a5 	mov	#-23296,&0x012c	;#0xa500
+ 226:	2c 01 
+ 228:	19 40 de ff 	mov	0xffde,	r9	;PC rel. 0x0208
+ 22c:	18 40 dc ff 	mov	0xffdc,	r8	;PC rel. 0x020a
+ 230:	3a 40 6a 02 	mov	#618,	r10	;#0x026a
+ 234:	a9 9a 00 00 	cmp	@r10,	0(r9)	;
+ 238:	11 24       	jz	$+36     	;abs 0x25c
+ 23a:	b2 40 40 a5 	mov	#-23232,&0x0128	;#0xa540
+ 23e:	28 01 
+ 240:	a9 4a 00 00 	mov	@r10,	0(r9)	;
+ 244:	92 b3 2c 01 	bit	#1,	&0x012c	;r3 As==01
+ 248:	fd 23       	jnz	$-4      	;abs 0x244
+ 24a:	b2 40 00 a5 	mov	#-23296,&0x0128	;#0xa500
+ 24e:	28 01 
+ 250:	b2 40 00 a5 	mov	#-23296,&0x012c	;#0xa500
+ 254:	2c 01 
+ 256:	a9 9a 00 00 	cmp	@r10,	0(r9)	;
+ 25a:	06 20       	jnz	$+14     	;abs 0x268
+ 25c:	2a 53       	incd	r10		;
+ 25e:	29 53       	incd	r9		;
+ 260:	18 83       	dec	r8		;
+ 262:	e8 23       	jnz	$-46     	;abs 0x234
+ 264:	82 43 72 01 	mov	#0,	&0x0172	;r3 As==00
+
+00000268 <stop>:
+ 268:	ff 3f       	jmp	$+0      	;abs 0x268
+Disassembly of section .data:

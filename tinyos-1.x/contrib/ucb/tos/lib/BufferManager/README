@@ -1,0 +1,64 @@
+README for BufferManager 
+Author/Contact: hohltb@cs.berkeley.edu 
+Project: FPS
+
+Description:
+The Buffer Manager is a facility developed for the FPS Project and has been
+in use since January 2003. Because of its general applicability for TinyOS we
+have included a generic version in this directory.  
+
+The Buffer Manager is used by the network, application, and the FPS power 
+scheduling components. It consists of a global buffer cache (BufferPool)
+partitioned into multiple free lists and a forwarding queue (QueuedASend). 
+(The FPS version supports multiple queues which we explain below.)
+
+Each element (or buffer) of a free list or queue is a TinyOS message of type 
+TOS_Msg. The size of each free list and queue is configurable and set at 
+compile time. Thus all message buffers are preallocated at compile time and 
+managed by the Buffer Manager at runtime.
+
+The buffers of each free list are reserved for their respective components (or 
+layers) and may share the use of queues. SwapList and FreeAList are the
+free lists for the network and application components respectively, and the
+SendQueue is shared by both network and application components.  Once a buffer 
+on a queue has been consumed, the Buffer Manager returns it to its respective 
+free list.
+
+QueuedASend provides the AllocSend interface. AllocSend replaces the Send 
+interface. It defines a method, allocBuffer(), which returns a
+free buffer from FreeAList. After the message has been sent, the buffer is
+returned to FreeAList and sendDone() is signalled.  
+
+To use this facility wire BufferManager/QueuedASend in place of lib/QueuedSend
+in your multihop routing configuration file.  
+
+Using the SwapList requires adding the calls below to the MultiHopEngineM file.
+	1. ReceiveMsg.receive(...) ...
+	      rbuf = call FreeList.dequeue();
+
+	2. SendMsg.sendDone(...) ...
+	      call FreeList.enqueue(rbuf);
+
+See example code in QueuedASend/templates and apps/TestQASend.
+ 
+
+More on FPS:
+FPS uses two additional queues. The CmdQueue is used by the network component 
+as a forwarding queue to disseminate commands and queries. The ProcessQueue is 
+used by the FPS power scheduling component as a dispatcher and allows the
+power scheduler to easily handle multiple requests. 
+
+For more information on FPS Buffer Management and queuing see Chapters 8 & 9 of my dissertation ==>
+	http://www.cs.berkeley.edu/~hohltb/disser 
+
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:
+../../../apps/TestQASend

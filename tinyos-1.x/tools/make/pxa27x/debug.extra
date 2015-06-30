@@ -1,0 +1,6 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: debug.extra,v 1.2 2007/03/05 01:06:30 lnachman Exp $
+
+#OPTFLAGS = -O1 -g -fnesc-no-inline
+OPTFLAGS = -g -fnesc-no-inline
+

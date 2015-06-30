@@ -1,0 +1,14 @@
+Allows a user with a laptop connected to a SN base station to tell motes to toggle their LEDS.   This program does not save the LED status in non-volatile memory.
+
+To run:
+- Install ControlLEDs on one or more mica2 motes.
+- Install TOSBase on a mica2 on the programming board.  
+- Run java program SerialForwarder:
+    $java net.tinyos.sf.SerialForwarder -comm serial@COM1:mica2 &
+- Run java program ControlLEDs:
+    $java ControlLEDs <group id>
+
+ControlLEDs will display three buttons for toggling the three LEDs.
+
+If you are using the NMRD d-sys 25mm mote, be sure to use a baud rate of 19200, 
+e.g., $java net.tinyos.sf.SerialForwarder -comm serial@COM1:19200 &

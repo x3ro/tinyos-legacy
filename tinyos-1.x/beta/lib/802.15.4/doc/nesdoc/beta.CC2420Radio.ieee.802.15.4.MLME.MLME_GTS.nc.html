@@ -1,0 +1,114 @@
+
+<html>
+<head>
+<title>Interface: MLME_GTS</title>
+</head>
+<body>
+<table BORDER="0" CELLPADDING="3" CELLSPACING="0" width="100%">
+<tr><td>
+<font size="-1">
+<b><font color="blue"><a href="apps_p.html">Apps</a></font></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="components_p.html">Components</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="interfaces_p.html">Interfaces</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="allfiles_p.html">All Files</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="index.html">Source Tree</a></b>
+&nbsp;&nbsp;&nbsp;
+</font>
+</td>
+<td align="right">
+<font size="-1">
+source: <b><a href="beta.CC2420Radio.ieee.802.15.4.MLME.MLME_GTS.nc.source">beta.CC2420Radio.ieee.802.15.4.MLME.MLME_GTS.nc</a></b>
+</font>
+</td></tr></table>
+<hr>
+
+<h1 align="center">Interface: MLME_GTS</h1>
+<p>
+
+ The MLME-SAP GTS management primitives define how GTSs are requested
+ and maintained.  Devcies wishing to use these primitives and GTSs in 
+ general will already be tracking the beacons of their PAN coordinators.
+ These GTS management primitives are optional for an RFD.
+
+ <table border="0" cellpadding="0">
+<tr valign="top"><td><b>Author:</b>
+<td> Joe Polastre
+</td></tr></table>
+
+<p>
+
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Commands</h3></td></tr></table>
+<ul>
+<li>
+         void     <a href="# void request(uint8_t GTSCharacteristics, bool SecurityEnable)">
+<b>request</b>    </a>
+(uint8_t GTSCharacteristics, bool SecurityEnable)
+<menu>
+ Request allocation of a new GTS or deallocation from the PAN
+ coordinator.
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Events</h3></td></tr></table>
+<ul>
+<li>
+         void <b>confirm</b>(uint8_t GTSCharacteristics, IEEE_status status)
+<menu>
+ Reports the results of a request to allocated a new GTS or
+ deallocate an existing GTS
+
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>GTSCharacteristics</b> -  The characteristics of the GTS request
+ </p><p STYLE="text-indent: -1cm"><b>status</b> -  The status of the GTS request
+</menu></menu>
+</td></tr></table>
+</menu><p>
+
+<li>
+         void <b>indication</b>(uint16_t DevAddress, uint8_t GTSCharacteristics, bool SecurityUse, uint8_t ACLEntry)
+<menu>
+ Indicates that a GTS has been allocated or that a previous allocated
+ GTS has been deallocated
+
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>DevAddress</b> -  Short address of the device that has been allocated
+                   or deallocated a GTS
+ </p><p STYLE="text-indent: -1cm"><b>GTSCharacteristics</b> -  The characteristics of the GTS request
+ </p><p STYLE="text-indent: -1cm"><b>SecurityUse</b> -  TRUE if security is enabled for this transfer
+ </p><p STYLE="text-indent: -1cm"><b>ACLEntry</b> -  The macSecurityMode parameter value from the ACL entry
+                 associated with the sender of the data frame
+</menu></menu>
+</td></tr></table>
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Commands - Details</h3></td></tr></table>
+    <a name=" void request(uint8_t GTSCharacteristics, bool SecurityEnable)"></a>
+        <h4>request</h4>
+         void <b>request</b>(uint8_t GTSCharacteristics, bool SecurityEnable)<P><menu>
+ Request allocation of a new GTS or deallocation from the PAN
+ coordinator.
+ See page 79 of the IEEE 802.15.4 specification.
+ 
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>GTSCharacteristics</b> -  The characteristics of the GTS request
+ </p><p STYLE="text-indent: -1cm"><b>SecurityEnable</b> -  TRUE if security is enabled for this transfer
+</menu></menu>
+</td></tr></table>
+</menu>

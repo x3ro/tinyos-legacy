@@ -1,0 +1,15 @@
+COMPONENT=TimeTest
+
+#CFLAGS+= -v
+
+#PFLAGS += -DUSE_TMAC_CLOCK
+
+PFLAGS += -DTMAC_DEBUG
+OPTFLAGS += -Os
+#OPTFLAGS += -O0 -gstabs+
+
+#PFLAGS += -DDONT_REALLY_SLEEP
+#PFLAGS += -DNO_LEDS
+
+include ../Makerules
+

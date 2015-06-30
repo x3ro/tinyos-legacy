@@ -1,0 +1,37 @@
+//$Id: README,v 1.1 2005/06/16 21:36:03 gtolle Exp $
+
+TestClog README
+
+OK, this is the basic test app for the routing subsystems.
+
+It's designed to require no human interaction, but as such, is only a
+bare functionality test and not a performance test.
+
+Node 1 becomes the Clog (landmark)
+
+Node 2 becomes the Tracker (mobile node) by joining the Drain
+multicast group and listening to the DripSend.Receive interface.
+
+Node 3 becomes a regular Drain tree root.
+
+The Clog and the Root rebuild their tree every 32 seconds. 
+
+The Tracker rejoins the Drain group every 4 seconds.
+
+The Rest send a message every 4 seconds, alternating between the Clog
+tree and the regular Drain tree. They blink Red when they do so.
+
+The Clog and the Root toggle Blue when they get a message over the
+Drain tree.
+
+The Tracker toggles Green when it gets a message over DripSend.Receive.
+
+If some friendly tester would like to modify this in order to gather
+performance statistics, it would be much appreciated. Some judicious
+use of Nucleus Attributes may make this much easier. Though, I haven't
+actually done this yet myself, and am pretty sure that Nucleus needs
+some modification in order to select the appropriate tree (Clog
+vs. Root).
+
+I'll be improving this app as time goes on.
+

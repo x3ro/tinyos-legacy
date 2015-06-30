@@ -1,0 +1,7 @@
+@opts = ("-gcc=c5x-gcc",
+         "-mmcu=tms320c5509",
+         "-fnesc-target=c55xx",
+         "-fnesc-no-debug");
+
+@commonplatforms = ();
+

@@ -1,0 +1,15 @@
+
+TOS_MODULE SNOOZE;	
+
+ACCEPTS{
+    void SNOOZE_AWHILE(char prescale);
+};
+
+SIGNALS{
+};
+
+USES{
+};
+
+HANDLES{
+};

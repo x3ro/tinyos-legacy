@@ -1,0 +1,24 @@
+README for LocalTimeTest
+Author/Contact: weiye@isi.edu
+
+Description:
+
+LocalTimeTest tests the implementation of LocalTime. LocalTime is the local
+system time since a node boots. It is based on the asynchronous counter,
+which is free running. Time is updated at overflow interrupt. CPU is put
+into sleep mode between interrupts.
+
+This test enables the LocalTime component to relay the interrupt signal to the
+application. The period to receive the signal is 250ms on Mica-class motes
+with ATmega128L. You can also measure timing accuracy by connecting motes with 
+an oscilloscope.
+ 
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:

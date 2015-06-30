@@ -1,0 +1,218 @@
+<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR"
+ content="Mozilla/4.78 [en] (X11; U; Linux 2.4.7-10 i686) [Netscape]">
+  <title>Lesson 7: Injecting and broadcasting packets</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><font face="tahoma,arial,helvetica"><font
+ size="-1">Lesson 7: Injecting and broadcasting packets</font></font></b>
+      <p><font face="tahoma,arial,helvetica">Last updated 23 August 2003</font></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This lesson discusses the use of simple Java tools to inject packets
+from a PC into the sensor network, as well as the use of a simple
+multi-hop broadcast protocol.
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Injecting
+packets</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>We first demonstrate a simple application that receives "command"
+packets from the radio and interprets them to perform a number of
+actions, such as turning the LEDs on and off. Program one mote with the <tt><a
+ href="../../apps/SimpleCmd">apps/SimpleCmd</a></tt> application, and
+another with <tt>apps/TOSBase</tt>. Next connect the programming board
+to the serial port of the computer. The mote programmed with <tt>apps/TOSBase</tt>
+should remain on the programming board. TOS<tt>Base</tt> will act as the
+base station; a gateway allowing radio communication between the PC and
+motes programmed with <tt>SimpleCmd</tt>. </p>
+<p>Now run the <tt>SerialForwarder</tt> as in Lesson 6 using </p>
+<p>&nbsp;&nbsp;&nbsp; <tt>java net.tinyos.sf.SerialForwarder -comm
+serial@COM1</tt> </p>
+<p>The Java application <tt><a
+ href="../../tools/java/net/tinyos/tools/BcastInject.java">tools/java/net/tinyos/tools/BcastInject</a></tt>
+is used to inject a command packet into the sensor network from the PC.
+You can run it using </p>
+<pre>&nbsp; java net.tinyos.tools.BcastInject &lt;group_id&gt; &lt;command&gt;</pre>
+where <tt>&lt;group_id&gt;</tt> is the Active Message group ID you are
+using for your network, specified in decimal. (For example, the default
+group ID of 0x7d is 125 decimal.) For <tt>command</tt> you can specify
+a number of options, but for this lesson the <tt>SimpleCmd</tt>
+application understands the following:
+<ul>
+  <li> <tt>led_on</tt> - Turn on the yellow LED</li>
+  <li> <tt>led_off</tt> - Turn off the yellow LED</li>
+  <li> <tt>radio_louder</tt> - Increase radio power</li>
+  <li> <tt>radio_quieter</tt> - Decrease radio power</li>
+</ul>
+By running <tt>BcastInject</tt> with the appropriate arguments you
+should be able to turn the yellow LED on and off. Looking at the code
+for <tt>SimpleCmdM.nc</tt>, you can see that the application simply
+waits for incoming messages to arrive and interprets one field of the
+message as the command type. Note that <tt>BcastInject</tt> and <tt><a
+ href="../../apps/SimpleCmd/SimpleCmdMsg.h">SimpleCmd</a></tt> have to
+agree on what the command types mean.
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Exercise</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+Add commands that will allow <tt>SimpleCmd</tt> to turn its sounder on
+and off. You'll need to perform the following modifications:
+<ul>
+  <li> In <tt>SimpleCmd.nc</tt>, wire the Sounder component into the
+application.</li>
+  <li> In <tt>SimpleCmdM.nc</tt>, initialize the sounder and add a new
+command action that will turn the sounder on and off.</li>
+  <li> In SimpleCmdMsg.h add a new command type for turning the sounder
+on and off</li>
+  <li> In <tt>BcastInject.java</tt>, add the sounder on/off command to
+the set of supported command types. Be sure to use the same command
+type codes as in <tt>SimpleCmdMsg.h</tt>.</li>
+</ul>
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Multihop
+broadcast</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+<p>In this part of the lesson, we extend the <tt>SimpleCmd</tt>
+application and cause it to forward command messages that it receives to
+other motes in the network. This is accomplished by re-broadcasting the
+command message once it has been processed. In this way we can form a
+simple multi-hop routing network, extending the motes' communication
+range. </p>
+<p>This code is in <tt><a href="../../apps/SimpleCmd/BcastM.nc">apps/SimpleCmd/BcastM.nc</a></tt>.
+In addition to processing the command contained within each received
+message, it re-broadcasts the message if it has not been seen before.
+Note that in order to install the <tt>Bcast</tt> application you need
+to edit <tt><a href="../../apps/SimpleCmd/Makefile">apps/SimpleCmd/Makefile</a></tt>
+and change the line </p>
+<pre>&nbsp; COMPONENT=SimpleCmd</pre>
+to
+<pre>&nbsp; COMPONENT=Bcast</pre>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>BcastM.nc</b>
+      <pre>&nbsp; event TOS_MsgPtr ReceiveCmdMsg.receive(TOS_MsgPtr pmsg){<br>&nbsp;&nbsp;&nbsp; TOS_MsgPtr ret = msg;<br>&nbsp;&nbsp;&nbsp; result_t retval;<br>&nbsp;&nbsp;&nbsp; struct SimpleCmdMsg *data= (struct SimpleCmdMsg *)pmsg-&gt;data;<br><br>&nbsp;&nbsp;&nbsp; // Check if this is a new broadcast message<br>&nbsp;&nbsp;&nbsp; call Leds.greenToggle();<br>&nbsp;&nbsp;&nbsp; if (is_new_msg(data)) {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; remember_msg(data);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; retval = call ProcessCmd.execute(pmsg) ;<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Return a message buffer to the lower levels, and hold on to the<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // current buffer<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ret = msg;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; msg = pmsg;<br><br>&nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp;&nbsp; return ret;<br>&nbsp; }</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>To determine whether a given command message has been seen before,
+the <tt>BcastM</tt> component tracks the sequence number contained in
+the message. If the sequence number of the current message is within
+127 of the current message, the command is accepted, processed, and
+forwarded. Otherwise, it's dropped. </p>
+<p>Note that the <tt>BcastInject</tt> program maintains its sequence
+number across invocations (saving it in a file called <tt>tools/java/bcast.properties</tt>).
+If you remove this file the sequence number generated by <tt>BcastInject</tt>
+will be reset to 1. You will need to power-cycle the motes if you do
+this in order for them to interpret subsequent messages as "new". </p>
+<p>Accepting messages with a wide range of sequence numbers (rather
+than just the previous sequence number plus 1) allows for cases where
+messages are dropped by the radio stack, for example, due to
+corruption. This is a fairly crude mechanism, of course, and in a real
+application you might want to do something more involved, such as
+packet acknowledgments.
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Exercises</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<ol>
+  <li> Look at <tt>SimpleCmdM.nc</tt> again - notice that the green and
+red LEDs are used to indicate the "hop count" of the message - that is,
+the number of times that message has been forwarded through a mote. Set
+up two motes running <tt>Bcast</tt> (from the apps/SimpleCmd directory)
+and place them so that one mote gets command messages with a hop count
+of 1, and another gets messages with a hop count of 2.</li>
+  <li> As written, the broadcast protocol is fairly fragile: it depends
+on a property that the sequence number on the BcastInject and the
+sequence number on the mote differ by less that 127. A better way to
+distinguish between the messages would be to create an index of a few
+(say 5) most recently seen messages. If the message currently received
+is not in that index, then the node should forward it. <tt>BcastInject</tt>
+can then run unmodified, or it could send out messages with random
+message numbers.</li>
+</ol>
+<hr><b><a href="lesson6.html">&lt; Previous Lesson</a></b> | <b><a
+ href="lesson8.html">Next Lesson &gt;</a></b> | <b><a href="index.html">Top</a></b>
+</body>
+</html>
+
+<!--  LocalWords:  TinyOS nesC nc async norace BlinkM FooM ncc SingleTimer Leds
+ -->
+<!--  LocalWords:  LedsC StdControl tos init TimerC redOn redOff uint redToggle
+ -->
+<!--  LocalWords:  metadata html nesdoc gcc exe avr objcopy srec uisp mib dprog
+ -->
+<!--  LocalWords:  towards dapa xff ThinkPad dlpt Makelocal micasb Wshadow DDEF
+ -->
+<!--  LocalWords:  finline fnesc cfile lm Atmel ATmega nesC's nesc SenseM rdata
+ -->
+<!--  LocalWords:  ADCControl SounderControl dataReady getData rcombine someval
+ -->
+<!--  LocalWords:  ADControl fooControl barControl MyTimer uniqueCount basicsb
+ -->
+<!--  LocalWords:  sensorboard Makerules sensorboards SenseTask taskname INTMSG
+ -->
+<!--  LocalWords:  SenseTaskM putdata processData CntToLedsAndRfm RfmToLeds Msg
+ -->
+<!--  LocalWords:  CntToRfmAndLeds IntToLeds IntToRfm IntOutput outputComplete
+ -->
+<!--  LocalWords:  IntToRfmM GenericComm SendMsg bool struct IntMsg src BCAST
+ -->
+<!--  LocalWords:  ADDR sizeof TOSH sendDone GenricComm AMStandard RfmToInt pc
+ -->
+<!--  LocalWords:  UARTNoCRCPacket RadioCRCPacket ActiveMessage RfmToIntM xfff
+ -->
+<!--  LocalWords:  ReceiveIntMsg ReceiveMsg MsgPtr addr SenseToRfm TOSSIM DBG
+ -->
+<!--  LocalWords:  TinyViz ffff crc usr dbg const printf prepended bitmask gdb
+ -->
+<!--  LocalWords:  ledsOn gdbinit plugin API TestTinyViz cd tinyviz plugins RFM
+ -->
+<!--  LocalWords:  FakeLocation RadioModelPlugin LocationPlugin afterwards disc
+ -->
+<!--  LocalWords:  DebugMsgEvent TestTinyVizM AutoRun autorun numsec stopstring
+ -->
+<!--  LocalWords:  gridrandom DebugMsgPlugin RadioLinkPlugin radiomodel precmd
+ -->
+<!--  LocalWords:  radioscaling nummotes logfile txt logfiles arConfig TOSSIM's
+ -->
+<!--  LocalWords:  SimpleCmd TOSBase SerialForwarder BcastInject SimpleCmdM ret
+ -->
+<!--  LocalWords:  SimpleCmdMsg Multihop Bcast BcastM ReceiveCmdMsg pmsg msg
+ -->
+<!--  LocalWords:  retval greenToggle ProcessCmd
+ -->

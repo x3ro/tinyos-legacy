@@ -1,0 +1,48 @@
+0   op_return
+1   op_constant
+2   op_integer1
+3   op_closure
+4   op_execute
+5   op_execute_global1
+6   op_execute_global2
+7   op_discard
+8   op_exit_n
+9   op_branch1
+10  op_branch2
+11  op_loop1
+12  op_loop2
+13  op_branch_nz1
+14  op_branch_nz2
+15  op_branch_z1
+16  op_branch_z2
+17  op_clear_local
+18  op_recall local
+19  op_recall closure
+20  op_recall global
+21  op_assign local
+22  op_assign closure
+23  op_assign global
+24  op_define
+25  op_builtin_eq 
+26  op_builtin_neq
+27  op_builtin_gt
+28  op_builtin_lt
+29  op_builtin_le
+30  op_builtin_ge
+31  op_builtin_sub
+32  op_builtin_multiply
+33  op_builtin_divide
+34  op_builtin_remainder
+35  op_builtin_bitor
+36  op_builtin_bitxor
+37  op_builtin_bitand
+38  op_builtin_shift_left
+39  op_builtin_shift_right
+40  op_builtin_ref
+41  op_builtin_set
+42  op_builtin_add
+43  op_builtin_negate
+44  op_builtin_bitnot
+45  op_builtin_not
+46  op_builtin_or
+47  op_builtin_and

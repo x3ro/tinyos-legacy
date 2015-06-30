@@ -1,0 +1,89 @@
+/** The calibration module stores calibration tables for on-board mote sensors in EEPROM.
+    The model I've chosen to adopt stores one entry per sensor value, so that lookups are very fast.
+    Installing calibration information is done via three steps:
+
+    1)  Clearing out the calibration table for a particular sensor
+    2)  Setting some known calibration values for that sensor
+    3)  Performing (linear) interpolation between known sensor values
+
+    This module provides all of this functionality, plus the ability to retrieve the calibrated
+    value for some sensor.
+
+    Currently, (4) tables are created on CALIB_INIT, each of which is for a 10-bit sensor.
+    Calibrated values are stored as 2-byte shorts, and a sensor readings are passed in as 2-byte
+    shorts, only the lower 10 bits of which are significant assuming the default tables are used.
+ 
+    Calibration information is written starting at offset 0x1024 into the EEPROM, growing upwards.
+    2^10 shorts = 2048 bytes x 4 = 8192 bytes total storage occupied by default.
+
+    All requests for calibrating are handled by the CALIBRATION_REQUEST active message handler.
+    system/include/CALIBRATION_MSG.h contains the format of the CALIBRATION_REQUEST message and various
+    needed to invoke the calibration layer.
+
+    @depends none (CALIBRATION.desc contains all required modules)
+    @msg_size 37
+    @crc no
+    @multihop no
+    @am 248
+    @uncaught none
+    @eeprom 0x1024 - 0x2048
+    @author smadden
+    @date 7/24/01
+*/
+
+TOS_MODULE CALIBRATION;	
+
+JOINTLY IMPLEMENTED_BY CALIBRATION;
+
+ACCEPTS{
+	char CALIB_INIT();
+	char CALIB_START();
+	char CALIB_INIT_SENSOR(short sid, short bitsPerEntry);
+	char ZERO_DATA(short sid);
+	char ADD_READING(short sid, short key, short value);
+	char INTERPOLATE(short sid);
+	char LOOKUP(short sid, short key);
+
+};
+
+SIGNALS{
+	char ADD_DONE(void);
+	char LOOKUP_DONE(short value);
+	char ZERO_DONE(void);
+	char INTERP_DONE(void);
+};
+
+USES{
+	char CALIB_EEPROM_WRITE(short line, char *data);
+	char CALIB_EEPROM_READ(short line, char *dest);
+	char CALIB_INIT_SUB();
+	char CALIB_CLOCK_INIT(char data, char scale);
+	char CALIB_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+
+	char CALIB_RED_LED();
+	char CALIB_GREEN_LED();	
+	char CALIB_YELLOW_LED();
+
+};
+
+HANDLES{
+	char WRITE_DONE(char success);
+
+	char READ_DONE(char *data, char success);
+
+	TOS_MsgPtr CALIBRATION_REQUEST(TOS_MsgPtr msg);
+	
+	char CALIB_SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+       
+	char SEND_READING(short data);
+
+	char SEND_ACK(void);
+	
+	void CALIB_CLOCK_EVENT();
+};
+
+
+
+
+
+

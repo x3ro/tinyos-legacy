@@ -1,0 +1,6 @@
+include modules{
+ POT;
+};
+
+MAIN:MAIN_SUB_POT_INIT POT:POT_INIT 
+

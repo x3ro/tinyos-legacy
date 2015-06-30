@@ -1,0 +1,17 @@
+A D/BaseStation////
+A D/Blink////
+A D/Bounce////
+A D/Null////
+A D/RadioStress////
+A D/SenseAndSend////
+A D/SenseCompressForward////
+A D/SenseStoreAndForward////
+A D/SerialCompress////
+A D/TestCollection////
+A D/TestJoin////
+A D/TestLogStorage////
+A D/TestPrintf////
+A D/TestSineSensor////
+A D/ThreadStress////
+R D/SerialCompress////
+R D/SenseCompressForward////

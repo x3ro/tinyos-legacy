@@ -1,0 +1,456 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla - Using the Local Tuple Space</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>Lesson 4: Using the
+
+            Local Tuplespace</h1>
+          <p><em>Last Updated on
+              <!-- #BeginDate format:Am1a -->December 28, 2005 6:50 PM<!-- #EndDate -->.</em></p>
+          <h2>Contents:</h2>
+          <ul>
+            <li><a href="#localts">Local Tuple Space Operations</a></li>
+            <li><a href="#rxn">Reactions
+            </a>              <ul>
+                <li><a href="#wait">Waiting for a reaction to fire</a></li>
+                <li><a href="#timing">Waiting a certain amount of time for reactions
+                    to fire</a></li>
+              </ul>
+            </li>
+          </ul>
+          <h2><a name="localts"></a>Local Tuple Space Operations</h2>
+          <p>Each mote has its own independent tuple space. Agilla provides 6
+            <a href="../../isa.html#LocalTS">instructions</a> for
+            accessing the local tuple space. They are listed below with their
+            parameters in parenthesis:</p>
+          <ol>
+            <li><code><a href="../../isa/out.html">out</a>(Tuple t)</code>: insert a tuple</li>
+            <li><code><a href="../../isa/inp.html">inp</a>(Template t)</code>: non-blocking remove</li>
+            <li><code><a href="../../isa/rdp.html">rdp</a>(Template t)</code>: non-blocking copy</li>
+            <li><code><a href="../../isa/in.html">in</a>(Template t)</code>: blocking remove</li>
+            <li><code><a href="../../isa/rd.html">rd</a>(Template t)</code>: blocking copy</li>
+            <li><code><a href="../../isa/tcount.html">tcount</a>(Template t)</code>: count the number of tuples that match
+              a particular template</li>
+            <li><code><a href="../../isa/regrxn.html">regrxn</a>(Reaction r)</code>: register a reaction</li>
+            <li><code><a href="../../isa/deregrxn.html">deregrxn</a>(Reaction
+                r)</code>: de-register a reaction</li>
+          </ol>
+          <p>Agilla agents use a stack architecture. Tuples and templates are
+            created by pushing their fields onto the stack, followed by the number
+            of fields. The order of the fields on the stack represents the order
+            that they appear in the tuple. For example, the code for inserting
+            tuple            &lt;int:1,
+            int:2, string:&quot;abc&quot;,
+            loc:(1,1)&gt;            and insert it into the local tuple space
+            is:</p>
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/out_example.ma</pre>
+<pre class="screen">
+	pushloc 1 1
+	pushn abc
+	pushc 2
+	pushc 1
+	pushc 4  	// 4 fields in the tuple
+	out		// insert tuple
+	halt</pre>
+	
+          <p>Note that since the stack is LIFO, the last field of the
+            tuple is pushed first. The tuple space provides <em>hard state</em>.
+            Tuples inserted in the tuple space remain there indefinitely even
+            if the agent that inserted it no longer exists. Tuples are moved
+            using instructions <a href="../../isa/in.html"><code>in</code></a> and <a href="../../isa/inp.html"><code>inp</code></a>. </p>
+          <p>The maximum number of fields a tuple can have is limited by the
+            maximum size of the tuple, which is by default 18 bytes as defined
+            by AGILLA_MAX_TUPLE_SIZE within <code>$WUAPPS/Agilla/types/TupleSpace.h</code>.
+            This value
+            was chosen to ensure
+            a tuple can fit within a single TinyOS message. The size
+            of a tuple or template's field is the size of the variable within
+            the
+            field
+            +
+            1. Variables sizes are given <a href="../variables.html">here</a>.
+            The extra byte within every field is used to indicate the variable
+            type. In addition, the tuple contains a byte for flags (e.g., whether
+            the tuple was inserted by the middleware, or by an agent), and a
+            byte to indicate the number of fields. Thus, the total size of a
+            tuple is the sum of its fields plus 2. For example, the tuple in
+            the example above would contains 3+3+3+5+2=14 bytes.</p>
+          <p>The middleware automatically inserts a HostID tuple containing &lt;&quot;hid&quot;,
+            value&gt;, and an AgentID tuple consisting of &lt;&quot;aid&quot;,
+            value&gt;. The value
+            within the HostID tuple is the address of the local host. The value
+            within an AgentID tuple is the unique ID of an agent. Both the HostID
+            and AgentID tuples are 8 bytes (string = 3, value = 3, header = 2).</p>
+          <p>To retrieve a tuple from the local tuple space, you need to supply
+            a template that matches the tuple. A template is the same as a tuple
+            except some of its fields may wild cards that match by type.
+            A match occurs when the template and tuple have the same number of
+            fields, and each field within the tuple matches that of a template.
+            If the template's field is a not a wild card, the tuple's
+            field must match exactly. This form of matching is called &quot;<em>match
+            by value</em>.&quot;
+            However, if the template's field is a wild-card variable, then the
+            tuple's field
+            must
+            simply be of
+            the
+            same
+            type.
+            This form of matching is called &quot;<em>match by type</em>.&quot; Note
+            that a type-variable may match &quot;ANY&quot; other type, in which
+            case a match
+            always occurs. The template may contain any mix of match-by-value
+            and match-by-type fields. For example, the following agent pushes
+            a template that is exactly the same as the tuple; it matches every
+            field by value:</p>
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/inp_example.ma</pre>
+          <pre class="screen">
+	pushloc 1 1
+	pushn abc
+	pushc 2
+	pushc 1
+	pushc 4  	// 4 fields in template
+	inp		// remove tuple
+	rjumpc FOUND 	// jump to FOUND if success
+	pushc 1
+	putled		// turn on red LED if not found
+	halt
+FOUND	pushc 2
+	putled		// turn on green LED if found
+	halt
+</pre>
+          <p align="left">If
+            this agent executes on the same node that the <code>out_example.ma</code> agent
+          ran on, the green LED will light up.</p>
+          <p align="left">The following agent uses a template that matches
+            every field by value:</p>
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/inp_type_example.ma</pre>
+<pre class="screen">
+	pusht LOCATION
+	pusht STRING
+	pusht VALUE
+	pusht VALUE
+	pushc 4		// 4 fields in template
+	inp
+	rjumpc FOUND
+	pushc 1
+	putled		// turn on red LED if not found
+	halt
+FOUND	pushc 2
+	putled		// turn on green LED if found
+	halt
+</pre>
+<p>The following template matches some fields by value and others by
+            type:</p>
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/inp_mix_example.ma</pre>
+<pre class="screen">
+	pushloc 1 1	// match by value
+	pusht STRING	// match by type
+	pushc 2		// match by value
+	pusht VALUE	// match by type
+	pushc 4		// 4 fields in template
+	inp
+	rjumpc FOUND
+	pushc 1
+	putled		// turn on red LED if not found
+	halt
+FOUND	pushc 2
+	putled		// turn on green LED if found
+	halt</pre>
+          <p align="left">The following template does NOT match the tuple since
+            it's first field, &lt;int:0&gt;, does not match:</p>
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/inp_fail_example.ma</pre>
+<pre class="screen">
+	pushloc 1 1
+	pushn abc
+	pushc 2	
+	pushc 0		// this should NOT match!
+	pushc 4		// 4 fields in template
+	inp
+	rjumpc FOUND
+	pushc 1
+	putled		// turn on red LED if not found
+	halt
+FOUND	pushc 2
+	putled		// turn on green LED if found
+	halt</pre>
+<p align="left">If the above agent is injected, the red LED should turn on.</p>
+<h2 align="left"><a name="rxn"></a>Reactions</h2>
+<p align="left">An agent can also register <em>reactions</em>. A reaction
+  allows an agent to respond to the presence
+              of a tuple in the local tuple space. It is used to prevent the
+  agent from having to poll for a tuple, which is inefficient.
+  Reactions consist of a template,
+              address, and a block of code. The template specifies when the reaction
+  should fire. When a reaction fires, the agent's current PC and
+  the matching tuple are pushed onto the stack. The agent's program counter is
+  then changed to the reaction's address, which points to the first instruction
+  in
+  the
+  reaction's code. The reaction's code is called the reaction's &quot;callback
+  function&quot;. </p>
+<p align="left">A reaction's callback function has the following structure:</p>
+<pre class="screen">BEGINRXN	...
+		...
+		...
+		endrxn</pre>
+<p align="left">The first instruction should be labeled so its address can be
+  pushed onto the stack when registering the reaction. In this case, the label
+  is &quot;BEGINRXN&quot;. A label can be any arbitrary string with no spaces.
+  The last instruction must be <a href="../../isa/endrxn.html"><code>endrxn</code></a>,
+  which tells
+  Agilla when the agent finishes executing the callback function.  To
+  prevent race conditions, a reaction's callback function is <strong>non-preemptable</strong>.
+  If there
+  are
+  multiple tuples matching the reaction's
+  template, or if there are multiple reactions belonging to the same agent that
+  are all enabled (i.e., can fire), all of the reactions will eventually fire,
+  one at a time. If a matching tuple appears in the midst of another reaction,
+  the reaction sensitive to the tuple will only be fired after the current reaction
+  is finished. <code>endrxn</code> expects
+  there to be a value on top of the stack. This value is the address of
+  the next instruction to
+  execute
+  after
+  finishing
+  executing a callback function. <code>endrxn</code> changes
+  the program counter to be this value. By default, Agilla pushes the address
+  of the instruction that the agent was executing before the reaction fired onto
+  the stack. This address may be used by <code>endrxn</code> to resume the agent
+  running where it left off prior to handling a reaction.</p>
+<p align="left">Agilla reactions are <em>asynchronous</em> and <em>weak</em>.
+  They are asynchronous in that a matching tuple may be inserted and removed
+  into the local tuple space without the reaction ever getting a chance to fire.
+  They
+  are weak in that when a matching
+  tuple is placed in the tuple space, the reaction may
+  not immediately fire. However, if the matching tuple remains,
+  the reaction is guaranteed to <em>eventually</em> fire. This is in contrast
+  to a <em>strong</em> reaction, which is guaranteed to fire at the first chance
+  possible (i.e., when the
+  agent is not already executing another reaction's callback function,
+  and is not blocked on another operation).</p>
+<p align="left">A reaction is designed to be executed quickly and atomically.
+  It is analogous to a TinyOS event. An agent cannot execute blocking operations
+  like <a href="../../isa/in.html"><code>in</code></a>, <a href="../../isa/rd.html"><code>rd</code></a>,  <a href="../../isa/wait.html"><code>wait</code></a>,
+  or <a href="../../isa/sleep.html">sleep</a> while executing a reaction's call-back
+  function.</p>
+<p align="left">To register a reaction, the agent pushes a template and an address
+  onto the stack. It then calls <strong><a href="../../isa/regrxn.html">regrxn</a></strong>. For example, consider
+  the following agent:</p>
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/regrxn_example.ma</pre>
+<pre class="screen">
+		pusht VALUE
+		pushc 1
+		pushc DORXN
+		regrxn			// register reaction (addr=BLINKRED, template=<int:1>)
+		
+// continuously blink green LED
+BLINKGREEN	pushc 26
+		putled
+		pushc 1
+		sleep
+		rjump BLINKGREEN
+
+// The reaction callback function
+DORXN		pop
+		pop			// pop tuple off stack
+		pushc BLINKRED		// push address BLINKRED onto stack
+		endrxn			// end reaction & jump to BLINKRED
+		
+BLINKRED	pushc 25
+		putled			// toggle red LED
+		pushc 1
+		sleep			// sleep for 1/8s
+		pushc 25
+		putled			// toggle red LED
+		jumps			// jump back to address before rxn occurred</pre>
+<p align="left">The   agent above registers a reaction using
+            template &lt;type:value&gt; and
+            address BLINKRED.  The agent is programmed to continuously blink
+            the green LED, and blink the red LED when the reaction fires.
+            The reaction's
+            callback function starts at BLINKRED and continues to the end. Note
+            that the first instruction is <a href="../../isa/inp.html">inp</a>.
+            This removes the tuple from the tuple space. The following two instructions
+            are both <code><a href="../../isa/pop.html">pop</a></code>.
+            This
+            is necessary
+            because
+            the tuple that caused the reaction to fire is stored on the agent's
+stack.</p>
+          <p align="left">The following &quot;provocateur&quot; agent can be
+            used to cause the agent above to fire its reaction, assuming
+            the agent
+            above is injected
+            onto
+            node (1,1):</p>
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/provocateur.ma</pre>
+<pre class="screen">
+	pushc 50
+	pushc 1		// push tuple <int:50>
+	pushloc 1 1
+	rout		// remote out tuple to location (1,1)
+	pushc 25
+	putled		// blink red LED
+	halt
+</pre>
+          <p align="left">If the provocateur agent is injected onto node (0,0),
+            while the reaction agent is injected onto node (1,1), the reaction
+            agent will react to the tuple and blink its red LED. </p>
+          <p align="left">Unlike tuples in a tuple space, reactions belong to
+            the agent that registered it and remains with the agent across strong
+            migrations. Reactions are explicitly deregistered using         
+            instruction <strong><a href="../../isa/deregrxn.html">deregrxn</a></strong>.</p>
+          <h2><a name="wait"></a>Waiting for a Reaction to Fire</h2>
+          <p>Agilla provides the special instruction <code><a href="../../isa/wait.html">wait</a></code> that
+            pauses an agent until a tuple arrives. If the agent only has one
+            reaction
+            registered, this instruction has the same behavior as <code><a href="../../isa/in.html">in</a></code>.
+            However, if more than one reaction is registered, the agent can be
+            woken up if a tuple matching <em>either</em> template is inserted
+            into the local tuple space. Thus, <a href="../../isa/wait.html">wait</a> is more flexible than <a href="../../isa/in.html">in</a>.
+             The following is an example agent that registers two reactions and
+            waits.</p>
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/wait_exmaple.ma</pre>
+<pre class="screen">// Blips the green LED when a tuple containing a value is
+// inserted into the local tuple space.  Blips the red LED
+// when a tuple containing a string is inserted into the 
+// local tuple space.
+		pusht value
+		pushc 1
+		pushc DOGREEN
+		regrxn
+		pusht string
+		pushc 1
+		pushc DORED
+		regrxn
+WAIT		wait
+
+
+// reaction DOGREEN call-back function
+DOGREEN		inp  		// remove tuple from TS
+		clear		// clear OpStack
+		pushc BLIPGREEN
+		endrxn
+		
+// reaction DORED call-back function
+DORED		inp  		// remove tuple from TS
+		clear		// clear OpStack
+		pushc BLIPRED
+		endrxn
+
+// turn on the green LED for 1 second
+BLIPGREEN	pushc 2
+		putled		// turn on green LED
+		pushc 8
+		sleep		// sleep 1 second
+		pushc 0
+		putled		// turn off green LED
+		pushc WAIT
+		jumps
+		
+// turn on the red LED for 1 second
+BLIPRED		pushc 1
+		putled		// turn on red LED
+		pushc 8
+		sleep		// sleep 1 second
+		pushc 0
+		putled		// turn off red LED
+		pushc WAIT
+		jumps</pre>
+<P align="left">Notice that the reaction code is extremely short. They simply
+  clear the stack, and then jump to another non-reaction block of code. This
+  is necessary because reactions cannot perform the <a href="../../isa/sleep.html">sleep</a> instruction within
+  their callback function. Once you have injected the above agent, 
+you can inject one of the agents below that out tuples that cause the reactions
+  to
+fire. The first agent inserts a tuple containing a string, causing the reaction
+  that blinks the red LED to fire. The second agent inserts a tuple containing
+  a value, causing the reaction that blinks the green LED to fire.</P>
+
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/wait_out_string.ma</pre>
+<pre class="screen">	pushn abc
+	pushc 1
+	out
+	halt
+</pre>		
+
+and:
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/wait_out_value.ma</pre>
+<pre class="screen">	pushc 1
+	pushc 1
+	out
+	halt
+</pre>
+<h2>&nbsp;</h2>
+<h2><a name="timing"></a>Waiting a Certain Amount of Time for Reactions to Fire</h2>
+<p>Sometimes it may be useful to register a reaction, and then to wait a specified
+  amount of time during which the reaction may fire multiple times. After this
+  time has passed, the agent will continue operating. To achieve this behavior,
+  an agent can register its reactions, then execute instruction <a href="../../isa/sleep.html"><code>sleep</code></a>.
+  If a reaction fires while the agent is asleep, the reaction's callback function
+  will be executed, and the agent will resume sleeping afterwards. The sleep
+  timer continues running while the reaction callback function is executing.
+  If the sleep time passes while a reaction is executing, the agent will resume
+  running after the reaction callback function terminates. </p>
+<p>For example, consider the following agent:</p>
+<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/sleep_rxn.ma</pre>
+<pre class="screen">		pushc 0
+		setvar 0		// set heap[0] = 0
+		pusht value
+		pushc 1
+		pushc REACTION
+		regrxn			// register reaction
+		pushcl 80
+		sleep			// sleep for 10 seconds
+		getvar 0
+		pushc 1			// create tuple containing sum
+		pushloc uart_x uart_y
+		rout			// send tuple to base station
+		getvar 0
+		pushc 7
+		land
+		putled			// display lower 3 bits of sum on LEDs
+		halt			// terminate agent
+
+// reaction callback function		
+REACTION	inp			// remove tuple from the TS
+		pop
+		getvar 0
+		add
+		setvar 0		// heap[0] += value in tuple
+		endrxn</pre>
+		<p>The agent above sets heap[0] = 0, registers a reaction sensitive to tuples containing a value, and then sleeps for 10 seconds.
+		During this time, if a tuple containing a value appears in the local tuple space, the agent will remove the tuple
+		using an inp, and then adds the value containing within the tuple to heap[0].  Once the agent finishes sleeping, it creates a tuple containing
+		a single value -- the sum of all tuples it reacted to while it was asleep and inserts it into the tuple space on the base station.  
+		It then displays the last 3 bits of the sum on the LEDs.</p>
+		
+		<p>The following agent can be injected while the agent above is asleep.  It simply inserts a tuple containing a single value.</p>
+		<pre class="caption">$WUAPPS/AgillaAgents/Tutorials/Lesson4/sleep_out_value.ma</pre>
+		<pre class="screen">		pushc 1
+		pushc 1
+		out
+		halt</pre>
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

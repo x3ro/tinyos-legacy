@@ -1,0 +1,69 @@
+		Micro In-System Programmer
+			CHANGES
+		Uros Platise (c) 1997-1999
+
+0.1.2 -> 0.1.3
+==============
+ * NEW: Parallel command line option support.
+ * Some little bug fixes for the parallel uploading (thanks to Denis)
+
+0.1.3 -> 0.1.4 (?. February 1999)
+=================================
+ * BUG FIX: Parallel Port Selection (PSPI.C and Main.C)
+ * BUG FIX: --DPCAvr command line parameters (Main.C)
+
+
+
+0.2 beta (2. August 1999)
+=========================
+ * NEW: 
+	* Parallel Access Improved (again)
+
+	* ATmega Page Programming support for the parallel access (not tested)
+	
+	* STK200 support (thanks to Marek Michalkiewicz)
+	
+	* Motorola S-record S1/S2 (16bit/24bit) format
+	
+	* Standard Intel 16 bit format
+	
+	* Improved Support for the standard serial Atmel Programmers
+	  (e.g. Atmel Low Cost Programmer) - uploading/downloading speed
+	  increased for more than 100%
+	  
+	* Auto-Select support for the Atmel Programmers
+	  Switch: -dpart=auto
+	  Use -v to trace trials ...
+	  
+	* ATmega support for the Atmel Programmers (not tested)
+	
+	* No Direct AVR Parallel Access support for non-Intel systems
+	
+	* and more, I cannot remember everything :)
+
+ * FORGOTTEN: 
+ 	uTools a.out format
+	bugs :)
+	
+
+
+CHANGES 21-26 October:
+======================
+	* Standard Atmel Programmator -favr_endianbug option added
+	
+	* ATmega Page bug fixed; thanks to Simon *?*
+	  Page buffer 0xff bug is still present. To workaround this
+	  bug convert S-rec to bin and then back from bin to S-rec.
+	
+	* Altera Byte BlasterMV Parallel Download Cable Support
+	  Connect: 
+	    TMS - Reset
+	    TDI - MOSI
+	    TDO - MISO
+	    TCK - SCK
+	    VCC - VCC	    
+	    GND - GND
+	
+	* Atmel Low Cost Programmater Address Auto Increment Detect
+	  (disabled for software versions lower than 2)
+

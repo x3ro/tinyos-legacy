@@ -1,0 +1,26 @@
+TOS_MODULE TINY_ALLOC;
+
+ACCEPTS{
+	char TINY_ALLOC_INIT();
+	char TINY_ALLOC_ALLOC(char ***handle, short size);	
+	char TINY_ALLOC_REALLOC(char **handle, short size);
+	void ALLOC_DEBUG();
+	void TINY_ALLOC_LOCK(char **handle);
+	void TINY_ALLOC_UNLOCK(char **handle);
+	short TINY_ALLOC_FREE(char **handle);
+	void TINY_ALLOC_COMPACT();
+	short TINY_ALLOC_SIZE(char **handle);
+	char TINY_ALLOC_IS_LOCKED(char **handle);
+};
+
+SIGNALS{
+	void TINY_ALLOC_COMPLETE(char ***handle, char success);
+	void TINY_ALLOC_REALLOC_COMPLETE(char **handle, char success);
+	void TINY_ALLOC_COMPACT_COMPLETE();
+};
+
+HANDLES{
+};
+
+USES{
+};

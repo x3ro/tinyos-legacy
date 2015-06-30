@@ -1,0 +1,37 @@
+
+import net.tinyos.packet.*;
+import net.tinyos.util.*;
+import net.tinyos.message.*;
+
+class PrettyPrint {
+  static int typeByte = 2;
+  static int groupByte = 3;
+
+
+  static int convertByte(byte temp) {
+    return (temp < 0) ? temp + 256 : temp;
+  }
+
+  public static void print(byte[] packet) {
+    Message msg = null;
+    int type = convertByte(packet[typeByte]);
+    int group = convertByte(packet[groupByte]);
+    if (group == 1) {
+      System.out.println("Sending ...");
+    } else if (group == 2) {
+      System.out.println("Receiving ...");
+    }
+    /* you can use the mig tools to simplify this parsing
+    if (type == AM_DELUGEADVMSG) {
+      msg = new DelugeAdvMsg(packet, 5);
+    }
+    */
+    Dump.printPacket(System.out, packet);
+  }
+
+  
+  
+  
+}
+
+

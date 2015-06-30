@@ -1,0 +1,594 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Mat&eacute; Tutorial: Lesson 6</title>
+    <LINK HREF="../mate.css" REL="stylesheet" TYPE="text/css">
+  </head>
+  
+  <BODY>
+    <CENTER>
+      <TABLE BGCOLOR=BLACK CELLPADDING=1>
+	<TR>
+	  <TD>
+	    <TABLE BGCOLOR=WHITE WIDTH=700 CELLPADDING=6>
+	      <TR>
+		<TD BGCOLOR=#BEBEBE>
+		  <IMG SRC="../img/banner.gif">
+		</TD>
+	      </TR>
+	      <TR>
+		<TD>
+		  <CENTER>
+		    <TABLE>
+		      <TR>
+			<TD>[<a href="index.html">Tutorial Home</A>]</TD>
+			<TD>[<a href="lesson1.html">Lesson 1</A>]</TD>
+			<TD>[<a href="lesson2.html">Lesson 2</A>]</TD>
+			<TD>[<a href="lesson3.html">Lesson 3</A>]</TD>
+			<TD>[<a href="lesson4.html">Lesson 4</A>]</TD>
+			<TD>[<a href="lesson5.html">Lesson 5</A>]</TD>
+			<TD>[Lesson 6]</TD>
+
+		      </TR>
+		      
+		    </TABLE>
+		    <HR>
+		  </CENTER>
+		</TD>
+	      </TR>
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <h3>Lesson 6: Adding Events</h3>
+		  <!-- Created: Wed Jun 16 16:09:01 PDT 2004 -->
+		    <!-- hhmts start -->
+Last modified: Fri Dec 10 12:50:14 PST 2004
+<!-- hhmts end -->
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  <p></p>
+		</TD>
+	      </TR>
+
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Introduction</b>
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+		  <p>Lesson 5 shows you how to write new functions to
+		  incorporate into Mat&eacute; VMs. This lesson shows
+		  you how to write new event handlers, so you can
+		  customize what causes your VM to execute. You write
+		  a new context component that executes every time the
+		  mote sends a packet.</p>
+		</TD>
+	      </TR>
+
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Context Components</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>Every Mat&eacute; handler has an associated
+		  context component. The component is responsible for
+		  allocating a Mat&eacute; execution context structure
+		  for the handler to run on, and triggering the
+		  context to run when an appropriate TinyOS event
+		  occurs. Like functions, context components usually
+		  have three files: a context description file
+		  (<tt>.cdf</tt>), a module implementing the context,
+		  and a configuration that wires the module to all of
+		  the other components it needs.</p>
+
+		  <p>A CDF must have a CONTEXT element that describes
+		  the context. This element must have three tags,
+		  DESC, ID, and NAME. DESC is a descriptive string
+		  which the VMBuilder GUI displays to the
+		  user. VMBuilder and Scripter use the NAME tag to
+		  uniquely identify a context. VMBuilder uses the
+		  value of the NAME tag to generate unique identifier
+		  constants referring to the context and its
+		  handler. For example, if <tt>NAME=EXAMPLE</tt>,
+		  VMBuilder generates the constants
+		  <tt>MATE_CONTEXT_EXAMPLE</tt> and
+		  <tt>MATE_HANDLER_EXAMPLE</tt>. When Scripter injects
+		  a new piece of code, it uses the HANDLER context to
+		  identify which handler the code corresponds to, so
+		  the VM can install it properly. When a VM sends an
+		  error message to the user, Scripter uses the CONTEXT
+		  constants to map the unique ID to the name of the
+		  context that triggered the error.
+
+		    <p>The ID element is currently unused, but will be
+		    used in the future. The issue with using unique
+		    IDs is that two different VMs with the same
+		    contexts cannot share code, as they might have
+		    different IDs for the same context. Explicit,
+		    global IDs for contexts solves this problem. A
+		    node will map the global ID to its local ID for
+		    the context.</p>
+
+		  <p>Contexts can have functions associated with
+		  them. For example, the Timer contexts have the
+		  <tt>settimer</tt> functions to control their firing
+		  rate, while the Trigger context has the
+		  <tt>trigger</tt> and <tt>triggerbuf</tt>
+		  functions. A context description file, in addition
+		  to containing a CONTEXT element, can contain
+		  FUNCTION elements which VMBuilder will automatically
+		  include when the context is incorporated into a
+		  VM. For example, this is
+		  <tt>lib/VM/contexts/Timer0Context.cdf</tt>:</p>
+
+		  <quote>
+		    <tt>&lt;CONTEXT name="Timer0" desc="A periodic timer." id=7><br></br>
+			&lt;FUNCTION name=SETTIMER0 opcode=settimer0 numparams=1 param1=value returnval=FALSE desc="Takes a single parameter, the interval (in tenths of a second) between timer firings for the Timer 0 context. Calling with a time of zero stops the timer.">
+		    </tt>
+		  </quote>
+
+		  <p>Context modules must use three interfaces:
+		  <tt>MateContextSynch</tt>, for interacting with the
+		  Mat&acute; scheduler, <tt>MateHandlerStore</tt>, for
+		  knowing when new code has arrived, and
+		  <tt>MateEngineStatus</tt>, for knowing when the VM
+		  has rebooted. Whenever new code arrives or the VM
+		  reboots, a context component must halt its context
+		  by calling <tt>MateContextSynch.halt()</tt>.
+		  Currently, the VM core signals reboot whenever any
+		  new code arrives, making one of the calls to halt
+		  redundant. However, better installation-time
+		  analysis may change this in the future, so a
+		  component should handle both, just to be
+		  sure. Contexts need to initialize their handler with
+		  <tt>MateHandlerStore</tt> when TinyOS boots, so
+		  context components usually provide a
+		  <tt>StdControl</tt> interface.</p>
+
+		  <p>In addition to these standard interfaces,
+		  contexts usually provide or use a few others, which
+		  control when the context executes. For example, the
+		  Timer0 context uses and provides Timer interfaces
+		  for controllingits time. The signature of
+		  <tt>Timer0ContextM</tt> is:</p>
+
+		  <quote>
+		    <pre>module Timer0ContextM {
+  provides {
+    interface StdControl;
+    interface Timer;
+  }
+  
+  uses {
+    interface StdControl as SubControlTimer;
+    interface Timer as ClockTimer;      
+    interface MateContextSynch as Synch;
+    interface MateHandlerStore as HandlerStore;
+    interface MateEngineStatus as EngineStatus;
+  }
+}</pre>
+		  </quote>
+
+		  <p>The provided <tt>Timer</tt> interface allows the
+		  <tt>settimer0</tt> function component to manipulate
+		  Timer0's Timer; it forwards calls to the underlying
+		  <tt>ClockTimer</tt>. When <tt>ClockTimer</tt> fires,
+		  <tt>Timer0ContextM</tt> submits its context to the
+		  Mat&eacute; scheduler, if it is not already
+		  running.</p>
+
+
+		  <p>We'll step through the implementation of
+		  Timer0COntextM, one part at a time. The source file
+		  resides int <tt>tos/lib/VM/contexts</tt>. You've
+		  already seen the module signature. The module
+		  allocates a <tt>MateContext</tt>, which it
+		  initializes in <tt>StdControl.init()</tt>:
+
+		  <quote>
+		    <pre>implementation {
+  MateContext timerContext;
+  
+  command result_t StdControl.init() {
+    result_t rval = call SubControlTimer.init();
+    timerContext.which = MATE_CONTEXT_TIMER0;
+    timerContext.rootHandler = MATE_HANDLER_TIMER0;
+
+    rval &= call HandlerStore.initializeHandler();
+    call Synch.initializeContext(&timerContext);
+    return rval;
+  }
+
+  command result_t StdControl.start() {
+    return call SubControlTimer.start();
+  }
+
+  command result_t StdControl.stop() {
+    call ClockTimer.stop();
+    return call SubControlTimer.stop();
+  }</pre>
+		  </quote>
+
+		    <p><tt>init()</tt> first initializes the
+		    underlying Timer component, then sets two fields
+		    in the context. The first field is the context
+		    identifier, which is the <tt>MATE_CONTEXT</tt>
+		    constant corresponding to the context name. The
+		    second field is the handler identifier, which
+		    refers to what code handler the VM should run when
+		    the context starts executing. Next,
+		    <tt>init()</tt> tells <tt>HandlerStore</tt> to
+		    initialize its handler. The component providing
+		    <tt>HandlerStore</tt> provides it as a
+		    parameterized interface: the parameter is the
+		    handler ID. This allows it to know which handler
+		    to initialize. Finally, <tt>init()</tt>
+		    initializes the actual context with
+		    <tt>Synch.initializeContext</tt>: the two fields,
+		    <tt>which</tt> and <tt>rootHandler</tt> must be
+		    set before this is called. <tt>start()</tt> just
+		    starts the underlying Timer component (but not the
+		    <tt>ClockTimer</tt> itself, which
+		    <tt>settimer0</tt> controls). <tt>stop</tt>,
+		    however, stops both the component and the
+		    <tt>ClockTimer</tt>.</p>
+
+		    <p>Next is the <tt>ClockTimer.fired()</tt> event,
+		    and the task it uses to run the context:</p>
+
+		    <quote>
+		      <pre>  task void ClockEventTask() {
+    if (timerContext.state == MATE_STATE_HALT) {
+      dbg(DBG_USR1, "VM: Timer 0 context running.\n");
+      timerContext.currentHandler = timerContext.rootHandler;
+      call Synch.initializeContext(&timerContext);
+      call Synch.resumeContext(&timerContext, &timerContext);
+    }
+    else {
+      // drop the event
+    }
+  }
+  
+  event result_t ClockTimer.fired() {
+    post ClockEventTask();
+    return SUCCESS;
+  }</pre>
+		    </quote>
+
+		    <p>When the underlying <tt>ClockTimer</tt> fires,
+		    the <tt>Timer0ContextM</tt> posts
+		    <tt>ClockEventTask</tt>, which ignores the event
+		    if the context is already running. Otherwise, it
+		    re-initializes the context (e.g., setting the
+		    program counter to the first instruction) and
+		    submits it to the Mat&eacute; scheduler with
+		    <tt>resumeContext</tt>.</p>
+
+		    <p>As it uses the <tt>MateHandlerStore</tt> and
+		    <tt>MateEngineStatus</tt> interfaces, a context
+		    component must handle two events, when new code
+		    arrives and when the VM reboots. In both cases,
+		    the component should halt the context if it is not
+		    already halted.</p>
+
+		    <quote>
+		      <pre>  event void HandlerStore.handlerChanged() {
+    dbg(DBG_USR3, "Timer0Context: Handler changed.\n");
+    if (timerContext.state != MATE_STATE_HALT) {
+      call Synch.haltContext(&timerContext);
+    }
+  }
+
+  event void EngineStatus.rebooted() {
+    dbg(DBG_USR1, "Timer0Context: VM rebooted.\n");
+    if (timerContext.state != MATE_STATE_HALT) {
+      call Synch.haltContext(&timerContext);
+    }
+  }</pre>
+		    </quote>
+
+		    <p>Finally, <tt>Timer0ContextM</tt> forwards calls
+		    made to its provided <tt>Timer</tt> to the
+		    <tt>ClockTimer</tt> it uses:</p>
+
+		    <quote>
+		      <pre>  command result_t Timer.start(char type, uint32_t interval) {
+    return call ClockTimer.start(type, interval);
+  }
+
+  command result_t Timer.stop() {
+    return call ClockTimer.stop();
+  }
+  
+ default event result_t Timer.fired() {
+   return SUCCESS;
+ }</pre>
+		    </quote>
+
+		    <p>The Timer0 context includes the
+		    <tt>settimer0</tt> function, which calls the
+		    <tt>Timer</tt> commands on
+		    <tt>Timer0ContextM</tt>. Another approach is to
+		    have a context component provide instances of the
+		    <tt>MateBytecode</tt> interface. The function
+		    configurations can then just wire to these
+		    implementations. For example, instead of having a
+		    <tt>OPsettimer0M</tt> module,
+		    <tt>Timer0ContextM</tt> could include</p>
+
+		    <quote>
+		      <tt>provides interface MateBytecode as SetTimer;</tt>
+		    </quote>
+		    
+		    <p>and the <tt>OPsettimer0</tt> configuration
+		    could just wire to it:</p>
+
+		    <quote>
+		      <tt>MateBytecode = Timer0ContextM.SetTimer;</tt>
+		    </quote>
+
+		    <p>This approach is useful if a function needs to
+		    access context state. For example, the Trigger
+		    context allows a program to pass a buffer to the
+		    Trigger handler as a parameter to the
+		    <tt>trigger</tt> function, which also causes the
+		    context to run. The function copies the buffer
+		    into the Trigger component (so the caller can
+		    continue to access its buffer), which can be
+		    accessed with the <tt>triggerbuf</tt> function. In
+		    this case, the Trigger component implements both
+		    functions. The <tt>trigger</tt> function copies
+		    the passed buffer into a component variable, and
+		    the <tt>triggerbuf</tt> function pushes that
+		    buffer onto the operand stack.</p>
+
+		    <p>Unlike functions, context configurations do not
+		    provide an interface; they self-wire themselves to
+		    the Mat&eacute; core. VMBuilder has to wire
+		    functions because it is responsible for generating
+		    the instruction set of a VM; contexts, in
+		    contrast, have no corresponding values that
+		    VMBuilder must generate, so can just wire
+		    themselves. For example, this is
+		    <tt>Timer0Context.nc</tt>:</p>
+
+		    <quote><pre>includes Mate;
+
+configuration Timer0Context {
+  provides interface Timer;
+}
+
+implementation {
+  components Timer0ContextM as Context, TimerC;
+  components MContextSynchProxy as ContextSynch;
+  components MateEngine as VM;
+  components MHandlerStoreProxy as Store;
+
+  Timer = Context;
+  
+  Context.SubControlTimer -> TimerC;
+  Context.ClockTimer -> TimerC.Timer[unique("Timer")];
+  Context.Synch -> ContextSynch;
+  Context &lt;- VM.SubControl;
+  Context.HandlerStore -> Store.HandlerStore[MATE_HANDLER_TIMER0];
+  Context.EngineStatus -> VM;
+}</pre></quote>
+
+		    <p>Just putting a context component in the
+		    top-level Mat&eacute; configuration component list
+		    will include it and all of its wirings.</p>
+		</TD>
+	      </TR>
+	      
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>SendCounterContext</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>Now that you've seen a simple context, you'll
+		  implement a new one. The SendDone context runs every
+		  time a mote sends a packet; it runs when
+		  <tt>GenericComm</tt>'s stand-alone<tt>sendDone</tt>
+		  event fires (not when the parameterized
+		  <tt>SendMsg.sendDone</tt> events fire).</p>
+
+		  <p>Go to your extensions directory and create a CDF,
+		  named <tt>SendCounterContext.cdf</tt>. Put a single
+		  CONTEXT element in it:</p>
+
+		  <quote>
+		    <tt>&lt;CONTEXT name=SendCounter desc="Runs every
+		    time a mote sends a packet." id=100></tt>
+		  </quote>
+
+		  <p>Next, create a module, named
+		  <tt>SendCounterContextM.nc</tt>. Like all other
+		  contexts, it needs to provide <tt>StdControl</tt>
+		  and use <tt>MateContextSynch</tt>,
+		  <tt>MateHandlerStore</tt>, and
+		  <tt>MateEngineStatus</tt>. Additionally, it needs to
+		  use the event <tt>void sendDone()</tt> for
+		  triggering context execution:</p>
+
+		  <quote>
+		    <pre>includes Mate;
+
+module SendCounterContextM {
+  provides {
+    interface StdControl;
+    event result_t sendDone();
+  }
+  uses {
+    interface MateContextSynch as Synch;
+    interface MateHandlerStore as HandlerStore;
+    interface MateEngineStatus as EngineStatus;
+  }
+}</pre>
+		  </quote>
+
+		  <p>The implementation needs to declare a context,
+		  and initialize it in <tt>StdControl.init()</tt>:</p>
+
+		  
+		  <quote>
+		    <pre>implementation {
+  MateContext counterContext;
+
+  command result_t StdControl.init() {
+    result_t rval;
+    timerContext.which = MATE_CONTEXT_SENDCOUNTER;
+    timerContext.rootHandler = MATE_HANDLER_SENDCOUNTER;
+
+    rval = call HandlerStore.initializeHandler();
+    call Synch.initializeContext(&counterContext);
+    return rval;
+  }
+
+  command result_t StdControl.start() {return SUCCESS;}
+
+  command result_t StdControl.stop() {return SUCCESS;}</pre>
+		  </quote>
+
+		  <p>It also needs to halt the context when code
+		  changes or the VM reboots:</p>
+
+		  <quote>
+		    <pre>  event void HandlerStore.handlerChanged() {
+    dbg(DBG_USR3, "SendCounterContext: Handler changed.\n");
+    if (counterContext.state != MATE_STATE_HALT) {
+      call Synch.haltContext(&timerContext);
+    }
+  }
+
+  event void EngineStatus.rebooted() {
+    dbg(DBG_USR1, "SendCounterContext: VM rebooted.\n");
+    if (counterContext.state != MATE_STATE_HALT) {
+      call Synch.haltContext(&timerContext);
+    }
+  }</pre>
+		  </quote>
+
+		  <p>Finally, it needs to submit the context to run
+		  when the network stack finishes sending a packet:</p>
+
+		  <quote>
+		    <pre>  event result_t sendDone() {
+    if (counterContext.state == MATE_STATE_HALT) {
+      dbg(DBG_USR1, "VM: SendCounter context running.\n");
+      call Synch.initializeContext(&counterContext);
+      call Synch.resumeContext(&counterContext, &counterContext);
+      return SUCCESS;
+    }
+    else {
+      // drop the event
+      return FAIL;
+    }
+  }</pre>
+		  </quote>
+
+		  <p>The module is complete. All you need is a
+		  configuration that wires it to all of the needed
+		  components. Open <tt>SendCounterContext.nc</tt> and
+		  implement it:</p>
+
+		  <quote>
+		    <pre>includes Mate;
+
+configuration SendCounterContext {
+}
+
+implementation {
+  components SendCounterContextM as Context;
+  components MContextSynchProxy as ContextSynch;
+  components MateEngine as VM;
+  components MHandlerStoreProxy as Store;
+  components GenericComm;
+  
+  Context.Synch -> ContextSynch;
+  Context <- VM.SubControl;
+  Context.HandlerStore -> Store.HandlerStore[MATE_HANDLER_SENDCOUNTER];
+  Context.EngineStatus -> VM;
+  Context.sendDone <- GenericComm.sendDone;
+}
+		    </pre>
+		  </quote>
+		  
+		  <p>Modify your <tt>simple.vmsf</tt> to include your
+		  new context:</p>
+
+		  <quote>
+		    <tt>&lt;CONTEXT name=SendCounter></tt>
+		  </quote>
+
+		  <p>Rebuild your simple VM with VMBuilder and compile
+		  it for TOSSIM. If set DBG to USR1 and run it TOSSIM
+		  with a single mote, you should see output like this:</p>
+
+		  <quote>
+		    <pre>
+0: VM: SendCounter context running.
+0: VM: Context 1 submitted to run.
+0: VM: Posting run task.
+0: VM (1): OPhaltM executed.
+0: VM: SendCounter context running.
+0: VM: Context 1 submitted to run.
+0: VM: Posting run task.
+0: VM (1): OPhaltM executed.
+0: VM: SendCounter context running.
+0: VM: Context 1 submitted to run.
+0: VM: Posting run task.
+0: VM (1): OPhaltM executed.
+0: VM: SendCounter context running.
+0: VM: Context 1 submitted to run.
+0: VM: Posting run task.
+0: VM (1): OPhaltM executed.
+		    </pre>
+		  </quote>
+
+		  <p>All of these <tt>sendDone</tt> events are from
+		  various services that periodically send packets. For
+		  example, multihop routing periodically sends beacons
+		  for link quality estimation, while the Mat&eacute;
+		  code propagation subsystem periodically advertises
+		  what code it has.</p>
+		</TD>
+	      </TR>
+
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <b>Conclusion</b>
+		</TD>
+	      </TR>
+	      
+	      <TR>
+                <TD>
+		  <p>You've completed the Mat&eacute;
+		  tutorials. You've learned how to program TinyOS
+		  networks with Mat&eacute;, as well as how to build
+		  VMs that meet your particular needs.</p>
+
+		  <hr></hr>
+		  <CENTER>
+		    <b><a href="lesson5.html">&lt; Previous Lesson</a></b> |
+		    <b><a href="index.html">Top</a></b>
+		  </CENTER>
+		</TD>
+	      </TR>
+	    </TABLE>
+	  </TD>
+	</TR>
+      </TABLE>
+    </CENTER>
+  </body>
+</html>

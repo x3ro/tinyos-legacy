@@ -1,0 +1,3 @@
+@opts = ();
+@commonplatforms = ("msp430");
+

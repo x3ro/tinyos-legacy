@@ -1,0 +1,6 @@
+COMPONENT=TinyDBApp
+SENSORBOARD=micasb
+CFLAGS=-I../../tos/lib/Attributes -I../../tos/lib/Commands -I../../tos/lib/TinyDB -I../../tos/lib/TinyDB/Aggregates -I../../tos/lib/Bombilla -I../../tos/interfaces/Bombilla -I../../tos/lib/FS -DNTIMERS=7
+MSG_SIZE=48
+include ../Makerules
+

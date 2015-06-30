@@ -1,0 +1,18 @@
+;-----------------------------------------------------------
+; TASKVIEW config file
+; To comment, use ';' as the first character in a line.
+; No blank lines.  Case sensitive.
+; Syntax: 
+;      Keyword: data<,data2_list,data3_list>
+; Where: 
+;      Server: <hostname or ip_addr>
+;      Database: <database_name>
+;      Bitmap: <bitmap_filename>
+;      Query: <query_table_name>
+;      Sensors: sensor1,sensor2,sensor3  ;<list of selected sensors>
+;-----------------------------------------------------------
+Server: localhost
+Database: task
+Bitmap: xbow.bmp
+Query: query1_results
+Sensors: 

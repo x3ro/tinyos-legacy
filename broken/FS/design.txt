@@ -1,0 +1,212 @@
+	       Matchbox: A simple filing system for motes
+			      David Gay
+
+Overview
+--------
+
+The mote filing system is designed to provide a simple filing system for
+mote-based applications. The design has the following goals:
+
+- Reliability, specifically:
+  - data corruption should be detected
+  - catastrophic failure (e.g., power off) should never lead to meta-data
+    corruption, data loss should be limited to files being written at the
+    time of failure. This implies that file renaming and deletion are 
+    atomic operations.
+- Low resource consumption (especially RAM)
+- Consider typical restrictions on flash memories (there are limitations
+on the number of times a block can be erased, on the minimum erasure size,
+and on multiple writes within a block - these vary depending on flash
+technology)
+
+Most of the design is based on what is not necessary. We do not need:
+- Security in any form
+- A hierarchical filing system
+- Random file access
+- Multiple readers or writers of the same file
+- Many files open simultaneously, however we do wish to support 
+  having two different files open, one for reading and one for writing
+  (this supports fily copy/edit operations)
+
+Expected clients of this filing system are TinyDB (and the Generic Sensor
+Kit), for logging data sets to permanent storage and for storing metadata,
+and the virtual machine for storing programs.
+
+Matchbox
+--------
+
+Matchbox is a flat filing system that supports only sequential reads and
+appending writes. Files are unstructured (simply a sequence of
+bytes). Space can optionally be preallocated for a file (ensuring both that
+space exists in permanent storage, and potentially reducing write
+overhead).
+
+At most one file can be open for reading, and one for writing (and these
+must be different files). Files (that are not open) may be renamed or
+deleted. In Unix style, renaming a file A as an existing file B also
+deletes B.
+
+Matchbox API
+------------
+
+See the attached FileDelete.nc, FileDir.nc, FileRead.nc, FileRename.nc, 
+FileWrite.nc files.
+
+Nearly all operations are split-phase, and fail at initiation if another
+operation is already in progress.
+
+Implementation
+--------------
+
+This implementation is tailored to the Atmel AT45DB041B flash chip used
+on the Micas. It should consider the following constraints of this 
+particular flash chip:
+- The flash is divided into sectors (mostly 128K, though some are smaller).
+- Each sector is divided into pages, each page is 264 bytes long. 
+- Pages can only be written as a whole.
+- Pages should be erased before being written (whatever "should" means).
+- After 10'000 writes to a sector, all its pages should have been written
+at least once.
+
+Note that these are different from "usual" flash rules. These typically say:
+- Each page/byte/whatever can be written a limited number of times (e.g.,
+100'000)
+- Erases are on a larger granularity than writes (e.g., 64k-erases, 
+528-byte writes)
+
+Data structures:
+
+On flash: 
+
+The 264-byte page is divided into 256 data bytes and 8 metadata bytes.
+The metadata stores the following information:
+- per-page CRC (2)
+- page-write counter (2)
+- page type + last-byte-used in page (2)
+  0 - 256: normal page (empty to full)
+  ffff: first metadata page
+- next page pointer (a page number), or all 1's for no next page (2)
+
+Pages are numbered from 0 to <file system capacity in pages>-1. The
+expectation is that the file system will use some whole number of
+flash sectors.
+
+There are two types of pages: data pages, and first-meta-data-page pages.
+
+Files and the metadata are both byte-streams. A byte-stream is a sequence
+of bytes, and is identified by its initial page number. The pages of a
+byte-stream are found by following the linked list formed by the next page
+pointers. Data ends at the first page where last-byte-used is not 256. Note
+that the linked list of pages may extend arbitrarily past the last page
+containing data - this means that space has been reserved for future
+expansion of the byte-stream.
+
+Meta-data format (viewed as a byte-stream):
+A header stores the meta-data version number, followed by an unsorted list
+of file entries. Each file entry is a 14-byte null-terminated string followed
+by the file's byte-stream's initial page number. The first page of the
+meta-data bytestream has the first-meta-data-page type. The other pages of
+the meta-data, and the file byte-stream pages have the data page type.
+
+Note that their is no fixed "root" page: the initial page number of the
+meta-data is found by scanning the flash looking for the page with type
+first-meta-data-page which contains the highest meta-data version number.
+This avoids continuously writing the "root" page (a bad idea given the 
+limited number of writes supported by flash). Scanning the flash to locate
+this page at boot time is acceptable in Matchbox as the flash is small
+(a few 100k) and page access relatively fast (approx. 1ms). 
+
+There is also no explicit listing of the free pages, this can also be
+reconstructed at boot time once the initial page of the meta-data is
+found.
+
+In memory: 
+Meta-data initial page number.
+Meta-data version number.
+Free page bitmap.
+Open-for-read file information:
+  initial page number
+  current page
+  current page offset
+  remaining bytes to read
+Open-for-write file information.
+  initial page number
+  current page
+  current page offset
+  remaining reserved bytes
+Last allocated page.
+Number of free pages.
+<various pieces of misc state for operations in progress>
+
+
+
+Algorithms: 
+
+I will not detail each operation's algorithm in detail at this point, but
+will mention a few basic principles.
+
+Update of meta-data is always atomic: new meta-data is written by making a
+copy of the old meta-data in new blocks, with appropriate changes. The new
+initial metadata page contains a higher version number than the current
+metadata. The initial page is only marked as a first-meta-data-page once
+all other metadata has been written. New meta-data is only written after the
+information it refers to is known to be valid (e.g., on new file creation,
+the file's first page has been successfully written).
+
+At boot time, the initial metadata page is located by reading all of the
+flash sequentially and finding the valid (CRC-based check)
+first-meta-data-page page with the highest version number.
+
+Once the initial metadata page is located, the free page bitmap is built by
+walking through the filing system. Inconsistencies in free blocks will lead
+to the filing system being marked readonly. A separate fsck-style tool
+should be written to fix this (note that this should only happen as a
+result of block corruption given the atomic metadata updates, hence should
+be hopefully rare). The handling of corrupt files has yet to be determined
+(I expect a small API change). A corrupt file is one containg a page with
+a bad CRC. This could be due, e.g., to a power-off during a file-page
+write.
+
+A free page is found by scanning the free page bitmap starting at the
+value of "Last allocated page" (and updating "Last allocated page"). This
+produces some amount of "wear levelling" (i.e., writing each page an
+equal number of times). The boot-time value of "Last allocate page" is
+the meta-data initial page number.
+
+A background task sequentially walks over the filing system's pages
+and checks their write counters. Any page which is more than 9000
+writes "old" is rewritten (and hence sees its write counter updated).
+The write counter value is maintained inside the EEPROM component.
+A walk rate of one page per minute should be sufficient (assuming
+that write-rate is not high - may need further analysis and/or
+adaptivity).
+
+Given these principles, the algorithms & implementation of the various
+operations of the Matchbox API should be straightforward.
+
+Dependencies
+------------
+
+A rewritten EEPROM component (based on the ByteEEPROM interface), with
+support for the reliability needs of Matchbox (CRCs on flash pages, write
+counters, page type - all using the per-page flash metadata).
+  Responsability: David Gay
+
+Timeline
+--------
+
+11/18: Dummy Matchbox available ("noop" API implementation) to allow 
+       other development to proceed.
+11/22: Matchbox component division and internal interfaces designed
+       Initial (partial reliability support) implementation of Matchbox
+       components complete.
+       New EEPROM interface designed
+11/29: New EEPROM component implemented
+       Initial Matchbox implementation tested
+12/6:  Reliability aspects of Matchbox completed
+
+Acknowledgements
+----------------
+
+Timothy Roscoe came up with the Matchbox name.
+Wei Hong helped define the filing system requirements.

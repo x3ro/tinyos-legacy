@@ -1,0 +1,3 @@
+COMPONENT=TestUSBC
+include ../Makerules
+

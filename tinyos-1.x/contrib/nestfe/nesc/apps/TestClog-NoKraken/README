@@ -1,0 +1,19 @@
+//$Id: README,v 1.2 2005/07/16 22:05:31 gtolle Exp $
+
+TestClog README
+
+This is the basic test app for the routing subsystems.
+
+All nodes send a message to the Drain group every 4 seconds. This
+should be configurable by changing the TestClogM.sendPeriod RAM
+attribute.
+
+Setting the TestClogIsMobile Nucleus attribute to 1 will make a node
+join a Drain group so that it can receive messages over DripSend. 
+
+Forwarders blink green, Receivers blink blue.
+
+There are RAM symbols keeping counts in DripSendM and TestClogM. 
+
+This doesn't include the actual Clog nesC component anymore. It
+depends on the Clog daemon running on a base station.

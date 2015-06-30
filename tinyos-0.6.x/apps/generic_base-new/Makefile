@@ -1,0 +1,3 @@
+DESC=generic_base.desc
+include ../Makeinclude
+

@@ -1,0 +1,3 @@
+COMPONENT=ObjectTrackingC
+include ../Makerules
+

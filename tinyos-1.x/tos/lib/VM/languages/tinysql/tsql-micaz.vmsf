@@ -1,0 +1,23 @@
+<VM NAME="TSQLVM" DESC="A TinySQL VM with micasb sensor board support." DIR="../../../../../apps/TSQLVM">
+<OPTION CAPSULE_SIZE=2048>
+<SEARCH PATH="../../opcodes">
+<SEARCH PATH="../../contexts">
+<SEARCH PATH="../motlle/mate">
+<SEARCH PATH="../motlle/mate/rep-float">
+<SEARCH PATH="../motlle/mate/runtime">
+<SEARCH PATH="../motlle/mate/runtime/gen">
+<SEARCH PATH="../motlle/matelib">
+<SEARCH PATH="../motlle/matelib/gen">
+<SEARCH PATH="../../../Util">
+<SEARCH PATH="../../../MultiHopLQI">
+
+<LANGUAGE NAME="motlle">
+<LOAD FILE="../motlle/mate/runtime/gen/floatfns.vmsf">
+
+<FUNCTION NAME="led">
+<FUNCTION name="id">
+<CONTEXT NAME="Timer0">
+<LOAD FILE="../../sensorboards/micasb.vmsf">
+<LOAD FILE="../motlle/matelib/gen/commfns.vmsf">
+<LOAD FILE="../motlle/matelib/gen/mhopfns.vmsf">
+<LOAD FILE="../motlle/matelib/gen/queryfns.vmsf">

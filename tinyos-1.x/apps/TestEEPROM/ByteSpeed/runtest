@@ -1,0 +1,8 @@
+#!/bin/tcsh
+@ b1 = $1 % 256
+@ t = $1 / 256
+@ b2 = $t % 256
+@ t = $t / 256
+@ b3 = $t % 256
+@ b4 = $t / 256
+msend ff ff 78 42 5 `tohex $2` `tohex $b1` `tohex $b2` `tohex $b3` `tohex $b4`

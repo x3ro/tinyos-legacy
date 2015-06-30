@@ -1,0 +1,4 @@
+#!/bin/bash
+# this is going to create a new table for the experiment 
+java Receiver newTable $1 COM2
+

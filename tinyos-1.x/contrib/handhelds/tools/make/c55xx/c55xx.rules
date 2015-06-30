@@ -1,0 +1,111 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: c55xx.rules,v 1.1 2005/07/29 18:29:24 adchristian Exp $
+
+define MSP_HELP
+
+ MSP extras:
+
+   debug    : compile with minimal optimization and debug symbols
+   debugopt : compile with debug symbols
+   xnp      : compile for network programming
+
+ Programmer options:
+
+   bsl,<com=3> : (default) use BSL programmer on <com> port, default 3
+
+   The dev or host parameter for the programmer option need not be specified,
+   in which case it is expected to be defined as in an environment variable of
+   the same name in all caps (such as BSL).
+
+endef
+HELP += $(MSP_HELP)
+
+MSP_NESC_TARGET ?= c55xx
+MSP_GCC ?= c5x-gcc
+MSP_MCU ?= tms320c5509
+PFLAGS += -fnesc-target=$(MSP_NESC_TARGET) -gcc=$(MSP_GCC) -mmcu=$(MSP_MCU)
+
+OBJCOPY = /bin/true
+OBJDUMP = /bin/true
+SET_ID = $(TINYOS_MAKE_PATH)/msp/set-mote-id
+NCC = ncc
+LIBS = -lm
+
+BUILDDIR = build/$(PLATFORM)
+MAIN_EXE = $(BUILDDIR)/main.exe
+MAIN_IHEX = $(BUILDDIR)/main.ihex
+INSTALL_IHEX = $(MAIN_IHEX).out
+
+PFLAGS += -Wall -Wshadow -DDEF_TOS_AM_GROUP=$(DEFAULT_LOCAL_GROUP) $(NESC_FLAGS) -fno-dollars-in-identifiers
+PFLAGS += -target=$(PLATFORM) -fnesc-cfile=$(BUILDDIR)/app.c -board=$(SENSORBOARD)
+ifdef MSG_SIZE
+PFLAGS += -DTOSH_DATA_LENGTH=$(MSG_SIZE)
+endif
+
+DEFAULT_PROGRAM ?= bsl
+
+BUILDLESS_DEPS += bytes
+
+# Use the 'if' function instead of the 'ifdef' construct because ifdef freaks
+# out with call in there.  I don't know why.
+$(if $(PROGRAM),,$(call TOSMake_include,msp/$(DEFAULT_PROGRAM).extra))
+
+ifndef BUILD_DEPS
+  ifeq ($(filter $(BUILDLESS_DEPS),$(GOALS)),)
+    BUILD_DEPS = ihex bytes
+  endif
+endif
+
+setid: FORCE
+	@cmd () { echo "$$@"; $$@; }; if [ x = x$(NODEID) ]; then cmd cp $(MAIN_IHEX) $(INSTALL_IHEX); else cmd $(SET_ID) --objcopy $(OBJCOPY) --objdump $(OBJDUMP) --target ihex $(MAIN_IHEX) $(INSTALL_IHEX) $(NODEID); fi
+
+ihex: exe FORCE
+	$(OBJCOPY) --output-target=ihex $(MAIN_EXE) $(MAIN_IHEX)
+
+exe: exe0 $(MAIN_EXE) bytes FORCE
+	@:
+
+TIDIR=w:\\zigbee\\msp\\dsp\\ti
+C5AS = wine $(TIDIR)\\c5500\\cgtools\\bin\\cl55.exe  --
+C5CC = wine $(TIDIR)\\c5500\\cgtools\\bin\\cl55.exe  --
+HEXGEN = wine $(TIDIR)\\c5500\\cgtools\\bin\\hex55.exe  --
+CONFGEN = wine $(TIDIR)\\plugins\\bios\\gconfgen.exe --
+
+C5ASMOPT = -g -mg -q -iinclude -i$(TIDIR)/c5500/bios/include -i. -d_DEBUG -ml -v5509 -eo.o
+C5CFLAGS = -g -mg -q -i$(TIDIR)/c5500/bios/include -i$(TIDIR)/c5500/cgtools/include -iinclude -i. -d_DEBUG -ml -v5509 -eo.o
+
+
+GENERATED_FILES = $(BUILDDIR)/zap.cdb $(BUILDDIR)/zapcfg.cmd $(BUILDDIR)/zapcfg_c.c $(BUILDDIR)/zapcfg.h $(BUILDDIR)/zapcfg.h55 $(BUILDDIR)/zapcfg.s55
+
+ASMOPT = -g -mg -q -iinclude -i$(TIDIR)/c5500/bios/include -i. -d_DEBUG -ml -v5509 -eo.o
+
+$(BUILDDIR)/zap.tcf:
+	cp $(TOSDIR)/platform/zap/zap.tcf $(BUILDDIR)/zap.tcf
+
+# confgen does not change the modification date/time on output files
+$(GENERATED_FILES): $(BUILDDIR)/zap.tcf
+	rm -f $(GENERATED_FILES)
+	cd $(BUILDDIR); wine $(TIDIR)/bin/utilities/tconf/tconf.exe -- -Dconfig.tiRoot=$(TIDIR) zap.tcf
+	echo after tconf
+	cd $(BUILDDIR); $(CONFGEN) zap.cdb
+	echo after confgen
+
+$(MAIN_EXE): $(GENERATED_FILES) $(BUILDDIR)/app.c exe0 $(BUILDDIR)/zapapp.lnk
+	cd $(BUILDDIR); $(C5CC) $(C5CFLAGS) -c zapcfg_c.c
+	cd $(BUILDDIR); $(C5CC) $(C5CFLAGS) -i$(TOSDIR)/platform/zap -i$(TOSDIR)/platform/c55xx -c utils.c
+	cd $(BUILDDIR); $(C5AS) $(ASMOPT) -c zapcfg.s55
+	cd $(BUILDDIR); $(C5CC) -@zapapp.lnk
+	cd $(BUILDDIR); $(HEXGEN) -boot -v5510:2 -serial8 -i -o zap.hex zap.out
+
+exe0: builddir $(BUILDDIR)/zap.cdb $(BUILD_EXTRA_DEPS) FORCE
+	@echo "    compiling $(COMPONENT) to a $(PLATFORM) binary"
+	$(NCC) -o $(MAIN_EXE) $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc $(LIBS) $(LDFLAGS)
+	mv app.o $(BUILDDIR)
+	@echo "    compiled $(COMPONENT) to $(MAIN_EXE)"
+
+builddir: FORCE
+	mkdir -p $(BUILDDIR)
+
+bytes: $(MAIN_EXE) FORCE
+	@objdump -h $(MAIN_EXE) | perl -ne '$$b{$$1}=hex $$2 if /^\s*\d+\s*\.(text|data|bss)\s+(\S+)/; END { printf("%16d bytes in ROM\n%16d bytes in RAM\n",$$b{text}+$$b{data},$$b{bss}); }'
+

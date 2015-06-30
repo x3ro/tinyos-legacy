@@ -1,0 +1,78 @@
+This driver is based on the umass nand driver.
+We implemented three interface for our TL-tree algorithm and fixed few bugs of the original driver.
+The driver with TL-tree will be released soon.
+
+Contact:	gongz@andrew.cmu.edu
+			dliang.buaa.edu.cn@gmail.com
+			lihuan@buaa.edu.cn
+			
+Project website: http://nand.bicoup.com
+
+
+/*
+ 
+* file:        interface & debug doc
+ 
+* description: guide for interface and debugging command
+ 
+* author:      Gong Zhang, Beihang Univ. School of Computer Science
+ 
+* 2011/5/4 15:16:53 GZhang
+ 
+*/
+
+
+Dev interface 
+
+	PageNAND.read1 (addr, offset, buf1);
+	// read from NAND to buf1[offset]~buf1[offset+512]
+
+	PageNAND.write1 (addr, offset, buf2);
+	// write NAND with value buf2[offset]~buf2[offset+512]
+
+	PageNAND.erase1 (addr);  
+	// erase 32page on NAND starts at addr
+
+	result_t WriteLD(uint8_t *buffer);
+	// handle the user's write command	
+
+NAND control interface
+
+	PageNAND.write(addr, offset, buf, sizeof(buf));
+	//read from NAND to buf
+
+	PageNAND.read(addr, 0, buf, sizeof(buf));
+	// write NAND with value in buf
+
+	PageNAND.erase(addr);
+	// erase 32page on NAND starts at addr
+
+User interface
+
+	NandFlashC.Write(sData1 sDataLD) 
+	//write a struct of data to NAND
+
+	PageNAND.read(addr, 0, buf, sizeof(buf));
+	// write NAND with value in buf
+
+	PageNAND.erase(addr);
+	// erase 32page on NAND starts at addr
+
+	NandFlashC.SearchLD(uint32_t Time);
+	// search the data in the flash by Time
+
+	
+Debugging command and function
+
+All the commands are ended with an ENTER and should be sent to UART port with the following configuration 57600,n,8,1.
+
+i\n - read and print ID register
+v xx\n  - set value to hex value
+a xx\n  - set page <number> to hex value
+?\n -read value and page <number>
+w\n - write block <number> with <value>
+r\n - read block <number> and verify =<value>
+e\n - erase block <number>
+I\n - init
+
+<html xmlns="http://www.w3.org/1999/xhtml"><body xmlns="http://www.w3.org/1999/xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><img width='77' height='5' src='chrome://livemargins/skin/monitor-background-horizontal.png' style='position: absolute;left:-77px;top:-5px'/> <img src='chrome://livemargins/skin/monitor-background-vertical.png' style='position: absolute;left:0;top:-5px;'/> <img id='monitor-play-button' src='chrome://livemargins/skin/monitor-play-button.png' onmouseover='this.style.opacity=1' onmouseout='this.style.opacity=0.5' style='position: absolute;left:1px;top:0;opacity:0.5;cursor:pointer'/>

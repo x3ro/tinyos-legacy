@@ -1,0 +1,68 @@
+\section{Introduction}
+
+\tinyos is an open-source operating system designed to 
+support the networked sensors, a platform regime with
+severe hardware restrictions especially with respect to memory and power. 
+The \tinyos runtime environment provides not only the traditional
+operating system role of resource mediation and system libraries, but
+also encompasses a set of support tools for data collection and
+aggregation, and debugging assistance. 
+
+\tinyos originally began as a research project at UC Berkeley in 1999
+with the goal of providing a platform for embedded systems. Beginning
+in 1999 Berkeley developed the first of a series of wireless sensor
+nodes, commonly called motes. \tinyos was the operating system
+created by then graduate student Jason Hill for the Berkeley-designed
+motes \cite{jhill-thesis}. While \tinyos is still a UC Berkeley research project, today
+there are now hundreds of companies and institutions using \tinyos as
+their embedded systems platform, the most common of which is networked
+embedded sensors or \emph{motes}. There are several instantiations of
+\tinyos radio stacks (Bluetooth, 802.15.4, proprietary FSK) as well as several
+processor ports (Atmel Atmega128, Motorola HCS08, TI MSP340).  The
+sensors that the motes offer vary from mote to mote but can include
+sensors for magnetic field, acceleration, light, sound, temperature,
+barometric pressure and relative humidity.  The motes \tinyos
+currently supports include the Mica and Mica2 (Atmega128/Chipcon
+CC1000) and the Telos (TI MSP340/Chipcon CC2420) mote families.
+
+Due to the variety among platform sensor and communication capabilities,
+this document only covers the \tinyos components common to all platforms.
+Platform-specific guides are available to cover platform-specific
+components.\footnote{No they're not.}
+
+{\bf About this document.} This document assumes a basic understanding
+of programming tools including shell scripts, cvs, compilers, the C
+programming language, and make. If you do not understand one of 
+these tools, try using \emph{Google} to
+find more information. We've also listed some references at the back 
+of the document.
+
+\subsection{nesC}
+\tinyos is written in a C extension Language called \nesc that provides
+language support to the concepts and execution model of \tinyos . The
+\nesc compiler, \ncc, preprocesses \tinyos code before passing
+compilation on to the Gnu C Compiler, gcc. \nesc allows for more
+complete error reporting, java-like interface syntax, programming
+model support. 
+
+Though this manual does not explain in detail \nesc syntax or semantics, 
+\nesc will be explained where necessary for understanding. For maximum
+benefit, we highly recommend that the \nesc Reference Manual be 
+read before continuing beyond this introduction.
+
+{\bf Programming conventions.} 
+enum. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

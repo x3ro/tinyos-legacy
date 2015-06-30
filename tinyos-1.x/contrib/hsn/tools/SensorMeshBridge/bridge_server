@@ -1,0 +1,1 @@
+./wsnbridge -s -gateIP 10.0.10.102 -beacon BROAD 10.0.0.10.100 -serial COM4

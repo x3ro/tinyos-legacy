@@ -1,0 +1,94 @@
+change the rssi filter and calibration
+make debugging commands to do each phase seperately
+make debugging commands to stop each phase
+make sure all delays we might want are configurable
+
+get sequence to happen with and without ranging exchange
+
+
+
+
+tonight: make change to backoff:txDelay doesn't seem to do anything; it is all in the delayMask
+tonight: change radio range: 
+morning: do a dryrun
+k tonight: fix matlab visualization
+c morning: setup 15+ nodes
+k tonight: run 7 simulations
+
+
+ultrasound board
+TxRxControllerM line 127: fix the pointer to a pointer problem and look for more of them
+fix the omnisound.h redundancy problem
+check out the TOSH_CLR_INC_PIN() command, which was removed from (which file)
+check out TOSH_CLR_5V_ENABLE_PIN conflict: possible shorting between atmega8 and mica2
+check out start & stop order in TxRxControllerM
+TxRxControllerM line 161 - when to re-enable interrupt??
+USoundDetectorM line 69 was fixed by MechE guy - why?
+
+figure out how to change the DIAGMSG_BASE_STATION from our code
+
+figure out how to get the source address out of the matlabMessageListener
+
+create small test application with matlab and testbed that makes each node chirp and stores estimates
+
+in micaUltrasoundLib/ReceiverM and TransmitterM, take out the rangingID stuff and the receive/receiveDone stuff  
+
+micaUltrasoundLib/receiverM.nc: remove the radioCoordinator.byte interface and move the performRanging=true into ChirpReceive.receive.  
+
+move the signalToAtmega8 into startSymbol.  then, change the byteCount in RadioCoordinator of TransmitterM from 10 to 5.
+
+Check fred's laptop for unchecked-in matlab or other code, especially data.
+
+write code to do 3-4 batches
+
+update code to filter 30-40 samples instead of 10
+
+update code to use 6-8 anchors instead of 4
+
+update code to receive one command and start
+
+update code to propogate shortest paths/anchor correction using delay-based broadcast
+
+go through contrib/calamari/todo list and finish unfinished items
+
+update code to have better anchor, shortest path, and correction factor selection/termination conditions
+
+shadowing error effect experiment
+
+derive specifications from PEG and do matlab simulations to figure out how to achieve them 
+
+
+
+COMM:
+
+Connect(socket1, socket2, ...)
+	create the connection if not exists
+		store in moteIF{i}, store name in connectionName{i}
+	for each functio/message in globalListeners
+		listen(function, message, socket1, socket2, etc)
+
+disconnect(socket1, socket2, etc)
+	shutdown phoenix source
+	deregister all mml
+	delete moteIF{i}, connectionName{i}, mml{i}, packet{i}, function{i}
+
+listen(messagetype, function)
+	add to function/message to global message listeners
+	create and add mml for all:  listen(function, message, moteIF{:})
+
+listen(messagetype, function, socket1, socket2, etc)
+	for each socket passed, create and add mml with function/messagetype
+		store in mml{i}(end)
+		store in packet{i}(end)
+		store in function{i}(end)
+
+stopListening(messagetype, function)
+	remove from global message listeners
+	remove from all open connections: stopListening(mesagetype, function, moteIF{:})
+
+stopListening(messagetype, function ,socket1, socket2, etc)
+	for each socket passed, find the function and the message
+		if found, take the corresponding mml, deregister and delete mml, packet, function
+
+COMM.socketName
+COMM.moteIF

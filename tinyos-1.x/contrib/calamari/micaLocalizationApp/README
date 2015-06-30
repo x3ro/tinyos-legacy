@@ -1,0 +1,5 @@
+This directory holds an application that should be installed on the mica2dot to do localization when there is an ultrasound ranging board attached, with the code in ultrasoundBoardApp installed on it.  To install use
+
+make mica2dot install
+
+All it really does is pull the localization code from the calamari/localization directory and initialize it.  The UART files are here because the ultrasound board is using sync bytes that are different from the standard TinyOS UART frames.  

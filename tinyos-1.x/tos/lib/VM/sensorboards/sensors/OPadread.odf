@@ -1,0 +1,7 @@
+//
+// Format: <name> <opcode> <numparam> [param0]...[paramN] <return value>
+// [return type] "<desc text>"
+//
+
+<FUNCTION name=adread opcode=adread numParams=1 returnVal=TRUE desc="Reads the specified A/D channel (0-13) from the MDA300CA." schedpoint=true>
+

@@ -1,0 +1,23 @@
+--------------------------------------------------------------------------------------------------
+change to BEAR network
+change IP to 10.0.0.121
+login: ssh root@10.0.0.12  (rootme)
+cd /home/shim;./relaymote 10.0.0.121 /dev/ttyS1 -u -d
+
+
+
+
+--------------------------------------------------------------------------------------------------
+java net.tinyos.sf.SerialForwarder -comm network-udp@9005@localhost:9999:telos
+
+cd /home/shawn/mydocs/lcl_tinyos/tinyos-1.x/contrib/nestfe/java
+java DelugeStats passive
+
+
+
+
+--------------------------------------------------------------------------------------------------
+java net/tinyos/sf/SerialForwarder -no-gui -port 9002 -comm serial@COM10:telos
+
+cd /home/shawn/mydocs/lcl_tinyos/tinyos-1.x/contrib/nestfe/java
+MOTECOM=sf@localhost:9002 java DelugeStats

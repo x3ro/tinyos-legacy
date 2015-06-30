@@ -1,0 +1,7 @@
+README 
+
+
+Description:
+-Measure voltage ref and thermistor resistance on Mica2dot
+-Computes battery voltage from it. Outputs messages to uart port.
+-Computes thermistor voltage, output message to uart port

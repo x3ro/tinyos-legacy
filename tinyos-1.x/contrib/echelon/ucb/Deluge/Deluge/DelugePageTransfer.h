@@ -1,0 +1,13 @@
+
+#ifndef __DELUGE_PAGE_TRANSFER_H__
+#define __DELUGE_PAGE_TRANSFER_H__
+
+#define DELUGE_MAX_IMAGE_SIZE     ((uint32_t)112*(uint32_t)1024)
+#define DELUGE_PKTS_PER_PAGE      24
+#define DELUGE_PKT_PAYLOAD_SIZE   22
+#define DELUGE_BYTES_PER_PAGE     (DELUGE_PKTS_PER_PAGE*DELUGE_PKT_PAYLOAD_SIZE)
+#define DELUGE_PKT_BITVEC_SIZE    (((DELUGE_PKTS_PER_PAGE-1) / 8) + 1)
+
+#define DELUGE_NO_PAGE            0xffff
+
+#endif

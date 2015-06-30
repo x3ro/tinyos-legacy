@@ -1,0 +1,8 @@
+README
+
+
+Description:
+-Read Light, X-axis and Y-axis accel sensor readings.
+-Get 5 samples of sound readings.
+-Output message to uart port
+-Output message to radio port

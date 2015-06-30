@@ -1,0 +1,75 @@
+#
+# Author: 	Barbara Hohlt <hohltb@cs.berkeley.edu>
+#
+# 	Buffer Management and Forward Queueing
+#		using SlackerQueues
+#
+#	TinyOS Ad-Hoc Routing Component Architecture 
+#
+
+Description:
+This software demonstrates how to implement buffer management and
+forward queueing in the TinyOS Ad-Hoc Routing Component Architecture 
+using SlackerQueues.  It is located in the sourceforge cvs repository 
+under the tinyos-1.x tree.
+
+	http://sourceforge.net/projects/tinyos/
+	module tinyos-1.x/contrib/SlackerBufferMgmt/ 
+
+SlackerQueues are circle buffer queues of type TOS_MsgPtr. The code of 
+interest is in the MultiHop component.  The MultiHop component implements 
+the TinyOS Ad-Hoc Routing Component Architecture. See 
+
+	http://www.tinyos.net/tinyos-1.x/doc/ad-hoc.pdf 
+
+TestSlackerQueues is a trivial test application wired to the MultiHop 
+component. It sends 100 messages. Both the TestSlackerQueues and MultiHop 
+components are meant to be example code to illustrate the use of SlackerQueues 
+for buffer management and forward queueing. 
+
+There are two SlackerQueues used in the MultiHop component. SQUEUE_SIZE
+is set in FPS.h.
+
+    MultiHopRoute.freeList
+	This is a SlackerQueue used as a free list of buffers. When
+	MultiHopRoute receives a route-thru message it puts the message 
+	on the MultiHopSend.sendQueue for forwarding and returns a 
+	message buffer from the freeList to the ActiveMessages layer.
+        Currently the freeList is initialized with 10 buffers. You
+        can change the number of free buffers in SlackerQueueM.makeQ();
+
+    MultiHopSend.sendQueue
+	This is a SlackerQueue used as a forwarding queue. The sendQueue 
+	handles route-thru packets as well as source originated packets
+	from the application layer. After a message has been forwarded,
+	MultiHopSend returns the message buffer either to
+	MultiHopRoute.freeList or the application.	
+
+
+MultiHopRouteSelect is placeholder code which enforces the network 
+neighborhood and topology in software. It assumes a network of 10 
+motes with ids 0-9 where mote 0 is the base station. 
+			0
+		/		\
+		1		2
+	/		\		\
+	3		4		5
+  /		\		/		\
+ 6		7		8		9
+
+You can use this framework to implement your own multi-hop routing
+algorithms by implementing MultiHopRoutSelect.
+
+MultiHopSend implements a naive store-and-forward queueing policy. 
+You can use this framework to implement your own queueing
+policies. Flexible Power Scheduling, for example, manages the sendQueue
+optimally using FPS communication scheduling. 
+
+Useage:
+1. TOSSIM
+	make pc
+	export DBG=route
+	build/pc/main.exe 6
+2. MICA
+Program motes 1-9 with TestSlackerQueues and mote 0 with TOSBase.
+   	make mica|mica2|mica2dot install

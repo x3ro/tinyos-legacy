@@ -1,0 +1,28 @@
+--- ../../../../tinyos-1.x/tos/system/AM.h	2002-09-10 10:50:27.000000000 -0700
++++ AM.h	2002-12-28 00:32:19.000000000 -0800
+@@ -67,6 +67,9 @@
+ 
+ // Message format
+ 
++#ifndef _H_AM_h
++#define _H_AM_h
++
+ enum {
+   TOS_BCAST_ADDR = 0xffff,
+   TOS_UART_ADDR = 0x007e,
+@@ -105,6 +108,8 @@
+   uint16_t strength;
+   uint8_t ack;
+   uint16_t time;
++  RoutingDispatch_t dispatch;
++  RoutingMsgExt_t ext;
+ } TOS_Msg;
+ 
+ enum {
+@@ -127,3 +132,6 @@
+ 
+   return offsetof(TOS_Msg, strength);
+ }
++
++#endif // _H_AM_h
++

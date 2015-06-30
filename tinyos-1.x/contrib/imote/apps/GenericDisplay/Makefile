@@ -1,0 +1,2 @@
+COMPONENT=GenericDisplay
+include ../Makerules

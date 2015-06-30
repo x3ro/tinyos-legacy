@@ -1,0 +1,61 @@
+$Id: README.xsm,v 1.1 2005/04/27 21:17:11 ssbapat Exp $
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+@author Prabal Dutta <dutta.4@osu.edu>
+@author Sandip Bapat <bapat@cse.ohio-state.edu>
+
+
+This README explains the directory structure for files relevant to the
+xsm platform and provides a quick start for getting up and running.
+
+
+OUTLINE OF SUBDIRECTORIES
+
+    make/  is the TinyOS Make System directory for xsm make files
+    platform/xsm/  is the platform directory
+    sensorboard/xsm/  is the sensorboard directory
+    
+QUICK START
+
+    # These variables should get set when you log in
+    export TOSDIR=`ncc -print-tosdir`
+    # Change the line below as needed to reflect the correct location of the 'exscal' folder
+    export EXSCALDIR=c:/exscal	
+ 	
+    export MAKERULES=$TOSDIR/../tools/make/Makerules
+    export TOSMAKE_PATH=$EXSCALDIR/make
+
+    # Just once, to help nesc
+    ln -s $EXSCALDIR/platform/xsm $TOSDIR/platform/
+
+    # Later, to build an application for the xsm
+    make xsm
+
+    # Or, or (re)install over an MIB600 (also known as EPRB)
+    make xsm eprb,192.168.1.103 reinstall,22
+
+
+DESCRIPTION OF QUICK START
+
+TOSDIR is set to make easy reference to that directory in the     following commnds of the quick start.
+
+MAKERULES points to the new TinyOS Make System (also known as TOSMake),
+required to build for the xsm target.  This is the Makerules that
+will be used when you type "make" in an application directory.
+
+TOSMAKE_PATH is used by TOSMake to pull in additional build targets and
+platforms from the specified directory.  This is how the build system
+knows about the "xsm" target.
+
+The symbolic link of xsm to $TOSDIR/platform/ is necessary for nesc
+to build the xsm platform.  This step is not needed when using nesc
+1.1.1beta4 or newer.
+
+After that, making and installing on the xsm platform occurs just
+like any other platform.
+
+
+ADDITIONAL REQUIREMENTS AND POINTS OF INTEREST
+
+The XSM platform code has been tested with TinyOS version 1.1.7
+GNUMake version 3.80 or newer is required by TOSMake.  Many linux
+systems install version 3.79.1, which is insufficient.

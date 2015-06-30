@@ -1,0 +1,5 @@
+#-*-Makefile-*- vim:syntax=make
+
+BUILD_DEPS = testbed_list
+NODE_LIST ?= nodes
+

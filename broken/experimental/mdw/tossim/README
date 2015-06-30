@@ -1,0 +1,17 @@
+This is a drop-in replacement for TOSSIM's radio stack that operates at
+the packet, rather than the bit, level. In preliminary testing it
+performs about 100 times faster than the default bit-level radio stack.
+Obviously it does not capture the subtleties and behavior of the
+bit-level simulation, but, it is useful for testing and simulating large
+networks. 
+
+To use this code, all you need to do is add the line
+  PFLAGS = -I/path/to/tinyos/broken/experimental/mdw/tossim
+to your application Makefile, then rebuild your application with 'make pc'.
+
+This packet-level simulation is compatible with TOSSIM's lossy radio
+models, so if you are using "-r lossy" or setting link-level loss
+probabilities with TinyViz, it will work.
+
+Matt Welsh - mdw@eecs.harvard.edu
+

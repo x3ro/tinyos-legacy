@@ -1,0 +1,23 @@
+This version of the multi-hop router
+is designed to be a drop-in replacement of the 
+TinyOS 1.1 version of lib/Route.  It will eventually
+be merged into the main release.
+
+To use this version of multi-hop routing, change your Makefile
+so this directory is in the Nesc search path and remove the
+tos/lib/Route directory.
+
+< PFLAGS= -I%T/lib/Route -I%T/lib/Queue -I%T/lib/Broadcast
+---
+> PFLAGS= -I%T../contrib/xbow/tos/lib/MintRoute -I%T/lib/Queue -I%T/lib/Broadcast
+
+Then change your applicaiton-level description file to use the EWMAMultiHopRouter.  
+In the case of Surge, the Surge.nc file is chaged as follows:
+
+< GenericCommPromiscuous as Comm, Bcast, MultiHopRouter as multihopM, QueuedSend, Sounder;
+---
+> GenericCommPromiscuous as Comm, Bcast, EWMAMultiHopRouter as multihopM, QueuedSend, Sounder;
+
+Simply recompile and you will be using the new routing protocol.
+
+

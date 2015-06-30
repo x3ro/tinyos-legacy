@@ -1,0 +1,27 @@
+Spantree region notes
+
+- Region.getRegion() is invoked by the root, which causes the spanning 
+  tree to be formed. (Non-root nodes do participate in spanning tree
+  formation, of course, but do not call getRegion() themselves.)
+
+- TupleSpace.put(): If a non-root node, sends to the root (caching along
+                        the way!)
+                    If the root node, floods to all nodes
+ 
+- TupleSpace.get(): Reads a locally-cached value
+   Supports NODE_ANY as an address for the get, which iterates through 
+   all cached values matching the given key
+
+- Reduce.reduceToOne(): Only works from the root; causes a reduction
+  initation message to be flooded through the network, causing the
+  reduction to occur. Nodes may be able to respond to the reduction
+  without collecting further data, since they have cached previous put()
+  data from their children
+
+              
+Implementing TinyDiff:
+  - Root does a 'put' of an interest variables (floods to network)
+  - All other nodes do a periodic 'get' to see if the interest matches
+    their data
+  - If so, they do a 'put' of their data which sends it up to the root
+  - Root does a periodic 'get_all' to get all variables pushed up

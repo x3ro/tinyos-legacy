@@ -1,0 +1,20 @@
+#-*-Makefile-*- vim:syntax=make
+# Makefile to be included by each application's Makefile for T-MAC
+#TOSDIR:=$(shell ncc -print-tosdir)
+MAKERULES:=$(TOSDIR)/../tools/make/Makerules
+TOSMAKE_PATH += $(TOSDIR)/../contrib/t-mac/make
+
+MAKECMDGOALS += tmac
+
+MICA_DERIVE=mica2 mica2dot tnode
+IS_DERIVE:=$(strip $(filter $(MICA_DERIVE),$(MAKECMDGOALS)))
+ifneq ($(IS_DERIVE),)
+$(if $(shell avr-as --help | grep allow-dollars),$(eval PFLAGS += -Wa,--allow-dollars),)
+endif
+
+IS_TNODE:=$(strip $(filter tnode,$(MAKECMDGOALS)))
+ifneq ($(IS_TNODE),)
+	TOSMAKE_PATH += $(TOSDIR)/../contrib/tnodes/make
+endif
+include $(MAKERULES)
+

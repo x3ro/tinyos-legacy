@@ -1,0 +1,31 @@
+#-*-Makefile-*- vim:syntax=make
+
+SPDIR := $(TOSROOT)/contrib/SP/tos
+
+PLATFORM = pc
+SENSORBOARD ?= micasb
+OPTFLAGS = -g -O0 
+PFLAGS := -I$(SPDIR)/random \
+          -I$(SPDIR)/lib/SP \
+          -I$(SPDIR)/lib/SP/CC2420 \
+          -I$(SPDIR)/platform/pc \
+          -I$(SPDIR)/platform/pc/telosb \
+          -I$(TOSDIR)/lib/CC2420Radio
+PFLAGS += -pthread $(PFLAGS) -fnesc-nido-tosnodes=1000
+
+#CFLAGS += -I$(TOSDIR)/lib/CC2420Radio
+
+ifdef TINYOS_NP
+  ifeq ($(TINYOS_NP),BNP)
+    PFLAGS += -I%T/lib/Deluge
+    PFLAGS += -I%T/lib/Deluge/TOSBoot/include
+  endif
+endif
+
+BUILD_DEPS ?= exe
+
+$(call TOSMake_include_platform,pc)
+
+p: $(BUILD_DEPS)
+	@:
+

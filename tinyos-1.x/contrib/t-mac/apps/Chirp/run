@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+#DBG=radio,led,am,packet,crc,encode,error,uart,usr1,clock,radio,usr2,simradio
+DBG=led,error,packet,simradio,usr2
+COUNT=2
+
+all:
+	 DBG=$(DBG) build/pc/main.exe -b=1 $(COUNT)
+
+debug:
+	 DBG=$(DBG) gdb build/pc/main.exe
+
+build: ChirpM.nc Chirp.nc
+	make pc 2>&1
+
+.PHONY: debug run build

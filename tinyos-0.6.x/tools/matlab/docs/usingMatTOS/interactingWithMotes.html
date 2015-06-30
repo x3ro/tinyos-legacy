@@ -1,0 +1,94 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Getting started with the TOS</title>
+</head>
+
+<body>
+
+<h1>Getting started <i>quickly </i>with the TOS/Matlab environment</h1>
+<p>This file is meant to teach you how to play interactively with your motes.&nbsp; 
+Basically, how do I read data from my mote over the serial port and how do I 
+send packets to my mote over the serial port? To explain this, we will use the 
+generic_sensor application, which is a TOS application that was designed to have 
+most basic functionality that you might want in a sensor node.&nbsp; You can 
+find this application in nest/apps.&nbsp; Go to that directory and type &quot;make 
+mica install&quot;.&nbsp; Then, follow the following directions to get started 
+playing with your mote.</p>
+<p>&nbsp;</p>
+<p>1.&nbsp; <b>Program a mica mote with the generic_sensor application</b>.&nbsp; 
+This application has (or will have) all functionality is required of any 
+standard sensor node.&nbsp; It also has a command interface which allows you to 
+control this functionality.&nbsp; Currently, it only has small functionality, 
+such as sensing data and sending it in a packet over the radio or UART.&nbsp; It 
+can also control the radio and leds, and other simple stuff.&nbsp; When you 
+program it, make sure you have a mica sensor board on there, or if you have a 
+basic sensor board make sure that you define that when you compile.&nbsp; If you 
+don't have a sensor board, this demo will work but you will get noise when you 
+try to read from the light sensor.&nbsp; Attach this mote to your serial port.</p>
+<p>2.&nbsp; <b>Open Matlab</b>, set your current directory to the &quot;nest/tools/matlab&quot; 
+directory.&nbsp; </p>
+<p>3.&nbsp; <b>Define the TOS environment </b>by running &quot;defineTOSenvironment.m&quot;.&nbsp; 
+This basically defines things like the start symbol, the TOS packet structure, 
+etc.</p>
+<p>4.&nbsp; <b>Define your private environment</b>.&nbsp; Change directories to 
+matlab/contrib/template and run the myWorld.m script.&nbsp; this will define a 
+comm stack rooted above your local serial port and will define node 1 to be 
+mapped to this serial port.</p>
+<p>5.&nbsp; <b>Send a command to your mote.</b>&nbsp; There are three equivalent 
+ways to do this.&nbsp; Run any of the following three commands:</p>
+<p>&nbsp;&nbsp;&nbsp; <b><font face="Courier New">routePackets(1, startSensing)</font></b><font face="Times New Roman">&nbsp; 
+This function calls a function called &quot;startSensing&quot; which returns a packet that 
+is a command to your mote.&nbsp; That packet is then routed to the port that 
+mote #1 is located on (in this case, your only port).</font></p>
+<p>&nbsp;&nbsp;&nbsp; <b><font face="Courier New">injectPackets(getPacketPorts('serial-com1'), 
+startSensing)</font></b><font face="Times New Roman">&nbsp; This function calls 
+a function called &quot;startSensing&quot; and routes the packet to COM1.</font></p>
+<p>&nbsp;&nbsp;&nbsp; <b><font face="Courier New">writeBytes(getDataPorts('serial-com1'), 
+toBytes(startSensing))</font></b><font face="Times New Roman">&nbsp; This 
+function calls a function called &quot;startSensing&quot;.&nbsp; It then converts the 
+packet to bytes and sends those bytes over the dataPort COM1.</font></p>
+<p><font face="Times New Roman">These three commands are equivalent, and 
+represent sending data at each of the three layers of the comm stack: the 
+routing layer, the packet layer, and the data layer.</font></p>
+<p><font face="Times New Roman">6.&nbsp; <b>Look at your mote.</b>&nbsp; If the 
+yellow led turned on, that means it received your command and started sampling 
+the light sensor and sending the readings over the UART.</font></p>
+<p><font face="Times New Roman">7. <b>Read the data from your mote.</b>&nbsp; 
+type 'watch(1)'.&nbsp; This will create a plot which plots the data streaming in 
+from mote 1.&nbsp; you should see the data scroll across the screen.&nbsp; Cover 
+the light sensor and see if the light reading drops.</font></p>
+<p><font face="Times New Roman">8.&nbsp; <b>Change the clock rate of your mote.</b>&nbsp; 
+Type the function 'routePackets(1, setClockRate(10))' or 'routePackets(1, 
+setClockRate(128))'.&nbsp; The number you are passing to the function 
+setClockRate defines the frequency that the mote should run with.&nbsp; 
+setClockRate returns a packet which a command with that frequency.&nbsp; You 
+should see the samples on your display come in faster or slower.</font></p>
+<p><font face="Times New Roman">9.&nbsp; <b>Change the data channel that you are 
+sampling.</b>&nbsp; Type the following sequence of commands:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; global 
+ADC_DATA_CHANNEL<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ADC_DATA_CHANNEL=0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+routePackets(1, startSensing)</font></p>
+<p><font face="Times New Roman">The first command gives you access to the global 
+variable that is used by the function startSensing to determine the data channel 
+that the ADC should sample from.&nbsp; Then, you set it to zero, where 0 is the 
+ADC channel that samples the BBout pin on the radio (ie. radio signal strength).&nbsp; 
+Then you send the command, which now indicates that you should start sensing on 
+ADC channel 0.&nbsp; You should see the values on your plot change to be the 
+radio signal strength received by your mote.&nbsp; This should work even if you 
+don't have a sensor board.&nbsp; Note that this should really be done by sending 
+a parameter to startSensing, but I havent had a chance to fix that.</font></p>
+<p><font face="Times New Roman">10.&nbsp; <b>Stop watching the data</b>. type 
+'stopWatch(1)'.&nbsp; This will disable the watch function.&nbsp; Now close the 
+window.</font></p>
+
+</body>
+
+</html>

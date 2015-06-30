@@ -1,0 +1,33 @@
+# Radio Frequencies for Mica2 motes: uncomment the line which 
+# has the frequency that you want your motes to use
+#Channel 0:
+#PFLAGS += -DCC1K_DEF_FREQ=433002000
+#Channel 2:
+#PFLAGS += -DCC1K_DEF_FREQ=433616400
+#Channel 4:
+PFLAGS += -DCC1K_DEF_FREQ=434107920
+#Channel 6:
+#PFLAGS += -DCC1K_DEF_FREQ=434845141
+
+# channel 0-2: 614400
+# channel 2-4: 491520
+# channel 4-6: 737221
+#PFLAGS += -DCC1K_DEF_PRESET=4
+
+# Radio Frequencies for MicaZ and Telos motes: uncomment the 
+# line which has the frequency that you want your motes to use
+#PFLAGS += -DCC2420_DEF_CHANNEL=11
+#PFLAGS += -DCC2420_DEF_CHANNEL=14
+#PFLAGS += -DCC2420_DEF_CHANNEL=15
+#PFLAGS += -DCC2420_DEF_CHANNEL=20
+#PFLAGS += -DCC2420_DEF_CHANNEL=26
+
+
+# Define for your local group in hex (otherwise it is 0x7d).
+DEFAULT_LOCAL_GROUP=0x07
+
+# Choose programmer and port. If nothing uncommented, then assumes MIB500.
+#MIB510=/dev/ttyS5
+
+# Uncomment out the following to enable Deluge
+# TINYOS_NP = BNP

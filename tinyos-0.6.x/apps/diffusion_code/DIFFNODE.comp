@@ -1,0 +1,58 @@
+TOS_MODULE DIFFNODE;
+
+ACCEPTS{
+	char DIFFNODE_INIT(void);
+	char DIFFNODE_START(void);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	TOS_MsgPtr DIFFNODE_RX_INTEREST_MSG(TOS_MsgPtr msg);
+	TOS_MsgPtr DIFFNODE_RX_DATA_MSG(TOS_MsgPtr msg);
+
+	TOS_MsgPtr DIFFNODE_RX_ID_MSG(TOS_MsgPtr msg);
+	TOS_MsgPtr DIFFNODE_RX_RESET_MSG(TOS_MsgPtr msg);
+
+	char DIFFNODE_SUB_ADC_PHOTO_DATA(short data);
+	char DIFFNODE_SUB_ADC_TEMP_DATA(short data);
+
+	char DIFFNODE_UART_TX_PACKET_DONE(TOS_MsgPtr packet);
+	TOS_MsgPtr DIFFNODE_UART_RX_PACKET_DONE(TOS_MsgPtr packet);
+};
+
+USES{
+	char DIFFNODE_SUB_INIT(void);
+	char DIFFNODE_TIMER_HEAP_INIT();
+	char DIFFNODE_ADD_TIMER(Timer *t, uint32_t tick);	
+	char DIFFNODE_TX_MSG(TOS_MsgPtr msg);
+	void DIFFNODE_TXMAN_TICK(void);
+	void DIFFNODE_TXMAN_SEED(unsigned int seed);
+	char DIFFNODE_SUB_PWR(char pwr);
+	char DIFFNODE_SUB_INIT(void);
+
+	char DIFFNODE_POWER_RC_INIT(void);
+
+	char DIFFNODE_SUB_ADC_INIT(void);
+	char DIFFNODE_SUB_ADC_GET_DATA(char sen);
+
+	char DIFFNODE_UART_INIT();
+	char DIFFNODE_UART_TX_MSG(TOS_MsgPtr data);
+
+	char LEDS_INIT(void); 
+	char YELLOW_ON(void);  
+	char YELLOW_OFF(void);  
+	char YELLOW_TOGGLE(void);  
+	char RED_ON(void);  
+	char RED_OFF(void);  
+	char RED_TOGGLE(void);  
+	char GREEN_ON(void);  
+	char GREEN_OFF(void);
+	char GREEN_TOGGLE(void);
+};
+
+
+
+
+

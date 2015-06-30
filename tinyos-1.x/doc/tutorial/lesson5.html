@@ -1,0 +1,631 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.78 [en] (X11; U; Linux 2.4.7-10 i686) [Netscape]">
+   <title>Lesson 5: Simulating TinyOS Applications in TOSSIM</title>
+</head>
+<body bgcolor="#F8F8FF" link="#005BB7" vlink="#005BB7">
+&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><font face="tahoma,arial,helvetica"><font size=-1>Lesson
+5: Simulating TinyOS Applications in TOSSIM</font></font></b>
+<p><font face="tahoma,arial,helvetica">Last updated 25 August&nbsp; 2003</font></td>
+</tr>
+</table>
+
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Introduction</font></nobr></b></td>
+</tr>
+</table>
+
+<p>TOSSIM, the TinyOS simulator, compiles directly from TinyOS code. Built
+with <tt>make pc</tt>, the simulation runs natively on a desktop or laptop.
+TOSSIM can simulate thousands of nodes simultaneously. Every mote in a
+simulation runs the same TinyOS program.
+<p>TOSSIM provides run-time configurable debugging output, allowing a user
+to examine the execution of an application from different perspectives
+without needing to recompile. TinyViz is a Java-based GUI that allows you
+to visualize and control the simulation as it runs, inspecting debug messages,
+radio and UART packets, and so forth. The simulation provides several mechanisms
+for interacting with the network; packet traffic can be monitored, packets
+can be statically or dynamically injected into the network. In this lesson,
+we won't be dealing with packet injection, which is discussed in <a href="lesson7.html">Lesson
+7</a> .
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Building and Running
+an Application</font></nobr></b></td>
+</tr>
+</table>
+
+<p>TOSSIM is compiled by typing <tt>make pc</tt> in an application directory.
+In addition to the expected TinyOS components, a few simulator-specific
+files are compiled; these files provide functionality such as support for
+network monitoring over TCP sockets.
+<p>Enter the <tt><a href="../../apps/CntToLedsAndRfm">apps/CntToLedsAndRfm</a></tt>
+directory. This application runs a 4Hz counter. It assumes a Mica mote
+which has 3 LEDs. On each counter tick, the application displays the least
+significant three bits of the counter on the three mote LEDs and sends
+the entire 16-bit value in a packet. Build and install the application
+on a Mica mote as in Lesson 4. You should see the LEDs blink.
+<p>Build a TOSSIM version of the application with <tt>make pc</tt>. The
+TOSSIM executable is <tt>build/pc/main.exe</tt>. Type <tt>build/pc/main.exe
+--help</tt> to see a brief summary of its command-line usage. TOSSIM has
+a single required parameter, the number of nodes to simulate. Type <tt>build/pc/main.exe
+1</tt> to run a simulation of a single node. You should see a long stream
+of output fly by, most of which refer to radio bit events. Hit control-C
+to stop the simulation.
+<p>By default, TOSSIM prints out all debugging information. As radio bit
+events are fired at 20 or 40 KHz, these are the most frequent events in
+the simulator, they comprise most of the output in CntToLedsAndRfm. Given
+the application, we're more concerned with the packet output and mote LEDs
+than individual radio bits. TOSSIM output can be configured by setting
+the <tt>DBG</tt> environment variable in a shell. Type <tt>export DBG=am,led</tt>
+in your shell; this makes only LED and AM (active messages) packet output
+enabled. Run the one-mote simulation again. You should see output similar
+to this:
+<br>&nbsp;
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre><tt>0: LEDS: Yellow off.
+0: LEDS: Green off.
+0: LEDS: Red off.
+0: Sending message: ffff, 4
+&nbsp;&nbsp;&nbsp; ff ff 04 7d 08 20 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 3b f3 00 00 01 00 00 00
+0: LEDS: Yellow off.
+0: LEDS: Green off.
+0: LEDS: Red on.
+0: Sending message: ffff, 4
+&nbsp;&nbsp;&nbsp; ff ff 04 7d 08 21 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 ac e6 00 00 01 00 00 00
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></pre>
+</td>
+</tr>
+</table></center>
+
+<p>The sixth byte of the packet contains the least significant byte of
+the two byte counter; in this example the first packet is hex 0x20 (32),
+in the second, it's hex 0x21 (33). As the LEDs show the bottom three bits
+of the counter, they are all off for the first packet and bit one is on
+for the second.
+<p>Almost every message is preceded by a <tt>0:</tt>; this means that the
+message pertains to the execution of mote 0. Run a simulation of two motes
+(<tt>build/pc/main.exe 2</tt>); after it runs for a few seconds, stop the
+simulation with control-C. You should see messages for both mote 0 and
+mote 1.
+<p>Set <tt>DBG</tt> to <tt>crc</tt>. Run two mote simulation of <tt>CntToLedsAndRfm</tt>.
+You should see output indicating that both nodes are successfully receiving
+packets from each-other.
+<p>The full set of DBG modes can be seen by typing <tt>build/pc/main.exe
+--help</tt>; they are listed at the bottom of the output.
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Adding Debugging
+Statements</font></nobr></b></td>
+</tr>
+</table>
+
+<p>Four DBG modes are reserved for application components and debugging
+use: <tt>usr1</tt>, <tt>usr2</tt>, <tt>usr3</tt>, and <tt>temp</tt>. In
+TinyOS code, debug message commands have this syntax:
+<br>&nbsp;
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre>dbg(&lt;mode>, const char* format, ...);</pre>
+</td>
+</tr>
+</table></center>
+
+<p>The mode parameter specifies which under which DBG modes this message
+will be printed. The full set of modes can be found in <tt><a href="../../tos/types/dbg_modes.h">tos/types/dbg_modes.h</a></tt>.
+The format and following parameters specify the string to output and have
+<tt>printf()</tt>
+semantics. For example, open <tt><a href="../../tos/lib/Counters/Counter.nc">tos/lib/Counters/Counter.nc</a></tt>in
+your editor. In <tt>Timer.fired()</tt>, add this line just before the return
+statement:
+<br>&nbsp;
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre>dbg(DBG_TEMP, "Counter: Value is %i\n", (int)state);</pre>
+</td>
+</tr>
+</table></center>
+
+<p>Set <tt>DBG</tt> to be <tt>temp</tt> and run a single mote simulation.
+You'll see the counter increment. In general, the DBG mode name in TinyOS
+code is the name used when you run the simulator, with <tt>DBG_</tt>prepended.
+For example, <tt>am</tt> is <tt>DBG_AM</tt>, <tt>packet</tt> is <tt>DBG_PACKET</tt>
+and <tt>boot</tt> is <tt>DBG_BOOT</tt>.
+<p>Just as you can enable multiple modes when running the simulator, a
+single debug message can be activated on multiple modes. Each mode is a
+bit in a large bitmask; one can use all of the standard logical operators
+(e.g. <tt>|</tt>, <tt>~</tt>) . For example, change the debug message you
+just added to:
+<br>&nbsp;
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre>dbg(DBG_TEMP|DBG_USR1, "Counter: Value is %i\n", (int)state);</pre>
+</td>
+</tr>
+</table></center>
+
+<p>It will now be printed if either <tt>temp</tt> or <tt>usr1</tt> is enabled.
+Run the application to see this is the case.
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Using gdb with TOSSIM</font></nobr></b></td>
+</tr>
+</table>
+
+<p>One significant advantage of TOSSIM is that, because it runs natively
+on a PC, you can use traditional debugging tools such as <tt>gdb</tt>.
+However, because TOSSIM is a discrete event simulation for large numbers
+of motes, traditional step-through debugging techniques only work on an
+event basis, and not cross-events.
+<p>Unfortunately, <tt>gdb</tt> is generally designed for C and not nesC;
+the component model of nesC means that a single command can have multiple
+providers; referring to a specific command requires specifying the component,
+interface, and command. For example, to break on entry to the <tt>redOff</tt>
+command of the <tt>Leds</tt> interface of <tt>LedsC</tt>, one must type:
+<br>&nbsp;
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre>&nbsp;gdb build/pc/main.exe&nbsp; // start gdb
+
+(gdb) break *LedsC$Leds$redOff
+Breakpoint 1 at 0x804c644: file tos/system/LedsC.td, line 97.
+
+run 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // run CntToLedsAndRfm with one mote</pre>
+</td>
+</tr>
+</table></center>
+
+<p>The leading * is necessary so <tt>gdb</tt> can parse the function name
+correctly; otherwise, it looks for the function <tt>LedsC</tt>.
+<p>Variables are similarly named. For example, to print the <tt>ledsOn</tt>
+variable of <tt>LedsC</tt> (which keeps track of on/off for the toggle
+commands), one types:
+<br>&nbsp;
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre>(gdb) print LedsC$ledsOn
+$3 = '\0' &lt;repeats 999 times></pre>
+</td>
+</tr>
+</table></center>
+
+<p>Actually, this isn't quite correct, as the output above shows; in TOSSIM,
+<tt>ledsOn</tt>
+isn't a single <tt>uint8_t</tt>, but an array of 1000 of them. This is
+how TOSSIM handles the state of many motes; it compiles fields to be arrays
+of <i>n</i> elements, where <i>n</i> is the maximum simulation size. Whenever
+a mote accesses a component's state, it indexes into the array based on
+its node ID. Therefore, to refer to a specific mote's state, one needs
+to index into the array properly:
+<br>&nbsp;
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre>(gdb) print LedsC$ledsOn[tos_state.current_node]
+$2 = 0 '\0'</pre>
+</td>
+</tr>
+</table></center>
+
+<p>We've supplied a simple <tt>gdb</tt> macro named <tt>VAR</tt> that handles
+this for you. Copy <tt><a href="../../tos/platform/pc/.gdbinit">tos/platform/pc/.gdbinit</a></tt>
+to your home directory (if there's already a <tt>.gdbinit</tt> there, just
+append this file).&nbsp; Type <tt>quit</tt> and start <tt>gdb</tt> it again.
+Break in <tt>LedsC$Leds$redOff</tt> as before. Now, instead of the above
+command line, you can type:
+<br>&nbsp;
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre>(gdb) VAR LedsC$ledsOn
+$3 = 0 '\0'</pre>
+</td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">TinyViz: The TOSSIM
+User Interface</font></nobr></b></td>
+</tr>
+</table>
+
+<p>TinyViz provides an extensible graphical user interface for debugging,
+visualizing, and interacting with TOSSIM simulations of TinyOS applications.
+Using TinyViz, you can easily trace the execution of TinyOS apps, set breakpoints
+when interesting events occur, visualize radio messages, and manipulate
+the virtual position and radio connectivity of motes. In addition, TinyViz
+supports a simple "plugin" API that allows you to write your own TinyViz
+modules to visualize data in an application-specific way, or interact with
+the running simulation.
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Getting Started</font></nobr></b></td>
+</tr>
+</table>
+
+<p>To get started, look at the <tt><a href="../../apps/TestTinyViz/TestTinyVizM.nc">apps/TestTinyViz</a></tt>
+application, which causes motes to periodically send a message to a random
+neighbor. There isn't anything interesting about the application itself,
+but it will allow us to demonstrate the basic features of TinyViz. Go ahead
+and build the app with <tt>make pc</tt>.
+<p>To compile TinyViz, <tt>cd</tt> to the <tt>tools/java/net/tinyos/sim</tt>
+directory and type <tt>make</tt>. This will build the TinyOS program as
+<tt>tinyviz.jar</tt>,
+a stand-alone Java JAR file that you can run with the <tt>tinyviz</tt>
+script, found in this directory. Place this script on your PATH and you
+will be able to run <tt>tinyviz</tt> directly from the command line.
+<p>Start up TinyViz, running the <tt>TestTinyViz</tt> app, as follows:
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre><tt>export DBG=usr1
+tinyviz -run build/pc/main.exe 30</tt></pre>
+</td>
+</tr>
+</table></center>
+
+<p>You will see a window looking something like the following:
+<center><a href="imgs/tinyviz-screenshot1.gif"><img SRC="imgs/tinyviz-screenshot1-small.png" height=356 width=636></a></center>
+
+<p>On the left is the graphical display of the sensor network. On the right
+is the control panel where you can interact with a series of
+<b>plugins</b>
+that control how TinyViz works.
+<p>In the mote window, you can select motes by clicking on them, or select
+a group of motes by dragging a rectangle around the group. You can move
+motes around by dragging them around. Selecting motes is meaningful for
+certain plugins, and other operations, such as toggling the power state
+of the motes.
+<p>The "pause/play" button pauses or resumes the simulation. The "grid
+button" toggles grid-lines on the display. The "clear" button clears out
+the display state. The "stop" button kills the simulation. The "delay"
+slider introduces a delay between the handling of each TOSSIM event, which
+will slow down the display -- useful in cases where you have a small number
+of motes and want to watch the simulation operating in "real time". The
+"On/off" button toggles the power state of the selected motes.
+<p><b>Plugins</b>
+<p>A TinyViz <b>plugin</b> is a software module that watches for events
+coming from the simulation -- such as debug messages, radio messages, and
+so forth -- and reacts by drawing information on the display, setting simulation
+parameters, or actuating the simulation itself, for example, by setting
+the sensor values that simulated motes will read. TinyViz comes with a
+suite of built-in plugins, in the
+<tt><a href="../../tools/java/net/tinyos/sim/plugins">tools/java/net/tinyos/sim/plugins</a></tt>
+directory, and you can write your own. Not all plugins are used for all
+applications -- for example, the <tt>Calamari</tt> plugin is used mainly
+for testing the Calamari localization service -- but many of them are generally
+useful.
+<p>Plugins can be selectively enabled or disabled, depending on what information
+you are interested in seeing during the simulation. You select plugins
+from the <tt>Plugins</tt> menu. When a plugin is enabled, its corresponding
+tab in the right-hand control panel window is active, which may have additional
+information and controls provided by that plugin. Plugins are designed
+to be independent of each other so you can enable or disable any group
+of plugins you like.
+<p>The main plugins you are likely to use are:
+<ul>
+<li>
+<b>Debug messages:</b> Shows a window with all of the debug messages generated
+by the simulation. You can select debug messages just from the selected
+group of motes, and also highlight messages that match a certain pattern.
+Note that the set of debug messages you see are controlled by the value
+of the <tt>DBG</tt> environment variable, just as they are when running
+TOSSIM in a stand-alone setting. So, if you only want to see debug messages
+of type <tt>DBG_USR1</tt> and
+<tt>DBG_AM</tt>, start up TinyViz with:</li>
+
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre><tt>DBG=usr1,am tinyviz -run build/pc/main.exe 30</tt></pre>
+</td>
+</tr>
+</table></center>
+
+<li>
+<b>Set breakpoint:</b> Allows you to set a breakpoint, which will pause
+the simulation when some condition is met. Right now, the possible conditions
+are (a) a substring match on a debug message, or (b) a match on the contents
+of a sent radio message. Multiple breakpoints can be set and they can be
+enabled or disabled by selecting them in the breakpoints list.</li>
+
+<li>
+<b>ADC readings:</b> Shows the most recent value of each ADC channel next
+to each mote.</li>
+
+<li>
+<b>Sent radio packets:</b> Shows a window with all sent radio packets,
+much like the <b>Debug messages</b> plugin. Note that the
+<b>Debug messages</b>
+plugin also shows this information.</li>
+
+<li>
+<b>Radio links:</b> Graphically displays radio message activity. When a
+mote broadcasts a message, a blue circle will be drawn around it. When
+a mote sends a message to another mote, a directed arrow will be drawn
+between the two motes. Note that this shows all message transmissions,
+regardless of whether they are successful; if a mote attempts to send a
+message but it is corrupted or lost, the arrow will still be drawn.</li>
+
+<li>
+<b>Set location:</b> Makes the virtual location of each mote available
+to that mote through the <tt>Location</tt> interface, found in
+<tt><a href="../../apps/TestTinyViz/Location.nc">apps/TestTinyViz/Location.nc</a></tt>.
+This is accomplished by setting the value of three "fake" ADC channels
+(one each for X, Y, and Z coordinates) on each mote, which the <tt>FakeLocation</tt>
+component reads to determine the mote's virtual location. This is meant
+to act as a stand-in for a real localization service when simulating TinyOS
+apps.</li>
+
+<li>
+<b>Radio model</b>: Sets the bit error rate between motes according to
+their location and various models of radio connectivity. Enabling this
+plugin allows you to use realistic connectivity models in your simulations.
+There are two built-in models: "Empirical" (based on an outdoor trace of
+packet connectivity with the RFM1000 radios) and "Fixed radius" (all motes
+within a given fixed distance of each other have perfect connectivity,
+and no connectivity to other motes). Setting the "scaling factor" in the
+control panel simply scales the distance parameter of the model. <b>Increasing</b>
+the scaling factor will <b>decrease</b> the connectivity range of the chosen
+model. By selecting a mote in the display you can see its connectivity
+to other motes -- the number shown next to each edge is the probability
+of a packet getting through. Changing the scaling factor and clicking "update
+model" will update the model parameters, as will moving motes around in
+the display.</li>
+</ul>
+<b>Layout</b>
+<p>Layout of the motes is controlled by the <tt>Layout</tt> menu, which
+gives you several options including random, grid-based, or a "grid+random"
+(grid-based but with a random perturbation) layout. You can also save and
+load layouts from a file. The location of the motes on the display is used
+in two ways. First, it is used to determine radio connectivity, when the
+<tt>RadioModelPlugin</tt>
+is enabled. Second, it is used to set the virtual location of the motes,
+when using the <tt>LocationPlugin</tt>.
+<p><b>Trying it out</b>
+<p>OK, now we're ready to try out the various features.
+<ol>
+<li>
+Startup TinyViz with <tt>DBG=usr1, tinyviz -run build/pc/main.exe 30</tt>
+if it is not already running.</li>
+
+<li>
+Select the <b>Debug messages</b>, <b>Radio links</b>, and <b>Set breakpoint</b>
+plugins from the Plugins menu, and resume the simulation by clicking the
+pause/play button.</li>
+
+<li>
+Clicking on the <b>Debug messages</b> tab in the control panel will show
+you all of the debug messages generated by the simulation. Click on a given
+mote (say, mote 3) then click "Selected motes only" to restrict the display
+to just that mote.</li>
+
+<li>
+Type a phrase (for example, "Received") in the box at the bottom of the
+control panel, then click "Highlight". This will highlight all messages
+matching the chosen string - very useful for visually scanning for "interesting"
+messages.</li>
+
+<li>
+Pause the simulation, then click on the "Set breakpoint" tab. Pull down
+the bar at the top of the control panel (which says "Current breakpoints")
+and choose "Add debug message breakpoint". In the "Message contains" box,
+type "Received message", then click "Enable breakpoint". This will add
+a new breakpoint that pauses the simulation whenever a matching debug message
+is printed. Click on the pause/play button to resume the simulation. Very
+soon afterwards, the simulation will pause and the control panel at the
+bottom of the screen will print something like</li>
+
+<pre>Breakpoint 0 fired: Debug message: [24] DebugMsgEvent [24: TestTinyVizM: Received message from 13]</pre>
+which simply means that this debug message triggered the breakpoint. Clicking
+the play button again will resume the simulation, causing the breakpoint
+to be hit again.
+<li>
+Select "Current breakpoints" from the bar at the top of the control panel.
+Disable the breakpoint by clicking on it in the breakpoints list, then
+click "Disable breakpoint".</li>
+
+<li>
+Select the <b>Radio model</b> plugin from the Plugins menu and click on
+the "Radio model" tab in the control panel, then pick "Fixed radius (100.0)"
+from the list of radio models. Drag the mouse across the mote display to
+select all motes; you will see a very densely-connected mesh, indicating
+that nearly every mote has connectivity with all others, due to the large
+radius of the radio model. Type "4" in the "Distance scaling factor" box,
+then click "Update model". The radio model will be updated -- which may
+take some time -- and the resulting connectivity mesh will be much more
+sparse.</li>
+
+<br>&nbsp;
+<p>&nbsp;
+<p>Note that once you restart the simulation, nodes that can no longer
+communicate (due to no connectivity) will still be sending messages to
+each other; this is because the <tt>TestTinyViz</tt> application accumulates
+a list of nodes to send messages to, but changing the underlying connectivity
+model does not modify this list. <i>However,</i> if you watch the debug
+messages from each node, you will notice that nodes are only <b>receiving</b>
+messages from those nodes they are connected to, as you would expect.</ol>
+<b>AutoRun - Scripting TOSSIM runs</b>
+<p>The TinyViz <b>AutoRun</b> feature allows you to "script" the configuration
+and execution of a TinyOS simulation, by setting parameters in a file that
+controls TinyViz. This allows you to automatically enable plugins, set
+breakpoints, run multiple simulations, log data to files, and execute commands
+both before and after each simulation runs. This is useful when you are
+using TinyViz as an analysis tool.
+<p>Look at the file <tt><a href="../../apps/TestTinyViz/sample.autorun">apps/TestTinyViz/sample.autorun</a></tt>
+in the <tt>TestTinyViz</tt> directory. The autorun file specifies one or
+more simulations to run; a simulation stops either when a specified number
+of simulated seconds have elapsed (the "<tt>numsec</tt>" option), when
+a substring match on a debug message occurs (the "<tt>stopstring</tt>"
+option), or when the simulation exits itself (e.g., a crash or deliberate
+call to <tt>exit()</tt>). The parameters for each simulation are separated
+by a blank line. When a parameter is set in the file for one simulation,
+it will carry forward for subsequent simulations in the file, saving you
+from having to re-specify parameters for each run.
+<p>Here is the sample file:
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre><tt># This is a sample TinyViz autorun file. To use it, run
+#&nbsp;&nbsp; tinyviz -autorun sample.autorun
+# Set the layout
+layout gridrandom
+# Enable some plugins
+plugin DebugMsgPlugin
+plugin RadioLinkPlugin
+plugin RadioModelPlugin
+# Total number of simulated seconds to run
+numsec 20
+# Name of the executable file
+executable build/pc/main.exe
+# DBG messages to include
+dbg usr1
+# The radio model and scaling factor to use
+radiomodel disc100
+radioscaling 5
+# Number of motes
+nummotes 10
+# Command to run before starting
+precmd echo "This is a command that will run before the simulation"
+# File to log all DBG messages to
+logfile logfile-20.txt
+
+# The blank line above indicates that we are starting another simulation
+# This time run with a different number of motes
+nummotes 30
+logfile logfile-30.txt</tt></pre>
+</td>
+</tr>
+</table></center>
+
+<p>The AutoRun file specifies two simulations, one with 20 motes and another
+with 30. All debug messages are logged to two different logfiles. We enable
+a few different plugins (specified by the Java class names as they are
+found in <tt>tools/java/net/tinyos/sim/plugins</tt>.
+<p>To run the simulations with this autorun file, just type:
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%">
+<pre><tt>tinyviz -autorun sample.autorun</tt></pre>
+</td>
+</tr>
+</table></center>
+
+<p>TinyViz starts up, enables and configures the appropriate plugins, and
+automatically runs each simulation for 10 simulated seconds, then exits.
+You can set up AutoRun to run a series of simulations and then go to lunch
+-- the data will be waiting for you in your logfiles when you get back.
+<p>AutoRun supports a number of features not shown here -- just look at
+the <tt>arConfig</tt> class in the
+<tt><a href="../../tools/java/net/tinyos/sim/AutoRun.java">tools/java/net/tinyos/sim/AutoRun.java</a></tt>source
+file. Note that all options specified in the file that aren't used by AutoRun
+itself, however they made available to plugins. So, for example, the <tt>radiomodel</tt>
+option is interpreted by the
+<tt>RadioModelPlugin</tt> to configure the
+radio model. You can write your own plugins that are configured through
+AutoRun in this way.
+<p><b>Writing TinyViz plugins</b>
+<p>By far the most useful feature of TinyViz is the ability to write your
+own plugins to interact with the simulation. Writing plugins is beyond
+the scope of this document, but we wanted to give you a couple of pointers
+on where to start. Look at <tt><a href="../../tools/java/net/tinyos/sim/plugins/RadioLinkPlugin.java">tools/java/net/tinyos/sim/plugins/RadioLinkPlugin.java</a></tt>for
+a simple, well-documented plugin implementation. Essentially, plugins must
+provide a method that receives events from the TOSSIM simulation and the
+TinyViz framework. Plugins react to events by changing internal state,
+updating the display, or possibly sending commands back into the simulation.
+TinyViz delivers events to plugins for initialization, debug messages,
+radio messages, a change in the location of a mote (e.g., when the user
+moves it), and when new motes join the simulation. Plugins provide additional
+methods that are called when the plugin is enabled or disabled, as well
+as when the mote window is redrawn.
+<p>Using <tt>RadioLinkPlugin.java</tt> as an example, it is straightforward
+to write your own plugins. Currently, all plugins must be located in the
+<tt>plugins</tt>
+subdirectory of the TinyViz directory. (In the future we will add support
+for a "plugin path"). Note that when you modify a plugin you need to recompile
+the <tt>tinyviz.jar</tt> file by typing
+<tt>make </tt>in the main TinyViz
+directory (tools/java/net/tinyos/sim); just typing <tt>make</tt> in the
+plugins directory is not adequate.
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Further Use</font></nobr></b></td>
+</tr>
+</table>
+
+<p>This tutorial only covers some of the functionality and usefulness of
+TOSSIM; for example, as TOSSIM simulates the TinyOS networking stack at
+bit granularity, radio models can simulate some of the difficult issues
+that arise. Similarly, one can test and debug low-level protocols (such
+as start symbol detection) in addition to application components and routing
+protocols. The <a href="../nido.pdf">TOSSIM System Description</a> goes
+into greater details on these capabilities and presents some information
+on TOSSIM's implementation.
+<p><b><a href="lesson4.html">&lt; Previous Lesson</a></b> |
+<b><a href="lesson6.html">Next
+Lesson ></a></b> | <b><a href="index.html">Top</a></b>
+</body>
+</html>
+
+<!--  LocalWords:  TinyOS nesC nc async norace BlinkM FooM ncc SingleTimer Leds
+ -->
+<!--  LocalWords:  LedsC StdControl tos init TimerC redOn redOff uint redToggle
+ -->
+<!--  LocalWords:  metadata html nesdoc gcc exe avr objcopy srec uisp mib dprog
+ -->
+<!--  LocalWords:  towards dapa xff ThinkPad dlpt Makelocal micasb Wshadow DDEF
+ -->
+<!--  LocalWords:  finline fnesc cfile lm Atmel ATmega nesC's nesc SenseM rdata
+ -->
+<!--  LocalWords:  ADCControl SounderControl dataReady getData rcombine someval
+ -->
+<!--  LocalWords:  ADControl fooControl barControl MyTimer uniqueCount basicsb
+ -->
+<!--  LocalWords:  sensorboard Makerules sensorboards SenseTask taskname INTMSG
+ -->
+<!--  LocalWords:  SenseTaskM putdata processData CntToLedsAndRfm RfmToLeds Msg
+ -->
+<!--  LocalWords:  CntToRfmAndLeds IntToLeds IntToRfm IntOutput outputComplete
+ -->
+<!--  LocalWords:  IntToRfmM GenericComm SendMsg bool struct IntMsg src BCAST
+ -->
+<!--  LocalWords:  ADDR sizeof TOSH sendDone GenricComm AMStandard RfmToInt pc
+ -->
+<!--  LocalWords:  UARTNoCRCPacket RadioCRCPacket ActiveMessage RfmToIntM xfff
+ -->
+<!--  LocalWords:  ReceiveIntMsg ReceiveMsg MsgPtr addr SenseToRfm TOSSIM DBG
+ -->
+<!--  LocalWords:  TinyViz ffff crc usr dbg const printf prepended bitmask gdb
+ -->
+<!--  LocalWords:  ledsOn gdbinit plugin API TestTinyViz cd tinyviz plugins RFM
+ -->
+<!--  LocalWords:  FakeLocation RadioModelPlugin LocationPlugin afterwards disc
+ -->
+<!--  LocalWords:  DebugMsgEvent TestTinyVizM AutoRun autorun numsec stopstring
+ -->
+<!--  LocalWords:  gridrandom DebugMsgPlugin RadioLinkPlugin radiomodel precmd
+ -->
+<!--  LocalWords:  radioscaling nummotes logfile txt logfiles arConfig TOSSIM's
+ -->

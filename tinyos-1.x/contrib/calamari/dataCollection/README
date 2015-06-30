@@ -1,0 +1,6 @@
+This application can be programmed onto a set of telos nodes and will collect RSSI and LQI readings from them all.
+To use, open a serial forwarder to the network and run the CollectRssi.py script as follows:
+
+   CollectRssi.py telosb sf@localhost:9001
+
+Make sure that you change the nodeIDs and any other constants that you want to change inside the script itself.

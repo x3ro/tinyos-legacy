@@ -1,0 +1,327 @@
+\documentclass{article}
+\usepackage{fullpage}
+
+\newcommand{\fname}[1]{{\tt #1}}
+\newcommand{\code}[1]{{\tt #1}}
+
+\title{Standard TinyOS Sensorboard Interface V1.1}
+\author{David Gay, Wei Hong, Phil Levis, and Joe Polastre \\
+dgay@intel-research.net, pal@cs.berkeley.edu, jpolastre@cs.berkeley.edu}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This document defines the ``standard'' interface a sensor board is expected
+to offer in TinyOS. As this is still relatively early days, there will
+undoubtably be sensor boards which cannot conform to this specification,
+but such boards should attempt to follow its spirit as closely as possible.
+
+This standard assumes that sensors return uninterpreted 16-bit values, and,
+optionally uninterpreted, arbitrary-size calibration data. Conversion of
+sensor values to something with actual physical meaning is beyond the
+(current) scope of this document.
+
+This standard departs from current conventions. Sensor board components
+and applications will need to be converted.
+
+\section{Directory Organisation}
+
+\begin{enumerate}
+
+\item A sensor board should have a unique name, composed of letters, numbers and
+underscores. Case is significant, but two sensor boards must differ in more
+than case.\footnote{Necessary to support platforms where filename case 
+differences are not significant.} We will use $S$ to denote the sensor board
+name in the rest of this document.
+
+\item Each sensor board should have its own directory named $S$; standard TinyOS
+sensor boards will be placed in \fname{tinyos-1.x/tos/sensorboards}, but
+sensor board directories can be placed anywhere as long as the nesC compiler
+receives a {\tt -I} directive pointing to the sensor board's directory.
+\footnote{This is supported in v1.1.1 and later of the nesC compiler}.
+
+\item Each sensor board directory must contain a \fname{.sensor} file. This file
+is a perl script which contains any additional compiler settings needed for
+this sensor board (this file will be empty in many cases). 
+%See Section~\ref{sec:dot-sensor} for more information.
+
+\item If the sensor board wishes to define any C types or constants, it should
+place these in a file named \fname{$S$.h} in the sensor board's directory.
+
+\item The sensor board directory should contain \emph{sensor board components}
+for accessing each sensor on the sensor board. The conventions for these
+components are detailed in Section~\ref{sec:sensor-components}.
+
+\item A sensor board may include additional components providing alternative or
+higher-level interfaces to the sensors (e.g., for TinyDB). These components
+are beyond the scope of this document. Future versions of this standard
+are likely to discuss TinyDB attributes.
+
+\item Finally, the sensor board can contain any number of components, interfaces,
+C files, etc for internal use. To avoid name collisions, all externally
+visible names (interface types, components, C constants and types) used for
+internal purposes should be prefixed with $S$.
+
+\end{enumerate}
+
+A simple example: the basic sensor board is named {\tt basicsb}, it's
+directory is \[ \fname{tinyos-1.x/tos/sensorboards/basicsb} \] It has no
+\fname{basicsb.h} file and its \fname{.sensor} file is empty. It has two
+components, {\tt Photo} and {\tt Temp} representing its two sensors.
+
+
+
+\section{Sensor Board Components}
+\label{sec:sensor-components}
+
+We have not yet selected any naming conventions for sensor board
+components. Please select reasonable names\ldots
+
+A sensor board component must provide a \code{StdControl} or
+\code{SplitControl} interface for initialisation and power management, some
+set of \code{Sensor} or \code{QSensor} interfaces for sampling, and,
+optionally, some set of \code{CalibrationData} interfaces for obtaining
+calibration data. These interfaces are shown in
+Figure~\ref{fig:interfaces}. A component can provide additional interfaces
+for other purposes; these are beyond the scope of this document. A sensor
+board component should be as lightweight as possible - it should just
+provide basic access to the physical sensors and not attempt to do
+calibration, signal processing, etc. If such functionality is desired, it
+should be provided in separate components.
+
+\begin{figure}
+\begin{verbatim}
+  interface Sensor {
+    /* Sensor is for sensors which will not be sampled at high rates */
+
+    /** Request sensor sample
+     *  @return SUCCESS if request accepted, FAIL if it is refused
+     *    dataReady or error will be signaled if SUCCESS is returned
+     */
+    command result_t getData();
+
+    /** Return sensor value
+     * @param data Sensor value
+     * @return Ignored
+     */
+    event result_t dataReady(uint16_t data);
+
+    /** Signal that the sensor failed to get data
+     * @param info error information, sensor board specific
+     * @return Ignored
+     */
+    event result_t error(uint16_t info);
+  }
+
+  interface QSensor {
+    /* QSensor is for sensors which need to be sampled at high rates or
+       at precise times.
+       The only difference with Sensor is that the getData/dataReady
+       functions can be called from interrupt handlers. */
+    async command result_t getData();
+    async event result_t dataReady(uint16_t data);
+    event result_t error(uint16_t errorInformation);
+  }
+
+  interface CalibrationData {
+    /* Collect uninterpreted calibration data from a sensor */
+
+    /** Request calibration data
+     *  @return SUCCESS if request accepted, FAIL if it is refused
+     *    data error will be signaled if SUCCESS is returned
+     */
+    command result_t get();
+
+    /** Returns calibration data
+     * @param x Pointer to (uinterpreted) calibration data. This data
+     *   must not be modified.
+     * @param len Length of calibration data
+     * @return Ignored.
+     */
+    event result_t data(const void *x, uint8_t len);
+  }
+\end{verbatim}
+\caption{Sensorboard interfaces}
+\label{fig:interfaces}
+\end{figure}
+
+If a \code{Sensor} or \code{QSensor} interface named \code{X} has a
+corresponding calibration interface, that interface should be called
+\code{XCalibration}.
+
+The commands and events in the \code{QSensor} interface are marked
+\code{async}, i.e., may execute as part of an interrupt handler. This is to
+support applications that require, and sensors that provide, low-jitter
+sampling. Figure~\ref{fig:easyfast} shows a component that converts a
+\code{QSensor} interface into a regular \code{Sensor} interface.
+
+The \code{Sensor} and \code{QSensor} interfaces return uinterpreted
+16-bit data. This might represent an A/D conversion result, a counter,
+etc. The optional calibration interface returns uninterpreted,
+arbitrary-size data.
+
+Some common setups for sensor board components are:
+\begin{itemize}
+\item A single \code{Sensor} (or \code{QSensor}) interface. This is
+probably the most common case, where a single component corresponds to a
+single physical sensor, e.g., for light, temperature, pressure and there is
+no expectation of high sample rates.
+
+\item Multiple \code{Sensor} (or \code{QSensor}) interfaces. Some sensors
+might be strongly related, e.g., the axes of an accelerometer.  A single
+component could then provide a sensor interface for each axis. For
+instance, a 2-axis accelerometer which can be sampled at high speed, and which
+has some calibration data might be declared with:
+\begin{verbatim}
+  configuration Accelerometer2D {
+    provides {
+      interface StdControl
+      interface QSensor as AccelX;
+      interface CalibrationData as AccelXCalibration;
+      interface QSensor as AccelY;
+      interface CalibrationData as AccelYCalibration;
+    }
+  }
+\end{verbatim}
+
+\item A parameterised \code{Sensor} (or \code{QSensor}) interface. If a
+sensor board has multiple similar sensors, it may make sense to provide a
+single component to access all of these, using a parameterised
+\code{Sensor} interface. For instance, a general purpose sensor board with
+multiple A/D channels might provide an \code{Sensor} interface
+parameterised by the A/D channel id.
+\end{itemize}
+
+Sensor board components are expected to respect the following conventions
+on the use of the \code{StdControl}, \code{SplitControl} and \code{Sensor}
+interfaces.  These are given assuming \code{StdControl} is used, but the
+behaviour with \code{SplitControl} is identical except that \code{init},
+\code{start} and \code{stop} are not considered complete until the
+\code{initDone}, \code{startDone} and \code{stopDone} events are
+signaled. The conventions are:
+
+\begin{enumerate}
+\item \code{StdControl.init}: must be called at mote boot time.
+
+\item \code{StdControl.start}: ensure the sensor corresponding to this
+component is ready for use. For instance, this should power-up the sensor
+if necessary. The application can call \code{getData} once 
+\code{StdControl.start} completes.
+
+If a sensor takes a while to power-up, the sensor board implementer can
+either use a \code{SplitControl} interface and signal \code{startDone} when
+the sensor is ready for use, or delay \code{dataReady} events until the
+sensor is ready. The former choice is preferable if the sensor is going to
+be used for high-frequency sampling.
+
+\item \code{StdControl.stop}: put the sensor in a low-power mode. 
+\code{StdControl.start} must be called before any further readings 
+are taken. The behaviour of calls to \code{StdControl.stop} during
+sampling (i.e., when an \code{dataReady} event is going to be
+signaled) is undefined.
+
+\item \code{Sensor/QSensor.getData}: get a sample from a sensor. 
+
+\item \code{Sensor/QSensor.dataReady(uint16\_t data)}: signals the
+sample value to the application.
+
+\item \code{Sensor/QSensor.error(uint16\_t info)}: reports a sensing 
+problem to the application (not all sensors will report errors). The
+values for \code{info} are sensor-board specific.
+
+\end{enumerate}
+
+\begin{figure}
+\begin{verbatim}
+  module QSensorAsSensor {
+    provides interface Sensor;
+    uses interface QSensor;
+  } implementation {
+    uint16_t temp;
+
+    command result_t Sensor.getData() {
+      return QSensor.getData();
+    }
+
+    task void ready() {
+      signal Sensor.dataReady(temp);
+    }
+
+    async command result_t QSensor.dataReady(uint16_t data) {
+      temp = data;
+      post ready();
+      return SUCCESS;
+    }
+
+    command result_t QSensor.error(uint16_t info) {
+      return Sensor.error(info);
+    }
+  }
+\end{verbatim}
+\caption{Convert a \code{QSensor} to a \code{Sensor} interface}
+\label{fig:easyfast}
+\end{figure}
+
+\section{\fname{.sensor} File}
+
+This file is a perl script which gets executed as part of the \fname{ncc}
+nesC compiler frontend. It can add or modify any compile-time options 
+necessary for a particular sensor board. It can modify the following perl
+variables:
+\begin{itemize}
+\item \code{@new\_args}: This is the array of arguments which will be
+passed to \code{nescc}. For instance, you might add an include directive
+to \code{@new\_args} with \[ \code{push\ @new\_args, '-Isomedir'} \]
+\item \code{@commonboards}: This can be set to a list of sensor board names
+which should be added to the include path list. These sensor boards must be
+in \code{tinyos-1.x/tos/sensorboards}.
+\end{itemize}
+
+\section{Example: micasb}
+
+The mica sensor board (micasb) has five sensors (and one actuator, the
+sounder):
+
+\vspace{0.2in}
+\begin{tabular}{|l|l|l|l|}\hline
+Name          & Component & Sensor Interfaces & Other Interfaces\\ \hline \hline
+Accelerometer & Accel     & AccelX         & \\
+              &           & AccelY         & \\ \hline
+Magnetometer  & Mag       & MagX           & MagSetting\\
+              &           & MagY           &  \\ \hline
+Microphone    & Mic       & MicADC         & Mic \\
+              &           &                & MicInterrupt \\ \hline
+Light         & Photo     & PhotoADC       & \\ \hline
+Temperature   & Temp      & TempADC        &\\ \hline
+\end{tabular}
+\vspace{0.2in}
+
+Each physical sensor is represented by a separate component. Specific
+sensors that have more than one axis of measurement (e.g., Accel and
+Mag) provide more than one Sensor interface on a single component. Some
+sensors, such as the magnetometer and microphone, have additional
+functionality provided through sensor-specific interfaces.
+
+Although light and temperature are represented by separate components,
+in reality they share a single ADC pin. The two components Photo and
+Temp sit on top of the PhotoTemp component, which controls access to
+the shared pin, and orchestrates which sensor is currently connected
+to it. From a programmer's perspective, they appear as individual
+sensors, even though their underlying implementation is a bit more
+complex.
+
+The board's {\tt micasb.h} file contains private configuration data
+(pin usage, ADC ports, etc).
+
+The mica sensor board has an empty {\tt .sensor} file. For a more
+interesting example, refer to the micawbdot sensor board.
+
+\end{document}
+
+% LocalWords:  TinyOS undoubtably Organisation nesC perl TinyDB basicsb init
+% LocalWords:  StdControl SplitControl initialisation parameterised behaviour
+% LocalWords:  initDone startDone stopDone getData getContinuousData dataReady
+% LocalWords:  uint async

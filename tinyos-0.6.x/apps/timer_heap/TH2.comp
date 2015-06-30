@@ -1,0 +1,31 @@
+
+TOS_MODULE TH2;
+
+ACCEPTS{
+	char TH2_INIT(void);
+	char TH2_START(void);
+};
+
+HANDLES{
+	char TH2_SUB_MSG_SEND_DONE(TOS_MsgPtr msg);
+};
+
+USES{
+	char TH2_TIMER(Timer *, uint32_t);
+	char TH2_SUB_TIMER_DELETE(Timer *);
+	char TH2_SUB_TIMER_INIT(void);
+	char TH2_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	char TH2_SUB_COMM_INIT();
+};
+
+SIGNALS{
+};
+
+INTERNAL{
+	void blink1();
+	void b1_one_shot();
+	void th2_send_packet();
+	void b1_terminate();
+	void flip_green();
+};
+

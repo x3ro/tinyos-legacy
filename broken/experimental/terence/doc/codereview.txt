@@ -1,0 +1,28 @@
+Virtual Commm
+1) Randomize timer to resend
+2) Increase resend time (exponentially)
+3) replace VirtualComm Send isBusy in send
+4) sendDone, if (result == SUCESS) signal VirtualCommSend.sendSuccess -
+5) in VirtuaCommSEnd.isBusy add in call FifoQueue.isFull(pendingQueue)
+6) change the name of sendFail and sendSucess to sendDoneFail,
+sendDone Success
+
+MHDispatcher
+1) change name from getBuffer to getUseablePortion
+2) sendFail and sendDoneFail for CollectData
+3) change from isNewData to isOriginatePacket
+4) change from pendingData to pendingOriginateDataPacket
+
+MHSender
+1) counter to retryCounter
+2) set lastPacket = msgToSend only if sendResult = true
+3) in trySendMsg change didNotGetDataYet
+4) retransmit increase link seqnum
+
+Routing
+1) don't need data seqence
+2) use a task to do paretn selection
+3) pick top 6 probilibty before you pcik hop
+4) who is my children in routing
+5) broadcast everything, but have parent field
+

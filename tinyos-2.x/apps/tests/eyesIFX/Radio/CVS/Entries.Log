@@ -1,0 +1,12 @@
+A D/TestBasicMac////
+A D/TestCCA////
+A D/TestHAL////
+A D/TestHPL////
+A D/TestMac////
+A D/TestPacketSerializer////
+A D/TestUARTPhy////
+A D/TestUARTPhyWithModes////
+R D/TestMac////
+R D/TestHPL////
+R D/TestCCA////
+R D/TestBasicMac////

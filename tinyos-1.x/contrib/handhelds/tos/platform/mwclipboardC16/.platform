@@ -1,0 +1,7 @@
+@opts = ("-gcc=msp430-gcc",
+         "-mmcu=msp430x1611",
+         "-fnesc-target=msp430",
+         "-fnesc-no-debug");
+
+@commonplatforms = ("mwclipboardC", "msp430_crl_base","msp430");
+

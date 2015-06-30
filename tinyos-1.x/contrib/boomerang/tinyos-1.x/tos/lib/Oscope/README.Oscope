@@ -1,0 +1,51 @@
+$Id: README.Oscope,v 1.1.1.1 2007/11/05 19:09:15 jpolastre Exp $
+
+README for Oscope
+Author/Contact: tinyos-help@millennium.berkeley.edu
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+
+Description:
+
+Oscope is a library service for easily sending aggregated data in the
+packet format recognized by the Oscilloscope visualization application,
+net.tinyos.oscope.Oscilloscope.  Ten readings are aggregated into a single
+Oscope message.  The Oscope service manages the aggregation and buffering
+for the application and immediately sends an Oscope message as soon as 10
+readings are aggregated.
+
+In the application module, sending data to Oscope is a single command:
+
+  call OscopeCh0.put( myDataValue );  //a single uint16_t
+  call OscopeCh1.put( myOtherValue );  //a single uint16_t
+
+The additional wiring for the application configuration is also minimal:
+
+  Main.StdControl -> OscopeC.StdControl;  //initialize OscopeC
+  MyApplicationM.OscopeCh0 -> OscopeC.Oscope[0];  //wire to channel 0
+  MyApplicationM.OscopeCh1 -> OscopeC.Oscope[1];  //wire to channel 1
+
+By default, this service supports up to two channels through the
+parameterized interface: 0 and 1.  This quantity can be increased (or
+decreased) with a compile time definition of OSCOPE_MAX_CHANNELS, for
+instance by adding a line like this to your Makefile
+
+  CFLAGS += -DOSCOPE_MAX_CHANNELS=4
+
+That's it!  Go render some waveforms!
+
+
+Tools:
+
+Run the Oscilloscope Java visualization like this
+
+  java net.tinyos.oscope.oscilloscope
+
+
+Known bugs/limitations:
+
+Some readings may be dropped by Oscope if a channel fills its oscope data
+buffer (10 readings) before that channel's previous data buffer has a
+chance to get out over the radio.  Dropped readings are indicated when
+Oscope.put returns FAIL instead of SUCCESS.
+

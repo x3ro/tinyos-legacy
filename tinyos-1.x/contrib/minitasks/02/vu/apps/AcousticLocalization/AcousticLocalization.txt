@@ -1,0 +1,152 @@
+Author/Contact
+		janos.sallai@vanderbilt.edu (Janos Sallai, ISIS, Vanderbilt)
+		miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+		gyorgy.balogh@vanderbilt.edu (Gyorgy Balogh, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+AcousticLocalization is a complete acoustic localization application for 
+the MICA and MICA2 motes with standard sensor boards. The localization is 
+performed at the base station and not in the network.
+
+It utilizes the OutsideRanging component (see lib/AcousticRanging). A ranging 
+measurement is made in the following way: the acoustic beacon emits an acoustic 
+ranging signal (one radio message followed by several buzzes) and the 
+neighboring motes (acoustic sensors) listen for them. The acoustic sensor 
+calculates the distance based on the time of flight of the sound and forwards 
+the result to the base station.
+
+AcousticRanging uses FloodRouting with GradientPolicy to route the measurement 
+data back to the base station. For details about the routing see 
+lib/FloodRouting/FloodRouting.txt and lib/FloodRouting/GradientPolicy.txt.
+
+AcousticRanging relies on the TimeSlotNegotiation module 
+(apps/TestTimeSlotNegotiation) to assign unique time slots to acoustic beacon 
+nodes in order to avoid overhearings. For details about TimeSlotNegotiation see 
+apps/TestTimeSlotNegotiation/TimeSlotNegotiation.txt.
+
+When sending TimeSlotNegotiation messages the application blinks the green LED.
+During the ranging measurement
+ - the yellow LED is blinking in every second,
+ - the red LED is on while sending an acoustic beacon message,
+ - the green LED is on while receiving an acoustic beacon message.
+
+ACCURACY:
+
+For the outside ranger, the maximum range is around 10 meters (depends on GOOD 
+radio and antenna). Surrouding vegetation (such as grass or shrubs) can lower the
+range of the acoustic ranging. The distance measuremens have a Gaussian error, 
+the average of measurement errors should be between 10 and 20 cm. The error does 
+not depend on the distance. Multipath effects (echoes) may cause considerably 
+higher errors to the measurements. 
+
+The results depend on the speed of sound. On the mica2 platform measurement 
+results are calculated with the speed of sound of 340 m/s. If using mica2 motes, 
+and the speed of sound is significantly different from the hard coded value the 
+measurement results can be linearly scaled (i.e. divided by 340 and multiplied 
+by the actual speed of sound, given is m/s). This kind of scaling is currently 
+unsupported on the mica platform.
+
+The manufacturing differences in the microphones and buzzers should not 
+influence the accuracy of the ranging. 
+
+OPERATION:
+
+0. You have to download the FULL minitasks/02/vu CVS directory from SourceForge 
+   to a new local directory (do not load it over your tinyos-1.x directory).
+1. Program several (up to 10-15) MICA2 motes with the AcousticLocalization 
+   application. Use unique mote id's. Attach the standard sensorboard (with mic
+   and buzzer) to these.
+2. Program one MICA2 mote with the GenericBase component. 
+3. Turn on each of the motes, waiting a couple of seconds in between.
+5. Deploy the motes OUTSIDE, for example in a 10x10 meter area.
+6. Connect the base station mote to a PC/laptop and load the 
+   isis.nest.ranging.AcousticLocalization application in MessageCenter. 
+   For details on usage see README.txt in tools/java/isis/nest/ranging.
+
+CONDUCTING MEASUREMENT USING REMOTECONTROL
+
+Advanced commands are available via the RemoteControl application (from 
+MessageCenter):
+
+The APP ID for AcousticRangingC component is 0x02(2). It 
+supports the following IntCommands:
+				0x0000	Stop ranging
+				0x0001	Start ranging
+				0x0002	Don't send -1 ranging results
+				0x0003	Send all ranging results (including -1's)
+
+The APP ID for TimeSlotNegotiationC component is 0x15(21). It supports the 
+following IntCommands:
+				0x0000	Stop negotiation
+				0x0001	Start negotiation
+				0x0002	Return status (1=negotiating, 0=idle)
+				0x??03	Set time slot to value of the high byte
+				other	Get time slot
+
+RemoteControl response messages can be viewed with MessageTable. The message 
+type is 130, the message format is the following:
+                const uint8_t appID = 94
+                omit uint16_t location
+                unique uint16_t nodeID
+                unique uint8_t seq
+                unique uint8_t response
+
+Acoustic ranging measurements can be viewed with MessageTable. The message type 
+is 130, the message format is the following:
+                const uint8_t appID = 2
+                omit uint16_t location
+                uint16_t actuator 
+                uint16_t sensor   
+                int16_t distance 
+
+COMPILE-TIME OPTIONS
+
+AcousticRanging supports XNP, Crossbow's over-the-air reprogramming module, 
+however, it is not compiled in by default. To turn on this feature place the 
+following line in the Makefile:
+PFLAGS := $(PFLAGS) -DWITH_XNP
+
+LIMITATIONS:
+
+- This algorithm is optimized for OUTSIDE and STATIONARY use. Inside buildings 
+there can be substantially more echoes. We plan to release an acoustic ranger 
+for inside use and  for moving targets.
+
+- The application has not been tested on MICA2 motes with radio speed other than 
+the default, because the acoustic ranging sensor is calibrated for the default 
+radio speed. Using the high radio speed on MICA2 might result in getting false 
+measurements.
+
+ALGORITHM:
+
+- As motes are turned on, they start the time slot negotiation. After about a 
+minute each mote should have a time slot that is unique within its hearing 
+distance.
+
+- If the motes receive a "Start Ranging" message they start the ranging process. 
+Each mote broadcasts an acoustic beacon message in its own time slot.
+
+- An acoustic beacon message consists of a radio signal and a chirp. First we 
+emit a radio signal. The SendMsg.sendDone and ReceiveMsg.receive events are used 
+to synchronize the acoustic beacon and acoustic rangers.
+
+- When receiving the radio signal, the acoustic sensor turns on the microphone. 
+Both sides wait 0.5 seconds for the microphone to power up.
+
+- Then the acoustic beacon emits 16 buzzes, each of which is 122 millisecond 
+long. The acoustic sensor samples each of the buzzes by streaming the microphone 
+(950 samples per buzz) and adds these samples together. The sampling frequency 
+is around 15600 Hz for MICA and 17700 Hz for MICA2 motes.
+
+- By sampling 16 times we increase the signal to noise ratio. Also, we vary the 
+delay  between the buzzes to eliminate some of the unwanted echoes and other 
+motes' buzzes.
+
+- Once the recording is done, we use a 35-length digital filter (with integer 
+coefficients) to filter out the 4-5 KHZ range.
+
+- Then we run a nice peak detection algorithm to detect the start of the buzz.
+
+- Finally, we convert the range to centimeters and route back the data to the 
+base station. If the peak cannot be reliably detected, -1 is returned.

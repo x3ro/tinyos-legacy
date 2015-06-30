@@ -1,0 +1,12 @@
+TestPeaceKeeper:
+
+Author/Contact: peter.volgyesi@vanderbilt.edu (Peter Volgyesi, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The TestPeaceKeeper verifies that the PeaceKeeper component works correctly. The 
+PeaceKeeper component helps detecting RAM corruption caused by the stack growing
+large and overwriting component variables. To see what happens when the stack 
+overwrites the memory of components uncomment the first line in TestPeaceKeeperM.nc.
+Please see the PeaceKeeper.txt documentation in the lib directory.
+

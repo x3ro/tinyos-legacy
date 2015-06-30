@@ -1,0 +1,98 @@
+This is a proposal for attaching attributes to nesC programs to support
+various goals:
+- simple language extensions without reserving lots of keywords and burdening
+  the syntax (e.g., "wire at most once")
+- user-specified annotations which would then be accessible to user-built
+  tools (e.g., mark a set of interfaces as "configuration interfaces" to
+  build a pc-side configuration tool for a specific app)
+
+The proposal is inspired by the annotations in the upcoming java 1.5
+(see http://jcp.org/aboutJava/communityprocess/review/jsr175/ for details),
+and would subsume the gcc __attribute__ mechanism.
+
+Part 1: Attribute declaration and use
+-------------------------------------
+
+An attribute has a name, and an associated value from a declared type. All
+attributes must be declared. For instance:
+
+  attribute void spontaneous; // spontaneous has no associated value
+  attribute char[] section; // special linker section for a variable, value
+	                    // is section name
+
+An attribute can be attached to:
+- declarations (variables, typedefs, enum constants, interface references, etc)
+- types
+- components and interfaces
+
+The attributes are placed in place as __attribute__ is in gcc's syntax
+(don't ask, it's messy), and can in fact reuse the __attribute__ syntax:
+
+  int main() __attribute__((spontaneous), (section, "foo")) { ... }
+
+or they can use the java 1.5-like @attribute-name(value) syntax:
+
+  int main() @spontaneous @section("foo") { ... }
+
+Appropriate definition of the rules for @/__attribute__ will (I believe)
+allow convenient specification of attributes with multiple arguments (whose
+associated type will be a struct). So:
+
+  attribute struct { int x, double y } silly;
+
+  int z @silly(3, 2.0);
+
+There should probably be some support for default values - not sure
+what form that should take (again, see java 1.5). I also need to make
+sure that we can declare all the existing gcc attributes (as we're
+taking over the __attribute__ syntax and must still deal with existing
+header files).
+
+Part 2: Attribute targets
+-------------------------
+
+Not all attributes make sense on all entities. We use a special attribute
+(@target) to declare the set of legal targets for an attribute:
+
+  attribute void spontaneous @target(FUNCTION);
+
+See the java 1.5 spec for more fun ideas along these lines...
+
+This is an example of an attribute which is known to and used by the
+compiler.
+
+
+Part 3: Attribute use by external tools
+---------------------------------------
+
+User-defined attributes have no direct effect on code generation. Instead,
+the nesC compiler has a special mode in which it parses and analyses a
+nesC program and outputs information on all attributes used, along with
+other useful information on the nesC program (see below). In this special
+mode, the nesC compiler does not generate code, and allows the following
+errors:
+- missing components
+- missing header files (from `includes ...' statements)
+- references to interfaces of missing components
+- references to unknown types, variables, functions
+
+The "useful information" which is output is:
+- the list of all components included
+- the specification of each component (i.e., the interfaces, commands
+  and events provided or used)
+- the definition of each interface
+- the program's (possibly incomplete) wiring graph
+Note that the above elements will be output will full type information.
+
+
+This approach will support tools that do the following:
+- check some properties of the program, especially as it relates to
+wiring and components (e.g., check an annotation like @atmostonce
+which restricts cardinalities in the wiring graph)
+- generate extra components, types, functions to make a complete program
+(e.g., a component which takes received messages to set
+configurable parameters and connects to all the program's components
+which have declared a configurable parameter via an @config annotation)
+
+[Note: I expect the details outlined above to require some change 
+once we try and build the first such tool...]

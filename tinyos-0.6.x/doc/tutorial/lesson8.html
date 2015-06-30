@@ -1,0 +1,206 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Lesson 8</title>
+</head>
+
+<body>
+
+    <h1>Lesson 8: Ranging</h1>
+
+    <p>
+    This tutorial will discuss ranging, which is the finding of distances 
+    between motes.&nbsp; Ranging in TinyOS is done with a component called 
+    TOF_RANGING, where TOF stands for Time Of Flight.&nbsp; The TOF_RANGING 
+    component has very poor accuracy because it uses minimal computation.&nbsp; 
+    However, this makes it very lightweight computationally, so it should not 
+    interfere with your application.&nbsp; You can link it into any application 
+    by simply initializing it in your description file with the following line:</p>
+
+    <p>
+    MYAPP:MYAPP_SUB_INIT TOF_RANGING:TOF_RANGING_INIT </p>
+
+    <h2>Overview</h2>
+
+    <p>This component <i>piggybacks </i>on the radio communication stack by 
+    sending an acoustic pulse at the same time as the radio packet.&nbsp; The 
+    acoustic pulse is time stamped upon arrival and this time stamp is compared 
+    to that of the corresponding radio packet.&nbsp; Since sound moves slower 
+    than light, the <i>time difference on arrival</i> (TDOA) can be directly 
+    translated into the distance between sender and receiver.&nbsp; As we will 
+    see, a lot of noise in the time is introduced by variations in the sounder 
+    and microphones and this may need to be calibrated out.</p>
+
+    <h2>The Interface</h2>
+
+    <p>The TOF_RANGING component is a <i>passive </i>component.&nbsp; A mote 
+    only chirps when commanded to do so.&nbsp; This means that the problem of 
+    scheduling chirps, which varies greatly in complexity depending on the 
+    application, has been left to the user. One method of scheduling chirps 
+    might be to turn ranging on all the time, which is useful in contexts of 
+    constant motion.&nbsp; Another method might be to control the chirping from 
+    a PC, i.e. centralized scheduling.&nbsp; Another might be to chirp whenever 
+    hearing a transmission from an unknown mote, a possible indication of 
+    motion.&nbsp; In this section, we only describe the <i>interface </i>that 
+    any such scheduler would use.&nbsp; Essentially, the interface allows you to 
+    do two things: 1) send a chirp and 2) obtain the resulting ranging estimate.</p>
+
+    <h3>Sending a Chirp</h3>
+
+    <p>There are two ways to command a mote to chirp:<br>
+    1.&nbsp; A local function call<br>
+    2.&nbsp; A command packet</p>
+
+    <p>The latter of these two methods can be initiated from either a mote or a 
+    PC.&nbsp; The following local function calls initiate:</p>
+
+    <p>a chirp in the <i>local </i>mote:&nbsp;&nbsp; <font face="Courier New">
+    char TOF_RANGING_CHIRP(char finalAction);<br>
+    </font>a chirp in <i>another </i>mote:&nbsp;&nbsp; <font face="Courier New">
+    char TOF_RANGING_CHIRP_COMMAND(int moteID, char finalAction, char numChirps);</font></p>
+
+    <p>The latter function initiates the following packet, which can also be 
+    initiated from a PC.&nbsp; It initiates a chirp in the mote that receives 
+    it:</p>
+
+    <p>FF FF 7D 1D 01 <span style="background-color: #FFFF00">01</span>
+    <span style="background-color: #00FFFF">FF</span> 00 00 00 00 00 00 00 00 00 
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 </p>
+
+    <p>Where the yellow byte is the <i>finalAction </i>and the blue byte is <i>
+    numChirps.</i>&nbsp; The numChirps field indicates how many times the mote 
+    should chirp.&nbsp; A setting of 0xFF indicates that the mote should chirp 
+    forever.&nbsp; You can stop it with a setting of 0x00.&nbsp; The <i>
+    finalAction </i>byte indicates what the mote should do with the final 
+    ranging estimate, once obtained, as discussed below.&nbsp; The premise 
+    behind this part of the protocol is that the agent that <i>initiates </i>the 
+    chirping knows who is interested in the ranging information.</p>
+
+    <p>To initiate the chirp command from a PC, call the tofChirpCommand 
+    function in nest/tools/matlab/shared/tofRanging</p>
+
+    <h3>Obtaining a Distance Estimate</h3>
+
+    <p>Once a mote has chirped 4 times, all receivers should have a distance 
+    estimate for it.&nbsp; There are two ways to obtain this distance estimate:<br>
+    1.&nbsp; the receiver signals a local TOS event<br>
+    2.&nbsp; the receiver broadcasts the data&nbsp; <br>
+    3.&nbsp; the receiver responds to a request packet&nbsp; </p>
+
+    <p>Whenever 4 chirps <i>with finalAction=0x00 </i>are heard from the same 
+    sender, the receiving mote broadcasts the final ranging estimate.&nbsp; 
+    Whenever 4 such chirps are heard <i>with finalAction=0x01</i>, however, the 
+    following event is signaled:</p>
+
+    <p>char TOF_RANGING_RANGING_DATA_READY(short distance); </p>
+
+    <p>When such a distance estimate is broadcast, it is sent in a <i>response 
+    packet</i>, which has the following format:</p>
+
+    <p>FF FF 7D 1D 02 <span style="background-color: #00FF00">11</span>
+    <span style="background-color: #FF0000">21 00</span> 00 00 00 00 00 00 00 00 
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 </p>
+
+    <p>Where the green byte is the receiver's mote ID and the red bytes are the 
+    distance estimate in centimeters (cm).&nbsp; This response packet is also 
+    sent in response to a request packet, which has the following format:</p>
+
+    <p>FF FF 7D 1D 01 <span style="background-color: #00FF00">10</span> 00 00 00 
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+    00 00 00 00 </p>
+
+    <p>Where the green byte is the mote ID of the requester.&nbsp; This request 
+    packet can be initiated either by a PC or from within a mote by calling the 
+    following function:</p>
+
+    <p><font face="Courier New">char TOF_RANGING_DATA_REQUEST(void);</font></p>
+
+    <p>To initiate the data request from a PC, call the tofRangingDataRequest 
+    function in nest/tools/matlab/shared/tofRanging</p>
+
+    <h2>Calibration</h2>
+
+    <p>Unfortunately, the sounder, microphone and tone detector on the mica 
+    sensorboard are not very high quality and our distance estimates will be 
+    very poor.&nbsp; We can reduce our error, however, by over 100% with 
+    calibration.&nbsp; There are two types of calibration that needs to be done:&nbsp; 
+    hardware and software.</p>
+
+    <h3>Hardware Modification</h3>
+
+    <p>Resistor R30 on the bottom of the mica sensor board should be about 
+    27.4KOhm.&nbsp; Otherwise, you will get no accuracy in your distance 
+    estimates at all.&nbsp; This resistor changes the center frequency of the 
+    tone detector on the sensor board.&nbsp; Your tone detector should be able 
+    to cleanly detect frequencies at least as low as 4.2KHz and hopefully as low 
+    as 4.0KHz.&nbsp; The higher the value of the resistor, the lower the center 
+    frequency of the tone detector.&nbsp; </p>
+
+    <h3>Software Calibration&nbsp; </h3>
+
+    <p>A tool exists to calibrate the mica sensor board for TOF ranging using 
+    the matTOS toolset, which integrates matlab into the TinyOS environment.&nbsp; 
+    For an introduction to matTOS, read the
+    <a href="../../tools/matlab/docs/index.html">matTOS documentation</a>.</p>
+
+    <p>First, be sure that all motes in your system are mapped to a location, as 
+    discussed in the matTOS documentation.&nbsp; Then, add nest/tools/matlab/contrib/kamin/tofCalibation 
+    to your path.&nbsp; Then, run the following commands:</p>
+
+    <p><font face="Courier New">initializeTOFcalibration(transmitters, 
+    receivers)<br>
+    startTOFcalibration</font></p>
+
+    <p>Where <i>transmitters</i> is an array of all IDs of your transmitters and
+    <i>receivers</i> is an array of all IDs of your receivers.&nbsp; You will 
+    get a prompt that asks you which mote you want to calibrate and what it's 
+    current location is:</p>
+
+    <p><font face="Courier New">Enter the ID of the calibrating transmitter 
+    (e.g. '213'):<br>
+    Enter the coordinates of the calibrating transmitter (e.g. [x y]):</font></p>
+
+    <p>When you enter this information it will command that mote to chirp and 
+    listen to the ranging estimates given by all motes you listed as receivers.&nbsp; 
+    If the mote fails to chirp, the system will halt.&nbsp; You can use the 
+    command</p>
+
+    <p><font face="Courier New">oopsRestartTOFcalibration</font></p>
+
+    <p>to restart the process.</p>
+
+    <p>Since matTOS has a mapping of each receiver to a location and it knows 
+    the location of the chirper, it can calculate the true value of each ranging 
+    estimate.&nbsp;&nbsp; It uses this true value along with the estimate for 
+    calibration.&nbsp; It is recommended that you calibrate each mote at several 
+    locations within your system.</p>
+
+    <p>When you are done, simply hit ENTER when prompted for a transmitter and 
+    the process will terminate.&nbsp; All calibration coefficients for all 
+    calibrated motes will be calculated.&nbsp; From this point on, whenever you 
+    want to calibrate a reading, use the following function call:</p>
+
+    <p><font face="Courier New">calibrateReading(transmitterID, receiverID, 
+    rangingEstimate)</font></p>
+
+    <p>it will take your ranging estimate between your transmitter and receiver 
+    and give you a calibrated ranging estimate using the calibration 
+    coefficients of that transmitter and that receiver.</p>
+
+    <p>If you are not using matlab in your system, at this point you could 
+    retrieve that calibration coefficients using the function</p>
+<p>stopTOFcalibration</p>
+<p>and port them to your system.&nbsp; Notice also that the nest/tools/matlab/contrib/kamin/localization 
+tool automatically uses these calibration coefficients.</p>
+
+<hr>
+<p><a href="lesson7.html">
+<b><font size=4>&lt; Previous Lesson</font></b> </a></p>
+
+</body>
+
+</html>

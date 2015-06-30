@@ -1,0 +1,22 @@
+PeaceKeeper:
+
+Author/Contact: peter.volgyesi@vanderbilt.edu (Peter Volgyesi, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The PeaceKeeper component helps detecting RAM corruption caused by the stack growing
+large and overwriting component variables. The PieceKeeper component fills the space
+between the last component memory frame and the stack frame with a special pattern.
+This patter can later be checked if it has been overwritten. Through the PeaceKeeper 
+interface one can check the remaining stack space and the maximum stack pace used ever. 
+Also, the PeaceKeeper continuously monitors the remaining space and if it detects 
+corruption halts the whole mote. In this emergency situation the mote will blink its 
+LEDs according to the following pattern:
+
+- The red LED is always blinked once per second.
+- The green LED is blinked if the remaining stack goes below 64 bytes 
+	(this is the DMZ zone)
+- The yellow LED is blinked if stack space (the DMZ zone) is corrupted by
+	components and not by the stack.
+
+

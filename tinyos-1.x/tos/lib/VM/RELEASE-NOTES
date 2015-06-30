@@ -1,0 +1,121 @@
+Release Notes for Mate' Version 2.2.1, 2.2.2
+April 27, 2005
+Philip Levis
+====================================
+
+Mate' v2.2.1-2 extends 2.2 slightly. There are three significant additions.
+The first is support for the Telos revB (TMote Sky) and micaZ platforms.
+The second is support for including Deluge into an ASVM with the 
+DELUGE tag in the ASVM OPTION element; the manual explains how 
+to do so. The third is support for the mca300 sensor board from
+Crossbow, Inc. There are also several minor changes/additions:
+  - Exponentiation is now implemented by a 16 element lookup table,
+    rather than casting to floating point and using math libraries.
+    Floating point exponentiation turns out to be a lot of code (e.g.,
+    3 kB). On code memory limited platforms (e.g., MSP430-based), this
+    was an issue.
+  - The VMBuilder tool no longer requires a GUI even when in
+    command line mode (it used to be that even if you did not pass
+    the -gui flag it required GUI capability and so would not work
+    over a remote shell without X forwarding).
+  - A set of more expressive led toggling functions.    
+  - TinyScript now supports constants up to 16 bits long.
+
+====================================
+
+Release Notes for Mate' Version 2.2
+Dec 15, 2004
+Philip Levis
+====================================
+
+Mate' v2.2 introduces several changes to the Mate' architecture. From
+a script writer's perspective, there should be no significant
+changes. However, the internals of a VM have been re-organized
+slightly. These changes fall into three categories: type management,
+type checking, and identifiers.
+
+Type Management
+------------------------------------
+
+In Mate 2.0, making languages truly language independent was very
+difficult.  For example, the send() function assumed a buffer as a
+parameter. However, a language may not support the buffer abstraction.
+As the only types that all languages support is a basic integer and
+sensor readings, limiting functions to these parameters is
+problematic, especially for networking.
+
+Essentially, functions that enable motes to communicate need to be
+able to take arbitrary, possibly language specific, data types and
+transform them into a representation suitable for transmission. For
+example, if a language has a linked list type, then the send()
+function needs to be able to encode the list into a packet-friendly
+form (i.e., not a series of pointers). Similarly, contexts and
+functions that enable motes to receive communication need to be able
+to decode these network representations.
+
+Mate' achieves this through the MateType interface, which the
+MTypeManager component provides. Every type must have a globally
+unique identifier. The MateType interface has commands for testing to
+see if a VM supports a given type, as well as transforming on-mote
+representations of the type to and from network representations.
+
+The component MTypeManager both provides and uses a parameterized
+MType, where the parameter is the type identifier. It also has a
+default implementation for its uses; this means that if a component
+wires to MTypeManager for a given type, then commands will forward to
+that component, but otherwise commands will go to the default
+implementations (which, among other things, say that the type is not
+supported).
+
+Type Checking
+------------------------------------
+
+Mate 2.0's type checking is implemented in the MStacks component. In
+Mate 2.2, the functionality has been moved to a new component,
+MTypesProxy (which encapsulates MTypeCheck). The interface remains
+unchanged; to update Mate 2.0 components, all you will need to rewire
+them.
+
+
+Identifiers
+------------------------------------
+
+The first change in identifiers is in context description files (.cdf
+files). All CONTEXT elements must now include an ID element, whose
+value is a globally unique integer. This is so that, in the future,
+Mate' can introduce support for networks with heterogeneous VMs
+(injecting a handler for a given event will be understood
+globally). Currently, the ID element is not used.
+
+The second change is internal to VMBuilder: the format of its output
+files with regards to wiring opcode components has changed slightly. In
+Mate' 2.0, including the OPadd component, for example, would result
+in this line in MateTopLevel.nc,
+
+  VM.Bytecode[OPadd] -> OPadd;
+
+and this line in MateConstants.h:
+
+  enum {
+    ...
+    OPadd = <some hex value>,
+    ...
+  }
+
+That is, the token OPadd refers to BOTH the component and its opcode
+value. For a variety of reasons, this will no longer be possible in
+nesC 1.2 (enums and component names will be in the same namespace). In
+Mate 2.2, the same inclusion will result in this line in
+MateTopLevel.nc
+
+  VM.Bytecode[OP_ADD] -> OPadd;
+
+and this line in MateConstants.h:
+
+  enum {
+    ...
+    OP_ADD = <some hex value>,
+    ...
+  }
+
+

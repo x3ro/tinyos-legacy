@@ -1,0 +1,83 @@
+README for MagDirectBot
+Author/Contact: Phoebus Chen (http://www.eecs.berkeley.edu/~phoebusc/)
+
+//WORK IN PROGRESS
+
+Compiles For:
+mica2dot (uses honeydot sensor board) - for the sensor network
+mica2 - for the COTSBOT
+
+Description:
+
+MagDirectBot is an application loaded onto the sensor network that
+provides position feedback to a COTSBOT running through the network.
+It is meant as the most basic example of providing a feedback
+mechanism within a sensor network.
+
+Similar to the PEG demo, there is some rudimentary data aggregation at
+a "leader" node, followed by a single hop radio broadcast to anyone
+that is listening (plus a transmission over the UART for experiment
+monitoring purposes).  Unlike PEG, we do not use any useful
+libraries/utilities such as "Neighborhood".
+
+
+Usage:
+
+To run the application, you need a COTSBOT running SenseAndNavigate
+with a strong magnet strapped on top.  Essentially, the two
+programs work together as follows:
+
+1) The Sensor Network, using its magnetic readings, estimates the
+position of the COTSBOT, and broadcasts this to the COTSBOT
+2) The COTSBOT broadcasts what it heard from the sensor network to the
+basestation running MATLAB, which does the computation for the controls
+3) The basestation broadcasts where to move to the COTSBOT
+4) The COTSBOT navigates to that position.
+5) repeat
+
+The actual pattern traversed by the COTSBOT is programmed into the
+matlab controls.
+
+
+LED Debugging:
+RED_LED -- lights for a short interval when first senses magnetic disturbance
+	   lights for a longer interval when broadcasts a position
+
+The user can configure the LED lighting intervals over the radio/UART.
+
+
+Tools/Other Code:
+The code on the COTSBOTS, SenseAndNavigate resides in
+	tinyos-1.x/contrib/ucb/apps/RobotTestbed/Robot/SenseAndNavigate
+
+The java/matlab tools providing the "brains" of the COTSBOT
+	tinyos-1.x/contrib/ucb/tools/matlab/RobotTestbed/MagDirectBot
+
+
+Known bugs/limitations: Not yet implemented.
+
+Preferably, we'd like to use Bombilla to script the controls onto the
+COTSBOT
+
+This application assumes that the radio communication range is more
+than twice as great as the magnetometer sensing range.  If not, we
+may get multiple reports for the same magnetic disturbance.
+
+Lossy Network: - Packets are dropped if the radio is busy - Some
+Aggregated Data may not be reported due to self-regulation in
+  this scenario:
+  1) Node A gets a sensing, and waits for timeOut period to assess if
+    it is the leader.
+  2) Another stronger sensing by a neighbor Node B arrives at time dt1
+     after Node A's sensing.  Node A decides not to be the leader.
+  3) Yet another stronger sensing by a neighbor Node C arrives at time
+     dt2 after Node A's sensing.  Node B decides not to be the leader.
+  4) Node C looks at timeOut period before it's sensing to aggregate
+     reports.  Assume dt2 > timeOut period.  Node A's report does not
+     get recorded by NodeC's aggregate report.
+
+Potential Areas for bugs:
+- Neighborhood table reposts if table is being accessed by another
+task... shouldn't happen.
+- tableLock in MagGatherAndReportM is temporary, and should be
+removed after testing.  shouldn't be necesary

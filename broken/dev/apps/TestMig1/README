@@ -1,0 +1,24 @@
+README for TestMig1
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+TestMig1 is a test application for Mig, the message interface generator 
+for nesC. This test application sends the same broadcast message out every seconds.
+The AM message type is 22 and message format is defined in 
+Mig1Msg.h located in the same directory as this README file. 
+The message body is hardcoded. 
+
+Test Set up:
+
+GenericBase on a programming board, which is connected to a PC's
+serial port. 
+
+PC side tools: 
+
+net.tinyos.sf.SerialForward 
+net.tinyos.tests.mig1
+This class interfaces to SerialForward. It parses the AM packet received 
+
+Known bugs/limitations:
+

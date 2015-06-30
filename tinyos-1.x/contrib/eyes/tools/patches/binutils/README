@@ -1,0 +1,1 @@
+A patch for binutils (msp430-as in particular) that enables dollar signs in the labels as required by nesc  

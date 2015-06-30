@@ -1,0 +1,48 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2002 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Philip Levis
+ *
+ * Component for controlling a Sony EVI-D100. A component specifies a set of
+ * lookup points in terms of coordinates. It can then provide weighted
+ * lists of lookup points; the CAMERA component weights the points
+ * and controls the camera to point at the correct point.
+ */
+
+TOS_MODULE CAMERA;
+
+ACCEPTS{
+	char CAMERA_INIT(void);
+	char CAMERA_START(void);
+	char CAMERA_ADD_POINT(short id, short pan, short tilt, short zoom);
+	char CAMERA_GOTO(short id1, char weight1, short id2, char weight2, short id3, char weight3, short id4, char weight4);
+};
+HANDLES{
+	char CAMERA_SEND_DONE(TOS_MsgPtr);
+	TOS_MsgPtr CAMERA_UART_RECEIVE(TOS_MsgPtr msg);
+};
+USES{
+	char CAMERA_SUB_SEND_MSG(char* msg, char len);
+	char CAMERA_SUB_INIT();
+	char CAMERA_SUB_RED_LED_TOGGLE();
+};
+

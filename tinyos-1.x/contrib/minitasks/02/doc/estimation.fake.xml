@@ -1,0 +1,43 @@
+<!-- $Id: estimation.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="Estimation">
+
+<p>
+This component aggregates sensor readings among a group of motes. The protocol
+for data measurement and aggregation is application-specific and transparent to
+the rest of demo code. If a target is detected, the component fires a
+TargetPosition event on the motes attached to the pursuers. The event passes
+the address of a target and a target identifier. The protocol will attempt to
+use the same identifier consistently to refer to the same target. This is
+accomplished with the help of the group management component described in
+Section 4.  A higher-level protocol can be used to compile a list of all
+identified targets and their current locations.
+</p>
+
+<p>
+Estimate Target depends on the PacketRouting component. Especially, it will
+need to use the RouteMobile interface to deliver the target information to the
+pursuers. The target estimation component also interacts with the location
+service. It needs the location information to calculate the position of the
+target using the positions of the detecting motes. 
+</p>
+
+<code>
+module PrototypeEstimateTargetM {
+    provides {
+        interface TargetPosition;
+    } uses {
+        interface ReceiveMsg;
+        interface SendMobile;
+    }
+}
+</code>
+
+<code>
+interface TargetPosition {
+   event result_t TargetPosition(location_t position; char target_id);
+}
+</code>
+
+</section>
+

@@ -1,0 +1,13 @@
+README for CntToLedsNumbered
+
+Description:
+
+CntToLedsNumbered maintains a counter on a 4Hz timer and displays the lowest
+four bits of the counter value. 
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+None.

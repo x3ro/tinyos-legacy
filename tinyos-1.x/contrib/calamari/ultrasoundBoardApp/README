@@ -1,0 +1,11 @@
+This file holds the application that should be run on the atmega8 ultrasound board.  To compile and install use the command
+
+make atmega8 install.0xFF01
+
+It is important that the ultrasound board be called 0xFF01 so that it will receive the I2C messages that the mica2dot sends (which will be addressed to 0x7e by definition).  It used to be important that the ultrasound board be called 0x7e so that it would receive the UART messages that the mica2dot sends (which will be addressed to 0x7e by definition).
+
+The UART files that are in this directory are because a UART sync byte is being used which is different from the standard TinyOS UART framing.  These UART files are basically the old TinyOS UART files.
+
+The AM_STANDARD file is probably a modified AM_STANDARD which doesn't filter for group ID and sends all messages to the UART, not sending any to the radio (of course).  
+
+The TestTxRxController.nc is just the high level configuration that basically initializes the TxRxController file in omnisound.  The idea I guess was that other apps could be written with the same library files.

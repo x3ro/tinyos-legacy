@@ -1,0 +1,103 @@
+#
+# Author: 	Barbara Hohlt <hohltb@cs.berkeley.edu>
+#
+#
+#		BufferManager
+#		QueuedASend
+#
+
+Description:
+This software demonstrates how to use the BufferManager and QueuedASend. 
+It is located in the sourceforge cvs repository under the 
+tinyos-1.x tree.
+
+	http://sourceforge.net/projects/tinyos/
+	module tinyos-1.x/contrib/ucb/tos/lib/
+		BufferManager/CircleQueue
+		BufferManager/BufferPool
+		BufferManager/QueuedASend
+	module tinyos-1.x/contrib/ucb/apps/
+		TestQASend
+
+QueuedASend manages the forwarding queue SendQueue. QueuedASend 
+provides the forwarding mechanism and SchedulePolicy provides the 
+scheduling policy.  
+
+TestMHQASend is a trivial test application wired to the schedroute/MultiHopC 
+and QueuedASend components. It sends 10 messages.
+
+TestQASend is a trivial stand-alone test application wired to the 
+QueuedASend component. It sends 10 broadcast messages.
+
+BufferManager
+
+lib/BufferManager/QueuedASend
+
+    ASendC: 
+	Uses FreeAList and SwapList free lists.
+ 	Implements AllocSend.
+	This module manages the application FreeAList and
+        the routing SwapList. Both MultiHopEngineM and the application share 
+	the SendQueue forwarding queue. Out-bound messages are put on 
+	the SendQueue for forwarding and returned to their respective 
+	free lists when done.
+        Currently the FreeAList and SwapList are initialized with N buffers. 
+	You can change the number of free buffers in FreeAListM.nc and
+	SwapListM.nc. 
+
+    QueuedASendC: 
+	Allocates SendQueue fifo queue and enforces the schedling policy.
+	The SendQueue handles route-thru packets as well as source 
+	originated packets from the application layer. After a message 
+	has been forwarded, QueuedASendM returns the message buffer to ASendC.
+
+    SendQueueC
+	A fifo queue that implements interface List. 
+
+
+schedroute
+	MultiHopEngineM:
+	Receives route-thru messages and uses the BufferManager/QueuedASend
+        and BufferPool.
+
+	RouteSelectDummy: 
+	Placeholder code which enforces the network 
+	neighborhood and topology in software. It assumes a network of 10 
+	motes with ids 0-9 where mote 0 is the base station. 
+
+				0
+			/		\
+			1		2
+		/		\		\
+		3		4		5
+	  /		\		/		\
+	 6		7		8		9
+
+
+	SchedulePolicy (optional):
+	The SchedulPolicyC and SchedulePolicyM can be omitted
+        entirely and QueuedASend will simply do a store-and-forward.
+	Implements a naive store-and-forward queuing policy that
+	additionally notifies the application when to send messages. 
+	Modify this component to implement your own queueing policies. 
+
+	Flexible Power Scheduling, for example, implements another 
+	policy (power scheduling) to manage the SendQueue and control 
+	radio wakeup and sleep times using FPS network scheduling. 
+
+Known bugs/limitations:
+1. Use SimpleTime. TimerC stalls. 
+
+Useage:
+1. TOSSIM
+	make pc
+	export DBG=route
+	build/pc/main.exe 10 
+
+2. mica|mica2|mica2dot 
+Program motes 1-9 with TestMHQASend and mote 0 with TOSBase.
+   	make mica|mica2|mica2dot install
+
+3. SingleHop. You can build a stand alone application that
+   is not wired to a multihop routing component.
+	make -f shmakefile [platform]

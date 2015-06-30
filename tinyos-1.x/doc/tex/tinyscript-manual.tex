@@ -1,0 +1,711 @@
+\documentclass[12pt]{article}
+
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{multicol}
+\usepackage{epsfig,amsmath,amsfonts}
+\usepackage{xspace}
+\usepackage{subfigure}
+
+\makeatletter                                   % Make '@' accessible. 
+\oddsidemargin=0in                              % Left margin minus 1 inch.
+\evensidemargin=0in                             % Same for even-numbered pages.
+\marginparsep=0pt                               % Space between margin & text
+
+\renewcommand{\baselinestretch}{1.2}              % Double spacing
+
+\textwidth=6.5in                                % Text width (8.5in - margins).
+\textheight=9in                                 % Body height (incl. footnotes)
+
+\topmargin=0in                                  % Top margin minus 1 inch.
+\headsep=0.0in                                  % Distance from header to body.
+\skip\footins=4ex                               % Space above first footnote.
+\hbadness=10000                                 % No "underfull hbox" messages.
+\makeatother                                    % Make '@' special again.
+
+\newcommand{\mate}{Mat\'{e}\xspace}
+\newcommand{\bomb}{Bombilla\xspace}
+\newcommand{\kw}[1]{{\tt #1}}
+\newcommand{\grammarshift}{\vspace*{-.7cm}}
+\newcommand{\grammarindent}{\hspace*{2cm}\= \\ \kill}
+\newcommand{\opt}{$_{OPT}$}
+
+\title{The TinyScript Language}
+\author{Philip Levis\\pal@cs.berkeley.edu}
+\date{}
+
+\begin{document}
+
+%\fontfamily{cmss}                               % Make text sans serif.
+%\fontseries{m}                                  % Medium spacing.
+%\fontshape{n}                                   % Normal: not bold, etc.
+%\fontsize{10}{10}                               % 10pt font, 10pt line spacing 
+
+\maketitle
+\vspace{2in}
+\begin{center}
+Version 1.0\\
+July 12, 2004
+\end{center}
+
+\fontfamily{cmr}                                % Make text Roman (serif).
+\fontseries{m}                                  % Medium spacing.
+\fontshape{n}                                   % Normal: not bold, etc.
+\fontsize{10}{10}                               % 10pt font, 10pt line spacing
+
+
+\thispagestyle{empty}
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+This document describes TinyScript, a language that the \mate VM
+framework supports for programming sensor networks. TinyScript is an
+imperative, BASIC-like language with dynamic typing and basic control
+structures such as conditionals and loops. 
+
+\section{Script Structure}
+\label{sec:tinyscript}
+
+This is an example TinyScript program that increments a counter:
+
+\begin{quotation}
+\begin{verbatim}
+
+! Define a shared variable, counter
+shared counter;
+
+! Increment it
+counter = counter + 1;
+
+\end{verbatim}
+\end{quotation}
+
+In TinyScript programs, all variables must be declared before any
+program statements. For example, the following program is invalid (and
+will throw a compilation error):
+
+\begin{quotation}
+\begin{verbatim}
+
+! Define a shared variable, counter
+shared counter;
+
+! Increment it
+counter = counter + 1;
+
+! Define a shared variable, index: ERROR
+shared index;
+
+\end{verbatim}
+\end{quotation}
+
+Statements generally end with a semicolon. {\tt !} declares the start
+of a comment, which extends to the end of a line. For example,
+
+\begin{quotation}
+\begin{verbatim}
+
+shared counter; ! Define a shared variable, counter
+counter = counter + 1; ! Increment it
+
+\end{verbatim}
+\end{quotation}
+
+is valid TinyScript code.
+
+TinyScript function and variable identifiers are case insensitive:
+{\tt var} is the same as {\tt VAR} or {\tt Var}. Identifiers are
+composed of alphanumeric characters and the underscore ('\_'), but the
+first character of an identifier must be a letter or the
+underscore. The following are all valid identifiers:
+
+\begin{verbatim}
+temp
+a51_b
+TEMP
+temp7
+buffer_Index
+_3
+\end{verbatim}
+
+The following are invalid identifiers:
+
+
+\begin{verbatim}
+@a
+4b
+sd?
+a 5
+\end{verbatim}
+
+
+To be precise, identifiers must follow the pattern {\tt
+[A-Za-z\_][A-Za-z0-9\_]*}.
+
+Certain words are TinyScript keywords, and cannot be used in programs
+to name variables or functions. In the above scripts, {\tt shared} is
+a keyword, declaring {\tt counter} to be a shared variable. The full
+list of keywords is:
+
+\begin{verbatim}
+not     and     or      xor     eqv     imp
+for     to      next    step    until   while
+end     private shared  buffer  if       then
+else
+\end{verbatim}
+
+TinyScript function and variable identifiers are case insensitive:
+{\tt var} is the same as {\tt VAR} or {\tt Var}. Keywords exist as
+both their uppercase and lowercase versions: {\tt shared} can also be
+written {\tt SHARED}, but cannot be written {\tt sHarEd}.
+
+\section{Variables}
+\label{sec:variables}
+
+TinyScript programs have two basic variable types: scalars and
+buffers. Scalars represent a single data item, such as an integer or a
+sensor reading. Buffers are small collections of values. In the above
+programs, the keyword {\tt shared} declared the variables to be
+scalars. Handlers can declare two kinds of scalars: {\tt private} and
+{\tt shared}. Private variables are local to that handler; the
+statement {\tt private a;} in two different handlers refers to two
+different variables. In contrast, {\tt shared a;} in two different
+handlers refer to the same variable. Using a shared variable, handers
+can pass data to one another. Buffers, declared with {\tt buffer}, are
+implicitly shared variables.
+
+Both values and buffers are dynamically typed. That is, the variables
+themselves have no explicit type in a program; instead, their type
+is determined dynamically as a program runs. In this program,
+
+\begin{quotation}
+\begin{verbatim}
+
+shared counter; 
+shared sensor;
+counter = random();
+sensor = light();
+
+\end{verbatim}
+\end{quotation}
+
+the variable {\tt counter} takes the type integer ({\tt rand()}
+returns an integer) while {\tt sensor} takes the type light ({\tt
+light()} returns a light value).
+
+Types constrain how values can be modified, and how buffers can be
+accessed. There is one basic scalar type, integer (16-bit, signed).
+Additionally, every sensor has its own type. Integers can be modified
+freely, through arithmetic, assignment, and other
+transformation. Sensor readings, however, are immutable. You cannot
+add two sensor readings, even if from the same sensor.
+
+The idea is that sensor readings should only be what is actually read
+from a sensor. Transformations on these readings should be
+distinguishable from actual readings.  To modify sensor readings, they
+must be cast to an integer with the {\tt int()} function. For example,
+this program computes an exponentially weighted moving average of the
+light sensor:
+
+\begin{quotation}
+\begin{verbatim}
+
+shared sensor; 
+shared aggregate;
+
+sensor = light();
+aggregate = (aggregate / 2) + (int(sensor) / 2); ! Cast light reading to integer
+
+\end{verbatim}
+\end{quotation}
+
+Buffers also have a type, which defines what values can be placed in
+it. A cleared buffer has no type, and takes the type of the first
+value placed in it. In the following program, {\tt aggBuffer} is
+cleared, which clears its type. An integer ({\tt aggregate}) is added
+to the buffer, making the buffer of the type integer.
+
+\begin{quotation}
+\begin{verbatim}
+
+shared sensor;
+shared aggregate;
+buffer aggBuffer;
+
+sensor = light();
+aggregate = aggregate + int(sensor); ! Cast light reading to integer
+aggregate = aggregate / 2;
+
+bclear(aggBuffer); ! Clear all buffer entries and type
+aggBuffer[] = aggregate; ! Append aggregate value to buffer
+                         ! Buffer is now of type integer
+
+\end{verbatim}
+\end{quotation}
+
+Buffers have a fixed maximum size of ten values. The function {\tt
+bfull()} can be used to see if a buffer is full, while {\tt bsize()}
+indicates how many entries it currently has. Individual buffer values
+can be accessed by indexing into a buffer. The following program
+obtains the median value stored in a buffer:
+
+\begin{quotation}
+\begin{verbatim}
+
+shared size;
+shared median;
+buffer aggBuffer;
+ 
+bsorta(aggBuffer);        ! Sort buffer entries in ascending order
+size = bsize(aggBuffer);  ! Number of entries in buffer
+median = aggBuffer[size / 2];  ! Return median value
+
+\end{verbatim}
+\end{quotation}
+
+An empty index value implies the tail (last value) of a buffer on
+access, or after the tail on assignment (append). For example:
+
+\begin{quotation}
+\begin{verbatim}
+
+buffer aggBuffer;
+shared val;
+
+val = aggBuffer[];             ! Val is the last value in the buffer
+aggBuffer[] = light();    ! Append a new light value to the buffer
+
+\end{verbatim}
+\end{quotation}
+
+\section{Functions}
+
+The above code examples used several functions, such as {\tt light()},
+{\tt bsorta()}, and {\tt int()}. Functions take a fixed number (zero
+or more) of parameters. For example, {\tt bclear()} takes a single
+parameter, a buffer to clear, and {\tt rand()} takes no
+parameters. Some functions return values (e.g., {\tt rand()}), while
+others do not (e.g., {\tt bsorta()}).
+
+Function parameters may have type requirements. However, as TinyScript
+is dynamically typed, these types are not checked at compile time. For
+example, {\tt bclear()} takes a single parameter, a buffer. Passing it
+an integer will cause a run-time error.
+
+Return values of function calls may be ignored. For example,
+
+\begin{quotation}
+\begin{verbatim}
+
+rand();
+
+\end{verbatim}
+\end{quotation}
+
+is a valid program.
+
+The return values of functions can be directly used as values or
+parameters to functions:
+
+\begin{quotation}
+\begin{verbatim}
+
+buffer aggBuf;
+shared val;
+
+val = aggBuf[rand() \% bsize(aggBuff)]; ! Hope size isn't zero
+val = sqrt(bsize(aggBuff)) + 2;         
+\end{verbatim}
+\end{quotation}
+
+Note that assigning to a buffer is different than assigning to an
+element of a buffer. Assigning a scalar to a buffer appends it. If a
+scalar is assigned to an element of a buffer, the buffer is
+dynamically sized to include that element if need be. Buffers can be
+assigned to one another (which results in a copy), but a buffer cannot
+be assigned to be the element of another buffer.
+
+\begin{quotation}
+\begin{verbatim}
+
+buffer aggBuf;
+buffer aggBuf2
+shared val;
+
+aggBuf2 = aggBuf;
+aggBuf[] = val;
+aggBuf2[val \% 8] = val;
+aggBuf[1] = aggBuf2;  ! ERROR
+\end{verbatim}
+\end{quotation}
+
+Currently, TinyScript does not support scripting functions.
+
+\section{Arithmetic, Logic, and Conditionals}
+
+Figure~\ref{fig:arithmetic} shows the set of arithmetic operations
+TinyScript provides, as well as their syntax.
+
+\begin{figure}
+\centering
+\subfigure[Arithmetic Operations]{\scriptsize
+\begin{tabular}{|l|c|l|} \hline
+Name           & Operator & Example \\ \hline
+Addition       & + & val = val + 2;\\ \hline
+Subtraction    & - & val = a - b; \\ \hline
+Division       & / & val = bsize() / 2; \\ \hline
+Multiplication & * & val = 2 * b; \\ \hline
+Exponentiation & $^{\wedge}$ & val = val $^{\wedge}$ 2 \\ \hline
+\end{tabular}
+\label{fig:arithmetic}
+}
+\subfigure[Comparison Operations]{\scriptsize
+\begin{tabular}{|l|c|l|} \hline
+Name                  & Operator & Example \\ \hline
+Less than             & $<$  & val = val $<$ 2;\\ \hline
+Greater than          & $>$  & val = a $>$ b; \\ \hline
+Less than or equal    & $<=$ & val = bsize() $<=$ 8; \\ \hline
+Greater than or equal & $>=$ & val = b $>=$ 2; \\ \hline
+Not equal             & $<>$ & cond = val $<>$ b \\ \hline
+\end{tabular}
+\label{fig:comparison}
+}
+\caption{TinyScript Computational Primitives}
+\label{fig:tscriptcomp}
+\end{figure}
+
+
+
+TinyScript also supports logical operations, which are show in
+Figure~\ref{fig:logic}. All of these operations only accept integers
+as operands. For the boolean operators (e.g., and, not), a value of
+zero is considered false; all other values are considered true. All
+operators use 0 as false and 1 as true. So, {\tt 1 and 2} resolves to
+1, while {\tt 0 and 34} resolves to 0. Figure~\ref{fig:tables}
+contains the truth tables for the boolean operators.
+
+\begin{figure}
+\centering
+\scriptsize
+\subfigure[Logical Operations] {
+\begin{tabular}{|l|c|l|} \hline
+Name           & Operator & Example \\ \hline
+And          & AND, and        & ready = full and idle;\\ \hline
+Or           & OR, or          & ready = full OR idle;\\ \hline
+Not          & NOT, not        & ready = not idle; \\ \hline
+Exclusive or & XOR, xor        & diff = a XOR b; \\ \hline
+Equivalent   & EQV, eqv        & rval = a eqv b; \\ \hline
+Implies      & IMP, imp        & ready = a imp b; \\ \hline
+Logical And  & \&              & bits = packetbits \& mask; \\ \hline
+Logical Or   & $\mid$          & bits = firstbit $\mid$ secondbi t; \\ \hline
+Logical Not  & $^{\sim}$       & mask = $^{\sim}$bits; \\ \hline
+\end{tabular}
+\label{fig:logic}
+}
+\subfigure[Truth Tables] {
+\begin{tabular}{|c||c|c||c|c||c|c||}\hline
+&\multicolumn{2}{|c||}{and}&\multicolumn{2}{c||}{or}&\multicolumn{2}{c||}{not} \\ \hline
+  & F & T & F & T & \multicolumn{2}{|c||}{} \\ \hline
+F & {\bf F} & {\bf F} & {\bf F} & {\bf T} & \multicolumn{2}{|c||}{{\bf T}} \\ \hline
+T & {\bf F} & {\bf T} & {\bf T} & {\bf T} & \multicolumn{2}{|c||}{{\bf F}} \\ \hline \hline
+&\multicolumn{2}{|c|}{xor}&\multicolumn{2}{|c|}{eqv}&\multicolumn{2}{|c|}{imp} \\ \hline
+  & F & T & F & T & F & T \\ \hline
+F & {\bf F} & {\bf T} & {\bf T} & {\bf F} & {\bf T} & {\bf T} \\ \hline
+T & {\bf T} & {\bf F} & {\bf F} & {\bf T} & {\bf F} & {\bf T} \\ \hline
+\end{tabular}
+}
+\caption{TinyScript Logical Primitives}
+\label{fig:tables}
+\end{figure}
+
+The logical operations manipulate integer bit fields. Instead of
+manipulating the integer as a singe value, they operate on each bit,
+in a manner similar to C operators. For example, {\tt 1 and 2}
+resolves to 1, while {\tt 1 \& 2} resolves to zero (1 and 2 share no
+common bits), and {\tt 1 $\mid$ 2} resolves to 3.
+
+Finally, TinyScript has standard comparison operators, as shown in
+Figure~\ref{fig:comparison}. They resolve to one if true, zero if
+false.
+
+\subsection{Control Structures}
+
+TinyScript supports standard language control structures such as
+conditionals and loops.
+
+The first set of control structures, conditionals, take this form:
+
+\begin{quotation}
+\begin{verbatim}
+
+if <expression> then                if <expression> then
+ <block 1>                           <block 1>
+end if                              else 
+                                     <block 2>
+                                    end if
+\end{verbatim}
+\end{quotation}
+
+
+If expression resolves to true, then block 1 executes. If the
+statement has an else clause and expression resolves to false, then
+block 2 executes. There can be nested if-then statements:
+
+\begin{quotation}
+\begin{verbatim}
+
+shared idle;
+buffer buf;
+
+if bfull(buf) then
+  idle = 0;
+  if rand() & 1 then
+    send(buf);
+    bclear(buf);
+  end if
+  idle = 1;
+end if
+\end{verbatim}
+\end{quotation}
+
+TinyScript provides loops through the {\tt for} construct. There are
+two basic forms, unconditional and conditional. Unconditional (for-to)
+loops run a specific number of times; their termination condition when
+the loop variable takes a specific value. Conditional (for-until)
+loops run until an arbitrary condition becomes true. {\tt next}
+defines the end of the loop block, and increments the loop
+variable. By default, the variable increments by one. However, the
+increment step can be set with the {\tt step} keyword. In summary:
+
+\begin{quotation}
+\begin{verbatim}
+
+for <x> = <expression> to <to-constant>
+  ...
+next <x>
+
+for <x> = <expression> to <to-constant> step <step-constant>
+  ...
+next <x>
+
+for <x> = <expression> until <until-exp>
+  ...
+next <x>
+
+for <x> = <expression> step <step-constant> until <until-exp>
+  ...
+next <x>
+
+\end{verbatim}
+\end{quotation}
+
+For example, this loop will run one hundred times, blinking the leds,
+
+\begin{quotation}
+\begin{verbatim}
+
+private i;
+
+for i = 1 to 100
+  leds(i & 7)
+next i
+\end{verbatim}
+\end{quotation}
+
+while this loop will put the values 1,3,5...21 in the buffer (when it has
+ten values, it will be full),
+
+\begin{quotation}
+\begin{verbatim}
+
+private i;
+buffer buf;
+
+bclear(buf);
+for i = 1 step 1 until i > 10
+  buf[] = i * 2;
+next i
+\end{verbatim}
+\end{quotation}
+
+Standard while loops can be implemented by setting a step of
+zero. This loop, for example, will put random values into a buffer
+until it is full:
+
+\begin{quotation}
+\begin{verbatim}
+
+private i;
+buffer buf;
+
+for i = 0 step 0 until bfull(buf)
+  buf[] = rand();
+next i
+\end{verbatim}
+\end{quotation}
+
+Parenthesis pairs can be added to define precedence, or for readability.
+
+\begin{quotation}
+\begin{verbatim}
+
+private i;
+buffer buf;
+
+bclear(buf);
+for i = 1 step 1 until i > 10
+  buf[] = ((i * 2) + 1);
+next i
+i = (5 + 2 * 2);    ! i = 9
+i = (5 + 2) * 2;    ! i = 14
+i = ((((5))));      ! i = 5
+
+\end{verbatim}
+\end{quotation}
+
+
+\mate is under active development. Bugs, contexts, and functions can be sent
+to Phil Levis ({\tt pal@cs.berkeley.edu}).
+
+\section{Appendix A: Grammar}
+\em \begin{tabbing}
+\grammarindent
+TinyScript-file: \\
+\>  variable-list\opt statement-list\opt\\
+\\
+variable-list:\\
+\> variable \\
+\> variable-list variable\\
+\\
+variable:\\
+\> \kw{shared} identifier\\
+\> \kw{private} identifier\\
+\> \kw{buffer} identifier\\
+\\
+statement-list:\\
+\> statement\\
+\> statement-list statement\\
+\\
+statement:\\
+\> assignment\\
+\> control-statement\\
+\> function-statement \\
+\\
+control:\\
+\> if-statement\\
+\> for-unconditional\\
+\> for-conditional\\
+\\
+if-statement:\\
+\> \kw{if} expression \kw{then} then-clause \kw{end if}\\
+\\
+then-clause:\\
+\> statement-list\\
+\> statement-list \kw{else} statement-list \\
+\\
+for-unconditional:\\
+\> \kw{for} variable-ref \kw{=} expression \kw{to} constant-expression step statement-list \kw{next} variable-ref\\
+\\
+for-conditional:\\
+\> \kw{for} scalar-ref \kw{=} constant-expression step for-condition statement-list \kw{next} scalar-ref\\
+\\
+for-condition:\\
+\> \kw{until} expression\\
+\> \kw{while} expression\\
+\\
+constant-expression:\\
+\> constant\\
+\\
+function-statement:\\
+\> function-call \kw{;}\\
+\\
+function-call:\\
+\> name \kw{(} parameter-list\opt \kw{)}\\
+\\
+parameter-list:\\
+\> parameter\\
+\> parameter-list \kw{,} parameter\\
+\\
+parameter:\\
+\> expression\\
+\\
+assignment:\\
+\> l-value \kw{=} expression \kw{;} \\
+\\
+l-value:\\
+\> var-ref\\
+\> buffer-ref\\
+\\
+scalar-ref:\\
+\> identifer\\
+\\
+var-ref:\\
+\> identifier\\
+\\
+buffer-ref:\\
+\> identifier \kw{[]}\\
+\> identifier \kw{[} expression \kw{]}\\
+\\
+expression:\\
+\> function-call\\
+\> constant-expression\\
+\> variable-expression\\
+\> paren-expression\\
+\> unary-expression\\
+\> binary-expression\\
+\> conditional-expression\\
+\\
+variable-expression:\\
+\> buffer-access\\
+\> variable-access\\
+\\
+buffer-access:\\
+\> identifier \kw{[]}\\
+\> identifier \kw{[} expression \kw{]}\\
+\\
+variable-access:\\
+\> identifier\\
+\\
+paren-expression:\\
+\> \kw{(} expression \kw{)}\\
+\\
+unary-expression:\\
+\> \kw{-} expression\\
+\> $\approx$ expression\\
+\> \kw{NOT} expression\\
+\\
+binary-expression:\\
+\> expression \kw{+} expression\\
+\> expression \kw{-} expression\\
+\> expression \kw{*} expression\\
+\> expression \kw{/} expression\\
+\> expression \kw{\%} expression\\
+\> expression \kw{\&} expression\\
+\> expression \kw{|} expression\\
+\> expression \kw{\#} expression\\
+\> expression \kw{AND} expression\\
+\> expression \kw{XOR} expression\\
+\> expression \kw{OR} expression\\
+\> expression \kw{EQV} expression\\
+\> expression \kw{IMP} expression\\
+\\
+conditional-expression:\\
+\> expression $=$ expression\\
+\> expression $!=$ expression\\
+\> expression $>=$ expression\\
+\> expression $>$ expression\\
+\> expression $<=$ expression\\
+\> expression $<$ expression\\
+\\
+constant:\\
+\> \kw{[1-9][0-9]}*\\
+\\
+identifier:\\
+\> \kw{[A-Za-z\_][A-Za-z\_0-9]*}\\
+
+\end{tabbing}
+
+\end{document}

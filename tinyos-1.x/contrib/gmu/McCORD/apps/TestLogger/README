@@ -1,0 +1,10 @@
+This toolkit downloads the content from the mote's flash and prints on the PC's console. Currently it works on Telos/Tmote motes only.
+
+Usage:
+(1) Build the java tool: javac Read.java
+(2) Change the volume ID (LOG_VOLUME_ID) in TestLoggerM.nc if necessary.
+(3) Program the mote with TestLogger.
+(4) Use the java program to read line by line from the flash.
+        MOTECOM=serial@COMx:telos java Read <from_flash_line> <to_flash_line> <hex>
+    Here a line means a 16-byte entry.
+

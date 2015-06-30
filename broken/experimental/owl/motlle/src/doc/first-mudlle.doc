@@ -1,0 +1,1568 @@
+Preface
+-------
+
+This documents attemps to introduce you, the reader, to mudlle, MUME's
+extension language. It assumes familiarity with the game as well as
+knowledge of some basic computer language concepts (eg what a stack
+is). Any complaints or questions should be addressed to Owl.
+
+MUDLLE, The Language
+--------------------
+
+Mudlle is a language designed for writing extensions to MUME, a
+diku-based MUD written in C. It had several conflicting design aims:
+
+- It should be simple and small. This translates into a simple
+compiler/interpreter, less bugs, and faster availability.
+
+- It should be easy to use (within the MUME framework).
+
+- It should be safe, ie bugs in programs written by gods should not
+crash the game. They are likely to cause strange behaviour, but this
+is more or less unavoidable.
+
+The result of this may not please everyone, but I feel that a
+reasonable balance has been struck. After many complaints, the syntax
+has been made more user-friendly, but otherwise the language is unchanged
+from the initial version.
+
+You may be wondering after all this what the language is like ? In one
+incomprehensible sentence, it is an expression-based imperative language
+with automatic storage allocation. An example will make this much
+clearer: the standard "hello world!" program is written thus:
+
+  hello = fn () [ display("Hello world!"); newline() ]
+
+This defines a new function, 'hello', which when executed will print
+"hello world!" on a line of its own. The basic constructions of the
+language are visible in this example, namely:
+
+  '<variable> = <value>' is used to give a value to a variable, in this
+    case a function is being stored in 'hello'.
+
+  'fn (<parameters>) <expression>' defines a function, whose result is
+    <expression>.
+
+  expressions: these are the basic building block of the language. 
+    Any piece of code written in the language is an expression that can
+    be evaluated, for example:
+
+      3+2	  // Add 3 to 2
+      newline()	  // Call the newline function
+      if (a == b) 1 else 2
+
+  code-blocks: these allow local variables to be declared and expressions
+    to be executed in sequence (eg a display followed by a newline, as
+    in the example above):
+
+      [ | a | a = x + y; display(a); newline(); a ] 
+
+    is a code-block that declares a variable 'a', stores 'x+y' in it,
+    then displays a. The value of this code-block is a: code-blocks
+    are also expressions. For example, you can write:
+
+      3 * [ | b | b = x + y; b + 2 * b * b ]
+
+    which calculates 3*((x+y) + 2*(x+y)*(x+y)).
+
+You will have noticed that their are no type declarations, the language
+is 'dynamically-typed'. This means that the language still has various
+data types (integer, string, list, ...), but that a given variable can 
+contain a value of any type. All type-checking is done at run-time,
+for example '+' checks that it is really adding two integers. So you
+can write:
+
+  3+"fun"
+
+and the compiler won't complain. However you will get a runtime error
+if you try and execute the code.
+
+The following notation is used to indicate what types of arguments a
+function called 'name' expects, as well as the type of its result:
+
+name: <p1> <p2> ... <pi> -> <r>
+
+This means that function 'name' takes 'i' parameters <p1>, <p2>, ...
+<pi> (or signals an error if there aren't enough). When it has
+finished, it returns a result of type <r>.
+
+<p1>, <p2>, ..., <r> are words, followed by an optional digit, for
+example 'n1', 'x' or 'table3'. The name indicates the type of the expected
+argument (n stands for an integer, for example), the digit allows
+multiple arguments of the same type to be distinguished. For example:
+
+  modulo: n1 n2 -> n
+
+means that 'modulo' is a function of 2 integers returning an integer.
+So the following code is legal:
+
+  modulo(3,2)
+  modulo(3+2, modulo(99,23))
+
+but the following will cause a runtime error:
+
+  modulo("aa", 1) // Bad type for arguments
+  modulo(3)	  // Bad number of arguments
+
+If the result type is omitted (eg as in 'newline: -> ') it means that
+the function returns an unspecified value (ie nothing useful). 
+
+
+Here is a list of the names used, and the corresponding types
+(definitions and examples of all these types are given further on):
+
+  x, y, x1, y1, x2, y2, ... : a value of any type
+  n, n1, n2, ... : an integer
+  b, b1, b2, ... : a boolean value (0 = FALSE, everything else = TRUE)
+  s, s1, s2, ... : a string
+  c, c1, c2, ... : a function (or closure as it is sometimes known)
+  sym, sym1, ... : a symbol
+  table, ...     : a symbol table
+  l, l1, l2, ... : a list
+  v, v1, v2, ... : a vector
+  p, p1, p2, ... : a MUME person (player or mobile)
+  o, o1, o2, ... : a MUME object (eg a sword)
+
+If the types and number of arguments don't match what is specified for
+the function, and error will be signaled. Of course, descriptions of
+the functions may describe other restrictions (eg you can't divide by
+0).
+
+To get help on a particular function, you can use the predefined
+function 'help'. For example, 'help(help)' prints:
+
+  c -> . Provides help on variable function c
+
+Or 'help(modulo)' prints:
+
+  n1 n2 -> n. n = n1 mod n2
+
+As you can see, 'help' also displays a quick explanation of the
+function beyond the definition of parameter and result types.
+
+In the examples that follow, I shall use the word RESULT: to indicate
+what the result of evaluating various examples, eg:
+
+  3 + 2
+  RESULT: 5
+
+or
+
+  3 + "fun"
+  RESULT: wrong type of arguments
+
+(the latter example is actually an error message)
+
+Expressions
+-----------
+
+In mudlle, everything is an expression. But what can an expression be ?
+The answer is lots of things:
+
+- a variable: a, solution
+
+- an array reference: a[i]
+
+- a constant: 3, "fun", '(1 2 3)
+
+- a function: fn (x) x + 1
+
+- a control expression: while (a > 0) [ a = a - 1; b = b * a], 
+    if (a == 1) 3 else 2
+
+- a function call: display("fun"), modulo(88,12)
+
+- a complex expression, with the usual operators (and brackets): 
+    3+2, 7*(a-b/2), a != 0 or b > 2
+
+- a variable assignment: a = 44
+
+- an array assignment: a[i] = 12
+
+- a code block: [ a = a - 1; b = b + 1; a * b ]
+
+
+A more detailed description of the various expressions follows:
+
+VARIABLES
+
+Variables are of two kinds: global and local. It isn't necessary to
+declare a global variable, a simple assignation will create it:
+
+  Master_of_the_Universe = "Owl"
+
+creates a new global variable Master_of_the_Universe and stores the
+string "Owl" in it. Local variables are created when a function is
+called or when a code block is entered, and are not visible outside.
+See the sections on these two constructions for details.
+
+Variable names are unlimited in length but restricted to letters,
+numbers, !, @, #, $, %, _, : and ?. A number can start an
+identifier, so the following are all legal variable names:
+
+  hello
+  023a
+  integer?
+
+CONSTANTS
+
+There are four types of constants: integers, strings, arrays and
+lists.
+
+Integers are stored in 31 bits and must therefore be between
+-1073741824 and 1073741823. The language has no real numbers.
+
+
+Strings are surrounded by double quotes. To include a double quote in
+a string, precede it with a "\". You can also include linefeeds with
+"\n", carriage returns with "\r" and tabs with "\t". For example:
+
+  "How fun it is\n\rto write a language."
+
+
+Array constants must be preceded with ', and are otherwise simply a
+list of constants (including other arrays) surrounded by '[' and ']'.
+For example:
+
+  '[ 1 2 (3 4) [5 6]]
+
+is a 4 element array, whose 4th element is itself an array.
+
+List constants are very similar, but surrounded with '(' and ')'. So:
+
+  '( "this" "is" (32 3 [1 2]))
+
+is a 3 element list. For more details on lists and arrays, see the
+discussions on the various types.
+
+It is illegal to attempt to modify the value of a constant (eg the
+characters in a string, the elements of an array).
+
+
+ASSIGNMENT
+
+expression : variable '=' expression2
+
+The value of 'expression2' is stored in 'variable'.
+
+The value of the expression is the value of 'expression2'.
+
+So for example you can write:
+
+  a = solution = b2 + 3
+
+COMPLEX EXPRESSIONS
+
+expression : expression1 operator expression2
+
+The value of the expression is the result of applying the operator to
+the value of 'expression1' and 'expression2'. The following operators
+are defined (inspired by C):
+
+*: multiplication.
+/: division
++: addition
+-: subtraction
+<<: bitwise left shift
+>>: bitwise right shift
+&: bitwise and
+|: bitwise or
+^: bitwise exclusive or
+==: equality comparison
+!=: inequality
+<, <=, >, >=: as usual, but apply to numbers only
+and: logical and
+or: logical or
+
+There are also unary operators:
+
+expression : unaryop expression1
+
+The value of the expression is the result of applying 'unaryop' to the
+value of 'expression1', with the following operators known:
+
+-: numerical negation
+": bitwise negation
+not: logical negation
+
+I won't go into the details of these operators here, as they can be
+simply considered as predefined functions with a convenient syntax (ie
+you write a*(b+c) instead of *(a, +(b, c))). They will be defined in
+more detail in the section on types.
+
+The precedence of all these operators is defined below (from highest to
+lowest). The other expression constructions are also included in this
+table as they are also part of the precedence order.
+
+function call, array reference
+- (unary), ~, not
+*, /
++, -
+<<, >>
+&
+|, ^
+==, !=, <, <=, >, >=
+and
+or
+= (assignment)
+if, while, functions
+
+You can of course use brackets to override these precedence rules, eg:
+
+  a = (if (b > 0) 1 else 2) * c
+
+
+ARRAY REFERENCE and ARRAY ASSIGNMENT: See the section on array types.
+
+CONTROL EXPRESSIONS: See the section on control structure.
+
+FUNCTIONS and FUNCTION CALLS: See the section on functions.
+
+CODE BLOCKS: See the section on code blocks.
+
+Functions
+---------
+
+Mudlle functions take a fixed number of parameters and return an
+expression, for example:
+
+  fn (x) x + 1
+  RESULT: {closure}
+
+is a function which adds one to x and returns the result.
+
+Functions are values like any other and are displayed as '{closure}'
+if you try and print them. It is generally more convenient to store
+them in a variable:
+
+  add1 = fn (x) x + 1
+  RESULT: {closure}
+
+You can then call this function with the usual syntax:
+
+  add1(4)
+  RESULT: 5
+
+You can however call a function directly:
+
+  (fn (x) x + 1)(4)
+  RESULT: 5
+
+The brackets are necessary to avoid precedence problems.
+
+Functions can have more than one parameter, eg:
+
+  average = fn (x, y) (x + y) / 2
+
+  average(10, 5)
+  RESULT: 7
+
+or none at all:
+
+  hello = fn () display("hello world!\n")
+
+  hello()
+  PRINTS: hello world!
+  RESULT: undefined
+
+And as pointed out above, functions are values. So they can be
+returned by other functions:
+
+  curry_add = fn (x) (fn (y) x + y)
+
+defines a function which returns a function... It can be used like
+this:
+
+  add5 = curry_add(5)
+  RESULT: {closure}
+
+  add5(7)
+  RESULT: 12
+
+or like this:
+
+  curry_add(3)(99)
+  RESULT: 102
+
+
+Code blocks
+-----------
+
+Sometimes you may wish to do more than one thing in a function
+definition, like printing 'a' and then a newline. This introduces that
+dreaded beast, imperative programming ... (which has already been
+lurking in previous paragraphs in the guise of its horrible sidekick,
+the 'side-effect')
+
+To solve this problem, mudlle provides the 'code block' construction
+which allows you to execute expressions in sequence, like this:
+
+  [ display(a); newline() ]
+
+A code block is itself an expression, whose value is that returned by
+the last expression in the block (in this case 'newline()', which has
+an undefined result).
+
+Here is a typically bad imperative function:
+
+  mad = fn (a, b) 
+    [ c = a + 2; d = b - 1;
+      display("The result of "); display(c); display("/"); display(d);
+      display(" is "); display(c / d); newline() ]
+
+A typical usage:
+
+  c = 99
+  RESULT: 99
+
+  mad(10, 7)
+  PRINTS: The result of 12/6 is 2
+  RESULT: undefined
+
+  c
+  RESULT: 12
+
+  d
+  RESULT: 6
+
+The values of the global variables c and d have been destroyed by the
+call to 'mad'. c and d shouldn't have been global variables, only the
+function 'mad' cares what their values are. They should therefore only
+be visible inside 'mad', and not get in the way of any other functions
+which use the same names.
+
+This is achieved by declaring 'c' and 'd' as local variables:
+
+  better = fn (a, b) 
+    [ | c d | // Declare local variables c and d
+      c = a + 2; d = b - 1;
+      display("The result of "); display(c); display("/"); display(d);
+      display(" is "); display(c / d); newline() ]
+
+A typical usage:
+
+  c = 99
+  RESULT: 99
+
+  better(10, 7)
+  PRINTS: The result of 12/6 is 2
+  RESULT: undefined
+
+  c
+  RESULT: 99
+
+  d
+  RESULT: something
+  
+
+Local variables are simply listed at the start of a code block,
+surrounded by '|'s. New local variables are created every time
+the block is executed, which allows recursion (see the section on
+control structures for some examples). 
+
+Local variables are only visible in the code block which declares them
+(and in any code block contained in the first), this is known as
+lexical scoping. So
+
+  a = 1
+  print_a = fn () [ display(a); newline() ]
+  print_two_a = fn (a) [ display(a); newline(); print_a() ]
+
+  print_two_a("fir-tree")
+  PRINTS: fir-tree
+	  1
+  RESULT: undefined
+
+Once a local variable has been created it will continue existing as
+long as necessary, this is called "indefinite extent". For people
+raised on conventional stack-based languages like C, this will
+probably be longer than they thought ... See the 'curry_add' example
+in the section on functions above for an example (the parameters to
+functions are also local variables).
+
+Control structures
+------------------
+
+Mudlle has three basic control structures: 'if', 'while' and recursion
+(or more strictly, abstraction and application). The first two are not
+actually strictly necessary, but make life much easier.
+
+As an aside to interested readers, here is how you can define 'if':
+
+  true = fn (x, y) x()
+  false = fn (x, y) y()
+  newif = fn (condition, success, failure) condition(success, failure)
+
+then:
+
+  newif(true, fn () 1, fn () 2)
+  RESULT: 1
+
+  newif(false, fn () 1, fn () 2)
+  RESULT: 2
+
+definining 'while', numbers and so on is left as an exercise to the
+student ... Readers who haven't given up in disgust may be reassured
+that I will now return to more traditional pastures.
+
+The 'if' and 'while' control structures are similar to those provided
+in C:
+
+  glorf = fn (a) if (a > 0) display("a is greater than 0")
+
+  glorf(23)
+  PRINTS: a is greater than 0
+
+  sumn = fn (n) [ | m | m = 0;
+		  while (n > 0) [ m = m + n; n = n - 1];
+		  m ]
+
+  sumn(10)
+  RESULT: 55
+
+Other traditional control structures, such as 'for' loops are also
+available albeit in a slightly strange form. This is because they are
+defined as functions and are not in any way different from others
+functions like 'display', 'modulo', etc. For example:
+
+  for(1, 5, fn (i) [ display(i); newline ])
+
+  PRINTS: 1
+	  2
+	  3
+	  4
+	  5
+
+
+This is possible because code blocks are values which can be passed to
+functions.  The other control structures which is provided in a
+similar way is 'repeat'. These control structures work as follow
+(some of the definitions are in pseudo-code for simplicity):
+
+  repeat: n c ->
+  Execute function 'c()' 'n' times.
+  Signals an error if 'n' < 0.
+  The result is undefined
+
+  for: n1 n2 c -> ?
+  If 'n1' <= 'n2' then
+    for i = n1 to n2 do
+      execute 'c(i)'
+    end for
+
+The factorial function can now be written without excessive
+difficulty. It takes an integer from the stack and produces another,
+so its definition is:
+
+  fact: n1 -> n2
+  n2 = factorial(n1), or 1 if n1 < 0.
+
+And it can be written in mudlle as:
+
+  fact = fn "n1 -> n2. n2 = factorial(n1), or 1 if n1 < 0" (n)
+    [ | result |
+      result = 1;	// Result of the factorial
+      while (n > 0) [ result = result * n; n = n - 1 ]
+      result ]		// Return result
+
+  fact(5)
+  RESULT: 120
+
+  fact(-4)
+  RESULT: 1
+
+  help(fact)
+  PRINTS: n1 -> n2. n2 = factorial(n1), or 1 if n1 < 0
+
+This example has also shown how you can add a help text to functions
+you define.
+
+The other classical control structure, recursion, is also available.
+Knowing that 
+
+	    | n * fact(n - 1) if n > 0
+  fact(n) = |
+	    | 1 if n = 0
+
+we can define frec (recursive factorial) as:
+
+  frec = fn "n1 -> n2. recursive factorial" (n)
+    if (n > 0) n * frec(n - 1)
+    else 1
+
+  frec(5)
+  RESULT: 120
+
+Types
+-----
+
+The following types are defined in mudlle:
+
+- integer: 32, -999999
+
+- string: an ASCII string, "Owl", "MUME", ...
+
+- list: a list of any values, (1 2 3), ("Owl" "is" [12 {closure}])
+
+- null type: used to mark the end of lists, has only one value: null
+
+- array: an array of values, similar to a list, [ ], [ 12 -1 ]
+
+- closure (or function): fn (x) x + 1
+
+- symbol table: this provides an associative array (a mapping from
+  strings to values)
+
+- symbol: what a symbol table contains ...
+
+- person: MUME mobiles or players
+
+- object: MUME object, eg a sword
+
+- gone: a MUME object or person that has been destroyed
+
+It isn't possible to define any new types in mudlle, but the existing
+ones are flexible enough to represent any data structure.
+
+Each of the types will be presented in more detail, except for the
+MUME related ones which are described in the section on the MUME
+interface.
+
+The section on each type will also define the operations which are
+predefined on objects of that type (some readers may notice
+similarities with Scheme ...)
+
+The language does not include a character or a boolean type. For
+simplicity, these are represented by integers (like in C). More
+precisely:
+
+A character is represented by its ASCII code, a number between 0 and
+255.
+
+Integer 0 is 'false', all other values are 'true'. Functions that
+return a boolean value return 1 for 'true'. So you can write:
+
+  if (3) 1 else 2
+  RESULT: 1
+
+  if (0) 1 else 2
+  RESULT: 2
+
+
+INTEGERS
+
+As already pointd out, integers are stored in 31 bits and must
+therefore be between -1073741824 and 1073741823.
+
+The following operators are available:
+
+  n1 + n2 -> n. Addition. There is no overflow or underflow checking (so
+  1073741823 + 1 is undefined)
+
+  n1 - n2 -> n. Subtraction. No checking either.
+
+  n1 * n2 -> n. Multiplication. No checking.
+
+  n1 / n2 -> n. Division. If n2 == 0, a runtime error is signaled. The
+  result of the division is rounded towards 0.
+
+  -n1 -> n2. Numerical negation.
+
+  n1 == n2 -> b. Numerical equality.
+
+  n1 != n2 -> b. Numerical inequality.
+
+  n1 < n2 -> b, n1 <= n2 -> b, n1 > n2 -> b, n1 >= n2 -> b. Numerical
+  ordering.
+
+  n1 | n2 -> n. Bitwise or.
+
+  n1 & n2 -> n. Bitwise and.
+
+  n1 ^ n2 -> n. Bitwise xor.
+
+  ~n1 -> n2. Bitwise negation
+
+  n1 << n2 -> n. Shift n1 left by n2 bits.
+
+  n1 >> n2 -> n. Shift n1 right by n2 bits. If n1 is negative, the n2 most
+  significant bits are set to 1, otherwise to 0 ('arithmetic shift right').
+
+
+There are also several functions:
+
+  integer?: x -> b. Returns TRUE if x is an integer.
+
+  %: n1 n2 -> n. Returns remainder of division of n1 by n2, defined in
+  such a way that: (a/b)*b + %(a,b) == a.
+
+  modulo: n1 n2 -> n. Returns (n1 mod n2), with the usual mathematical
+  definition of modulo (this is different from % when negative numbers
+  are involved).
+
+  min: n1 n2 -> n. Returns n1 if n1<n2, n2 otherwise.
+
+  max: n1 n2 -> n. Returns n1 if n1>n2, n2 otherwise.
+
+  abs: n1 -> n2. Returns |n1|.
+
+
+STRINGS
+
+Strings are sequences of characters of a given length n. There are no
+limits on the maximum length of strings. For a sequence of length n,
+the first character is numbered 0, the last n-1. The characters are
+represented by their ascii codes.
+
+Strings are either constants (included in the source), or created by
+one of the functions below. It is illegal to modify a constant string.
+
+
+  string?: x -> b. Returns TRUE if x is a string.
+
+  make_string: n -> s. Creates a new string of length n. The contents
+  are undefined.
+
+  string_length: s -> n. Returns the length of string s.
+
+  string_fill: s n -> . Sets all the characters in s to ascii code n. s
+  must not be a constant. The result is undefined.
+
+  string_ref: s n1 -> n2. Return the ascii code (n2) of the n1'th
+  character of s.
+
+  string_set: s n1 n2 -> . Set the n1'th character of s to the character
+  whose ascii code is n2. s must not be a constant. The result is
+  undefined.
+
+  string_cmp: s1 s2 -> n. Compare 2 strings. Returns 0 if s1 = s2, < 0
+  if s1 < s2 and > 0 if s1 > s2.
+
+  string_icmp: s1 s2 -> n. Compare 2 strings ignoring the case of the
+  characters.  Returns 0 if s1 = s2, < 0 if s1 < s2 and > 0 if s1 > s2.
+
+  substring: s1 n1 n2 -> s2. Extract substring of s starting
+  at n1 of length n2. The returned string is modifiable.
+
+  string_append: s1 s2 -> s. Concatenate s1 and s2. The returned string
+  is modifiable.
+
+  split_words: s -> l. Split string s into words in list l. The strings
+  in l are modifiable.
+
+
+LISTS
+
+Lists in mudlle follow the traditional Lisp representation based on
+the concept of 'pairs'. A pair is just what it's name implies: a pair
+of values. Pairs are created with the 'cons' function:
+
+  cons(3, 2)
+  RESULT: (3 . 2)
+
+The two functions 'car' and 'cdr' return respectively the first and
+second element of a pair (the names have historical reasons):
+
+  a = cons(3,2)
+  RESULT: (3 . 2)
+
+  car(a)
+  RESULT: 3
+
+  cdr(a)
+  RESULT: 2
+
+Lists are just a convention on the use of pairs: to pass a list to a
+function you pass it a pair. The first element of the pair is
+considered to be the first element of the list. The second element of
+the pair is expected to be either: 
+
+- null (the null value), which means that this is the end of the list.
+
+- another pair. Then the first element of this second pair is the
+second element of the list, and the second element must be either a
+pair (containing the third element of the list) or null.
+
+- any other value: the list isn't a proper list (so (3 . 2) above is a
+malformed list).
+
+So we can create the 3 element list (1 2 3) like this:
+
+  endlist = cons(3, null)
+  RESULT: (3)
+
+  middle = cons(2, endlist)
+  RESULT: (2 3)
+
+  mylist = cons(1, middle)
+  RESULT: (1 2 3)
+
+You will notice that the printing functions know about lists and print
+them in a friendly fashion ... You can now use 'car' and 'cdr' to look
+at pieces of mylist:
+
+  car(mylist) // Get first element
+  RESULT: 1
+
+  cdr(mylist) // Get rest of list
+  RESULT: (2 3)
+
+  car(cdr(mylist)) // Get 2nd element
+  RESULT: 2
+
+After this (hopefully clear) introduction, here is a summary of the
+functions that operate on pairs / lists:
+
+  pair?: x -> b. Returns TRUE if x is a pair.
+
+  cons: x1 x2 -> l. Make a new pair from elements x1 & x2.
+
+  car: l -> x. Returns first element of pair l
+
+  cdr: l -> x. Returns 2nd element of pair l
+
+  set_car: l x ->. Sets the first element of pair l to x. l must not be
+  a constant.
+
+  set_cdr: l x ->. Sets the 2nd element of pair l to x. l must not be
+  a constant.
+
+Be careful when using set_car or set_cdr: you can create a circular
+list:
+
+  a = cons(3, null)
+  RESULT: (3)
+
+  set_cdr(a, a)
+  RESULT: undefined
+
+  a
+  RESULT: (3 3 3 3 3 3 3 3 3 3 ....
+
+This result logically follows, because:
+
+  car(a)
+  RESULT: 3
+
+  eq?(cdr(a), a)
+  RESULT: 1
+
+The first element of the list is 3. The pair stored in the 2nd element
+of 'a', ie 'a' itself, so the 2nd element is also 3, and so on.
+
+
+ARRAYS
+
+These are sometimes called vectors. An array is similar to a string,
+but can contain any value: it is a fixed length sequence of values,
+the first of which is numbered 0.
+
+Mudlle provides some syntax to help in manipulating arrays:
+
+- There are array constants, like '[ 1 2 "mad"].
+
+- You can easily read the n'th element of an array: a[3]
+
+- You can modify the n'th element of an array: a[i + 1] = "fun".
+However, it is illegal to modify the elements of a constant array.
+
+
+  vector?: x -> b. Returns TRUE if x is a vector.
+
+  make_vector: n -> v. Create an empty vector of length n (all elements
+  are set to null).
+
+  vector_length: v -> n. Returns the length of the vector.
+
+  vector_fill: v x -> . Sets all elements of vector v to x. This is
+  illegal if v is a constant array.
+
+
+FUNCTIONS
+
+These have been discussed above. The only function defined
+specifically to operate on functions is:
+
+  function?: x -> b. Returns TRUE if x is a function.
+
+
+SYMBOL TABLES and SYMBOLS
+
+A symbol table allows you to associate values with strings. It can
+thus be viewed as a generalisation of an array, but using strings
+instead of numbers to index it.
+
+A symbol table stores a number of 'symbols'. A symbol is just a name
+(a string) and a value stored together, with the following functions
+defined:
+
+  symbol?: x -> b. Returns TRUE if x is a symbol
+
+  symbol_name: sym -> s. Returns the name of a symbol
+
+  symbol_get: sym -> x. Returns the value of a symbol
+
+  symbol_set: sym x -> . Sets the value of symbol sym to x. The result
+  is undefined.
+
+You will notice that their is no way to directly create a new symbol,
+they always come from symbol tables:
+
+  table?: x -> b. Returns TRUE if x is a symbol table.
+
+  make_table: -> table. Create a new (empty) symbol table
+
+  table_lookup: table s -> sym. Returns the symbol named s in the table.
+  If their was no symbol by that name already there, a new symbol is
+  created (with value null) and added to the table.
+
+One example of use would be a mobile remembering the names of the
+people it had met, and what they had done to it. It could then use
+this information next time it met the same person to decide how to act
+(eg be friendly / be agressive).
+
+Miscellaneous operations
+------------------------
+
+Not all operations are linked to particular types. The following
+functions are also available:
+
+INPUT / OUTPUT
+
+Within MUME, this is only useful for debugging (when using /mudlle).
+The output from these functions is thrown away if it is executed as
+a timed action or as a reaction.
+
+  write: x -> . Print a representation of x.
+
+  display: x -> . Display a representation of x.
+
+  examine: x -> . Examine a representation of x.
+
+  newline: -> . Print a newline.
+
+  load: s -> . Loads file s.
+
+display, write and examine display varying amounts of information on
+their parameter, display the least, examine the most.
+
+load loads a file whose pathname you specify. Within MUME, it is
+generally more convenient to use load_mobile, load_room or load_object
+(see below).
+
+LOGICAL OPERATIONS
+
+The following logical operators and functions are available:
+
+  b1 and b2 -> b. Returns TRUE if b1 and b2 are true.
+
+  b1 or b2 -> b. Returns TRUE if b1 or b2 are true.
+
+  not b1 -> b2. Returns TRUE if b1 is FALSE.
+
+  eq?: x1 x2 -> b. Returns TRUE if x1 and x2 are the same object.
+
+Be careful that these operators always evaluate both arguments (as
+opposed to the C && and || operators). So:
+
+  if (1 < 0 and display("fun")) 1 else 2
+  PRINTS: fun
+  RESULT: 2
+
+By the same object it is meant a particular object created at a
+particular moment. The contents are not compared. So:
+
+  eq?("fun", "fun")
+  RESULT: 0
+
+  a = "fun"; eq?(a, a)
+  RESULT: 1
+
+Similarly
+
+  eq?(cons(3, 2), cons(3, 2))
+  RESULT: 0
+
+  a = cons(3, 2); eq?(a, a)
+  RESULT: 1
+
+However, 2 integers are 'eq?' if they have the same value. So:
+
+  eq?(33, 33)
+  RESULT: 1
+
+
+REALLY MISCELLANEOUS
+
+  quit: -> . Exit mudlle.
+
+  help: c -> . Provides help on function c.
+
+  debug: n -> . Set debug level (0 = no debug). This is most useful if
+  you know how the mudlle internals work ...
+
+Storage allocation
+------------------
+
+Looking at the functions defined above, you will notice that there are
+lots of functions to allocate things (arrays, pairs, ...) but nothing
+to free the memory thus reserved. This is because the language (or to
+be more precise, the garbage collector) is responsible for freeing any
+memory that isn't used anymore.
+
+Basically, all values to which there is still a reference (in a
+variable, as an element of an array which is itself referenced
+somewhere, referenced from within the game, ...) will be kept.
+Everything else is freed automatically, thus freeing you, the
+programmer, from an annoying burden.
+
+Errors
+------
+
+All operations and functions check their arguments for consistency
+before executing them, and signal an appropriate error if necessary.
+The possible errors are:
+
+  bad function -- you tried to call something that wasn't a function,  eg:
+
+    hello = 1; hello()
+    RESULT: error: bad function
+
+  stack underflow -- this shouldn't happen
+
+  bad type -- you passed arguments of the wrong type, eg:
+
+    3+"fun"
+    RESULT: error: bad type
+
+  divide by zero -- you tried to do a division by zero
+
+  bad index -- you tried to access a non-existent element of an array
+    or string, eg:
+
+    a = [ 1 ]; a[2]
+    RESULT: error: bad index
+
+  bad value -- a parameter had an invalid value (lots of causes)
+
+  variable is read-only -- you tried to modify one of the predefined
+    functions or variables:
+
+    display = 1
+    RESULT: error: variable is read-only
+
+
+  function probably has an infinite loop -- should be clear ...
+
+  function probably has an infinite recursion -- should be clear ...
+
+  wrong number of parameters -- example:
+
+    modulo(3)
+    RESULT: error: wrong number of parameters
+
+All this checking has the great advantage that mudlle cannot crash
+MUME (except for the case of bugs in mudlle itself, not in the
+programs you write).
+
+When an error is signaled, whatever is being done is aborted and the
+error message is printed (if you are using mudlle interactively). You
+can use this feature to avoid doing some checks in your code, for example:
+
+If you have a function which looks for an object in a room (by
+name) and does something if it finds it, you can simply write it like
+this:
+
+fn () // Take an object called "glorf" in room 1010
+ [ | obj | obj = find_object_in(actor, 1010, "glorf");
+   move_object(obj, actor) ]
+
+Theoretically, you should check that obj is not FALSE (no object
+called "glorf" found), but move_object expects an object as parameter.
+If it gets FALSE, it will signal a runtime error and whatever was
+being doing will be abandoned.
+
+MUME Interface
+--------------
+
+The MUME interface isn't finished yet, so don't be surprised if some
+things you would like to be able to do seem impossible. There is quite
+a lot of work involved in integrating mudlle in MUME ...
+
+M U M E   T Y P E S
+
+MUME contains basically three types of entities: rooms, persons
+(mobiles or players) and objects. They are represented in mudlle as
+follows:
+
+- rooms are represented by their room number. Any function expecting a
+room will be passed an integer.
+
+- persons are represented by values of the 'person' type.
+
+- objects are reprensented by values of the 'object' type.
+
+Objects and mobiles (or non-playing characters, NPCs as they are often
+called) are divided into classes, ie 'grey wolf', 'torch' of which
+there can be several instances. These classes are identified by
+numbers, so any mudlle functions which act on all objects/mobiles of a
+class (eg to define their behaviour) will expect an integer as
+argument. There are no room classes (or depending on your point of
+view, there is one class per room ...).
+
+To complicate things a bit, a mudlle variable may contain a value
+representing a particular person. If this person is killed, or quits
+the game, what should happen to the value ? The solution adopted is to
+silently transform this value into a special type called 'gone' with
+which you can't do anything. Any attempts to use this value will then
+fail.
+
+As rooms/objects/persons have different types, several functions
+accept parameters representing any of these, for convenience (eg
+find_object_in will find an object in a room, in somebody's inventory
+or inside another object).
+
+A summary of the functions defined for the various entities follows:
+
+ROOMS
+
+  room_name: n -> s. Returns name of room n.
+
+  room_exits: n -> l. Returns a list of the exits from room n (as
+  numbers).
+
+  room_lit?: n -> b. Returns TRUE if room n is lit.
+
+  room_contents: n -> l. Returns a list of the objects in a room.
+
+  room_people: n -> l. Returns a list of the people in a room.
+
+OBJECTS
+
+  find_objects: x -> l. Returns all objects whose name or number is x.
+
+  find_object_in: p x s -> o. Returns the object in room x/object
+    x/x's inventory whose name is 's', that can be seen by p, FALSE if
+    there are none.
+
+  find_object_hidden: x s -> o. Returns the object in room x/object
+    x/x's inventory whose name is 's', FALSE if there are none.
+
+  find_object_equipment: p s -> n. Returns position of object s in p's
+    equipment, null if nothing by that name (beware: FALSE = 0 is a
+    valid position).
+
+  obj_contains: o -> l. Returns list of objects contained in o.
+
+  equip_char: p o n -> . Puts object o at position n in p's equipment.
+
+  move_object: o x -> . Moves object o to x (room/mobile/object).
+
+  get_obj_val: o n1 -> n2. Returns the n1'th (0 <= n1 <= 3) value of
+    object c.
+
+  get_obj_room: o -> n. Return object's room number, -1 if none
+
+  get_obj_name: o -> s. Returns object's name
+
+  get_obj_carrier: o -> c. Returns character carrying o, FALSE if none
+
+  get_obj_container: o1 -> o2. Returns object o2 which contains o1,
+    FALSE if none
+
+  get_obj_type: o -> n. Return object's type.
+
+  get_obj_extra: o -> n. Return object's extra flags.
+
+  get_obj_wear: o -> n. Return object's wear flags.
+
+  get_obj_number: o -> n. Return object's number (identical for all
+    instances of a given object class)
+
+  get_obj_value: o -> n. Returns object's cost.
+
+PERSONS
+
+  find_players: x -> l. Returns all mobiles whose name or number is x
+
+  find_player_visible: p1 s -> p2. Returns the player p2 whose name is
+    s, and who can be seen by p1, FALSE if there isn't anybody
+
+  find_player_known: p1 s -> p2. Returns the player p2 known by p1
+    whose name is s, FALSE if there are none
+
+  char_inventory: p -> l. Returns list of objects in player's inventory
+
+  char_equipment: p -> v. Returns a vector of p's equipment (Unused
+    positions are FALSE)
+
+  char_followers: p -> l. Returns list of followers of p
+
+  send_char: p s -> . Sends message s to p
+
+  move_char: p n -> . Moves p to room n
+
+  get_char_name: p -> s. Returns characters name
+
+  get_char_sex: p -> n. Returns characters sex
+
+  get_char_class: p -> n. Returns characters class
+
+  get_char_race: p -> n. Returns characters race
+
+  get_char_level: p -> n. Returns characters level
+
+  get_permanent_str: p -> n. Returns characters strength
+
+  get_permanent_str_add: p -> n. Returns characters additional strength
+
+  get_permanent_intel: p -> n. Returns characters intelligence
+
+  get_permanent_wis: p -> n. Returns characters wisdom
+
+  get_permanent_dex: p -> n. Returns characters dexterity
+
+  get_permanent_con: p -> n. Returns characters constitution
+
+  get_char_str: p -> n. Returns characters strength
+
+  get_char_str_add: p -> n. Returns characters additional strength
+
+  get_char_intel: p -> n. Returns characters intelligence
+
+  get_char_wis: p -> n. Returns characters wisdom
+
+  get_char_dex: p -> n. Returns characters dexterity
+
+  get_char_con: p -> n. Returns characters constitution
+
+  get_char_position: p -> n. Returns characters position
+
+  get_char_act: p -> n. Returns characters act flags
+
+  get_char_affected: p -> n. Returns characters affected flags
+
+  get_char_alignment: p -> n. Returns characters alignment
+
+  get_char_low_quests: p -> n. Returns characters low quest flags
+
+  get_char_high_quests: p -> n. Returns characters high quest flags
+
+  get_char_istari_quests: p -> n. Returns characters istari quest flags
+
+  get_char_room: p -> n. Returns room in which p is (-1 if out of game)
+
+  get_char_mana: p -> n. Returns characters mana
+
+  get_char_max_mana: p -> n. Returns characters max mana
+
+  get_char_hit: p -> n. Returns characters hit points
+
+  get_char_max_hit: p -> n. Returns characters max hit points
+
+  get_char_move: p -> n. Returns characters move points
+
+  get_char_move_extra: p -> n. Returns characters extra move points
+    when riding
+
+  get_char_max_move: p -> n. Returns characters max move points
+
+  get_char_gold: p -> n. Returns characters fortune (in pennies)
+
+  get_char_age: p -> n. Returns characters age in game minutes, with
+    0 = 17 years old
+
+  get_char_fighting: p1 -> p2. Returns mobile p2 being fought by p1,
+    or FALSE if none
+
+  get_char_master: p1 -> p2. Returns mobile p2 who is p1's master, or
+    FALSE if none
+
+  get_char_riding: p1 -> p2. Returns mobile p2 which p1 is riding, or
+    FALSE if none
+
+  get_char_drunk: p -> n. Returns characters drunkenness, -1 <= n <= 24
+
+  get_char_thirst: p -> n. Returns characters thirst, -1 <= n <= 24
+
+  get_char_hunger: p -> n. Returns characters hunger, -1 <= n <= 24
+
+  set_char_str: p n -> . Sets character p's strength to n, 3 <= n <= 18.
+
+  set_char_str_add: p n -> . Sets character p's additional strength to
+    n, 0 <= n <= 100.
+
+  set_char_intel: p n -> . Sets character p's intelligence to n, 3 <= n <= 18.
+
+  set_char_wis: p n -> . Sets character p's wisdom to n, 3 <= n <= 18.
+
+  set_char_dex: p n -> . Sets character p's dexterity to n, 3 <= n <= 18.
+
+  set_char_con: p n -> . Sets character p's constitution to n, 3 <= n <= 18.
+
+  set_char_alignment: p n -> . Sets character p's alignment to n,
+    -1000 <= n <= 1000.
+
+  set_char_low_quests: p n -> . Sets characters low quest flags
+
+  set_char_high_quests: p n -> . Sets characters high quest flags
+
+  set_char_istari_quests: p n -> . Sets characters istari quest flags
+
+  set_char_age: p n -> . Sets p's age to 17 years + n minutes (n >= 0)
+
+
+M U M E   A C T I O N S
+
+All the functions defined above are very low level, and simply modify
+or read the state of the world. The next level up is to provide access
+to the functionality of the various MUME commands (like hit, drop,
+cast, ...). These commands have the advantage that they send all the
+right messages to the game players. However, as things are currently
+organised it isn't possible to know the result of an action (ie, did
+it succeed or fail ? And if it failed, why ?).
+
+These actions are designed to be executed by somebody. To avoid
+constantly passing the same parameter when defining the behaviour of a
+particular mobile, these functions look at the value of the global
+variable 'actor' and use this as the person executing the action. So
+for example to have Elrond tell Owl "Hello", you would do:
+
+  say_hello = fn ()
+    [ actor = car(find_players("Elrond"));
+      tell(find_player_known(actor, "Owl"), "Hello!") ]
+
+(find_player_known() is used, because Elrond should only say hello to
+Owl if he can know of him).
+
+Currently, very few actions are defined:
+
+  tell: p s -> . Actor tells p 's'.
+
+  say: s -> . Actor says 's'.
+
+  exec: s -> . Actor executes command 's'. This allows rapid access to
+    all MUME commands, but isn't very convenient (or efficient).
+
+
+C O D E   E X E C U T I O N
+
+Under what conditions is mudlle code executed ? The answer to this
+will tell you how to go about customising MUME. 
+
+There are three ways mudlle code gets executed automatically in MUME:
+
+- Code can be executed as a reaction to a particular (or to any)
+command. This is called a 'reaction procedure'.
+
+- Code can be executed at a particular time (within a MUME day, ie
+1440 real seconds). This is called an 'action procedure'.
+
+- Code can be executed when a monster or object is created. This is
+called an 'initialisation procedure'.
+
+
+REACTION PROCEDURES
+
+Reaction procedures can be associated with rooms, monster classes or
+object classes.
+
+Whenever a command is executed by person p, the following entities are
+checked for reaction procedures:
+
+- the room in which p is.
+
+- the classes of the people in the same room as p.
+
+- the classes of the objects in the same room as p.
+
+- the classes of the objects in p's inventory.
+
+- the classes of the objects that p is wearing.
+
+All reaction procedures found are executed (but reaction procedures
+can be restricted to react to only some commands).
+
+How is the reaction procedure called ? Assume that:
+
+- person 'p' executed a command 'n' (all commands have unique numbers)
+with arguments 's'
+
+- the reaction procedure is 'reacting'
+
+- this procedure was found on object/room/mobile 'x'
+
+then the following function call is made:
+
+  reacting(p, x, n, s)
+
+If this procedure wants to prevent the command from being normally
+executed, it should call the 'override' function:
+
+  override: -> . If called in a reaction procedure, the command
+    which caused the procedure to be executed is overridden
+
+If none of the reaction procedures calls override, the command is then
+executed as usual.
+
+Reaction procedures are associated with a particular class or room at
+load time, see the section on editing for details. They don't change
+dynamically during MUME execution (except while debugging ... see the
+section on editing).
+
+There can of course be severalof them for a class or room, to avoid
+having to put everything in one gigantic function.
+
+
+
+ACTION PROCEDURES
+
+Action procedures are mudlle functions which are scheduled for
+execution at a particular time in the MUME day. This time is specified
+in MUME minutes (ie real seconds, which should be precise enough).
+
+You can register a function to be executed at a particular time with
+the register_at function:
+
+  register_at: c s n -> . Registers function c (description s) to be
+    executed at time n.
+
+  register_list: -> v. Returns currently registered timed functions.
+    This function is intended for debugging purposes.
+
+  mudlle_time: -> n. Returns the current time (in minutes since
+    midnight), as known to be mudlle. This is the time used to decide
+    when to execution action procedures.
+
+The description is returned with register_list, which should help for
+debugging.
+
+If you wish a function to be executed say every n seconds, you can use
+the following mudlle code (which will be provided in a standard
+library):
+
+  register_every = fn "c s n -> . Execute c (description s) every n
+    MUME minutes, starting next minute" (c s n)
+    [ | every |
+      every = fn () // Execute c, and reschedule it in n minutes
+        [ register_at(every, s, mudlle_time() + n);
+	  c() ];
+      register_at(every, s, mudlle_time() + 1) ]
+
+Note: if you register something at 'mudlle_time()', it won't be
+executed for a whole MUME day ...
+
+As this example shows, action procedures are executed without any
+parameters.
+
+
+INITIALISATIN PROCEDURES
+
+Initialisation procedures are functions which are associated with a
+particular room, object class or mobile class. They are executed:
+
+- when rooms are created when the game boots
+
+- whenever an object of the class is created
+
+- whenever a mobile of the class is created
+
+They can thus be used to customise the behaviour of whatever they
+affect, either by initialising or changing some of its characteristics
+or by setting up a regular action procedure specific to that object.
+
+As an example, here is an initialisation procedure used to make a
+monster hit somebody in the room in which it finds itself (but not
+itself!) every 10 seconds:
+
+  nasty_init = fn "Setup mobile to be nasty ..." (who)
+    // who is the mobile which has just been created
+    [ | nasty | 
+      nasty = fn "Hit somebody ..." ()
+        [ | tohit | actor = who;
+	  if (not get_char_fighting(actor))
+	    hit(random_person(get_char_room(actor))) ];
+      // Setup a regular action
+      register_every(nasty, "Try and hit somebody", 10) ]
+
+This code assumes the existence of:
+
+  random_person: n -> p2. Returns somebody in room n (but don't choose
+    the actor), or FALSE if nobody can be found.
+
+  hit: p -> . Actor hits p.
+
+These two functions don't actually exist yet ...
+
+Initialisation functions are called with the object/room/mobile
+created as parameter.
+
+There can of course be several initialisation procedures for a class
+or room, to avoid having to put everything in one gigantic function.
+
+
+E D I T I N G
+
+The discussions on reaction and initialisation procedures did not tell
+you how to add them to objects, rooms or mobiles. That is because
+this is related to how the code is stored and edited:
+
+Every object class, mobile class and room has a file of mudlle code
+associated with it. This file belongs to the owner of a mobile (only
+he/she and Arata can edit it). It simply contains mudlle code that is
+loaded and executed when the game boots. This code should therefore
+simply add all the necessary reaction and initialisation procedures to
+the object class/room/mobile class with which it is associated, and
+maybe initialise a few variables.
+
+To avoid total chaos, it is only possible to add reaction or
+initialisation procedures to (say) mobile 232 within the file
+associated with mobile 232. This restriction is enforced by the
+'react' and 'add_init' functions, which are defined as follows:
+
+  react: c s -> . Registers function c (with description s) to be
+    called as a reaction for whatever is being loaded.
+
+  add_init: c s -> . Registers function c (with description s) to be
+    called as an initialisation function for whatever is being loaded.
+
+If 'react' or 'add_init' are called at any other time, they simply
+cause an error.
+
+You can get a list of the reactions or initialisations associated with
+a particular object class/room/mobile class by passing a room number,
+object or mobile to:
+
+  init_list: x -> l. Returns a list of init code for
+    objects/mobiles/rooms of the same class as x
+
+  react_list: x -> l. Returns a list of reactions on
+    object/mobile/room x
+
+To allow convenient debugging, it is possible to ask for the code for
+an object/mobile class or room to be reloaded and executed. If this is
+done, all the old initialisation and reaction procedures associated
+with it are thrown out first:
+
+  load_mobile: n -> . Load code for mobile n
+
+  load_room: n -> . Load code for room n
+
+  load_object: n -> . Load code for object n
+
+Finally, you can edit the code for the mobile with the following
+functions (currently the only editor supported is emacs):
+
+  edit_mobile: n -> . Edit mobile n
+
+  edit_room: n -> . Edit room n
+
+  edit_object: n -> . Edit object n
+
+
+Reference
+---------
+
+All the functions and types available in mudlle have already been
+documented in previoius sections, so I will only include the mudlle
+grammar here:

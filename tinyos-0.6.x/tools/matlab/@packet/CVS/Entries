@@ -1,0 +1,19 @@
+/addField.m/1.6/Wed Jul 24 18:38:50 2002//
+/calculateCRC.m/1.2/Fri May 10 18:45:10 2002//
+/char.m/1.2/Fri May 10 18:45:10 2002//
+/checkCRC.m/1.2/Fri May 10 18:45:10 2002//
+/display.m/1.5/Wed Jul 24 18:38:51 2002//
+/displayBytes.m/1.5/Wed Jul 24 18:38:51 2002//
+/displayHexBytes.m/1.4/Fri Jul 19 20:58:50 2002//
+/get.m/1.6/Thu May 30 04:34:55 2002//
+/getDataSize.m/1.2/Fri May 10 18:45:10 2002//
+/getFieldPosition.m/1.2/Fri May 10 18:45:10 2002//
+/insertField.m/1.4/Fri Jul 19 20:58:50 2002//
+/packet.m/1.5/Thu May 30 04:44:48 2002//
+/removeField.m/1.4/Fri May 10 18:45:10 2002//
+/set.m/1.3/Fri May 10 18:45:10 2002//
+/setBytes.m/1.2/Fri May 10 18:45:10 2002//
+/setDataSize.m/1.2/Fri May 10 18:45:10 2002//
+/toBytes.m/1.2/Fri May 10 18:45:10 2002//
+/toHexBytes.m/1.3/Fri Jul 19 20:58:50 2002//
+D

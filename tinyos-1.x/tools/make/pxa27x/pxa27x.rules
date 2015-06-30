@@ -1,0 +1,128 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: pxa27x.rules,v 1.10 2009/08/01 16:11:21 radler Exp $
+
+define PXA27X_HELP
+
+ PXA27x extras:
+
+   debug    : compile with minimal optimization and debug symbols
+   debugopt : compile with debug symbols
+  endef
+HELP += $(PXA27X_HELP)
+
+AS = xscale-elf-as
+ASFLAGS = -mcpu=iwmmxt -mfpu=softfpa
+OBJCOPY = xscale-elf-objcopy
+OBJDUMP = xscale-elf-objdump
+SET_ID = $(TINYOS_MAKE_PATH)/msp/set-mote-id
+XDB_SYMBOL_EXTRACT = dwarf2bd
+NCC = ncc
+LIBS = -lm
+
+BUILDDIR = build/$(PLATFORM)
+MAIN_EXE = $(BUILDDIR)/main.exe
+MAIN_BIN = $(BUILDDIR)/main.bin
+INSTALL_BIN = $(MAIN_BIN).out$(if $(NODEID),-$(NODEID),)
+PLATFORM_DIR = $(TOSDIR)/platform/pxa27x
+ASSEMBLY_FILES += $(PLATFORM_DIR)/barecrt.s $(PLATFORM_DIR)/mmu_table.s $(PLATFORM_DIR)/util.s 
+ASSEMBLY_OBJS =  $(BUILDDIR)/asms.o
+
+MOTELIBS += $(PLATFORM_DIR)/lib/libimote2.a $(PLATFORM_DIR)/../imote2/devices/USB/lib/libusb.a
+MOTELIB_DIRS += $(PLATFORM_DIR)/lib $(TOSDIR)/platform/imote2/devices/USB/lib
+
+OPTFLAGS ?= -O1 -g
+
+#OPTFLAGS ?= -fmerge-constants -fthread-jumps -floop-optimize -fif-conversion -fif-conversion2 -fguess-branch-probability -fcprop-registers -g
+
+ifdef PROFILE_ATOMIC_TIME
+	PFLAGS += -DPROFILE_ATOMIC_TIME
+endif
+
+ifdef ASSERT_IRQ_TIME
+	PFLAGS += -DASSERT_IRQ_TIME
+	PFLAGS += -DIRQ_TIME_LIMIT=325 
+endif
+
+ifdef PROFILE_IRQ_TIME
+	PFLAGS += -DPROFILE_IRQ_TIME
+endif
+
+ifdef ENABLE_TRACE
+	PFLAGS += -DENABLE_TRACE=$(ENABLE_TRACE)
+endif	
+
+ifdef SYSTEM_CORE_FREQUENCY
+	PFLAGS += -DSYSTEM_CORE_FREQUENCY=$(SYSTEM_CORE_FREQUENCY)
+endif	
+
+ifdef SYSTEM_BUS_FREQUENCY
+	PFLAGS += -DSYSTEM_BUS_FREQUENCY=$(SYSTEM_BUS_FREQUENCY)
+endif	
+
+
+PFLAGS += -Wall -Wshadow -DDEF_TOS_AM_GROUP=$(DEFAULT_LOCAL_GROUP) $(NESC_FLAGS)
+PFLAGS += -target=$(PLATFORM) -fnesc-cfile=$(BUILDDIR)/app.c -board=$(SENSORBOARD)
+
+#CFLAGS += -mapcs
+
+ifdef MSG_SIZE
+PFLAGS += -DTOSH_DATA_LENGTH=$(MSG_SIZE)
+endif
+
+INSTALL_PROGRAM ?= jtag
+
+BUILDLESS_DEPS += bytes
+
+#if PROGRAM is not defined, go get what we've defined as the install program
+$(if $(PROGRAM),,$(call TOSMake_include,pxa27x/$(INSTALL_PROGRAM).extra))
+
+# Boot Loader changes are moved in to the default compile, however it
+# is easier to have a way to eliminate the boot loader changes if required.
+# Uncommenting the IFDEF will require an extra compile time flag to include
+# the boot loader changes.
+# The changes are 
+#   barcert.s - Defines a new linker section for reset handler.
+#   PXA27XUSBClientM.nc - Added Message type of boot loader.
+# If uncommented the Usage is: make imote2 bootloader.
+# - Junaith
+
+#ifdef BOOTLOADER
+ASFLAGS += -defsym BOOTLOADER=1
+PFLAGS += -DBOOTLOADER
+#endif
+
+ifndef BUILD_DEPS
+  ifeq ($(filter $(BUILDLESS_DEPS),$(GOALS)),)
+    BUILD_DEPS = bin bytes $(POST_BUILD_EXTRA_DEPS)
+  endif
+endif
+
+
+setid: FORCE
+	@cmd () { echo "$$@"; $$@; }; if [ x = x$(NODEID) ]; then cmd $(OBJCOPY) --output-target=binary $(MAIN_EXE) $(INSTALL_BIN); else cmd $(SET_ID) --objcopy $(OBJCOPY) --objdump $(OBJDUMP) --target binary $(MAIN_EXE) $(INSTALL_BIN) $(NODEID); fi
+
+objcopy:
+	$(OBJCOPY) --output-target=binary $(MAIN_EXE) $(INSTALL_BIN)
+
+bin: exe objcopy FORCE
+	$(XDB_SYMBOL_EXTRACT) -nc $(MAIN_EXE)
+
+exe: exe0 bytes FORCE
+	@:
+
+exe0: builddir asms library $(BUILD_EXTRA_DEPS) FORCE
+	@echo "    compiling $(COMPONENT) to a $(PLATFORM) binary"
+	$(NCC) -o $(MAIN_EXE) $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc $(LIBS) $(LDFLAGS) $(ASSEMBLY_OBJS) $(MOTELIBS)
+	@echo "    compiled $(COMPONENT) to $(MAIN_EXE)"
+
+builddir: FORCE
+	mkdir -p $(BUILDDIR)
+
+bytes: FORCE
+	@objdump -h $(MAIN_EXE) | perl -ne '$$b{$$1}=hex $$2 if /^\s*\d+\s*\.(text|data|bss|stack)\s+(\S+)/; END { printf("%16d bytes in ROM\n%16d bytes in RAM\n%16d bytes in STACK\n%16d bytes available in HEAP\n",$$b{text}+$$b{data},$$b{data}+$$b{bss},$$b{stack},262144-$$b{data}-$$b{bss}-$$b{stack} ); }'
+
+asms: 
+	$(AS) $(ASFLAGS) $(ASSEMBLY_FILES) -o $(BUILDDIR)/asms.o
+library:
+	$(foreach i,$(MOTELIB_DIRS),cd $(i); make;)
+#cd $(PLATFORM_DIR)/lib; make;

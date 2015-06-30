@@ -1,0 +1,9 @@
+A D/AgentReceiver////
+A D/AgentReceiver_noack////
+A D/AgentSender////
+A D/AgentSender_noack////
+A D/ClusterheadDirectory////
+A D/ContextDiscovery////
+A D/LocationReporter////
+A D/NetworkInterface////
+R D/ClusterheadDirectory////

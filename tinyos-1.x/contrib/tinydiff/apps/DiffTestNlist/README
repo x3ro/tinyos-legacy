@@ -1,0 +1,5 @@
+
+A test for TinyDiffusion (OnePhasePull) Publish, Subscribe, DiffusionControl,
+Filter interfaces.  Uses our Neighborlist and NeighborFilter functionality
+underneath.
+

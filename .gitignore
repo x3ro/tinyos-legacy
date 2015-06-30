@@ -1,0 +1,7 @@
+CVSROOT
+
+# Added by gemignore. Snippet 'Global/CVS'
+/CVS/*
+*/CVS/*
+.cvsignore
+*/.cvsignore

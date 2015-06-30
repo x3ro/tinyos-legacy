@@ -1,0 +1,19 @@
+/BatteryLevel.nc/1.2/Wed Jul 12 17:02:45 2006//
+/BatteryLevelSensorC.nc/1.5/Sat Mar 10 21:58:37 2007//
+/CoulombCounter.nc/1.2/Thu Dec  6 18:33:02 2007//
+/CoulombCounterC.nc/1.1/Tue Jul 24 12:37:39 2007//
+/CoulombCounterP.nc/1.2/Thu Dec  6 18:33:02 2007//
+/DemoSensorC.nc/1.4/Tue Dec 12 18:23:41 2006//
+/DemoSensorNowC.nc/1.4/Tue Dec 12 18:23:41 2006//
+/DemoSensorStreamC.nc/1.4/Tue Dec 12 18:23:41 2006//
+/PhotoSensorC.nc/1.4/Tue Dec 12 18:23:41 2006//
+/ReadNowShiftC.nc/1.3/Tue Dec 12 18:23:41 2006//
+/ReadShiftC.nc/1.3/Tue Dec 12 18:23:41 2006//
+/ReadStreamShiftC.nc/1.3/Tue Dec 12 18:23:41 2006//
+/RssiSensorC.nc/1.4/Tue Dec 12 18:23:41 2006//
+/RssiSensorVccC.nc/1.4/Tue Dec 12 18:23:41 2006//
+/SensorSettingsC.nc/1.4/Tue Dec 12 18:23:41 2006//
+/TempExtSensorC.nc/1.6/Wed Nov 28 13:19:49 2007//
+/TempExtSensorP.nc/1.1/Thu Jan 11 16:11:18 2007//
+/sensors.h/1.6/Tue Jul 10 13:19:04 2007//
+D

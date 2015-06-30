@@ -1,0 +1,50 @@
+/**
+ *  @file Xxx_Test.cc
+ *
+ *  @author Ion Yannopoulos
+ */
+
+#include <tossim/test/private.hh>
+#include <tossim/test/Xxx_Test.hh>
+#include <cppunit/TestSuite.hh>
+
+namespace tos {
+namespace sim {
+
+namespace tests {
+
+using Cppunit::TestSuite;
+
+
+Xxx_Test::Xxx_Test()
+{
+}
+
+Xxx_Test::~Xxx_Test()
+{
+}
+
+void
+Xxx_Test::setUp()
+{
+}
+
+void
+Xxx_Test::tearDown()
+{
+}
+
+Test *
+Xxx_Test::suite()
+{
+  TestSuite * a_suite = new TestSuite("Xxx Test");
+  
+
+  return a_suite;
+}
+
+
+} // namespace tests
+
+} // namespace sim
+} // namespace tos

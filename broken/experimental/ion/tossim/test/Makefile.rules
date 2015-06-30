@@ -1,0 +1,42 @@
+# -*- makefile -*-
+TARGET ?= exe
+
+all:    $(TARGET)
+
+exe:    $(DEPEND_FILE) $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJECTS) $(MAIN)
+	$(CXX) -o $@ $(OBJECTS) $(MAIN) $(LINKFLAGS) $(LPATH) $(LIBS)
+
+lib:    $(DEPEND_FILE) $(ARCHIVE)
+
+$(ARCHIVE): $(OBJECTS)
+	$(AR) $@ $(OBJECTS)
+
+dll so: $(DEPEND_FILE)
+	$(MAKE) CXXFLAGS="$(CXXFLAGS) $(CXXFLAGS_DLL)" LINKFLAGS="$(LINKFLAGS) $(LINKFLAGS_DLL)" $(LIBRARY)
+
+$(LIBRARY): $(OBJECTS)
+	$(CXX) -o $@ $(OBJECTS) $(LINKFLAGS) $(LPATH) $(LIBS)
+
+%.o:    %.cc
+	$(CXX) $(CXXFLAGS) $(IPATH) -c $<
+
+runtest: $(EXECUTABLE)
+	$(EXECUTABLE)
+
+# Get rid of object files
+tidy:
+	rm -f $(OBJECTS) $(DEPEND_FILE)*
+
+# Get rid of binaries
+clean:  tidy
+	rm -f $(EXECUTABLE) $(ARCHIVE) $(LIBRARY) core.*
+
+depend: $(SOURCES)
+	makedepend $(IPATH_DEPEND) $(SOURCES) -f $(DEPEND_FILE)
+
+$(DEPEND_FILE):
+	touch $@
+
+include $(DEPEND_FILE)

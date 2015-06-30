@@ -1,0 +1,108 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>The Communications Stack</title>
+<style>
+<!--
+ p.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	margin-left:0in; margin-right:0in; margin-top:0in}
+ li.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	margin-left:0in; margin-right:0in; margin-top:0in}
+h2
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:18.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold}
+h3
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:13.5pt;
+	font-family:"Times New Roman";
+	font-weight:bold}
+-->
+</style>
+</head>
+
+<body>
+
+<h1>The 6.1 Communications Stack</h1>
+
+<p>The 6.1 commStack was created to address issues with matlab's serial port 
+interactions.&nbsp;&nbsp; Reading from serial ports in Matlab R12 was quite 
+slow.&nbsp; Furthermore, the names of serial port properties between matlab 12.0 
+and 12.1 were different, making it difficult to have a single comm stack that 
+everybody could use.&nbsp; Finally, the biggest problem was that parsing the 
+byte stream was quite slow.</p>
+
+<p>To remedy these issues, a new comm stack was created in which the data layer 
+was implemented in Java.&nbsp; this solves all three issues described above.&nbsp; 
+Furthermore, a MatlabTimer object was created in Java that signals clock events 
+with a given frequency, allowing clock driven applications instead of data 
+driven apps (this was not previously possible because matlab is single threaded 
+and so cannot have a seperate clock thread driving the main app).&nbsp; The only 
+disadvantage of using the 6.1 comm stack is that you need to add the new java 
+classes to the matlab classpath.</p>
+
+<p>This is done by typing &quot;edit classpath.txt&quot; in your matlab command window and 
+adding the line &quot;C:/nest/tools&quot; or whatever the path to your nest/tools/matlab 
+directory is.&nbsp; That's all you need to do.&nbsp; The rest of this document 
+simply describes the semantics of the new java data layer.</p>
+
+<p><font size="2">(Note that if you want to continue using the old comm stack, 
+which was developed for Matlab R12, you can simply use the old version of 
+nest/tools/matlab/defineTOSenvironment.m, which declares the old commStack to be 
+the default.&nbsp; If you want to use the old comm stack with Matlab R12.1, 
+there are a few places where you need to change the names of the elements 
+BytesReceivedAction to BytesReceivedFcn.)</font><br>
+&nbsp;</p>
+
+<h3>The New Data Layer</h3>
+
+<p>To use the matlabDataPort just use the command:</p>
+
+<p>p = net.tinyos.matlab.MatlabDataPort('Name of the port', 'host', port, 
+desired, 0)</p>
+
+<p>where port is an integer and desired is one of two values:</p>
+
+<p>net.tinyos.matlab.MatlabDataPort.MOST_RECENT_PACKETS<br>
+net.tinyos.matlab.MatlabDataPort.LAST_UNSEEN_PACKETS</p>
+
+<p>these two constants basically switch the port between reliable and unreliable 
+mode.&nbsp; If you are only sampling from the data stream, you will want to use 
+unreliable data ports.</p>
+
+<p>After creating the Dataport, you can call the following commands, too:</p>
+
+<p>p.setMaxBufferSize(int)</p>
+
+<p>p.setPacketsDesired(see above)</p>
+
+<p>p.write(bytes)</p>
+
+<h3>The MatlabTimer</h3>
+
+<p>To use the matlab timer, run the command</p>
+
+<p>c = net.tinyos.matlab.MatlabClock('my function description', 'myFunction', 
+period(ms), 1)</p>
+
+<p>then, a java window will pop up that lets you call &quot;my function&quot; whenever you 
+want and with whatever period you want.</p>
+
+</body>
+
+</html>

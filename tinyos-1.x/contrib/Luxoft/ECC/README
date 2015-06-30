@@ -1,0 +1,18 @@
+Error correction module
+
+$Id: README,v 1.2 2003/12/26 11:36:35 korovkin Exp $
+
+  This module provides the error correction functionality by sending
+and receiving acknowledgement packets. 
+This module keeps an array of structures decscribing messages already
+sent. There are two options:
+1. We have a broadcast message. In this case we go the traditional way.
+2. We have a message to be sent to particular mote. In this case we
+put the pessage (neater it's pointer) to the array and wait for an ack 
+message from the receiver. If ACK message comes we remove message from 
+the array and do sendDone.
+  We also have the timer counting timeouts. Each time timer ticks we pass
+through the array and do "if (--timeout <= 0) message sending failed"
+if there are no messages we stop the timer. We start it on message sending.
+
+-end-

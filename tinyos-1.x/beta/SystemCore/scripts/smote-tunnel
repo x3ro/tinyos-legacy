@@ -1,0 +1,5 @@
+#!/bin/sh
+
+ssh -f -L 7777:$1:10002 get@smote.cs.berkeley.edu sleep 3600000
+java net.tinyos.sf.SerialForwarder -comm network@localhost:7777 -port 9001 &
+

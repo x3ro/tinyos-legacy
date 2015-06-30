@@ -1,0 +1,3 @@
+PFLAGS += -I$(SPAULDINGSRC)/samplingToDataStore/
+PFLAGS += -I$(SPAULDINGSRC)/dataStore/
+PFLAGS += -I$(SPAULDINGSRC)/lib/

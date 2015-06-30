@@ -1,0 +1,65 @@
+error.o: ../src/error.c /usr/local/avr/include/stdlib.h \
+  /usr/local/avr/include/string.h ../src/runtime/runtime.h \
+  ../src/mudlle.h /usr/local/avr/include/inttypes.h ../src/options.h \
+  ../src/mvalues.h ../src/code.h ../src/memory.h ../src/context.h \
+  /usr/local/avr/include/setjmp.h ../src/types.h ../src/alloc.h \
+  ../src/error.h ../src/motlle-interface.h ../src/global.h \
+  ../src/machine.h ../src/primitives.h /usr/local/avr/include/progmem.h \
+  /usr/local/avr/include/pgmspace.h /usr/local/avr/include/ina90.h \
+  /usr/local/avr/include/eeprom.h /usr/local/avr/include/io.h \
+  /usr/local/avr/include/io-avr.h /usr/local/avr/include/iom103.h \
+  /usr/local/avr/include/iomacros.h ../src/call.h
+
+/usr/local/avr/include/stdlib.h:
+
+/usr/local/avr/include/string.h:
+
+../src/runtime/runtime.h:
+
+../src/mudlle.h:
+
+/usr/local/avr/include/inttypes.h:
+
+../src/options.h:
+
+../src/mvalues.h:
+
+../src/code.h:
+
+../src/memory.h:
+
+../src/context.h:
+
+/usr/local/avr/include/setjmp.h:
+
+../src/types.h:
+
+../src/alloc.h:
+
+../src/error.h:
+
+../src/motlle-interface.h:
+
+../src/global.h:
+
+../src/machine.h:
+
+../src/primitives.h:
+
+/usr/local/avr/include/progmem.h:
+
+/usr/local/avr/include/pgmspace.h:
+
+/usr/local/avr/include/ina90.h:
+
+/usr/local/avr/include/eeprom.h:
+
+/usr/local/avr/include/io.h:
+
+/usr/local/avr/include/io-avr.h:
+
+/usr/local/avr/include/iom103.h:
+
+/usr/local/avr/include/iomacros.h:
+
+../src/call.h:

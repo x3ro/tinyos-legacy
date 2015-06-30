@@ -1,0 +1,184 @@
+#!/usr/bin/perl
+
+open(FOO, "sed 's/^ *//' $ARGV[0]|") or die;
+
+while(<FOO>){
+	if(/^component (\w+)/){
+		$comp = $1;
+		while(<FOO>){
+		    if(/end component/) {
+			last;
+		    }
+			/^(port\()?(\w+): (\w+)/;
+			$components{$comp}{$2} = $3;
+		}
+	}if(/^begin/){
+		while(<FOO>){
+		   /^(\w+): (\w+)/;
+		   $comp = $2;
+		   $instance = $1;
+		   while(<FOO>){
+			if(/^generic map/){
+				/^generic map\((\w+) => \"(\w+)\"/;
+				$pinargs{$instance}{$1} = $2;
+			   while(<FOO>){
+				/(\w+) => \"(\w+)\"/;
+				$pinargs{$instance}{$1} = $2;
+			        if(/\)/){ last;	}
+			    }
+			}
+			if(/\w/){
+				/^(port map\()?(\w+) => (\w+)/;
+				$pinID = $3;
+				$pinName = $2;
+				$_ = $components{$comp}{$pinName};
+				/(\w+)/;
+				$direction = $1;
+				$components{$comp}{$pinName} .=  " " .$pinID;
+				$pin_by_inst{$instance}{$pinName} = $pinID;
+				push @{$pinset{$pinID}{$direction}} ,$pinName;
+				next;
+			}
+			last;
+	            }
+		}
+	}
+}
+	foreach $comp (sort keys %ccomponents) {
+		$pinlist = $components{$comp};
+		foreach $pin (sort keys %$pinlist) {
+			print " $pin ";
+			print $components{$comp}{$pin};
+			# same as:  print ${%$pinlist}{$pin};
+			print "\n";
+		}
+	}
+	foreach $pinname (sort keys %cpinset) {
+		print $pinname . "\n";
+		$attrib = $pinset{$pinname};
+		foreach $val (sort keys %$attrib) {
+			print " \t $val: ";
+			for $i (@{$pinset{$pinname}{$val}}){
+				print $i . " ";
+			}
+			print "\n";
+		}
+	}
+	foreach $pinname (sort keys %cpinset) {
+		if(1 <  @{$pinset{$pinname}{"IN"}}){	
+			print $pinname . " overloaded defined by:\n\t";
+			for $i (@{$pinset{$pinname}{"IN"}}){
+				print $i . " ";
+			}
+			print "\n";
+			print "\tcalled by by:\n\t";
+			for $i (@{$pinset{$pinname}{"OUT"}}){
+				print $i . " ";
+			}
+			print "\n";
+		}
+	}
+	open(FILE, ">super.h") or die;
+	print FILE "\#ifndef SUPER_H\n\#define SUPER_H\n\#include \"tos.h\"\n";
+	print FILE "\#include \"mote.h\"\n";
+	foreach $pinname (sort keys %pinset) {
+		if($pinname eq "OPEN") {next;} 
+		$attrib = $pinset{$pinname};
+		foreach $val (sort keys %$attrib) {
+			$_ = $val;
+			if(/\w+/){
+		 	   for $i (@{$pinset{$pinname}{$val}}){
+			        if($i eq "PIN"){ next;}
+				print FILE "\#define $i $pinname \n ";
+			   }
+			   
+			}
+		}
+	}
+	foreach $pinname (sort keys %pinset) {
+		if(1 <  @{$pinset{$pinname}{"IN"}}){	
+			for $caller (@{$pinset{$pinname}{"OUT"}}){
+				if($caller eq "AM_MSG_REC"){next;}
+				open(FILS, "cat *.h | grep $caller|") or die;
+				while(<FILS>){
+				    if(!/^\#define/){
+					$decl = $_;
+					s/;$/\{/;
+					$def = $_;
+					/(\w+) (TOS_COMMAND\()?$caller(\)?)\((.*)\)/;
+					print "$1:$2:$3:$4:$5\n";
+					$lab1 = $2;
+					$lab2 = $3;
+					$retType = $1;
+					$params = $4;
+					$args = "";	
+					$_ = $params;
+					if(/([\w\*]+)\s([\w\*]+)(,\s([\w\*]+)\s([\w\*]+))?/){
+					print "$1:$2:$3:";
+					$args = $2;
+					$_ = $3;
+					while(/,\s([\w\*]+)\s([\w\*]+)(,\s([\w\*]+)\s([\w\*]+))?/){
+						$args .= ", $2";
+						$_ = $3;
+					}
+					}	
+					print FILE "\#undef $caller\n";
+					for $i (@{$pinset{$pinname}{"IN"}}){
+						 print FILE "\#undef $i\n";
+						 $_ = $decl;
+						 s/$caller/$i/;
+						 print FILE $_;
+					}
+					print FILE "static inline " . $def;	
+					if(! ($retType eq "void")){ print FILE "$retType autoretval;\n";}
+					for $i (@{$pinset{$pinname}{"IN"}}){
+						$_ = $decl;
+						s/$caller/$i/;
+						s/^\w+//;
+						print FILE "\t";
+						if(! ($retType eq "void")){ print FILE "autoretval = ";}
+						print FILE "$lab1$i$lab2($args);\n";
+					}	
+					if(! ($retType eq "void")){ print FILE "\treturn autoretval;\n";}
+					print FILE "};\n";
+					last;
+				    }
+				}
+			}
+		}
+	}
+	print FILE "\#ifndef FULLPC\n";
+	foreach $pin (sort keys %pinargs) {
+		$pinlist = $pinargs{$pin};
+		$num =  $pinargs{$pin}{"PIN"} . " ";
+		$port = $pinargs{$pin}{"PORTNAME"} . " ";
+		foreach $direct ("OUT", "IN"){
+		foreach $user (@{$pinset{$pin_by_inst{$pin}{"PIN"}}{$direct}}){
+			print FILE "static inline void SET_$user(){ sbi($port, $num);}\n";
+			print FILE "static inline void CLR_$user(){ cbi($port, $num);}\n";
+			$port =~ s/PORT/PIN/;
+			print FILE "static inline char READ_$user(){ return 0x01 & (inp($port) >> $num);}\n";
+		}}
+	}
+	
+	print FILE "static inline void SET_PIN_DIRECTIONS(){\n";
+		print FILE "\t outp(0x00, DDRA);\n";
+		print FILE "\t outp(0x00, DDRB);\n";
+		print FILE "\t outp(0x00, DDRC);\n";
+		print FILE "\t outp(0x00, DDRD);\n";
+	foreach $pin (sort keys %pinargs) {
+		$pinlist = $pinargs{$pin};
+		$num =  $pinargs{$pin}{"PIN"} . " ";
+		$port = $pinargs{$pin}{"PORTNAME"} . " ";
+		$port =~ s/PORT/DDR/;
+		if(${$pinset{$pin_by_inst{$pin}{"PIN"}}{"OUT"}}[0]){
+			print FILE "\tsbi($port, $num);\n";
+		}
+	}
+	print FILE "}\n";
+
+		
+	print FILE "\#endif FULLPC\n";
+
+	print FILE "\#endif;";
+			

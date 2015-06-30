@@ -1,0 +1,19 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: cc2420dbk.target,v 1.2 2005/01/17 01:37:18 jpolastre Exp $
+
+PLATFORM = cc2420dbk
+SENSORBOARD ?= micasb
+PROGRAMMER_PART ?= -dpart=ATmega128 --wr_fuse_e=ff
+PFLAGS += -finline-limit=100000
+
+TINYOS_BETADIR ?= $(TOSDIR)/../beta
+
+CFLAGS += \
+-I$(TOSDIR)/lib/CC2420Radio \
+-I$(TINYOS_BETADIR)/platform/cc2420dbk
+
+$(call TOSMake_include_platform,avr)
+
+cc2420dbk: $(BUILD_DEPS)
+	@:
+

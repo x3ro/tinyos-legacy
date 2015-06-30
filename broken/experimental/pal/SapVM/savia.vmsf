@@ -1,0 +1,49 @@
+<VM NAME="SaviaVM" DESC="Savia is used in sap flow applications as devised principally by Dr. Stephen Burgess.  Savia, written by Neil E. Turner, runs on the Telos RevB platform. The original Mate developers (namely Phil Levis) contributed the generic VM operations.  Kaisen Lin contributed the logging/flash operations." DIR="../../../../apps/Savia">
+
+<SEARCH PATH="../opcodes">
+<SEARCH PATH="../contexts">
+<SEARCH PATH="../languages">
+
+<SEARCH PATH="../SapVM">
+<SEARCH PATH="../SapVM/CC2420">
+<SEARCH PATH="../SapVM/Logger">
+<SEARCH PATH="../SapVM/TimeSync">
+<SEARCH PATH="../SapVM/monibus">
+<SEARCH PATH="../../../../beta/STM25P/STM25P">
+<SEARCH PATH="../../../../contrib/ucb/tos/sensorboards/monibus">
+
+<SEARCH PATH="../../Flash">
+
+<LOAD FILE="../sensorboards/telosb.vmsf">
+<LANGUAGE NAME="tinyscript">
+
+//standard functions
+<FUNCTION NAME="bclear">
+<FUNCTION NAME="id">
+<FUNCTION NAME="int">
+<FUNCTION NAME="led">
+<FUNCTION NAME="sendlqi">
+<FUNCTION NAME="sleep">
+<FUNCTION NAME="uart">
+
+//monibus functions
+<FUNCTION NAME="HRMInnerVelocity">
+<FUNCTION NAME="HRMOuterVelocity">
+<FUNCTION NAME="HRMPulse">
+<FUNCTION NAME="HRMVoltage">
+<FUNCTION NAME="monibusoff">
+<FUNCTION NAME="monibuson">
+<FUNCTION NAME="solaroff">
+<FUNCTION NAME="solaron">
+
+
+//data logging/flash functions
+<FUNCTION NAME="fread">
+<FUNCTION NAME="fwrite">
+<FUNCTION NAME="fformat">
+<FUNCTION NAME="stamp">
+
+//<CONTEXT NAME="Once">
+<CONTEXT NAME="Reboot">
+<CONTEXT NAME="SynchTimer">
+<CONTEXT NAME="Timer0">

@@ -1,0 +1,15 @@
+/mc13192CCA.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192Control.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192ControlInterrupt.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192DataInterrupt.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192EventTimer.nc/1.1/Wed Aug 23 09:34:03 2006//
+/mc13192PowerManagement.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192Receive.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192Regs.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192Send.nc/1.3/Wed Aug 23 09:34:03 2006//
+/mc13192State.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192StreamEvents.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192Timer.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192TimerCounter.nc/1.2/Wed Aug 23 09:34:03 2006//
+/mc13192TimerInterrupt.nc/1.2/Wed Aug 23 09:34:03 2006//
+D

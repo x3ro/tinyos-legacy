@@ -1,0 +1,2 @@
+receive('calamariDbgMsgReceive', net.tinyos.calamari.LocalizationDebugMsg, 'localhost:9000');%'c62b256:10001');%'COM1');
+receive('calamariDbgMsgReceive', net.tinyos.calamari.RangingDebugMsg, 'localhost:9000');%'c62b256:10001');%'COM1');

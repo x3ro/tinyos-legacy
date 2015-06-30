@@ -1,0 +1,4 @@
+<SEARCH PATH="../../../sensorboards/basicsb">
+<SEARCH PATH="../sensorboards/sensors">
+<FUNCTION NAME="light">
+<FUNCTION NAME="temp">

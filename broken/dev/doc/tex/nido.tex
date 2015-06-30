@@ -1,0 +1,709 @@
+\documentclass[10pt]{article}
+
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{multicol}
+\usepackage{epsfig,amsmath,amsfonts}
+
+\makeatletter                                   % Make '@' accessible. 
+\oddsidemargin=0in                              % Left margin minus 1 inch.
+\evensidemargin=0in                             % Same for even-numbered pages.
+\marginparsep=0pt                               % Space between margin & text
+
+\renewcommand{\baselinestretch}{1}              % Double spacing
+
+\textwidth=6.5in                                % Text width (8.5in - margins).
+\textheight=9in                                 % Body height (incl. footnotes)
+
+\topmargin=0in                                  % Top margin minus 1 inch.
+\headsep=0.0in                                  % Distance from header to body.
+\skip\footins=4ex                               % Space above first footnote.
+\hbadness=10000                                 % No "underfull hbox" messages.
+\makeatother                                    % Make '@' special again.
+
+
+\begin{document}
+
+\fontfamily{cmss}                               % Make text sans serif.
+\fontseries{m}                                  % Medium spacing.
+\fontshape{n}                                   % Normal: not bold, etc.
+\fontsize{10}{10}                               % 10pt font, 10pt line spacing 
+
+\title{Nido System Description}
+\author{Philip Levis, Nelson Lee}
+\maketitle
+
+\fontfamily{cmr}                                % Make text Roman (serif).
+\fontseries{m}                                  % Medium spacing.
+\fontshape{n}                                   % Normal: not bold, etc.
+\fontsize{10}{10}                               % 10pt font, 10pt line spacing
+
+\section*{System Overview}
+
+Nido\footnote{Spanish; nest (as in an insect nest)} is a discrete
+event simulator that allows users to run and debug TinyOS applications
+on a PC. Experimental results show it to scale well up to networks one
+thousand motes. An external communication system allows other tools to
+monitor network traffic and inject packets into the simulated
+network. Nido also allows finely grained configuration of debugging
+output at runtime.
+
+Current general purpose network simulators are inadequate for
+TinyOS. Traditional network simulators are usually focused on protocol
+simulation for large area networks in which there is a large
+connectivity disparity in regions of the network (e.g. backbones
+vs. LANs). For example, {\tt ns-2} simulates a network at packet
+granularity and has detailed node and link specification. In contrast,
+Nido is intended for simulating TinyOS and its behavior; the
+inacessibility of sensor motes means some form of debugging is
+invaluable. Additionally, Nido simulates the TinyOS networking stack
+at bit granularity, allowing the testing of protocols at layer 2 and
+above.
+
+Nido itself provides run-time information in the form of configurable
+text output. By setting the {\tt DBG} environment variable, a user can
+enable or disable classes of output messages. There are also several
+tools that communicate with Nido to inject packets and display network
+traffic.
+
+\section*{Getting Started}
+
+Nido is automatically built when you compile an
+application. Applications are compiled by entering an application
+directory (e.g. {\tt /apps/Blink}) and typing {\tt
+make}. Alternatively, when in an application directory, you can type
+{\tt make pc}, which will only compile a simulation of the application.
+
+The Nido executable is named {\tt main.exe}, and resides in {\tt
+build/pc}. It has the following usage:
+
+
+{\tt main.exe [-h|--help] [-r $<$static|simple|space$>$] [-ro
+=$<$portnumber$>$] [-ri =$<$portnumber$>$] [-e $<$file$>$] [-p $<$sec$>$] <num\_nodes>}
+
+The {\tt -h} or {\tt --help} options print out a more verbose usage
+message, specifying which dbg modes are enabled in the simulator, etc.
+
+The {\tt -r} option specifies the radio model to use. None of the
+current radio models take into account interference or noise; signals
+are perfectly transmitted and received. The {\tt simple} model places
+all of the motes in a single radio cell; every mote can hear every
+other mote. The {\tt static} model reads in a file at startup ({\tt
+cells.txt}) that specifies which motes can hear each-other. The
+format of this file is defined at the end of this document. The {\tt
+space} model is a rudimentary model of 2D space. Motes are randomly
+placed at startup, then move in a random, Brownian motion-like
+fashion. Signal reception is based on distance between motes, with
+potentiometer settings mapping to a distance table that has no basis
+in reality. The default model is {\tt simple}.
+
+The {\tt -ro} option pauses the simulator at startup, waiting for an
+output connection on the port specified {\tt portnumber} or by default
+port 10577. This is primarily used for SimGUI, so that SimGUI
+can connect to the simulation before it begins and log
+every message sent over the network.
+
+The {\tt -ri} option pauses the simulator at startup, waiting for an
+input connection on the port specified {\tt portnumber} or by default
+port 10576. This allows for pre-startup injection of packets with SimGUI. 
+
+The {\tt -p} option allows simulation text output to be more easily
+understood. If it is specified, then the simulation pauses at every
+system clock (not radio clock) event for the specified number of
+seconds. Since system clock events are often major instigators of mote
+behavior, this allows a user to make the simulation output be broken
+up enough to be read, instead of the standard (far too fast to read)
+constant stream.
+
+The {\tt -e} option is for named EEPROM files. If {\tt -e} isn't
+specified, the logger component stores and reads data, but this data
+is not persistent across simulator invocations: it uses an anonymous
+file. If {\tt -e} is specified, the simulator uses the specified
+file. This allows logger data to be persistent across invocations of
+the simulator, and also allows algorithms based on logger data to be
+easily compared. The file grows as needed, and is initially a sparse
+file (if mote 1000 writes a single byte to its last EEPROM line in an
+otherwise empty EEPROM, only one disk block is allocated). The Nido
+logger component resembles the mica hardware; it is 512KB in size.
+
+The {\tt num\_nodes} option specifies how many nodes should be
+simulated. A compile-time upper bound is specified in {\tt
+/apps/Makerules}. The standard TinyOS distribution sets this value to be
+1000.
+
+\section*{dbg}
+
+Nido provides configuration of debugging output at run-time. We have
+added debugging statements to most TinyOS system components. Every
+debugging statement is accompanied by one or more modal flags. When
+the simulator starts, it reads in the DBG environment variable to determine
+which modes should be enabled. Modes are stored and processed as
+entries in a bit-mask, so a single output can be enabled for multiple
+modes, and a user can specify multiple modes to be displayed. For
+example, the statement
+
+
+\begin{verbatim}
+dbg(DBG_CRC, ("crc check failed: \%x, \%x\n", crc, mcrc));
+\end{verbatim}
+
+
+will print out the failed CRC check message if the user has enabled
+CRC debug messages, while
+
+
+\begin{verbatim}
+dbg(DBG_BOOT, ("AM Module initialized\n"));
+\end{verbatim}
+
+
+will be printed to standard out if boot messages are enabled. DBG
+flags can also be combined, as in this example:
+
+
+\begin{verbatim}
+dbg(DBG_ROUTE|DBG_ERROR, ("Received control message: \
+                           lose our network name!.\n"));
+\end{verbatim}
+
+
+This will print out if either route or error messages are enabled.
+
+There are a set of bindings from ASCII strings to debug modes. For
+example, setting DBG to {\tt boot} will enable boot message (by
+setting the appropriate bit in the mask). Setting DBG to {\tt
+boot,route,am} will enable boot, routing and active message output.
+
+This system allows a user to reconfigure the type of output displayed
+on each run of the simulator without needing to modify source files
+and recompile. There are several modes reserved for applications or
+temporary testing use, which can be safely used when writing new
+components. There are also modes that provide output on the internals
+of the simulator, such as memory allocation or the event queue. When
+TinyOS is compiled for mote hardware, all of the debug statements are
+removed through redefinition of the macro; we have verified that they
+add no instructions to the TinyOS code image.
+
+\section*{The GUI}
+
+The Nido visualization GUI is included in the default TinyOS release
+as a Java application. Currently, the simulation only supports radio
+packet messages (incoming and outgoing). It resides in the {\tt
+tools/java/} directory of the default TinyOS release, and can be run
+by typing {\tt java net.tinyos.sim.SimGUI} when in that
+directory. It has two optional parameters, {\tt -r}, for specifying a
+file of radio messages to introduce to the simulation, and a {\tt -p}
+option which specifies which port to connect to and read packets from.
+
+\subsection*{File Format}
+
+SimGUI allows a file of radio packets to be specified at the
+command line. These packets are read in and then sent over port
+10576. The file has the following format:
+
+\vspace{0.1in}
+$<$time (decimal long long)$>$ $<$mote (decimal short) $<$data0 (hex byte)$>$ ... $<$data36 (hex byte)$>$.
+\vspace{0.1in}
+
+Each value is separated from the other by whitespace. All whitespace
+is insignificant. A sample file exists at {\tt tools/radio.txt}.
+
+\section*{The NetworkInjector}
+
+This GUI provides a convenient mechanism for dynamically injecting
+packets into the simulation. It resides in the {\tt tools/java/}
+directory. NetworkInjector connects to Nido using port 10579 by
+default if no port number is specified.
+
+\section*{Nido Internals}
+
+Currently, Nido compiles by using alternative implementations of
+some core system components (e.g. {\tt Main.td}, {\tt HPL.td}) and
+incorporating a few extra files (e.g. {\tt event\_queue.c}). 
+
+The basic Nido structure definitions exist in {\tt
+platform/pc/sim.h}. These include the global simulation state
+(event queue, time, etc.) and individual node state. Hardware settings
+that affect multiple components (such as the potentiometer setting)
+currently must be modeled as global node state. {\tt sim.h} also
+includes a few useful macros, such as {\tt NODE\_NUM} and {\tt
+THIS\_NODE}; these should be used whenever possible, so minimal code
+modifications will be necessary if the data representation
+changes. 
+
+{\tt Nido.td} is where the Nido global state is defined. The {\tt
+main()} function parses the command line options, initializes the
+Nido global state, initializes the external communication
+functionality (defined in {\tt external\_comm.c, PCRadio.h}), then initializes the
+state of each of the simulated motes with {\tt call StdControl.init()} and {\tt
+call StdControl.start()}. It then starts executing a small loop that handles
+events and schedules tasks. Currently, tasks are un-interruptible and
+execute instantaneously (in simulation time). We hope to model tasks
+more accurately soon.
+
+Nido catches SIGINT (control-C) to exit cleanly. This is useful when
+profiling code.
+
+\subsection*{Nido Architecture}
+
+Nido replaces a small number of TinyOS components, the components
+that handle interrupts and the {\tt Main} component. Interrupts are
+modeled as discrete events. Normally, the core TinyOS loop that runs
+on motes is this:
+
+
+\begin{verbatim}
+while(1){
+  TOSH_run_task();
+}
+\end{verbatim}
+
+{\tt TOSH\_run\_task} runs tasks until the task queue is empty, at which
+point it puts the CPU to sleep. An interrupt will wake the mote. If
+the interrupt has caused a task to be scheduled, then that task will
+be run. While that task is running, interrupts can be handled.
+
+The core Nido loop is slightly different:
+
+\begin{verbatim}
+for (;;) {
+  while(TOSH_run_next_task()) {}
+  if (!queue_is_empty(&(tos_state.queue))) {	
+    tos_state.tos_time =
+       queue_peek_event_time(&(tos_state.queue));
+    queue_handle_next_event(&(tos_state.queue));
+}
+\end{verbatim}
+
+
+
+A notion of virtual time (stored as a 64-bit integer) is kept in the
+simulator (stored in {\tt tos\_state.tos\_time}), and every event is
+associated with a specific mote. Most events are emulations of
+hardware interrupts. For example, when the clock in {\tt hpl.c} is
+initialized to certain counter values, Nido's implementation
+enqueues a clock interrupt event, whose handler calls the function
+normally registered as the clock interrupt handler; from this point,
+normal TinyOS code takes over (in terms of events being signaled,
+etc.) In addition, the event enqueues another clock event for the
+future, with its time (for the event queue) being the current time
+plus the time between interrupts.
+
+ 
+When compiling for Nido, the nesC compiler modifies code generation
+for components such that fields declared in components result in
+arrays of each field.  The maximum number of motes that can be
+simulated at once is set at compile time by the size of this array;
+the default value is 1000 and is specified in {\tt /apps/Makerules}
+with the {\tt -fnesc-tossim-tosnodes=} flag. Since every event is
+associated with a specific mote, the {\tt tos\_state.current\_node}
+field is set just before the event handler function is called, so that
+all modifications to component fields affect the correct mote's
+state. Since all TinyOS tasks enqueued by an event are run to
+completion before the next event is handled, tasks all execute with
+the same node number and access the enqueuing mote's state.
+
+\subsection*{RFM}
+
+Instead of requiring a certain level of radio simulation accuracy,
+Nido uses an extensible radio model. By doing so, the simulation can
+be run with any level of accuracy a user wants (and is willing to
+write). While simple protocol correctness tests might be satisfied
+with a model that assumes perfect signal transmission, protocol
+performance tuning tests might want to introduce bit error and
+transient interference.
+
+The interface to the radio model is defined in {\tt rfm\_model.h}:
+
+\begin{verbatim}
+typedef struct {
+  void(*init)();
+  void(*transmit)(int, char);
+  void(*stop\_transmit)(int);
+  char(*hears)(int);
+} rfm_model;
+\end{verbatim}
+
+The data pointer is provided so that radio models that require a large
+amount of state can only allocate the memory if they're being used;
+otherwise, if the state is comprised of global variables in source
+files, the process uses up space for every model's bookkeeping.
+
+The {\tt int} arguments are mote IDs, while the {\tt char} arguments
+are bits (0 or 1).
+
+{\tt init} is called at simulation startup. {\tt transmit} is called
+whenever a mote calls the transmit command on the lowest level radio
+abstraction. {\tt stop\_transmit} is called on every radio interrupt
+to clear status if the mote was previously transmitting. {\tt hears}
+is called on every radio interrupt when the radio is in receive state,
+and returns the value that is heard. The {\tt data} pointer is
+provided so that large data structures can be allocated dynamically at
+{\tt init}; otherwise, if the simulation includes many models, a lot
+of memory could be wasted.
+
+We have implemented several radio models; we will describe a simple
+one that we call {\bf static}. When the {\tt init} method of the
+static model is called, the simulator tries to open a file named {\tt
+cells.txt} that defines an undirected network connectivity graph in
+terms of mote IDs. {\tt init} reads and builds this graph. If no file
+is found, every mote is made adjacent to every other. The model stores
+two pieces of state for every mote: whether it is currently {\bf
+transmitting }a one, and a {\bf radio\_active} value. Both values are
+initialized to zero in {\tt init}.
+
+When a mote transmits a 1, its {\bf transmitting} is set to true, and
+{\bf radio\_active} of every mote adjacent to it in the graph is
+incremented. If {\bf transmitting} is true when {\tt stop\_transmit}
+is called, {\bf radio\_active} of every adjacent mote is
+decremented. When a mote {\tt hears}, it tests {\bf radio\_active}; if
+greater than zero, the mote hears a bit. This assumes that two motes
+transmitting at the same time will never cancel each-other's
+signals. The increment/decrement element is necessary to determine
+when the last of the transmitters a mote can hear has finished.
+
+The static model has many shortcomings; it assumes perfect signal
+propagation (there are no bit errors) and the connectivity graph
+doesn't change (hence the name). We have also implemented a simplistic
+spatial model that handles mote movement and transmit distances; motes
+begin at random positions and move in a random walk
+manner. Connectivity for a mote is recomputed at each radio clock
+event. Our intention is not to provide realistic world models that
+account for the complexities of RF propagation, instead, to provide a
+framework for users to develop models of complexity as fine or coarse
+as their work needs; we believe the models we have developed show the
+feasibility of more realistic models.
+
+Nido simulates the radio using the mica 40Kb stack, {\tt
+MicaHighSpeedRadioM}. {\tt MicaHighSpeedRadioM} distributes
+functionality across several components. Thus more components had to
+be replaced, as opposed to the old radio radio stack where only {\tt
+RFM} had to be replaced. Hooks into higher level components for the
+external communication system were added, but their logic remained
+unchanged.
+
+\section*{ADC and Spatial Models}
+
+Nido also has extensible ADC and spatial models. The provided
+implementations of these models return identical data on every call;
+every ADC port has a value of zero, and all motes are always at the
+same coordinates. This is the interface to a spatial model:
+
+\begin{verbatim}
+typedef struct {
+  double xCoordinate;
+  double yCoordinate;
+  double zCoordinate;
+} point3D;
+
+typedef struct {
+  void(*init)();
+  void (*get_position)(int, long long, point3D*);   // int moteID,
+                                                    // long long time
+                                                    // point3D* storage
+} spatial_model;
+\end{verbatim}
+
+This is the interface to an ADC model:
+
+\begin{verbatim}
+typedef struct {
+  void(*init)();
+  short (*read)(int, char, long long);  // int mote, char port, long long time
+} adc_model;
+\end{verbatim}
+
+The global {\tt tos\_state} structure holds a pointer to all of the
+three models: rfm, spatial and adc.
+
+The spatial model is separate from the other two so that they can
+easily share state and can provide correlated readings.
+
+\section*{External Communication}
+
+IO is a major limitation in debugging sensor networks. If a network
+has a complex topology (e.g. motes can be several network hops from
+one another), gathering real-time information on network traffic can
+be difficult. For example, a single mote might be producing packets
+with corrupted application data due to a bug. These corrupted packets
+could then have a ripple effect through the network. Neither of the
+two options to deal with this kind of bug are very appealing.
+
+One can incorporate network traffic logging on the motes, storing
+packets for later retrieval. The difficulty arises when correlating
+the traffic observed by multiple motes; doing so requires global time
+synchronization, which is not incorporated into the motes by default,
+and adding it might make the bug disappear, just as adding logging might. 
+
+Alternatively, one could add a number of motes that solely listen and
+log traffic. These monitor motes could be connected to PCs, allowing
+real-time observation of traffic. However, if the network is composed
+of many transmit cells (many hops), one must use a large number of
+monitor motes, or at least move them around.
+
+Instead, Nido allows a global view of the network that is distinct
+from what the motes hear. It sends data on network and UART traffic
+over TCP sockets, including AM-level packet transmissions as well as
+bit transmissions. The former is useful for application debugging,
+while the latter can be used to debug data link level encoding and
+decoding. When Nido starts, it attempts to connect to ports on the
+local machine, each of which is associated with a certain kind of IO
+data. If a connection attempts fails, Nido does not retry to connect
+and doesn't output that data during its run.
+
+Nido also opens a server socket that runs in a separate
+thread. Connections made to this socket allow a user to dynamically
+inject packets into the network; each packet has a time stamp and a
+mote ID; that mote will receive the packet at that time, bypassing all
+of the protocol stack below the AM component (an event is enqueued
+whose handler signals the event that tells AM a packet has been
+received). If the timestamp is set for a point in the past, the packet
+is received at the current time in the simulator (the time of the next
+event in the queue).
+
+Nido waits for a TCP connection request on default or specified ports
+for message injection and output before it commences the mote boot
+sequence -- this synchronous behavior ensures that initial packets
+sent will not be missed and that the simulations involving injected
+packets can be reproduced.
+
+Nido also includes functionality for introducing and reading network
+traffic real-timne. This is also achieved through the use of TCP
+sockets that are opened before the simulation begins. Nido initiates a
+connection to localhost on a series of ports. Each of these ports,
+their use, and their communication format are detailed below. In
+addition, Nido always opens two server (passive) port and waits for
+external connections; client sockets connecting to one port can inject
+messages into the network, while the client sockets connecting to the
+other port will receive packets sent in the network.
+
+\subsection*{UART}
+
+\subsubsection*{Reading: Port 10580}
+
+The UART communication channel allows an external process to
+communicate with the motes over their UARTs. At startup, the Nido
+process reads from the socket until the server side closes it. Data
+sent over the socket must have the following format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{4in} & \hspace{1in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID (short) & Data(char) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+These messages cannot be generated dynamically; they are all read in
+before the simulation starts. Once the server process has sent all of
+its messages, it closes the connection to Nido.
+
+{\bf UART communication is currently not implemented.}
+
+\subsubsection*{Writing: Port 10581}
+
+UART messages are written using the same format with which they are
+read. On startup, the simulator opens a connection to port 22577 on
+localhost and send messages over this channel.
+
+{\bf UART communication is currently not implemented.}
+
+\subsection*{Radio}
+\subsubsection*{Reading: Port 10576}
+
+The radio communication channel allows an external process to
+communicate with the motes over the radio. At startup, Nido opens a
+server connection on port 10576 waiting for SimGUI to connect to
+it (this functionality specified by the {\tt -ri} option when running
+Nido). Once connected, Nido reads from the socket until no more data is
+read. Data sent over the socket must have the following format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{2in} & \hspace{2in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID(short) & TOS\_Msg (36 bytes) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+These messages cannot be generated dynamically; they are all read in
+before the simulation starts. The simulation stores them as
+events. Sending messages in this manner bypasses the radio layers in
+the mote, directly calling {\tt Nido\_received(\&(data-$>$msg))}, which
+signals {\tt ReceiveMsg.receive(packet)} in {\tt AMStandard.td}.
+
+Once the client has sent all of its messages, it closes the connection
+to Nido.
+
+This mechanism allows for the initialization of base stations at
+simulation startup. Since all motes must run the same code image, base
+station logic must be incorporated into the build of TinyOS. A message
+handler can be used to receive messages that switch a mote from
+standard to base-station mode, and messages of this type can be
+introduced into the simulator through this mechanism.
+
+\subsubsection*{Writing: Port 10577}
+
+This socket notifies an external program whenever a mote starts to
+transmit a packet. This notification occurs when the mote completes
+the transmission; if there is a lot of radio traffic, this might be
+significantly after it attempts to start transmitting. The simulator pauses before mote boot sequence for a client to
+connect (this of course is specified with the {\tt -ro} option when running Nido). The packet is sent along the socket in this format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{2in} & \hspace{2in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID(short) & Data (36 bytes) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+SimGUI is the primary application that uses this feature of the simulator.
+
+
+\subsubsection*{Real-time Reading: Port 10579}
+
+Nido spawns a thread at startup that opens a server socket and waits
+for connections on port 10579. Clients connecting to this port can
+inject messages dynamically into the network. Data sent over this
+socket should have the following format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{2in} & \hspace{2in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID(short) & TOS\_Msg (36 bytes) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+If the time field specifies a time that has already passed in the
+simulation, the message is scheduled to be received immediately. If
+the time field specifies a time in the future, the message is
+scheduled to be received at the specified time.
+
+If the client closes the connection, Nido will wait for another
+connection request.
+
+A GUI for injecting packets is included in the TinyOS release: {\tt
+net.tinyos.tossim.NetworkInjector}. It uses the {\tt
+net.tinyos.packet} package to provide a packet type specific GUI. If
+you want to add a new packet type, merely write a new packet class and
+include it in the {\tt main} of {\tt NetworkInjector}. 
+
+\subsubsection*{Real-time Writing: Port 10584}
+Nido spawns a thread at startup that opens a server socket and waits
+for connection on prot 10584. Clients connecting to the port will
+receive packets sent in the following format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{2in} & \hspace{2in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID(short) & Data (36 bytes) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+If the client closes the connection, Nido will wait for another
+connection request.
+
+SimGUI is the primary application that uses this feature of the simulator.
+
+\subsubsection*{Bit Writing: Port 10578}
+
+Radio messages are written to a connection made to this port. The
+messages have the following format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{4in} & \hspace{1in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID(short) & Bit (byte) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+The bit states whether the mote transmits a 1 or doesn't transmit
+(0). The mote is considered to be producing the same value until
+another message saying otherwise arrives.
+
+This functionality is useful if debugging activity below the packet
+layer, such as encodings/start symbols.
+
+\section*{cells.txt}
+
+There are currently two network connectivity models in Nido. The simple model places every mote within a single cell; all of the motes can hear one another. This is the default network model. The second network model, the static model, uses a network connectivity graph that is determined at run-time before the simulation starts. The graph is specified by a file named {\tt cells.txt} which must be in the directory where the program is executed. The file format is very simple.
+
+\begin{verbatim}
+
+0:1 1:2 4:5 9:1
+
+\end{verbatim}
+
+defines a graph in which motes 0 and 1 can communicate, 2 and 1 can communicate, 4 and 5 can communicate, and 9 and 1 can communicate. Connectivity is bidirectional: {\tt 0:1} is the same as {\tt 1:0}. A sample file can be found in the root TinyOS directory.
+
+\section*{GDB}
+One of the most useful purposes of Nido, if not the most useful, is
+that the binary executable produced by typing {\tt make pc} in any app
+directory can be debugged using GDB. Developers of TinyOS code can now step through
+programs they have written, thereby debugging deterministic, logical
+aspects of their code before loading their programs onto motes.
+
+When accessing variables and functions in Nido under GDB, specific
+prefixes precede them. For instance, if two components had a {\tt
+uint8\_t count} variable, how would one using GDB print or set each value?
+To answer this question, it is first necessary to explain how the nesC
+compiler works. In essence, it takes each source file, combines it
+into one {\tt C} file, and compiles that single file into an
+executable. The nesC compiler takes each component's fields and functions
+and renames them with unique identifiers. This renaming for fields of
+a component is done by
+taking the field name, and preceding it by the component name and a
+{\tt \$} sign. Functions are renamed by taking the name of the
+function and preceding it by the name of the component it is defined
+in, followed by a {\tt \$} sign, followed by the interface
+name, followed by another {\tt \$} sign.
+
+At compile time, the maximum number of nodes that can be simulated is
+specified.  This value, as mentioned in section
+{\tt Nido Architecture} specifies the size of the array for each component's fields during code
+generation of the compilation process. When compiling for the {\tt
+pc}, each declaration of a component field is followed by {\tt [}, the
+value of {\tt tossim\_num\_nodes}, and {\tt ]}, where tossim\_num\_nodes
+is specified by the flag {\tt -fnesc-tossim\_tosnodes=} in {\tt
+Makerules}, or by default, set
+to 1000.  This is the way Nido simulates multiple
+motes. Nido keeps an array for each variable of state, and references
+each mote's corresponding state when running code for that mote.
+
+Furthermore, during code generation for the {\tt pc}, all references to component
+fields are followed by {\tt [}, {\tt tos\_state.current\_node} and {\tt
+]}, where {\tt tos\_state.current\_node} refers to the moteID of
+the mote Nido is currently executing code for.
+
+Using the application {\tt Blink} as an example, type {\tt make pc} in
+the {\tt /apps/Blink/} directory to compile the application for Nido. Run {\tt gdb} on the executable
+produced by typing {\tt gdb build/pc/main.exe}. Examining {\tt
+BlinkM.td}, to break at the function Clock.fire(), type {\tt b
+*BlinkM\$Clock\$fire}. {\tt b} specifies a breakpoint in GDB, and the
+{\tt *} tells the GDB command line parser to examine the entire block of text
+following it as a single expression. It is currently necessary to
+specify the {\tt *} before the function name for GDB to parse it
+properly. {\tt BlinkM} denotes the component the function is defined
+in, and {\tt Clock} specifies the interface the function {\tt fire}
+belongs to.
+
+To run {\tt Blink} with one mote, type {\tt r 1}.  {\tt r} is the GDB
+command to run the current executable, and all values after the {\tt
+r} are passed as arguments to the executable. Therefore the {\tt 1}
+specifies the number of motes to simulate to Nido. MoteIDs are
+assigned starting at 0.  In this current example the moteID of the
+single mote being simulated is 0.  
+
+Upon hitting the breakpoint at {\tt fire}, to print the value of {\tt
+BlinkM}'s {\tt state}, type \\{\tt p
+BlinkM\$state[tos\_state.current\_node]}. {\tt p} is the print command
+in GDB. {\tt BlinkM} corresponds to the component the field {\tt
+state} belongs to. Since the application was compiled for the pc,
+it is necessary to specify which mote's {\tt BlinkM\$state} to
+access, as {\tt [tos\_state.current\_node]} following the field name does. 
+
+
+\end{document}
+
+
+
+
+

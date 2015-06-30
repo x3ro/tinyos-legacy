@@ -1,0 +1,9 @@
+Example/test code for the mda300ca access functions.
+
+vm.vmsf is the VM description file
+
+pintrigger.mt: send a UART message, toggle led when pin changes
+readpin.mt: send UART message with pin 2's value
+writepin.mt: toggle pin 2 once a second
+readsht.mt: send UART message with temperature, humidity
+sample.mt: turn 2.5V on, read A/D channel 4

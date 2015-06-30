@@ -1,0 +1,4 @@
+#!/bin/sh
+cd ../../apps/Blink
+make $PLATFORM install.2
+exit $?

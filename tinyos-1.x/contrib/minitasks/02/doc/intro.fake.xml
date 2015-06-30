@@ -1,0 +1,103 @@
+<!-- $Id: intro.fake.xml,v 1.1.1.1 2002/12/06 23:00:28 cssharp Exp $ -->
+
+<section name="Introduction">
+
+<section name="Chapter Descriptions">
+
+<section name="Introduction" numbered="no">
+<p> Chapter Descriptions. Roles of Berkeley, Middleware Groups, and Document.
+</p>
+</section>
+
+<section name="Demo Description" numbered="no">
+<p> Detailed description of the demo scenario, including what entities are
+present and how they behave.  Also define high-level architecture decisions
+such as global/local coordinate systems, global/local time, etc. </p>
+</section>
+
+<section name="Architecture Methodologies" numbered="no">
+<p> Informal, linguistic description of the philosophies used to construct each
+component </p>
+</section>
+
+<section name="Estimation" numbered="no">
+<p>
+</p>
+</section>
+
+<section name="Grouping" numbered="no">
+<p>
+</p>
+</section>
+
+<section name="Localization" numbered="no">
+<p>
+</p>
+</section>
+
+<section name="Power Management" numbered="no">
+<p>
+</p>
+</section>
+
+<section name="Routing" numbered="no">
+<p>
+</p>
+</section>
+
+<section name="Service Coordination" numbered="no">
+<p>
+</p>
+</section>
+
+<section name="Time Synchronization" numbered="no">
+<p>
+</p>
+</section>
+
+</section>
+
+<section name="Group and Document Roles">
+
+<p> Berkeley's role </p>
+
+<ul>
+<li> Manage this NEST Challenge Architecture Document </li>
+<li> Set revision dates </li>
+<li> Provide the initial abstract architecture and concrete implementations </li>
+<li> Review and integrate changes proposed by other groups </li>
+<li> Web site </li>
+<li> Mailing list </li>
+<li> SourceForge facilities / repository </li>
+<li> Provide the demo kits as well as the final demo test bed </li>
+</ul>
+
+<p> Middleware groups' role </p>
+
+<ul>
+<li> Work within the framework of the provided architecture </li>
+<li> Conform to changes in revisions of the architecture </li>
+<li> Suggest changes to the architecture </li>
+<li> Use the collaborative infrastructure and facilities </li>
+<li> Provide NesC component implementations </li>
+<li> Provide Formal Architecture for their components </li>
+</ul>
+
+<p> Challenge Architecture Document goals </p>
+
+<ul>
+<li> Provide frameworks to allow for Middleware providers to develop individual
+components in a reasonably independent manner </li>
+<li> Define a Methodology subject to constraints extracted from the demo
+description </li>
+<li> Define Prototypes which form the core abstraction </li>
+<li> Use those Prototypes create Concrete Implementations in NesC, subject to
+constraints specified in the Formal Architecture </li>
+<li> Always work toward abstractions when it makes sense to do so </li>
+<li> Specify common types / structures used between components </li>
+</ul>
+
+</section>
+
+</section>
+

@@ -1,0 +1,6 @@
+README 
+
+
+Description:
+Measure voltage ref on Mica2 then computes battery voltage from it. Outputs messages to uart port.
+

@@ -1,0 +1,14 @@
+Todo:
+  - finish the code for location database
+
+  - add an application message id to the BVRHeader instead of using the
+    payload to do that
+
+  - make the BVRRouter generic (to use different AM types). How to enforce
+    that no one will use the reserved AM types?
+
+Status:
+  - BVR code released tested on mica2dot motes, working well. Also tested on
+    simulator.
+
+

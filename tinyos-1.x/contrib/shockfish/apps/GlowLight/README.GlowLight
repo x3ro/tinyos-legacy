@@ -1,0 +1,6 @@
+make tinynode install.TOS_LOCAL_ADDRESS bsl,/dev/ttyS0
+
+with TOS_LOCAL_ADDRESS unique in [0..2].
+This will define the network id and the led number.
+
+

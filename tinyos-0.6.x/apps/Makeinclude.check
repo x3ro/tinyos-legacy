@@ -1,0 +1,98 @@
+#-*-Makefile-*-
+######################################################################
+#
+# Makefile for validating the TinyOS call graph. This Makefile should
+# not be invoked manually; it should be invoked by using Makeinclude.qual,
+# which calls this file after building the necessary resource files.
+#
+# This Makefile is shared by all applications and is included by
+# Makefile.check in application directories.
+#
+# When run, this Makefile reads in cqual/cqual.objs, which should
+# have three variables defined: CQUAL_FILES.c, CQUAL_FILES.h, and
+# CQUAL_OBJS. The first two list the locations of the source or header
+# files comprising the application; the last lists the preprocessed
+# source files that cqual will be run on.
+#
+# As cqual needs qualifier header files, this Makefile removes all
+# previous copies of the header files needed (CQUAL_FILES.h), then
+# generates ones which include qualifiers. These are then moved into
+# the cqual directory (cqual/). Copies of the required source files
+# (CQUAL_FILES.c) are made in the cqual directory (cqual/). Using these
+# source files, the needed preprocessed files (CQUAL_OBJS) are built by
+# adding qualifiers (with tools/cqual_add) the running the preprocessor.
+#
+# Once the preprocessed source files have been built, cqual is run on them.
+#
+# Created: 1/19/2002,  Philip Levis <pal@cs.berkeley.edu>
+#
+######################################################################
+
+# HARDWARE PLATFORM: add new output directories here
+WORKINGDIRS = binpc
+
+BASEDIR = ../..
+CDIR    = cqual
+
+TOOLS   = $(BASEDIR)/tools
+TOS     = $(BASEDIR)/tos
+DOC     = $(BASEDIR)/doc
+SYSTEM  = $(TOS)/system
+SHARED  = $(TOS)/shared
+PLATFORM_DIR = $(TOS)/platform/pc
+
+CQUAL = $(TOOLS)/cqual
+GCC = /usr/bin/gcc
+
+CQUAL_CONFIG = $(DOC)/cqual.lattice
+CQUAL_OPTIONS = -config $(CQUAL_CONFIG) -w
+
+INCLUDES = -I. -I$(CDIR)/ -I$(TOS)/include -I$(PLATFORM_DIR) -I$(PLATFORM_DIR)/include -I$(SYSTEM) -I$(SHARED)
+DEFINES = -DTOSSIM -DFULLPC -DDEFAULT_LOCAL_GROUP=0x00 -DCQUAL_BUILD
+
+######################################################################
+######################################################################
+##                                                                  ##
+##                      Begin main rules                            ##
+##                                                                  ##
+######################################################################
+######################################################################
+
+include $(CDIR)/cqual.objs
+
+CQUAL_FILES.c += $(SYSTEM)/sched.c
+CQUAL_FILES.c += $(PLATFORM_DIR)/events.c
+CQUAL_FILES.c += $(PLATFORM_DIR)/rfm_model.c
+CQUAL_FILES.c += $(PLATFORM_DIR)/rfm_space_model.c
+CQUAL_FILES.c += $(PLATFORM_DIR)/spatial_model.c
+
+CQUAL_OBJS += $(CDIR)/sched.i
+CQUAL_OBJS += $(CDIR)/events.i
+CQUAL_OBJS += $(CDIR)/rfm_model.i
+CQUAL_OBJS += $(CDIR)/rfm_space_model.i
+CQUAL_OBJS += $(CDIR)/spatial_model.i
+
+
+
+all: clear copy
+	make -f Makefile.check check
+clear:
+	\rm -f $(CQUAL_FILES.h)
+
+copy: $(CQUAL_FILES.h)
+	cp $(CQUAL_FILES.c) $(CDIR)/
+	mv $(CQUAL_FILES.h) $(CDIR)/
+
+%.h: %.comp
+	$(TOOLS)/mkheader.cqual $< > $@
+
+%.i: %.c
+	$(TOOLS)/cqual_add $<
+	$(GCC) -E $(DEFINES) $(INCLUDES) -o $@ $<
+
+# here we do the work, yo
+check: $(CQUAL_OBJS)
+	$(CQUAL) $(CQUAL_OPTIONS) $(INCLUDES) $(CQUAL_OBJS)
+	echo ""
+	echo "Call graph check completed. Please examine the output for possible errors."
+	echo ""

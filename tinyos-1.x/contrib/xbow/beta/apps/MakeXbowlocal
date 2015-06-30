@@ -1,0 +1,98 @@
+##########################################################################
+#
+# MakeXbowlocal - Local Defines related to apps in contrib/xbow directory
+#
+##########################################################################
+
+##########################################################################
+# set Mote group id
+# - default mote group  (in makerules) is 0x7E
+##########################################################################
+DEFAULT_LOCAL_GROUP=0x81
+
+##########################################################################
+# set radio channel (freq)
+#   -Uncomment ONLY one line to choose the desired radio operating freq.
+#   -Select band based on freq label tag on mote (916,433..)
+#    (i.e. 433Mhz channel will not work for mote configured for 916Mhz)
+##########################################################################
+#
+# 916 MHz Band
+#
+# CHANNEL_00 - 903 MHz     CHANNEL_02 - 904 MHz     CHANNEL_04 - 905 MHz
+# CHANNEL_06 - 906 MHz     CHANNEL_08 - 907 MHz     CHANNEL_10 - 908 MHz
+# CHANNEL_12 - 909 MHz     CHANNEL_14 - 910 MHz     CHANNEL_16 - 911 MHz
+# CHANNEL_18 - 912 MHz     CHANNEL_20 - 913 MHz     CHANNEL_22 - 914 MHz
+# CHANNEL_24 - 915 MHz     CHANNEL_26 - 916 MHz     CHANNEL_28 - 917 MHz
+# CHANNEL_30 - 918 MHz     CHANNEL_32 - 919 MHz     CHANNEL_34 - 920 MHz
+# CHANNEL_36 - 921 MHz     CHANNEL_38 - 922 MHz     CHANNEL_40 - 923 MHz
+# CHANNEL_42 - 924 MHz     CHANNEL_44 - 925 MHz     CHANNEL_46 - 926 MHz
+# CHANNEL_48 - 927 MHz
+#
+CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_00
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_02
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_04
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_06
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_08
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_10
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_12
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_14
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_16
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_18
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_20
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_22
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_24
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_26
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_28
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_30
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_32
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_34
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_36
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_38
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_40
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_42
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_44
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_46
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_916BAND_CHANNEL_48
+#--------------------------------------------------------------------------
+# 433 MHz Band
+#
+# CHANNEL_00 - 433.113 MHz     CHANNEL_02 - 433.616 MHz
+# CHANNEL_04 - 434.108 MHz     CHANNEL_06 - 434.618 MHz
+#
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_433BAND_CHANNEL_00
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_433BAND_CHANNEL_02
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_433BAND_CHANNEL_04
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_433BAND_CHANNEL_06
+##--------------------------------------------------------------------------
+# 315 MHz Band
+#
+# CHANNEL_00 - 315 MHz
+#
+##--------------------------------------------------------------------------
+#CFLAGS = -DCC1K_DEFAULT_FREQ=RADIO_315BAND_CHANNEL_00
+##########################################################################
+
+
+##########################################################################
+# Set Radio Power 
+#  - Radio transmit power is by a value (RTP) between 0x00 and 0xFF
+#  - RTP = 0 for least power; =0xFF for max transmit power
+#-------------------------------------------------------------------------
+#  For Mica2 and Mica2Dot
+#  Freq Band:  Output Power(dBm) RTP
+#  916 Mhz     -20               0x02
+#              -10               0x09
+#               0 (1mw)          0x80
+#               5                0xFF
+#  433 Mhz     -20               0x01
+#              -10               0x05
+#               0 (1mw)          0x0F
+#               10               0xFF
+##########################################################################
+CFLAGS += -DRADIO_XMIT_POWER=0xFF
+
+##########################################################################
+
+
+

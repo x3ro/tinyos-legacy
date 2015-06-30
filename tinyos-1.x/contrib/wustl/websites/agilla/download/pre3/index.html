@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Pre-Packaged Versions of Agilla</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../../styles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>Pre-Packaged Versions of Agilla</h1>
+<p>Here are pre-packaged versions of Agilla. See the <a href="../docs/tutorials/getting_started.htm">tutorial</a> for
+  installation instructions.</p>
+<ul>
+  <li><strong>05-13-2007 Version 3.0.3</strong> - <a href="../Agilla_v3.0.3.tar.gz"><strong>Source</strong></a><br>
+    Added #if statements around cc2420-specific code, modified the AgentInjector
+      to check whether clustering is enabled before it resets the LocationMgr,
+      modified some default settings to use relative paths for portability.</li>
+  <li><strong>05-22-2006 Version 3.0.2</strong> - <a href="Agilla_v3.0.2.zip">Source</a><br>
+  <em>Added an Example Makefile.Agilla and updated the README to describe the flags in it.</em></li>
+  <li><strong>05-16-2006 Version 3.0.1</strong> - <a href="Agilla_v3.0.1.zip">Source</a><em><br>
+  Contains a small fix that rectifies the &quot;QUEUE_ENQUEUE&quot; error that
+      sometimes occurs when there are numerous agents in the network. This distribution
+      contains both the Java and NesC code in a single zip file. To install it,
+  extract it
+  to /opt/tinyos-1.x/.</em></li>
+  <li><strong>05-14-2006 Version 3.0</strong> - <a href="Agilla-NesC_v3.0.zip">NesC</a>, <a href="Agilla_Java_v3.0.zip">Java</a><em><br>
+  Added support for TelosB platform. Allow the user to disable the grid topology
+      filter and greedy routing. Note that the Java Makefile assumes a $AGILLA
+      environment variable that specifies the root directory of Agilla's NesC
+  code. Agilla's nesC code goes under tinyos-x.1/contrib/wustl/apps/Agilla/.</em></li>
+  <li>
+    <p><strong>07-14-2005 Version 2.2</strong> - <a href="Agilla-NesC_v2.2.zip">NesC</a>, <a href="Agilla_Java_v2.2.zip">Java</a><em><br>
+  Comments: Reduced memory usage to avoid stack overflow when large agents are
+      injected.</em></p>
+  </li>
+  <li>
+    <p><strong>05-25-2005 Version 2.1 -</strong> <a href="Agilla-NesC_v2.1.zip">NesC</a>, <a href="Agilla_Java_v2.1.zip">Java</a><br>
+        <em>Comments: This version fixes a bug that prevented you from moving
+        a mote more than once. It also changes the &quot;reset all&quot; function
+        to only reset nodes that are reachable from the base station that broadcasted
+        the reset message.</em> </p>
+  </li>
+  <li><strong>05-17-2005 Version 2.0</strong> - <a href="Agilla-NesC_v2.0.zip">NesC</a>, <a href="Agilla_Java_v2.0.zip">Java</a><br>
+Comments:<br>
+1) The grid size can be changed using the AgentInjector (you no longer have to
+reprogram all the motes to change the grid size)
+<p><em>2) When specifying the grid size, you only specify the number of columns
+    (you no longer need to specify the number of rows). The node&#8217;s TinyOS
+    address still determines the mote&#8217;s location. Mote 0 is at (1,1) located
+    at the lower-left corner of the grid. TinyOS address&#8217;s increase in
+    row major order.</em></p>
+<p><em>3) A mote&#8217;s location can be changed using the AgentInjector (you
+    no longer need to reprogram the mote to change its address/location). The
+    original ID of the mote is always used to specify which mote to modify, e.g., &#8220;move
+    mote 1 to location (2,3).&#8221;</em></p>
+<p><em>4) The AgentInjector enters a modal state for ~3 seconds after a reset
+    to allow the network components to reinitialize themselves. This is especially
+    critical now that I&#8217;m sending the base station a message immediately
+    after it resets telling it that it is a base station.</em></p>
+<p><em>5) The nodes periodically broadcast a beacon, neighbor discovery is done
+    by each node</em></p>
+<p><em>6) The base station can be any node in the network. It no longer has a
+    special address. There can be multiple base stations. Base stations can also
+    move, their location is set like any other node using the AgentInjector.</em></p>
+<p><em>7) Since the location of a base station is no longer known by the non-base
+    station nodes, Agilla no longer performs multi-hop routing to (uart_x, uart_y).
+    Only the base station can perform a remote tuple space operation to (uart_x,
+    uart_y). It is now up to the application to route messages to the base station.
+    If an agent knows the location of the base station, Agilla can still perform
+    the greedy multi-hop routing to it.</em></p>
+  </li>
+  <li><strong>03-30-2005 Version 1.6</strong> - <a href="Agilla-NesC_v1.6.zip">NesC</a>, <a href="Agilla_Java_v1.6.zip">Java</a><em><em><br>
+Comments: Fixed a bug in OPcompare preventing comparisons between variables of
+      two different types. Now, whenever you try to compare two variables of
+      different types, the condition code will always be set to 0.<br>
+          <br>
+Issues: Linux's timing seems to be different from Windows resulting in agents
+being corrupted when injected. To solve this, open &lt;agilla&gt;/types/MigrationMsgs.h,
+uncomment lines 63-66, and comment out lines 77-84.</em></em></li>
+  <li><strong>03-24-2005 Version 1.5</strong> - <a href="Agilla-NesC_v1.5.zip">NesC</a>, <a href="Agilla_Java_v1.5.zip">Java</a><em><br>
+Comments: Fixed a bug preventing agents in the WSN from inserting tuples into
+    the laptop's tuple space. Added an Oscilloscope example to demonstrate how
+    a Java application running on the laptop can access the laptop's tuple space.</em></li>
+  <li><strong>03-23-2005 Version 1.4</strong> <strong> - </strong><a href="Agilla-NesC_v1.4.zip">NesC</a>, <a href="Agilla_Java_v1.4.zip">Java</a><strong></strong><em><strong><br>
+  </strong><em>Comments: Fixed the tuple space and modified assembler to report
+  line numbers in errors.</em></em></li>
+  <li><strong>03-21-2005 Version 1.3 - </strong><a href="Agilla-NesC_v1.3.zip">NesC</a>, <a href="Agilla_Java_v1.3.zip">Java</a><strong><br>
+  </strong><em>Comments: This version removes instruction shiftl and shiftr and
+  replaces them with mul (multiply) and div (divide). Agents can perform remote
+  tuplespace operations on the laptop's tuple space by using location (uart_x,
+  uart_y). <br>
+    <br>
+Issues: The RMI code for allowing remote access to the laptop's tuple space has
+not been implemented yet.</em></li>
+  <li><strong>11-30-2004
+    Version 1.2</strong> - <a href="Agilla_NesC_v1.2.zip">NesC</a>, <a href="Agilla_Java_v1.2.zip">Java</a><br>
+      <em>Comments: This is the version used to write the IPSN 2005 SPOTS paper.<br>
+                  <br>
+      Issues: The pc can access the tuplespace on mote (0,0), but there is no clean
+        interface for this yet. The pc cannot register reactions as of yet. The agents
+    on the laptop cannot register reactions on tuplespaces within the WSN.</em></li>
+</ul>
+
+</body>
+</html>

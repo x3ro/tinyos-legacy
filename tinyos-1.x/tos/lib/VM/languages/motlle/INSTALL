@@ -1,0 +1,21 @@
+To configure motlle for use, run 'make' in this directory.
+
+To build a VM, for instance the example VM in the examples directory:
+  cd examples # you must be in the examples directory to build the VM
+  motlle-vmbuild base.vmsf # builds the VM
+This will create $TOSDIR/apps/MotlleVM.
+
+You then need to compile and install this VM, e.g.:
+  cd /opt/tinyos-1.x/apps/MotlleVM
+  make mica2 install.0
+
+You install applications using the tools/mload script, which requires
+that you have a SerialForwarder running to talk to a mote. You must be in the
+generated VM's directory when you run mload (more specifically, the conf.mt
+file which you find there needs to be in the current directory).
+Using the previously built VM:
+  cd /opt/tinyos-1.x/apps/MotlleVM
+  motlle-load /opt/tinyos-1.x/tos/lib/VM/languages/motlle/examples/cnttoleds.mt
+
+Your leds should start blinking.
+

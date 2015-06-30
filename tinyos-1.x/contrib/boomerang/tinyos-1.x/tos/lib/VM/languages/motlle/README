@@ -1,0 +1,36 @@
+motlle (MOTe Language for Litlle Extensions) is a scheme-inspired
+(dynamically-typed, garbage-collected, first-class functions) scripting
+language for Mate, with a very C-like syntax.
+
+At this point, motlle only builds and runs with tossim and on mica2 and
+mica2dot motes.
+
+See doc/motlle.txt for an introduction to motlle.
+
+See INSTALL for instructions for configuring motlle for use, building
+a simple motlle VM and loading a program (the usual led counting demo).
+
+--
+
+Directory structure:
+
+full, standalone: 
+  PC-version of motlle. Used to compile and transmit motlle code.
+  Not currently documented or supported for other uses...
+src:
+  source code used by standalone motlle to compile and transmit
+  motlle code.
+
+mate:
+  Mate-based version of motlle. What this is all about...
+mate/runtime:
+  Standard motlle runtime library (no mote-specific functions).
+
+matelib:
+  Library of motlle-specific mate functions.
+
+tools:
+  Utilities for using motlle.
+
+examples:
+  Example motlle VMs and source code.

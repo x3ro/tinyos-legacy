@@ -1,0 +1,431 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Mat&eacute; Tutorial: Lesson 1</title>
+    <LINK HREF="../mate.css" REL="stylesheet" TYPE="text/css">
+  </head>
+  
+  <BODY>
+    <CENTER>
+      <TABLE BGCOLOR=BLACK CELLPADDING=1>
+	<TR>
+	  <TD>
+	    <TABLE BGCOLOR=WHITE WIDTH=700 CELLPADDING=6>
+	      <TR>
+		<TD BGCOLOR=#BEBEBE>
+		  <IMG SRC="../img/banner.gif">
+		</TD>
+	      </TR>
+	      <TR>
+		<TD>
+		  <CENTER>
+		    <TABLE>
+		      <TR>
+			<TD>[<a href="index.html">Tutorial Home</A>]</TD>
+			<TD>[Lesson 1]</TD>
+			<TD>[<a href="lesson2.html">Lesson 2</A>]</TD>
+			<TD>[<a href="lesson3.html">Lesson 3</A>]</TD>
+			<TD>[<a href="lesson4.html">Lesson 4</A>]</TD>
+			<TD>[<a href="lesson5.html">Lesson 5</A>]</TD>
+			<TD>[<a href="lesson6.html">Lesson 6</A>]</TD>
+		      </TR>
+		      
+		    </TABLE>
+		    <HR>
+		  </CENTER>
+		</TD>
+	      </TR>
+	      <TR BGCOLOR=#80bf80>
+                <TD>
+		  <h3>Lesson 1: Building and Using Mat&eacute;</h3>
+		  <!-- Created: Wed Jun 16 16:09:01 PDT 2004 -->
+		    <!-- hhmts start -->
+Last modified: Wed Apr 27 19:10:18 PDT 2005
+<!-- hhmts end -->
+		</TD>
+	      </TR>
+
+	      <TR>
+		<TD>
+	  In this lesson, you build a provided Mat&eacute;
+	  VM and programming environment. You install the VM
+	  on a mote (or use TOSSIM) and write a simple program
+	  to test that everything is working properly.
+	</TD>
+      </TR>
+
+      <TR BGCOLOR=#80bf80>
+	<TD>
+	  <b>Introduction</b>
+	</TD>
+      </TR>
+
+      <TR>
+	<TD>
+	  
+	  <p>Mat&eacute; has two parts: a Java toolchain and
+	  TinyOS components. The Java toolchain resides in the
+	  directory</p>
+	  
+	  <p><tt>tinyos-1.x/tools/java/net/tinyos/script</tt></p>
+	      
+	  <p>while the TinyOS components reside in</p>
+
+	  <p><tt>tinyos-1.x/tos/lib/VM</tt>.</p>
+
+	  <p>The first thing you need to do is compile the
+	  Mat&eacute; toolchain. Go to
+	  <tt>tinyos-1.x/tools/java/net/tinyos/script</tt> and
+	  type <tt>make</tt>. This should build the two major
+	  tools, VMBuilder and Scripter. If you encounter
+	  compilation problems, chances are that you haven't
+	  properly compiled all the rest of the TinyOS Java
+	  packages that Mat&eacute; depends on. These packages
+	  include <tt>util</tt>, <tt>packet</tt> and
+	  <tt>message</tt>.
+	</TD>
+      </TR>
+
+      
+      <TR BGCOLOR=#80bf80>
+	<TD>
+	  <b>VMBuilder</b>
+	</TD>
+      </TR>
+
+      <TR>
+	<TD>
+	  <p><tt>VM/samples</tt> contains the specification files for
+	  several sample VMs, which have the suffix
+	  <tt>vmsf</tt>. There are several sample VMs: one for mica
+	  platforms (<tt>bombilla-mica.vmsf</tt>), one for Telos revA
+	  (<tt>bombilla-telosa.vmsf</tt>), and one for Telos revB
+	  motes (<tt>bombilla-telosb.vmsf</tt>). The distinction
+	  between the last two is how much RAM they use and hardware
+	  details with regards to sensor boards:
+	  <tt>bombilla-telosa</tt> is designed to fit in the 2KB of a
+	  Telos revA node. The distinction between the mica and Telos
+	  VMs lies in the sensors they have.</p>
+		    
+
+         <p>Depending on what platform you have, you want to choose
+         the appropriate vmsf file. You build a VM with the VMBuilder
+         tool; while in the directory <tt>VM/samples</tt>, type</p>
+
+	  <p><tt>java net.tinyos.script.VMBuilder <i>file</i></tt></p>
+
+	  <p>This tells VMBuilder to build the VM specified by the
+	  file named <i>file</i> (e.g.,
+	  <tt>bombilla-telosb.vmsf</tt>). Bombilla is a VM that
+	  supports several basic sensor net operations. You should see
+	  output similar to this:</p>
+
+	  <quote>
+	    <pre>$ java net.tinyos.script.VMBuilder bombilla-telosb.vmsf
+Currently, filed-based VMBuilder only works from the samples/ subdirectory.
+Please be sure you execute it from there.
+
+Writing VM to directory /opt/tinyos-1.x/apps/BombillaTelosB
+config file vm.vmdf
+constants file MateConstants.h
+185 of 256 opcodes used.
+component file MateTopLevel.nc
+Makefile
+	    </pre>
+	  </quote>
+
+	</TD>
+      </TR>
+
+      <TR BGCOLOR=#80bf80>
+	<TD>
+	  <b>Running Bombilla in TOSSIM</b>
+	</TD>
+      </TR>
+
+      <TR>
+	<TD>
+
+	  <p>To make sure the Mat&eacute; toolchain is working
+	  properly, you'll first write programs for TOSSIM
+	  motes. TOSSIM only supports mica-class motes, so build
+	  bombilla-mica, go to the directory where VMBuilder put it
+	  (BombillaMica) and compile it for TOSSIM with <tt>make
+	  pc</tt>. You should see a long stream of output, as you
+	  build several Java classes, followed by the TOSSIM
+	  executable. Set your DBG environment variable to
+	  <tt>led</tt>, and run TOSSIM with the following flags:</p>
+
+	  <quote>
+	    <pre>
+./build/pc/main.exe -l=1 -b=1 1
+	    </pre>
+	  </quote>
+
+	  <p>This has TOSSIM run in real-time, instead of as
+	  quickly as possible (<tt>-l=1</tt>), and makes the
+	  node boot in the first second of simulation time
+	  (<tt>-b=1</tt>). You should see no output, as the
+	  Bombilla VM currently has no code to run.</p>
+
+	</TD>
+      </TR>
+
+      <TR BGCOLOR=#80bf80>
+	<TD>
+	  <b>CntToLeds in Mat&eacute;</b>
+	</TD>
+      </TR>
+      
+      <TR>
+	<TD>
+	  <p>Open a second window and go to the Bombilla
+	  application directory. Using your favorite editor,
+	  create a file named "reboot.txt" with this code in it:</p>
+
+	  <quote>
+	    <pre>
+led(1);
+	    </pre>
+	  </quote>
+
+	  <p>This tells the VM to turn on the red LED. Exit
+	  your editor and type this at the command line:</p>
+
+	  <quote>
+	    <pre>
+java net.tinyos.script.Scripter -comm tossim-serial reboot reboot.txt
+	    </pre>
+	  </quote>
+
+	  <p>This runs the TinyScript
+	  compiler/scripter. <tt>-comm tossim-serial</tt>
+	  tells it to connect to TOSSIM through a virtual
+	  serial port to mote 0. <tt>reboot reboot.txt</tt>
+	  tells it to inject code that should run when the VM
+	  reboots (<tt>Reboot</tt>), and the code is in the
+	  file <tt>reboot.txt</tt>. The VM reboots every time
+	  it installs new code.</p>
+
+	  <p>All of the tools for interacting with a running
+	  VM, such as <tt>Scripter</tt> and
+	  <tt>VMBufferReader</tt> (which you'll use later, in
+	  Lesson 2), <b>must</b> be executed from the VM's
+	  application directory. This is because each VM can
+	  have customized message formats and values, and the
+	  tools must use the VM-specific versions of those
+	  Java classes, which reside in the directory named
+	  <tt>vm_specific</tt>.</b>
+
+	  <p>In the TOSSIM window, you should see this output:</p>
+
+	  <quote>
+	    <pre>
+0: LEDS: Red on.
+0: LEDS: Green off.
+0: LEDS: Yellow off.
+	    </pre>
+	  </quote>
+
+	  <p>If you don't see the output, trying running the
+	  Scripter again.</p>
+
+	  <p>That program was very simple: it wasn't even
+	  Blink. Let's try CntToLeds. This requires writing
+	  two scripts: one for what to do when a timer fires
+	  (increment a counter and display it), and one to
+	  start the timer. Open a file named "timer0.txt" and
+	  type:</p>
+
+	  <quote>
+	    <pre>
+private counter;
+counter = counter + 1;
+led(counter % 8);
+	    </pre>
+	  </quote>
+
+	  <p>Every time this program runs, it will increment
+	  counter and display its bottom three bits on the
+	  mote LEDs (% is the modulo operator). Type</p>
+
+	  <quote>
+	    <pre>
+java net.tinyos.script.Scripter -comm tossim-serial timer0 timer0.txt
+	    </pre>
+	  </quote>
+
+	  <p>to install the timer script on the VM. However,
+	  the timer isn't firing yet; you need to install a
+	  script that will start it. Re-open "reboot.txt" and
+	  edit it to be</p>
+
+	  <quote>
+	    <pre>
+settimer0(10);
+	    </pre>
+	  </quote>
+
+	  <p>The function <tt>settimer0</tt> controls the rate
+	  at which timer0 fires. The parameter is in terms of
+	  tenths of a second, so 10 will fire the timer at
+	  once a second. Calling it with 0 will stop the
+	  timer. When the VM installs the script, it will
+	  reboot and run it, starting timer0:</p>
+
+	  <quote>
+	    <pre>
+java net.tinyos.script.Scripter -comm tossim-serial reboot reboot.txt
+	    </pre>
+	  </quote>
+	  
+	  <p>You should see the LED increment in the TOSSIM
+	  window. You can also start TinyViz with </p>
+	  
+	  <quote>
+	    <pre>
+java net.tinyos.sim.SimDriver -gui
+	    </pre>
+	  </quote>
+
+	  <p>to see the mote blink visually.</p>
+	</TD>
+      </TR>
+
+      <TR BGCOLOR=#80bf80>
+	<TD>
+	  <b>Network Programming</b>
+	</TD>
+      </TR>
+      
+      <TR>
+	<TD>
+	  <p>So far, you've been writing scripts for a single
+	  simulated mote. Mat&eacute; VMs automatically
+	  propagate new programs into a network. Run TOSSIM
+	  with four motes:</p>
+
+	  <quote>
+	    <pre>
+./build/pc/main.exe -l=1 -b=1 4
+	    </pre>
+	  </quote>
+	  
+	  <p>Write a script that displays mote ID on the
+	  LEDs, saving it to "id-led.txt":</p>
+	  
+	  <quote>
+	    <pre>
+led(id() % 8);
+	    </pre>
+	  </quote>
+
+	  <p>Install it on mote 0 with Scripter:</p>
+	  
+	  <quote>
+	    <pre>
+java net.tinyos.script.Scripter -comm tossim-serial reboot id-led.txt
+	    </pre>
+	  </quote>
+
+	  <p>A few moments later, you should see the other
+	  motes receive the code and execute it.</p>
+	</TD>
+      </TR>
+      
+      
+      <TR BGCOLOR=#80bf80>
+	<TD>
+	  <b>Programming Motes</b>
+	</TD>
+      </TR>
+
+      <TR>
+	<TD>
+
+	  <p>If you have motes, you can repeat all of the above steps
+	  using them instead of TOSSIM. If you have Telos motes,
+	  you'll need to compile one of the Telos variants. Compile
+	  Bombilla for the type of mote you have, and install it as
+	  you would any other TinyOS application. Install it on four
+	  motes: be sure to give them unique IDs, preferrably
+	  sequential (e.g., 9, 10, 11 , 12).</p>
+
+	  <p>Turn on one of the motes and plug it into your
+	  serial port or other serial communication
+	  device. Start a SerialForwarder for
+	  it. SerialForwarder is usually the default
+	  communication interface for tools like Scripter.
+	  Take the script that displays the bottom three bits
+	  of mote ID on the LEDs ("id-led.txt") and install it
+	  with Scripter.  You can omit the <tt>-comm</tt>
+	  command line parameter:</p>
+      
+	  <quote>
+	    <pre>
+java net.tinyos.script.Scripter reboot id-led.txt
+	    </pre>
+	  </quote>
+	  
+	  <p>If Scripter tries to connect to something besides
+	  SerialForwarder, you can tell it to explicitly use
+	  SerialForwarder:</p>
+
+	  <quote>
+	    <pre>
+java net.tinyos.script.Scripter -comm sf reboot id-led.txt
+	    </pre>
+	  </quote>
+      
+      
+	  <p>You should see the mote LEDs display the bottom
+	  three bits of the mote ID. If you happened to choose
+	  a number evenly divisible by eight (e.g., 120), then
+	  no LEDs will turn on. Use one of the other
+	  motes.</p>
+
+	  <p>Once the script is installed and has run, turn on
+	  the other three motes. It may take a few seconds,
+	  but they will request the script, download it, and
+	  run it themselves, automatically reprogramming. The
+	  reason it might take a while is the code propagation
+	  algorithm: Mat&eacute; tries to send as few packets
+	  as possible (to conserve energy). If it thinks every
+	  mote already has the program (as was the case when
+	  only one was on), then it slows its code
+	  advertisement rate. If things seem to be going too
+	  slowly, re-inject the script. This will kick-start
+	  the connected mote to advertise more frequently.</p>
+
+	</TD>
+      </TR>
+      
+      <TR BGCOLOR=#80bf80>
+	<TD>
+	  <b>Conclusion</b>
+	</TD>
+      </TR>
+
+      <TR>
+	<TD>
+	  <p>This concludes Lesson 1, which showed you how to
+	  build a Mat&eacute; VM, injecting programs, and
+	  automatic code propagation. Lesson 2 introduces
+	  TinyScript (the language the above scripts were in)
+	  in greater depth.</p>
+
+	  <hr>
+	    <CENTER>
+	      <b><a href="lesson2.html">Next Lesson ></a></b> |
+	      <b><a href="index.html">Top</a></b>
+	    </CENTER>
+	</TD>
+      </TR>
+
+	    </TABLE>
+	  </TD>
+	</TR>
+      </TABLE>
+    </CENTER>
+  </body>
+</html>

@@ -1,0 +1,2 @@
+COMPONENT=SDCCTest
+include ../Makerules

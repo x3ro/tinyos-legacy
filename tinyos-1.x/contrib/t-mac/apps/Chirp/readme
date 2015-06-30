@@ -1,0 +1,38 @@
+README for Chirp running over T-MAC without modification
+Author/Contact: T.E.V.Parker@ewi.tudelft.nl
+
+Description:
+
+The original app was used by S-MAC as a test (this readme is adapted from the
+readme by Wei Ye <weiye@isi.edu>) and is now used as a T-MAC test.
+
+The application is copied from tinyos-1.x/apps/Chirp/ to demonstrate the
+compatibility provided by T-MAC stack that allows applications developed on 
+standard UCB's stack (based on GenericComm and AMStandard) to run over
+T-MAC with out any modifications.
+
+T-MAC debugging code (enable with -DTMAC_DEBUG) has been added, but nothing else.
+
+Makefile is modified to include correct search paths.
+
+The following is the original README for Chirp application
+
+README for Chirp
+Author/Contact: tinyos-help@millennium.berkeley.edu
+
+Description:
+
+Chirp is an application that periodically obtains sensor data from
+the photo sensor and sends the data over the radio.  The application
+demonstrates:
+  * how to obtain data from the ADC
+  * how to send a packet
+  * how to use the Timer configuration
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None

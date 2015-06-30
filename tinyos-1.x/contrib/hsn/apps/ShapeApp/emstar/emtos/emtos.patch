@@ -1,0 +1,249 @@
+Index: BUILD
+===================================================================
+RCS file: /home/cvs/cvsroot/emstar/mote/BUILD,v
+retrieving revision 1.44
+diff -u -r1.44 BUILD
+--- BUILD	21 Aug 2004 00:44:10 -0000	1.44
++++ BUILD	13 Sep 2004 23:48:24 -0000
+@@ -30,6 +30,10 @@
+ 	target RfmToLeds { tinyos-1.x/apps/RfmToLeds }
+ }
+ 
++build tos {
++	target ShapeApp { tinyos-1.x/devel/hsn/apps/ShapeApp }
++}
++
+ #
+ #  Build EmStar mote support..
+ #
+@@ -58,6 +62,7 @@
+ 		libmote/emtos_logger.c,
+ 		libmote/smacradio.c,
+                 libmote/empdserver.c,
++		libmote/shapedclient.c,
+                 libmote/adc.c
+ 	}
+ 
+Index: emtos/tos_emstar.h
+===================================================================
+RCS file: /home/cvs/cvsroot/emstar/mote/emtos/tos_emstar.h,v
+retrieving revision 1.20
+diff -u -r1.20 tos_emstar.h
+--- emtos/tos_emstar.h	6 Aug 2004 00:15:24 -0000	1.20
++++ emtos/tos_emstar.h	13 Sep 2004 23:48:25 -0000
+@@ -177,6 +177,12 @@
+ int emtos_adc_register_port(uint8_t port);
+ int emtos_adc_get_data(uint8_t port);
+ 
++// STARGATE BUTTON
++#define STARGATE_SWITCH2 "/proc/platx/gpio/gpio10"
++#define STARGATE_GPIO_CONTROL "/proc/platx/gpio/GPCTL"
++#define STARGATE_BUF_SIZE 4
++int emtos_stargate_verify_button();
++int emtos_stargate_get_button();
+ 
+ // Inter-component fucntions go here
+ //fp_list_t *get_fplist();
+Index: hostmote/hostmote_main.c
+===================================================================
+RCS file: /home/cvs/cvsroot/emstar/mote/hostmote/hostmote_main.c,v
+retrieving revision 1.19
+diff -u -r1.19 hostmote_main.c
+--- hostmote/hostmote_main.c	12 Aug 2004 23:07:31 -0000	1.19
++++ hostmote/hostmote_main.c	13 Sep 2004 23:48:25 -0000
+@@ -184,7 +184,7 @@
+ 	  m.baudrate = B57600;
+ 	  baudrate_set = 1;
+ 	}
+-	m.requested_conf.pot = 6;
++	m.requested_conf.pot = 3;
+       }
+       else if (!strcmp(optarg, "cricket")) {
+ 	m.motetype = CRICKET;
+@@ -196,7 +196,7 @@
+       }
+       else if (!strcmp(optarg, "mica2dot")) {
+ 	m.motetype = MICA2DOT;
+-	m.requested_conf.pot = 6;
++	m.requested_conf.pot = 3;
+       }
+       else {
+ 	elog_g(LOG_CRIT, "unknown MOTE type '%s'", optarg);
+Index: include/emtos.h
+===================================================================
+RCS file: /home/cvs/cvsroot/emstar/mote/include/emtos.h,v
+retrieving revision 1.2
+diff -u -r1.2 emtos.h
+--- include/emtos.h	16 May 2004 06:36:39 -0000	1.2
++++ include/emtos.h	13 Sep 2004 23:48:27 -0000
+@@ -49,6 +49,16 @@
+ #define MAX_TASKS   32
+ #define TASK_MASK   (MAX_TASKS - 1)
+ 
++// defs for leds on the stargate!
++#define STARGATE_LEDS            "/dev/platx/led"
++#define STARGATE_LED_IOCTL_MAGIC 'g'
++#define STARGATE_LED_STOP_AUTO   _IO (STARGATE_LED_IOCTL_MAGIC, 4)
++#define STARGATE_LED_START_AUTO  _IO (STARGATE_LED_IOCTL_MAGIC, 3)
++#define STARGATE_LED_SET         _IO (STARGATE_LED_IOCTL_MAGIC, 1)
++#define STARGATE_LED_GREEN       (1 << 13)
++#define STARGATE_LED_RED         (1 << 14)
++#define STARGATE_LED_YELLOW      (1 << 15)
++
+ 
+ /*
+  *  EEPROM status struct
+@@ -102,6 +112,9 @@
+     uint8_t red;
+     uint8_t green;
+     uint8_t yellow;
++    uint8_t useleds;
++    uint16_t ledstate;
++    int ledfd;
+ } __attribute__ ((packed)) leds_status_t;
+ 
+ 
+Index: libmote/emtos_main.c
+===================================================================
+RCS file: /home/cvs/cvsroot/emstar/mote/libmote/emtos_main.c,v
+retrieving revision 1.31
+diff -u -r1.31 emtos_main.c
+--- libmote/emtos_main.c	4 Sep 2004 21:59:40 -0000	1.31
++++ libmote/emtos_main.c	13 Sep 2004 23:48:27 -0000
+@@ -252,7 +252,12 @@
+ 	emt.cblist=(fp_list_t *)malloc(sizeof(fp_list_t));
+ 	
+ 	misc_init(&argc, argv, CVSTAG);
+-	
++
++	/* parse out whether we use the leds or not */
++	emt.leds_status.useleds = 
++		misc_parse_out_switch(&argc, argv, "leds", 'l');
++	emt.leds_status.ledfd = -1;
++
+ 	/* parse out the --uses flag */
+ 	emt.link_name = link_parse_uses(&argc, argv, "mote0");
+ 
+@@ -448,6 +452,16 @@
+ 			elog(LOG_ERR, "Unknown Led type %d", led);
+ 			break;
+ 	}
++    if (emt->leds_status.useleds && emt->leds_status.ledfd >= 0) {
++        emt->leds_status.ledstate = (emt->leds_status.red << 14) |
++                                    (emt->leds_status.green << 13) |
++                                    (emt->leds_status.yellow << 15);
++      if (ioctl (emt->leds_status.ledfd, STARGATE_LED_SET, emt->leds_status.ledstate) < 0)
++      {
++        elog(LOG_ERR, "Error ioctl'ing led");
++      }  
++
++    }
+ 	g_status_dev_notify(emt->leds_status_ev);
+ }
+ 
+@@ -572,3 +586,53 @@
+ }
+ 
+ 
++
++int emtos_stargate_verify_button() {
++  int gpioControl;
++
++  gpioControl = open(STARGATE_GPIO_CONTROL, O_WRONLY|O_NOCTTY|O_NDELAY);
++  if (gpioControl < 0) {
++    elog(LOG_WARNING, "Button gpio open error: %s\n", STARGATE_GPIO_CONTROL);
++    return 0;
++  }
++
++  // read value from gpio 10
++  if ((write(gpioControl, "r10", 3) <0)) {
++    elog(LOG_WARNING, "Button gpio write error: %s\n", STARGATE_GPIO_CONTROL);
++    return 0;
++  }
++  
++  close(gpioControl);
++  
++  return 1;
++}
++
++
++int emtos_stargate_get_button() {
++
++  int switch2;
++  char buffer[STARGATE_BUF_SIZE];
++  int i;
++
++  switch2 = open(STARGATE_SWITCH2, O_RDONLY|O_NOCTTY|O_NDELAY);
++  if (switch2 < 0) {
++    elog(LOG_CRIT, "Error opening switch2 device: %s\n", STARGATE_SWITCH2);
++    return 0;
++  }
++
++  for (i=0; i < STARGATE_BUF_SIZE; ++i) {
++    buffer[i] = (char)0;
++  }
++
++  if (read(switch2, buffer, STARGATE_BUF_SIZE-1) < 0) {
++    elog(LOG_CRIT, "Error reading switch2 device: %s\n", STARGATE_SWITCH2);
++    return 0;
++  }
++  
++  // 0 means the switch is depressed
++  if (buffer[0] == '0') {
++    return 1;
++  } else {
++    return 0;
++  }
++}
+Index: libmote/leds.c
+===================================================================
+RCS file: /home/cvs/cvsroot/emstar/mote/libmote/leds.c,v
+retrieving revision 1.8
+diff -u -r1.8 leds.c
+--- libmote/leds.c	6 May 2004 15:56:33 -0000	1.8
++++ libmote/leds.c	13 Sep 2004 23:48:27 -0000
+@@ -76,13 +76,23 @@
+ }
+ 
+ 
++static void leds_status_destroy(void* data, g_event_t *event) {
++	emtos_state_t *emt = (emtos_state_t *) data;
++	if (emt->leds_status.useleds) {
++		/* set the auto leds back on */
++		ioctl (emt->leds_status.ledfd, STARGATE_LED_START_AUTO);
++		close(emt->leds_status.ledfd);
++	}
++}
++
+ 
+ void leds_status_init(emtos_state_t *emt)
+ {
+ 	status_dev_opts_t s_opts = {
+ 		device: {	
+ 			device_info: emt,
+-			devname: TOS_LEDS_STATUS_DEV
++			devname: TOS_LEDS_STATUS_DEV,
++			destroy: leds_status_destroy
+ 		},
+ 		printable: leds_status_printable,
+ 		binary: leds_status_binary,
+@@ -99,5 +109,18 @@
+ 					s_opts.device.devname);
+ 			exit(1);
+ 		}
+-	}
++        if (emt->leds_status.useleds) {
++            emt->leds_status.ledfd = open(STARGATE_LEDS, O_RDWR);
++            if (emt->leds_status.ledfd < 0) {
++              elog(LOG_ERR, "Stargate leds module not loaded!\n");
++                emt->leds_status.useleds = 0;
++            } else {
++                emt->leds_status.ledstate = 0;
++                if (ioctl (emt->leds_status.ledfd, STARGATE_LED_STOP_AUTO) < 0) {
++                    elog(LOG_ERR, "Stargate leds module ioctl error\n");
++                    emt->leds_status.useleds = 0;
++                }
++            }
++        }
++    }
+ }

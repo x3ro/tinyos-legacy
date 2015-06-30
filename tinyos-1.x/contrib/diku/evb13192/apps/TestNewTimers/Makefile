@@ -1,0 +1,3 @@
+COMPONENT=TestAsyncTimer
+include ../Makerules
+

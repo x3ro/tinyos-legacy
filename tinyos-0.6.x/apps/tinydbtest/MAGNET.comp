@@ -1,0 +1,30 @@
+TOS_MODULE MAGNET;
+
+ACCEPTS{
+	char MAGNET_INIT(void);
+	char MAGNET_START(void);
+	char MAGNET_STOP(void);
+	short MAGNET_GET_XDATA(void);
+	short MAGNET_GET_YDATA(void);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	void MAGNET_TIMER_EVENT(void);
+	char MAGNET_DATA_EVENT_2(short data);
+	char MAGNET_DATA_EVENT_3(short data);
+	char MAGNET_SET_POT_X_DONE(char success);
+	char MAGNET_SET_POT_Y_DONE(char success);
+};
+
+USES{
+	char MAGNET_TIMER_START(UINT8 timer_id, char type, UINT32 interval);
+	char MAGNET_TIMER_STOP(UINT8 timer_id);
+	char MAGNET_MAG_INIT(void);
+	char MAGNET_GET_MAG_XDATA();
+	char MAGNET_GET_MAG_YDATA();
+	char MAGNET_SET_POT_X(char val);
+	char MAGNET_SET_POT_Y(char val);
+};

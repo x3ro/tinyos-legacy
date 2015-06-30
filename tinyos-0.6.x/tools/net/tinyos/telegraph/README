@@ -1,0 +1,8 @@
+TeleSensorProxy looks for motes with a MOTEINFO layer and adds them
+as sources to Telegraph.  Telegraph is a query processing system built
+by the UC Berkeley database group.
+
+Of course, you'll need a telegraph distribution too.  It's a sourceforge
+project;  see http://telegraph-db.sf.net
+
+Email madden@cs.berkeley.edu for assistance

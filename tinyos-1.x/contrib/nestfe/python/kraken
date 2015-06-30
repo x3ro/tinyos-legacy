@@ -1,0 +1,4 @@
+#!/bin/sh
+export PYTHONPATH="`cygpath -m "$TOSDIR/../contrib/python"`;$PYTHONPATH"
+cygstart -- c:/Python24/python.exe c:/Python24/Scripts/ipython -pylab "$@"
+

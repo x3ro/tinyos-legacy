@@ -1,0 +1,10 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: telos_hc08.target,v 1.1 2004/02/10 18:04:35 cssharp Exp $
+
+PLATFORM = telos_hc08
+
+$(call TOSMake_include_platform,hc08)
+
+telos_hc08: $(BUILD_DEPS)
+	@:
+

@@ -1,0 +1,665 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+  <head>
+    <title>Lesson: Mat&eacute;</title>
+  </head>
+  <body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+    
+    <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+      <tr bgcolor="#e0e0ff">
+	<td width="100%">
+	  <font face="tahoma,arial,helvetica"><b><big><big>
+		  Mat&eacute;</big><br>
+		  <b>Safe and Rapid Sensor Network Programming</b></big></b>
+	    <p>
+	      Last updated 22 Mar. 2004
+	  </font>
+	</td></tr>
+    </table>
+    
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">Introduction</font>
+	      </b></td> </tr>
+      </table>
+    </p>
+
+    <p>Mat&eacute; allows users to program TinyOS networks with short,
+    high level event handler scripts. Users install a virtual machine
+    TinyOS application on motes, and a Java application compiles
+    scripts to the VM bytecodes. These bytecodes run in a sandboxed VM
+    environment, so buggy programs cannot crash a mote. Event handlers
+    have version numbers, and motes automatically install new versions
+    they hear. Once a single copy of a newer program is installed, the
+    network will automatically propagate it to every node.</p>
+
+    <p>Mat&eacute; simplifies programming by providing a synchronous
+    interface to TinyOS operations. For example, the
+    <code>send()</code> function blocks until the underlying
+    <code>sendDone</code> event is handled by TinyOS. This makes code
+    much less complex, especially for novice programmers. Currently,
+    Mat&eacute; programs are written in a simple, BASIC-like scripting
+    language called TinyScript. We are working on making the
+    architecture flexible enough for alternative scripting language
+    options.</p>
+      
+    <p>As the core of Mat&eacute; is a virtual machine, it also
+    provides a form of execution protection. Unlike TinyOS
+    applications, which have no user/kernel boundary, Mat&eacute;
+    programs cannot crash a mote or render it
+    unresponsive. Mat&eacute; catches errors at run time
+    (e.g. accessing an invalid heap variable) and has a mechanism for
+    alerting a user to them (all the LEDs blink and it sends a
+    message), including simple debugging information on the code that
+    caused the error.</p>
+	
+    <p>Mat&eacute; has an event-based execution model; pieces of code
+    are run in response to events, such as a timer or a packet
+    reception. The presence of blocking operations requires that event
+    handlers be able to run in parallel; the presence of shared
+    variables could make race conditions a significant
+    problem. Mat&eacute; handles this issue by having handlers
+    implicitly lock all shared resources they use; the set of shared
+    resources used is computed with a full program analysis when code
+    is installed. Therefore, a programmer can write several
+    Mat&eacute; event handlers that share variables and be sure there
+    will be no race conditions without having to consider the
+    necessary synchronization.</p>
+	
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Building and Installing Mat&eacute;</font> </b></td> </tr> </table></p>
+
+    <p>Mat&eacute; allows users to build customized virtual machines
+    for specific application deployments. However, it also has two
+    simple example VMs which you can build and use.</p>
+
+    <p>Mat&eacute;'s code resides in two directories. The first,
+    <code>tools/java/net/tinyos/script</code> is the Java toolchain
+    for building VMs and writing scripts. The second,
+    <code>tos/lib/VM</code>, is the actual VM TinyOS code.</p>
+
+    <p>The first step to using Mat&eacute; is to build the Java
+    toolchain. Go to <code>tools/java/net/tinyos/script</code> and
+    type <code>make</code>. This builds the two principal tools,
+    VMBuilder and Scripter, as well as all of their supporting code
+    (parsers, etc.).</p>
+
+    <p>Once you've built the toolchain, the next step is to build a
+    Mat&eacute; VM and associated scripting environment. Go to
+    <code>tos/lib/VM/samples</code>. You should see two files:
+    <code>bombilla.vmsf</code> and <code>simple.vmsf</code>. These
+    files describe VMs. Build Bombilla by typing:
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+
+$ java net.tinyos.script.VMBuilder -nw bombilla.vmsf
+
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+
+      You <b>must</b> do this from the <code>samples</code>
+      directory. You should see output similar to this:
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+
+Creating files
+Generating language-based instructions.
+Organizing function primitives.
+Making Config file
+Making constants file
+Making component file
+164 of 256 opcodes used.
+
+Making makefile (haha!)
+
+ 	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+    </p>
+
+    <p>Running <code>VMBuilder</code> on this file creates an
+    application in <code>tinyos-1.x/apps/Bombilla</code>. There should
+    be four files: <code>Makefile</code>,
+    <code>MateConstants.h</code>, <code>MateTopLevel.nc</code> and
+    <code>vm.vmdf</code>.</p>
+
+    <p>Go there and type <code>make pc</code>. Running make should
+    create a new directory, <code>vm_specific</code>, which contains
+    several Java classes for the Bombilla VM, as well as build a
+    TOSSIM version of the VM. You can correspondingly <code>make
+    mica2</code> for mica2 nodes. Note that every time you build a
+    Mat&eacute; executable, <code>make</code> regenerates the Java
+    files. Correspondingly, <code>make reinstall.num</code> can be
+    useful.</p>
+    
+    <p>Build Bombilla for the hardware that you have. Install the VM
+    on a single node, with ID 0 (<code>make reinstall.0</code>). Plug
+    that mote into your serial port. Then, from the Bombilla
+    directory, type
+
+      
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+
+$ java net.tinyos.script.Scripter -comm serial
+
+ 	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+    </p>
+
+    If you aren't using a serial port, or have some specific options
+    you need (e.g., <code>-comm serial@COM2</code> or <code>-comm
+    sf</code>), change the parameter correspondingly.</p>
+
+    <p>This will load a Scripter interface for Bombilla. It should
+      look something like this:</p>
+    
+    <p>
+      <center><IMG SRC="imgs/bombilla.jpg"><br>
+      <b>The Scripter Interface</b></center>
+    </p>
+    
+    <p>This is the interface for writing scripts to install on a
+      Mat&eacute; network.</p>
+    
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">The Scripter Interface</font>
+	      </b></td> </tr>
+      </table>
+    </p>
+
+    <p>The Scripter interface is broken into three major parts. We'll
+    step through each of them, one by one.</p>
+
+    <p>The left panel has two fields, Mote ID and Version Number. In
+    Mote ID you should enter the ID of the mote at the end of the
+    serial port; in this case, it's 0, so you don't need to change
+    anything. You generally do not need to change the Version Number
+    field; the interface will take care of that for you. However,
+    sometimes you need to manually change it. For now, leave it
+    alone.</p>
+
+    <p>
+      <center><IMG SRC="imgs/bombilla-left.jpg"><br>
+      <b>The Left Scripter Panel</b></center>
+    </p>
+    
+    <p>Below the two fields is a selection for which event handler you
+    which to program. The Bombilla VM has two event handlers: Once and
+    Timer0. The Once event handler runs once, when new code is
+    installed. Timer0 runs periodically at some frequency. By default,
+    it is disabled. Other VMs can handle different events than these,
+    such as packet reception, target detection, or processing
+    requests. Bombilla is a simple one, however, so only has these
+    two.</p>
+
+    <p>Below the selection is an area called <b>Shared
+    Variables</b>. As a later section shows, scripts can declare
+    variables that are shared across scripts. This area displays all
+    of the shared variables currently in use. For now, it's empty. To
+      the right of this display is the <b>Inject</b> button, and a
+      greyed-out button, which you can ignore. Inject is used to
+    introduce a new program to a network.</p>
+    
+     <p>
+      <center><IMG SRC="imgs/bombilla-center.jpg"><br>
+      <b>The Center Scripter Panel</b></center>
+    </p>
+
+    <p>The center panel has a single area, <b>Program Text</b>. This
+    is where you write TinyScript code to compile and install in a
+    network.</p>
+
+      
+    <p>
+      <center><IMG SRC="imgs/bombilla-right.jpg"><br>
+      <b>The Right Scripter Panel</b></center>
+    </p>
+
+    
+    <p>The right panel has two areas. On top is a list of
+    <b>Primitives</b>. These are functions, beyond general TinyScript
+    operations, that scripts can call. Selecting one of them brings up
+    a brief description in the lower panel.</p>
+
+    <p>When you quit Scripter, you should always do so through the
+    <b>File</b> menu. Scripter saves some state about the current
+    session to a file, and quitting without using this menu item
+    prevents this from happening.</p>
+    
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">A First Program: CntToLeds</font>
+	      </b></td> </tr>
+      </table>
+    </p>
+
+    <p>Select the <code>Timer0</code> handler in the left panel. Then
+    type this program into the program text area:
+    
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+
+private counter;
+counter = counter + 1;
+call led(counter & 7);
+
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+
+      This is CntToLeds in TinyScript; it keeps a private variable
+      <code>counter</code>, which it increments each time it
+      executes. It then calls <code>led()</code> with the low three
+      bits, to display them. Press <b>Inject</b>.</p>
+
+    <p>In the shell you started Scripter from, you should see output
+    similar to this:
+    
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+
+Generating assembly.
+Assembling to instruction set.
+Sending program: 38 81 00 40 38 87 03 1c 02 
+Sending 1 chunks (9,28): +
+Garbage collecting variables
+
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+
+      This says that it was able to correctly compile the program to
+      assembly code, translate that assembly to the VM opcodes, then
+      send it. Scripter breaks larger programs up into "chunks," which
+      is sends one by one. In this case, the program is nine bytes
+      long and the chunk size is 28 bytes, so it sent a single
+      chunk. Once the program has been sent, the Scripter checks what
+      variables all of the handlers use to see if any shared variables
+      (more on that later) can be reclaimed (garbage collected).</p>
+
+    <p>When the Timer0 event fires, Mat&eacute; will run this
+    code. However, Timer0 doesn't fire when the VM boots. We need to
+    tell the VM to start firing Timer0. We'll do this with the Once
+    handler. We'll need to use one of the Primitives,
+    <code>settimer0</code>. Click on it in the right panel to read its
+    description.</p>
+
+    <p>Select the Once handler, and type this program:
+
+            <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+call settimer0(10);
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+
+      This will start firing Timer0 at 1Hz, or once per second. Hit
+      <b>Inject</b>. You should see the LEDs start ticking.</p>
+
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">TinyScript</font>
+	      </b></td> </tr>
+      </table>
+    </p>
+
+    <p>TinyScript programs have two sections. The first is the
+    variable declaration region. In the Timer handler above, this was
+    the <code>private counter;</code> statement. All variables must be
+    declared before any statements. There are three kinds of
+    variables: <code>private</code>, which only that handler can
+    access, <code>shared</code>, which all handlers can access, and
+    <code>buffer</code> variables, which are shared. For example, this
+    program declares a shared variable, a private variable, a buffer,
+    and turns on the red LED:
+      
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+shared data;
+private value;
+buffer cache;
+
+call led(1); ! Turn on red led
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+
+      Comments can be entered with <code>!</code>, which comments out
+      everything until the end of line.</p>
+
+    <p>Private and shared valuables can be either sensor readings,
+    generated by primitives such as <code>temp</code> or
+    <code>light</code>, or integers. Sensor readings are immutable;
+    trying to modify them will result in a run-time error. You also
+    cannot compare with with anything except sensor values of the same
+    type (e.g., light with light). For example:
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+private cond;
+shared value;
+
+cond = call rand() & 1;
+if (cond) then
+  value = call light();
+else
+  value = 20;
+end if
+
+value = value / 2;  ! This will fail if value is a light reading
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center> 
+
+      If you need to modify sensor readings, say, for averaging, then
+      you can cast them to integers with the <code>cast</code>
+      primitive. This is a version of the above program that will execute
+      without a run-time error:
+
+            <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+private cond;
+shared value;
+
+cond = call rand() & 1;
+if (cond) then
+  value = call cast(call light());
+else
+  value = 20;
+end if
+
+value = value / 2;  ! Now it works
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+      </p>
+
+    <p>Buffers are indexed with <code>[]</code>; by default, they have
+    ten elements. An empty index implies the tail of the buffer;
+    <code>call cast(buf[]);</code> will return an integer value of the
+    end of the buffer, while <code>buf[] = 0;</code> will append to a
+    buffer.</p>
+
+    <p>Buffers are typed. An empty buffer has no type. The
+    <code>bclear</code> primitive empties a buffer. A buffer takes the
+    type of the first element put into it (integer, light reading,
+    etc.), and a run-time error occurs if any other type is put into
+    it. Here is a program that sends a light reading over a tree-based
+    ad-hoc collection routing protocol:
+            <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+buffer buf;
+
+call bclear(buf);
+buf[] = call light();
+call send(buf);
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+      </p>
+    
+    <p>TinyScript supports basic arithmetic operations, such as
+    addition (<code>+</code>), multiplication (<code>*</code>),
+      division (<code>/</code>), modulus (<code>%</code>), as well as
+      boolean operations such as and (<code>AND</code>) as well as or
+      (<code>OR</code>), as well as their binary (logical) equivalents
+    (<code>&</code>, <code>|</code>).</p>
+
+    <p>Primitives are invoked with the <code>call</code> keyword
+    (e.g., <code>call led(1);</code>). If the primitive has a return
+    value (check its documentation), it must be stored. For example,
+    <code>rand()</code> returns a random value. <code>call
+    random();</code> will cause a compile error, while <code>rval =
+    call random();</code> will not.</p>
+
+    <p>Control structures include <code>if ... then</code> as shown
+    above, as well as loops. For example, to put ten successive light
+    values into a buffer:
+
+            <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+buffer buf;
+private i;
+
+call bclear(buf);
+
+for i=0 to 9 
+  buf[] = call light();
+next i
+
+call send(buf);
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+    </p>
+
+    <p>There are a limited number of buffers and variables. By
+    default, there are 16 shared variables, eight private variables
+    (per handler), and eight buffers.</p>
+    
+    <p>A full <A HREF="../mate-manual.pdf">reference</A> for
+    TinyScript can be found in the standard documentation
+    directory. This tutorial only covers a few major points.</p>
+
+        <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Errors</font> </b></td> </tr> </table></p>
+    
+
+    
+      <p>When Mat&eacute; encounters an error in a program
+      (e.g. trying to add a light and temperture value), it enters an
+      error state. In this error state, it stops running
+      capsules. Instead, it periodically toggles all of the LEDs (all
+      of them blinking on and off is an indication something has gone
+      wrong) and sends a packet over the UART. The packet is a
+      Mat&eacute;ErrorMsg and contains information on the cause of the
+      error.</p>
+
+
+
+        <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">A Simple Program</font> </b></td> </tr> </table></p>
+
+    <p>Here is a simple program, where each mote will periodically
+    (one every ten seconds) sample its temperature and light sensors,
+    but those values into a buffer, and route those to a base
+    station. Note that, for this to work, there must be a routing base
+    station (a node with ID 0).</p>
+
+    <p>If Timer0 is running from the earlier part of the tutorial,
+    stop it with the Once handler by <code>call
+    settimer0(0);</code>. Then, install this as Timer0:
+
+      <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	  <tr bgcolor="#e0e0e0">
+	    <td width="100%">
+	      <code>
+		<pre>
+buffer buf;
+private counter;
+
+counter = counter + 1;
+if (counter >= 10) then
+  call bclear(buf);
+  buf[] = call cast(call light());
+  buf[] = call cast(call temp());
+  counter = 0;
+  call send(buf);
+end if
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+      </p>
+
+    followed by this as Once:
+
+    
+    <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+call settimer0(10);
+	      </pre>
+	      </code>
+	    </td></tr>
+	</table>
+      </center>
+
+    Alternatively, instead of maintaining the counter value, you could
+    <code>call settimer0(100);</code>.</p>
+    
+    <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+      <tr bgcolor="#e0e0ff">
+	<td width="100%"><nobr> <b> <font face="arial,helvetica">Data
+	Consistency</font> </b></td> </tr> </table></p>
+    
+
+    
+    <p>By default, multiple Mat&eacute; handlers can run concurrently;
+    the VM interleaves their execution at instruction-level
+    granularity. When there are shared variables (and buffers), this
+    can lead to possible race conditions. Using installation-time
+    program analysis, Mat&eacute; ensures race-free, deadlock-free
+    execution of handlers. If two handlers can safely run concurrently
+    (they share no variables), then the scheduler lets them do so.</p>
+    
+    <p>This can fail due to handler installation. Notably, as
+      handlers are installed immediately upon reception, a context
+      can be in the midst of a computation when it is halted due to
+      new code being installed.</p>
+    
+    <p>This means that to ensure perfect data consistency, the
+      values of shared variables cannot be transferred from one
+      version of a handler to the next. For example, before
+      installing a new version of the clock handler, one could
+      install a clock handler that clears out the shared variables,
+      restoring them to a consistent state.</p>
+    
+    <p>We are currently working on a handler installation
+      mechanism that will preserve execution atomicity; this
+      understandably becomes difficult in the presence of buggy
+      handlers that do not halt.</p>
+    
+    
+    <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+      <tr bgcolor="#e0e0ff">
+	<td width="100%"><nobr> <b> <font face="arial,helvetica">Further Use
+	</font> </b></td> </tr> </table></p>
+
+    <p>This document just touches on Mat&eacute; and some simple
+    programs that you can write with the example Bombilla
+    VM. Mat&eacute; allows you to build customized VMs, with
+    user-specified event handlers and primitives. For example, you can
+    build a scripting environment that receives and sends packets,
+    reacts to target detection, or acts as a data aggregation engine.
+    For more information, please refer to the <A
+    HREF="../mate-manual.pdf">Mat&eacute; manual</A></p>
+
+    <p>Mat&eacute; is in active development. If you find bugs, please
+    enter them in the <A HREF="http://sourceforge.net/tracker/?group_id=28656&atid=393934">TinyOS bug tracker</A> on
+    Sourceforge. Feature requests and questions should be sent to the
+    standard TinyOS users list,
+    <code>tinyos-users@millennium.berkeley.edu</code>. You can sign up
+    <A
+    HREF="http://webs.cs.berkeley.edu/tos/support.html#lists">here</A>.
+    <p>
+<hr>
+<b><a href="index.html"> Tutorial Index</a></b>
+
+</body>
+</html>

@@ -1,0 +1,341 @@
+#
+# FILE:    xfreq.extra
+# AUTHOR:  Martin Turon
+# DATE:    January 12, 2004
+#
+# Simplifies the compilation of XMesh application binaries in various
+# configurations.  By passing flags to the make tool, features can be
+# compiled into the final image.
+#
+#	FREQ=<freq>	where freq is one of:
+#		903	903 MHz 	[mica2 default]
+#		915	915 MHz 
+#		433	433 MHz
+#		315 	315 MHz
+#		2420	2.4 GHz micaz
+#
+# Copyright (c) 2004-2005 Crossbow Technology, Inc.  All Rights Reserved.
+#
+# $Id: freq.extra,v 1.4 2005/04/07 04:52:35 mturon Exp $
+#
+
+ifeq ($(FREQ),)
+FREQ=903
+endif
+
+## Need to fix this, so PLATFORM can auto-define RADIO_CHIP
+ifeq ($(PLATFORM),mica2)
+RADIO_CHIP = CC1000
+endif
+
+ifeq ($(FREQ),)
+$(error FREQ must be defined, try "make $(TARGETS) help")
+endif
+
+
+# ==================== MICA2 ============================= 
+##########################################################################
+# set radio channel (freq)
+#   -Uncomment ONLY one line to choose the desired radio operating freq.
+#   -Select band based on freq label tag on mote (916,433..)
+#    (i.e. 433Mhz channel will not work for mote configured for 916Mhz)
+##########################################################################
+#
+# 916 MHz Band
+#
+# CHANNEL_00 - 903 MHz     CHANNEL_02 - 904 MHz     CHANNEL_04 - 905 MHz
+# CHANNEL_06 - 906 MHz     CHANNEL_08 - 907 MHz     CHANNEL_10 - 908 MHz
+# CHANNEL_12 - 909 MHz     CHANNEL_14 - 910 MHz     CHANNEL_16 - 911 MHz
+# CHANNEL_18 - 912 MHz     CHANNEL_20 - 913 MHz     CHANNEL_22 - 914 MHz
+# CHANNEL_24 - 915 MHz     CHANNEL_26 - 916 MHz     CHANNEL_28 - 917 MHz
+# CHANNEL_30 - 918 MHz     CHANNEL_32 - 919 MHz     CHANNEL_34 - 920 MHz
+# CHANNEL_36 - 921 MHz     CHANNEL_38 - 922 MHz     CHANNEL_40 - 923 MHz
+# CHANNEL_42 - 924 MHz     CHANNEL_44 - 925 MHz     CHANNEL_46 - 926 MHz
+# CHANNEL_48 - 927 MHz
+
+ifeq ($(FREQ), 903)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 00
+endif
+ifeq ($(FREQ), 904)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 02
+endif
+ifeq ($(FREQ), 905)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 04
+endif
+ifeq ($(FREQ), 906)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 06
+endif
+ifeq ($(FREQ), 907)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 08
+endif
+ifeq ($(FREQ), 908)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 10
+endif
+ifeq ($(FREQ), 909)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 12
+endif
+ifeq ($(FREQ), 910)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 14
+endif
+ifeq ($(FREQ), 911)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 16
+endif
+ifeq ($(FREQ), 912)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 18
+endif
+ifeq ($(FREQ), 913)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 20
+endif
+ifeq ($(FREQ), 914)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 22
+endif
+ifeq ($(FREQ), 915)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 24
+endif
+ifeq ($(FREQ), 916)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 26
+endif
+ifeq ($(FREQ), 917)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 28
+endif
+ifeq ($(FREQ), 918)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 30
+endif
+ifeq ($(FREQ), 919)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 32
+endif
+ifeq ($(FREQ), 920)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 34
+endif
+ifeq ($(FREQ), 921)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 36
+endif
+ifeq ($(FREQ), 922)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 38
+endif
+ifeq ($(FREQ), 923)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 40
+endif
+ifeq ($(FREQ), 924)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 42
+endif
+ifeq ($(FREQ), 925)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 44
+endif
+ifeq ($(FREQ), 926)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 46
+endif
+ifeq ($(FREQ), 927)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 916
+RADIO_CHANNEL = 48
+endif
+
+#--------------------------------------------------------------------------
+# 433 MHz Band
+#
+# CHANNEL_00 - 433.113 MHz     CHANNEL_02 - 433.616 MHz
+# CHANNEL_04 - 434.108 MHz     CHANNEL_06 - 434.618 MHz
+#
+#CFLAGS = -DCC1K_DEFAULT_FREQ=CC1K_433_002_MHZ
+#CFLAGS = -DCC1K_DEFAULT_FREQ=CC1K_434_845_MHZ
+
+ifeq ($(FREQ), 433)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 433
+RADIO_CHANNEL = 00
+endif
+
+ifeq ($(FREQ), 433.5)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 433
+RADIO_CHANNEL = 02
+endif
+
+ifeq ($(FREQ), 434)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 433
+RADIO_CHANNEL = 04
+endif
+
+ifeq ($(FREQ), 434.5)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 433
+RADIO_CHANNEL = 06
+endif
+
+##--------------------------------------------------------------------------
+# 315 MHz Band
+#
+# CHANNEL_00 - 315 MHz
+#
+ifeq ($(FREQ), 315)
+RADIO_CHIP    = CC1000
+RADIO_CLASS   = 315
+RADIO_CHANNEL = 00
+endif
+
+# ==================== MICAZ ============================= 
+
+#########################################################
+#
+# Zigbee Channel Selection
+# CHANNEL_11 - 2405 MHz    CHANNEL_12 - 2410 MHz    CHANNEL_13 - 2415 MHz
+# CHANNEL_14 - 2420 MHz    CHANNEL_15 - 2425 MHz    CHANNEL_16 - 2430 MHz
+# CHANNEL_17 - 2435 MHz    CHANNEL_18 - 2440 MHz    CHANNEL_19 - 2445 MHz
+# CHANNEL_20 - 2450 MHz    CHANNEL_21 - 2455 MHz    CHANNEL_22 - 2460 MHz
+# CHANNEL_23 - 2465 MHz    CHANNEL_24 - 2470 MHz    CHANNEL_25 - 2475 MHz
+# CHANNEL_26 - 2480 MHz
+#
+# 15, 20, 25 & 26 seem to be non-overlapping with 802.11
+#########################################################
+
+ifeq ($(FREQ), 2405)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 11
+endif
+ifeq ($(FREQ), 2410)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 12
+endif
+ifeq ($(FREQ), 2415)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 13
+endif
+ifeq ($(FREQ), 2420)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 14
+endif
+ifeq ($(FREQ), 2425)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 15
+endif
+ifeq ($(FREQ), 2430)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 16
+endif
+ifeq ($(FREQ), 2435)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 17
+endif
+ifeq ($(FREQ), 2440)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 18
+endif
+ifeq ($(FREQ), 2445)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 19
+endif
+ifeq ($(FREQ), 2450)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 20
+endif
+ifeq ($(FREQ), 2455)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 21
+endif
+ifeq ($(FREQ), 2460)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 22
+endif
+ifeq ($(FREQ), 2465)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 23
+endif
+ifeq ($(FREQ), 2470)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 24
+endif
+ifeq ($(FREQ), 2475)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 25
+endif
+ifeq ($(FREQ), 2480)
+RADIO_CHIP    = CC2420
+RADIO_CHANNEL = 26
+endif
+
+## Final settings based on radio type.
+
+$(call TOSMake_include,power.extra)
+
+######## CC1000 Radio settings ##############
+ifeq ($(RADIO_CHIP),CC1000)
+
+ifeq ($(RADIO_POWER),)
+ifeq ($(RADIO_CLASS),315)
+RADIO_POWER=0x01
+else
+RADIO_POWER=0xFF
+endif
+endif
+
+CFLAGS =-DCC1K_DEFAULT_FREQ=RADIO_$(RADIO_CLASS)BAND_CHANNEL_$(RADIO_CHANNEL)
+CFLAGS +=-DRADIO_XMIT_POWER=$(RADIO_POWER) 
+
+ifeq ($(RADIO_CLASS),433)
+PFLAGS +=-DFREQ_433_MHZ 
+endif
+
+endif
+
+######## CC2420 Radio settings ##############
+ifeq ($(RADIO_CHIP),CC2420)
+
+ifeq ($(RADIO_POWER),)
+RADIO_POWER   = TXPOWER_MAX
+endif
+
+CFLAGS =-DCC2420_TXPOWER=$(RADIO_POWER) -DCC2420_DEF_CHANNEL=$(RADIO_CHANNEL)
+endif
+
+
+

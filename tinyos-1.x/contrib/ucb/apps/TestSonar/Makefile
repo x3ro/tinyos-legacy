@@ -1,0 +1,3 @@
+COMPONENT = TestSonar
+include $(MAKERULES)
+

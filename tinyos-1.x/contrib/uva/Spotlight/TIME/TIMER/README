@@ -1,0 +1,108 @@
+[Module Title]                       
+  GlobalAbsoluteTimer                
+
+[Authors]                            
+  Tian He,Su Ping,Miklos Maroti
+
+[Version]
+
+  SOWN Version 1.2
+                                     
+[Module Overview]                    
+  
+The module provides an AbsoluteTimer, which is to set its expire time to an absolute time instead of 
+a time interval. The unit of time can be 1/1000 second or 1/32768 second.
+The timer can be cancelled before expiration.
+                                     
+[Interface Description]
+
+  provides {
+    interface GlobalAbsoluteTimer[uint8_t id];
+  }
+  uses {
+    interface Timer;
+    interface TimeUtil;
+    interface StdControl as TimerControl; 
+    interface Leds; 
+    interface Timer as UpdateTimer; 
+       
+    #ifdef TIME_SYNC
+	  interface GlobalTime;
+    #else
+     interface LocalTime; 	
+    #endif  
+  }
+  
+interface GlobalAbsoluteTimer {
+  /**
+   *  start a AbsoluteTimer and set its expire time to t 
+   *  If the AbsoluteTimer is started of, return SUCCESS
+   *  Else, return FAIL. This unit of time is 1/1000 second.
+   **/
+  command result_t set(tos_time_t t );
+  
+  /**
+   *  start a AbsoluteTimer and set its expire time to t 
+   *  If the AbsoluteTimer is started of, return SUCCESS
+   *  Else, return FAIL. This unit of time is 1/32768 second.
+   **/
+  command result_t set2(tos_time_t t );  
+    
+  /**
+   *  Cancel an absolute timer. 
+   *  If the timer does not exist, 
+   *  return FALSE.
+   **/
+  command result_t cancel();
+
+  /**
+   *  The AbsoluteTimer exipired event that a timer user needs to handle 
+   **/
+  event   result_t fired();
+  
+  /**
+   *  Get 64 bit GlobalTime in unit of millisecond
+   *  @return false if it hasn't been synchronized by 
+   *  @return true if global time has been return successfuuly
+   **/  
+   
+  command result_t getGlobalTime(tos_time_t *t);
+  
+    /**
+   *  Get 64 bit GlobalTime in unit of jiffies
+   *  @return false if it hasn't been synchronized by 
+   *  @return true if global time has been return successfuuly
+   **/     
+  command result_t getGlobalTime2(tos_time_t *t);
+  
+    /**
+   *  convert jiffies into millisecond
+   *  @return ms 
+   **/    
+  command uint32_t jiffy2ms(uint32_t jiffy);
+   
+   /**
+   *  convert millisecond into jiffies
+   *  @return jiffies 
+   **/      
+  command uint32_t ms2jiffy(uint32_t ms);
+}
+
+  
+[Component Description]
+
+The GlobalAbsoluteTimer interface (GlobalAbsoluteTimer.nc) has been extended to support the setting of 
+interrupt rates in 1/32768 sec units.
+
+The GlobalAbsoluteTimer header file (GlobalAbsoluteTimer.h) has been extended to provide constants to 
+describe the possible frequencies of interrupt rates.
+
+The GlobalAbsoluteTimer module (GlobalAbsoluteTimerM.nc and GlobalAbsoluteTimerC.nc) implements 
+the new GlobalAbsoluteTimer interface.
+  
+[Usage]                              
+  tos_time_t GlobleAbsoluteTimer[MAX_NUM_ABS_TIMERS]
+  provides the number of the GlobleAbsoluteTimers.
+
+
+              

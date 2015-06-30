@@ -1,0 +1,71 @@
+/*									tab:4
+ *  tone_detect.h - Main component for simple application that blinks LED
+ *                  when sounder's tone is detected.
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Alec Woo
+ *
+ * This application simply blinks the leds with each clock interrupt.  It
+ * outputs the value of a three bit counter onto the LEDS.
+ *
+ */
+
+TOS_MODULE TONE_DETECT;
+
+ACCEPTS{
+	char TONE_DETECT_INIT(void);
+	char TONE_DETECT_START(void);
+};
+
+HANDLES{
+	void TONE_DETECT_CLOCK_EVENT(void);
+	char TONE_DETECT_DATA_EVENT(short data);
+	char TONE_DETECT_MIC_TONE_DETECTED(void);
+	char TONE_DETECT_DATA_SEND_DONE(char success);
+	char TONE_DETECT_DATA_RECV_DONE(char data, char success);
+};
+
+USES{
+	char TONE_DETECT_SUB_INIT(char interval, char scale);
+	char TONE_DETECT_UART_INIT();
+	char TONE_DETECT_MIC_INIT();
+	char TONE_DETECT_MIC_TONE_INTR(char enable);
+	char TONE_DETECT_MIC_PWR(char mode);
+	char TONE_DETECT_MIC_MUX_SEL(char select);
+	char TONE_DETECT_POT_ADJUST(char data);
+	char TONE_DETECT_GET_CONTINUOUS_DATA(void);
+	char TONE_DETECT_GET_DATA(void);
+	char TONE_DETECT_SET_SAMPLING_RATE(char rate);
+	char TONE_DETECT_SEND_DATA(char data);
+	char TONE_DETECT_SET_SAMPLING(char rate);
+        char TONE_DETECT_LEDy_on();
+        char TONE_DETECT_LEDy_off();
+	char TONE_DETECT_LEDy_TOGGLE();
+        char TONE_DETECT_LEDr_on();
+        char TONE_DETECT_LEDr_off();
+        char TONE_DETECT_LEDg_on();
+        char TONE_DETECT_LEDg_off();
+	char TONE_DETECT_READ_TONE_DETECTOR();
+};
+
+SIGNALS{
+};
+

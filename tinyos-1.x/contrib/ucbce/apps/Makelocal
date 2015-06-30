@@ -1,0 +1,14 @@
+
+###  Change this locally
+TOSROOT = $(HOME)/sf.net/tinyos-1.x
+
+FIREBOARD = $(TOSROOT)/contrib/ucbce/tos
+
+FIREBOARD_PATH  = -I$(FIREBOARD)/interfaces/
+FIREBOARD_PATH += -I$(FIREBOARD)/sensorboards/fireboard
+FIREBOARD_PATH += -I$(FIREBOARD)/sensors/adg_715
+
+
+
+CFLAGS = -DCC1K_DEFAULT_FREQ=CC1K_433_002_MHZ
+

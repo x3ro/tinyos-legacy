@@ -1,0 +1,22 @@
+Testing the Analog Devices ADXL320EB evaluation board.
+
+
+The Analog Devices ADXL320EB evaluation board has been wired to TelosB
+mote using the expansion header.  The ADXL320EB contains a single
+ADXL320 two-axis accelerometer.  Connections are as follows:
+
+   Telos B	ADXL320EB
+   
+   Vcc		Vcc
+   Gnd		Gnd
+   ADC0		Xout
+   ADC1		Yout
+
+
+The sample code in this directory records data at a flat rate
+alternating between the X and Y channels.  The data is available
+through the SIPLite streaming interface.
+
+
+	Andrew Christian     <andrew.christian@hp.com>
+	July 2005

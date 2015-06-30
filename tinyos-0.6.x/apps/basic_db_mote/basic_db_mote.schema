@@ -1,0 +1,31 @@
+#temperature sensor
+field {
+       name : "temp"   #optional
+       type : int
+       units : celsius
+       min : -20
+       max : 100
+       bits : 8
+       sample_cost : 10.0 J  #optional -- for use in costing
+       sample_time : 10.0 ms #optional -- for use in costing
+       input : adc2   #optional  :  read from adc channel 1
+       sends : ondemand
+       accessorEvent : GET_TEMPERATURE_DATA
+       responseEvent : TEMPERATURE_DATA_READY
+}
+
+#light sensor
+field {
+       name : "light"   #optional
+       type : int
+       units : candela
+       min : 0
+       max : 100
+       bits : 8
+       sends : ondemand
+       input : adc1   #optional  :  read from adc channel 1
+       accessorEvent : GET_LIGHT_DATA
+       responseEvent : LIGHT_DATA_READY
+}
+
+

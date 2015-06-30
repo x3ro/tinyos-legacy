@@ -1,0 +1,87 @@
+
+<html>
+<head>
+<title>Interface: MLME_ORPHAN</title>
+</head>
+<body>
+<table BORDER="0" CELLPADDING="3" CELLSPACING="0" width="100%">
+<tr><td>
+<font size="-1">
+<b><font color="blue"><a href="apps_p.html">Apps</a></font></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="components_p.html">Components</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="interfaces_p.html">Interfaces</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="allfiles_p.html">All Files</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="index.html">Source Tree</a></b>
+&nbsp;&nbsp;&nbsp;
+</font>
+</td>
+<td align="right">
+<font size="-1">
+source: <b><a href="beta.CC2420Radio.ieee.802.15.4.MLME.MLME_ORPHAN.nc.source">beta.CC2420Radio.ieee.802.15.4.MLME.MLME_ORPHAN.nc</a></b>
+</font>
+</td></tr></table>
+<hr>
+
+<h1 align="center">Interface: MLME_ORPHAN</h1>
+<p>
+
+ The MLME-SAP orphan notification primitives define how a coordinator can 
+ issue a notification of an orphaned device.
+
+ <table border="0" cellpadding="0">
+<tr valign="top"><td><b>Author:</b>
+<td> Joe Polastre
+</td></tr></table>
+
+<p>
+
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Commands</h3></td></tr></table>
+<ul>
+<li>
+         void <b>response</b>(uint64_t OrphanAddress, uint16_t ShortAddress, bool AssociatedMember, bool SecurityEnable)
+<menu>
+ Allows the next higher layer of a coordinator to respond to the
+ indication primitive
+
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>OrphanAddress</b> -  The 64-bit extended address of the orphaned device
+ </p><p STYLE="text-indent: -1cm"><b>ShortAddress</b> -  The short address allocated to the orphaned device
+                     if it is associated with this coordinator
+ </p><p STYLE="text-indent: -1cm"><b>AssociatedMember</b> -  TRUE if the orphaned device is associated 
+                         with this coordinator
+ </p><p STYLE="text-indent: -1cm"><b>SecurityEnable</b> -  TRUE if security is enabled for this transfer
+</menu></menu>
+</td></tr></table>
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Events</h3></td></tr></table>
+<ul>
+<li>
+         void <b>indication</b>(uint64_t OrphanAddress, bool SecurityUse, uint8_t ACLEntry)
+<menu>
+ Allows the MLME of a coordinator to notify the next higher layer of the
+ presence of an orphaned device
+
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>OrphanAddress</b> -  The 64-bit extended address of the orphaned device
+ </p><p STYLE="text-indent: -1cm"><b>SecurityUse</b> -  TRUE if security is enabled for this transfer
+ </p><p STYLE="text-indent: -1cm"><b>ACLEntry</b> -  The macSecurityMode parameter value from the ACL entry
+                 associated with the sender of the data frame
+</menu></menu>
+</td></tr></table>
+</menu><p>
+
+</ul>

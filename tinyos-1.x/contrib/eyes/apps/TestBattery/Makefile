@@ -1,0 +1,3 @@
+COMPONENT=TestBatteryLevel
+include ../MakeEyes
+

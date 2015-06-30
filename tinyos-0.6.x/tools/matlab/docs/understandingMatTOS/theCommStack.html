@@ -1,0 +1,204 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>The Communications Stack</title>
+<style>
+<!--
+ p.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	margin-left:0in; margin-right:0in; margin-top:0in}
+ li.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	margin-left:0in; margin-right:0in; margin-top:0in}
+h2
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:18.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold}
+h3
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:13.5pt;
+	font-family:"Times New Roman";
+	font-weight:bold}
+-->
+</style>
+</head>
+
+<body>
+
+<h1>The Communications Stack</h1>
+
+<p>This file is slightly out of data</p>
+
+<p>The communications stack is meant to allow people to interact with their
+network of motes at any level of abstraction: <b>raw bytes, packets, active
+messages, individual motes </b><b style='mso-bidi-font-weight:normal'>or other
+routing abstractions</b>.<span style='mso-spacerun:yes'>  </span>It also
+prevents people from having to replicate code for accessing motes or data ports
+over and over again.<span style='mso-spacerun:yes'>  </span></p>
+
+<p>The commStack is divided into different layers which mirror that of the TOS
+communications stack.<span style='mso-spacerun:yes'>  </span>Each layer builds
+upon the previous layers to provide a new level of data abstraction.<span
+style='mso-spacerun:yes'> E.g. the first layer is the data layer in which you 
+deal with bytes.&nbsp; The next layer is the packet layer, which builds upon the 
+data layer to let you deal with packets instead of bytes.&nbsp;&nbsp; </span>However,  each 
+layer has an accessible
+interface so you can access any layer you wish.<span style='mso-spacerun:yes'> 
+</span>The comm stack can be initialized automatically given the names of
+existing ports, or the user can manually create pieces of it.<span
+style='mso-spacerun:yes'>  </span>Click here for a tutorial on 
+<a
+href="../CommStack.html" style="color: blue; text-decoration: underline; text-underline: single">creating and using the commStack</a>.<span
+style='mso-spacerun:yes'>  </span>Here is an overview of the different layers
+of communication stack, along with the interface for each one.</p>
+
+<h3>The Data Layer</h3>
+
+<p><b style='mso-bidi-font-weight:normal'>The data layer allows you to access
+specific ports at a byte-by-byte level</b>.<span style='mso-spacerun:yes'> 
+</span>This is especially useful for streaming in raw data over the UART, where
+you don’t want the bandwidth and processing overhead of TOS packets.<span
+style='mso-spacerun:yes'>  </span>It is also useful for debugging.<span
+style='mso-spacerun:yes'>  </span></p>
+
+<p>There is a simple read/write interface to the data layer using the two
+commands:</p>
+
+<p style='margin-left:.5in'><span style='font-family:"Lucida Console"'>readBytes(dataPorts,
+numBytes)<br>
+writeBytes(dataPorts, bytes)<o:p></o:p></span></p>
+
+<p>There is also an event-driven interface for reading bytes using the following
+two commands (unimplemented):</p>
+
+<p style='margin-left:.5in'>
+<span style='background-position: 0% 0%; font-family:"Lucida Console";
+mso-highlight:lime; background-image:none; background-repeat:repeat; background-attachment:scroll'>addByteListeners(dataPorts, byteListeners)<br>
+removeByteListeners(dataPorts, byteListeners)</span><span style='font-family:
+"Lucida Console"'><o:p></o:p></span></p>
+
+<p>(Read comments in 
+<a href="../DataLayer.html" style="color: blue; text-decoration: underline; text-underline: single">creating and using dataPorts</a>
+before using the event-driven interface).<span style='mso-spacerun:yes'> 
+</span>In all of these functions, you must specify a specific <b
+style='mso-bidi-font-weight:normal'>dataPort</b>, which is an abstraction of
+the physical connection to the mote network, such as a serial port of socket<b
+style='mso-bidi-font-weight:normal'>.<span style='mso-spacerun:yes'>  </span></b><span
+style='mso-spacerun:yes'> </span>There is one dataPort per physical
+connection.<span style='mso-spacerun:yes'>  </span>They can be created
+automatically by the commStack or you can create them individually
+yourself.<span style='mso-spacerun:yes'>  </span>Click here for a tutorial on 
+<a
+href="../DataLayer.html" style="color: blue; text-decoration: underline; text-underline: single">using the data layer</a>.</p>
+
+<h3>The Packet Layer</h3>
+
+<p><b style='mso-bidi-font-weight:normal'>The packet layer allows you to access
+specific ports at a packet-by-packet level</b>.<span style='mso-spacerun:yes'> 
+</span>It allows you to send data without having to explicitly parse it into
+correctly ordered bytes.<span style='mso-spacerun:yes'>  </span>Furthermore,
+when data is received the bytes are automatically merged back into real data.<span
+style='mso-spacerun:yes'>  </span>This is all facilitated through the field
+definitions of your 
+<a href="../PacketClass.html" style="color: blue; text-decoration: underline; text-underline: single">packet class</a>.</p>
+
+<p>There is a simple read/write interface to the packetlayer using the two
+commands:</p>
+
+<p style='margin-left:.5in'>
+<span style='background-position: 0% 0%; font-family:"Lucida Console";
+mso-highlight:lime; background-image:none; background-repeat:repeat; background-attachment:scroll'>readPackets(packetPorts, numPackets)</span><span
+style='font-family:"Lucida Console"'><br>
+writePackets(packetPorts, packets)<o:p></o:p></span></p>
+
+<p>There is also an event-driven interface for reading packets using the
+following two commands:</p>
+
+<p style='margin-left:.5in'><span style='font-family:"Lucida Console"'>addPacketListeners(dataPorts,
+byteListeners)<br>
+removePacketListeners(dataPorts, byteListeners)<o:p></o:p></span></p>
+
+<p>In all of these functions, you must specify a specific <b style='mso-bidi-font-weight:
+normal'>packetPort</b>, which is an abstraction of its corresponding dataPort<b
+style='mso-bidi-font-weight:normal'>. <span style='mso-spacerun:yes'> </span></b><span
+style='mso-spacerun:yes'> </span>There is one packetPort per dataPort.<span
+style='mso-spacerun:yes'>  </span>They can be created automatically by the
+commStack or you can create them individually yourself.<span
+style='mso-spacerun:yes'>    </span>Click here for a tutorial on 
+<a
+href="../PacketLayer.html" style="color: blue; text-decoration: underline; text-underline: single">using the packet layer interface</a>.</p>
+
+<h3>The AM Layer</h3>
+
+<p>The AM layer allows you to receive active messages.<span
+style='mso-spacerun:yes'>  </span>This is the first layer of the commStack that
+is not tied to a specific dataPort.<span style='mso-spacerun:yes'>  </span></p>
+
+<p>There is an event-driven interface for receiving active messages using the
+following two commands (unimplemented): </p>
+
+<p style='margin-left:.5in'>
+<span style='background-position: 0% 0%; font-family:"Lucida Console";
+mso-highlight:lime; background-image:none; background-repeat:repeat; background-attachment:scroll'>addAMListeners(&lt;AMPorts&gt;, AMNumbers,
+AMListeners)<br>
+removeAMListeners(&lt;AMPorts&gt;, AMNumbers, AMListeners)</span><o:p></o:p></p>
+
+<p>These functions take an optional <b style='mso-bidi-font-weight:normal'>AMPort</b>
+parameter, an active message number, and the AM listener.<span
+style='mso-spacerun:yes'>  </span>AMPorts can be created automatically by the
+commStack or manually by the user.<span style='mso-spacerun:yes'>  </span>An
+AMport can be associated with any subset of the existing packetPorts.<span
+style='mso-spacerun:yes'>  </span>Note that there is no write interface to the
+AMports because active messages don’t inherently have a destination; they must
+be routed.<span style='mso-spacerun:yes'>  </span>Click here for a tutorial on 
+<a
+href="../AMLayer.html" style="color: blue; text-decoration: underline; text-underline: single">using the AM layer</a>.</p>
+
+<h3>The Routing Layer</h3>
+
+<p>The routing layer allows you to send/receive packets directly to/from motes
+or groups of motes.<span style='mso-spacerun:yes'>  </span>This is the first
+layer of the commStack that is completely independent of dataPorts for both
+reading and writing packets.<span style='mso-spacerun:yes'>  </span>At this
+level of abstraction, you do not even need to know how your network is
+connected to your PC.<span style='mso-spacerun:yes'>  </span>Your routing layer
+needs to perform some form of <i style='mso-bidi-font-style:normal'>discovery </i>and
+will route packets for you.<span style='mso-spacerun:yes'>  </span>It is not
+built <i style='mso-bidi-font-style:normal'>over</i> the AM layer, but rather
+sits beside it in the comm stack (It receives packets from the AM layer but can
+also be used by the AM layer to send and receive packets).</p>
+
+<p>There is a simple write interface to the routinglayer using the following command:</p>
+
+<p style='margin-left:.5in'><span
+style='font-family:"Lucida Console"'>routePackets([moteIDs], packets)<o:p></o:p></span></p>
+
+<p>There is also an event-driven interface for reading packets using the
+following two commands:</p>
+
+<p style='margin-left:.5in'><span style='font-family:"Lucida Console"'>addMoteListeners(moteIDs,
+byteListeners)<br>
+removeMoteListeners(moteIDs, byteListeners)<o:p></o:p></span></p>
+
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">I have found that the most convenient thing to do is send 
+through the routing layer and listen on the packet layer, although that is 
+mainly just because I haven't had time to implement the AM layer and the routing 
+layer</p>
+
+</body>
+
+</html>

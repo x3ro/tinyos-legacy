@@ -1,0 +1,14 @@
+Sources for TinySchema documentation.  Requires a working installation of elatex
+(latex2e).  To build the documentation, type:
+
+make
+
+If you have latex2html installed, you can also built an html version
+of the documentation by typing:
+
+make tinyschema.html
+
+The postscript documentation is written to tinyschema.ps. The html documentation
+is written to tinyschema/index.html.
+
+author:  Wei Hong

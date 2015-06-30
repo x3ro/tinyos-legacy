@@ -1,0 +1,105 @@
+
+Process for Changes to Major TinyOS Changes 
+
+Notes from 2/26 LaVals' mtg.
+
+In attendance:
+Deborah Estrin (UCLA)
+Deepak Ganesan (UCLA)
+David Gay (Intel)
+Phil Levis (Berkeley)
+Sam Madden (MIT)
+Miklos Maroti (Vanderbilt)
+Eric Osterwiel (CENS)
+Cory Sharp (Berkeley)
+Thanos Stathopoulos (UCLA)
+Rob Szewczyk (Berkeley)
+Matt Welsh (Harvard)
+Kamin Whitehouse (Berkeley)
+Alec Woo (Berkeley)
+Kristin Wright (Berkeley)
+
+
+General culture
+------------------
+The group agreed that the TinyOS culture should be:
+
+(1) trusting. Participants are expected to do the Right Thing. That
+said, it is also understood that everyone makes mistakes -- it's
+whether you address your mistakes in a timely manner that matters.
+
+(2) "light" on process. That is, few rules are defined and, in
+situations where rules do not exist, group members are trusted to do
+the Right Thing. See (1).
+
+
+Process Overview
+------------------
+The TinyOS Core modification process is a mix between the IETF model
+(presented by Deborah at the TTX) and the BSD model (presented by
+McKusick).  Step 1: Before modifications are made to Interfaces / core
+TinyOS systems, discussion will take place ala the IETF model. Step 2:
+Once consensus has been reached, commits to the tree will be done by
+Committers ala BSD. It was agreed that the pre-commit,
+interface/design definition step is the more important step of the
+two.
+
+(1 - Design) Interface design, major design modifications / additions
+to the TinyOS core are discussed beforehand amongst an appropriate
+group. While the definition of 'appropriate group' will vary between
+topics, to promote communication it was agreed that the group should
+include at a minimum two reasonably disparate institutions. 
+
+(2 - Commit) Once agreement has been reached, changes to the core will
+be made via a BSD-like model. Specifics are:
+
+- you must be a Committer to commit changes to the TinyOS Core*
+
+- new committers are nominated by a current committer; a vote for
+  membership is taken; >= 50% (abstaining allowed) approves the
+  nominee for committing 
+
+-in addition to making commits, committers have the following 
+ responsibilities:
+       + subscribe to the appropriate tinyos-commits lists**
+       + have major changes reviewed by a fellow committer
+         appropriately sufficiently from yourself before committing
+       + review other committers' commits
+       + address bugs sent to them by the Bug traige person 
+         (see below)
+
+- committers not committing within the last 6 months will have their
+  commit bit removed automatically; movement in and out of the commit
+  group is expected to be fluid as people's time commitments vary
+
+- a committer can be ousted for egregious behavior via an
+  oust-nomination and subsequent vote; >= 50% qualifies the committer
+  to be ousted.
+
+Bugs
+------
+Bug-fixing follows a different process than major changes. All bugs
+are entered by anyone in the TinyOS bugs database (currently linked
+off the home page). Bugs will be triaged and sent to
+committers. Committers can reassign bugs where appropriate. Bug fixes
+do not necessarily have to be reviewed; Committers just use their
+discretion.
+
+The TinyOS site will publicize the process for posting
+bugs / submitting patches.
+
+Whether a change is a bug-fix or something major enough to warrant a
+peer committer review is at the committers' discretion. (See 1.)
+
+
+--------------------------------------------------------------------
+* There is a larger ring of Developers who can commit to non-core code
+  such as contrib. Developer access is covered external to this text.
+
+** There is only one commits list now, but finer-grained lists have
+  been requested and will soon exist. You can join the existing list
+  at
+  http://mail.millennium.berkeley.edu/mailman/listinfo/tinyos-commits
+  Past commits are archived. Use the page listed there to set up your
+  subscription for digesting.
+

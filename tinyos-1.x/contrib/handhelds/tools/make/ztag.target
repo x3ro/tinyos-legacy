@@ -1,0 +1,22 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: ztag.target,v 1.1 2005/07/29 18:29:24 adchristian Exp $
+
+PLATFORM = ztag
+
+# on the adapter board it does!
+HAS_USB=True
+MSP_MCU = msp430x1611
+MSP_BSL_FLAGS ?= --ztag
+
+# Disable MSP430 hardware multiply because it makes MSPGCC die
+
+PFLAGS += -mdisable-hwmul \
+ -I$(HHTOSDIR)/tos/platform/ztag \
+ -I$(HHTOSDIR)/tos/platform/msp430_crl_base
+
+$(call TOSMake_include_platform,msp)
+
+MSP_JTAG_FLAGS = -R 2048
+
+ztag: $(BUILD_DEPS)
+	@:

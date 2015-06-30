@@ -1,0 +1,84 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2002 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Phil Levis <pal@cs.berkeley.edu>
+ *
+ * This component implements RMTP, the Reliable Mote Transport
+ * Protocol.  It is a tree-based ad-hoc routing protocol that makes
+ * efforts for reliable end-to-end transmission. This is accomplished
+ * by per-link retransmissions and a transport ACK.
+ *
+ */     
+
+TOS_MODULE RMTP;
+
+ACCEPTS{
+  char RMTP_INIT(void);
+  char RMTP_START(void);
+  char RMTP_SEND(char* data, char len);
+  char RMTP_SEND_CANCEL(void);
+  char RMTP_HAS_PARENT(void);
+  char RMTP_DISCOVER(void);
+};
+
+SIGNALS{
+  char RMTP_SEND_ACKED(char* data);
+  char RMTP_SEND_FAILED(char* data);
+  char RMTP_FORWARD_PACKET(TOS_MsgPtr msg);
+};
+
+HANDLES{
+  TOS_MsgPtr CONTROL_MSG(TOS_MsgPtr data);
+  TOS_MsgPtr DATA_MSG(TOS_MsgPtr data);
+  TOS_MsgPtr ACK_MSG(TOS_MsgPtr data);
+
+  void RMTP_SEND_RETRANSMIT_TIMER(void);
+  void RMTP_ACK_RETRANSMIT_TIMER(void);
+  void RMTP_SEND_FAIL_TIMER(void);
+  void RMTP_CONTROL_TIMER(void);
+  
+  char RMTP_SEND_DONE(TOS_MsgPtr data);
+};
+
+USES{
+  char RMTP_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+  char RMTP_SUB_LED_INIT();
+  char RMTP_SUB_COMM_INIT(void);
+  char RMTP_SUB_TIMER_INIT(void);
+
+  char RMTP_SUB_TIMER_TERMINATE(void);
+  char RMTP_SUB_TIMER_START(UINT8 id, char type, UINT32 interval);
+  char RMTP_SUB_TIMER_STOP(UINT8 id);
+
+  short RMTP_SUB_RANDOM(void);
+  
+  char RMTP_LED1_OFF();
+  char RMTP_LED1_ON();
+  char RMTP_LED1_TOGGLE();
+  char RMTP_LED2_OFF();
+  char RMTP_LED2_ON();
+  char RMTP_LED2_TOGGLE();
+  char RMTP_LED3_OFF();
+  char RMTP_LED3_ON();
+  char RMTP_LED3_TOGGLE();
+};
+

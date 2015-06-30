@@ -1,0 +1,28 @@
+README for MicasbTest1
+Author/Contact: tinyos-help@millennium.berkeley.edu
+ 
+Description:
+ 
+MicasbTest1 is an application that test out the magnetometer, accelerometer, and temperature sensor.
+It demonstrates how to access the data from each individual sensors, how to perform real time 
+"calibration", and how to filter and process sensory data for the magnetometer.  
+
+The test cases for the accelerometer and the temperature sensor is very simple.  The raw 10 bit data from
+these sensors are sent over the UART for visual inspection.  The format of the packet looks like
+the following: (24 bytes long, each data is 2 bytes long)
+
+[TEMP ACCEL_X ACCEL_Y] [TEMP ACCEL_X ACCEL_Y] [TEMP ACCEL_X ACCEL_Y] [TEMP ACCEL_X ACCEL_Y] [TEMP ACCEL_X ACCEL_Y]
+
+For the magnetometer, one can visually look at the LEDs to see if it is working.
+RED - self calibration is being done
+GREEN - idle -> no magnetic field event detected
+Yellow - event triggered:  either X or Y axis has event detected. 
+
+Tools:
+ 
+None
+ 
+Known bugs/limitations:
+ 
+The new radio stack may only send 29 bytes instead of the usual 30 bytes packet. 
+If this is true, you may lose the last byte for the packet sent over the UART.

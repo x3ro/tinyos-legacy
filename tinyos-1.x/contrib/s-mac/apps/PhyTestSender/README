@@ -1,0 +1,48 @@
+1. INTRODUCTION
+
+   This application tests the Physical Layer (PHY) developed at USC/ISI and
+UCLA. The primary component of the physical layer that provides the interface
+to upper layer is PHY_RADIO. The mote programmed by this application is a
+transmitter that sends out different lengths of packets in different packet
+intervals.
+
+2. FUNCTIONALITY
+
+   There are 4 groups of packets to be sent
+
+1) Fixed-length packets with a fixed packet interval defined by
+   TST_PKT_INTERVAL.
+2) Variable-length packets with the same fixed packet interval,
+   TST_PKT_INTERVAL.
+3) Fixed-length packets without packet interval (back-to-back), i.e, start
+   sending the second packet as soon as sending the first packet is done.
+4) Variable-length packets without packet interval (back-to-back).
+
+3. HOW TO USE
+
+   To use all the default parameters, simply type 'make mica' and/or 'make
+install mica'.
+
+   The following parameters can be defined in the config.h file. If not 
+defined, default values will be used.
+   
+ Parameter               Description                    Default Value
+ 
+PHY_MAX_PKT_LEN  Maximum pkt length                        100 bytes
+TST_NUM_PKTS     Number of pkts being sent in each group   100
+TST_PKT_INTERVAL Fixed pkt interval for group 1 and 2      10 ms
+TST_GRP_INTERVAL Pause time between each group             1000 ms
+
+
+4. NOTES
+
+1) This application is to be used with a receiver part, which is at
+apps/PhyTestReceiver/.
+
+2) You can use a snooper (at apps/Snooper/) to see the contents of each packet.
+Please note that the sender does NOT clean the memory for each packet. So when
+sending variable length packets, a long packet following a short packet will
+contain all the payload of the short packet. Don't simply think that packet is
+corrupted because of the non-zero payload.
+
+

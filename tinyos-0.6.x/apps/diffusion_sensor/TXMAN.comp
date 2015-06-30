@@ -1,0 +1,33 @@
+/* This is written by Tom and Vlad as
+ * an implementation of what we call
+ * TxMan (short for 
+ * "Transmission Manager").
+ * If you want to use this with the
+ * AM handler then you should put
+ * this module between the MAC and
+ * the AM module.
+ */
+
+TOS_MODULE TXMAN;
+
+ACCEPTS{
+	char TXMAN_INIT(void);
+	char TXMAN_ENQUEUE_TX(TOS_MsgPtr msg);
+	void TXMAN_TICK(void);
+	void TXMAN_SEED(unsigned int seed);
+};
+
+SIGNALS{
+};
+
+HANDLES{
+	char TXMAN_TX_PACKET_DONE(TOS_MsgPtr msg);
+};
+
+USES{
+	char TXMAN_TX_PACKET(short addr, char type, TOS_MsgPtr msg);
+	char TXMAN_SUB_INIT(void);
+};
+
+
+

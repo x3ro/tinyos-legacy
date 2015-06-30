@@ -1,0 +1,92 @@
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+</head>
+<body>
+<H1> Upgrading to TinyOS 1.1.x CVS Snapshots </H1>
+<i>Note: While minor releases deliver TinyOS additions and
+improvements to the community more quickly, they do so with less
+testing. If your environment requires stability, consider using the
+previous major release (TinyOS 1.1.0) or, at least, testing your
+applications carefully with the new release before migrating wholesale
+to a 1.1.x CVS snapshot.</i>
+<p>
+To install a TinyOS 1.1.x snapshot, you must first have installed
+TinyOS 1.1.0. If you have not installed TinyOS 1.1.0, please see <a
+href="http://webs.cs.berkeley.edu/tos/download.html"> the TinyOS
+download page </a>. </p>
+<p>
+<b>You need not install any previously released 1.1.x snapshots. That
+is, if you have 1.1.0 installed on your machine, you can jump right to
+installing 1.1.15 rather than installing 1.1.1... up to 1.1.15. 
+Each 1.1.x CVS snapshot supercedes previous 1.1.x CVS snapshot
+releases.</b>
+<h3>WINDOWS INSTALLATION (Win 2K and XP)<br>
+</h3>
+If you already have TinyOS 1.1.0 installed, upgrading to TinyOS 1.1.x consists of three steps:
+<ul>
+<li><b>Save your previous work. </b>We recommend making a tarball of
+your entire TinyOS-1.x directory and saving it someplace.</li>
+<li><b>Download the most recent 1.1.x rpm: </b><a
+href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows/tinyos-1.1.15Dec2005cvs-1.cygwin.noarch.rpm">tinyos-1.1.15Dec2005cvs-1.cygwin.noarch.rpm</a></li>
+<li><b>Install.</b> As Administrator in a cygwin shell do <br>"<span
+style="font-family: monospace;">rpm --force --ignoreos -Uvh
+tinyos-1.1.15Dec2005cvs-1.cygwin.noarch.rpm</span>" in the directory where you saved the rpm. This will take a while (the tinyos package
+installation includes compiling the java code). TinyOS is installed in
+/opt/tinyos-1.x.</li>
+
+  <li>You're done! Check the documentation in
+/opt/tinyos-1.x/doc/index.html for more information. See <a
+href="#INSTALLING_AND_UPDATING_PACKAGES">Installing and Updating
+Packages</a> if you want to install any optional packages.<br>
+  </li>
+
+</ul>
+<h3>LINUX INSTALLATION (Redhat 9):<br>
+</h3>
+<p>
+If you already have TinyOS 1.1.0 installed, upgrading to TinyOS 1.1.x consists of three steps:
+<ul>
+<li><b>Save your previous work. </b>We recommend making a tarball of your entire tinyos-1.x directory and saving it someplace.</li>
+<li><b>Download the latest 1.1.x rpm: </b><a href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux/tinyos-1.1.15Dec2005cvs-1.noarch.rpm">tinyos-1.1.15Dec2005cvs-1.noarch.rpm</a></li>
+</li>
+<li><b>Install.</b> As root in linux install the 1.1.15 rpm with <br>
+    <div style="margin-left: 40px; font-family: monospace;">rpm -Uvh --prefix
+<span style="font-style: italic;">TINYOSDIR</span> 
+tinyos-1.1.15Dec2005cvs-1.noarch.rpm<br>
+cd <span style="font-style: italic;">TINYOSDIR;</span> chown -R <span
+ style="font-style: italic;">USER.GROUP</span> tinyos-1.x<br>
+    </div>
+This will install TinyOS in <span
+ style="font-style: italic; font-family: monospace;">TINYOSDIR</span><span
+ style="font-family: monospace;">/tinyos-1.x</span>),  for user <span
+ style="font-style: italic; font-family: monospace;">USER</span> (with
+group <span style="font-style: italic; font-family: monospace;">GROUP</span>).
+Installing this rpm will take a while as the java code will be compiled.<br>
+Note that this only allows one TinyOS source tree per machine, see the <a
+ href="install-cvs.txt">directions for using a CVS-based tree</a> if you
+need several distinct source trees.</li>
+  <li>You're done! Check the documentation in
+/opt/tinyos-1.x/doc/index.html for more information. See <a
+ href="#INSTALLING_AND_UPDATING_PACKAGES">Installing
+and Updating Packages</a> if you want to install further packages.<br>
+  </li>
+</ul>
+<h3><a name="INSTALLING_AND_UPDATING_PACKAGES"></a>INSTALLING AND
+UPDATING PACKAGES</h3>
+The <a href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux">http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/linux</a>
+and <a href="http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows">http://webs.cs.berkeley.edu/tos/dist-1.1.0/tinyos/windows</a>
+directories contain a number of optional packages you can install if you
+wish. Most packages in those directories were released along with TinyOS 1.1.0, 
+but will work with 1.1.x snapshots. Several packages have released new 
+minor versions since 1.1.0. Download the appropriate rpms, and install them with <span
+ style="font-family: monospace;">rpm -ivh &lt;rpm file name&gt;</span>
+(first installation) or <span style="font-family: monospace;">rpm -Uvh
+&lt;rpm file name&gt;</span> (upgrade). 
+
+</body>
+</html>

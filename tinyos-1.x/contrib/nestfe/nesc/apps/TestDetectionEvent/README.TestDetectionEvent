@@ -1,0 +1,6 @@
+See lib/detectionevent/EventGenerator/README.EventGenerator for how to
+enable the different event generators (assuming you've compiled them 
+into your application).
+
+To add/remove Event Generators to your compiled application,
+uncomment/comment the lines in TestDetectionEventC as necessary.

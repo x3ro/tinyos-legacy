@@ -1,0 +1,404 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>CC1000 Radio Stack Manual</title>
+</head>
+
+<body  bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%">
+<font face="tahoma,arial,helvetica"><b><big><big>MICA2 Radio Stack for TinyOS</big></big></b>
+<p>
+Last updated 03 Sep 2003
+</font>
+</td></tr>
+</table>
+
+<br>
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">Overview</font></b></td>
+</tr></table>
+
+<p>The MICA2 series of sensor motes use the <a href="http://www.chipcon.com">ChipCon</a> model 
+<a href="http://www.chipcon.com/index.cfm?kat_id=2&subkat_id=12&dok_id=14">CC1000</a> single-chip RF 
+transceiver. Features of this radio include:</p>
+<ul>
+  <li>Frequency selectable from 300-1000 MHz *</li>
+  <li>FSK modulation w/ data rates up to 76.8 kBaud</li>
+  <li>Hardware based Manchester encoding</li>
+  <li>Integrated bit synchronizer</li>
+  <li>-110 dBm sensitivity (@ 2.4 kBaud)</li>
+  <li>Selectable power states</li>
+  <li>Digital control interface using special function registers</li>
+</ul>
+<p>* Note: While the operating freq. is software selectable, external hardware 
+attached to the CC1000 is set to operate in one frequency band. That is, a board 
+set to operate in 433 MHz band will not operate at the 868/915 MHz 
+bands. <a href="mica2freq.html">How do I 
+tell what my operating range is?</a></p>
+<p>This document describes the principles and operations of the 
+software components used to drive the CC1000 for TinyOS.</p>
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">Description</font></b></td>
+</tr></table>
+
+<p><b>Figure 1</b> illustrates the overall component and configuration architecture for 
+the CC1000 Stack.</p>
+<p align="center"><a href="CC1000StackFig.jpg">
+<img border="2" src="CC1000StackFig_small.jpg" xthumbnail-orig-image="CC1000StackFig.jpg" width="100" height="75"></a><br>
+<b>Figure 1: The CC1000 Radio Stack Architecture</b></p>
+<p>There are two core components to the stack:</p>
+<p><tt><b>CC1000RadioIntM:</b></tt> The data path module for the CC1000.This 
+module provides transmit and receive data movement using CSMA/CA based 
+contention avoidance schemes. In the receive mode, the module accepts <i>bytes</i> 
+of data from the radio via the SPI interface and performs the necessary 
+preamble detection, synchronization and CRC calculation/checks. When a 
+packet has been received, it posts a task which signals a receive event.&nbsp; 
+NOTE: While the stack computes and checks the CRC, it does not drop the packet 
+based on a bad CRC. Rather it sets the <tt>crc</tt> field of the <tt>TOS_Msg</tt> struct to be '1' if the 
+CRC is valid. <br>
+To transmit, the 
+stack checks to see if the channel is clear by searching for a preamble AND 
+monitoring received signal strength (via the ADC). When the channel is clear, it 
+toggles the radio and pushes out the preamble, sync and payload bytes. The stack also implements low 
+power listening modes and uses the Timer components to trigger RX and TX 
+periods.</p>
+<p><tt><b>CC1000ControlM:</b></tt> The control path module for CC1000 operation. This 
+module provides all of the management functions of the radio including tuning, 
+toggling between TX/RX operation, selecting power states, and reading special 
+I/O pins. It provides these features via the <tt>CC1000Control</tt> 
+interface. While most of the functionality of this stack is used by the 
+data path, it is also exported outside the radio stack for applications that may 
+need to take direct control of the stack. <tt>CC1000Const.h</tt> is a supplemental header 
+file for the control module that contains special register definitions and the 
+frequency parameters table. This file is further explained in the 
+<a href="#Usage">Usage</a> section.</p>
+<p>Both these modules and the necessary supporting modules are tied together in 
+a single configuration component: <tt>CC1000ControlC</tt>. The configuration exports the <tt>RecieveMsg</tt>, <tt>BareSendMsg</tt> and <tt>StdControl</tt> interfaces. It also exports the 
+<tt>CC1000Control</tt> interface for applications that wish additional control/monitoring 
+of the radio.</p>
+<p></p>
+<p>The MICA2 CC1000 radio implementation differs from the MICA TR1000  stack in 
+the following ways:</p>
+<ol>
+  <li>The control path is separated into it's own module, 
+allowing for different possible data-path/MAC access modules</li>
+  <li>The data path does not implement SecDed encoding or 
+  software Manchester encoding. Manchester encoding is provided by the CC1000 
+hardware.</li>
+  <li>The data path interfaces to the radio at the byte level 
+vs. the bit level. The CC1000 hardware takes care of bit-synchronization 
+and clocking. The bytes coming off the radio, however, are not necessarily 
+aligned with the data packet. The data path determines and executes the 
+  necessary bit shifts on the incoming stream.</li>
+  <li>The CRC computation is a running calculation which does 
+not require a separate pass on the received data packet.</li>
+</ol>
+<p><a name="Usage"></a></p>
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">Usage</font></b></td>
+</tr></table>
+
+
+<dir>
+  <li><a href="#Tuning">Tuning</a></li>
+  <li><a href="#Messaging">Messaging</a></li>
+  <li><a href="#Low Power">Low power operation</a></li>
+</dir>
+
+<p><a name="Tuning"></a>- <i><b>Tuning</b></i></p>
+
+<p>As is, the modules default to the following operational state after being 
+issued <tt>StdControl.init()</tt> and <tt>StdControl.start()</tt>:</p>
+
+<ul>
+  <li>Default frequency channel (see the compile time tuning options below)</li>
+  <li>19.2 kbps data rate (38.4 kbps chip rate)</li>
+  <li>High sensitivity mode (longest settling time)</li>
+  <li>0 dBm TX power (10.4 mA)</li>
+  <li>Radio ON, in RX mode</li>
+</ul>
+
+<p>The CC1000 uses a digital frequency synthesizer to select a particular 
+send/receive channel. Specific control registers are 
+programmed with values according to the channel and FSK separation used.<b> 
+Because of the nature of the synthesizer, it is only capable of reproducing 
+discrete frequencies in the operating range of the device.</b> The manufacturer 
+provides tools to determine these optimal frequencies and their associated 
+control values, but they are unintuitive and cumbersome to use.</p>
+
+<p>The TinyOS stack and related tools take the guesswork out of tuning the 
+CC1000 for the MICA2 series motes. The stack will automatically compute the 
+nearest channel for a given frequency and program the necessary register values (<i>manual tuning</i>), 
+or use pre-determined values from a preset table (<i>preset tuning</i>). In 
+addition, the <tt>channelgen</tt> tool&nbsp; provides a means to verify 
+the actual channel used by the radio and simplify the generation of new presets.</p>
+
+<p><b>Important Points on tuning the CC1000:</b></p>
+
+<ol>
+  <li>Tune only in the operating range designed for your sensor device. <a href="mica2freq.html">How do I 
+tell what my operating range is?</a></li>
+  <li>Choose separate channels with a minimum spacing of 150 KHz.</li>
+  <li>Always set a default frequency when compiling your application using one 
+  of the 'Compile time' options listed below.</li>
+  <li>Use the provided functions/tools with TinyOS to tune or establish presets.</li>
+</ol>
+
+<blockquote>
+
+<p><u><i>Manual Tuning (PREFERRED METHOD)</i></u></p>
+
+<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="78%" id="AutoNumber1">
+  <tr>
+    <td width="5%">&nbsp;</td>
+    <td width="14%">Runtime: </td>
+    <td width="94%"> <tt>CC1000Control.TuneManual(uint32_t DesiredFreq)</tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+(<tt>DesiredFreq</tt> is in Hz)</td>
+  </tr>
+  <tr>
+    <td width="5%">&nbsp;</td>
+    <td width="14%">Compile time: </td>
+    <td width="94%"> <tt>-DCC1K_DEF_FREQ=&lt;DesiredFreq&gt;</tt></td>
+  </tr>
+</table>
+<p>This method is the preferred method of tuning the mica2 radio. The control path function <tt>CC1000Control.TuneManual()</tt> takes a desired 
+frequency in Hz, computes the optimal achievable frequency, determines the necessary control register values, programs the 
+CC1000 and calibrates the device. It returns the frequency, in Hz, of the actual 
+channel.&nbsp;Defining the compiler flag 
+<tt>CC1K_DEF_FREQ=x</tt> sets the default frequency for the device when 
+compiling the application. For example, the command:</p>
+
+<p>&nbsp;&nbsp;&nbsp; bash% <tt>CFLAGS=-DCC1K_DEF_FREQ=916400000 make mica2</tt></p>
+
+<p>will build your application using a default frequency around 916.400 MHz. You 
+can alternatively put the compiler flag as a part of your custom build 
+environment.</p>
+
+<p>&nbsp;Using manual tuning does not affect the modem control 
+registers (default data rate is 38.4 Kbaud/19.2 Kbps). </p>
+
+<p><u><i>Preset Tuning</i></u>&nbsp;&nbsp;&nbsp;  </p>
+
+<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="78%" id="AutoNumber1">
+  <tr>
+    <td width="5%">&nbsp;</td>
+    <td width="14%">Runtime:</td>
+    <td width="94%"> <tt>CC1000Control.TunePreset(uint8_t Index)</tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+(<tt>Index</tt> is the preset index value)</td>
+  </tr>
+  <tr>
+    <td width="5%">&nbsp;</td>
+    <td width="14%">Compile time: </td>
+    <td width="94%"> <tt>-DCC1K_DEF_PRESET=&lt;Index&gt; </tt></td>
+  </tr>
+</table>
+
+<p>Th<tt>e CC1K_Params[]</tt> table in <tt>CC1000Const.h</tt> defines  specific operating 
+parameters for a given frequency/datarate combination. The table resides in 
+flash memory to minimize RAM footprint. The control path function 
+<tt>CC1000Control.TunePreset()</tt> takes a given index in this table, sets 
+the register values and calibrates the device. Defining the compiler flag 
+<tt>CC1K_DEF_PRESET=N</tt> sets the default preset index to use when compiling the 
+application. For example:</p>
+
+<p>&nbsp;&nbsp;&nbsp; bash% <tt>CFLAGS=-DCC1K_DEF_PRESET=2 make mica2</tt></p>
+
+<p>will build an application using preset #2 from the preset table.&nbsp; You 
+can alternatively put the compiler flags as a part of your custom build 
+environment.</p>
+
+<p>The TinyOS-1.1 distribution comes with some pre-packaged presets 
+defined in <tt>CC1000Const.h</tt>. Use the <tt>channelgen</tt> tool to generate additional presets 
+if desired. <br>
+NOTE:
+When using preset tuning, ALL of the preset parameters are programmed in the 
+device, including the modem control registers.</p>
+
+<p><u><i>Using</i> <tt>channelgen</tt></u></p>
+
+<p>To build the tool, change to the <tt>tools/src/CC1000</tt> directory and type '<tt>make</tt>' at 
+the command prompt.</p>
+
+<p>SYNOPSIS</p>
+
+<blockquote>
+
+<p><tt><b>channelgen</b> [options] FREQUENCY</tt></p>
+
+</blockquote>
+
+<p>DESCRIPTION</p>
+
+<p>The <b><tt>channelgen</tt></b> tool generates CC1000 channel information for the given 
+desired <tt>FREQUENCY</tt>. The application emulates the <tt>TuneManual()</tt> component function 
+of the radio stack and implements the same calculation engine. It can be used to 
+determine what actual frequency the radio will use given a desired frequency 
+and/or to generate a preset table entry. By default, <b><tt>channelgen</tt></b> provides only 
+actual channel information. </p>
+
+<p>OPTIONS</p>
+
+<blockquote>
+
+<p><b><tt>-p</tt></b> Print C-style preset table entry.</p>
+
+</blockquote>
+
+</blockquote>
+
+<p>The <tt>CC1000Control</tt> interface provides additional functions to control various functions 
+of the radio at runtime. Users should refer to documentation comments in 
+the file <tt>CC1000Control.nc</tt>.</p>
+
+<p><b><i><a name="Messaging"></a>- Messaging</i></b></p>
+
+<p>The component <tt>CC1000RadioC</tt> exports the BareSendMsg and ReceiveMsg 
+interfaces. Their function the same as that for the original MICA stack and can 
+be directly connected to components using these interfaces. </p>
+
+<p><i><b><a name="Low Power"></a>- Low Power Operation</b></i></p>
+
+<p>The data path provides a method of altering the duty cycle state of the radio 
+to meet power constraints of the application and/or power source. 
+<tt>CC1000RadioIntM</tt> exports individual commands to set and determine the present 
+duty cycle mode for both the receiving and transmitting side of the data path.&nbsp;&nbsp; 
+The functions are summarized in Table 1.&nbsp; The associated listening states 
+are summarized in Table 2.&nbsp; </p>
+
+<p>Note that BOTH the receiver and transmitter must be in the same mode to 
+communicate.</p>
+
+<div align="center">
+  <center>
+
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="87%" id="AutoNumber2">
+  <tr>
+    <td width="41%">
+    <p align="center"><b>Command Declaration</b></td>
+    <td width="59%">
+    <p align="center"><b>Description</b></td>
+  </tr>
+  <tr>
+    <td width="41%"><tt>result_t SetListeningMode(uint8_t power)</tt></td>
+    <td width="59%">Sets the receiver duty cycle mode.<blockquote>
+      <p><i>Parameters:</i> <tt>power</tt> - The index of the desired duty cycle mode.<br>
+      <i>Returns:</i> <tt>SUCCESS</tt> if the duty cycle mode was set.</p>
+    </blockquote>
+    </td>
+  </tr>
+  <tr>
+    <td width="41%"><tt>uint8_t GetListeningMode()</tt></td>
+    <td width="59%">Get the current receiver duty cycle setting.<blockquote>
+      <p><i>Returns:</i> The index of the present receiver duty cycle mode</p>
+    </blockquote>
+    </td>
+  </tr>
+  <tr>
+    <td width="41%"><tt>result_t SetTransmitMode(uint8_t power)</tt></td>
+    <td width="59%">Set the transmitter duty cycle mode.<blockquote>
+      <p><i>Parameters:</i> <tt>power</tt> - The index of the desired duty cycle mode.<br>
+      <i>Returns:</i> <tt>SUCCESS</tt> if the duty cycle mode was set.</p>
+    </blockquote>
+    </td>
+  </tr>
+  <tr>
+    <td width="41%"><tt>uint8_t GetTransmitMode()</tt></td>
+    <td width="59%">Get the current transmitter duty cycle mode.<blockquote>
+      <p><i>Returns:</i> The index of the present transmitter duty cycle mode.</p>
+    </blockquote>
+    </td>
+  </tr>
+</table>
+
+  </center>
+</div>
+
+<p align="center"><b>Table 1: Radio data path duty cycle control commands.</b></p>
+
+<p align="center">&nbsp;</p>
+
+<div align="center">
+  <center>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="65%" id="AutoNumber3">
+    <tr>
+      <td width="9%" align="center"><b>Mode</b></td>
+      <td width="23%" align="center"><b>Duty Cycle %)</b></td>
+      <td width="36%" align="center"><b>Max Packet Rate (pkts/sec)</b></td>
+      <td width="32%" align="center"><b>Effective Data Rate (kbps)</b></td>
+    </tr>
+    <tr>
+      <td width="9%" align="center">0</td>
+      <td width="23%" align="center">100</td>
+      <td width="36%" align="center">42.93</td>
+      <td width="32%" align="center">12.364</td>
+    </tr>
+    <tr>
+      <td width="9%" align="center">1</td>
+      <td width="23%" align="center">35.5</td>
+      <td width="36%" align="center">19.69</td>
+      <td width="32%" align="center">5.671</td>
+    </tr>
+    <tr>
+      <td width="9%" align="center">2</td>
+      <td width="23%" align="center">11.5</td>
+      <td width="36%" align="center">8.64</td>
+      <td width="32%" align="center">2.488</td>
+    </tr>
+    <tr>
+      <td width="9%" align="center">3</td>
+      <td width="23%" align="center">7.53</td>
+      <td width="36%" align="center">6.03</td>
+      <td width="32%" align="center">1.737</td>
+    </tr>
+    <tr>
+      <td width="9%" align="center">4</td>
+      <td width="23%" align="center">5.61</td>
+      <td width="36%" align="center">4.64</td>
+      <td width="32%" align="center">1.336</td>
+    </tr>
+    <tr>
+      <td width="9%" align="center">5</td>
+      <td width="23%" align="center">2.22</td>
+      <td width="36%" align="center">1.94</td>
+      <td width="32%" align="center">0.559</td>
+    </tr>
+    <tr>
+      <td width="9%" align="center">6</td>
+      <td width="23%" align="center">1.00</td>
+      <td width="36%" align="center">0.89</td>
+      <td width="32%" align="center">0.258</td>
+    </tr>
+  </table>
+  </center>
+</div>
+
+<p align="center"><b>Table 2: Duty cycle modes and their corresponding packet 
+and data rates.</b></p>
+
+<table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+<tr bgcolor="#e0e0ff">
+<td width="100%"><b><font face="arial,helvetica">Updates</font></b></td>
+</tr></table>
+
+<p>This page will be updated as new features/fixes are made to the radio stack.</p>
+
+<p>Last updated:
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/17/2003<!--webbot bot="Timestamp" endspan i-checksum="12605" --></p>
+
+<p></p>
+
+</body>
+
+</html>

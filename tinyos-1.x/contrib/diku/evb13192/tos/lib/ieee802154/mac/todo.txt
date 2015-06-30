@@ -1,0 +1,15 @@
+
+TODO:
+-------
+ - Only wait for frame response timeouts while in CAP!
+ - Beacon tracker needs to handle beacon payload
+ - Disassociate (Should be easy!)
+ - Indirect tx module..
+ - CFP & GTS (including gts support in beacons)
+ - Data transmission (direct, indirect, GTS) and reception
+ - Beacon generation (including the start primitive and coordinator CAP)
+ - Associate functions for coordinator! (Handling indication & response)
+ - RxEnable (should be easy when we have CAP control in place)
+ - Reset?
+ - Orphan handling
+ - PAN conflict handling

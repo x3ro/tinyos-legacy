@@ -1,0 +1,27 @@
+1. INTRODUCTION
+
+  This application tests the basic functionality of the low-power listen (LPL)
+  MAC. In this MAC nodes randomly polls for channel activity. A sender sends 
+  a long preamble before each packet to wake up the receiver.
+
+2. FUNCTIONALITY
+
+  This application used the common implementation in apps/MacTest/, and 
+provides wiring and configuration for LPL
+
+3. HOW TO USE
+
+   Suppose you are using 3 motes as the default setting.
+   
+   1) Compile and install by 'make mica2' and 'make install mica2'.
+   2) You can either specify node ID by using 'make install.x mica', 
+      where x is the node ID.
+   3) Each node first sends 10 broadcast messages, and followed by 10 
+      unicast message. The default unicast address for each node is
+      - node 1 sends to node 2
+      - node 2 sends to node 3
+      - node 3 sends to node 1
+     This triangle makes sure their transmissions are interfere with each other.
+   
+   You can specify different parameters and options in the config.h file.
+

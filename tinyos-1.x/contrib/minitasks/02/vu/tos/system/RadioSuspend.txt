@@ -1,0 +1,22 @@
+RadioSuspend:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+The RadioSuspend component allows to temporaly shot down the wireless communication 
+stack. This crude hack is required because the GenericComm.StdControl interface
+(in the tinyos-1.0 distribution) does not work properly: the stop() and stop() 
+methods do not stop and restart the stack. 
+
+Robert Szewczyk indicated that a properly working GenericCommm can be found on
+the SourceForge CVS in the PowerManagementDemo, which will eventually be the default
+implementation. You probably want to develop application using that and not 
+our RadioSuspend component.
+
+TESTING:
+
+Two testing components are included. The first, TestRadioSuspend1C.nc, checks if
+we can send a message, suspend radio, resume the radio from a timer and restart this
+sequence again. The second component tests the maximum interrupt rates that we can 
+achieve with the stack running/ with the stack suspended and without the stack.

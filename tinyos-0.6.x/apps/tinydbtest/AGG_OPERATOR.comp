@@ -1,0 +1,31 @@
+TOS_MODULE AGG_OPERATOR;
+
+#include "TinyDB.h"
+#include "SchemaAPI.h"
+
+ACCEPTS{
+	TinyDBError AGG_OPERATOR_PROCESS_PARTIAL_RESULT(QueryResult *qr, ParsedQuery *qs, Expr *e);
+	TinyDBError AGG_OPERATOR_NEXT_RESULT(QueryResult *qr, ParsedQuery *qs, Expr *e);
+	TinyDBError AGG_OPERATOR_PROCESS_TUPLE(ParsedQuery *qs, Tuple *t, Expr *e);
+	void AGG_RESET_EXPR_STATE(ParsedQuery *q, Expr *e);	
+};
+
+SIGNALS{
+	TinyDBError AGG_OPERATOR_PROCESSED_RESULT(QueryResult *qr, ParsedQuery *q, Expr *e);
+	TinyDBError AGG_OPERATOR_PROCESSED_TUPLE(Tuple *t, ParsedQuery *q, Expr *e);
+};
+
+HANDLES{
+	void AGG_ALLOC_DONE(char ***handle, char success);
+	void AGG_REALLOC_DONE(char **handle, char success);
+	void AGG_FINISHED_QUERY(ParsedQuery *q);
+};
+
+USES{
+	short AGG_OP_GET_FIELD_SIZE(ParsedQuery *q, char field);
+	CharPointer AGG_OP_GET_FIELD_PTR(ParsedQuery *q, Tuple *t, char field);
+	char AGG_ALLOC(char ***handle, short size);	
+	char AGG_REALLOC(char **handle, short size);	
+	short AGG_FREE(char **handle);
+	void AGG_DEBUG_MEMORY();
+};

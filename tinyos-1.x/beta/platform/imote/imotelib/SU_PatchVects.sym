@@ -1,0 +1,16 @@
+#<SYMDEFS>#
+;
+; SU_PatchVects.sym
+;
+;       Symbols for refrencing patch vectors in Flash
+
+0x0020 A SU_PtchV0      ;Patch for Reset vector
+0x0024 A SU_PtchV1      ;Patch for Undef instruction vector
+0x0028 A SU_PtchV2      ;Patch for SWI vector
+0x002c A SU_PtchV3      ;Patch for Prefetch abort vector
+0x0030 A SU_PtchV4      ;Patch for Data abort vector
+0x0034 A SU_PtchV5      ;Patch for Reserved vector
+0x0038 A SU_PtchV6      ;Patch for IRQ vector
+0x003c A SU_PtchV7      ;Patch for FIQ vector
+
+

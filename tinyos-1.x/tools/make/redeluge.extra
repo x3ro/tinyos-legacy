@@ -1,0 +1,14 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: redeluge.extra,v 1.3 2005/07/28 22:12:05 jwhui Exp $
+
+PROGRAM = deluge
+BUILD_DEPS = program
+
+ifndef REDELUGE
+$(error No Deluge image number specified)
+endif
+
+program: FORCE
+	java net.tinyos.tools.Deluge -f -i -in=$(REDELUGE) -ti=$(BUILDDIR)/tos_image.xml
+	java net.tinyos.tools.Deluge -f -r -in=$(REDELUGE)
+

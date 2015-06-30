@@ -1,0 +1,9 @@
+typedef enum {
+  REDUCE_OP_ADD,
+  REDUCE_OP_PROD,
+  REDUCE_OP_MIN,
+  REDUCE_OP_MAX,
+  REDUCE_OP_MINID,
+  REDUCE_OP_MAXID,
+} operator_t;
+

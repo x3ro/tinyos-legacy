@@ -1,0 +1,7 @@
+
+This program uses a SLEEP component to periodically put itself 
+into a low-power state (~300uA).  When it wakes up, it takes a
+few ADC measurements, blinks the leds, and goes back to sleep.
+
+
+

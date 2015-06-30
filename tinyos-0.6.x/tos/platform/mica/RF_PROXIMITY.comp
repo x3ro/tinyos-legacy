@@ -1,0 +1,13 @@
+TOS_MODULE RF_PROXIMITY;
+
+ACCEPTS{
+	void RF_PROXIMITY_START();
+};
+
+USES{
+	void RF_PROXIMITY_SLEEP(char prescale);
+};
+
+
+
+

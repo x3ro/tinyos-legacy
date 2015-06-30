@@ -1,0 +1,157 @@
+<html>
+<title>TestBed Config README
+</title>
+<link rel="stylesheet" href="style.css">
+<body>
+<h1>Testbed Config</h1>
+Author: Rodrigo Fonseca (rfonseca at cs.berkeley.edu)
+
+<p>This is the description for a set of tools to interface with static ethernet testbeds. It consists of a *very*
+simple configuration specification, a perl module and a java class to parse it, and a set of scripts and programs (perl, 
+bash, and java).
+
+<h2> Configuration File Format </h2>
+The configuration file is very simple, and the parser is not very robust.
+All lines starting with '#' are ignored, as well as blank lines.
+
+A line starting with <pre>platform</pre> indicates the platform that the testbed uses. Currently,
+we assume all motes to be of the same platform.
+
+A line starting with <pre>mote</pre> specifies a ... mote! The format is:
+<pre>mote &lt;id&gt; &lt;ip address&gt; &lt;x&gt; &lt;y&gt; </pre>.
+
+<p>
+x and y are used by some other scripts, for example to draw graphs of the testbed, etc.
+
+<h2> Utilities </h2>
+<h3> Environment Variables </h3>
+<pre>
+  TOS_TESTBED_CONFIG - some scripts expect this to point to the testbed configuration file you want to use
+</pre>
+<h3> Programming motes </h3>
+<pre>testbed-program.pl</pre> is a wrapper to the rsc scripts that reads from a configuration file and
+allows interaction with the testbed (programming, pinging, etc). It requires an extra argument,
+<pre>--testbed=<file></pre>, that indicates the file.
+
+<h3> Running Experiments </h3>
+<p>
+The format of experiments I am currently running creates a serial forwarder to each mote,
+which forwards the data to and from port 9100 + mote id. 
+The reason for this is that this indirection is useful if you want to multiplex access to the motes:
+otherwise, if you connect directly to the mote from the packet logger, you can't open a second connection simultaneously.
+I use this to log and at the same time send commands to the motes.
+<p>
+Use <pre> testbed_start_sf.pl </pre> to start the serial forwarders. It reads the config file from <pre>$TOS_TESTBED_CONFIG</pre>
+and starts them.
+
+<p> Then start <pre>java net.tinyos.testbed.TestBedPacketLogger &lt;testbed config file&gt; &lt;time&gt; to run(seconds)></pre>.
+This will log all packets that the motes send to the UART to a binary file, and
+to STDOUT in textual format. 
+
+<p>The format of the text output is:
+<pre>
+  <id> <time in ms> <hex short>
+</pre>
+
+<p>id and time are decimal numbers, and the other bytes are 0X (hex) representations of
+the packet bytes.
+
+<p>The format of the binary output is as follows. The byte order is whatever java's DataOutputStream writes.
+<pre>
+  short id;
+  long  time;
+  short packet_length;
+  byte[packet_length] packet;
+</pre>
+
+
+<h2> Using the Perl Module </h2>
+
+The perl module TinyOS::Util::TestBedConfig is useful for creating simple iterators over the motes in a given testbed
+configuration. testbed-program.pl, eraselabapp.pl, and resetlabapp.pl provide nice examples os the usage.
+
+<h3> 1. Make the module accessible:</h3>
+
+Place it into a directory, such as /path/to/TinyOS/Util/TestBedConfig.pm
+
+Add the directory to you environment variable:
+
+<pre>
+  export PERL5LIB=$PERL5LIB:/path/to/scripts  (bash) or <br>
+  setenv PERL5LIB $PERL5LIB:/path/to/scripts
+</pre>
+
+<h3> 2. Use it</h3>
+
+Quick help
+
+<pre>
+   use TinyOS::Util::TestBedConfig;
+   $cfg = TinyOS::Util::TestBedConfig->new($config_file);
+   $n = cfg->getNumberOfMotes();
+</pre>
+
+Iterating over the motes
+
+<pre>
+   my @mote_array;
+   $cfg->getMotes(\@mote_array);
+   for $mote (@mote_array) {
+      $address = $mote->{'address'};
+      $id      = $mote->{'id'};
+      $x       = $mote->{'x'};
+      $y       = $mote->{'y'}; 
+      #do whatever you want
+   }
+</pre>
+Other calls:
+<pre>
+   $moteref = getMote($id);
+   getMotes(\@array);
+   $n = getNumberOfMotes();
+   $platform = getPlatform();
+</pre>
+
+The array of motes returned by getMotes() is an array of hash references with the following keys:
+
+<ul>
+<li> 'address' is the ip address or host name of the mote
+<li> 'id' is the mote id (TOS_LOCAL_ADDRESS for the mote)
+<li> 'x' is the x coordinate of the mote in the testbed
+<li> 'y' is the y coordinate of the mote in the testbed
+</ul>
+
+<h2> Using the Java Class </h2>
+
+The java class, net.tinyos.testbed.TestBedConfig, has a very similar usage.
+It is used, for example, by TestBedPacketLogger to create the packet listeners.
+The main method also provides an example.
+
+<h3> Method summary</h3>
+
+<pre>
+  TestBedConfig.TestBedConfigMote getMote(int i)
+  java.util.Iterator getMotesIterator()
+  int getNumberOfMotes()
+</pre>
+
+<p>Method summary for <pre>TestBedConfigMote</pre>. This is just a wrapper for the information in the config file about a mote.
+
+<p>Constructor Summary</pre>
+
+<pre>
+  TestBedConfig.TestBedConfigMote(int id, java.lang.String address)
+  TestBedConfig.TestBedConfigMote(int id, java.lang.String address, double x, double y)
+</pre>           
+ 
+<p>Method Summary</p>
+<pre>
+  java.lang.String getAddress()
+  int getId()
+  double getX()
+  double getY()
+</pre>
+
+           
+</body>
+</html>

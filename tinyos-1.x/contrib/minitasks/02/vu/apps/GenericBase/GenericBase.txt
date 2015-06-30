@@ -1,0 +1,35 @@
+GenericBase:
+
+Author/Contact:
+    janos.sallai@vanderbilt.edu (Janos Sallai, ISIS, Vanderbilt)
+    miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+This component is a modification of the native GenericBase component. It
+uses SyncedCRCPacket as the packet abstraction layer, which adds CRC and
+integrity check and a two-byte-long message preamble to provide a more
+robust error recovery mechanism. This implementation uses an internal
+buffer of messages to avoid dropping packets. The native implementation
+can drop short messages because transmitting them on the UART takes longer
+than they can be received from the radio.
+
+LEDS:
+
+The green LED is toggled when receiving a radio message with our group id.
+
+The red LED is toggled when receiving a message from the UART.
+
+The yellow LED is toggled when receiving a message from the UART with the 
+incorrect group id. In this case we correct the group id, and retransmit
+it over the radio. The yellow LED is also toggled when the internal buffer
+kept for incoming and outgoing messages is full, or in case of a CRC
+error.
+
+USAGE:
+
+Note that because of using SyncedCRCPacket for commmunication over the
+UART, CRC and the message preamble have to be properly handled on the PC.
+The corresponding java programs, a modified version of SerialForwarder and
+SerialSourceStub can be found in tools/java/isis/nest/sf and at
+tools/java/isis/nest/util/SyncedCRCSerialPortStub.java respectively.

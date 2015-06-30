@@ -1,0 +1,500 @@
+\documentclass[11pt]{article}
+\usepackage{html}
+\usepackage{psfig}
+\usepackage{nomencl}
+\oddsidemargin  -0.1in   %  Note that \oddsidemargin = \evensidemargin
+\evensidemargin -0.1in
+
+%\topmargin -55pt         %    Nominal distance from top of page to top
+%                         %    of box containing running head.
+\headheight 12pt         %    Height of box containing running head.
+%\headsep 25pt            %    Space between running head and text.
+%\footskip 60pt           %    Distance from baseline of box containing
+
+
+\textheight 9.125in        % Height of text (including footnotes and
+                         % figures, excluding running head and foot).
+\textwidth 6.75in         % Width of text line.
+                         % For two-column mode:
+
+\textheight 9.125in        % Height of text (including footnotes and
+                         % figures, excluding running head and foot).
+\textwidth 6.75in         % Width of text line.
+                         % For two-column mode:
+\renewcommand{\baselinestretch}{1.2}
+
+
+\newcommand{\docroot}{broken/dev}
+
+\begin{latexonly}
+\title{\vspace{2.5in} TinySchema: Creating Attributes and Commands in TinyOS}
+\end{latexonly}
+\begin{htmlonly}
+\title{TinySchema: Managing Attributes and Commands in TinyOS}
+\end{htmlonly}
+\author{Wei Hong and Sam Madden \\
+	whong@intel-research.net, madden@cs.berkeley.edu}
+\date{}
+
+\begin{document}
+\pagenumbering{arabic}
+%\pagestyle{myheadings}
+\markright{{\bf TinySchema Documentation. }}
+
+\maketitle
+\begin{latexonly}
+\vspace{2in}
+\end{latexonly}
+\begin{center}
+Version 0.1 \\
+August 21, 2002
+\end{center}
+
+
+\begin{latexonly}\newpage\end{latexonly}
+\section{Introduction}
+
+{\em TinySchema} is a collection of TinyOS components that manages
+a small respository of named attributes and commands that can be
+easily queried or invoked from inside or outside a mote network.
+A TinySchema {\em attribute} is much like a column in a traditional database system.
+It has a name and a type.  In addition, TinySchema allows you to
+associate arbitrary TinyOS code to each attribute for getting
+and setting the attribute value.  Once an attribute is created, it can
+be retrieved or updated through a unified interface provided by TinySchema.
+{\em TinyDB} (see TinyDB document), the in-network query
+processing system for TinyOS, is one of the applications built on top
+of this interface.  You can also build your own application for manipulating
+attributes based on the interfaces provided by TinySchema.  Typically, there
+are three classes of attributes:
+\begin{itemize}
+\item Sensor Attributes.  These can be raw readings from sensors such as
+temperature and photo sensors, accelerometers, magnetometers, etc.
+They can also be computed sensor values after applying some calibration
+or signal processing logic.
+\item Introspective Attributes.  These are values from internal
+software or hardware states, e.g., software version stamp, parent node
+in routing tree, battery voltage, etc.  They are very useful for
+monitoring the health and statistics of a mote network.
+\item Constant Attributes.  These are constant values assigned to
+a mote at programming time or run time, e.g., node id, group id, name,
+location, etc.
+\end{itemize}
+
+A TinySchema {\em command} is much like a stored procedure in a traditional
+database system.  It consists of a name, a list of arguments and a return
+type.  You can associate arbitrary TinyOS code to each command.
+TinySchema provides a unified interface for invoking these commands.
+TinyDB is also built on top of the TinySchema command interfaces for
+its trigger actions (see TinyDB document).  Typically, there are two
+classes of commands:
+\begin{itemize}
+\item Actuation Command.  These are commands that cause some physical
+actions on a mote, e.g., rebooting a mote, flash LEDs, sound buzzer,
+raise a blind (when connected to an appropriate actuator), etc.
+\item Tuning Command.  These are commands that adjust internal parameters,
+e.g., routing policy, number of retransmissions, sample rate, etc.
+\end{itemize}
+
+Currently all attributes and all commands must be staticly built
+into each mote.  We plan to integrate with the virtual machines being
+developed for the TinyOS such as Mate and Mottle to allow dynamic
+creation of attributes and commands.
+
+TinySchema only runs on MICA motes with NesC.
+
+\section{System Overview}
+
+TinySchema has two separate components in {\tt \docroot/tos/lib}:
+{\em Attr.td} and {\em Command.td}.  {\em Attr} provides all attributes
+related interfaces and {\em Command} provides all command related interfaces.
+
+{\em Attr} provides the following interfaces:
+\begin{itemize}
+\item {\tt StdControl} for initialization.
+\item {\tt AttrRegister} for creating new attributes.  It is parametrized
+by a {\tt uint8\_t} (for up to 256 such interfaces).  Each non-constant attribute must be
+connected to one of these interfaces.  The coding convention is not
+to hardwire a specific number when you wire to one these 256 interfaces, but
+to wire your interface to {\tt Attr.Attr[unique("Attr")]} and let
+the NesC compiler to automatically choose a unique number for you.
+\item {\tt AttrRegisterConst} for creating new constant attributes.  It is a
+simplified interface of AttrRegister for attributes associated to 
+constant values only.
+\item {\tt AttrUse} for discovering and using attributes.
+\end{itemize}
+
+{\em Command} provides the following interfaces:
+\begin{itemize}
+\item {\tt StdControl} for initialization.
+\item {\tt CommandRegister} for creating new commands.  It is parametrized
+by a {\tt uint8\_t} (for up to 256 such interfaces).  Each command must be connected to
+one of these interfaces.  The coding convention is not
+to hardwire a specific number when you wire to one these 256 interfaces, but
+to wire your interface to {\tt Command.Cmd[unique("Command")]} and let
+the NesC compiler to automatically choose a unique number for you.
+\item {\tt CommandUse} for discovering and using commands.
+\end{itemize}
+
+We will describe each of the above interfaces in details in the next
+section.
+
+\section{Detailed Interface Descriptions}
+
+\subsection{Data Types and Error Codes}
+All of TinySchema's data types and error codes are defined in 
+{\tt \docroot/tos/interfaces/SchemaTypes.h}.
+
+The following data types are supported:
+\begin{itemize}
+\item {\tt VOID}: the void type.  Used for defining commands that do not
+return anything.
+\item {\tt INT8 and UINT8}: 8-bit signed and unsigned integer types.
+\item {\tt INT16 and UINT16}: 16-bit signed and unsigned integer types.
+\item {\tt INT32 and UINT32}: 32-bit signed and unsigned integer types.
+\item {\tt TIMESTAMP}: not yet supported.
+\item {\tt STRING}: null-terminated ASCII strings.
+\item {\tt COMPLEX\_TYPE}: not yet supported.
+\end{itemize}
+
+Here are the error codes used in all TinySchema interfaces:
+\begin{itemize}
+\item {\tt SCHEMA\_SUCCESS}: success!
+\item {\tt SCHEMA\_ERROR}: something is wrong.
+\item {\tt SCHEMA\_RESULT\_READY}: the return result is ready in the result
+buffer.  Used for non-split-phase attributes and commands.
+\item {\tt SCHEMA\_RESULT\_NULL}: the return result is null.
+\item {\tt SCHEMA\_RESULT\_PENDING}: the return result is not yet filled in in the
+result buffer.  Must wait for the data ready event.  Used for split-phase
+attributes and commands.
+\end{itemize}
+
+\subsection{Attribute Related Interfaces}
+
+\subsubsection{Attribute Data Structures}
+
+All attribute related data structures are defined in
+{\tt \docroot/tos/interfaces/Attr.h}.  The main data
+structure is {\tt AttrDesc} which contains the definition
+of each attribute.  {\tt AttrDescs} is just an array of
+{\tt AttrDesc}'s for all the attributes defined in each mote.
+You must pay attention to the constants defined at the beginning of the
+file which defines the maximum number of attributes, maximum
+attribute name length, etc.  Do not exceed those limits!  Increase
+them as needed, but they cost more precious RAM space on a mote.
+
+\subsubsection{AttrRegister}
+
+\noindent{\tt command result\_t registerAttr(char *name, TOSType attrType, uint8\_t attrLen)}
+
+This is the command you call to register an attribute.  The {\tt attrLen} 
+argument is only relevant to variable-length types such as STRING.
+It is ignored for fixed-length types.
+
+
+\noindent{\tt event result\_t getAttr(char *name, char *resultBuf, SchemaErrorNo *errorNo)}
+
+This is the TinyOS code that you must provide for getting the value of the
+attribute you just registered through {\tt registerAttr}.  {\tt name} is 
+the name of the attribute.  It is mostly redundent, but may come in handy
+if you want to write one piece of code that supports mulitple attributes.
+{\tt resultBuf} is a pointer to a pre-allocated buffer to hold the
+value of this attribute.  You can assume
+that enough space has been allocated to hold the value of this
+attribute.  {\tt errorNo} is the return error code.  You are required
+to do one of the following in {\tt getAttr}:
+\begin{itemize}
+\item fill in the attribute value in {\tt resultBuf} and set
+{\tt *errorNo} to {\tt SCHEMA\_RESULT\_READY},
+\item or set {\tt *errorNo} to
+{\tt SCHEMA\_RESULT\_PENDING} and fill in {\tt resultBuf} later when the
+data is ready and call {\tt getAttrDone},
+\item or set {\tt *errorNo} to {\tt SCHEMA\_RESULT\_NULL},
+\item or set {\tt *errorNo} to {\tt SCHEMA\_RESULT\_ERROR}.
+\end{itemize}
+
+
+\noindent{\tt event result\_t setAttr(char *name, char *attrVal)}
+
+This is the TinyOS code that you must provide for setting the value of
+the attribute you just registered through {\tt registerAttr}.
+{\tt name} is
+the name of the attribute.  It is mostly redundent, but may come in handy
+if you want to write one piece of code that supports multiple attributes.
+{\tt attrVal} is a pointer to a value of the same type as the attribute type.
+NULL pointer means a null value.  If the value of this attribute cannot be set,
+simply return {\tt FAIL}.
+
+
+\noindent{\tt command result\_t getAttrDone(char *name, char *resultBuf, SchemaErrorNo errorNo)}
+
+This is the command you must call for split-phase attributes.  In this case,
+the {\tt getAttr} will initiate a split-phase operation, set {\tt *errorNo} to 
+{\tt SCHEMA\_RESULT\_PENDING} then return.  In the split-phase completion event
+(e.g. {\tt ADC.dataReady()}), you must call this command with the attribute
+value filled in {\tt resultBuf}.
+
+\subsubsection{AttrRegisterConst}
+
+\noindent{\tt command result\_t registerAttr(char *name, TOSType attrType, char *attrVal)}
+
+This command provides a simplified way to associate a constant value to an
+attribute without having to write the {\tt getAttr} and {\tt setAttr} code
+as described above in the {\tt AttrRegister} interface.  {\tt attrVal} points
+to a value of the {\tt attrType} type.  The {\tt Attr}
+component preallocates space to hold values for a fixed number
+({\tt MAX\_CONST\_ATTRS} defined in {\tt \docroot/tos/interfaces/Attr.h})
+of constant attributes.  This command assigns a slot in the preallocated
+space to hold the constant value at {\tt attrVal}.  The {\tt AttrUse}
+interface to be described below will automatically handle the get and set
+of the newly defined constant attributes just like any other attributes.
+Currently, a constant attribute can be at most 4 bytes long.
+
+\subsubsection{AttrUse}
+\label{sec:attruse}
+
+\noindent{\tt command AttrDescPtr getAttr(char *name)}
+
+This command returns a pointer to the attribute descriptor
+for the attribute with a name that matches the argument.
+NULL will be returned if the attribute does not exist.
+The returned attribute descriptor is NOT to be freed.
+
+
+\noindent{\tt command AttrDescPtr getAttrById(uint8\_t attrIdx)}
+
+This command returns a pointer to the attribute descriptor
+corresponding to an attribute index.
+
+
+\noindent{\tt command uint8\_t numAttrs()}
+
+This command returns the total number of attributes that have been registered.
+
+
+\noindent{\tt command AttrDescsPtr getAttrs()}
+
+This command returns the array of attribute descriptors for all the
+the attributes that have been registered.
+
+
+\noindent{\tt command result\_t getAttrValue(char *name, char *resultBuf, SchemaErorNo *errorNo)}
+
+This is the command retrieves the value of an attribute by name.
+{\tt name} is the name of the attribute.  {\tt resultBuf} is a pointer to
+a preallocated buffer to hold the attribute value.  It must be at least
+as big as the attribute length.  {\tt errorNo} is a return parameter of
+the error code.  It has the following cases:
+\begin{itemize}
+\item {\tt SCHEMA\_RESULT\_READY}.  This means
+that the value of the attribute has already been copied into {\tt resultBuf}.
+This is not a split-phase attribute.
+\item {\tt SCHEMA\_RESULT\_PENDING}.  This means that
+the attribute value is not ready.  It will be ready when the 
+{\tt getAttrDone} event is signaled.  This is a split-phase attribute.
+\item {\tt SCHEMA\_RESULT\_NULL}.  The value of this attribute is null.
+\item {\tt SCHEMA\_RESULT\_ERROR}.  Something is wrong.
+\end{itemize}
+
+
+\noindent{\tt command result\_t setAttrValue(char *name, char *attrVal)}
+
+This command sets the value of an attribute by name.  {\tt name} is the attribute name.  {\tt attrVal} is a pointer to a value of the same type as the
+attribute.  This command will return FAIL if the attribute cannot be set.
+
+
+\noindent{\tt event result\_t getAttrDone(char *name, char *resultBuf, SchemaErrorNo errorNo)}
+
+This event will be signaled after a {\tt getAttrValue} command is called on
+a split-phase attribute when the value of the attribute is ready.
+By this time, the value of the attribute is already copied into resultBuf.
+{\tt errorNo} are the same as described for {\tt getAttrValue}.
+
+\subsection{Command Related Interfaces}
+\subsubsection{Command Data Structures}
+
+All command related data structures are defined in
+{\tt \docroot/tos/interfaces/Command.h}.
+It defines the following important data structures:
+\begin{itemize}
+\item {\tt CommandDesc} is for a command descriptor.
+\item {\tt CommandDescs} is for an array of command descriptors.
+\item {\tt ParamList} is a list of parameter types used in command definitions.
+There is a convinient varg function {\tt setParamList} to 
+populate a {\tt ParamList} with a list of types.
+\item {\tt ParamVals} is a a list of parameter values for command invocation.
+\end{itemize}
+
+You must pay attention to the constants defined at the beginning
+of {\tt Command.h} for the current limitations such as maximum number of
+parameters in a command, maximum number of commands and maximum number of
+characters in a command name.  These limits must be observed or extended
+at the cost of more RAM consumption.
+
+\subsubsection{CommandRegister}
+
+\noindent{\tt command result\_t registerCommand(char *name, TOSType retType, uint8\_t retLen, ParamList *paramList)}
+
+This NesC command registers a new TinySchema command.  {\tt name} is the
+name of the command.  {\tt retType} is the return type of the command.
+Use the {\tt VOID} type if the command does not return any value.
+{\tt retLen} is the maximum length for the return value
+for any variable length types such as {\tt STRING}.
+It is ignored for fixed-length types.
+{\tt paramList} is the list of parameter types that this
+command expects when invoked.
+
+
+\noindent{\tt event result\_t commandFunc(char *commandName, char *resultBuf, SchemaErrorNo *errorNo, ParamVals *params)}
+
+This is the TinyOS code you provide that implements the command
+that you just registered through {\tt registerCommand}.
+{\tt commandName} is the name of the command.  It is mostly redundant, but may
+come in handy when you want to write one piece of code to implement
+multiple commands.  {\tt resultBuf} is a pointer to the preallocated buffer
+this command's return value is supposed to be copied into.
+{\tt errorNo} is the return parameter for error code.  {\tt params} is
+the list of parameter values for the current invocation.
+You are required to do one of the following in {\tt commandFunc}:
+\begin{itemize}
+\item Non-split-phase return.  Copy the return value to resultBuf, 
+set {\tt *errorNo}
+to {\tt SCHEMA\_RESULT\_READY} or {\tt SCHEMA\_RESULT\_NULL} then return.
+\item Split-phase return.  Initiate the split-phase operation,
+set {\tt *errorNo}
+to {\tt SCHEMA\_RESULT\_PENDING} then return.  
+{\tt commandDone} must be called
+from the split-phase completion event.
+\item Error.  Set {\tt *errorNo} to {\tt SCHEMA\_RESULT\_ERROR} then return.
+\end{itemize}
+
+
+\noindent{\tt command result\_t commandDone(char *commandName, char *resultBuf, SchemaErrorNo errorNo)}
+
+This NesC command must be called in the split-phase completion event if
+{\tt commandFunc} returns an error code of {\tt SCHEMA\_RESULT\_PENDING}.
+{\tt commandName} is the command name.  {\tt resultBuf} is a pointer to
+a buffer the return value is supposed to be copied into.
+{\tt errorNo} is the error code.
+
+\subsubsection{CommandUse}
+
+\noindent{\tt command CommandDescPtr getCommand(char *name)}
+
+This NesC command looks up a TinySchema command descriptor by name.  NULL is returned
+if the command does not exist.
+
+
+\noindent{\tt command CommandDescPtr getCommandById(uint8\_t idx)}
+
+This NesC command looks up a TinySchema command descriptor by index.
+
+
+\noindent{\tt command uint8\_t numCommands()}
+
+This NesC command returns the total number of TinySchema commands
+currently registered.
+
+
+\noindent{\tt command CommandDescsPtr getCommands()}
+
+This NesC command returns an array of command descriptors for all
+the currently registered TinySchema commands.
+
+
+\noindent{\tt command result\_t invoke(char *commandName, char *resultBuf, SchemaErrorNo *errorNo, ParamVals *params)}
+
+This NesC command is for invoking a TinySchema command.  {\tt commandName} is
+the name of the TinySchema command.  {\tt resultBuf} is a pointer to
+the buffer the return value is supposed to be copied into.  {\tt errorNo} is
+the return parameter for error code.  {\tt ParamVals} is the
+list of parameter values to be passed into this TinySchema command.
+See the description of {\tt getAttrValue} in Section~\ref{sec:attruse}
+for all the error codes you should handle.
+
+
+\noindent{\tt command result\_t invokeMsg(TOS\_MsgPtr msg, char *resultBuf, SchemaErrorNo *errorNo)}
+
+This NesC command is a wrapper over {\tt invoke}.  It first parses the
+{\tt TOS\_Msg} into a command name and a list of parameter values then calls
+{\tt invoke}.  {\tt msg.data} is expected to start with the null-terminated
+string for command name followed by the list of parameter values tightly
+packed one after the other.  This NesC command is introduced for
+supporting remote invocation of TinySchema commands via the radio.
+
+
+\noindent{\tt event result\_t commandDone(char *commandName, char *resultBuf, SchemaErrorNo errorNo)}
+
+This is the event you are supposed to implement to handle split-phase
+command completion.  See the description for {\tt getAttrDone} event
+in Section~\ref{sec:attruse}.
+
+\section{Examples}
+
+Directories {\tt \docroot/tos/lib/Attributes} and 
+{\tt \docroot/tos/lib/Commands}
+contain all the ready-to-use components that implements
+the most common attributes and commands.
+These are also the attributes and commands that are built into TinyDB.
+They also serve as examples of TinySchema attribute and 
+command implementations. 
+The following is the list of files in these two directories and the
+corresponding attributes and commands that they implement.  If you want to
+use any of these predefined attributes or commands in your application,
+simply wire the {\tt StdControl} interface of these components to 
+{\tt Main.StdControl} and the attributes or commands will be automatically
+registered and ready to use.
+
+\begin{itemize}
+\item {\tt \docroot/tos/lib/Attributes/}
+\begin{itemize}
+\item {\tt \{AttrAccel,AttrAccelM\}.td} defines two attributes: {\em accel\_x}
+and {\em accel\_y} for the raw accelerometer readings in the X and Y axis
+respectively.
+\item {\tt \{AttrGlobal,AttrGlobalM\}.td} defines two attributes: {\em nodeid}
+and {\em group} for the node id and group id respectively.
+\item {\tt \{AttrMag,AttrMagM\}.td} defines two attributes: {\em mag\_x}
+and {\em mag\_y}.  They are maximum magnetometer readings in the X or Y axis
+at 32 samples/second since the last time you get their values.  At the same
+time, they also automatically adjust the X and Y potentiometers
+of the magnetometer to keep the readings centered and avoid railing.
+These two attributes are designed for detecting moving magnetic fields.
+For example, they are used in the car tracking demo in TinyDB in which
+the car (with a magnet) is detected by a mote based on spikes in
+the values of these two attributes.
+\item {\tt \{AttrMic,AttrMicM\}.td} defines four attributes: {\em rawmic},
+{\em noise}, {\em rawtone} and {\em tones}.  {\em rawmic} is the raw
+microphone ADC reading.  {\em noise} is the maximum microphone reading
+at 32 samples/second since last time the attribute is read.  {\em rawtone}
+returns 1 if a sounder tone is detected, 0 otherwise.  {\em tones} returns
+the total number of tones detected at 32 samples/second since the last
+time this attribute is read.
+\item {\tt \{AttrPhoto,AttrPhotoM\}.td} defines the {\em light} attribute.
+It returns the raw ADC reading from the photo sensor.
+\item {\tt \{AttrPot,AttrPotM\}.td} defines the {\em pot} attribute.  It
+returns the current potentiometer setting (transmit power).  
+This attribute can also be set.
+\item {\tt \{AttrTemp,AttrTempM\}.td} defines the {\em temp} attribute.  It
+returns the raw temperature sensor reading.
+\item {\tt \{AttrVoltage,AttrVoltageM\}.td} defines the {\em voltage} attribute.
+It returns the ADC reading for the current battery voltage.  It is an indicator
+of how much battery power is remaining.
+\end{itemize}
+\item {\tt \docroot/tos/lib/Commands/}
+\begin{itemize}
+\item {\tt \{CommandLeds,CommandLedsM\}.td} defines three commands:
+{\em SetLedR(UINT8)}, {\em SetLedG(UINT8)} and {\em SetLedY(UINT8)}.
+They control the Red, Green and Yellow LEDs on a mote respectively.
+An argument of 0 means turning the LED off, 1 means on and 2 means toggle.
+All three commands return VOID.
+\item {\tt \{CommandPot,CommandPotM\}.td} defines the {\em SetPot(UINT8)}
+command.  It sets the potentiometer value (transmit power) on a mote.
+\item {\tt \{CommandReset,CommandResetM\}.td} defines the dangerous
+{\em reset} command.  It reboots a mote.
+\item {\tt \{CommandSounder,CommandSounderM\}.td} defines the 
+{\em SetSnd(INT16)} command.  It turns on the buzzer for
+a period specified by the argument (in milliseconds).
+\end{itemize}
+\end{itemize}
+
+\end{document}

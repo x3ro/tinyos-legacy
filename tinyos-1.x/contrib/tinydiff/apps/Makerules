@@ -1,0 +1,36 @@
+#
+# Makefile to be included by each application's Makefile for S-MAC
+# Author: Mohan Mysore (Makejr was mimicked from Makesmac in contrib/s-mac)
+#
+# $Id: Makerules,v 1.1.1.2 2004/03/06 03:01:04 mturon Exp $
+#
+# $Log: Makerules,v $
+# Revision 1.1.1.2  2004/03/06 03:01:04  mturon
+# Initial import.
+#
+# Revision 1.1.1.1  2003/06/12 22:11:27  mmysore
+# First check-in of TinyDiffusion
+#
+# Revision 1.5  2003/05/08 21:18:45  mmysore
+# Old/new transceiver related changes... just making sure that the new
+# transceiver code doesn't step on the old code until we switch over to the
+# new one...
+#
+# Revision 1.4  2003/05/08 18:22:44  eoster
+# Changed include to use new Makecontrib file for including other contrib
+# dirs in a local build.
+#
+#
+
+TINYDIFF_TOSDIR = ../../tos
+
+INCLUDE = -I. -I$(TINYDIFF_TOSDIR)/interfaces \
+          -I$(TINYDIFF_TOSDIR)/system -I$(TINYDIFF_TOSDIR)/lib \
+	  -I$(TINYDIFF_TOSDIR)/sensorboards/$(SENSORBOARD) \
+	  -I$(TINYDIFF_TOSDIR)/platform/$(PLATFORM)
+
+CFLAGS += $(INCLUDE)
+
+PROGRAMMER_EXTRA_FLAGS = -v=2
+
+include $(TOSDIR)/../apps/Makerules

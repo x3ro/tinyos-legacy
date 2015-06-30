@@ -1,0 +1,29 @@
+AGENT GROUP COMMUNICATION
+-------------------------------------------------------------------------------
+The group is hard coded within the leader to be at locations (1,1), (2,1), (3,1) and (4,1). 
+The leader has a reaction sensitive to member broadcast messages.  When this reaction fires,
+the leader sends the value stored within the message to each member.
+
+The members react to the group broadcast message, extract the value and display it on the LEDs.
+
+The MemberSend periodically sends the leader a member broadcast message that triggers the 
+sending of the group message.
+
+The leader must be at (1,1).
+Members must be at (1,1), (2,1), (3,1) and (4,1).
+One of the members must be MemberSend.ma.
+
+MESSAGE FORMATS
+-------------------------------------------------------------------------------
+Member Broadcast Message:
+ 
+ <"mbm", value>
+ 
+ This message is sent from the member to the leader for broadcasting to the 
+ group.
+
+Leader Broadcast Message:
+  <"lbm", value>
+ 
+  This message is sent from the group leader to each member in the group.
+  

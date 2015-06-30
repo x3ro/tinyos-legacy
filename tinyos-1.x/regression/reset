@@ -1,0 +1,4 @@
+#!/bin/sh
+make -f `ncc -print-tosdir`/../apps/Makerules $PLATFORM reset >/dev/null 2>/dev/null
+exit $?
+

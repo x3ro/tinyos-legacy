@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<script>
+function swap_in_video(swap_target, video_url) {
+    swap_target.innerHTML = '<object id="MediaPlayer" width="640" height="525" classid="CLSID:22d6f312-b0f6-11d0-94ab-0080c74c7e95" standby="Loading Windows Media Player components..." type="application/x-oleobject"><param name="filename" value="' + video_url + '"/><param name="autoStart" value="true"/><param name="ShowStatusBar" value="true"/><param name="Volume" value="1"/><param name="ShowTracker" value="false"/><param name="ShowAudioControls" value="false"/><param name="ShowPositionControls" value="false"/><embed type="application/x-mplayer2" src="' + video_url + '" width="640" height="525" autoStart="true" ShowStatusBar="true" Volume="0" ShowTracker="false" ShowAudioControls="false" ShowPositionControls="false"></embed></object>';
+}
+</script>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+<h2><font face="Verdana, Arial, Helvetica, sans-serif">Fire Tracking Using a
+    Single Type of Agent</font></h2>
+<p>This is an example of how a single Agilla agent can be used to detect and
+  form a perimeter around a fire.
+  Fire is modeled by an agent that OUTs a tuple containing the string &quot;fir&quot;
+  into the local tuplespace, and then continuously blinks the red LED. A fire
+  tracking agent is then injected into the network that forms a perimeter around
+  the fire. The fire tracking agent initially wanders around the
+  network looking for fire. Each time it arrives at a node, it checks whether
+  any neighbors are on fire. If so, it clones itself onto nodes within two horizontal
+  and vertical
+  gridhops of the fire. This process is repeated by the clones, eventually forming
+  a perimeter. Fire detection agents continuously check the fire and proactively
+  adopt to breaches in the perimeter.</p>
+<p>There are two types of fire agents: static and dynamic. Static agents do not
+  spread, they stay where they are initially injected. Dynamic agents
+  gradually spread, eventually engulfing the entire network. </p>
+<h2>Source Code</h2>
+<p>The source code for the agents are here:</p>
+<ul>
+  <li><a href="../Examples/single_agent_fire_detection/Tracker.ma">Fire Tracker Agent</a></li>
+  <li><a href="../Examples/single_agent_fire_detection/Fire_Static_Blink.ma">Static Fire Agent</a></li>
+  <li><a href="../Examples/single_agent_fire_detection/Fire_Dynamic_56.ma">Dynamic Fire Agent - Slow Spread</a></li>
+  <li><a href="../Examples/single_agent_fire_detection/Fire_Dynamic_40.ma">Dynamic Fire Agent - Fast Spread</a></li>
+  </ul>
+<p>&nbsp;</p>
+<h2>Experiments</h2>
+<p align="left">To test the efficiency of the fire detection agents, two experiments
+  are run. All of our experiments are run on a 5x5 wireless sensor network of
+  MICA2 motes. The first set of experiments measures how quickly a tracker
+  agent can form a perimeter
+  around
+  a static fire
+  of various
+  shapes.
+  We consider
+  four
+  scenarios, they are shown below:</p>
+<p align="center"><img src="../Examples/single_agent_fire_detection/static_tests.jpg" width="400" height="425"></p>
+<p align="left">Videos of these experiments are given below. <a href="http://www.microsoft.com/windows/windowsmedia/default.aspx">Windows
+    Media player</a>  is required to play the videos.</p>
+<table align="center">
+<tr>    <td><h3 align="center">Static Fire Tracking - Scene A</h3></td>
+</tr>  <tr>
+
+    <td onClick='swap_in_video(this, "http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/IPSN_SPOTS-StaticTestA.wmv")' style='cursor: pointer; cursor: hand;}'>
+      <h3><br />		
+          <img src='http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/static_test_a.jpg' border=0><br />	
+      </h3>
+   </td>
+  </tr>
+  <tr>
+  <td><a href="../Examples/single_agent_fire_detection/IPSN_SPOTS-StaticTestA.wmv">download</a> (right-click and choose
+    save as)</td>
+  </tr>
+</table>
+
+<br>
+<br>
+
+<table align="center">
+<tr>    <td><h3 align="center">Static Fire Tracking - Scene B</h3></td>
+</tr>  <tr>
+
+    <td onClick='swap_in_video(this, "http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/IPSN_SPOTS-StaticTestB.wmv")' style='cursor: pointer; cursor: hand;}'>
+      <h3><br />		
+          <img src='http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/static_test_b.jpg' border=0><br />	
+      </h3>
+   </td>
+  </tr>
+    <tr>
+  <td><a href="../Examples/single_agent_fire_detection/IPSN_SPOTS-StaticTestB.wmv">download</a> (right-click and choose
+    save as)</td>
+  </tr>
+</table>
+
+<br>
+<br>
+
+<table align="center">
+<tr>    <td><h3 align="center">Static Fire Tracking - Scene C</h3></td>
+</tr>  <tr>
+
+    <td onClick='swap_in_video(this, "http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/IPSN_SPOTS-StaticTestC.wmv")' style='cursor: pointer; cursor: hand;}'>
+      <h3><br />		
+          <img src='http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/static_test_c.jpg' border=0><br />	
+      </h3>
+   </td>
+  </tr>
+  <tr>
+  <td><a href="../Examples/single_agent_fire_detection/IPSN_SPOTS-StaticTestC.wmv">download</a> (right-click and choose
+    save as)</td>
+  </tr>  
+</table>
+
+<br>
+<br>
+
+<table align="center">
+<tr>    <td><h3 align="center">Static Fire Tracking - Scene D</h3></td>
+</tr>  <tr>
+
+    <td onClick='swap_in_video(this, "http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/IPSN_SPOTS-StaticTestD.wmv")' style='cursor: pointer; cursor: hand;}'>
+      <h3><br />		
+          <img src='http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/static_test_d.jpg' border=0><br />	
+      </h3>
+   </td>
+  </tr>
+    <tr>
+  <td><a href="../Examples/single_agent_fire_detection/IPSN_SPOTS-StaticTestD.wmv">download</a> (right-click and choose
+    save as)</td>
+  </tr>
+</table>
+        <p>&nbsp;</p>
+        <p>The second set of experiments tests how well the tracker agents can
+            proactively adjust the perimeter as the fire spreads. Four tracking
+          agents are initially injected into the network, then the dynamic fire
+          agent is injected. The nodes on which these agents are injected are
+          shown below:</p>
+        <p align="center"><img src="dynamic_tests.jpg" width="325" height="316"></p>
+        <p align="left">Note that the tracker agents are injected into four regions
+          of the network. This is to maximize the liklihood that they will quickly
+          detect the fire. This experiment is run twice with two different fire-spreading
+          rates: fast and slow.</p>
+        <table align="center">
+          <tr>
+            <td><h3 align="center">Dynamic Fire Tracking - Slow</h3>
+            </td>
+          </tr>
+          <tr>
+            <td onClick='swap_in_video(this, "http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/IPSN_SPOTS-DynamicTest_Slow.wmv")' style='cursor: pointer; cursor: hand;}'>
+              <h3><br />
+                  <img src='http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/IPSN_SPOTS-DynamicTest.jpg' border=0><br />
+              </h3>
+            </td>
+          </tr>
+		    <tr>
+  <td><a href="../Examples/single_agent_fire_detection/IPSN_SPOTS-DynamicTest_Slow.wmv">download</a> (right-click and choose
+    save as)</td>
+  </tr>
+        </table>
+        <p>&nbsp;</p>
+        <table align="center">
+          <tr>
+            <td><h3 align="center">Dynamic Fire Tracking - Fast</h3>
+            </td>
+          </tr>
+          <tr>
+            <td onClick='swap_in_video(this, "http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/IPSN_SPOTS-DynamicTest_Fast.wmv")' style='cursor: pointer; cursor: hand;}'>
+              <h3><br />
+                  <img src='http://mobilab.wustl.edu/projects/agilla/Examples/single_agent_fire_detection/IPSN_SPOTS-DynamicTest.jpg' border=0><br />
+              </h3>
+            </td>
+          </tr>
+		    <tr>
+  <td><a href="../Examples/single_agent_fire_detection/IPSN_SPOTS-DynamicTest_Fast.wmv">download</a> (right-click and choose
+    save as)</td>
+  </tr>
+        </table>
+        <p>&nbsp;</p>
+        <p align="left">&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

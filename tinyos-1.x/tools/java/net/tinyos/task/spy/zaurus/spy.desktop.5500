@@ -1,0 +1,8 @@
+[Desktop Entry]
+Exec=runspy
+Icon=scythe
+Type=Application
+Name=Spy
+CanFastload=0
+HidePrivilege=1
+NeedSpace=4096

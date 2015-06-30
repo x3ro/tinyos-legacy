@@ -1,0 +1,771 @@
+
+                The Wizard's Guide to Mudlle Magic
+                ==================================
+                      - Vivriel, Jul 1994 -
+
+This Guide aims to supplement Owl's Official Manual and provide some
+hints to new mudllers on style, pitfalls to avoid, etc.  It assumes
+familiarity with MUME and a basic understanding of the mudlle language.
+Read at least Part 1 of the Manual before reading this Guide.
+
+This Guide is not meant to be a complete reference to mudlle functions,
+though basic functions are introduced in the relevant chapters.  Refer
+to Ancalagon's summary list for that.
+
+Please send all comments and criticisms to Vivriel.
+
+
+CONVENTIONS USED
+
+Mudlle types are represented as:
+        b       boolean
+        n       integer
+        s       string
+        l       list
+        v       vector
+        t       symbol table
+        r       room
+        o       object
+        p       character
+        x       any type
+
+Mudlle functions are represented as:
+        name (<type>, <type>)
+
+
+TABLE OF CONTENTS
+1.  Some Starting Concepts
+  1.  Mudlle Interface to MUME
+  2.  Functions and Primitives
+  3.  MUME Classes and Mudlle Types
+2.  Writing Mudlle
+  1.  Command Line Interpreter
+  2.  Mudlle Files
+  3.  Events and Reactions
+    1.  Predefined Events
+    2.  Special Events
+  4.  Timed Actions
+  5.  Mudlle Variables and Scopes
+  6.  Storing Mudlle Data
+    1.  Object Values
+    2.  Symbol Tables
+    3.  Data Files
+3.  Testing and Debugging
+  1.  Loading Mudlle Files
+  2.  Mudlle Security Levels
+  3.  Debugging Aids
+4.  Coding Style
+  1.  File Identification and Comments
+
+
+1.  Some Starting Concepts
+
+This chapter introduces some basic concepts of mudlle needed to understand
+subsequent chapters.
+
+
+1.1.  Mudlle Interface to MUME
+
+Mudlle (MUD Language for Little Extensions) is a language in its own right,
+not an integral part of MUME.  It interfaces to MUME via 2 basic mechanisms:
+command line interpreter and mudlle files.
+
+The command line interpreter is invoked with the MUME command '/mudlle'
+(V+ only).  It allows you to write and execute simple mudlle code.  This
+mode is often used for quick testing of functions, or in Vivriel's case,
+for her charming socials.
+
+The other mechanism involves files known to both MUME and mudlle to
+contain code.  MUME loads these files at startup and passes them to mudlle
+to execute.  Special actions on mobiles and objects are done this way.
+
+
+1.2.  Functions and Primitives
+
+We all know what a mudlle function is.
+
+What is a mudlle primitive?  It is just a function which has been written
+in C, and is thus unmodifiable through mudlle.  While primitives are used
+in exactly the same way as functions, they execute much faster and should
+always be chosen over a function which does the same thing.
+
+In the rest of this Guide, the term "function" will be used to mean both
+primitives and mudlled functions.
+
+
+1.3.  MUME Classes and Mudlle Types
+
+Mudlle knows about 3 distinct MUME classes: room, object and character.
+
+A room is represented in mudlle by its integer room number.  You can
+think of a room as a class with only one instance, and the room number
+uniquely identifies both the class and the instance.
+
+For an object, its v-number serves only to identify the class of the object.
+Each instance created has its own identifier of type 'object'.  Some basic
+primitives on objects:
+
+object? (x)             is x an object type?
+make_object (n)         create a new object instance (in room 0)
+find_objects (n)        list all object instances of class n
+get_obj_number (o)      return v-number of object
+
+Similarly, the v-number of a mobile identifies only its class.  Mobile
+instances have their own identifier of type 'character'.  Related primitives:
+
+character? (x)          is x a character type?
+make_mobile (n, r)      create a new mob instance in room r
+find_players (n)        list all mob instances of class n
+get_char_number (p)     return v-number of mob
+
+What about players?  Mudlle represents each player as a character type just
+like mobiles.  The character identifier is created when the player enters
+the game, so if he quits and re-enters, his character identifier will change.
+What remains constant is the unique player number, which is the negative
+of that returned by get_char_number(p).
+
+If an instance is purged, or if a player leaves the game, what happens to
+the instance identifier?  Mudlle transforms it (whether object or character)
+into the special type 'gone', which cannot be used for anything.  Functions
+which attempt to act on the instance will conveniently fail.
+
+
+2.  Writing Mudlle
+
+You know what mudlle is, and how to piece expressions together to form
+a code block.  (If you don't, re-read Owl's Official Manual Part I.)
+
+But how do you write executable mudlle code in MUME?  How do you change
+the behaviour of a MUME object through mudlle?  Where do you start?
+This chapter attempts to answer these questions.
+
+
+2.1.  Command Line Interpreter
+
+You can enter the mudlle interpreter mode from MUME with:
+
+> /mud
+
+In this mode, every line you type is interpreted as a mudlle statement,
+and MUME commands are not recognized.  Exit with:
+
+> quit()
+
+A more common practice is to type the mudlle statement on the same line:
+
+> /mud all_players()
+
+This will cause mudlle to execute the statement "all_players()" and
+immediately return control to MUME.
+
+Common mudlle functions called in this way:
+
+> /mud apropos("find_player")
+> /mud help(find_players)
+> /mud list_files("Vivriel")
+
+
+2.2.  Mudlle Files
+
+Every room, object and mobile class in MUME has an associated mudlle file.
+To define special mudlled behaviour, you have to edit the associated file
+by calling the appropriate function in the command-line interpreter:
+
+edit_room (r)           edit the file of room r
+edit_object (n)         edit the file of object class n
+edit_mobile (n)         edit the file of mobile class n
+
+For example, to add mudlle to room 35:
+
+> /mud edit_room(35)
+
+The file is owned by the owner of the zone, object or mobile, and resides
+physically in his directory.  Normally, you have authority to edit only
+those files owned by players of your level or lower.  To edit the file of
+a higher level player, you need explicit access to him, which can be
+granted by an A+.  (The MUME command '/access list' shows you your access
+list.)
+
+Besides defining special behaviour on MUME classes, you can also write
+generic mudlle functions.  Such functions are usually put in general files,
+which are edited by calling the function:
+
+edit (s)                edit the file named s
+
+Note that if you edit the file "test", you are creating it in your own
+directory.  Editing "<yourname>/test" has the same effect, but editing
+"Vivriel/test" gets the file "test" in Vivriel's directory.
+
+To delete a file you no longer want, edit it and reduce the file size
+to zero.
+
+To see all the files in someone's directory:
+
+list_files (s)          list files in s's directory
+
+
+2.3.  Events and Reactions
+
+Most of the special behaviour in MUME are coded as reactions to events
+received.  When an action occurs in MUME, the appropriate event is
+generated and sent to a number of entities.  If an entity has a reaction
+to that particular event, that reaction is executed.  If more than one
+reaction is found, all reactions are executed.
+
+Event recipients can be:
+
+room            the room where the action occurs
+obj             an instance of an object class
+mob             an instance of a mobile class
+global          the global event handler
+
+The global event handler is a special case - its associated mudlle file
+is not attached to any class, and is accessible only at imp-level.  Note
+also that players cannot receive events, since no mudlle files are
+attached to players.
+
+Events can be broadly classified as:
+
+immediate       sent at the time the action occurs
+delayed         sent after completion of the action causing the event
+
+Currently, only one predefined event (EVENT_COMMAND) is immediate,
+and the command causing it can be aborted by a reaction.
+
+The generic syntax for a reaction procedure is:
+
+react_event(fn (me, arg1, arg2 .. argn) [ ... ],
+            "short explanation of reaction",
+            <event>)
+
+where 'me' is the event recipient.
+
+You can write any number of reaction procedures on a class.  Typically,
+the complete code on a class is no more than a collection of relevant
+reactions, plus the declaration of some local variables and functions.
+
+Code example:
+
+[
+
+| master, greet_master |
+
+master = "Vivriel";
+
+greet_master = fn (who)
+[
+    if (!string_icmp(get_char_name(who), master))
+        send_char(who, "Welcome home, Master!\n\r");
+];
+
+react_event(fn (me, who)
+    [
+        greet_master(who);
+    ], "greet master on entrance", EVENT_ENTER);
+
+]
+
+You can write reactions within functions which are then called in the
+associated file of a MUME class, but you cannot embed a reaction in
+another reaction.  This is because reactions are registered on the
+class at load time, and do not change dynamically after.
+
+Reactions to events not handled by the class and reactions not called on
+a class are ignored.
+
+
+2.3.1.  Predefined Events
+
+For all events, the first argument 'me' (the event recipient) is always
+sent and is assumed.  Only additional arguments are listed.  Where 'p'
+is used, it means either a player or a mobile.  Events which differentiate
+between the two will use the term 'player' or 'mob'.
+
+Immediate events:
+
+EVENT_COMMAND   sent when p types a command
+                to objs equipped by p, room, mobs in room, objs in room
+                (args: p, command, command_args)
+
+<command> is an integer usually represented by the global constant 'CMD_???',
+and <command_args> is the string passed as argument to the command.
+For example, when Vivriel types "say hello world" in MUME, EVENT_COMMAND
+is sent with the arguments (<char_Vivriel>, CMD_SAY, " hello world").
+
+If any of the event recipients has a reaction procedure which calls
+'override_command()', the command is aborted.  Otherwise it is executed
+normally after the reactions.
+
+Delayed events:
+
+EVENT_CREATE    sent when instance is created
+                to instance
+                (args: none)
+
+EVENT_EQUIPPED  sent when p equips obj
+                to p, all objs equipped by p
+                (args: p, obj)
+
+EVENT_ENTER     sent when player enters a room
+                to room, all mobs in room
+                (args: player)
+
+EVENT_EXIT      sent when player exits a room
+                to room, all mobs in room
+                (args: player)
+
+EVENT_I_MOVED   sent when a mob moves
+                to mob
+                (args: none)
+
+EVENT_SPELL     sent when p casts a spell successfully on x
+                to x and x's eq, if x is a char
+                to x only, if x is an obj
+                to room, otherwise
+                (args: p, spell)
+
+EVENT_ATTACK    sent when p1 attacks p2, whether with weapons or spells
+                to p1's room, all mobs in room
+                (args: p1, p2)
+
+EVENT_DEATH     sent when p dies
+                to room, all mobs in room
+                (args: p)
+
+EVENT_TELL      sent when p1 tells p2 a message
+                to p2
+                (args: p1, message)
+
+EVENT_GIVE      sent when p1 gives p2 an obj
+                to p2, obj
+                (args: p1, p2, obj)
+
+EVENT_GIVE_MONEY sent when p1 gives p2 money
+                to p2
+                (args: p1, p2, amount)
+
+EVENT_TAKE      sent when p takes an obj from room
+                to room, all mobs in room
+                (args: p, obj)
+
+EVENT_TAKE_MONEY sent when p takes money from room
+                to room, all mobs in room
+                (args: p, amount)
+
+EVENT_DROP      sent when p drops an obj
+                to p's room, obj
+                (args: p, obj)
+
+EVENT_DOOR      sent when p does an action on a door
+                to room, other_room beyond door
+                (args: p, action, room, door_dir)
+                (action: DOOR_OPENED, DOOR_CLOSED, DOOR_LOCKED, DOOR_UNLOCKED)
+
+EVENT_HELP_CRY  sent when a citizen cries for help
+                to complain room of town
+                (args: citizen, attacker, 0)
+
+EVENT_ENTER_GAME sent when player enters the game
+                to room, global
+                (args: player, room)
+
+EVENT_WEATHER   sent at weather changes
+                to global
+                (args: weather_type, value)
+
+Currently defined weather events are:
+
+WEATHER_SUN     SUN_RISE when sun rises
+                SUN_LIGHT when day begins
+                SUN_SET when sun sets
+                SUN_DARK when night falls, or Sauron casts his darkness
+
+
+2.3.2.  Special Events
+
+In rare cases, you may need to trigger reactions to special actions not
+covered by the pre-defined events.  An example is the Harlond-Forlond
+ferry in Grey Havens; the ferry needs to notify the boarding room of its
+arrival and departure.
+
+You can allocate and cause a specialized event with:
+
+allocate_event (s)      create a new event and assign its identifier to
+                        a global variable named s
+cause_event (n, v, b, dn, dx)
+                        send event n with vector of arguments v to destination
+                        pair (dn, dx), immediate if b is TRUE, else delayed
+
+Arguments <v> exclude 'me' which is always sent and implied.  Destination
+pairs can be:
+
+EVENT_ROOM, room        send to room
+EVENT_CHAR, mob         send to mob
+EVENT_OBJ, obj          send to obj
+EVENT_IN_ROOM, room     send to room, all mobs and objs in room
+
+Code example:
+
+[
+
+| ferry, shore |
+
+allocate_event("EVENT_FERRY");
+FERRY_ARRIVE = 1;
+...
+cause_event(EVENT_FERRY, vector(FERRY_ARRIVE, ferry), FALSE,
+            EVENT_ROOM, shore);
+
+]
+
+Corresponding reaction procedure:
+
+react_event(fn (me, type, ferry)
+    if (type == FERRY_ARRIVE)
+    [
+        ...
+    ], "ferry arrival", EVENT_FERRY);
+
+
+2.4.  Timed Actions
+
+Besides reactions, you can also register actions to be executed at a certain
+MUME time:
+
+register_at (fn (), s, n)       execute fn(), description s, at time n
+
+The time n is the MUME time of day in minutes.  Each MUME day is 1440 MUME
+mins, or 1440 real seconds.  Time 0 corresponds to 1 am in MUME.  You can
+get the current time with:
+
+mudlle_time ()                  return current MUME time as an integer
+
+Most actions are registered at time 'mudlle_time() + n', i.e. n MUME mins
+or n real secs from now.  Actions registered at 'mudlle_time()' are
+executed fraction of a sec later.
+
+register_at() returns an identifier which can be used to cancel the action:
+
+cancel (x)                      cancel registered action x
+
+In rare cases, you may need an action to be executed periodically.  Use:
+
+register_every (fn (), s, n)    execute fn() every n seconds
+
+In particular, if you are writing a periodic action for a room, use:
+
+room_periodic (r, fn (), s, n, b)
+
+This registers fn () on room r every n seconds, with additional control
+such that if you reload the room (see the chapter on Testing and Debugging)
+a new action is registered and the previous one is cancelled, thus avoiding
+problems with multiple running registers on the room.  If b is TRUE, the
+action is suspended while no mortal players are in the room.  You should
+set b to TRUE if on average, players enter the room much less frequently
+than the action interval n.
+
+
+2.5.  Mudlle Variables and Scopes
+
+Mudlle variables are dynamically typed.  This means you do not need to
+declare the type of a variable before using it, and the same variable
+can hold different types of values at different times.
+
+A variable which is used without prior declaration is implicity declared
+as a global.  Global variables are universally visible, and can be
+assigned values by anyone or from any code.  One special global of interest
+is 'actor', which is used by many functions such as 'can_see?(p)'.
+You need to set actor to the character doing the action before calling
+such a function.
+
+If you are only using a variable within your code, declare it as a local:
+
+| local_var1, local_var2 |
+
+Local variables are visible at the level of their declaration and downwards.
+If declared at the top level of a class file, the variable is shared by
+all instances of the class.  A lower-level declaration hides a higher-level
+variable of the same name.
+
+Code example:
+
+[
+
+| trap_all |
+
+react_event(fn (me, who)
+    [
+        | trap_one |
+        ...
+    ], "trap anyone who enters", EVENT_ENTER);
+
+]
+
+If this code is in the file of a mob class, every mob instance created will
+see the same file-scope variable 'trap_all'.  However, each instance has
+its own copy of the function-scope variable 'trap_one'.
+
+
+2.6.  Storing Mudlle Data
+
+Local variables are too restrictive in scope, and global variables are
+too visible.  Where then should shared or persistent data be stored?
+
+There are basically 3 mechanisms for storing data:
+
+1.  unused value fields of object instances,
+2.  symbol tables associated with an instance, and
+3.  data files.
+
+Except for symbol tables associated with mobile instances, all these
+mechanisms store data permanently through reboots.
+
+
+2.6.1.  Object Values
+
+Every MUME object has an associated data structure which stores the values
+of properties such as object type and damage condition.  In particular,
+there is a 4-element array (val[0] to val[3]) the values of which are
+interpreted according to the type of the object.  Only the values of hit
+and the val array are directly modifiable through mudlle:
+
+gain_obj_hit (o, n)     add n to obj o's hit points (max 10000)
+set_obj_val (o, i, n)   set the value of obj o's val[i] to n
+
+Corresponding functions to read the values:
+
+get_obj_hit (o)         return obj o's hit points
+get_obj_val (o, i)      return the value of obj o's val[i]
+
+These 5 values can be used to store integer mudlle data, in the case of
+object types which do not interpret them.  The data so stored will persist
+through reboots.  Currently, object types which do not interpret these
+values are:
+
+ITEM_TREASURE
+ITEM_OTHER
+ITEM_TRASH
+ITEM_NOTE
+ITEM_PEN
+ITEM_BOAT
+
+Some other object types interpret only a subset of these values.  Refer
+to the builders' board for a complete list.
+
+If you use any of these values on an object, document such use clearly
+in the code.  Be aware that the values may be used one day.
+
+
+2.6.2.  Symbol Tables
+
+Every room, object and mobile instance, and every player has an associated
+symbol table.  You can store any type of data in these symbol tables:
+
+instance["index"] = x
+
+will store the value x in the symbol table of instance, indexed by the
+name "index".  To read the value you have stored:
+
+x = instance["index"]
+
+The symbol table with all stored values will be saved when the instance
+is auto-saved.
+
+You can get the entire symbol table with:
+
+room_table (n)          return room n's symbol table
+obj_table (o)           return obj o's symbol table
+char_table (p)          return mob or player p's symbol table
+table_list (t)          list all non-null symbols in table t
+
+As these symbol tables are attached to instances, the data stored in them
+live only as long as the instance.  It follows that the tables of mobiles
+and free objects do not persist through reboots.  Room symbol tables are
+also not persistent, but the tables of players and objects in players'
+inventory are.
+
+Because of the permanent nature of player tables, you should not store
+frivolous or unrelated data in them.
+
+
+2.6.3.  Data Files
+
+The most flexible form of data storage must be the data file.  Unlike object
+values and symbol tables, a data file is not attached to any instance.  And
+unlike the class files which contain mudlle code, it is not even owned by
+any particular player.  All data files are put in a common data directory
+irregardless of who created them.
+
+You can store any type of data in a data file with:
+
+write_file (s, x)       store the value x in file s
+
+and read back the data with:
+
+read_file (s)           return the value x stored in file s
+
+Because of the common ownership, however, you can overwrite anybody else's
+data file if not careful.  It is recommended that you use file names
+constructed with your name, such as "vivriel_importantdata".  To be doubly
+safe, always do a 'read_file(s)' before you attempt to write to a new file.
+You may write to the file only if the read returns an error.
+
+
+3.  Testing and Debugging
+
+Now that you have written some mudlle code, how do you test and debug it
+online?  This chapter attempts to cover debugging practices and common
+pitfalls in mudlle.
+
+
+3.1.  Loading Mudlle Files
+
+Besides the automatic loading at MUME boot, you can force a reload of any
+mudlle file with:
+
+load_room (r)           load the file for room r
+load_object (n)         load the file for object class n
+load_mobile (n)         load the file for mobile class n
+load (s)                load the general file s
+
+This loads in your new functions or reaction procedures immediately, which
+is useful for testing purposes.  Note that old registers which are already
+running are left alone, so you could get multiple registers if not careful.
+
+
+3.2.  Mudlle Security Levels
+
+Before testing your mudlle, you should be aware of the security levels of
+mudlle code and their implications.
+
+Mudlle code runs at the security level of the file owner, which in the
+case of a file associated with a MUME class, is the owner of the zone,
+object or mobile.  A function at a particular security level will not work
+on a player of the same level or higher, unless that player has chosen to
+react to mudlle via the MUME command '/react'.  As this command is Vm+ only,
+it means mudlle code at Ms level will never work on an Ms or Va, though the
+same code will work on a Vm who is reacted.
+
+Conversely, code of higher level will always work on lower level gods,
+irregardless of their react mode.
+
+Because of the complications involved, it is often advisable to use a
+mortal test character.  Remember also the Ms you are mudlling for has
+no other way to see the effect of your work.
+
+Finally, the security level of a piece of code will change often in its
+lifetime, when the immortal owning it is promoted or demoted.  When
+something that has been working suddenly fails to work, check security
+levels first.
+
+
+3.3.  Debugging Aids
+
+Useful with the command line interpreter are the debugging primitives:
+
+react_list (x)          return list of reactions on instance x
+register_list ()        return currently registered functions
+
+display (x)             display a representation of x
+write (x)               print a representation of x
+examine (x)             examine a representation of x
+
+display, write and examine print varying amounts of information, with
+display the least and examine the most.
+
+The output of these functions, and all error messages from mudlle, are
+silently discarded when they occur during the execution of code in a file.
+To print debugging output from a file, you have to use:
+
+with_output (p, fn)     execute fn() and send result to player p; if p is
+                        not a player, just execute normally
+with_output_to (s, fn)  execute fn() and send result to player named s,
+                        if he/she is connected
+
+Bad code example (on room 35):
+
+[
+
+react_event(fn(me, who)
+    [
+        with_output_to("Vivriel", fn ()
+        say("Welcome home, master!")
+        );
+    ], "greet master on entrance", EVENT_ENTER);
+
+]
+
+When someone enters the room, Vivriel if connected gets the output:
+
+bad type
+Call trace is:
+say("Welcome home, master!")
+<fn>[room 35:9]()
+with_output_to[Manwe/mudlle.mud:41]("Vivriel", {closure})
+<fn>[room 35:7](35, {player Vivriel})
+
+This indicates that the call 'say("Welcome home, master!")' has a parameter
+of the wrong type.  The cause of the error is that 'actor' is not set.
+
+In more involved debugging, however, these functions are not enough, and
+most mudllers have their own debugging utilities.  If you ask nicely,
+Vivriel will even share hers with you.  If you decide to write your own,
+use an obvious name like "dain_debug".
+
+
+4.  Coding Style
+
+Although coding style is largely a matter of personal preference, adhering
+to some basic rules and practices will make your code clearer and more
+understandable to others who may have to debug or enhance it in future.
+This chapter attempts to introduce good coding style for mudlle.
+
+(Adapted and revised from Yorick's Guide to Good Mudlle Style rev. 3.)
+
+
+4.1.  File Identification and Comments
+
+Each file should start with some identification on the file, the author,
+the date of coding and a brief statement of purpose:
+
+// -*-mudlle-*-
+// Object 6011 - coffee machine, by Yorick, 1993
+// Periodic actions to make noise and coffee
+
+This identifies the file as the class file of object 6011, a coffee machine.
+The original author is Yorick, and the code registers periodic actions.
+
+If you use emacs, you will include '-*-mudlle-*-' to inform the editor
+that it is a mudlle file.
+
+For a general file, the identification may look like this:
+
+// File:        gates
+// Written:     Vivriel, Apr 1994
+// Last mod:    10 Jul 94
+// Functions for implementing gates with intelligent gatekeepers.
+
+In addition, it is often a good idea to have some comments on how your
+code works, particularly how you store the specialized data used by
+the code.  For example, the moneybag stores amount of money in val[],
+and gems in the symbol table.  Comments in the file:
+
+// Object 5723 - moneybag by Vivriel.
+//   Amt of money in bag is stored as:
+//      val[0] = quantity of gold
+//      val[1] = quantity of silver
+//      val[2] = quantity of copper
+//      val[3] = max capacity in units of gold/silver/copper coins -
+//               gems take (1/5000 * cost) units of space
+//   Other forms of wealth are stored in the symbol table as:
+//      ["q_<gem>"] = quantity of particular <gem>
+//
+//   Note that money has no weight, but gems have, and mudlle can't set weight.
+//   To add other gems in future, just extend typ_tab.
+
+This makes it easier for others to understand your code, and leads to fewer
+potential problems of mis-fixes.
+
+Of course, comments are not constrained to the top of the file.  You should
+add comments wherever you feel the code is not clear, and wherever you
+have used some clever trick.

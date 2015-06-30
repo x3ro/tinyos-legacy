@@ -1,0 +1,13 @@
+
+The SimDriver / TinyViz code is still rather fresh. Be warned, your
+mileage may vary. This is a (likely incomplete) list of things that I
+know need to be done and plan to do in the near future.
+
+- fix bug in RadioModelGuiPlugin where it doesn't reflect the scripted
+  changes
+
+- pause callbacks to optionally take an event parameter
+
+- do the jarfile packaging
+
+- link up slider with simulation rate

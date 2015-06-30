@@ -1,0 +1,51 @@
+Package: net.tinyos.SerialForwarder
+Description: provides serial port multiplexing
+Author: Bret Hull <bwhull@uclink4.berkeley.edu>
+
+This application instantiates a server which provides
+a bi-directional packet stream between a mote connected
+to the host PC and clients anywhere on the network.  For 
+more information, see "serialforwarder.pdf" in the "doc"
+directory.  Run from the nest "tools" directory.
+
+
+Executables: none
+
+Program: SerialForwarder
+
+net.tinyos.SerialForwarder.SerialForward
+        usage: java net.tinyos.SerialForwarder.SerialForward
+        descr: main SerialForwarder application
+
+Classes:
+
+ClientServicer.java
+
+Handles the connection between a given client and the server.
+
+ControlWindow.java
+
+The main window that is displayed when the SerialForwarder is 
+operating in GUI mode.
+
+DBReader.java
+
+This class handles reading packets from a database
+
+ListenServer.java
+
+This class creates a server socket that listens for incoming client
+connections.
+
+SerialForward.java
+
+The class contains the "main" function and processes command line
+arguments.
+
+SerialPortIO.java
+
+This class interfaces with the serial port and forwards packets to all
+clients.
+
+
+

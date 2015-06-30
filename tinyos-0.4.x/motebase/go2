@@ -1,0 +1,6 @@
+#!/bin/tcsh
+source ~jhill/ENV
+cd ~jhill
+cd tos/motebase/examples/java
+setenv CLASSPATH /home/jhill/GFC:.
+java Demo2

@@ -1,0 +1,3 @@
+COMPONENT=BaseMote
+include ../../Makerules
+

@@ -1,0 +1,94 @@
+
+<html>
+<head>
+<title>Interface: MLME_RESET</title>
+</head>
+<body>
+<table BORDER="0" CELLPADDING="3" CELLSPACING="0" width="100%">
+<tr><td>
+<font size="-1">
+<b><font color="blue"><a href="apps_p.html">Apps</a></font></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="components_p.html">Components</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="interfaces_p.html">Interfaces</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="allfiles_p.html">All Files</a></b>
+&nbsp;&nbsp;&nbsp;
+<b><a href="index.html">Source Tree</a></b>
+&nbsp;&nbsp;&nbsp;
+</font>
+</td>
+<td align="right">
+<font size="-1">
+source: <b><a href="beta.CC2420Radio.ieee.802.15.4.MLME.MLME_RESET.nc.source">beta.CC2420Radio.ieee.802.15.4.MLME.MLME_RESET.nc</a></b>
+</font>
+</td></tr></table>
+<hr>
+
+<h1 align="center">Interface: MLME_RESET</h1>
+<p>
+
+ The MLME-SAP reset primitives specify how to reset the MAC sublayer to its
+ default values.
+
+ <table border="0" cellpadding="0">
+<tr valign="top"><td><b>Author:</b>
+<td> Joe Polastre
+</td></tr></table>
+
+<p>
+
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Commands</h3></td></tr></table>
+<ul>
+<li>
+         void     <a href="# void request(bool SetDefaultPIB)">
+<b>request</b>    </a>
+(bool SetDefaultPIB)
+<menu>
+ Allows the next higher layer to request that the MLME performs a
+ reset operation
+ 
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Events</h3></td></tr></table>
+<ul>
+<li>
+         void <b>confirm</b>(IEEE_status status)
+<menu>
+ Reports the results of the reset operation
+
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>status</b> -  The status of the reset operation
+</menu></menu>
+</td></tr></table>
+</menu><p>
+
+</ul>
+<table BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<tr BGCOLOR="#CCCCFF"><td>
+<h3>Commands - Details</h3></td></tr></table>
+    <a name=" void request(bool SetDefaultPIB)"></a>
+        <h4>request</h4>
+         void <b>request</b>(bool SetDefaultPIB)<P><menu>
+ Allows the next higher layer to request that the MLME performs a
+ reset operation
+ 
+ <table border="0" cellpadding="0">
+</td></tr>
+<tr valign="top"><td><br><b>Parameters:</b></td>
+<td><menu><p STYLE="text-indent: -1cm"><b>SetDefaultPIB</b> -  If TRUE, the MAC sublayer is reset and all MAC PIB
+                      attributes are set to their default values.  If
+                      FALSE, the MAC sublayer is reset but all MAC PIB
+                      attributes retain their values prior to the
+                      generation of the reset primitive.
+</menu></menu>
+</td></tr></table>
+</menu>

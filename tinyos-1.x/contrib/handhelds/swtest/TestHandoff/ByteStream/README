@@ -1,0 +1,18 @@
+ByteStream
+
+This application is designed to test the operation of the handoff process 
+among multiple access points. The client will be continuously sending 
+packets with unique sequence numbers to a data logging server with a 
+fixed IP address through its associated access point. 
+
+The data logging server logs sequence numbers it receives from the 
+client. The goal is to prevent data loss caused by movement of 
+the client device from the range of one access point to another 
+access point.
+
+lib/ contains the adapted code from tos/lib/CC2420Radio to support 
+     the handoff process
+
+==========================================
+Bor-rong Chen<bor-rong.chen@hp.com>
+July 2005

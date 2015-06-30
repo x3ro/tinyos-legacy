@@ -1,0 +1,75 @@
+// $Id: general_customstartupcode.prm,v 1.1 2005/01/31 21:05:01 freefrag Exp $
+
+/* "Copyright (c) 2000-2003 The Regents of the University of California.  
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement
+ * is hereby granted, provided that the above copyright notice, the following
+ * two paragraphs and the author appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY
+ * OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ */
+
+// @author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+// This is a linker parameter file for the GB60
+
+// all the needed files will be passed to the linker by command line
+NAMES END
+
+// We define the STACK section to force maximal usage of RAM.  Here it is the
+// guaranteed stack size and will spill down into BSS as needed at runtime.  
+
+SECTIONS
+  RAM    = READ_WRITE 0x0080 TO 0x0FFF;
+  STACK  = READ_WRITE 0x1000 TO 0x107F;
+  ROMLOW = READ_ONLY  0x1080 TO 0x17FF;
+  ROM    = READ_ONLY  0x182C TO 0xFEFF;
+END
+
+/******************************************************************************
+From page 255 in Chapter "Sections (ELF)" of Manual_SmartLinker.pdf:
+
+  .data  This is the default section for all objects normally allocated to RAM.
+  It is used for variables not belonging to any section or to a section not
+  assigned a segment in the PLACEMENT block in the linker's parameter file.  If
+  any of the sections .bss or .stack is not associated with a segment, these
+  sections are included in the .data memory area in the following order:
+
+    +---------+--------+----------+
+    |  .data  |  .bss  |  .stack  |
+    +---------+--------+----------+
+
+  .text  This is the default section for all functions. If a function is not
+  assigned to a certain section in the source code or if its section is not
+  associated with a segment in the parameter file, it is automatically added to
+  section .text. If any of the sections .rodata, .rodata1, .startData or .init
+  is not associated with a segment, these sections are included in the .text
+  memory area in the following order:
+
+    +---------+--------------+---------+-----------+------------+
+    |  .init  |  .startData  |  .text  |  .rodata  |  .rodata1  |
+    +---------+--------------+---------+-----------+------------+
+******************************************************************************/
+
+PLACEMENT
+  .text  INTO ROM;
+  .data  INTO RAM;
+  .stack INTO STACK;
+END
+
+STACKSIZE 0x080
+
+// reset vector: this is the default entry point for a C/C++ application.
+VECTOR 0 _TinyOSStartup
+

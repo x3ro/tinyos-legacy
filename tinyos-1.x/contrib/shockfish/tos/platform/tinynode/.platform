@@ -1,0 +1,27 @@
+# Includes that should take precedence come first.  Platforms come before
+# chips because they may override files.  These must be specified as
+# @includes instead of -I's to @opts, otherwise the %T won't be processed
+# by ncc.  And because of that, the current platform's include directory
+# must be specified, otherwise its search order is last instead of first.
+
+push( @includes, qw(
+  %T/../contrib/shockfish/tos/platform/tinynode
+  %T/platform/telos
+  %T/platform/msp430
+  %T/platform/msp430/adc
+  %T/platform/msp430/dac
+  %T/platform/msp430/dma
+  %T/lib/Flash/AT45DB
+  %T/lib/Flash
+) );
+
+
+@opts = ("-gcc=msp430-gcc",
+         "-mmcu=msp430x1611",
+         "-fnesc-target=msp430",
+         "-fnesc-no-debug");
+
+push @opts, "-mingw-gcc" if $cygwin;
+
+@commonplatforms = ("msp430");
+

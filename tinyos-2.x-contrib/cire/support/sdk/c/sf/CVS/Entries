@@ -1,0 +1,19 @@
+/.cvsignore/1.1/Sat May 21 08:11:32 2011//
+/Makefile.am/1.1/Sat May 21 08:11:32 2011//
+/README/1.1/Sat May 21 08:11:32 2011//
+/bootstrap/1.1/Sat May 21 08:11:32 2011//
+/build.xml/1.1/Sat May 21 08:11:32 2011//
+/configure.ac/1.1/Sat May 21 08:11:32 2011//
+/message.c/1.1/Sat May 21 08:11:32 2011//
+/message.h/1.1/Sat May 21 08:11:32 2011//
+/prettylisten.c/1.1/Sat May 21 08:11:32 2011//
+/seriallisten.c/1.1/Sat May 21 08:11:32 2011//
+/serialsend.c/1.1/Sat May 21 08:11:32 2011//
+/serialsource.c/1.1/Sat May 21 08:11:32 2011//
+/serialsource.h/1.1/Sat May 21 08:11:32 2011//
+/sf.c/1.1/Sat May 21 08:11:32 2011//
+/sflisten.c/1.1/Sat May 21 08:11:32 2011//
+/sfsend.c/1.1/Sat May 21 08:11:32 2011//
+/sfsource.c/1.1/Sat May 21 08:11:32 2011//
+/sfsource.h/1.1/Sat May 21 08:11:32 2011//
+D

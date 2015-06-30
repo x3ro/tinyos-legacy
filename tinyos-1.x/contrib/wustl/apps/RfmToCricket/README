@@ -1,0 +1,13 @@
+Receives packets sent from CricketToRfm, reassembles
+the original cricket data, and forwards the data to
+the UART.
+
+
+Example output:
+VR=2.0,ID=01:25:61:61:0b:00:00:42,SP=ship,DB=44,DR=1323,TM=1729,TS=1120160
+VR=2.0,ID=01:25:61:61:0b:00:00:42,SP=ship,DB=44,DR=1322,TM=1776,TS=1120928
+VR=2.0,ID=01:25:61:61:0b:00:00:42,SP=ship,DB=44,DR=1320,TM=1870,TS=1121984
+VR=2.0,ID=01:25:61:61:0b:00:00:42,SP=ship,DB=44,DR=1321,TM=1727,TS=1122976
+
+
+Author: Chien-Liang Fok

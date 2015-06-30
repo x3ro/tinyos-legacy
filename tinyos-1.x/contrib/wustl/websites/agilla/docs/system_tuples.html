@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<link rel="stylesheet" href="../styles.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+
+<!-- InstanceBeginEditable name="MainText" -->
+
+          <h1>System Tuples</h1>
+
+          <p>There are two special types of tuples automatically inserted into
+
+            the tuple space by Agilla: 1) Agent Tuples and 2) Host Tuples. For
+
+            each agent running on a node, Agilla inserts an Agent tuple containing
+
+            the agent's ID. The tuple has two fields where the first is a string &quot;aid&quot; and
+
+            the second is an AgentID. When the agent terminates or migrates off
+
+            the host, Agilla automatically removes the agent tuple. This tuple
+
+            is useful to determine which agents are residing on a particular
+
+            host. The Host tuple is inserted to allow an agent to discover the
+
+            location of neighboring nodes. It has two fields, the first being
+
+            the string &quot;hid&quot; and the second being a location (the location
+
+            of the host).</p>
+
+          <p>The group probing operations has not been implemented yet. Once
+
+            it is, an agent can perform a group probe on the tuplespace to determine
+
+            the locations of neighboring hosts and agents.</p>
+
+<!-- InstanceEndEditable -->
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

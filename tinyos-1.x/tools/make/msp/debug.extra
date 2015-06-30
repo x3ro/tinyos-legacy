@@ -1,0 +1,5 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: debug.extra,v 1.1 2004/03/31 20:36:10 vlahan Exp $
+
+OPTFLAGS = -O1 -g -fnesc-no-inline
+

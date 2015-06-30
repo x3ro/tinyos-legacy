@@ -1,0 +1,37 @@
+LIBRARY MSP430mspgcc
+
+EXPORTS
+DllMain
+MSP430_Initialize@8
+MSP430_Open@0
+MSP430_Close@4
+MSP430_Configure@8
+MSP430_VCC@4
+MSP430_Reset@12
+MSP430_Erase@12
+MSP430_Memory@16
+MSP430_Error_Number@0
+MSP430_Error_String@4
+MSP430_VerifyMem@12
+MSP430_EraseCheck@8
+MSP430_Funclet@16
+MSP430_ReadRegister@8
+MSP430_WriteRegister@8
+MSP430_isHalted@0
+
+MSP430_Initialize     = MSP430_Initialize@8
+MSP430_Open           = MSP430_Open@0
+MSP430_Close          = MSP430_Close@4
+MSP430_Configure      = MSP430_Configure@8
+MSP430_VCC            = MSP430_VCC@4
+MSP430_Reset          = MSP430_Reset@12
+MSP430_Erase          = MSP430_Erase@12
+MSP430_Memory         = MSP430_Memory@16
+MSP430_Error_Number   = MSP430_Error_Number@0
+MSP430_Error_String   = MSP430_Error_String@4
+MSP430_VerifyMem      = MSP430_VerifyMem@12
+MSP430_EraseCheck     = MSP430_EraseCheck@8
+MSP430_Funclet        = MSP430_Funclet@16
+MSP430_ReadRegister   = MSP430_ReadRegister@8
+MSP430_WriteRegister  = MSP430_WriteRegister@8
+MSP430_isHalted       = MSP430_isHalted@0

@@ -1,0 +1,11 @@
+A D/Nucleus////
+A D/TestHello////
+A D/TestLogger////
+A D/TestNetwork////
+A D/TestQuery////
+A D/TestSNMS////
+A D/TestSystemCore////
+R D/TestSystemCore////
+R D/TestQuery////
+R D/TestNetwork////
+R D/TestHello////

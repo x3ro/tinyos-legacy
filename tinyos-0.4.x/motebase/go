@@ -1,0 +1,5 @@
+#!/bin/tcsh
+source ~jhill/ENV
+cd ~jhill
+cd tos/motebase/examples
+./forward -n 10 2 1 0 0 0 0

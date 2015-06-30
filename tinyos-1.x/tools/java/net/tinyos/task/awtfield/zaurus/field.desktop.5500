@@ -1,0 +1,8 @@
+[Desktop Entry]
+Exec=runfield
+Icon=scythe
+Type=Application
+Name=Field
+CanFastload=0
+HidePrivilege=1
+NeedSpace=4096

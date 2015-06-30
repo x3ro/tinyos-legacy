@@ -1,0 +1,23 @@
+NAME=tinyos
+VERSION=1.1.15Dec2005cvs
+
+cd ../..
+rm -rf $NAME-$VERSION
+tools/release/extractor $NAME-$VERSION <<'EOF' | gzip >../$NAME-$VERSION.tar.gz
+!^./beta
+!^./contrib
+!^./apps/(Bombilla|GSK|LittleGuySleep|TASKApp|TinyDBApp|TestTimeStamping|TestPC2420|Xnp*)
+!^./tos/lib/(TinyDB|VM)
+!^./tools/java/jars/(JLex|cup|gwe|jazz|junit|pgjdbc2|plot.*|xercesImpl|xmlParserAPIs).jar
+!^./tools/java/net/tinyos/(GSK|task|tinydb|vm_asm|script)
+!^./tools/java/net/tinyos/util/DTN
+!^./tools/java/net/tinyos/tools/TestTimeStamping.java
+!^./tools/java/net/tinyos/xnp
+!^./tools/matlab/contrib
+!^./tools/release
+!^./tools/src/motelist/regls
+!^./doc/(.*TinyDB.*|.*bombilla|tinydb|TASK|mate)
+!/CVS/
+!/CVS$
+EOF
+rm -rf $NAME-$VERSION

@@ -1,0 +1,3 @@
+COMPONENT=TestWDT
+include ../Makerules
+

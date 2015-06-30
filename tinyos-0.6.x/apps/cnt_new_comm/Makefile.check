@@ -1,0 +1,3 @@
+DESC=cnt_to_leds_and_rfm.desc
+include ../Makeinclude.check
+

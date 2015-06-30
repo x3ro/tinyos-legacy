@@ -1,0 +1,19 @@
+
+
+TOS_MODULE CHANNEL_MON;
+
+
+ACCEPTS{
+	char STOP_MONITOR_CHANNEL(void);
+	char MONITOR_CHANNEL(void);
+	char MONITOR_CHANNEL_INIT(void);
+	char MAC_DELAY(char data);
+};
+SIGNALS{
+	char START_SYM_DETECT();
+	char CHANNEL_IDLE_DETECT();
+};
+
+USES{
+	short MAC_SUB_NEXT_RAND();
+};

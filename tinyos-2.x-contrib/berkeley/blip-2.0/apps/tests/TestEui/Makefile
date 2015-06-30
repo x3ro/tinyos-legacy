@@ -1,0 +1,4 @@
+COMPONENT=TestEuiAppC
+CFLAGS += -I$(LOWPAN_ROOT)/tos/lib/net/blip -DPRINTFUART_ENABLED
+include $(MAKERULES)
+

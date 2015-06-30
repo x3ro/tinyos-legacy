@@ -1,0 +1,155 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.78 [en] (X11; U; Linux 2.4.7-10 i686) [Netscape]">
+   <title>Lesson 3: Introducing Tasks for Application Data
+Processing</title>
+</head>
+<body bgcolor="#F8F8FF" link="#005BB7" vlink="#005BB7">
+&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><font face="tahoma,arial,helvetica"><font size=-1>Lesson
+3: Introducing Tasks for Application Data Processing</font></font></b>
+<p><font face="tahoma,arial,helvetica">Last updated 15 August 2003</font></td>
+</tr>
+</table>
+
+<p>This lesson introduces the TinyOS notion of <b>tasks</b>, which can
+be used to perform general-purpose "background" processing in an application.
+This lesson makes use of the <tt>SenseTask</tt> application, which is a
+revision of the <tt>Sense</tt> application from the previous lesson.
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Task creation and
+scheduling</font></nobr></b></td>
+</tr>
+</table>
+
+<p>TinyOS provides a two-level scheduling hierarchy consisting of
+<b>tasks</b> and <b>hardware event handlers</b>. Remember that the keyword
+<b>async</b> declares a command or event that can be executed by a hardware
+event handler. This means it could be executed at any time (preempting
+other code), so <b>async</b> commands and events should do small amounts of
+work and complete quickly. Additionally, you should pay attention to the
+possibility of data races on all shared data accessed by an <b>async</b>
+command or event. <b>Tasks</b> are used to perform longer processing
+operations, such as background data processing, and can be preempted by
+hardware event handler.
+
+<p>A task is declared in your implementation module using the syntax
+<pre>&nbsp; task void taskname() { ... }</pre>
+where <tt>taskname()</tt> is whatever symbolic name you want to assign
+to the task. Tasks must return <tt>void</tt> and may not take any arguments.
+<p>To dispatch a task for (later) execution, use the syntax
+<pre>&nbsp; post taskname();</pre>
+A task can be posted from within a command, an event, or even another task.
+<p>The <tt>post</tt> operation places the task on an internal <b>task queue</b>
+which is processed in FIFO order. When a task is executed, it runs to completion
+before the next task is run; therefore, a task should not spin or block
+for long periods of time. Tasks do not preempt each other, but a task can
+be preempted by a hardware event handler. If you need to run a series of long operations,
+you should dispatch a separate task for each operation, rather than using
+one big task.
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">The SenseTask Application</font></nobr></b></td>
+</tr>
+</table>
+
+<p>To illustrate tasks, we have modified the Sense application from Lesson
+2, which is found in <tt><a href="../../apps/SenseTask">apps/SenseTask</a></tt>.
+The <tt>SenseTaskM</tt> component maintains a circular data buffer, <tt>rdata</tt>,
+that contains recent photo sensor samples; the <tt>putdata()</tt> function
+is used to insert a new sample into the buffer. The <tt>dataReady()</tt>
+event simply deposits data into the buffer and posts a task, called
+<tt>processData()</tt>,
+for processing.
+<br>&nbsp;
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%"><b>SenseTaskM.nc</b>
+<pre>&nbsp; // ADC data ready event handler
+&nbsp; async event result_t ADC.dataReady(uint16_t data) {
+&nbsp;&nbsp;&nbsp; putdata(data);
+&nbsp;&nbsp;&nbsp; post processData();
+&nbsp;&nbsp;&nbsp; return SUCCESS;
+&nbsp; }</pre>
+</td>
+</tr>
+</table></center>
+
+<p>Some time after the async event completes (there may be other tasks
+pending for execution), the <tt>processData()</tt> task will run. It computes
+the sum of the recent ADC samples and displays the upper three bits of
+the sum on the LEDs.
+<center><table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="80%" hspace="4" >
+<tr BGCOLOR="#E0E0E0">
+<td WIDTH="100%"><b>SenseTaskM.nc, continued</b>
+<pre>&nbsp; task void processData() {
+&nbsp;&nbsp;&nbsp; int16_t i, sum=0;
+
+&nbsp;&nbsp;&nbsp; atomic {
+&nbsp;&nbsp;&nbsp; for (i=0; i &lt; size; i++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sum += (rdata[i] >> 7);
+&nbsp;&nbsp;&nbsp; }&nbsp;
+&nbsp;&nbsp;&nbsp; display(sum >> log2size);
+&nbsp; }</pre>
+</td>
+</tr>
+</table></center>
+
+<p>The keyword <b>atomic </b>in the task <tt>processData() </tt>illustrates
+the use of nesC <i>atomic statements</i>. This means the code section within
+the <tt>atomic</tt> curly braces will execute without preemption. In this
+example, access to the shared buffer <tt>rdata</tt> is being protected.
+Where else should this be used ?
+<p>Atomic statements delay interrupt handling which makes the system less
+responsive. To minimize this effect, atomic statements in nesC should avoid
+calling commands or signaling events when possible (the execution time of
+an external command or event will depend on what the component is wired
+to).
+
+<br>&nbsp;
+<table BORDER=0 CELLSPACING=2 CELLPADDING=3 WIDTH="100%" hspace="4" >
+<tr BGCOLOR="#E0E0FF">
+<td WIDTH="100%"><b><nobr><font face="arial,helvetica">Exercises</font></nobr></b></td>
+</tr>
+</table>
+
+<p>Try to break up the <tt>processData()</tt> task so that each invocation
+of the task only adds one element of the <tt>rdata</tt> array to <tt>sum</tt>.
+<tt>processData()</tt> should then post itself to continue processing the
+complete <tt>sum</tt>, and display the LEDs when the final element of the
+array has been processed. Be careful of concurrency issues - since
+<tt>processData()</tt>
+is also posted from <tt>ADC.dataReady()</tt>, you might want to add a flag
+to prevent a new instance of the task from being started before the previous
+sum has been computed!
+<p>
+<hr><b><a href="lesson2.html">&lt; Previous Lesson</a></b> |
+<b><a href="lesson4.html">Next
+Lesson ></a></b> | <b><a href="index.html">Top</a></b>
+</body>
+</html>
+
+<!--  LocalWords:  TinyOS nesC nc async norace BlinkM FooM ncc SingleTimer Leds
+ -->
+<!--  LocalWords:  LedsC StdControl tos init TimerC redOn redOff uint redToggle
+ -->
+<!--  LocalWords:  metadata html nesdoc gcc exe avr objcopy srec uisp mib dprog
+ -->
+<!--  LocalWords:  towards dapa xff ThinkPad dlpt Makelocal micasb Wshadow DDEF
+ -->
+<!--  LocalWords:  finline fnesc cfile lm Atmel ATmega nesC's nesc SenseM rdata
+ -->
+<!--  LocalWords:  ADCControl SounderControl dataReady getData rcombine someval
+ -->
+<!--  LocalWords:  ADControl fooControl barControl MyTimer uniqueCount basicsb
+ -->
+<!--  LocalWords:  sensorboard Makerules sensorboards SenseTask taskname
+ -->
+<!--  LocalWords:  SenseTaskM putdata processData
+ -->

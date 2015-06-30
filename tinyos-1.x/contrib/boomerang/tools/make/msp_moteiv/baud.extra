@@ -1,0 +1,5 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: baud.extra,v 1.1.1.1 2007/11/05 19:11:22 jpolastre Exp $
+
+PFLAGS += -DDEFAULT_BAUDRATE=$(BAUD)
+

@@ -1,0 +1,337 @@
+\documentclass[12pt]{article}
+
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{multicol}
+\usepackage{epsfig,amsmath,amsfonts}
+
+\makeatletter                                   % Make '@' accessible. 
+\oddsidemargin=0in                              % Left margin minus 1 inch.
+\evensidemargin=0in                             % Same for even-numbered pages.
+\marginparsep=0pt                               % Space between margin & text
+
+\renewcommand{\baselinestretch}{1.5}              % Double spacing
+
+\textwidth=6.5in                                % Text width (8.5in - margins).
+\textheight=9in                                 % Body height (incl. footnotes)
+
+\topmargin=0in                                  % Top margin minus 1 inch.
+\headsep=0.0in                                  % Distance from header to body.
+\skip\footins=4ex                               % Space above first footnote.
+\hbadness=10000                                 % No "underfull hbox" messages.
+\makeatother                                    % Make '@' special again.
+
+
+\begin{document}
+
+\fontfamily{cmss}                               % Make text sans serif.
+\fontseries{m}                                  % Medium spacing.
+\fontshape{n}                                   % Normal: not bold, etc.
+\fontsize{10}{10}                               % 10pt font, 10pt line spacing 
+
+\title{TOSSIM System Description}
+\author{Philip Levis}
+\maketitle
+
+\fontfamily{cmr}                                % Make text Roman (serif).
+\fontseries{m}                                  % Medium spacing.
+\fontshape{n}                                   % Normal: not bold, etc.
+\fontsize{10}{10}                               % 10pt font, 10pt line spacing
+
+\section*{System Overview}
+
+TOSSIM (TinyOS SIMulator) is a simulation environment for TinyOS. It
+simulates a set of motes all running the same TinyOS program. The
+number of motes can be set at run time at the command line. TOSSIM
+uses a discrete event simulation to handle core clock and radio clock
+events. It simulates radio communication with a few simplifications:
+e.g.  mote transmissions never cancel one another (they are always in
+phase).
+
+Messages can be injected into the simulation from an outside source,
+and network traffic can be visualized or stored by an external
+program.
+
+Currently, TOSSIM has three network connectivity models: simple
+connectivity (all the motes are in one cell), static connectivity (the
+network graph is established at startup and never changes), and space
+connectivity (the motes move around randomly in a square area, and
+potentiometer settings change their transmission range).
+
+Unless one uses an external program to read in data produced by TOSSIM
+(e.g. the TOSSIM Java GUI), very little information is provided. Use
+of {\tt dbg} settings by the {\tt DBG} environment variable allow for
+some information on the state of the simulation (see {\tt
+system/include/dbg\_modes.h}), but due to its volume this is only
+really useful for post-run analysis.
+
+\section*{Getting Started}
+
+TOSSIM is compiled using {\tt MakefileTOS}, which is in the root
+TinyOS directory ({\tt tos/tos} in the CVS tree). {\tt MakefileTOS} is
+similar in structure to the other TinyOS makefiles; the desired
+application is set using the {\tt DESC} variable, etc. Every mote in
+TOSSIM runs the same code image (application).
+
+The TOSSIM executable is named {\tt main}. It has the following usage:
+
+{\tt main [-r <static|simple|space>] [-p usec] num\_nodes}
+
+The {\tt -r} option specifies the radio model to use. None of the
+current radio models take into account interference or noise; signals
+are perfectly transmitted and received. The {\tt simple} model places
+all of the motes in a single radio cell; every mote can hear every
+other mote. The {\tt static} model reads in a file at startup ({\tt
+cells.txt}) that specifies the which motes can hear each-other. The
+format of this file is defined at the end of this document. The {\tt
+space} model is a rudimentary model of 2D space. Motes are randomly
+placed at startup, then move in a random, Brownian motion-like
+fashion. Signal reception is based on distance between motes, with
+potentiometer settings mapping to a distance table that has no basis
+in reality. The default model is {\tt simple}.
+
+The {\tt -p} option allows simulation text output to be more easily
+understood. If it is specified, then the simulation pauses at every
+system clock (not radio clock) event for the specified number of
+microseconds. Since system clock events are often major determinants
+of mote behavior, this allows a user to make the simulation output be
+broken up enough to be read, instead of the standard constant stream.
+
+The {\tt num\_nodes} option specifies how many nodes should be
+simulated. A compile-time upper bound ({\tt TOSNODES}) is specified in
+{\tt TOSSIM.h}. The standard distribution sets this value to be 1000.
+
+\section*{The GUI}
+
+The TOSSIM visualization GUI is included in the default TinyOS release
+as a Java application. Currently, the simulation only supports radio
+packet messages (incoming and outgoing). It resides in the {\tt
+tools/} directory of the default TinyOS release, and can be run by
+typing {\tt java TossimGUI} when in that directory. It has a single
+optional parameter, {\tt -r}, for specifying a file of radio messages
+to introduce to the simulation.
+
+\subsection*{File Format}
+
+TossimGUI allows a file of radio packets to be specified at the
+command line. These packets are read in and then sent over port
+10576. The file has the following format:
+
+\vspace{0.1in}
+$<$time (decimal long long)$>$ $<$mote (decimal short) $<$data0 (hex byte)$>$ ... $<$data37 (hex byte)$>$.
+\vspace{0.1in}
+
+Each value is separated from the other by whitespace. All whitespace
+is insignificant. A sample file exists at {\tt tools/radio.txt}.
+
+\section*{TOSSIM Internals}
+
+Currently, TOSSIM compiles by using alternative implementations of
+some core system components (e.g. {\tt MAIN.c}, {\tt CLOCK.c}) and
+incorporating a few extra files (e.g. {\tt event\_queue.c}). Also,
+TinyOS macros such as {\tt VAR} are provided alternative definitions
+in {\tt tos.h}.
+
+The basic TOSSIM structure definitions exist in {\tt
+system/tossim/tossim.h}. These include the global simulation state
+(event queue, time, etc.) and individual node state. Hardware settings
+that affect multiple components (such as the potentiometer setting)
+currently must be modeled as global node state; the {\tt static}
+nature of TinyOS frames prevents otherwise. {\tt tossim.h} also
+includes a few useful macros, such as {\tt NODE\_NUM} and {\tt
+THIS\_NODE}; these should be used whenever possible, so minimal code
+modifications will be necessary if the data representation
+changes. They will probably soon be transitioned to functions for this
+reason.
+
+{\tt MAIN.c} is where the TOSSIM global state is defined. The {\tt
+main()} function parses the command line options, initializes the
+TOSSIM global state, initializes the external communication
+functionality (defined in {\tt external\_comm.c}), then initializes the
+state of each of the simulated motes with {\tt MAIN\_SUB\_INIT} and {\tt
+MAIN\_SUB\_START}. It then starts executing a small loop that handles
+events and schedules tasks. Currently, tasks are uninterruptible and
+execute instantaneously (in simulation time). We hope to model tasks
+more accurately soon.
+
+TOSSIM catches SIGINT (control-C) to exit cleanly. This is useful when
+profiling code.
+
+
+\subsection*{RFM}
+
+Instead of requiring a certain level of radio simulation accuracy,
+TOSSIM uses an extensible radio model. By doing so, the simulation can
+be run with any level of accuracy a user wants (and is willing to
+write). While simple protocol correctness tests might be satisfied
+with a model that assumes perfect signal transmission, protocol
+performance tuning tests might want to introduce bit error and
+transient interference.
+
+The interface to the radio model is defined in {\tt rfm\_model.h}:
+
+\begin{verbatim}
+typedef struct {
+  void(*init)();
+  void(*transmit)(int, char);
+  void(*stop\_transmit)(int);
+  char(*hears)(int);
+  void* data;
+} rfm_model;
+\end{verbatim}
+
+The data pointer is provided so that radio models that require a large
+amount of state can only allocate the memory if they're being used;
+otherwise, if the state is comprised of global variables in source
+files, the process uses up space for every model's bookeeping.
+
+The {\tt int} arguments are mote IDs, while the {\tt char} arguments
+are bits (0 or 1).
+
+\subsubsection*{Example Model: static}
+
+Herein I will describe how the static rfm\_model works so people get a
+feeling of why such a simple event model allows for very accurate
+radio timing simulation.
+
+
+\section*{External Communication}
+
+TOSSIM includes functionality for introducing and reading network
+traffic. This is achieved through the use of TCP sockets that are
+opened before the simulation begins. TOSSIM initiates a connection to
+localhost on a series of ports. Each of these ports, their use, and
+their communication format are detailed below. In addition, TOSSIM
+opens a single server (passive) port and waits for external
+connections; client sockets connecting to this port can inject
+messages into the network.
+
+\subsection*{UART}
+
+\subsubsection*{Reading: Port 10580}
+
+The UART communication channel allows an external process to
+communicate with the motes over their UARTs. At startup, the TOSSIM
+process reads from the socket until the server side closes it. Data
+sent over the socket must have the following format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{4in} & \hspace{1in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID (short) & Data(char) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+These messages cannot be generated dynamically; they are all read in
+before the simulation starts. Once the server process has sent all of
+its messages, it closes the connection to TOSSIM.
+
+{\bf UART communication is currently not implemented.}
+
+\subsubsection*{Writing: Port 10581}
+
+UART messages are written using the same format with which they are
+read. On startup, the simulator opens a connection to port 22577 on
+localhost and send messages over this channel.
+
+{\bf UART communication is currently not implemented.}
+
+\subsection*{Radio}
+\subsubsection*{Reading: Port 10576}
+
+The radio communication channel allows an external process to
+communicate with the motes over the radio. At startup, the TOSSIM
+process reads from the socket until the server side closes it. Data
+sent over the socket must have the following format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{2in} & \hspace{2in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID(short) & TOS\_Msg (38 bytes) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+These messages cannot be generated dynamically; they are all read in
+before the simulation starts. The simulation stores them as
+events. Sending messages in this manner bypasses the radio layers in
+the mote, directly calling {\tt AM\_RX\_PACKET\_DONE}.
+
+Once the server has sent all of its messages, it closes the connection
+to TOSSIM.
+
+This mechanism allows for the initialization of base stations at
+simulation startup. Since all motes must run the same code image, base
+station logic must be incorporated into the build of TinyOS. A message
+handler can be used to receive messages that switch a mote from
+standard to base-station mode, and messages of this type can be
+introduced into the simulator through this mechanism.
+
+\subsubsection*{Writing: Port 10577}
+
+This socket notifies an external program whenever a mote starts to
+transmit a packet. This notification occurs when the mote completes
+the transmission; if there is a lot of radio traffic, this might be
+significantly after it attempts to start transmitting. The packet is
+sent along the socket in this format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{2in} & \hspace{2in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID(short) & Data (38 bytes) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+\subsubsection*{Bit Writing: Port 10578}
+
+Radio messages are written to a connection made to this port. The
+messages have the following format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{4in} & \hspace{1in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID(short) & Bit (byte) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+The bit states whether the mote transmits a 1 or doesn't transmit
+(0). The mote is considered to be producing the same value until
+another message saying otherwise arrives.
+
+This functionality is useful if debugging activity below the packet
+layer, such as encodings/start symbols.
+
+\subsubsection*{Real-time Reading: Port 10579}
+
+TOSSIM spawns an additional thread at startup, which opens a server
+socket and waits for connections on port 10579. Clients connecting to
+this port can inject messages dynamically into the network. Data sent
+over this socket should have the following format:
+
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|}\hline
+\hspace{2in} & \hspace{2in} & \hspace{0.5in} \\ \hline
+Time (long long)& Mote ID(short) & TOS\_Msg (38 bytes) \\ \hline
+\end{tabular}
+\vspace{0.1in}
+
+If the time field specifies a time that has already passed in the
+simulation, the message is scheduled to be received immediately. If
+the time field specifies a time in the future, the message is
+scheduled to be received at the specified time.
+
+If the client closes the connection, TOSSIM will wait for another
+connection request.
+
+\section*{cells.txt}
+
+There are currently two network connectivity models in TOSSIM. The simple model places every mote within a single cell; all of the motes can hear one another. This is the default network model. The second network model, the static model, uses a network connectivity graph that is determined at run-time before the simulation starts. The graph is specified by a file named {\tt cells.txt} which must be in the directory where the program is executed. The file format is very simple.
+
+\begin{verbatim}
+
+0:1 1:2 4:5 9:1
+
+\end{verbatim}
+
+defines a graph in which motes 0 and 1 can communicate, 2 and 1 can communicate, 4 and 5 can communicate, and 9 and 1 can communicate. Connectivity is bidirectional: {\tt 0:1} is the same as {\tt 1:0}. A sample file can be found in the root TinyOS directory.
+
+\end{document}

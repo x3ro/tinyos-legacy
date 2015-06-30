@@ -1,0 +1,3 @@
+COMPONENT=TempSensor
+include ../Makerules
+

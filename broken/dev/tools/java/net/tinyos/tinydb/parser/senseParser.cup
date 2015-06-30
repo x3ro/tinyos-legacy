@@ -1,0 +1,540 @@
+package net.tinyos.tinydb.parser;
+
+// CUP specification for sensor query parser
+
+import java_cup.runtime.*;
+
+import java.util.*;
+import java.io.*;
+
+import net.tinyos.tinydb.*;
+
+action code {:
+	byte queryId = 1;
+	short epochDur = 1024;
+	TinyDBQuery tinyDBQuery = new TinyDBQuery(queryId, epochDur);
+
+	Vector aggFields = new Vector();
+	Vector selList = new Vector();
+	HashMap fields = new HashMap();
+	Vector conds = new Vector();
+	short fieldIndex = 0;
+	short groupIdx = -1;
+
+	Catalog catalog = Catalog.curCatalog;
+
+	class ArithExpressionClass {
+	    String fieldOp;
+	    short fieldConstant;
+	    FieldInfo finf;
+	    boolean isAttr;
+	}
+
+	class AggField {
+	    AggOp fieldOp;
+	    ArithExpressionClass fieldData;
+	}
+
+	class FieldInfo {
+	    boolean isAgg;
+	    AggField af;
+	    QueryField qf;
+	}
+
+	class SelStmt {
+	    SelOp op;
+	    ArithExpressionClass aexp;
+	    short c;
+	}
+
+	public QueryField getQueryField(String column, byte aggOp, short fid) {
+	    QueryField qf = null;
+	    String hashKey = column + aggOp;
+
+	    if (fields.get(hashKey) == null) {
+		qf = catalog.getAttr(column).copy();
+		
+		if (qf == null)
+		    SensorQueryer.errorMessage = "Can't find field " + column + " in catalog";
+		
+		qf.setIdx(fid);
+		qf.setOp(aggOp);
+		fields.put(hashKey, qf);
+		//tinyDBQuery.addField(qf);
+	    } else qf = (QueryField) fields.get(hashKey);	
+	    return qf;
+	}
+
+	public QueryField getQueryField(String column, byte aggOp) {
+	    String hashKey = column + aggOp;
+	    if (fields.get(hashKey) != null)
+		return ((QueryField)fields.get(hashKey));
+	    else
+		return getQueryField(column, aggOp, fieldIndex++);
+	}
+
+	public short removeField(String name, byte aggOp) {
+	    String hashKey = name + aggOp;
+	    //System.out.println("IN REMOVEFIELD: " + name + "  ,OP  " + aggOp);
+	    QueryField qf = (QueryField)fields.get(hashKey);
+	    if (qf != null) {
+		fields.remove(hashKey);
+		return qf.getIdx();
+	    }
+	    else return 0xFF;
+	}
+
+:};
+
+parser code {:
+	public static String errorMsg = "no errors";
+
+	private boolean errorSet = false;
+
+	public void report_error(String message, Object info) {
+	  Symbol cur_token = (Symbol) info;
+	  
+	  //System.out.println("errorMsg = " + errorMsg);
+	  //System.out.println("cur_token.sym = " + cur_token.sym);
+	  
+
+	  if (message.equals("Syntax error")) {
+	    if (cur_token.sym == 0)
+	      errorMsg = "Bad Syntax - Possibly missing clause";
+	    else 
+	      errorMsg = "Syntax error at " + cur_token.value;
+	    errorSet = true;
+	  } 
+	  
+	  if (!errorSet) {
+	    errorMsg = "Can't parse query string";
+	  }
+
+	  System.out.println("errorMsg = " + errorMsg);
+	}
+	
+	public void syntax_error(Symbol cur_token) {
+	  report_error("Syntax error", cur_token);
+	}
+
+	
+:}
+
+/* Terminals (tokens returned by the scanner).  */
+
+terminal String		NAME;
+terminal		RPAREN, LPAREN, PERIOD, COMMA;
+terminal		SUM, CNT, AVG, MAX, MIN, EXPAVG,WINAVG,WINMIN,WINMAX,WINSUM,WINCNT;
+terminal		AND, OR;
+terminal		GREATER_THAN, LESS_THAN, EQUAL, GREATER_EQUAL, LESS_EQUAL, NOT_EQUAL;
+terminal		SELECT, FROM, WHERE, GROUP_BY;
+terminal Integer	CONSTANT;
+terminal		EPOCH, DURATION, ONE_SHOT;
+terminal		AS;
+terminal		ACTION, BUFFER;
+terminal		QUERY_STRING;
+terminal String         ARITHMETIC_OP;
+
+
+/* Non terminals */
+non terminal TinyDBQuery	query;
+non terminal			select_stat, select_stat_list, selectable;
+non terminal AggOp		agg,tagg,agg_or_tagg; 
+non terminal SelOp		rel_op;
+non terminal FieldInfo		attr;
+non terminal			from_stat, from_stat_list;
+non terminal			where_stat;
+non terminal SelStmt            condition;
+non terminal Vector             more_conditions;
+non terminal ArithExpressionClass group_by_stat;
+non terminal String		bool_op;
+non terminal			epoch_stat, action_stat;
+non terminal			source;
+non terminal                    arith_expr;
+
+precedence left NAME;
+precedence left BUFFER;
+
+start with query;
+
+query ::= select_stat from_stat where_stat group_by_stat:gf epoch_stat action_stat
+	{: 
+	 Enumeration e;
+	 Iterator i;
+	 boolean hasAgg = false;
+	 //System.out.println("in query code");
+	
+	 /* If this query is nested -- e.g. it has a from qid, we'll need to 
+	    make sure that we translate aggregate expressions into aggregate
+	    query fields.
+
+	    Also, for non-nested queries, we don't allow nested aggregate expressions
+	    (e.g. avg(avg(light)) )
+	 */
+	 if (tinyDBQuery.getFromQid() != TinyDBQuery.NO_FROM_QUERY) {
+	     //have to map aggregate expressions to 
+	     //query fields 
+	     
+	     //first, look for aggregates in WHERE claues
+	     e = conds.elements();
+	     while (e.hasMoreElements()) {
+		 SelStmt s = (SelStmt)e.nextElement();
+		 FieldInfo finf = s.aexp.finf;
+		 if (finf.isAgg && !finf.af.fieldData.finf.isAgg) {
+		     byte op = finf.af.fieldOp.toByte();
+		     short fid = removeField(finf.af.fieldData.finf.qf.getName(), AggOp.AGG_NOOP);
+		     finf.isAgg = false;
+		     if (fid == 0xFF)
+			 finf.qf = getQueryField(finf.af.fieldData.finf.qf.getName(), op);
+		     else
+			 finf.qf = getQueryField(finf.af.fieldData.finf.qf.getName(), op,fid);
+		     System.out.println("EXPR QUERY FIELD = " + finf.qf);
+		 }
+	     }
+
+	     //and then in the SELECT clause
+	     e = selList.elements();
+	     while (e.hasMoreElements()) {
+		 FieldInfo finf = (FieldInfo)e.nextElement();
+		 
+		 if (finf.isAgg && !finf.af.fieldData.finf.isAgg) {
+		     byte op = finf.af.fieldOp.toByte();
+		     short fid = removeField(finf.af.fieldData.finf.qf.getName(), AggOp.AGG_NOOP);
+		     finf.isAgg = false;
+		     if (fid == 0xFF)
+			 finf.qf = getQueryField(finf.af.fieldData.finf.qf.getName(), op);
+		     else
+			 finf.qf = getQueryField(finf.af.fieldData.finf.qf.getName(), op,fid);
+		     //		     System.out.println("SEL QUERY FIELD = " + finf.qf);
+		 }
+	     }
+
+	     //finally, the GROUP BY clause
+	     if (gf != null && gf.finf.isAgg) {
+		 AggField af = gf.finf.af;
+		 QueryField nestedqf = af.fieldData.finf.qf;
+		 QueryField qf = getQueryField(nestedqf.getName(),AggOp.AGG_NOOP);
+
+		 if (qf == null) {
+		     SensorQueryer.errorMessage = "GROUP BY field cannot appear elsewhere in query.";
+		     return null;
+		 }
+		 gf.finf.isAgg = false;
+		 short fid = removeField(nestedqf.getName(),AggOp.AGG_NOOP);
+		 gf.finf.qf = getQueryField(nestedqf.getName(), af.fieldOp.toByte(), fid);
+		 
+	     }
+		    
+	 }
+
+	 //first add fields
+	 i = fields.values().iterator();
+	 while (i.hasNext()) {
+	     QueryField qf = (QueryField)i.next();
+	     //System.out.println("GOT FIELD: " + qf);
+	     tinyDBQuery.addField(qf);
+	 }
+	 
+	 //then add select statements
+	 e = conds.elements();
+	 while (e.hasMoreElements()) {
+	     SelStmt s = (SelStmt)e.nextElement();
+	     FieldInfo finf = s.aexp.finf;
+	     SelExpr se;
+	     if (finf.isAgg && tinyDBQuery.getFromQid() == TinyDBQuery.NO_FROM_QUERY) {
+		 SensorQueryer.errorMessage = "Can't select on an aggregate field in a non-nested query.";
+		 return null;
+	     }
+	     if (s.aexp.isAttr) {
+		 se = new SelExpr(finf.qf.getIdx(), s.op, s.c);
+	     } else {
+		 se = new SelExpr(finf.qf.getIdx(), s.aexp.fieldOp, s.aexp.fieldConstant, s.op, s.c);
+	     }
+	     //System.out.println("GOT SEL EXPR: " + e);
+	     tinyDBQuery.addExpr(se);
+	 }
+	 
+	 //and then add aggregate expressions
+	 e = selList.elements();
+	 while (e.hasMoreElements()) {
+	     FieldInfo f = (FieldInfo)e.nextElement();
+	     if (f.isAgg) {
+		 ArithExpressionClass a = f.af.fieldData;
+		 FieldInfo inner = a.finf;
+		 
+		 AggExpr ae;
+		 if (inner.isAgg && tinyDBQuery.getFromQid() == TinyDBQuery.NO_FROM_QUERY) {
+		     SensorQueryer.errorMessage = "Nested aggregates not supported in non-nested queries.";
+		     return null;
+		 }
+		 if (gf != null && gf.finf.isAgg && tinyDBQuery.getFromQid() == TinyDBQuery.NO_FROM_QUERY) {
+		     SensorQueryer.errorMessage = "Can't group by an aggregate field in a non-nested query.";
+		     return null;
+		 }
+		 
+		 if (a.isAttr) {
+		     ae = new AggExpr(inner.qf.getIdx(), f.af.fieldOp);
+		 } else {
+		     ae = new AggExpr(inner.qf.getIdx(), a.fieldOp, a.fieldConstant, f.af.fieldOp);
+		 }
+		 if (gf != null) {
+		     if (!gf.isAttr) {
+			 ae.setGroupFieldOp(gf.fieldOp);
+			 ae.setGroupFieldConst(gf.fieldConstant);
+		     }
+		     ae.setGroupField(gf.finf.qf.getIdx());
+		 }
+		 //System.out.println("GOT AGG EXPR: " + ae);
+		 tinyDBQuery.addExpr(ae);
+		 hasAgg = true;
+	     }
+	 }
+	 
+	 if (!hasAgg && gf != null) {
+	     SensorQueryer.errorMessage = "GROUP BY can only be used with aggregate queries.";
+	     return null;
+	 }
+	 
+
+	 RESULT = tinyDBQuery;
+	
+	 :};
+
+select_stat ::= SELECT select_stat_list ;
+ //System.out.println("Select Clause"); :};
+	
+select_stat_list ::= select_stat_list COMMA attr:at
+	 {:
+	  selList.addElement(at);
+	 :} 
+	 | attr:at
+	 {:
+	  selList.addElement(at);
+	 :};
+
+agg ::= SUM 
+	{: RESULT = new AggOp(AggOp.AGG_SUM); :}
+	| CNT 
+	{: RESULT = new AggOp(AggOp.AGG_COUNT); :}
+	| AVG 
+	{: RESULT = new AggOp(AggOp.AGG_AVERAGE); :}
+	| MAX 
+	{: RESULT = new AggOp(AggOp.AGG_MAX); :}
+	| MIN
+	 {: RESULT = new AggOp(AggOp.AGG_MIN); :};
+
+tagg ::= EXPAVG LPAREN CONSTANT:c COMMA
+	{: RESULT = new AggOp(AggOp.AGG_EXPAVG, c.shortValue()); :} 
+	| WINAVG LPAREN CONSTANT:c COMMA
+	{: RESULT = new AggOp(AggOp.AGG_WINAVG, c.shortValue());  :}
+	| WINMIN LPAREN CONSTANT:c COMMA
+	{: RESULT = new AggOp(AggOp.AGG_WINMIN, c.shortValue());  :}
+	| WINMAX LPAREN CONSTANT:c COMMA
+	{: RESULT = new AggOp(AggOp.AGG_WINMAX, c.shortValue());  :}
+	| WINSUM LPAREN CONSTANT:c COMMA
+	{: RESULT = new AggOp(AggOp.AGG_WINSUM, c.shortValue());  :}
+	| WINCNT LPAREN CONSTANT:c COMMA
+	{: RESULT = new AggOp(AggOp.AGG_WINCNT, c.shortValue());  :};
+
+attr ::= NAME:n1 PERIOD NAME:n2
+	{:
+	 //System.out.println("in attr code");
+	 //System.out.println("n1 = " + n1);
+	 FieldInfo f = new FieldInfo();
+	 f.isAgg = false;
+	
+	 QueryField qf = getQueryField(n2,AggOp.AGG_NOOP);
+
+	 f.qf = qf;
+	 RESULT = f;
+	:}
+	| NAME:column
+	{:
+	    QueryField qf = getQueryField(column,AggOp.AGG_NOOP);
+	    FieldInfo f = new FieldInfo();
+	    f.isAgg = false;
+	    f.qf = qf;
+	    RESULT = f;	
+	:} 
+	 | agg_or_tagg:agg arith_expr:arithObj RPAREN 
+	 {:
+	     ArithExpressionClass ac = (ArithExpressionClass)arithObj;
+	     if (ac.finf.isAgg) {
+		 //if this is an agg of an agg, set the operator of the inner
+		 //query field to be the inner agg operator
+		 AggField inner = ac.finf.af;
+		 if (inner.fieldData.finf.isAgg) {
+		     SensorQueryer.errorMessage = "Nested aggregate expressions with nesting greater than 2 not allowed.";
+		     return null;
+		 }
+		 short fid = removeField(inner.fieldData.finf.qf.getName(), AggOp.AGG_NOOP);
+		 //weirdness -- set the qf field, but don't unset the isAgg field,
+		 //since we'll need to fire an error about this double nesting
+		 //later if this doesn't turn out to be a nested query
+
+		 //also, nested queries convert a single aggregate expression to
+		 //a query field, which we don't want to do
+		 if (fid == 0xFF)
+		     ac.finf.qf= getQueryField(inner.fieldData.finf.qf.getName(), inner.fieldOp.toByte());
+		 else
+		     ac.finf.qf= getQueryField(inner.fieldData.finf.qf.getName(), inner.fieldOp.toByte(), fid);
+	     }
+	     FieldInfo f = new FieldInfo();
+	     f.isAgg = true;
+	     AggField af = new AggField();
+	     af.fieldOp = agg;
+	     af.fieldData = (ArithExpressionClass)arithObj;
+	     f.af = af;
+	     RESULT = f;
+	     
+	 :};
+
+agg_or_tagg ::= agg:a LPAREN
+                {:
+		    RESULT = a;
+		:}
+                | tagg:a 
+                {:
+		    RESULT = a;
+		:};
+
+
+
+from_stat ::= FROM from_stat_list |;
+from_stat_list ::= from_stat_list COMMA source | source;
+
+source ::= QUERY_STRING CONSTANT:c {:
+				    //System.out.println("got : " + c);
+	tinyDBQuery.setFromQid(c.byteValue());
+	:}
+	| NAME
+	| NAME AS NAME;
+
+where_stat ::= WHERE condition:c 
+	 {:
+	  conds.addElement(c);
+	  :}
+         | WHERE condition:c more_conditions:v
+	 {:
+	  conds.addElement(c);
+	  for (int i = 0; i < v.size(); i++) {
+	      conds.addElement(v.elementAt(i));
+	  }
+	  :}
+	 |; 
+
+condition ::= arith_expr:aObj rel_op:r CONSTANT:c 
+	{:
+	 ArithExpressionClass a = (ArithExpressionClass) aObj;
+	 SelStmt s = new SelStmt();
+	 
+	 if (a.finf.isAgg && a.finf.af.fieldData.finf.isAgg) {
+	     SensorQueryer.errorMessage = "Too much nesting in WHERE clause.";
+	     RESULT = null;
+	 }
+
+	 
+	 s.op = r;
+	 s.aexp = a;
+	 s.c = c.shortValue();
+
+	 RESULT = s;
+	:};
+
+
+more_conditions ::= bool_op condition:c 
+                    {:
+		     Vector v = new Vector();
+		     v.addElement(c);
+		     RESULT = v;
+		    :}
+                    | bool_op condition:c more_conditions:v
+                    {:
+			v.addElement(c);
+			RESULT = v;
+		    :};
+
+bool_op ::= AND 
+	{: RESULT = "AND"; :}
+	| OR
+	{: RESULT = "OR"; :};
+
+group_by_stat ::= GROUP_BY arith_expr:aObj
+	{:
+	 ArithExpressionClass a = (ArithExpressionClass) aObj;
+	 if (a.finf.isAgg && a.finf.af.fieldData.finf.isAgg) {
+	     SensorQueryer.errorMessage = "Too much nesting in group by expression.";
+	     RESULT = null;
+	 } else
+	     RESULT = a;
+	:}
+	 |;
+rel_op ::= GREATER_THAN
+	{: RESULT = new SelOp(SelOp.OP_GT); :} 
+	| LESS_THAN 
+	{: RESULT = new SelOp(SelOp.OP_LT); :}
+	| EQUAL 
+	{: RESULT = new SelOp(SelOp.OP_EQ); :}
+	| GREATER_EQUAL 
+	{: RESULT = new SelOp(SelOp.OP_GE); :}
+	| LESS_EQUAL 
+	{: RESULT = new SelOp(SelOp.OP_LE); :}
+	| NOT_EQUAL
+	{: RESULT = new SelOp(SelOp.OP_NEQ); :};
+
+epoch_stat ::= EPOCH DURATION CONSTANT:c
+	{: tinyDBQuery.setEpoch(c.shortValue()); :}
+	| ONE_SHOT 
+	{: 
+	 if (tinyDBQuery.getFromQid() != TinyDBQuery.NO_FROM_QUERY)
+	   tinyDBQuery.setEpoch(TinyDBQuery.kEPOCH_DUR_ONE_SHOT);
+	 else
+	   SensorQueryer.errorMessage = "One shot, non-nested queries not supported.";
+	 
+	 :}
+	| ;
+
+action_stat ::= ACTION BUFFER LPAREN CONSTANT:c RPAREN
+		{:
+			tinyDBQuery.useRamBuffer(c.shortValue());
+		:}
+	     | ACTION NAME:n 
+		{:
+			tinyDBQuery.setOutputCommand(n);			
+		:}
+	     | ACTION NAME:n LPAREN CONSTANT:c RPAREN
+		{:
+		    //System.out.println("NAME: " + n);
+			tinyDBQuery.setOutputCommand(n, c.shortValue());
+		:}
+	     | {: :};
+
+arith_expr ::= attr:a ARITHMETIC_OP:arithOp CONSTANT:arithConst
+	 {:
+	  // e.g. light * 20
+	  ArithExpressionClass exp = new ArithExpressionClass();
+	  
+	  exp.finf = a;
+	  exp.fieldOp = arithOp;
+	  exp.fieldConstant = arithConst.shortValue();
+	  exp.isAttr = false;
+	  RESULT = exp;
+	  :}
+	 | LPAREN attr:a ARITHMETIC_OP:arithOp CONSTANT:arithConst RPAREN
+	 {:
+	  // e.g. (light * 20)
+	  ArithExpressionClass exp = new ArithExpressionClass();
+	  exp.finf = a;
+	  exp.fieldOp = arithOp;
+	  exp.fieldConstant = arithConst.shortValue();
+	  exp.isAttr = false;
+	  RESULT = exp;
+	  :}
+	 | attr:a 
+	 {: 
+	  // e.g. light
+	  ArithExpressionClass exp = new ArithExpressionClass();
+	  exp.isAttr = true;
+	  exp.finf = a;
+	  RESULT = exp;
+	  :};

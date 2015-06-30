@@ -1,0 +1,84 @@
+README for Moteiv's Oscilloscope application on Tmote Invent devices
+Author/Contact: support@moteiv.com
+
+Description:
+
+The OscilloscopeTmoteInvent application senses the photodiode,
+accelerometer's x and y axes, the msp430's internal temperature
+sensor, and the internal voltage sensor.  Oscilloscope communicates
+the sensor values over the radio to a base station running the TOSBase
+application.
+
+Supported sensors:
+  Hamamatsu Photodiode
+  Analog Devices ADXL320 2-Axis Accelerometer
+  TI MSP430 Internal Temperature Sensor
+  TI MSP430 Internal Voltage Sensor
+
+Oscilloscope channel assignments:
+ 0: Photo
+ 1: Accelerometer X-Axis
+ 2: Accelerometer Y-Axis
+ 4: InternalTemperature
+ 5: InternalVoltage
+
+Usage:
+
+  Install one mote with the Oscilloscope application.
+	Type: make tmoteinvent install,#
+	Where # is the address of the mote
+  Install a second mote (connected to the PC) with TOSBase.
+	Go to directory apps/TOSBase
+	Type: make tmoteinvent install
+  Run: java net.tinyos.oscope.oscilloscope.
+	If TOSBase is connected to COM3 (check using the motelist command)
+	then run:
+		MOTECOM=serial@COM3:tmote java com.moteiv.oscope.oscilloscope
+
+  If no readings can be seen:
+    - check the "scrolling" checkbox
+    - click the "zoom out y" button to see values > 1024
+
+Converting Tmote Invent sensor readings to SI units:
+
+Lets start with channels 4 and 5 because they use the internal ADC.
+
+The Internal ADC is 12-bits, so to convert the raw value to its
+corresponding voltage, you do:
+(1)  value/4096 * Vref
+where Vref = 1.5V
+
+Converting the internal temperature voltage to degrees is described
+in the Moteiv datasheet available from moteiv.com.
+
+The internal voltage is reported in millivolts (mV), so no
+conversion is necessary.
+
+The Photo sensor output is dependent on the gain setting and ADC
+reading.  The photodiode creates a current through a variable
+resistor--in this case set to 5kOhm.  By calculating the raw voltage
+using equation (1) above, convert the voltage into a current using
+V=IR: 
+(2) I = Vsensor / 5,000 
+where Vsensor is the voltage calculated with the raw value and
+converted using equation (1).  The Moteiv datasheet includes curves
+for converting the photodiode's current into light values (Lux).
+
+The accelerometer is centered at mid-scale for zero-g ouput and
+measured relative to Vcc.  The acceleration values are proportional to
+the input voltage, thus measuring relative to Vcc provides a standard
+number of ADC units per g of acceleration.  Thus, zero acceleration is
+approximately 2048 ADC units.  For each g of acceleration, the ADC
+units will increase or decrease by 245 ADC units.  To calculate the
+acceleration in units of 'g', take the raw ADC value and perform the
+calculation:
+(3) Acceleration = (value - 2048) / 245
+where value is the raw ADC units returned by the Oscilloscope application.
+
+Tools:
+
+moteiv/tools/java/com/moteiv/oscope
+
+Known bugs/limitations:
+
+None

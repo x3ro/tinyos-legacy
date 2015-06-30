@@ -1,0 +1,1402 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with jLaTeX2HTML 2002 (1.62) JA patch-1.4
+patched version by:  Kenshi Muto, Debian Project.
+LaTeX2HTML 2002 (1.62),
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+
+<!-- Then edited (a lot) by hand by Mike Demmer -->
+<HTML>
+<HEAD>
+<TITLE>Tython: Scripting TOSSIM</TITLE>
+<LINK REL="STYLESHEET" HREF="tython.css">
+
+</HEAD>
+
+<BODY>
+<P>
+<H1 ALIGN=CENTER>Tython: Scripting TOSSIM</H1>
+<P ALIGN=CENTER><STRONG>Michael Demmer and Philip Levis</STRONG></P>
+<P ALIGN=LEFT></P>
+<DIV ALIGN="CENTER">
+Version 0.6
+<BR>
+February 5, 2004
+</DIV>
+
+<BR>
+
+<H2>Contents</A>
+</H2>
+<!--Table of Contents-->
+
+<UL>
+<LI><A HREF="manual.html#sec:intro">Introduction</A>
+<LI><A HREF="manual.html#sec:getting_started">Getting Started</A>
+<UL>
+<LI><A HREF="manual.html#sec:invoking">Invoking SimDriver</A>
+<LI><A HREF="manual.html#sec:connecting">Connecting to TOSSIM</A>
+<LI><A HREF="manual.html#sec:execution">Scripting an Execution</A>
+<LI><A HREF="manual.html#sec:pause">Pausing and Resuming</A>
+<LI><A HREF="manual.html#sec:execution">Scripting an Execution</A>
+<LI><A HREF="manual.html#sec:basic_commands">Some Basic Commands</A>
+<LI><A HREF="manual.html#sec:script_files">Script Files</A>
+</UL>
+<LI><A HREF="manual.html#sec:caffeinated_snake">The Caffeinated Snake</A>
+<UL>
+<LI><A HREF="manual.html#sec:exploring_objects">Exploring Objects</A>
+<LI><A HREF="manual.html#sec:importing_java">Importing and Instantiating Java</A>
+<LI><A HREF="manual.html#sec:java_vs_python">Java vs. Python</A>
+<LI><A HREF="manual.html#sec:packets">The Packet History Structure</A>
+</UL>
+<LI><A HREF="manual.html#sec:plugins">Tython, SimDriver, plugins, and the radio</A>
+<UL>
+<LI><A HREF="manual.html#sec:radio_models">Position-based Radio Models</A>
+<LI><A HREF="manual.html#sec:update_radio">Updating the Radio Model</A>
+<LI><A HREF="manual.html#sec:gui_labels">GUI Labels</A>
+</UL>
+<LI><A HREF="manual.html#sec:complex_scripting">Complex Scripting</A>
+<UL>
+<LI><A HREF="manual.html#sec:event_handlers">Event Handlers</A>
+<LI><A HREF="manual.html#sec:future_actions">Future Actions</A>
+<LI><A HREF="manual.html#sec:periodic_actions">Periodic Actions</A>
+<LI><A HREF="manual.html#sec:behavior_objects">Behavior Objects</A>
+<LI><A HREF="manual.html#sec:mote_variables">Mote Frame Variables</A>
+</UL>
+<LI><A HREF="javadoc/index.html">Javadoc Reference for simcore</A>
+<LI><A HREF="manual.html#sec:design">Appendix A: Design Ideology</A>
+<LI><A HREF="manual.html#sec:about">About this document ...</A>
+</UL>
+<!--End of Table of Contents-->
+
+<P>
+
+<H1><A NAME="sec:intro">
+Introduction</A>
+</H1>
+
+<P>
+Experimenting with and testing sensor networks is hard. TOSSIM, a
+TinyOS simulator, allows users to run and test algorithms, protocols,
+and applications in a controlled, reproducible environment. However,
+by itself a TOSSIM simulation is static. Instead of modeling behaviors
+such as motion or changing sensor readings, TOSSIM provides a
+socket-based command API for other programs to do so. On one hand, this
+keeps TOSSIM simple and efficient; on the other, it puts the burden
+of writing complex real-world models on the user.
+
+<P>
+One solution to this problem is TinyViz, a GUI that communicates with
+TOSSIM over the socket API. With TinyViz, users can interact with a
+simulation through a GUI panel, by dragging motes and setting options.
+These actions can be difficult to reproduce exactly (e.g., dragging a
+mote). Additionally, TinyViz can (as its name suggests) visualize what
+goes on in the network. Users can write TinyViz ``plugins'' in Java to
+extend the GUI's functionality and issue commands to TOSSIM. However,
+because users must precompile their plugins, this only allows limited
+interactivity.
+
+<P>
+Tython (or, Tinython) complements TinyViz's vizualization by adding a
+scripting interace to TOSSIM. Users can interact with a running
+simulation through TinyViz, a Tython console, or both simultaneously.
+Tython is based on Jython, a Java implementation of the Python
+language. In addition to being a complete scripting language (with
+plenty of documentation, literature, tutorials, etc.), Jython makes it
+very easy to import and use Java classes within Python. This allows
+users to access the entire TinyOS Java tool chain, including packet
+sources, MIG-generated messages, and TinyViz.
+
+<P>
+This document explains how to get started with Tython, and explains the
+library functions that can be used to access TOSSIM or TinyViz. It
+does not contain an in-depth Python tutorial: many of those can be
+found at <TT>www.python.org</TT>.
+
+<P>
+
+<HR>
+<H1><A NAME="sec:getting_started">
+Getting Started</A>
+</H1>
+
+<P>
+TinyViz and Tython sit on top of <TT>SimDriver</TT>, a java
+application that manages interactions with TOSSIM. To get started,
+just run the application:
+
+<P>
+<PRE>
+java net.tinyos.sim.SimDriver
+</PRE>
+
+<P>
+The Jython environment may take a little while to come up the first
+time; it scans all of the TinyOS and system jar files, but caches the
+information for later invocations. <em>(Passing
+<TT>-Dpython.cachedir=[dir]</TT> to the application will select a
+directory besides the current one for the cached files.)</em>
+
+<P>After booting, Tython will give you a script prompt:
+
+<P>
+<PRE>
+>>>
+</PRE>
+
+<P>
+
+<H2><A NAME="sec:invoking">
+Invoking SimDriver</A>
+</H2>
+
+<P>
+<TT>SimDriver</TT> can be invoked with a variety of options. For
+example, <TT>-gui</TT> has it start a GUI interface (TinyViz). For
+backwards compatibility, TinyViz arguments such as <TT>-run</TT> and
+<TT>-autorun</TT> are still supported. The tython console will start
+by default, though it can be disabled with the <TT>-noconsole</TT>
+option. For example,
+
+<P>
+<PRE>
+# java net.tinyos.sim.SimDriver -noconsole -gui -run main.exe 20
+</PRE>
+
+<P>
+Will start TinyViz without a console and start a TOSSIM simulation (in
+this case, <TT>main.exe</TT>) of 20 motes. This is identical to
+starting TinyViz in previous releases.
+
+<P>The <TT>-h</TT> flag option will proint the full set of
+<TT>SimDriver</TT> command line options. For TOSSIM options, refer to
+the TOSSIM reference manual.
+
+<P>
+Note: when <TT>SimDriver</TT> invokes TOSSIM, it always enables the
+TOSSIM lossy radio model.
+
+<P>
+
+<H2><A NAME="sec:connecting"></A>
+Connecting to TOSSIM
+</H2>
+
+<P>
+As in TinyViz, one easy way to get <TT>SimDriver</TT> to communicate
+with the simulation is to first run TOSSIM with the <TT>-gui</TT>
+option, then run <TT>SimDriver</TT>. At startup, <TT>SimDriver</TT>
+will indicate that it has successfully connected to TOSSIM:
+
+<pre>
+Starting SimDriver... 
+Initializing simulator objects...
+Loading simulator plugins...
+status: Connecting to simulator...
+status: Connection to simulator established
+SimComm: TossimInitEvent received... initializing system.
+
+Welcome to Tython. Type 'quit' to exit.
+ESC on a line by itself will pause/resume the simulator.
+
+>>>
+</pre>
+
+<P>
+At this point, the simulation is running and you can start interacting
+with the running simulation using the Tython API.
+
+<H2><A NAME="sec:execution"></A>
+Scripting an execution
+</H2>
+
+<P>
+You can also use the scripting interface to <TT>SimDriver</TT> to run
+TOSSIM for you. This is useful to allow you to write a script that
+runs a number of simulations.
+
+<P>
+First off, just run <TT>SimDriver</TT>. At the Tython prompt, run the
+following:
+
+<pre>
+>>> from simcore import *
+>>> sim.exec("build/pc/main.exe", 10)
+</pre>
+
+<p>
+The <tt>exec</tt> function takes as arguments the path to the
+executable and the number of motes to run, much as the <tt>-run</tt>
+command line option does. This will execute a new TOSSIM process and
+connect to it. 
+
+<p>
+You can also pass additional arguments to TOSSIM as follows:
+
+<pre>
+>>> from simcore import *
+>>> sim.exec("build/pc/main.exe", 10, "-l=1.0 -b=1")
+</pre>
+
+<H2><A NAME="sec:pause"></A>
+<BR>
+Pausing and Resuming
+</H2>
+
+<P>
+The Tython interpreter runs concurrently with the TOSSIM simulation
+itself, hence you can interact with the running simulation. However,
+to add some more control to interactions, you can also pause the
+simulation to examine state, control several settings at once, etc.
+
+<P>
+The <TT>sim</TT> object has function interfaces to pause, resume, and
+probe the paused state:
+
+<P>
+<PRE>
+>>> from simcore import *
+>>> sim.resume()
+>>> sim.pause()
+>>> if (sim.isPaused()):
+...    sim.resume()
+</PRE>
+
+As a shortcut, hitting the escape key and hitting return will toggle
+the pause state of the simulation. If the simulator is running, it
+will pause it; if paused, it will resume it.
+<P>
+
+<H2><A NAME="sec:basic_commands"></A>
+<BR>
+Some Basic Commands
+</H2>
+
+<P>
+In addition to a basic Jython environment, Tython has several objects
+that provide functions to interact with TOSSIM. The previous sections
+showed some of this, specifically how the <TT>sim</TT> object can be
+used to execute, pause and resume a simulation.
+
+<P>
+Notice that in the previous examples, the <tt>simcore</tt> module was
+imported into the running environment. This module is, appropriately
+enough, the core interface that is used to interact with the Tython
+environment. This module is in fact not Python code at all, instead, a
+single instance of each class of the Java
+<tt>net.tinyos.sim.script.reflect</tt> package is created and is bound
+into the <tt>simcore</tt> module.
+
+<P>
+Some example commands are shown in the following table. The <a
+href="javadoc/index.html">javadoc</a> for the reflect package lists
+the complete interface.
+<P>
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<TABLE>
+<CAPTION><STRONG>Table:</STRONG>
+Basic Tython Commands</CAPTION>
+<TR><TD>
+<P>
+<DIV ALIGN="CENTER"></DIV>
+<P>
+<DIV ALIGN="CENTER"><TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT">Name</TD>
+<TD ALIGN="LEFT">Effect</TD>
+</TR>
+<TR><TD ALIGN="LEFT">sim.pause()</TD>
+<TD ALIGN="LEFT">Pause TOSSIM</TD>
+</TR>
+<TR><TD ALIGN="LEFT">sim.resume()</TD>
+<TD ALIGN="LEFT">Resume TOSSIM</TD>
+</TR>
+<TR><TD ALIGN="LEFT">motes[i].turnOn()</TD>
+<TD ALIGN="LEFT">Turn mote i on</TD>
+</TR>
+<TR><TD ALIGN="LEFT">motes[i].turnOff()</TD>
+<TD ALIGN="LEFT">Turn mote i off</TD>
+</TR>
+<TR><TD ALIGN="LEFT">motes[i].moveTo(x, y)</TD>
+<TD ALIGN="LEFT">Move mote i to <I>x,y</I></TD>
+</TR>
+<TR><TD ALIGN="LEFT">motes[i].move(x,y)</TD>
+<TD ALIGN="LEFT">Move mote i <I>x,y</I> from its current position</TD>
+</TR>
+<TR><TD ALIGN="LEFT">comm.setSimRate(rate)</TD>
+<TD ALIGN="LEFT" >Set the simulator rate to <I>rate</I><BR>
+(This is identical to TOSSIM's <TT>-l</TT> option)</TD>
+</TR>
+<TR><TD ALIGN="LEFT">radio.setLossRate(senderID, receiverID, prob)</TD>
+<TD ALIGN="LEFT">Set the radio loss rate between two motes</TD>
+</TR>
+<TR><TD ALIGN="LEFT">comm.sendRadioMessage(mote, time, message)</TD>
+<TD ALIGN="LEFT">Deliver message to mote over Radio</TD>
+</TR>
+<TR><TD ALIGN="LEFT">comm.sendUARTMessage(mote, time, message)</TD>
+<TD ALIGN="LEFT">Deliver message to mote over UART</TD>
+</TR>
+</TABLE>
+
+<A NAME="table:basic_commands"></A></DIV></TD></TR>
+</TABLE>
+</DIV><P></P>
+<BR>
+
+<H2><A NAME="sec:script_files"></A>
+<BR>
+Script Files
+</H2>
+
+<P>
+The previous examples of Tython scripting assumed the use of the
+console. While appropriate for interactive use, this is cumbersome for
+repeated actions.
+
+<P>
+The builtin <tt>execfile</tt> command can be used to source a file and
+execute the contents as Tython commands:
+
+<PRE>
+>>> execfile("myscript.py")
+</PRE>
+
+<P>
+This will read and execute the contents of the specified file. As an
+alternative, passing the command line argument <tt>-script</tt> to
+Tython will cause it to automatically source and execute the named
+script file. For example:
+
+<PRE>
+java net.tinyos.sim.SimDriver -script "myscript.py"
+</PRE>
+
+<HR>
+<H1><A NAME="sec:caffeinated_snake">
+The Caffeinated Snake</A>
+</H1>
+
+<P>
+Jython's Java support allows a user to basically use it as a Java
+scripting language. It also provides the basic features of the Python
+environment, including builtin functions and data structures.
+
+
+<H2><A NAME="sec:exploring_objects">
+Exploring Objects</A>
+</H2>
+
+<P>
+As mentioned previously, the <tt>simcore</tt> module provides the
+basic access to the simulator interactions. The builtin Python
+<TT>dir()</TT> function is a useful hook to see the set of functions
+an object provides. First, type the name of the object:
+
+<P>
+<PRE>
+>>> from simcore import *
+>>> sim
+net.tinyos.sim.script.reflect.Sim@5f3a5f53
+</PRE>
+
+<P>
+This tells you that the <TT>sim</TT> object is actually an instance of
+the <TT>net.tinyos.sim.script.reflect.Sim</TT> Java class. To see the
+variables and functions a <TT>Sim</TT> object provides, type
+<TT>dir(Sim)</TT>.
+
+<P>
+<PRE>
+>>> dir(Sim)
+['__driver', 'argv', 'dumpDBG', 'exec', 'exit', 'getTossimTime', 'getWorldHeight', 'getWorldWidth', 'isPaused', 'pause', 'paused', 'reset', 'resume', 'setSimDelay', 'simDelay', 'stop', 'stopDBGDump', 'tossimTime', 'worldHeight', 'worldWidth']
+</PRE>
+
+<P>
+<TT>dir()</TT> can be used on both Java and Python objects. For
+example, <TT>dir(Sim)</TT> returns a Python list of strings, with each
+element being a method or attribute of the Sim class. So,
+<TT>dir(dir(Sim))</TT> lists the functions a Python list object
+provides:
+
+<P>
+<PRE>
+>>> dir(dir(sim))
+['append', 'count', 'extend', 'index', 'insert', 'pop', 'remove', 'reverse', 'sort']
+</PRE>
+
+<P>
+Note that <TT>dir()</TT>'s semantics are slightly different for Python
+and Java. One can call <TT>dir()</TT> on a Python object to learn its
+functions, but for Java, one must call it on the class. Specifically:
+
+<P>
+<PRE>
+>>> sim
+net.tinyos.sim.script.reflect.Sim@5f3a5f53
+>>> dir(sim)
+[]
+>>> dir(Sim)
+['__driver', 'argv', 'dumpDBG', 'exec', 'exit', 'getTossimTime', 'getWorldHeight', 'getWorldWidth', 'isPaused', 'pause', 'paused', 'reset', 'resume', 'setSimDelay', 'simDelay', 'stop', 'stopDBGDump', 'tossimTime', 'worldHeight', 'worldWidth']
+>>> m = dir(Sim)
+>>> dir(m) 
+['append', 'count', 'extend', 'index', 'insert', 'pop', 'remove', 'reverse', 'sort']
+</PRE>
+
+<P>
+Calling <TT>dir()</TT> with no parameters lists the set of variables,
+functions, and modules currently bound in the Jython environment:
+
+<P>
+<PRE>
+>>> dir()
+['Commands', 'Interp', 'Location', 'Mote', 'Motes', 'PacketType', 'Packets', 'Radio', 'Sim', 
+'SimBindings', 'SimReflect', '__doc__', '__driver', '__name__', 'comm', 'interp', 'location', 
+'motes', 'packets', 'radio', 'sim', 'simcore', 'sys']
+</PRE>
+
+<P>
+Finally, calling <TT>dir()</TT> on a module lists the set of objects
+and functions exposed by that module.
+</P>
+
+<PRE>
+>>> import simcore
+>>> dir(simcore)
+['Commands', 'Interp', 'Motes', 'Packets', 'Radio', 'Sim', '__doc__', '__name__', 'comm', 'interp', 'motes', 'packets', 'radio', 'sim']
+</PRE>
+
+<H2><A NAME="sec:importing_java">
+Importing and Instantiating Java</A>
+</H2>
+
+<P>
+Jython allows you to import Java classes with Python's import syntax.
+For example, to import <TT>java.util.Enumeration</TT>, or the entire
+<TT>java.util</TT> package:
+
+<P>
+<PRE>
+>>> from java.util import Enumeration
+>>> from java.util import *
+</PRE>
+
+<P>
+Python is a dynamically typed language. Therefore, variables do not
+have type specifiers. While instantiating a <TT>StringBuffer</TT> in
+Java looks like this:
+
+<P>
+<dt><em>(Note: from now on, Tython code will be shown as if it were in a
+file, that is, without a command line prompt. Each line could be just
+as easily typed into a console)</em></dt>
+
+<P>
+<PRE>
+StringBuffer buffer = new StringBuffer();
+</PRE>
+
+<P>
+in Jython it looks like this,
+
+<P>
+<PRE>
+buffer = StringBuffer()
+</PRE>
+
+<P>
+Note, however, that Jython does not automatically import
+<TT>java.lang.*</TT>.
+
+<P>
+By importing Java classes, one can access the TinyOS Java toolchain:
+
+<P>
+<PRE>
+from net.tinyos.message import *
+from net.tinyos.packet import *
+
+moteIF = MoteIF()
+msg = BaseTOSMsg()
+msg.set_addr(0)
+msg.set_type(5)
+moteIF.send(0, msg)
+</PRE>
+
+<P>
+The above code will send a message of AM type 5 to mote 0 over the
+default MoteIF interface.
+
+<P>
+Access to the toolchain includes GUI-based programs. For example, one
+can instatiate a SerialForwarder:
+
+<P>
+<PRE>
+from net.tinyos.sf import *
+s = SerialForwarder([])
+</PRE>
+
+<P>
+Note, however, that some classes (SerialForwader's GUI among them)
+expect to be stand-alone applications. This means that when you tell
+them to quit, with the quit button, for example, they may cause the
+entire Jython environment to quit.
+
+<H2><A NAME="sec:java_vs_python">
+Java vs. Python</A>
+</H2>
+
+<P>
+Given that all Java objects are accessible through the python
+interface, in many cases there is redundancy between the two
+languages, and there is more than one interface available for a given
+programming task.
+
+<P>
+Being dynamically typed, the Jython environment loses many of the
+correctness benefits of the Java compilation process. For objects such
+as strings, lists, and maps, it's often easier to use Python's
+primitives instead of Java's, as they are syntactically built into the
+language. For example, compare the use of a Python map and a Java
+hashtable:
+
+<P>
+<PRE>
+# Java
+from java.util import *
+h = new Hashtable()
+h.put("Seed", getPacket())
+print(h.get("Seed"))
+
+# Python
+h = {}
+h["Seed"] = getPacket()
+print h["Seed"]
+</PRE>
+
+<P>
+Similarly, one can use either Java or Python to write a file:
+
+<P>
+<PRE>
+# Java
+from java.io import *
+file = FileWriter("output.txt")
+file.write(packets[0])
+
+# Python
+file = open("output.txt", "w")
+file.write(packets[0])
+</PRE>
+
+<P>
+We've found that, for data collection and processing, the Python
+idioms are generally easier to use than Java. Among other things, its
+data structure primitives end up being a lot simpler and less error
+prone. However as mentioned previously, Java allows you to interact
+with all of the existing structure a TinyOS distribution provides,
+such as packet sources, message class generation, and interaction with
+TinyViz.
+
+<H2><A NAME="sec:packets"></A>
+<BR>
+The Packet History Structure
+</H2>
+
+<P>
+Much of the power of the Tython environment comes from the synergy
+between the two languages. Specifically, the use of Java to implement
+internal functionality, while presenting a Python interface for
+scripts.
+
+<P>
+The <TT>packets</TT> variable in the <tt>simcore</tt> module is an
+example of this. This data structure allows scripts to access all of
+the packets that motes have transmitted. The variable is a dictionary
+of lists, keyed by mote ID. Each list contains all of the packets a
+given mote has sent, in temporal order (the first packet is the first
+element of the list).
+
+<P>
+<PRE>
+print packets[3]
+</PRE>
+
+<P>
+will print all of the packets mote 3 has sent. 
+
+<P>Each element of a given list is a Java instance of
+<TT>net.tinyos.sim.event.RadioMsgSentEvent</TT>. This class is used
+because it stores not only the message sent, but also metadata, such
+as time. The time represents when the packet send <I>completed</I>,
+not when it began.
+
+<P>
+<TT>RadioMsgSentEvent</TT> has three basic accessor functions:
+<TT>getMessage()</TT>, which returns a
+<TT>net.tinyos.message.TOSMsg</TT>, <TT>getMoteID()</TT>, which
+returns the sender's ID, and <TT>getTime()</TT>, which returns the
+send time.
+
+<P>
+<TT>packets</TT> is an immutable object; unlike normal dictionaries, a
+script cannot assign to it. If a script needs to transform the packet
+dictionary, it can make a copy with <TT>packets.copy()</TT>, which is
+a normal Python dictionary and can be modified accordingly.
+
+<P>
+In addition to normal dictionary operations, <TT>packets</TT> has an
+extra function to support TinyOS messages, <TT>addPacketType(Message
+message)</TT>. This function can create packet type specific
+reflections of <TT>packets</TT>. For example,
+
+<P>
+<PRE>
+from net.tinyos.message import IntMsg
+packets.addPacketType(IntMsg())
+</PRE>
+
+<P>
+will create a new variable in the Tython environment,
+<TT>IntMsgs</TT>, which contains all of the messages in
+<TT>packets</TT> that are of type <TT>IntMsg</TT>, as defined by
+active message type. This variable, <TT>IntMsgs</TT>, can be indexed
+and accessed just as <TT>packets</TT> is.
+
+<P>
+Note, however, that each element in the <TT>packets</TT> lists
+contains a <TT>TOSMsg</TT>; this means that in the above example,
+<TT>IntMsgs</TT> also has <TT>TOSMsgs</TT>; you cannot easily
+manipulate the elements as if they were actually instances of
+<TT>IntMsg</TT>, by accessing their message type specific fields, etc.
+
+<P>
+In order to transform the <TT>IntMsgs</TT> into a dictionary of
+<TT>net.tinyos.message.IntMsg</TT>, you must call
+<TT>IntMsgs.downCast()</TT>. For example:
+
+<P>
+<PRE>
+from net.tinyos.msg import IntMsg
+packets.addPacketType(IntMsg())
+
+# Get a dictionary of IntMsgs, instead of TOSMsgs
+myMsgs = IntMsgs.downCast()
+# Print the value in the first IntMsg that mote 0 transmitted
+print myMsgs[0].pop().get_val()
+</PRE>
+
+<P>
+Using a <TT>downCast()</TT> dictionary allows you to easily access
+message fields. However, it discards the additional metadata (such as
+transmit time) that a <TT>RadioMsgSentEvent</TT> contains.
+
+<P>
+The variable defined by <TT>addPacketType()</TT> will update as more
+motes send packets; it represents a filter on top of <TT>packets</TT>.
+The dictionary returned by <TT>downCast()</TT>, however, is static; it
+does not update as more motes send packets.
+
+<HR>
+<H1><A NAME="sec:plugins">
+Tython, SimDriver, plugins, and the radio</A>
+</H1>
+
+<P>
+The core of SimDriver is an event bus. Java plugins can connect to
+this event bus, receiving TOSSIM events and sending TOSSIM commands;
+many of the Tython abstractions are built on top of SimDriver plugins.
+TinyViz, the visualization environment, also uses plugins, so users
+can write new visualizations. Correspondingly, there are two classes
+of SimDriver plugins: GUI and non-GUI. In addition, scripts can
+register event handlers as well, as described in a later <a
+href="#sec:event_handlers">section</a>.
+
+<P>
+Examples of GUI plugins include TinyViz's radio quality visualization,
+its communication visualization, and the basic plugin that draws motes
+on the screen. Examples of non-GUI plugins include the radio model
+plugin and the packet logger plugin. GUI plugins are only loadable
+through TinyViz, while non-GUI plugins are accessible through Tython,
+and are used to actuate TOSSIM in response to network changes.
+SimDriver maintains a list of mote objects, which store state
+pertinent to the scripting environment, such as position and LED
+values.
+
+<P>
+For example, calling mote.moveTo() modifies that mote's position. This
+can change radio connectivity. The radio model notices the event that
+indicates a Mote's position has changed, and then calculates the
+appropriate bit error rates based on new distances. The plugin will
+then automatically communicate the new link qualities to TOSSIM, which
+is internally unaware of mote position.
+
+<P>
+
+<H2><A NAME="sec:radio_models">
+Position-based Radio Models</A>
+</H2>
+
+<P>
+Tython and TinyViz provide two position-based radio models: disc and
+empirical. The first models the network using "perfect disc"
+connectivity, at three different disc radii ("disc10", "disc100", and
+"disc1000"). Connectivity is perfect in that links are either
+error-free or not present, depending on whether the target is in or
+outside of the disc. Although links are perfect, collisions can still
+occur, which will corrupt a packet.
+
+<P>
+The second model, "empirical", uses an error distribution based on
+empirical data. Essentially, for any particular distance there is a
+distribution of possible bit error rates: two links of identical
+length can have different rates. These bit errors can cause a packet
+to be corrupted so that a receiver does not recover it properly. Links
+are directed: the error rate from A to B is distinct from the rate
+from B to A. Roughly speaking, motes closer than 16 units will have
+good connectivity, motes between 16 and 28 units will have highly
+variable and possibly asymmetric connectivity, and motes 30 units and
+higher away will have poor connectivity.
+
+<P>
+These position models boil down to a simple function: given a distance
+between two motes, produce a bit error rate. For disc-based models,
+this is a simple cutoff, which results in symmetric and perfect links.
+For the empirical model, the function returns a sample from the
+distribution corresponding to the distance.
+
+<P>
+Scripts can also explicitly specify connectivity qualities with the
+<TT>radio</TT> object. <TT>setLossRate(src, dest, prob)</TT> sets the
+bit error rate from ID <TT>src</TT> to ID <TT>dest</TT> to be
+probability <TT>prob</TT>. <TT>comm.packetLossToBitError(prob)</TT>
+calculates bit error rates from a packet loss rate*.
+
+<P>
+<DT><EM>*(This is actually a non-trivial calculation. It makes several
+assumptions about the data link encoding (the mica stack, with SecDed
+based encoding and a 9 bit start symbol) and packet length.
+Specifically, the packet error rate represents a 36-byte packet. As
+packets grow longer, their loss rate increases, as there is a set bit
+error rate.)</EM></DT>
+
+<H2><A NAME="sec:update_radio">
+Updating the Radio Model</A>
+</H2>
+
+<P>
+It is important to keep in mind that there at any one time, there are
+actually two radio models for a given simulation. TOSSIM internally
+maintains a table of bit error rates and uses this table to determine
+if any corruption should be applied to a radio message. In addition,
+SimDriver's Radio Model Plugin also maintains a table of error rates,
+driven by the above-described models. The correlation of these two
+data structures is controllable by the script (and also by the TinyViz
+GUI).
+
+<P>
+The <TT>radio.setLossRate()</TT> function only affects the data
+structure within SimDriver. Calling <TT>radio.publishModel()</TT>.
+propagates the entire connectivity graph to TOSSIM, which is
+<B>O(n<SUP>2</SUP>)</B>. Therefore, if a large number of links are
+updated, it's best to only publish the model once, after all of the
+updates.
+
+<P>
+To avoid this complexity and inefficiency, the Radio model also
+supports an <em>auto-publish</em> mode. When enabled, any changes to
+the connectivity graph within SimDriver are immediately propagated to
+TOSSIM. Note however, that auto publish is not enabled by default, and
+a script must enable it if desired:
+
+<pre>
+radio.setAutoPublish(True)
+</pre>
+
+<P>
+In addition, as mentioned previously, the radio models will
+automatically recalculate connectivity rates when Mote objects
+reposition themselves in the virtual simulator space. Note that if
+motes are moving around the space often, then auto-publish may result
+in a large number of messages being sent to TOSSIM to update the
+model.
+
+<H2><A NAME="sec:gui_labels">
+GUI Labels</A>
+</H2>
+
+<P>
+When using Tython with TinyViz, scripts can add annotations to mote
+visualizations. The <TT>setLabel()</TT> method of the mote class takes
+three parameters: a string, an X offset, and a Y offset. For example,
+
+<P>
+<PRE>
+motes[2].setLabel("queue depth: " + depth, 10, 0)
+</PRE>
+
+<P>
+will put a small label 10 pixels to the right of mote 2 in the TinyViz
+visualization panel, stating what its queue depth is (assuming the
+variable <TT>depth</TT> has been set to this value previously).
+
+<HR>
+<H1><A NAME="sec:complex_scripting">
+Complex Scripting</A>
+</H1>
+
+<P>
+The previous sections described how to control and monitor TOSSIM
+through Tython. However, the examples given were fairly simple. By
+using some of Python's expressive power, one can write much more
+intricate and complex scripts.
+
+<P>
+
+<H2><A NAME="sec:event_handlers"></A>
+<BR>
+Event Handlers
+</H2>
+
+<P>
+Fundamentally, both TOSSIM and </TT>SimDriver</TT> are event-driven
+programs. Internal to TOSSIM is a master event queue that manages the
+various simulated motes. When <TT>SimDriver</TT> is connected to
+TOSSIM, events are exchanged over the network connection. In this way,
+the <TT>SimDriver</TT> core is structured as a set of event handlers
+for events both coming from TOSSIM and internally generated.
+
+<P>
+Many Tython primitives depend on being able to handle TOSSIM events
+which update the known state about the simulation. For example, every
+time a mote transmits a packet, TOSSIM sends an event to
+<TT>SimDriver</TT>. Internally, a plugin within <TT>SimDriver</tt>
+subscribes to packet event notifications and uses them to update the
+<TT>packets</TT> variable (discussed in a <A
+HREF="manual.html#sec:packets">previous section</A>).
+
+<P>
+Tython scripts can also register event handlers through the
+<TT>simcore.interp</TT> object. Event handlers must be functions that
+expect a single parameter, the event handled. Scripts register
+handlers with <TT>interp.addEventHandler()</TT>. The first parameter
+is the event handler function. The second, optional, parameter is the
+Java class type of the events that the function should handle (not an
+instance of the event class). Passing an event type will register the
+handler for only events of that type; omitting it will have it handle
+all event types. For example:
+
+<P>
+<PRE>
+def print_handler(event):
+  print event
+
+# Print all events
+interp.addEventHandler(print_handler)
+
+# Print only LED events
+from net.tinyos.sim.event import LedEvent
+interp.addEventHandler(print_handler, LedEvent)
+</PRE>
+
+<P>
+The <TT>net.tinyos.sim.event</TT> package contains all of the events
+that TOSSIM generates (as well as a few which <TT>SimDriver</TT> uses
+internally). The TOSSIM events are:
+
+<P>
+<BR><P></P>
+<DIV ALIGN="CENTER"><A NAME="227"></A>
+<TABLE>
+<CAPTION><STRONG>Table:</STRONG>
+TOSSIM Events</CAPTION>
+<TR><TD>
+<DIV ALIGN="CENTER"><TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT">Name</TD>
+<TD ALIGN="LEFT">When?</TD>
+</TR>
+<TR><TD ALIGN="LEFT">ADCDataReadyEvent</TD>
+<TD ALIGN="LEFT">When a mote receives an ADC reading</TD>
+</TR>
+<TR><TD ALIGN="LEFT">AttributeEvent</TD>
+<TD ALIGN="LEFT">(Internal to SimDriver) When a mote attribute such as power, location, etc changes.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">DebugMsgEvent</TD>
+<TD ALIGN="LEFT">Each enabled <TT>dbg</TT> statement</TD>
+</TR>
+<TR><TD ALIGN="LEFT">InterruptEvent</TD>
+<TD ALIGN="LEFT">Unique scheduled event. See the next <a href="sec:future_actions">section</a></TD>
+</TR>
+<TR><TD ALIGN="LEFT">RadioMsgSentEvent</TD>
+<TD ALIGN="LEFT">When a mote finishes sending a radio packet</TD>
+</TR>
+<TR><TD ALIGN="LEFT">SimObjectDraggedEvent</TD>
+<TD ALIGN="LEFT">When a mote is dragged in the GUI</TD>
+</TR>
+<TR><TD ALIGN="LEFT">SimObjectSelectedEvent</TD>
+<TD ALIGN="LEFT">When a mote is selected in the GUI</TD>
+</TR>
+<TR><TD ALIGN="LEFT">TossimInitEvent</TD>
+<TD ALIGN="LEFT">When Tython connects to TOSSIM</TD>
+</TR>
+<TR><TD ALIGN="LEFT">UARTMsgSentEvent</TD>
+<TD ALIGN="LEFT">When a mote finishes sending a UART packet</TD>
+</TR>
+</TABLE>
+
+<A NAME="table:events"></A></DIV></TD></TR>
+</TABLE>
+</DIV><P></P>
+<BR>
+
+<P>
+Event handlers can be useful for waiting for a condition, or for
+logging information. For example, if you want to examine why a mote
+sends a specific (perhaps malformed) packet, you can register a
+handler for send events, and when the handler detects the packet,
+pause TOSSIM.
+
+
+<P>
+
+<H2><A NAME="sec:future_actions"></A>
+<BR>
+Future Actions
+</H2>
+
+<P>
+Most of the events described in the previous section are issued when a
+mote performs a certain action, or when the user makes an action in
+the TinyViz GUI. TOSSIM also provides a command for external programs
+to receive a callback in the future, the <TT>InterruptEvent</TT>. The
+method <TT>sim.interruptInFuture()</TT> command sends a command to
+TOSSIM which schedules an <TT>InterruptEvent</TT> at a designated time
+(in 4MHz simulator ticks). The command also takes an integer ID as a
+parameter, which is then used to distinguish between the
+InterruptEvents that fire. The <TT>sim.getInterruptID()</TT> API
+function can be used to get a unique id.
+
+<P>
+Here is an example use of these pause events, in this case where a
+user wants to print out mote state one minute into simulation:
+
+<P>
+<PRE>
+import simcore
+from net.tinyos.sim.event import InterruptEvent
+
+id = simcore.interp.getInterruptID()
+
+def time_handler(event):
+  global id
+  if event.get_id() == id:
+    print "Printing motes 1-20"
+    for i in range(0, 20):
+      print motes[i]
+
+simcore.interp.addEventHandler(time_handler, InterruptEvent)
+simcore.interp.interruptInFuture(60 * 4000000, id)
+</PRE>
+
+<P>
+To help manage some of the event and id bookkeeping, the
+<TT>simutil</TT> package provides a simpler python class interface to
+accomplish the same task:
+
+<P>
+<PRE>
+import simutil, simtime
+
+def time_handler():
+  print "Printing motes 1-20"
+  for i in range(0, 20):
+    print motes[i]
+
+simutil.CallIn(simtime.onemin, time_handler);
+</PRE>
+
+<P>
+In this example, <TT>CallIn</TT> is a simple python class that manages
+the pause and event identifiers. Besides the constructor method that
+schedules the callback, it also exports a <TT>cancel()</TT> method,
+which allows a script to nullify a previously scheduled action.
+
+<P>
+In addition, note that the first parameter to <TT>simutil.CallIn</TT>
+uses the <TT>simtime</TT> module, specifically the <TT>onemin</TT>
+constant. <TT>simtime</TT> is a simple module that has predefined
+constants and conversion functions for manipulating 4MHz simulator
+clock ticks. Also, the first parameter to <TT>CallIn</TT>is an offset
+from the current time, so the above call will occur one minute in the
+future. This is in contrast to both <TT>interp.interruptInFuture</TT>
+and the simple wrapper <TT>simutil.CallAt</TT> which both take a
+absolute time value.
+
+<P>
+
+<H2><A NAME="sec:periodic_actions"></A>
+<BR>
+Periodic Actions
+</H2>
+
+<P>
+The <TT>InterruptEvent</TT> interface is the primary means by which a
+script can schedule actions. Event handlers can also be made to
+reschedule themselves for periodic actions. For example, a simple
+change to the previous handler will cause the mote state to be printed
+every minute instead of only once:
+
+<P>
+<PRE>
+def time_handler(event):
+  global id
+  if event.get_id() == id:
+    print "Printing motes 1-20"
+    for i in range(0, 20):
+      print motes[i]
+    # Reschedule to happen again in one minute
+    simcore.interp.interruptInFuture(event.getTime() + simtime.onemin, id)
+</PRE>
+
+<P>
+This can get the job done, but is clunky, verbose and difficult.
+Changing the period from once a minute to twice a minute requires a
+new function. In order to just print out mote state every thirty
+seconds, a user has to write a function, request a pause ID, register
+a handler, and schedule an event to go off.
+
+<P>
+The <TT>simutil</TT> package provides a convenience class,
+<TT>Periodic</TT> for exactly this reason:
+
+<P>
+<PRE>
+from simutil import Periodic
+import simtime
+
+def time_handler(event):
+  print "Printing motes 1-20"
+  for i in range(0, 20):
+    print motes[i]
+
+p = Periodic(simtime.onemin, time_handler)
+</PRE>
+
+<P>
+Because Python functions are first class values, we can use closures
+to dynamically generate functions with the parameters a user needs.
+Thus telling Tython to print out a range of mote states periodically
+can be done with a single function call:
+
+<P>
+<PRE>
+from simutil import Periodic
+import simtime
+
+def print_state(low_mote, high_mote, period):
+  def time_handler(event):
+    print "Printing motes ", low_mote, " to ", high_mote
+    for i in range(low_mote, high_mote):
+      print motes[i];
+  return Periodic(period, time_handler);
+
+p = print_state(3, 5, simtime.onemin);
+</PRE>
+
+<P>
+In this example, <TT>print_state</TT> returns the newly allocated
+<TT>Periodic</TT> object instance, whose <TT>stop</TT> method can be
+used to stop the recurring action. Once <TT>print_state</TT> is
+called, the Tython environment will print out the state of motes
+<TT>low_mote</TT> to <TT>high_mote</TT>, every <TT>period</TT> ticks.
+
+<P>
+Closures can also be used for periodic commands to TOSSIM. For
+example, a test of a routing protocol may want to inject periodic
+beacons from a PC to a mote over the UART:
+
+<P>
+<PRE>
+from simutil import *
+def uart_beacon(mote, period, msg):
+  def sendMessage(event):
+    comm.sendUARTMessage(mote, 0, msg)
+  return Periodic(period, sendMessage)
+</PRE>
+
+<P>
+
+<H2><A NAME="sec:behavior_objects">
+Behavior Objects</A>
+</H2>
+
+<P>
+Using closures as described in the previous <a
+href="sec:periodic_actions">section</a> allows scripts to start
+periodic actions in a concise and simple manner. One use of this is to
+implement mote behaviors. For example, to make a mote move in a random
+walk, all one needs is a handler that moves a mote a small random
+step, then schedule this event to go off periodically.
+
+<P>
+One problem that emerges is conflicting behaviors. For example, one
+could call <TT>random_walk()</TT> to make a mote move randomly, and
+also call <TT>move_to()</TT> to make it move towards a specific
+qdestination. By registering two event handlers, the script has
+specified two conflicting movement behaviors, which will interleave
+and come into conflict.
+
+<P>
+A clean solution to solve this problem is through the use of a Python
+object. The object has functions for each of the different behaviors,
+and stores state on what behavior a mote is currently following. It
+also implements a singleton pattern to ensure that only one instance
+of hte object is created.
+
+<P>
+From an abbreviated example adapted from the <TT>simutil</TT> package:
+
+<P>
+<PRE>
+#
+# MoteMover is a utility class that handles various movement patterns
+# for motes. 
+#
+import simcore
+import simutil
+import simtime
+import math
+
+from net.tinyos.sim.event import InterruptEvent
+from java.util import Random
+
+# there should be only a single instance
+motemover = None;
+
+class MoteMover:
+  def __init__(self):
+    global motemover
+    if (motemover != None):
+      raise "Cannot instantiate MoteMover more than once"
+
+    self.rand = Random();
+    
+  handlers = {}
+  rate = simtime.onesec
+
+  #
+  # Move the mote to the given x,y position, moving a distance of
+  # 'step' each time. Calls the arrivedCallback when it gets there.
+  #
+  def moveTo(self, mote, step, x, y, arrivedCallback = None, rate = -1):
+    moteID = mote.getID();
+    if rate == -1:
+      rate = int(self.rate)
+    
+    if (self.handlers.has_key(moteID)):
+      raise IndexError("Mote ID %d already on the move" % moteID)
+
+    dx = x - mote.getXCoord();
+    dy = y - mote.getYCoord();
+    distance = mote.getDistance(x, y);
+    nsteps = distance / step;
+    xstep = dx / nsteps;
+    ystep = dy / nsteps;
+
+    def callback(pauseEvent):
+      distance = mote.getDistance(x, y);
+      if (distance < step):
+        mote.moveTo(x, y);
+        self.stop(mote); # clear handlers, cancel event, etc
+        if (arrivedCallback != None):
+          arrivedCallback(mote)
+      else:
+        mote.move(xstep, ystep);
+
+    periodic = simutil.Periodic(rate, callback);
+    self.handlers[moteID] = (periodic, 'move_to');
+
+  #
+  # Move the given mote in a random walk pattern, moving a distance of
+  # 'step' units on each time interval.
+  #
+  def randomWalk(self, mote, step, rate=-1):
+    moteID = mote.getID();
+    
+    if rate == -1:
+      rate = self.rate
+      
+    if (self.handlers.has_key(moteID)):
+      raise IndexError("Mote ID %d already on the move" % moteID)
+
+    def callback(pauseEvent):
+      x = self.rand.nextDouble() * step * 2.0 - step;
+      y = self.rand.nextDouble() * step * 2.0 - step;
+      simcore.motes[moteID].move(x, y)
+      # print "random_walk: move mote %d by (%d, %d)" % (moteID, x, y);
+      
+    periodic = simutil.Periodic(rate, callback);
+    self.handlers[moteID] = (periodic, 'random_walk')
+
+</PRE>
+
+<P>
+In this example, the class variable <TT>handlers</TT> is used to store
+the notion of whether or not a particular mote is moving. Conflicting
+movement patterns are therefore detected and an error is reported.
+Additional movement patterns can be easily added to the object as new
+functions that follow the same pattern to avoid conflict.
+
+<H2><A NAME="sec:mote_variables">
+Mote Frame Variables</A>
+</H2>
+
+<P>
+One of Tython's most powerful features is the ability to request
+snapshots of variables from the running TOSSIM simulation.
+Specifically, the <tt>Mote</tt> object (accessible through the
+<tt>motes</tt> list), implements four functions (<TT>getBytes()</TT>,
+<TT>getLong()</TT>, <TT>getInt()</TT>, and <TT>getShort()</TT>) that
+allow you to request variable values from TOSSIM, returning them in
+the appropriate type.
+
+<P>
+The string parameter to each of these functions is the variable's C
+name. For nesC components, this takes the form of
+<tt>&lt;component_name&gt;$&lt;variable_name&gt;</tt> For example,
+this code fetches some variables from the TimerM component of mote 2:
+
+<P>
+<PRE>
+tail = motes[2].getByte("TimerM$queue_tail")
+head = motes[2].getByte("TimerM$queue_head")
+print "head: ", head,  "tail: ", tail
+</PRE>
+
+<P>
+The <TT>getBytes()</TT> function can be used to fetch entire
+structures. Currently, the variable parameter does not support
+accessing structure fields, pointer traversals, or array elements.
+Therefore, while <TT>getBytes("TimerM$mTimerList")</TT> will return
+all of the timer structures as an array of bytes,
+<BR><TT>getBytes("TimerM$mTimerList[1]")</TT> and
+<TT>getBytes("TimerM$mTimerList[1].ticks")</TT> do not work.
+
+<HR>
+<H1><A NAME="sec:design">
+Appendix A: Design Ideology</A>
+</H1>
+
+<P>
+Tython is a new system that adds a powerful new tool to the sensor
+network developer's portfolio. Through both predefined scripts and
+interactive console sessions, Tython aids the tasks of developing,
+testing, and evaluating a new algorithm or application. The core
+architecture is extensible, allowing developers to write new python
+modules and <TT>SimDriver</TT> plugins to add new forms of interaction
+and manipulation.
+
+<P>
+The primary goal of Tython is to offer the sensor network developer a
+simulation environment with dynamic interactivity, enabling both
+unattended simulation experiments, as well as interactive debuggging
+and simulation control. The confluence of these two goals informs the
+major design decisions of our project, as well as the particular
+interfaces exposed by the Tython commands and classes.
+
+<P>
+In some senses, the first order design question relates to the value
+of a dynamic simulation environment. Indeed, TOSSIM alone is a
+valuable tool for aiding sensor network development, offering a
+scalable simulation of a network of sensor motes with a fairly
+realistic radio model and a rich debugging capability (gdb). Yet
+TOSSIM alone essentially just simulates tossing a set of motes into a
+field and letting them go, assuming a constant radio topology. On the
+other hand, the real world is a dynamic place; objects and motes can
+move, radio connectivitity changes, motes can fail. An important tool
+in the developer's toolbox, therefore, is the ability to simulate
+these dynamic interactions and thereby engineer a program that can
+cope with these situations.
+
+<P>
+Rather than integrating dynamically controlled interfaces to TOSSIM,
+the simulator instead implements a network protocol that allows
+interactive applications to connect to and control a running
+simulation. This separation allows the TOSSIM code base to remain
+insulated and relatively lean (maintaining performance capabilities),
+while more complicated calculations and interactivity can be
+implemented in a separate process.
+
+<P>
+TinyViz was a tool that enables developers to dynamically manipulate a
+simulation. The protocol between TOSSIM and TinyViz enables the GUI to
+introduce dynamics into a test application's execution. However, GUI
+elements do not address all the needs of a dynamic interaction. In
+general, a user's interaction with a GUI is non-deterministic, making
+repeated executions of a test case difficult if not impossible to
+reproduce. Furthermore, to run a set of experiments using manual
+manipulation of the simulation state is an extremely cumbersome task,
+limiting the developer to a simple cursory exploration of the
+potential interactivity parameter space.
+
+<P>
+The TinyViz plugin system is an available avenue to manipulate or
+visualize the parameters of an application. The plugin API allows a
+Java object to be loaded into the TinyViz GUI environment and to
+interact with the TOSSIM protocol. Through custom plugins, an
+application writer could fully express control over the dynamics of a
+particular experiment. In point of fact, much of the core Tython
+functionality is implemented using the TinyViz plugin system. However,
+writing custom plugins is an insufficient solution due not only to the
+cumbersome nature of writing experiments in a compiled language, but
+more importantly that it does not enable interactive code execution.
+In addition, being able to run an unattended simulation is a valuable
+convenience to developers.
+
+<P>
+Through a scripting environment, developers are able to control
+experiments through repeatable interactions. The Python and reflected
+Java commands/objects expose the key control elements of the
+simulation environment. These hooks can be used both in a controlled
+experiment framework and through console interaction with a running
+simulation. The interative console session is both useful for dynamic
+debugging and investigation of an experiment, but also as a
+prototyping arena for code that may become part of a longer experiment
+framework. The dynamic console functionality not only eases the burden
+of writing simulation scripts, but also enables interactive
+experimentation with the simulation itself. A developer can pause a
+simulation at a given time, use the variable resolution features to
+probe around (and potentially alter) the simulation state, then
+continue the simulation to observe the effects of the actions.
+
+<P>
+
+<HR>
+<H1><A NAME="sec:about">
+About this document..</A>
+</H1>
+<STRONG>Tython: Scripting TOSSIM</STRONG><P>
+This document was generated using the <A
+HREF="http://www.latex2html.org/"><STRONG>LaTeX</STRONG>2<tt>HTML</tt></A>
+translator Version 2002 (1.62)
+<P>
+Copyright &#169; 1993, 1994, 1995, 1996,
+<A HREF="http://cbl.leeds.ac.uk/nikos/personal.html">Nikos Drakos</A>, 
+Computer Based Learning Unit, University of Leeds.
+<BR>
+Copyright &#169; 1997, 1998, 1999,
+<A HREF="http://www.maths.mq.edu.au/~ross/">Ross Moore</A>, 
+Mathematics Department, Macquarie University, Sydney.
+<P>
+<P>
+
+This document is based on an initial translation run by Michael Demmer
+on January 30, 2004 as a conversion from the previous version of the
+Tython manual. Since then, both formatting and content have been
+heavily modified.
+
+</BODY>
+</HTML>

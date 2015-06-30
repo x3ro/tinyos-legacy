@@ -1,0 +1,40 @@
+AcousticBeacon:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+Upon receiving an acoustic beacon message, this component will turn of the radio and will
+sample the microphone at specified time intervals at around 16 KHz. The sampling intervals
+are specified with the setTiming command. Basically, it specifies when to start sampling
+the microphone in jiffies.
+
+The sending of the acoustic signal is done in AcousticBeacon.
+
+IMPLEMENTATION:
+
+This component will only work with Vanderbilt's version of Clock, Timer and ADC. 
+The Clock and Timer components are needed to start and restart the conversion at 
+jiffy (1/32768 sec) precision. The ADC cannot be left running between the sampling
+periods because then when the new sampling interval comes, the alignment of the
+sampling will not be precise. The new ADC component will turn off the ADC completely
+(unlike the original one) which stops the ADC prescaler. This is also needed for
+the precise operation. With the old ADC component we were able to observe following 
+behavior too:
+
+	samples arrived in the wrong order
+
+This was caused by the bad interaction of software components. If an ADC interrupt 
+comes we start to service it. If during this time a Clock interrupt comes, then we
+go into the Clock and Timer components and use the CPU for some extended time. This
+could take longer than the ADC sampling interval. So while servicing the Clock/Timer
+another ADC interrupt comes which completes (this is the first observable sample at
+higher levels). Then the Clock/Timer interrupt completes, and only after that will the
+first sample arrive. The new ADC solves this problem in the following way:
+
+When servicing an ADC interrupt, we set a flag that we are "busy". When the next ADC
+interrupt comes and if this flag is set, then we know that we are still processing the
+old sample. So we put the new value to an internal buffer and return immediatelly from
+the interrupt handler. When the first ADC sample is processed and control is returned 
+to the ADC component, then we check if new samples arrived in the mean time. If so, then
+we deliver them one by one.

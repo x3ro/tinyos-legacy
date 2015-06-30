@@ -1,0 +1,305 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 FINAL//EN">
+<html>
+  <head>
+    <title>Lesson 7: Data logging application</title>
+  </head>
+
+  <body>
+    <h1>Lesson 7: Data logging application</h1>
+
+    <p>
+    This tutorial will discuss a fairly complete application for remote data
+    logging and collection, called <a href="../../apps/sense_and_log/">
+    sense_and_log</a>. This application builds on components from previous
+    lessons: <tt>BCAST</tt>, <tt>SENSE</tt> and <tt>COMMAND</tt>.  This
+    tutorial also discusses the <tt>LOGGER</tt> component, and shows a simple
+    multihop data propagation from the sensors to a central location.</p>
+
+    <h2>Functionality</h2>
+
+    <tt>sense_and_log</tt> application is an example of a more complete data
+    collection.  Using broadcasted commands, we can instruct a collection of
+    motes to collect a certain number of samples at a chosen rate. This data
+    will be stored locally on the mote. It can be later retrieved from the
+    network.  
+
+    The high-level functionality of <tt>sense_and_log</tt> can be best
+    understood by looking at the <tt>COMMAND</tt> component. The structure of
+    this module builds on on the <tt>COMMAND</tt> from <a href="lesson6.html">
+    Lesson 6</a>. The <tt>eval_cmd</tt> processing loop now recognizes two
+    additional commands: 
+    <ul>
+      <li>START_SENSING -- this command invokes the <tt>SENSE</tt> component
+	to collect a specified number of samples at a specified sampling rate
+	and to store these samples in the EEPROM. 
+      <li>READ_LOG -- this command will retrieve a block of data from the
+	EEPROM and report it over the multihop network to the base station.
+	The requests flood the network, whereas the reply travels along a well
+	defined path. This also causes a more complex interaction with the
+	BCAST component -- if a node detects that it should act on the
+	message, it squashes the local re-broadcast.
+    </ul>
+    
+    Since the data is supposed to flow to the origin of the <tt>READ_LOG</tt>
+    request, the each node now remembers where the message originated.  We'll
+    return to this piece of information when discussing multihop routing. 
+
+    <h2>Sensing</h2>
+    
+    <p>
+    This component builds on the <tt>SENSE</tt> component from <a
+    href="lesson2.html"> Lesson 2 </a> and <tt>OSCOPE</tt> component from <a
+    href="lesson5.html"> Lesson 5</a>.  In order to start sensing, an upper
+    layer needs to invoke the START method, and specify the number of samples
+    to be taken, as well as the rate at which they should be taken. </p>
+
+    On each clock tick, the application issues a request to sample the sensor
+    (exactly which sensor that might be depends on the description file).
+    When the pre-specified number of samples has been collected, the
+    application turns off the <tt>CLOCK</tt>:
+<pre>void TOS_EVENT(SENSE_CLOCK_EVENT)(){
+    VAR(nsamples)--;
+    if (VAR(nsamples)== 0) {
+	// Stop the clock. 
+	TOS_CALL_COMMAND(SENSE_CLOCK_INIT)(0, 255);
+    }
+    TOS_CALL_COMMAND(SENSE_LEDr_toggle)();
+    TOS_CALL_COMMAND(SENSE_GET_DATA)();
+}
+
+</pre>
+    
+    The data ready event deposits the sensor readings into a buffer, much like
+    in <tt>OSCOPE</tt>.  When this local buffer fills up, it is written out to
+    the <tt>LOGGER</tt>.  The application uses double buffering (much like
+    <tt>OSCOPE</tt>), so the constraint is that the LOGGER_APPEND is finished
+    before the second buffer fills up.
+    
+    <h2>Logger component, interfaces, usage, and limitations</h2>
+
+    The Mica mote has an on-board, 4-MB flash EEPROM.  The EEPROM
+    serves as a persistent storage device for the mote, and it has proven
+    indispensable in many applications involving data collection (both sensor
+    data and debugging traces) or network programming.  The <a
+    href="../../tos/system/LOGGER.c"> LOGGER</a> component abstracts the
+    access to this hardware. It exposes a record-oriented interface, and it
+    operates on 16-byte blocks.  It exposes three methods for interacting with
+    the EEPROM:
+    <ul>
+      <li><tt> char APPEND_LOG(char* data);</tt> -- sequential write access,
+	useful for storing sensor data or other in-order streams.  Low regions
+	of the EEPROM cannot be accessed with APPEND_LOG, which is useful in
+	certain applications
+      <li><tt>char WRITE_LOG(int line, char* data);</tt> -- random access
+	write to the EEPROM, very useful when the size and structure of the
+	object stored is known in advance.  This functionality is very useful
+	when it comes to network reprogramming. 
+      <li><tt>char READ_LOG(int line, char* dest);</tt> -- random access
+	read, the component using the log passes in a buffer to be
+	written.
+    </ul>
+
+    <p>
+    All of the above operations are split phase - APPEND_LOG and WRITE_LOG
+    will signal a <tt>APPEND_LOG_DONE(char success);</tt> upon completion, and
+    READ_LOG will signal <tt>READ_LOG_DONE(char* packet, char
+    success);</tt>. Only one of these operations can be performed at a time,
+    if there is an operation is progress, the invocation of any of these
+    commands will fail.  Applications using the LOGGER must take care to
+    either ensure a full serialization of operations or check the command
+    return code and retry periodically.</p>
+
+    <p>
+    You'll note that both READ_LOG and WRITE_LOG will address the underlying
+    EEPROM in units of <em> lines</em>.  Line is analogous to a block number
+    on a harddrive -- it addresses the EEPROM not in the units of bytes but
+    rather in the units of LOG_ENTRIES. With the 16 LOG_ENTRIES, the log will
+    store 2048 log lines</p>
+
+    <p>
+      <em> Note on internal storage organization:</em> The APPEND_LOG command
+      from this release of LOGGER will not write any data to lines 0 through
+      3. This region of EEPROM has been set aside to store data persistent to
+      the mote. If you're using network reprogramming components, this region
+      will hold the TOS_LOCAL_ADDRESS for the mote, which will make it
+      persistent across reprogramming. Also when using network programming,
+      you may wish to set aside a larger buffer for the downloaded code, or
+      otherwise gurantee that logging of other data will not interfere with
+      downloaded code. </p>
+
+    <p>
+      <em> Note on tossim:</em> At this point there is no functionality of
+      logger in the tossim, so applications using the logger cannot be
+      reliably simulated under tossim.</p>
+
+    <h3> Logging performance</h3>
+    
+    <p>
+    Another issue that comes up quite often is the performance of the
+    logger. Read performance is proportional to the amount of data being read,
+    and is fast enough not to be a problem in most TinyOS applications.  The
+    write speed is a different issue. Since the write speed is slower than the
+    maximum data generation of the mote, it is the logger component that
+    effectively limits the capture rate. The write speed is proportional to
+    the amount of data being written, but after every log entry write there is
+    a pause of about 5 ms. During that pause, the EEPROM transfers the data
+    from an internal RAM buffer into nonvolatile storage. During that time,
+    the EEPROM is completely nonresponsive.  It is that internal EEPROM buffer
+    that limits the maximum size for EEPROM log entries to 64 bytes.  Moving
+    to larger EEPROM entries will have the effect of increasing the throughput
+    of the EEPROM.  For the LOGGER in the release, we chose log entries of 16
+    bytes, as a reasonable compromise between logging performance, buffering
+    requirements, and interactions between the logging components and the
+    messaging subsystem. </p>
+
+    <p>
+    As a rule of thumb, you should assume that writing a log entry to the
+    EEPROM will take about 10 ms. This implies the logging throughput at 1600
+    bytes per second. If you're trying to use the EEPROM to log data from an
+    analog sensor attached to the mote, then you can log data at up to 800
+    samples per second.  When you exploit the fact that the ADC on the mote
+    only produces 10 bits of data per sample, then you can log up to 1280
+    samples per second. At the maximum throughput, the mote is able to record
+    about 20 seconds worth of data.</p>
+
+    <h2> Multihop data collection</h2> 
+    
+    As we mentioned above, this application adopts a pull model for extracting
+    the data: someone must ask for a specific piece of recorded data from a
+    mote. This request is flooded out. The reply travels the path reverse of
+    the request path. The following code inside the <tt> COMMAND</tt>
+    component accomplishes this:
+<pre>// Log message structure
+typedef struct {
+    short source; 
+    short address;
+    char log[16];
+    unsigned hop_count;
+} logmsg_t;
+
+#define TOS_FRAME_TYPE COMMAND_obj_frame
+TOS_FRAME_BEGIN(COMMAND_obj_frame) {
+    TOS_MsgPtr msg;
+    TOS_Msg log_msg;
+    short parent;
+    char send_pending;
+    char pending;
+}
+TOS_FRAME_END(COMMAND_obj_frame);
+
+...
+TOS_TASK(eval_cmd) {
+    cmdmsg_t * cmd = (cmdmsg_t *) VAR(msg)->data;
+    char status = BCAST_FORWARD;
+    // do local packet modifications: update the hop count and packet source
+    cmd->hop_count++;
+    VAR(parent) = cmd->source;
+    cmd->source = TOS_LOCAL_ADDRESS;
+
+    switch (cmd->action) {
+
+    case READ_LOG:
+	//Check if the message is meant for us, if so issue a split phase call
+	//to the logger
+	if ((cmd->args.rl_args.address == TOS_LOCAL_ADDRESS) &&
+	    (VAR(send_pending) == 0)) {
+	    if (TOS_CALL_COMMAND(COMMAND_READ_LOG)
+		(cmd->args.rl_args.logLine, 
+		 ((logmsg_t*) VAR(log_msg).data)->log)) {
+		VAR(pending) ++;
+	    }
+	    status = BCAST_PRUNE;
+	}
+	break;
+    }
+
+....
+
+}
+
+// The log has completed the reading, and now we're ready to send out this
+// message. Note a potential problem: what is send_pending set to? 
+
+char TOS_EVENT(COMMAND_READ_LOG_DONE)(char* packet, char success) {
+    if (success) {
+	VAR(pending) = 0;
+	VAR(send_pending) = TOS_CALL_COMMAND(COMMAND_SUB_SEND_MSG)
+	    (VAR(parent), AM_MSG(LOG_MSG), &VAR(log_msg));
+    }
+    return 1;
+}
+
+// Routing handler for the LOG_MSG. The default handler is very simple: we
+// copy the data out of the packet into the log buffer, and forward it to the
+// parent. Exercise to the reader: what are the rece conditions in routing and
+// how can they be fixed? 
+
+TOS_MsgPtr TOS_MSG_EVENT(LOG_MSG)(TOS_MsgPtr msg) {
+    char i;
+    char *ptr1, *ptr2;
+    if (VAR(send_pending) == 0) {
+	VAR(send_pending) = 1;
+	ptr1 = (char *) &(VAR(log_msg));
+	ptr2 = (char *) msg;
+	for (i =0; i < defaultMsgSize(msg); i++) {
+	    *ptr1++ = *ptr2++;
+	}
+	if (TOS_CALL_COMMAND(COMMAND_SUB_SEND_MSG)
+	    (VAR(parent), AM_MSG(LOG_MSG), &VAR(log_msg)) == 0) {
+	    VAR(send_pending) = 0;
+	}
+
+    }
+    return msg;
+}
+
+</pre>
+    
+    <p>
+    When any broadcast request is received, each node stores the ID of the
+    node that forwarded that request.  When a node composes the log message,
+    it forwards it just to the parent node (unlike broadcast, which sends out
+    the message to the entire neighborhood).  The parent of the originating
+    mote forwards such messages to its parent, until the message reaches the
+    source of the request flood. </p>
+
+    <p>
+    Mote IDs fullfill two important roles: they help us identify a specific
+    data stream, and they are used to identify a specific path through the
+    network.  There are schemes, like directed diffusion, which do not use the
+    mote IDs for identifying network paths; looking at the <tt>
+    TOS_MSG_EVENT(LOG_MSG)</tt>, we could have used a schemes which are more
+    in the spirit of diffusion, e.g. the reply could have been flooded back to
+    the requester.</p>
+
+    <p>
+    Also note that the buffer management in the <tt>LOG_MSG</tt> handler is a
+    bit different from what you've seen so far: rather than playing the
+    pointer swapping game (like <tt>BCAST</tt>), the message being forwarded
+    is copied to the local buffer, and the original buffer is returned to the
+    communication stack.</p>
+    
+    <h2> PC-side tools</h2>
+    
+    <h2> Exercise </h2> 
+    
+    Build one mote with <tt>generic_base</tt>. Install <tt>sense_and_log</tt>
+    on your remaining motes, taking care  to assign different ids to each
+    mote.  Then test out the application:
+    
+<pre>java net.tinyos.tools.BcastInject groupID START_SENSING 128 4 128
+</pre>
+
+    This will instruct the motes to collect 128 light samples at 8 samples per
+    second.  Manipulate the conditions so that the light levels change during
+    the sampling. Then, extract the data with 
+<pre> 
+java net.tinyos.tools.BcastInject groupID READ_LOG moteID 4
+</pre> 
+
+    You should see a packet reporting the light readings for the first second
+    of measurements from mote moteID. 
+
+<hr>
+<b><font size=4><a href="lesson6.html">&lt; Previous Lesson</a></font></b> | <u>
+    <b><font size="4"><a href="lesson8.html">Next Lesson &gt;</a></font></b></u></body></html>

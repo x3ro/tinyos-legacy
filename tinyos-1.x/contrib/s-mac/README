@@ -1,0 +1,57 @@
+S-MAC Implementation in TinyOS
+
+Contact: Wei Ye (weiye@isi.edu)
+
+S-MAC is an energy-efficient Medium Access Control (MAC) protocol for wireless
+sensor networks designed by USC/ISI and UCLA. S-MAC implementation in TinyOS 
+is not based on the standard radio communication stack by UC Berkeley. Instead, 
+we implemented a new physical layer (PHY) that handles low-level packet 
+transmission and reception and provides important support to S-MAC. Our S-MAC 
+and PHY forms a new communication stack in TinyOS.
+
+Following is a highlight of some features of S-MAC stack.
+
+ * Flexible architecture that allows people to easily build different 
+   components at different layers. The nested header structure allows each
+   component to freely define its own packet formats and add its header fields
+   in packets from upper layers.
+
+ * Clean separation of MAC and PHY allows different MACs can be built on the
+   same PHY. The PHY can reliably and efficiently handle variable length 
+   packets up to 250 bytes, and is robust to back-to-back packet transmission.
+
+ * S-MAC provides energy-efficient operations on radio
+
+   * Low-duty-cycle operation on radio trades off latency for energy savings.
+   * Overhearing avoidance -- sleep when neighbors are talking
+
+ * Abundant features in unicast provided by S-MAC (similar to IEEE 802.11).
+
+   * RTS/CTS/Data/ACK mechanism is Robust to collisions, hidden terminal 
+     problem, and data packet losses.
+   * Fragmentation support for long messages
+   
+For details of S-MAC protocol design, please refer to the following paper
+
+  Wei Ye, John Heidemann and Deborah Estrin, "Medium Access Control with 
+  Coordinated, Adaptive Sleeping for Wireless Sensor Networks," To appear in 
+  the IEEE/ACM Transactions on Networking.
+  
+  Available at http://www.isi.edu/~weiye/pub/smac_ton.pdf
+
+For details of S-MAC implementation, please refer to the following technical
+report
+
+  Wei Ye, John Heidemann and Deborah Estrin, "A Flexible and Reliable Radio 
+  Communication Stack on Motes," USC/ISI Technical Report ISI-TR-565.
+  
+  Available at http://www.isi.edu/~weiye/pub/commstack.pdf
+
+  The main S-MAC source code download page is at
+  
+  http://www.isi.edu/ilense/software/smac/
+
+New users can look at the following web page to get started with S-MAC
+stack. There are also README file in each application directory.
+
+  http://www.isi.edu/ilense/software/smac/get_start_1.1.html

@@ -1,0 +1,1 @@
+<FUNCTION name=startradio opcode=startradio numparams=0 returnval=FALSE desc="turns the radio back on">

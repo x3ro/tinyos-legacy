@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><!-- InstanceBegin template="/Templates/Main.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+
+<title>Agilla</title>
+
+<!-- InstanceEndEditable -->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+</head>
+
+<body>
+<table width="95%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td><p>&nbsp;</p>
+      <table width="100%" border="1" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80%">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><!-- InstanceBeginEditable name="MainText" -->
+
+          <h2><font face="Verdana, Arial, Helvetica, sans-serif">Tutorial  Lesson 1 - Customizing the Network Topology</font></h2>
+
+          <p>Agilla addresses each node by its location rather than its TinyOS
+
+            ID. This is because agents need to know their location to
+
+            correlate sensor readings with the location from which they were
+
+            obtained. Having a sensor reading without its location is not useful.
+
+            For example, if an agent takes a temperature reading and determines
+
+            that
+
+            there
+
+            is
+
+            a
+
+            fire,
+
+            it cannot
+
+            simply tell
+
+            a base
+
+            station
+
+            &quot;fire&quot; but rather &quot;fire at (1,2).&quot; By utilizing a location-centric
+
+            addressing scheme, Agilla provides a unified way of identifying nodes,
+
+            and allows its primitives
+
+            to
+
+            be generalized to operate over regions (e.g., out a tuple into all
+
+            tuple spaces within a particular geographic region). </p>
+
+          <p>Since TinyOS does not provide geographic routing or location discovery,
+
+            the current verion of Agilla utilizes a multi-hop sensor network
+
+            arranged
+
+            in an <em>n</em> <font face="Arial, Helvetica, sans-serif">x</font> <em>m</em> grid.
+
+            Each node is identified by its integer (x,y) location. The lower-left
+
+            corner of the network is location (1,1) and the x and
+
+            y coordinates increase going left and up, respectively. The mote
+
+            connected to the base station has a location of (0,0). Below
+
+            is a 5<font face="Arial, Helvetica, sans-serif"> x</font> 5
+
+            sized network:</p>
+
+          <p align="center"><img src="network_setup.JPG" width="350" height="233"></p>
+
+          <p>A multi-hop network is achieved by modifying the TinyOS network
+
+            stack to examine and filter out messages fron non-neighbors. A node
+
+            can only communicate with its imediate neighbors as specified by
+
+            the grid topology. For example, a node located at (2,2) can communicate
+
+            with nodes (1,1), (1,2), (1,3), (2,1), (2,3), (3,1), (3,3), (3,4).</p>
+
+          <p>              To simplify geographic routing, the mote ID relates
+
+            to its location as follows: </p>
+
+          <p align="center"><em>ID = x + (y-1)*(number of columns)</em></p>
+
+          <p>Given the ID, the location can be calculated as follows:</p>
+
+          <p align="center"><em>x = [(ID-1) mod (number of columns)] + 1<br>
+
+  y = (ID &#8211; x)/(number of columns) + 1</em></p>
+
+          <p>For example, in a 4x4 network, the nodes would have the following
+
+            IDs and locations:<br>
+
+              <img src="4x4example.jpg" width="350" height="207"></p>
+
+          <p>The base station is a special case with an ID of 0 and a location
+
+            of (0,0). The base station can interact with any node in the network
+
+            using the build-in geographic routing. Internally, it nodes in the
+
+            first row (x=1). </p>
+
+          <p>To change the size of the network, open <em>&lt;agilla&gt;/types/Agilla.h</em> and
+
+            change the <em>NUM_ROWS</em> and <em>NUM_COLUMNS</em> macros. Once
+
+            you have changed this, you need to recompile Agilla and re-install
+
+            it on all of the motes. Agilla comes with a simple gawk script that
+
+            re-installs Agilla on all of the mote, prompting you to install each
+
+            mote onto the programming board. Use it by going to &lt;agilla&gt; and
+
+            typing <em>gawk -f installer.awk</em>.</p>
+
+        <!-- InstanceEndEditable --></td>
+        </tr>
+        <tr>
+          <td width="80%" cellpadding="2" cellspacing="2" bgcolor="#990000">&nbsp;           </td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+<hr>This work is supported by the <a href="http://formal.cs.uiuc.edu/contessa">ONR MURI Project CONTESSA</a> 
+and the <a href="http://www.nsf.gov/">NSF</a> under grant number CCR-9970939.
+</body>
+<!-- InstanceEnd --></html>

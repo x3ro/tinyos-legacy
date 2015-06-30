@@ -1,0 +1,14 @@
+#-*-Makefile-*- vim:syntax=make
+# Makefile to be included by each application's Makefile for Tnodes
+TOSDIR= $(shell ncc -print-tosdir)
+MAKERULES=$(TOSDIR)/../tools/make/Makerules
+
+TOSMAKE_PATH += $(TOSDIR)/../contrib/t-mac/make
+MAKECMDGOALS += tmac
+
+PFLAGS+=-Wa,--allow-dollars
+
+TOSMAKE_PATH += $(TOSDIR)/../contrib/tnodes/make
+
+include $(MAKERULES)
+

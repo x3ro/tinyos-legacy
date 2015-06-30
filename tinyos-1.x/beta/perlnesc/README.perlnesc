@@ -1,0 +1,108 @@
+$Id: README.perlnesc,v 1.1 2004/07/15 18:25:40 cssharp Exp $
+@author Cory Sharp <cssharp@eecs.berkeley.edu>
+
+PerlNesc README
+
+
+***
+***  SETUP
+***
+
+1) Put $TOSDIR/../beta/perlnesc/bin/perlncpp in your path:
+
+    export PATH=$PATH:$TOSDIR/../beta/perlnesc/bin
+
+2) PerlNesc requires the new TinyOS make system in tools/make/.  After
+setting that up, add perlnesc to TOSMAKE_PATH:
+
+    export TOSMAKE_PATH=$TOSDIR/../beta/perlnesc
+
+3) Add perlnesc to the GOALS of an application Makefile:
+
+    GOALS += perlnesc
+
+
+***
+*** OVERVIEW
+***
+
+PerlNesc scans every file chained from the top-level application
+configuration looking for <perl> ... </perl> style tags.  Like PHP, these
+tags are executated and their contents replaced by the output of all
+"print" statements invoked by that block of code.  Blocks of code is full
+Perl can do anything Perl can do, such as define new subroutines.  Files
+modified by PerlNesc are exported to the platform build directory such as
+build/telos/ or build/mica2/.
+
+On the first pass of the files in the applicaiton ntree, <perl></perl>
+tags are executed when they are encountered.  <perl last></perl> tags are
+executed on a second pass.  Then, files are written to the platform build
+directory.  Finally accounting subroutines are executed, which may
+optionally collect and output additional information.
+
+Within a perl block, the following variables are available: $file, $opts,
+and $text.  $file is a PerlNesc class which contains the following useful
+hash entries:
+
+  files      - (global) PerlNescFiles class, all the files of the appl.
+  tags       - (global) PerlNescTags class, all the tags if this appl.
+  children   - PerlNescFiles class, all the files included by this file
+  parents    - PerlNescFiles class, all the files that included this file
+
+  opts       - (global) hash, cmdline options and other given to perlncpp
+  text       - string, the contents of this file
+  name       - string, just the name and extension of this file
+  file       - string, full path specification to this file
+  modified   - integer, true if the file has been modified
+
+PerlNesc class also provides the following useful member subroutines:
+
+  save_file($name,$text) - output text as file name into the builddir
+  include($name) - include and process a file, search the include path
+  post_accounting($sub) - post an accounting subroutine
+
+If you want to reprocess any text, also think about using the package
+function (not member function) parse_text, which extract blocks of code
+into an array of types, COMMENT, STRING, CODE, or a special block.
+
+$opts is a hash of all the key-value pairs given in the perl tag, such as
+<perl iggly=jeejee></perl>, where $opts{iggly}="jeejee".  Keys without
+values are assigned the value 1, such as <perl wiggly></perl>, where
+$opts{wiggly}=1.
+
+$text is the original text contained within the perl block.
+
+You can use $file->{tags}->add_tag($tagname,$tagsub) to add a new tag for
+processing.  The tag handler has access to the same variables as the
+standard perl handler, but as a hash pass as an argument, like this:
+
+  <perl>
+  sub snms_tag {
+    my %arg = @_;
+    if( $arg{opts}{log} ) {
+      # process in here if log was a key to the tag
+      # do something with $arg{text}, maybe print stuff
+    } else {
+      # do something else
+    }
+    1; # return true to substitute the print statement for the tag body
+  }
+  $file->{tags}->add_tag("snms",\&snms_tag);
+  </perl>
+
+  // ... and later ...
+
+  <snms log> this is text that snms_tag must parse and process </snms>
+
+Oh, you can also check out beta/perlnesc/include/pncdeps.h to see how I
+use post_accounting to output nesc_deps.txt which describes the file
+dependency tree.
+
+
+***
+*** INKLINGS
+***
+
+That intro should give you an inkling of what's going on.  Holler if you
+need help.  Thanks.  - Cory
+

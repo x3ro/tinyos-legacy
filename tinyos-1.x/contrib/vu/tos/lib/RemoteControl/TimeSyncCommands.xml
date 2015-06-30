@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences>
+  <node name="net">
+    <node name="tinyos">
+      <node name="mcenter">
+        <node name="RemoteController">
+          <node name="config">
+            <node name="TimeSync ctl">
+              <entry key="appId" value="0x26" />
+              <entry key="target" value="109" />
+              <entry key="intParam" value="6" />
+              <entry key="dataParam" value="40" />
+              <entry key="usage" value="0=global error, 1=global &lt;- (*never* use broadcast with 0 or 1) 
+2=rootID, 3=seqNum,4=numEntries,5=heartBeats" />
+              <entry key="type" value="0" />
+              <entry key="command" value="1" />
+            </node>
+          </node>
+        </node>
+      </node>
+    </node>
+  </node>
+</preferences>
+

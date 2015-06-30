@@ -1,0 +1,60 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: ptII.rules,v 1.3 2006/06/13 22:40:29 celaine Exp $
+
+define PTII_HELP
+
+ PTII TOSSIM extras:
+
+   fast     : compile with no dbg and maximum performance 
+
+endef
+HELP += $(AVR_HELP)
+
+NCC = ncc
+LIBS = -lm
+
+BUILDDIR = build/$(PLATFORM)
+MAIN_EXE = $(BUILDDIR)/main.exe
+PTII_APPFILE = $(BUILDDIR)/app.c
+
+PTII_SHARED_LIBRARY = $(BUILDDIR)/$(PTJNI_SHAREDLIBRARY_PREFIX)$(COMPONENT).$(PTJNI_SHAREDLIBRARY_SUFFIX)
+PTII_JNIFILE = $(PTIIROOT)/tos/platform/ptII/ptII.c
+
+PFLAGS += -Wall -Wshadow -DDEF_TOS_AM_GROUP=$(DEFAULT_LOCAL_GROUP) $(NESC_FLAGS)
+PFLAGS += -target=$(PLATFORM) -fnesc-cfile=$(PTII_APPFILE) -board=$(SENSORBOARD)
+
+# ptII: needed for nesc to compile nido (pc) specific files.
+PFLAGS += -DPLATFORM_PC
+
+ifdef MSG_SIZE
+PFLAGS += -DTOSH_DATA_LENGTH=$(MSG_SIZE)
+endif
+
+ifndef DEFAULT_PROGRAM
+DEFAULT_PROGRAM = dapa
+endif
+
+# Use the 'if' function instead of the 'ifdef' construct because ifdef freaks
+# out with call in there.  I don't know why.
+$(if $(PROGRAM),,$(call TOSMake_include,avr/$(DEFAULT_PROGRAM).extra))
+
+exe: exe0 FORCE
+	@:
+
+exe0: builddir $(BUILD_EXTRA_DEPS) FORCE
+	@echo "    compiling $(COMPONENT) to a $(PLATFORM) binary"
+	$(NCC) -E -o $(MAIN_EXE) $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc $(LDFLAGS)
+	@echo "    compiled $(COMPONENT) to $(PTII_APPFILE)"
+	$(PTCC) $(PTJNI_NO_CYGWIN) "-I$(PTJAVA_DIR)/include" \
+		"-I$(PTJAVA_DIR)/include/$(PTJNI_ARCHITECTURE)" \
+		$(PTJNI_SHAREDLIBRARY_CFLAG) $(PTJNI_SHAREDLIBRARY_LDFLAG) \
+		$(MY_PTCC_FLAGS) \
+		-shared -o $(PTII_SHARED_LIBRARY) \
+		$(PTII_APPFILE) $(PTII_JNIFILE) $(PTJNI_LIBRARIES)
+	@echo "    compiled $(COMPONENT) to $(PTII_SHARED_LIBRARY)"
+	@echo "    compiling $(COMPONENT).java"
+	CLASSPATH="$(PTII)" "$(JAVAC)" -d $(BUILDDIR) Loader$(COMPONENT).java
+	@echo "    compiled Loader$(COMPONENT).java to $(BUILDDIR)/Loader$(COMPONENT).class"
+
+builddir: FORCE
+	mkdir -p $(BUILDDIR)

@@ -1,0 +1,27 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: ptII.target,v 1.2 2006/01/17 04:12:43 celaine Exp $
+
+PLATFORM = ptII
+SENSORBOARD ?= micasb
+OPTFLAGS = -g -O0
+
+PTIIROOT ?= $(TOSDIR)/../contrib/ptII/ptinyos
+PFLAGS += -I$(PTIIROOT)/tos/platform/ptII
+PFLAGS += -I$(PTIIROOT)/tos/types
+
+PFLAGS := $(PFLAGS) -fnesc-nido-tosnodes=1000
+
+ifdef TINYOS_NP
+  ifeq ($(TINYOS_NP),BNP)
+    PFLAGS += -I%T/lib/Deluge
+    PFLAGS += -I%T/lib/Deluge/TOSBoot/include
+  endif
+endif
+
+BUILD_DEPS ?= exe
+
+$(call TOSMake_include_platform,ptII)
+
+ptII: $(BUILD_DEPS)
+	@:
+

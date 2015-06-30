@@ -1,0 +1,3 @@
+COMPONENT = TestTinyViz
+include ../Makerules
+

@@ -1,0 +1,11 @@
+<VM NAME="TestVM" DESC="A VM that includes all working contexts and functions." DIR="../../../../apps/TestVM">
+<SEARCH PATH="../opcodes">
+<SEARCH PATH="../contexts">
+<SEARCH PATH="../languages">
+<LANGUAGE NAME="empty">
+
+<FUNCTION NAME="id">
+<FUNCTION NAME="led">
+
+<CONTEXT NAME="Once">
+

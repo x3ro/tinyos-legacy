@@ -1,0 +1,156 @@
+#
+# FILE:    power.extra
+# AUTHOR:  Martin Turon
+# DATE:    February 12, 2004
+#
+# Simplifies the compilation of XMesh application binaries in various
+# configurations.  By passing flags to the make tool, features can be
+# compiled into the final image.
+#
+#	POWER=<power>	where power is one of:
+#		max	
+#		10 
+#		5	
+#		0
+#		-10	
+#		-20	
+#		min	
+#			
+#
+# Copyright (c) 2004-2005 Crossbow Technology, Inc.  All Rights Reserved.
+#
+# $Id: power.extra,v 1.2 2005/02/17 08:53:14 mturon Exp $
+#
+
+#ifeq ($(POWER),)
+#$(error POWER must be defined, try "make $(TARGETS) help")
+#endif
+
+
+##########################################################################
+# Set Radio Power 
+#  - Radio transmit power is by a value (RTP) between 0x00 and 0xFF
+#  - RTP = 0 for least power; =0xFF for max transmit power
+#-------------------------------------------------------------------------
+#  For Mica2 and Mica2Dot
+#  Freq Band:  Output Power(dBm) RTP
+#  916 Mhz     -20               0x02
+#              -10               0x09
+#               0 (1mw)          0x80
+#               5                0xFF
+##########################################################################
+#CFLAGS += -DRADIO_XMIT_POWER=0xFF
+
+ifeq ($(RADIO_CHIP),CC1000)
+
+ifeq ($(RADIO_CLASS),916)
+
+ifeq ($(POWER), max)
+RADIO_POWER=0xFF
+endif
+ifeq ($(POWER), 0)
+RADIO_POWER=0x80
+endif
+ifeq ($(POWER), -10)
+RADIO_POWER=0x09
+endif
+ifeq ($(POWER), -20)
+RADIO_POWER=0x02
+endif
+ifeq ($(POWER), min)
+RADIO_POWER=0x02
+endif
+
+endif
+
+#-------------------------------------------------------------------------
+#  For Mica2 and Mica2Dot
+#  Freq Band:  Output Power(dBm) RTP
+#  433 Mhz     -20               0x01
+#              -10               0x05
+#               0 (1mw)          0x0F
+#               10               0xFF
+##########################################################################
+
+ifeq ($(RADIO_CLASS),433)
+
+ifeq ($(POWER), max)
+RADIO_POWER=0xFF
+endif
+ifeq ($(POWER), 10)
+RADIO_POWER=0xFF
+endif
+ifeq ($(POWER), 0)
+RADIO_POWER=0x0F
+endif
+ifeq ($(POWER), -10)
+RADIO_POWER=0x05
+endif
+ifeq ($(POWER), -20)
+RADIO_POWER=0x01
+endif
+ifeq ($(POWER), min)
+RADIO_POWER=0x01
+endif
+
+endif
+
+
+ifeq ($(RADIO_CLASS),315)
+
+ifeq ($(POWER), max)
+RADIO_POWER=0x01
+endif
+ifeq ($(POWER), min)
+RADIO_POWER=0x01
+endif
+
+endif
+
+endif
+
+
+##############################################
+#
+# MICAZ RF Power Levels
+#TXPOWER_MAX      TXPOWER_0DBM
+#TXPOWER_0DBM     0x1f   //0dBm
+#TXPOWER_M3DBM    0x23   //-3dBm
+#TXPOWER_M5DBM    0x19   //-5dBm
+#TXPOWER_M10DBM   0x0B   //-10dBm
+#TXPOWER_M15DBM   0x07   //-15dBm
+#TXPOWER_M25DBM   0x03   //-25dBm
+#TXPOWER_MIN      TXPOWER_M25DBM
+##########################################
+
+ifeq ($(RADIO_CHIP),CC2420)
+
+ifeq ($(POWER), max)
+RADIO_POWER=TXPOWER_MAX
+endif
+ifeq ($(POWER), 0)
+RADIO_POWER=TXPOWER_0DBM
+endif
+ifeq ($(POWER), -3)
+RADIO_POWER=TXPOWER_M3DBM
+endif
+ifeq ($(POWER), -5)
+RADIO_POWER=TXPOWER_M5DBM
+endif
+ifeq ($(POWER), -10)
+RADIO_POWER=TXPOWER_M10DBM
+endif
+ifeq ($(POWER), -15)
+RADIO_POWER=TXPOWER_M15DBM
+endif
+ifeq ($(POWER), -25)
+RADIO_POWER=TXPOWER_M25DBM
+endif
+ifeq ($(POWER), min)
+RADIO_POWER=TXPOWER_M25DBM
+endif
+
+endif
+
+
+

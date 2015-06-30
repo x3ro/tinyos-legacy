@@ -1,0 +1,5 @@
+PingPong: 
+A simple application to test two-way communications. 
+Also used for smoketesting new nodes (see smoketest/README).
+
+

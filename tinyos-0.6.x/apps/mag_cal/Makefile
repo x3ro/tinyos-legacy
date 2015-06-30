@@ -1,0 +1,3 @@
+SENSORBOARD=micasb
+include ../Makeinclude
+

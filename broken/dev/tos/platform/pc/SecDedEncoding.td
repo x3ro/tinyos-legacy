@@ -1,0 +1,250 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000-2002 The Regents of the University  of California.  
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice, the following
+ * two paragraphs and the author appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ */
+/*									tab:4
+ *  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.  By
+ *  downloading, copying, installing or using the software you agree to
+ *  this license.  If you do not agree to this license, do not download,
+ *  install, copy or use the software.
+ *
+ *  Intel Open Source License 
+ *
+ *  Copyright (c) 2002 Intel Corporation 
+ *  All rights reserved. 
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are
+ *  met:
+ * 
+ *	Redistributions of source code must retain the above copyright
+ *  notice, this list of conditions and the following disclaimer.
+ *	Redistributions in binary form must reproduce the above copyright
+ *  notice, this list of conditions and the following disclaimer in the
+ *  documentation and/or other materials provided with the distribution.
+ *      Neither the name of the Intel Corporation nor the names of its
+ *  contributors may be used to endorse or promote products derived from
+ *  this software without specific prior written permission.
+ *  
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ *  PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE INTEL OR ITS
+ *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * 
+ */
+module SecDedEncoding
+{
+   provides {
+	interface RadioEncoding as Code;
+   }
+}
+
+implementation{
+
+
+
+
+
+enum {
+
+
+	IDLE_STATE         = 0,
+	DECODING_BYTE_3    = 1,
+	DECODING_BYTE_2    = 2,
+	DECODING_BYTE_1    = 3,
+	ENCODING_BYTE      = 4
+};
+
+char data1;
+char data2;
+char data3;
+char state;                     // state of this component
+
+void radio_decode_thread();
+void radio_encode_thread();
+
+command result_t Code.decode(char d1){
+	if(state == IDLE_STATE){
+		state = DECODING_BYTE_1;
+		data1 = d1;
+		return 1;
+	}else if(state == DECODING_BYTE_1){
+		state = DECODING_BYTE_2;
+		data2 = d1;
+		return 1;
+	}else if(state == DECODING_BYTE_2){
+		state = DECODING_BYTE_3;
+		data3 = d1;	
+		radio_decode_thread();
+		return 1;
+	}
+	return 0;	
+}
+
+
+command result_t Code.encode_flush(){
+
+	return 1;
+}
+
+command result_t Code.encode(char d){
+	if(state == IDLE_STATE){
+		state = ENCODING_BYTE;
+		data1 = d;
+		radio_encode_thread();
+		return 1;
+	}
+	return 0;	
+}
+
+/* This function encode the data using SEC_DED encoding */
+void radio_encode_thread(){
+     char ret_high = 0;
+     char ret_low = 0;
+     char parity = 0;
+     char val = data1;
+	//encode then expand.
+
+	//encode first.
+
+	if((val & 0x1) != 0) {
+    		parity ^=0x5b;
+ 		ret_low |= 0x1;
+	} else { ret_low |= 0x2;}
+
+	if((val & 0x2) != 0) {
+    		parity ^=0x58;
+ 		ret_low |= 0x4;} 
+	else { ret_low |= 0x8;}
+	if((val & 0x4) != 0) {
+    		parity ^=0x52;
+ 		ret_low |= 0x10;} 
+	else { ret_low |= 0x20;}
+	if((val & 0x8) != 0) {
+    		parity ^=0x51;
+ 		ret_low |= 0x40;} 
+	else { ret_low |= 0x80;}
+	if((val & 0x10) != 0) {
+    		parity ^=0x4a;
+  		ret_high |= 0x1;} 
+	else { ret_high |= 0x2;}
+ 	if((val & 0x20) != 0) {
+     		parity ^=0x49;
+  		ret_high |= 0x4;} 
+	else { ret_high |= 0x8;}
+ 	if((val & 0x40) != 0) {
+     		parity ^=0x13;
+  		ret_high |= 0x10;} 
+	else { ret_high |= 0x20;}
+ 	if((val & 0x80) != 0) {
+     		parity ^=0x0b;
+  		ret_high |= 0x40;} 
+	else { ret_high |= 0x80;}
+
+
+	//now balance the the parity parts.
+
+	if(!(parity & 0x40)) parity |= 0x80;
+	if(!(parity & 0x50)) parity |= 0x20;
+	if(!(parity & 0xa)) parity |= 0x4;
+		
+     state = IDLE_STATE;
+     signal Code.encodeDone(parity);
+     signal Code.encodeDone(ret_high);
+     signal Code.encodeDone(ret_low);
+
+ }
+
+/* This function decodes SEC_DED encoded data */
+void radio_decode_thread(){
+    
+     //strip the data
+     char ret_high = 0;
+     char ret_low = 0;
+     char parity;
+     char error = 0;
+     short encoded_value = 0;
+     parity = data1;
+     ret_high = data2;
+     ret_low = data3;
+     if((ret_low & 0x1) != 0) encoded_value |= 0x1;  
+     if((ret_low & 0x4) != 0) encoded_value |= 0x2;
+     if((ret_low & 0x10) != 0) encoded_value |= 0x4;
+     if((ret_low & 0x40) != 0) encoded_value |= 0x8;
+     if((ret_high & 0x01) != 0) encoded_value |= 0x10;
+     if((ret_high & 0x04) != 0) encoded_value |= 0x20;
+     if((ret_high & 0x10) != 0) encoded_value |= 0x40;
+     if((ret_high & 0x40) != 0) encoded_value |= 0x80;
+     parity = (parity & 0x3) | ((parity & 0x18) >> 1) | ((parity & 0x40) >> 2);
+     encoded_value =  encoded_value << 5 | parity;
+
+	// check the parity
+	parity = 0;
+	if((encoded_value & 0x1) != 0) parity ^= 0x1;
+	if((encoded_value & 0x2) != 0) parity ^= 0x2;
+	if((encoded_value & 0x4) != 0) parity ^= 0x4;
+	if((encoded_value & 0x8) != 0) parity ^= 0x8;
+	if((encoded_value & 0x10) != 0) parity ^= 0x10;
+	if((encoded_value & 0x20) != 0) parity ^= 0x1f;
+	if((encoded_value & 0x40) != 0) parity ^= 0x1c;
+	if((encoded_value & 0x80) != 0) parity ^= 0x1a;
+	if((encoded_value & 0x100) != 0) parity ^= 0x19;
+	if((encoded_value & 0x200) != 0) parity ^= 0x16;
+	if((encoded_value & 0x400) != 0) parity ^= 0x15;
+	if((encoded_value & 0x800) != 0) parity ^= 0xb;
+	if((encoded_value & 0x1000) != 0) parity ^= 0x7;
+	
+	//now fix the error.
+	error = -1;
+	if(parity == 0){}
+	else if(parity == 0x1) { encoded_value ^= 0x1;}
+	else if(parity == 0x2) { encoded_value ^= 0x2; }
+	else if(parity == 0x4) { encoded_value ^= 0x4; }
+	else if(parity == 0x8) { encoded_value ^= 0x8; }
+	else if(parity == 0x10) { encoded_value ^= 0x10;}
+	else{
+		error = 0;
+		if(parity == 0x1f) { encoded_value ^= 0x20;}
+		else if(parity == 0x1c) { encoded_value ^= 0x40;}
+		else if(parity == 0x1a) { encoded_value ^= 0x80;}
+		else if(parity == 0x19) { encoded_value ^= 0x100; }
+		else if(parity == 0x16) { encoded_value ^= 0x200; }
+		else if(parity == 0x15) { encoded_value ^= 0x400; }
+		else if(parity == 0xb) { encoded_value ^= 0x800; }
+		else if(parity == 0x7) { encoded_value ^= 0x1000;}
+		else {
+			error = 1;
+		}
+	}
+
+	//pull off the data bits
+     state = IDLE_STATE;
+     signal Code.decodeDone((encoded_value >> 5) & 0xff, error);
+}
+}

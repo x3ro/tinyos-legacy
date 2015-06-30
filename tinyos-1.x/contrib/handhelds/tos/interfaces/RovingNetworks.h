@@ -1,0 +1,34 @@
+/* 
+ * radioMode in enableBluetooth() can be set to one of the following modes,
+ * see the RovingNetworks AT command set for further details on module configuration 
+ */
+enum {
+  SLAVE_MODE,
+  
+  /* This master mode is useful when the device only wants to initiate connections (not
+     receive them). In this mode the device will NOT be discoverable or connectable.
+  */
+  MASTER_MODE,
+  TRIGGER_MASTER_MODE,
+  AUTO_MASTER_MODE    
+};
+
+enum { 
+  NADA,
+  INITIAL,
+  FINAL
+};
+/*
+const char * SETMODE =  "SM,";
+const char * SETMASTERMODE =  "SM,1";
+const char * SETSLAVEMODE =   "SM,0";
+const char * DISCOVERRADIOS = "I,";
+const char * DISCOVERRADIOS2 = ",0";
+
+const char * SETFASTBAUD    = "SU,115";
+const char * ENTERCOMMANDMODE = "$$$";
+const char * SETSLEEPMODE   = "SW,0300";
+const char * DIALRADIO      = "C,";
+const char * HANGUPRADIO    = "R,1";
+const char * WAKERADIO      = "";
+*/

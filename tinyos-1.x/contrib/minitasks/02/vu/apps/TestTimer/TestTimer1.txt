@@ -1,0 +1,10 @@
+TestTimer1:
+
+The TestTimer1C component does a very primitive verification of the Timer 
+implementation. It starts two timers, one with 2 Hz (32768/16384), and another 
+with 10.922Khz (32768/3). From the first timer we blink the red LED at every 
+tick. From the second timer we blink the yellow LED at every 5461 (16384/3) 
+ticks. The two LEDS should blink at the same rate (there is a small difference, 
+because 3*5461 = 16383 != 16384).
+
+Author: miklos.maroti@vanderbilt.edu

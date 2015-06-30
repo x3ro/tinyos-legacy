@@ -1,0 +1,280 @@
+MNP README 
+
+Authors/Contact: 
+=================
+	Limin Wang, Sandeep Kulkarni
+	Dept. of Computer Science and Engineering
+	Michigan State University
+	Emails: {wanglim1,sandeep}@cse.msu.edu
+
+Brief introduction:
+=======================
+MNP (Multi-hop Network Programming) is a multi-hop reprogramming service that is targeted to Mica-2 motes. 
+The goal of multihop reprogramming is to provide a service that all the sensor nodes in a 
+connected network are reprogrammed with a new binary image. 
+
+MNP uses the same bootloader as XNP. Therefore, we adapted some parts of the code (like reboot, write data to EEPROM) from XNP program. 
+
+We provide both the implementation code that runs on Mica2 motes and simulation code that runs on TOSSIM. They are basically the same, but with some subtle difference. 
+For example, in simulation code, we assume the base station(s) has the new code in the initial state; when the reprogramming is done, nodes do not reboot, only inform the application by sending a signal to the application. 
+
+The current version is MNP v2.0. (Note that the implementation code (that runs on Mica2 motes) is based on MNP v1.0. MNP v2.0 is tested on TOSSIM platform only.)
+
+Major features of MNP:
+==============================
+MNP uses a sender selection algorithm, in which source nodes compete with each other based on the number of distince requests they receive. 
+The nodes that have received the most number of requests become senders. Those that lose in the sender selection algorithm go to sleep. We call this kind of sleep "contention sleep". 
+The sender selection algorithm reduces the message collision problem. By putting the node into "sleep" state when its neighbors are transmitting a segment 
+that is not of interest, MNP reduces the active radio time of a sensor node, thus saves energy. 
+ 
+MNP uses pipelining to enable fast data propagation. 
+
+To further reduce the energy consumption, in MNP v2.0, we add two other sleep types: "init sleep" and "noReq sleep". 
+"Init sleep" is used to reduce idle listening at the beginning of reprogramming. A node takes short naps before it receives any advertisements of a new program. 
+"NoReq Sleep" is used to reduce idle listening at the end of reprogramming or after reprogramming (at the maintenance phase). After a node has sent advertisements for several times, it will go to sleep. When the sleep timers fires, it wakes up and advertises again. The sleep duration is exponentially increasing. 
+
+Publication on MNP:
+===============================
+S. S. Kulkarni and L. Wang. "MNP: Multihop Network Reprogramming Service for Sensor Networks" In the 25th International Conference on Distributed Computing Systems (ICDCS), 06/2005. Columbus, OH. 
+
+How to run MNP on Mica2 motes:
+=====================
+Copy TestMNP/ (under apps/) to tinyos-1.x/apps, copy Mnp/ and MnpSim/ (under tos/lib/) to tinyos-1.x/tos/lib. 
+
+Read the following instructions if you want to try the code on your motes. 
+
+1. Wire application code to MNP (make your application MNP-enabled). We use MnpBlink as an example. 
+
+1.1 Wire MNP in configuration file. 
+
+In MnpBlink.nc:
+
+configuration MnpBlink {
+}
+implementation {
+  components Main, MnpBlinkM, TimerC, LedsC, MnpC;
+  Main.StdControl -> MnpBlinkM.StdControl;
+  MnpBlinkM.Timer -> TimerC.Timer[unique("Timer")]; 
+  MnpBlinkM.Leds -> LedsC;
+
+  // for MNP
+  Main.StdControl -> MnpC.StdControl;
+  MnpBlinkM.Mnp -> MnpC;
+}
+
+1.2 Modify implementation file to handle events and set IDs. 
+
+1.2.1 Handling events.
+Mnp.downloadRequest() is called when MnpM module requests to download a new version of program. 
+The event handler can grant or deny the request by calling Mnp.requestGranted().
+In current implementation, we assume that the application always grants the request. 
+
+Mnp.downloadAborted() is called when the ongoing download process fails. In current implementation, 
+the application simply returns SUCCESS, since MnpM module will try to get code from a different 
+source node some time later. 
+
+1.2.2 Setting mote IDs. 
+The mote ID and group ID are saved in a special location EEPROM. After reboot, Mnp.setIDs should 
+be called to set the mote ID and group ID. 
+
+In MnpBlinkM.nc
+
+module MnpBlinkM {
+  provides {
+    interface StdControl;
+  }
+  uses {
+    // FOR MNP	
+    interface Mnp;
+  }
+}
+implementation {
+  /**
+   * Initialize the component.
+   * 
+   * @return Always returns <code>SUCCESS</code>
+   **/
+  command result_t StdControl.init() {
+	// FOR MNP
+    call Mnp.setIDs();               //set mote_id and group_id 
+    
+    return SUCCESS;
+  }
+
+......
+
+  // FOR MNP
+  
+/*****************************************************************************
+NetProgramming service module has received a request from the network to
+download a program srec image. We can either grant or deny the request. 
+*****************************************************************************/
+event result_t Mnp.downloadRequest(uint16_t wProgramID)
+{
+// Application should relinquish control to wireless channel and EEPROM by calling GenericCommCtl.stop(), EEPROMControl.stop(), or Timer.stop(), etc. 
+	call Timer.stop();
+	call Mnp.requestGranted(wProgramID, SUCCESS);
+	return SUCCESS;
+}
+
+event result_t Mnp.downloadAborted(uint16_t progID)
+{
+	return SUCCESS;
+}
+
+event result_t Mnp.downloadDone(uint16_t progID)
+{
+	call Timer.start(TIMER_REPEAT, 300);
+	return SUCCESS;
+}
+
+}
+
+1.3 Add "PFLAGS+=-I$(TOSDIR)/lib/Mnp" in Makefile, so that the files defined in lib/Mnp are added 
+to the search path. 
+
+Makefile for MnpBlink:
+
+COMPONENT=MnpBlink
+PFLAGS+=-I$(TOSDIR)/lib/Mnp
+include $(TOSDIR)/../apps/Makerules
+
+2. Compile and Install
+The commands for compiling and installing reprogramming module are the same as XNP. 
+
+Go the application files directory, for example, apps/TestMNP/MnpBlink. 
+* Compile
+   $ make mica2
+* Load application code
+   $ make mica2 reinstall.<moteid>
+* Load boot loader
+   $ make mica2 inp
+
+3. Steps for conducting your experiments
+
+Step 1: Prepare "Base station" mote
+We assume there is one mote in the network acting as the "base station". 
+
+The default "base station" mote ID is set to 1. You can change it by change the constant 
+   "BASE_ADDR" in lib/Mnp/Mnp.h.
+
+Download 'new' program (the program that you want to send to the whole network) to "base station" using XNP. This is because MNP uses the same format to store a new program 
+in EEPROM as XNP does (so that they can share the same boot loader).
+
+Step 1.1: Install xnp-enabled program (e.g., XnpCount) to "base station" mote. In apps/XnpCount
+   $ make mica2
+   $ make mica2 reinstall.1
+Step 1.2: Download 'new' program (the program that you want to send to the whole network) to the external flash of "base station" mote using Java application. 
+* To compile java application, go to "tools/java/net/tinyos/xnp" directory, simply type "make".
+    $ make
+* Set the environment variable MOTECOM as serial@COM1:mica2
+    $ export MOTECOM=serial@COM1:mica2
+* Connecting a mote that is running TOSBase to UART. 
+* Run Java application. (Also, record the program ID and program size (number of capsules/packets) shown in the XNP Java applicaiton interface, you'll need them for 'start' and 'reboot' program. )
+    $ java net.tinyos.xnp.xnp
+ 
+Step 1.3: Install mnp-enabled program (e.g., MnpBlink. This is the 'old' program) to "base station" mote, for example, MnpBlink. 
+In apps/TestMNP/MnpBlink directory.
+   $ make mica2
+   $ make mica2 reinstall.1
+   $ make mica2 inp
+      
+Step 2:  Install mnp-enable program (e.g., MnpBlink. This is the old program) to all other motes. 
+In apps/TestMNP/MnpBlink directory. (In this example, the node ID is 2)
+   $ make mica2 reinstall.2
+   $ make mica2 inp
+
+Step 3: Start network programming by sending a "start" command to "base station" mote. 
+   The program that sends "start" command can be found in apps/TestMNP/BSStart.
+   BSStart not only starts network programming, but also sends ID and size of the 'new' program to 
+   the "base station". You can get the ID and size (number of capsules/packets) of the 'new' program through XNP Java 
+   application interface, when the base station downloads the 'new' program from PC through XNP. Then set the constants
+   in apps/TestMNP/BSStart/BSStartM.nc, e.g.,
+
+#define PROGRAM_ID	0xae7b
+#define PROGRAM_SIZE	1326
+   
+Step 4: After getting the code, the motes do not reboot with the new program automatically. Instead, they reboot only 
+when receiving a "reboot" command. The program that sends a "reboot" command can be found in apps/TestMNP/Reboot. 
+The reboot command only needs to be sent once, and will be propagated to the whole network. 
+"Reboot" command includes the ID of the new program to reboot to. You can set the constants in apps/TestMNP/Reboot/RebootM.nc, e.g.,
+
+#define PROGRAM_ID	0xae7b
+
+This program ID must be correctly set. Each mote, when receiving the reboot command, will check to see if the program ID 
+contained in the reboot command matches the program image stored in EEPROM, if so, it will call boot loader and reboot
+with the new program; otherwise, it will not reboot. 
+
+4. Additional Notes
+* During reprogramming process, we assume MNP has full control of resources, including wireless channel and EEPROM. 
+  When the application allows reprogramming to proceed, it must relinquish the resources it is using. 
+
+* We used two spare motes, one to send "start" command, one to send "reboot" command. 
+
+How to run MNP on TOSSIM:
+===============================
+Copy TestMNP/ (under apps/) to tinyos-1.x/apps, copy Mnp/ and MnpSim/ (under tos/lib/) to tinyos-1.x/tos/lib. 
+
+1. Wire application code to MNP (make your application MNP-enabled). 
+Everything is the same as mentioned in the last section, except that in the makefile
+Add "PFLAGS+=-I$(TOSDIR)/lib/MnpSim" in Makefile, so that the files defined in lib/MnpSim are added to the search path. 
+
+Makefile for MnpBlink:
+
+COMPONENT=MnpBlink
+PFLAGS+=-I$(TOSDIR)/lib/MnpSim
+include $(TOSDIR)/../apps/Makerules
+
+2. Compile
+Go the application files directory, apps/TestMNP/MnpBlink. 
+   $ make pc
+
+3. Run simulation, see TOSSIM tutorial.
+
+4. Some parameters: 
+4.1 Program size (number of packets) is decided by the following parameters: 
+
+In tos/lib/MnpSim/Mnp.h
+
+#define TOSSIM_NMB_SEGMENT	2	// number of segments
+#define MNP_CAPSULE_PER_SEGMENT	128	// segment size: number of packets per segment, each packet has 22 bytes data pay load, which is default in TinyOS
+#define TOSSIM_LAST_SEGMENT_SIZE 128	// the size of the last segment
+
+program size = (TOSSIM_NUM_SEGMENT - 1) * MNP_CAPSULE_PER_SEGMENT + TOSSIM_LAST_SEGMENT_SIZE
+
+4.2 Base station(s) placements are defined in the IsBase() function in tos/lib/MnpSim/MnpM.nc
+
+bool IsBase(uint16_t addr)
+{
+	if(addr == BASE_ADDR)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+The default setting is to put one base station at the corner (node ID 0). 
+
+4.3 Sleep period
+
+In tos/lib/MnpSim/Mnp.h
+
+#define SLEEP_DURATION		40000
+
+Here, the sleep period is set to be 40 seconds (40000 milliseconds). The sleep period should be adjusted according to network size and network density.
+
+Note: The performance can vary a lot with different sleep periods. 
+
+5. Initially, we assume that the base station(s) has the new program. 
+
+6. When a node has received the entire new program, it will send a signal to the application. 
+
+In tos/lib/MnpSim/MnpM.nc:
+
+signal Mnp.downloadDone(wProgramID);
+
+7. Note that the simulation will not stop by itself. After all the nodes have received the new program, the network is in the "maintenance phase", that is, 
+nodes are advertising infrequently, so that the nodes that join the network later will receive the code eventually. 
+
+I added DBG statements in the program so that you can tell when reprogramming has finished by looking at the output file. 
+
+For example, if node 11 receives Segment 2, there is a line in the output file: "11: get Seg 2 at ...". 

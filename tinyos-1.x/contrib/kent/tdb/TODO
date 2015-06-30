@@ -1,0 +1,11 @@
+TODO for next version (0.5):
+	*Add ability to save log
+	*Fix lots o' bugs
+	*Add to gui a place where it tells the current mote
+	*Redo build process - make it build outside the TinyViz hierarchy
+		* Refactor, and split presentation from logic
+	*Rename controller?
+
+Future:
+*Timestamping of watchpoints?
+*Display source code?

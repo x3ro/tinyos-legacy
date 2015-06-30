@@ -1,0 +1,3 @@
+COMPONENT=TestTinyAlloc
+include ../Makerules
+

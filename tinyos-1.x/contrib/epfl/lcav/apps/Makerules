@@ -1,0 +1,7 @@
+#-*-Makefile-*- 
+
+
+
+PFLAGS += -I$(shell ncc -print-tosdir)/../contrib/epfl/lcav/tos/platform/tinynode/solar
+
+include $(shell ncc -print-tosdir)/../tools/make/Makerules

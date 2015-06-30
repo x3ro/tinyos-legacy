@@ -1,0 +1,16 @@
+For IFRC key function performed by this module are 
+
+   (i) Interface to receive a packet from the transport layer 
+   (ii) store a "copy" of the message in the queue
+   (iii) Attempt the send each packet (until queue is
+   empty) with link layer ACK and MAX_RETRANSMIT_COUNT retransmission
+   (iv) Maintain a average queue (EWMA) with weight as ALPHA
+   (v) Average queue is calculated whenever a packet is
+   added to the queue
+   (vi) Provides an interface getOccupancy() that returns
+   the average queue. 
+
+Though the code is derived from the stands QueuedSend in
+tinyos it includes some major modifications.
+
+# vim: set ts=4 tw=60:

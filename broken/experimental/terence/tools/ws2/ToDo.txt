@@ -1,0 +1,81 @@
+
+Simulator itself
+- randomly place in a cell
+- need to specify density
+- effective range is about 12 feet
+- Let's take a 12x12 square, how many nodes can you fit into it
+  - If you want cell density to be N, there should be (N+1) nodes
+
+mh_send_retransmit 
+- just a FIFO send queue that handles retransmission
+- for now, the queue is infinite, and all broadcast messages are
+  in the same queue.  (No retransmission for broadcast messages
+  since they are always return with a true result).
+
+
+----------
+At this moment, all messages are on the queue.
+Broadcast messages will have no ACK.
+No flow or congestion control.
+Transmission queue is infinite.
+
+ 
+shortest_path and mrp_shortest_path
+- needs to break apart to neighbor_hood estimator (easy)(done)
+- just clean up (done)
+- When a neighbor is removed, removed all the previous data. (done)
+- extract link estimator from the parent selection algorithm (done)
+- sort according out_est for the top six neighbors. (done)
+
+------------
+Sept 16, 2002
+
+- compare with old data???
+
+
+- tune time_out value for mobility?
+
+
+Well, basically how long does it take to warm up?
+- basically, how many steps of updates
+  - vary with 
+    - number of nodes
+    - average cell density
+    - link estimator
+    - topology
+    - number of nodes to give feedback
+    - protocol specific:
+      - threshold, mrp noise margin
+  - metrics
+    - stability
+    - quality of the tree
+ 	- path reliablity, historgram
+        - hop count, histogram
+    - (link estimator affects errors and how fast the warm up phase is)
+    - can you guess?
+Basically, what's the maintanence phase of updates to
+make the network responsive?
+- vary
+  - exchange rate vs. data rate
+  - sudden changes or mobility
+  - link estimator
+  - optional:  queue length
+- metrics
+  - (pretty stable) responsiveness to changes
+  - retransmission overhead
+  - success rate to base station
+
+
+What's the ratio between warmup and steady state?
+- application depenedent
+- how much mobility can steady state keep up?
+
+
+
+Paper organization
+- title 'On the Multihop Routing Problem in Sensor Networks'
+- Introduction
+  - define the problem
+  - what looks like a classic problem actually have many facets
+generalize issues in mult
+- plans

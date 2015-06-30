@@ -1,0 +1,9 @@
+@inproceedings{hackmann05:agile,
+	Author = {Gregory Hackmann and Chien-Liang Fok and Gruia-Catalin Roman and Chenyang Lu and Christopher Zuver and Kent English and John Meier},
+	Booktitle = {Proceedings of the 3rd Annual Conference on Embedded Networked Sensor Systems (SenSys'05)},	
+	Title = {Demo Abstract: Agile Cargo Tracking Using Mobile Agents},
+	Year = {2005},
+	Month = {November},
+	pages = {303},
+	publisher = {ACM},
+	location = {San Diego, CA, USA}}

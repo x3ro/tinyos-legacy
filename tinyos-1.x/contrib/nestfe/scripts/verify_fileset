@@ -1,0 +1,40 @@
+#!/usr/bin/perl -w
+use strict;
+
+#$Id: verify_fileset,v 1.5 2005/07/15 22:56:59 kaminw Exp $
+
+my ($fileset_reference, $fileset_cache) = @ARGV;
+
+exit 0 unless -f $fileset_reference && -f $fileset_cache;
+my $diff_cmd = "diff -U 0 -b -B -I \"^#\" $fileset_reference $fileset_cache";
+my $fh;
+open $fh, "$diff_cmd |" or die "could not execute diff cmd: $diff_cmd";
+my %order = ( '-' => 0, '+', => 1 );
+my %lines = ();
+my $rv = 0;
+while( <$fh> ) {
+  if( /^([-+])([^-+][^,]*)/ ) {
+    $lines{"$2 $order{$1}"} = $_;
+    print <<"EOF" unless $rv;
+
+   !!!  Error, the filesets are inconsistent.
+   !!!  Reference fileset:  $fileset_reference
+   !!!  Current fileset:  $fileset_cache
+
+Your options:
+1) You probably want to "cvs update" the appropriate files
+2) If the difference is acceptable, you can build with fileset,ignore
+3) If you are _confident_ the new fileset is valid, you can copy the current
+fileset to the reference fileset
+
+Here is a diff where '-' is the file in the most recently committed fileset
+and '+' is the file that you are currently compiling with :
+
+EOF
+    $rv = 1;
+  }
+}
+print @lines{sort keys %lines};
+print "\n" if $rv;
+exit $rv;
+

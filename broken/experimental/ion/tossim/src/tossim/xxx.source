@@ -1,0 +1,26 @@
+/**
+ *  @file Xxx.cc
+ *
+ *  @author Ion Yannopoulos
+ */
+
+#include <tossim/private.hh>
+#include <tossim/Xxx.hh>
+
+namespace tos {
+namespace sim {
+
+namespace impl {
+
+Xxx::Xxx()
+{
+}
+
+Xxx::~Xxx()
+{
+}
+
+} // namespace impl
+
+} // namespace sim
+} // namespace tos

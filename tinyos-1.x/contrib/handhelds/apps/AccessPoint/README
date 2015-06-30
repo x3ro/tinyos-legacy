@@ -1,0 +1,104 @@
+/*************** HOW TO COMPILE **********************/
+Since the IP stack takes several parameters at compile-time, here's a word of explanation:
+
+The standard tinyos build line is "make <target>"
+
+With a shimmer, you'd have "make shimmer"; similarly, with a shimmer2
+you'd have "make shimmer2"
+
+To build and install the executable image in flash simultaneously, you'd have 
+
+"make shimmer install bsl,<tty port of programming board>"
+
+For example, if the programming board occupies the ports /dev/ttyUSB0
+and /dev/ttyUSB1, use the (numerically) first one, so the complete
+compilation commmand is: 
+
+make shimmer install bsl,/dev/ttyUSB0
+
+HOWEVER, with IP-enabled applications like this one, that line alone
+will give you errors.  Four parameters describe the CC2420's network
+behavior:  
+
+CC2420_CHANNEL  this radio operates over 16 channels, from 11 to 26.
+channel 26 is a popular choice for low interference.
+
+SSID  like an ssid with Wi-Fi, choose a personal SSID up to 15
+characters.
+
+PAN_ID  802.15.4 radios operate on a PAN, and manage associations
+based upon PAN membership.  supply one hex word (16 bits).
+
+IP  the device's IP address.  choose one on the same LAN subnet as the
+access point, and not occupied by another computer.
+
+For example, let's use channel 26; an SSID of rti; a PAN_ID of 0xfeed;
+and an IP address of 192.168.1.200.  Now, the correct compile line is
+
+make shimmer CC2420_CHANNEL=26 SSID=rti PAN_ID=0xfeed IP=192.168.1.200 install bsl,/dev/ttyUSB0
+
+/************** RUNNING THE ACCESS POINT ********************/
+
+from this directory (contrib/handhelds/apps/AccessPoint), at a command
+prompt do this:
+
+bash# cd kernel
+
+bash# make
+
+then -- this is important -- as root (e.g., sudo bash)
+
+bash# echo 1 > /proc/sys/net/ipv4/conf/all/forwarding
+
+bash# echo 1 > /proc/sys/net/ipv4/conf/all/proxy_arp
+
+bash# /sbin/insmod telos_ap.ko
+
+then you need to build the daemon that attaches the communications
+from the a.p. device's radio to the running kernel's network stack:
+
+bash# cd ../daemon
+
+bash# make
+
+Use the second of the two tty ports to run the daemon (if you're using
+a device that only presents one, use it).  In the programming example
+above, you'd use /dev/ttyUSB1.  Sample output is shown after the command.
+
+bash# ./zattach -v -n /dev/ttyUSB1
+
+got socket for binding: 5
+binding success!
+
+No HW Address found for this interface!
+
+Event: Reset
+IP:    192.168.1.50
+Addr:  a0:a0:00:00:10:57:0d:9e
+PanID: 0xfeed
+Freq:  2480 (channel 26)
+SSID:  rti
+Time:  Mon Jul 27 13:31:09 2009
+
+setting host ip address
+
+     ...then, when a client associates, you'll see something like this:
+
+Event: Associate
+IP:    0.0.0.0
+Addr:  a0:a0:00:00:10:58:36:47
+SAddr: 0
+Flags: 0x81
+Time:  Mon Jul 27 13:32:31 2009
+
+
+Event: ARP
+IP:    192.168.1.200
+Addr:  a0:a0:00:00:10:58:36:47
+SAddr: 0
+Flags: 0x81
+Time:  Mon Jul 27 13:32:31 2009
+
+
+
+

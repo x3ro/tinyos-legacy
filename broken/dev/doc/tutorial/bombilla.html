@@ -1,0 +1,1766 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+  <head>
+    <title>Lesson: Bombilla</title>
+  </head>
+  <body bgcolor="#f8f8ff" link="#005BB7" vlink="#005BB7">
+    
+    <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+      <tr bgcolor="#e0e0ff">
+	<td width="100%">
+	  <font face="tahoma,arial,helvetica"><b><big><big>
+		  Bobmilla</big><br>
+		  <b>Viral programs with a certain cosmopolitan
+		  charm</b></big></b>
+	    <p>
+	      Last updated 28 Aug. 2002
+	  </font>
+	</td></tr>
+    </table>
+    
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b>
+		<font face="arial,helvetica">Introduction</font>
+	      </b></td> </tr>
+      </table>
+    </p>
+
+    <p>Bombilla is a bytecode interpreter that runs on TinyOS. The
+    conciseness of a high-level instruction set allows users to write
+    programs and dynamically install them in a network much more
+    quickly than possible with binary images. Additionally, Bombilla
+    can automatically forward programs through a network; a new
+    forwarding Bombilla program installed on a single mote will
+    eventually run on every mote in the network.</p>
+
+    <p>Bombilla simplifies programming by providing a synchronous
+    interface to TinyOS operations. For example, the <code>send</code>
+    instruction blocks until the underlying <code>sendDone</code>
+    event is handled by TinyOS. This makes code much less complex,
+    especially for novice programmers. Currently, Bombilla programs
+    are written in a high-level assembly language (e.g. sending a
+    packet is a single instruction).</p>
+
+    <p>As Bombilla is a virtual machine, it also provides a form of
+    execution protection. Unlike TinyOS applications, which has no
+    user/kernel boundary, Bombilla programs cannot crash a mote or
+    render it unresponsive. Bombilla catches errors at run time
+    (e.g. accessing an invalid heap variable) and has a mechanism for
+    alerting a user to them, including simple debugging information on
+    the instruction that caused the error.</p>
+	
+    <p>Bombilla has an event-based execution model; pieces of code are
+    run in response to events, such as a timer or a packet
+    reception. The presence of blocking operations requires that event
+    handlers be able to run in parallel; the presence of shared
+    variables could make race conditions a significant
+    problem. Bombilla handles this issue by having handlers implicitly
+    lock all shared resources they use; the set of shared resources
+    used is computed with a full program analysis when code is
+    installed. Therefore, a programmer can write several Bombilla
+    event handlers that share variables and be sure there will be no
+    race conditions without having to consider the necessary
+    synchronization.</p>
+	
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Installing Bombilla and
+	  Capsules</font> </b></td> </tr> </table></p>
+
+    <p>A Bombilla-enabled mote application exists in the TinyOS
+    applications directory: <code>Bombilla</code>. Build and install
+    this application on a mote. By default, Bombilla runs a simple
+    program, similar to CntToLedsAndRfm, except that it sends the
+    packet over the UART instead of the radio. Once the application
+    installs, you should see the LEDs blink and a packet containing a
+    counter being sent to your PCs serial port; the packet format is
+    different from that used by IntToRfm.</p>
+
+    <p>Bombilla programs are broken into <b>capsules</b> of 24
+    instructions. There are two kinds of capsules: event handlers and
+    subroutines. Event handler capsules are executed in response to an
+    event; subroutines are called from other capsules. For example,
+    there is a clock capsule, that runs in response to Bombilla's 1Hz
+    timer.</p>
+
+    <p>Let's install a new clock capsule. Run
+    <code>net.tinyos.vm_asm.CapsuleInjector</code>; a GUI like this
+    should appear:</p>
+
+    <center><img src="imgs/CapsuleInjector.jpg"></center>
+    
+    <p>Select the capsule type to be "Clock." Set the mote ID to be
+    <code>ffff</code> or the ID you installed on the mote. Bombilla
+    only installs capsules that have a higher version number than the
+    currently installed capsule; the default clock capsule is version
+    0, so set the capsule version to 1.</p>
+    
+    <p>Next, we need to type in a program. Type this program into the Program Text window:</p>
+	
+    <center>
+	<table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+pushc 1
+inv
+getvar 0
+add
+copy
+setvar 0
+pushc 7
+land
+putled
+halt	      </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+    
+    <p>This program is a simpler and slightly different version of the
+    default capsule. Instead of incrementing the counter, it
+    decrements it, and it does not send the counter over the
+    UART. Press the Inject button in the GUI; you should shortly see
+    the LEDs blinking in a decrementing (instead of incrementing)
+    fashion. If all 3 LEDs begin blinking in unison, then Bombilla has
+    encountered a runtime error in your program; make sure that you
+    typed it in correctly. If you need to install a new capsule, be
+    sure to increment the Capsule Version field.</p>
+
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">How This Capsule Works</font> </b></td>
+	</tr> </table></p>
+
+    <p>Bombilla is a stack based architecture; instructions push and
+    pop operands on a stack. This results in more condense code, as no
+    embedded addresses are required; there are, however, instructions
+    with embedded operands (such as <code>pushc</code>, push
+    constant). Bombilla has a 16 variable heap, however, which is
+    accessed with the <code>getvar</code> and <code>setvar</code>
+    instructions, which have embedded operands.</p>
+
+    <p>In addition to capsules, Bombilla has <b>contexts</b>; contexts
+    are the execution contexts (e.g. program counter, operand stack,
+    etc.) that run capsules. Every context is associated with a
+    capsule that it runs when triggered. For example, the clock
+    context runs the clock capsule. There is not a 1-to-1 mapping
+    between capsules and contexts, as subroutine capsules do not have
+    associated contexts.</p>
+      
+    <p>Let's look at the program you just installed and step through
+      each instruction.</p>
+
+    <p><b>pushc 1</b>: This instruction pushes a 1 onto the operand
+    stack, which is empty when the capsule starts execution. The
+    operand stack now has one variable, 1.</p>
+	
+    <p><b>inv</b>: This instruction inverts the value on top of the
+    operand stack, making the 1 a -1. The operand stack now has one
+    variable, -1.</p>
+
+    <p><b>getvar 0</b>: This instruction fetches the counter from the
+    0th shared variable (they are numbered 0-15). The shared variables
+    are initialized to all be 0 when Bombilla boots; as the default
+    capsule was using this to store its counter, it has some small
+    positive value (depending on how long you let the default capsule
+    run). The operand stack now has two variables; the top of the
+    stack is the counter, and below it is -1.</p>
+	  	  
+    <p><b>add</b>: This instruction takes the top two variables on the
+    operand stack and adds them, pushing the result onto the operand
+    stack. In this case, it takes the counter and adds -1 to it,
+    decrementing it. The operand stack now has one variable, the new
+    decremented counter.</p>
+
+    <p><b>copy</b>: This instruction copies the top of the operand
+    stack. The operand stack now has two variables, both of which are
+    separate copies of the decremented counter.</p>
+
+    <p><b>setvar 0</b>: This instruction takes the top of the operand
+    stack and stores it in shared variable 0, updating the stored
+    value of the counter to the new decremented value. The operand
+    stack now has one variable, a single copy of the decremented
+    counter.</p>
+
+    <p><b>pushc 7</b>: This instruction pushes the number 7 onto the
+    operand stack. The operand stack now has two variables; the top of
+    the stack is 7, and below it is the decremented counter.</p>
+
+    <p><b>land</b>: This instruction pops two variables off the
+    operand stack and computes their logical and. As 7 is
+    <code>00000111</code> in binary, the result of this operation is
+    the lowest three bits of the decremented counter; this is pushed
+    onto the operand stack. The operand stack now has one variable, a
+    value between 0 and 7 composed of the three least significant bits
+    of the new counter value.</p>
+
+    <p><b>putled</b>: This instruction sets the mote's LEDs. It pops
+    the variable on top of the operand stack and uses it as an
+    operand. <code>putled</code> takes a five bit operand. The lowest
+    three bits specify which LEDs to operate on, and the fourth and
+    fifth bits specify which LED operation. For us, these two bits are
+    both zero; this specifies the "set" LED operation. This means
+    that, for each LED bit, <code>putled</code> will turn the LED on
+    if the bit is 1 and off if it is 0. This behavior is similar to
+    the component <code>IntToLeds</code>. This results in the bottom
+    three bit of the new counter value being displayed on the
+    LEDs. The operand stack is now empty.</p>
+
+    <p><b>halt</b>: Halt execution. One can always omit the trailing
+    <code>halt</code>; CapsuleInjector will automatically add
+    one. Bombilla will stop running the capsule until the next clock
+    event (one second later).</p>
+
+    <p>This clock capsule keeps a stored counter in shared variable 0,
+    decrements it by one on each clock event, and displays the bottom
+    three bits of the new counter on the mote LEDs. Except for sending
+    the data over the UART (discussed in a later section), this
+    capsule's only distinction from the default one is the presence of
+    the <code>inv</code> instruction.</p>
+    	
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Bombilla Errors</font> </b></td>
+	  </tr> </table></p>
+
+    <p>When Bombilla encounters an error in a program (e.g. trying to
+    pop off an empty operand stack), it enters an error state. In this
+    error state, it stops running capsules. Instead, on each clock
+    event, it toggles all of the LEDs (all of them blinking on and off
+    is an indication something has gone wrong) and sends a packet over
+    the UART. The packet is a BombillaErrorMsg and contains
+    information on the cause of the error.</p>
+
+    <p>The format of a BombillaErrorMsg is as follows:</p>
+    <code>
+      <pre>
+typedef struct BombillaErrorMsg {
+  uint8_t context;
+  uint8_t reason;
+  uint8_t capsule;
+  uint8_t instruction;
+} BombillaErrorMsg;
+      </pre>
+    </code>
+
+    <p>The <code>context</code> field indicates which context
+    triggered the error. The <code>reason</code> field indicates the
+    cause of the error. The <code>capsule</code> field indicates which
+    capsule the context was running when it triggered the error, and
+    the <code>instruction</code> field indicates which instruction in
+    the capsule. A list of reason codes can be found in <a href="../../tos/lib/Bombilla.h">Bombilla.h</a>:</p>
+
+    <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+typedef enum {
+  BOMB_ERROR_TRIGGERED                =  0,
+  BOMB_ERROR_INVALID_RUNNABLE         =  1,
+  BOMB_ERROR_STACK_OVERFLOW           =  2,
+  BOMB_ERROR_STACK_UNDERFLOW          =  3, 
+  BOMB_ERROR_BUFFER_OVERFLOW          =  4,
+  BOMB_ERROR_BUFFER_UNDERFLOW         =  5,
+  BOMB_ERROR_INDEX_OUT_OF_BOUNDS      =  6,
+  BOMB_ERROR_INSTRUCTION_RUNOFF       =  7,
+  BOMB_ERROR_LOCK_INVALID             =  8,
+  BOMB_ERROR_LOCK_STEAL               =  9,
+  BOMB_ERROR_UNLOCK_INVALID           = 10,
+  BOMB_ERROR_QUEUE_ENQUEUE            = 11,
+  BOMB_ERROR_QUEUE_DEQUEUE            = 12,
+  BOMB_ERROR_QUEUE_REMOVE             = 13,
+  BOMB_ERROR_QUEUE_INVALID            = 14,
+  BOMB_ERROR_RSTACK_OVERFLOW          = 15,
+  BOMB_ERROR_RSTACK_UNDERFLOW         = 16, 
+  BOMB_ERROR_INVALID_ACCESS           = 17,
+  BOMB_ERROR_TYPE_CHECK               = 18,
+  BOMB_ERROR_INVALID_TYPE             = 19,
+  BOMB_ERROR_NOSUCHLOCK               = 20
+} BombillaErrorCode;	      </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+
+    <p>For example, if the error message packet were <b>Currently broken need to fix</b></p>
+    
+  <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+7e 00 1d 7d 04 40 03 40 04	      </pre>	    </code>	</tr></tr>
+      </table>
+    </center>
+
+    <p>this would mean that context 64 (0x40, the clock context)
+    failed on capsule 64 (0x40, the clock capsule) on instruction 4
+    because of an operand stack underflow (reason 3). Here's an
+    example program that would do this; try installing it to see what
+    happens:</p>
+
+    <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+pushc 1
+getvar 0
+add
+setvar 0
+setvar 0 </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+    
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Sensing, Types and Shifting</font> </b></td>
+	  </tr> </table></p>
+
+    <p>Twiddling with counters shows that Bombilla works, but is of
+    limited use. Bombilla can also read sensors with the
+    <code>sense</code> instruction. <code>sense</code> takes one
+    operand, which indicates which sensor to read. Currently, Bombilla
+    supports two sensors, the temperature and light sensors. Light is
+    sensor 1, and temperature is sensor 2.</p>
+
+    <p>An issue arises with the fact that sensor readings have types;
+    for example, what does it mean to add a light reading to a
+    temperature reading? Bombilla handles this problem by having a
+    simple type system. Every variable has one of three types: a
+    value, a sensor reading (of a certain kind), or a buffer. We'll
+    talk more about buffers later; right now, we're concerned with
+    values and readings.</p>
+
+    <p>The counter maintained in the previous programs was a value, a
+    16-bit signed integer. Sensor readings are distinct from values in
+    that they have a sensor type (e.g. light) and are immutable; any
+    operation that modifies a reading produces a value. For example,
+    adding two light readings produces a value. A sensor reading
+    variable represents only a raw reading; otherwise, it could have
+    any value and a light reading shifted three bits to the right
+    would be the same as a raw reading.</p>
+
+    <p>Let's recreate the TinyOS application <code>SenseToLeds</code>;
+    this application reads the light sensor and displays the three
+    most significant digits of the ten bit reading on the LEDs:</p>
+
+        <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+pushc 1
+sense
+cast
+pushc 7
+shiftr
+putled	      </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+
+    <p>Let's step through each instruction and explain what's happening.</p>
+
+    <p><b>pushc 1</b>: Push the value 1 onto the operand stack. The
+    operand stack now has one variable, 1.</p>
+
+    <p><b>sense</b>: Take a reading from a sensor board; the sensor is
+    specified by the variable on top of the stack. Sensor 1 is the
+    light sensor (sensor 2 is the temperature sensor), so this
+    instruction will pop the 1 off the stack and push a light sensor
+    reading. The operand stack now has one variable, a 10 bit light
+    reading.</p>
+
+    <p><b>cast</b>: Pop the sensor reading on top of the stack and
+    push the equal value.</p>
+
+    <p><b>pushc 7</b>: Push the value 7 onto the operand stack. The
+    operand stack now has two variables; the top of the stack is 7 and
+    below it is the 10 bit value of the cast light reading.</p>
+
+    <p><b>shiftr</b>: Bitshift a value to the right; this instruction
+    takes the variable below the top of the operand stack and shifts
+    it right a number of bits specified by the top of the operand
+    stack. In this case, it takes the cast sensor reading and shifts
+    it right seven bits, producing a value; as the sensor value was
+    ten bits, this is the three most significant bits of the
+    reading.</p>
+
+    <p><b>putled</b>: Display these top three bits on the mote
+    LEDs.</p>
+      
+    
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Buffers</font> </b></td> </tr>
+      </table></p>
+    
+    <p>Storing and dealing with individual values is useful, but often
+    being able to handle sets of data is needed. Bombilla provides
+    buffers, which can hold up to ten variables. Buffers are typed. An
+    empty buffer has no type, and takes on the type of the first
+    variable put in it. For example, if the first variable is a light
+    reading, then the buffer will become a light reading
+    buffer. Attempting to put a variable of another type (e.g. a
+    value) into the buffer will result in an error.</p>
+
+    <p>Bombilla provides two buffers, which can be pushed onto the
+    operand stack with <code>bpush0</code> and
+    <code>bpush1</code>. Variables can be placed in the buffers with
+    the <code>add</code> instruction; this polymorphism of the
+    <code>add</code> instruction leads to a more concise instruction
+    set.</p>
+
+    <p>In an add, if the buffer is on top of the stack (with the
+    variable below it), the variable will be prepended. If the
+    variable is on top of the stack (with the buffer below it), the
+    variable will be appended. Appending takes O(1) time, while
+    prepending takes O(n) time. In both cases, the buffer will remain
+    on the stack. For example, the first sequence of instructions will
+    prepend 6 to buffer 0, while the second will append it:</p>
+      
+         <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+pushc 6
+bpush0
+add
+
+-------
+
+bpush0
+pushc 6
+add      </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+
+    <p>Variables can be extracted from buffers with the
+    <code>bhead</code>, <code>btail</code>, <code>bget</code> and
+    <code>byank</code> instructions. Their semantics are:</p>
+
+    <p><b>bhead</b>: Remove the first variable in the buffer and push
+    it onto the operand stack. Triggers an error if the buffer is empty.</p>
+
+    <p><b>btail</b>: Remove the last variable in the buffer and push
+    it onto the operand stack. Triggers an error if the buffer was empty.</p>
+
+    <p><b>bget</b>: Copy the nth variable of the buffer onto the
+    operand stack; do not remove it. Consumes two operands; the first
+    (on top of the stack) is the index in the buffer, the second is
+    the buffer. Triggers an error if the index is out of bounds.</p>
+
+    <p><b>byank</b>: Remove the nth variable of the buffer and push it
+    onto the operand stack. Consumes two operands; the first (on top
+    of the stack) is the index in the buffer, the second is the
+    buffer. Triggers an error if the index is out of bounds.</p>
+
+    <p>There are two instructions for querying the status of a buffer:
+    <code>bsize</code> and <code>bfull</code>. Additionally, buffers
+    can be cleared (set to size 0 with no type) with the
+    <code>bclear</code> instruction. Last of all, the variables in a
+    buffer can be sorted with a single instruction;
+    <code>bsorta</code> sorts them into ascending order, while
+    <code>bsortd</code> sorts them into descending order.</p>
+
+    <p>All buffer instructions keep the buffer variable on the operand
+    stack. For example <code>bfull</code> takes one operand, a buffer,
+    and after it completes, the top of the stack is whether the buffer
+    was full, beneath which is the buffer.</p>
+      
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Branches</font> </b></td> </tr>
+      </table></p>
+
+    <p>There are two branch instructions in Bombilla:
+    <code>jumps</code> and <code>jumpc</code>; we'll only discuss the
+    first, <code>jumps</code> (which stands for "jump stack"
+    ... <code>jumpc</code> is "jump condition"). Both instructions
+    have an embedded 5-bit operand, the absolute instruction to jump
+    to. <code>jumps</code> consumes a single value operand from the
+    operand stack; if the top of the stack is not a value, this
+    triggers an error. If the value is nonzero, control jumps to the
+    instruction specified by embedded operand. For example, the first
+    code snippet below always jumps (infinite loop) to instruction 8,
+    while the second jumps to instruction 14 if shared variable 3 is
+    equal to 8 (tested with the <code>eq</code> instruction).</p>
+    
+            <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+pushc 1
+jumps 8
+
+-------
+
+getvar 3
+pushc 8
+eq
+jumps 14     </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+    
+    
+  <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Sample Data Filter</font> </b></td> </tr>
+      </table></p>
+    
+    
+    <p>Bringing all of these concepts together, below is a simple data
+    filtering clock capsule. This capsule reads the light sensor and
+    stores it in a buffer. When the buffer is full, it sorts the
+    elements and displays the median value on the LEDs. Comments
+    alongside the instructions briefly explain each step.</p>
+    
+    <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+bpush0         # Push buffer 0 onto stack
+pushc 1        # 
+sense          # Sense light (sensor type 1)
+add            # Append the reading to the buffer
+
+bfull          # If the buffer was full, push 1, otherwise push 0; buffer off operand stack
+jumps 7        # If the buffer was full, jump past the pop and halt
+pop            # Pop buffer off stack so stack is empty for next exec
+halt         
+
+bsorta         # Sort its elements (stays on the stack)
+bsize          # Take its size     (stays on the stack)
+pushc 1        
+shiftr         # Divide size by 2
+
+byank          # Pull out middle element (size/2)
+cast           # Cast sensor reading to a value
+pushc 7
+shiftr         # Take top 3 bits
+
+putled
+bclear         # Clear out the buffer
+halt
+	      </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+
+       <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Communication</font> </b></td> </tr>
+      </table></p>
+    
+    <p>Blinking the three LEDs demonstrates you're collecting data,
+    but communicating it is better; these are sensor <i>networks</i>,
+    after all. Bombilla has three communication mechanisms. The first
+    is a built in ad-hoc routing layer; sent using this mechanism is
+    automatically routed to a base station (it uses the Narpro
+    component, so one must have a Narpro base station)). The second is
+    sending to the uart. The third is to trigger Bombilla's routing
+    capsules, which can format headers before sending a packet; this
+    allows ad-hoc routing algorithms to be implemented in
+    Bombilla. This final mechanism is rather complex, and is not
+    covered in this tutorial.</p>
+
+    <p><b>uart:</b> The <code>uart</code> instruction consumes a
+    single operand, a buffer. <code>uart</code> sends that buffer to
+    the mote UART.</p>
+
+    <p><b>send:</b> The <code>send</code> instruction consumes a
+    single operand, a buffer. <code>send</code> passes that buffer to
+    the Narpro component, which sends the packet using a simple
+    beaconless ad-hoc routing algorithm.</p>
+
+    <p>Buffers have the following layout in a packet:</p>
+
+       <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+typedef struct {
+  uint8_t type;
+  uint8_t size;
+  int16_t entries[BOMB_BUF_LEN];
+} BombillaDataBuffer;
+</pre>	    </code>	</td></tr>
+      </table>
+    </center>
+
+    <p>where type is one of </p>
+
+    <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+typedef enum {
+  BOMB_DATA_NONE    = 255,
+  BOMB_DATA_VALUE   = 0,
+  BOMB_DATA_PHOTO   = 1,
+  BOMB_DATA_TEMP    = 2,  
+  BOMB_DATA_MIC     = 3,
+  BOMB_DATA_MAGX    = 4,
+  BOMB_DATA_MAGY    = 5,
+  BOMB_DATA_ACCELX  = 6,
+  BOMB_DATA_ACCELY  = 7,
+  BOMB_DATA_END     = 8
+} BombillaSensorType;
+      </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+
+    <p>For example, the packet</p>
+        <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+00 7e 1f 7d 0 4 05 00 08 00 0c 00 15 00 &lt;crc&gt; &lt;crc&gt;
+     </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+
+    <p>contains a buffer of four values: 5, 8, 13, and 21.</p>
+
+    <p>Here's a variation of the previous filtering program; instead
+    of displaying the median value on the LEDs, this capsule sends a
+    sorted buffer over the radio.</p>
+
+        <center>
+      <table border=0 hspace=4 cellspacing=2 width="80%" cellpadding=3>
+	<tr bgcolor="#e0e0e0">
+	  <td width="100%">
+	    <code>
+	      <pre>
+bpush0         # Push buffer 0 onto stack
+pushc 1        # 
+sense          # Sense light (sensor type 1)
+add            # Append the reading to the buffer
+
+bfull          # If the buffer was full, push 1, otherwise push 0
+jumps 7        # If the buffer was full, jump past the pop and halt
+pop            # Pop buffer off stack so stack is empty for next exec
+halt         
+
+bsorta         # Sort its elements (stays on the stack)
+send           # Send over the radio
+bpush0         #
+bclear         # Clear out buffer 0
+
+pop            # Pop buffer off operand stack     </pre>	    </code>	</td></tr>
+      </table>
+    </center>
+
+    <p>Install this capsule and see. Having your Bombilla mote on the
+    programming board can be a problem; on one hand, it has to be
+    plugged in to install the capsule, but it can't have a sensor
+    board on when plugged in (e.g. when it boots), which means that
+    the board will. not be initialized propely. The way to handle this
+    is to transmit the capsule to the mote with a GenericBase; you can
+    then see the packets the mote sends.</p>
+    
+     <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Capsule Forwarding</font> </b></td> </tr>
+      </table></p>
+
+
+    <p> So far, we've been installing capsules on individual
+    motes. This is inherently difficult on large sensor networks,
+    especially multihop networks. Bombilla capsules can therefore
+    virally propagate through a network. One copy of a capsule set
+    "forwarding" will slowly duplicate itself through the network;
+    version numbers are used to determine which capsules to install
+    and which to not.</p>
+
+    <p>Install Bombilla on two motes. Using a GenericBase, send a new
+    program to both motes; barring packets being dropped, both should
+    receive and start running the new capsule. Reset the motes and
+    replace the GenericBase with one of the motes, then install the
+    new program over the UART. The second Bombilla mote (not plugged
+    into the UART) will continue to run the old program.</p>
+    
+    <p>The <code>CapsuleInjector</code> GUI has a radio button for
+    setting whether the generated capsule is forwarding or not. Set
+    your new program to be forwarding, increment the version number,
+    and install it on the mote plugged into the UART. After a little
+    while (within a minute or so), the second mote should start
+    running the new program; the first mote broadcast the new capsule
+    out over the radio and the second mote installed it.</p>
+
+    <p>Capsule forwarding uses a very simple heuristic to try to not
+    saturate a network; it takes a rough measure of network activity
+    and decides whether to forward a capsule based on this measure. In
+    a very, very busy network, Bombilla will try forwarding a capsule
+    every minute or so; in an idle one, it forwards every other second
+    or so. However, it randomly selects which capsule to forward; this
+    means that, with 8 capsules, it will actually forward any given
+    capsule every 16 seconds or so.</p>
+    
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Other Goodies</font>
+	      </b></td> </tr> </table></p>
+
+    <p>Bombilla has several other pieces of functionality, such as the
+    receive and send contexts for message processing. These are,
+    however, outside of the scope of this tutorial.</p>
+
+    <p>
+      <table border=0 hspace=4 cellspacing=2 width="100%" cellpadding=3>
+	<tr bgcolor="#e0e0ff">
+	  <td width="100%"><nobr> <b> <font
+	  face="arial,helvetica">Complete Instruction Set</font>
+	  </b></td> </tr> </table></p>
+
+    <center>
+      <table border=1>
+	<tr>
+	  <td>Instruction</td>
+	  <td>Short description</td>
+	  <td>Opcode(s)</td>
+	  <td>Class</td>
+	  <td>Operands</td>
+	  <td>Results</td>
+	  <td>Long Description</td>
+	</tr>
+
+	<tr>
+	  <td><code>halt</code></td>
+	  <td>Halt execution</td>
+	  <td><code>0x00</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>None</td>
+	  <td>Halts execution of the issuing context, which returns to an idle state, releasing all locks</td>
+	</tr>
+
+	<tr>
+	  <td><code>id</code></td>
+	  <td>Push mote ID</td>
+	  <td><code>0x01</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  <td>Pushes the mote ID onto the operand stack as a value</td>
+	</tr>
+
+	<tr>
+	  <td><code>rand</code></td>
+	  <td>Push random number</td>
+	  <td><code>0x02</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  <td>Pushes a 16-bit random number onto the operand stack as a value</td>
+	</tr>
+
+	<tr>
+	  <td><code>ctrue</code></td>
+	  <td>Set condition to true</td>
+	  <td><code>0x03</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  <td>Sets the issuing context's condition variable to true (1)</td>
+	</tr>
+
+	<tr>
+	  <td><code>cfalse</code></td>
+	  <td>Set condition to false</td>
+	  <td><code>0x04</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  <td>Sets the issuing context's condition variable to false (0)</td>
+	</tr>
+
+	<tr>
+	  <td><code>cpush</code></td>
+	  <td>Push condition variable</td>
+	  <td><code>0x05</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  <td>Pushes the issuing context's condition variable onto the operand stack as a value.</td>
+	</tr>
+
+	<tr>
+	  <td><code>logp</code></td>
+	  <td><b>not implemented</b></td>
+	  <td><code>0x06</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  <td>Pushes the global log line index onto the operand stack as a value.</td>
+	</tr>
+
+	<tr>
+	  <td><code>bpush0</code></td>
+	  <td>Push buffer 0</td>
+	  <td><code>0x07</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>Buffer</td>
+	  <td>Pushes buffer zero onto the operand stack.</td>
+	</tr>
+
+	<tr>
+	  <td><code>bpush1</code></td>
+	  <td>Push buffer 1</td>
+	  <td><code>0x08</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>Buffer</td>
+	  <td>Pushes buffer one onto the operand stack.</td>
+	</tr>
+
+	<tr>
+	  <td><code>depth</code></td>
+	  <td>Push opstack depth</td>
+	  <td><code>0x09</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  <td>Pushes the current depth of the issuing context's operand stack as a value; the value is the depth before the push.</td>
+	</tr>
+
+	<tr>
+	  <td><code>err</code></td>
+	  <td>Enter error state</td>
+	  <td><code>0x0a</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>None</td>
+	  <td>Forces the issuing context to enter an error state with reason <code>BOMB_ERROR_TRIGGERED; halts execution.</code></td>
+	</tr>
+
+	<tr>
+	  <td><code>ret</code></td>
+	  <td>Return from subroutine call</td>
+	  <td><code>0xb</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>None</td>
+	  <td>Pops a return address of the context's address stack and returns control to the popped instruction and capsule.</td>
+	</tr>
+
+	<tr>
+	  <td><code>call0</code></td>
+	  <td>Call subroutine 0</td>
+	  <td><code>0x0c</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>None</td>
+	  <td>Pushes a return address onto the context's return address stack, consisting of the current capsule and current pc+1. Then jumps to instruction zero of subroutine 0.</td>
+	</tr>
+
+	<tr>
+	  <td><code>call1</code></td>
+	  <td>Call subroutine 1</td>
+	  <td><code>0x0d</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>None</td>
+	  <td>Pushes a return address onto the context's return address stack, consisting of the current capsule and current pc+1. Then jumps to instruction zero of subroutine 1.</td>
+	</tr>
+
+	<tr>
+	  <td><code>call2</code></td>
+	  <td>Call subroutine 2</td>
+	  <td><code>0x0e</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>None</td>
+	  <td>Pushes a return address onto the context's return address stack, consisting of the current capsule and current pc+1. Then jumps to instruction zero of subroutine 2.</td>
+	</tr>
+
+	<tr>
+	  <td><code>call3</code></td>
+	  <td>Call subroutine 3</td>
+	  <td><code>0x0f</code></td>
+	  <td>Basic</td>
+	  <td>None</td>
+	  <td>None</td>
+	  <td>Pushes a return address onto the context's return address stack, consisting of the current capsule and current pc+1. Then jumps to instruction zero of subroutine 3.</td>
+	</tr>
+	
+	<tr><td colspan=7></td></tr>
+
+	<tr>
+	  <td><code>inv</code></td>
+	  <td>Invert a value (multiply by -1)</td>
+	  <td><code>0x10</code></td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>Value</td>
+	  <td>Pops a value off the operand stack, then pushes -1* that
+	  value onto the operand stack.</td>
+	</tr>
+
+	<tr>
+	  <td><code>cpull</code></td>
+	  <td>Set condition variable</td>
+	  <td><code>0x11</code></td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>None</td>
+	  <td>Pops a value off the operand stack, then set's the
+	  issuing context's condition variable to this value. Combined
+	  with <code>jumpc</code>, useful for fixed loops.</td>
+	</tr>
+
+	<tr>
+	  <td><code>not</code></td>
+	  <td>Boolean not</td>
+	  <td><code>0x12</code></td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>Value</td>
+	  <td>Pops a value off the operand stack; if equal to zero,
+	  pushes 1, else pushes zero.</td>
+	</tr>
+
+	<tr>
+	  <td><code>lnot</code></td>
+	  <td>Logical not</td>
+	  <td><code>0x13</code></td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>Value</td>
+	  <td>Pops a value off the operand stack and pushes its
+	  logical not (e.g. 0x2e will result in 0xffd1).</td>
+	</tr>
+
+	<tr>
+	  <td><code>sense</code></td>
+	  <td>Read a sensor</td>
+	  <td><code>0x14</code></td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>Sensor reading</td>
+	  <td>Pops a value off the operand stack; reads the sensor
+	  indicated by the reading. Sensor 1 is light, sensor 2 is
+	  temperature.</td>
+	</tr>
+
+	<tr>
+	  <td><code>send</code></td>
+	  <td>Send a packet</td>
+	  <td><code>0x15</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>None</td>
+	  <td>Pops a buffer off the operand stack and sends it using a
+	  built-in ad-hoc routing protocol. Failure to send is silent.</td>
+	</tr>
+
+	<tr>
+	  <td><code>sendr</code></td>
+	  <td>Send a raw packet</td>
+	  <td><code>0x16</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>None</td>
+
+	  <td>Pops a buffer off the operand stack and pushes a copy
+	  onto the top of the send context, which is triggered to
+	  run. The send context (and only the send context) is given
+	  an opportunity to obtain locks in the issuer's relinquish
+	  set. If the send context is non-idle, fails silently.</td>
+
+	</tr>
+
+	<tr>
+	  <td><code>uart</code></td>
+	  <td>Send packet to UART</td>
+	  <td><code>0x17</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>None</td>
+
+	  <td>Pops a buffer off the operand stack and sends it to the
+	  UART. Fails silently.</td>
+
+	</tr>
+
+	<tr>
+	  <td><code>logw</code></td>
+	  <td><b>not implemented</b></td>
+	  <td><code>0x18</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>None</td>
+
+	  <td>Pops a buffer off the operand stack and writes it to
+	  non-volatile memory (the log), at a location derived from
+	  the log index pointer. Log write failures will be retried
+	  indefinitely (context blocks).</td>
+
+	</tr>
+
+	<tr>
+	  <td><code>bhead</code></td>
+	  <td>Push head of buffer (element 0)</td>
+	  <td><code>0x19</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>&lt;buffer type&gt;, Buffer, ...</td>
+
+	  <td>Pops a buffer off the operand stack and copies its head
+	  (the first element); pushes the buffer back onto the operand
+	  stack, followed by the variable copied from the buffer. This
+	  results in the variable being on the top of the stack,
+	  followed by the buffer. The variable has the type of the
+	  buffer; it could be either a value or a sensor reading.</td>
+
+	</tr>
+
+	<tr>
+	  <td><code>btail</code></td>
+	  <td>Push tail of buffer (element size -1)</td>
+	  <td><code>0x1a</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>&lt;buffer type&gt;, Buffer, ...</td>
+
+	  <td>Pops a buffer off the operand stack and copies its tail
+	  (the last element); pushes the buffer back onto the operand
+	  stack, followed by the variable copied from the buffer. This
+	  results in the variable being on the top of the stack,
+	  followed by the buffer. The variable has the type of the
+	  buffer; it could be either a value or a sensor reading.</td>
+
+	</tr>  
+
+	<tr>
+	  <td><code>bclear</code></td>
+	  <td>Clear buffer</td>
+	  <td><code>0x1b</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>Buffer</td>
+
+	  <td>Pops a buffer off the operand stack and clears it: sets
+	  it to be of size zero and untyped. Pushes this cleared
+	  buffer back onto the operand stack.</td>
+
+	</tr>  
+
+	<tr>
+	  <td><code>bsize</code></td>
+	  <td># elements in buffer</td>
+	  <td><code>0x1c</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>Value, Buffer, ...</td>
+
+	  <td>Pops a buffer off the operand stack and copies its
+	  current size as a value. Pushes the buffer back onto the
+	  operand stack, followed by the value. This results in the
+	  value being on the top of the stack, followed by the
+	  buffer.</td>
+
+	</tr> 
+
+	<tr>
+	  <td><code>copy</code></td>
+	  <td>Copy top of operand stack</td>
+	  <td><code>0x1d</code></td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;</td>
+	  <td>&lt;x&gt;, &lt;x&gt;, ...</td>
+
+	  <td>Pops the top of the operand stack, then pushes two
+	  copies of this variable back onto the operand stack. For
+	  example, if the value 1 were on top of the stack, the stack
+	  would become 1, 1, ...; if buffer 0 were on top of the
+	  stack, the stack would become buffer 0, buffer 0, ...</td>
+
+	</tr> 
+
+	<tr>
+	  <td><code>pop</code></td>
+	  <td>Pop operand stack</td>
+	  <td><code>0x1e</code></td>
+	  <td>Basic</td>
+	  <td>&lt;any&gt;</td>
+	  <td>None</td>
+
+	  <td>Pops the top of the operand stack.</td>
+
+	</tr> 
+
+	
+	<tr><td colspan=7></td></tr>
+
+	<tr>
+	  <td><code>bsorta</code></td>
+	  <td>Sort buffer, ascending</td>
+	  <td><code>0x20</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>Buffer</td>
+
+	  <td>Pops a buffer off the operand stack, sorts its elements
+	  in ascending order, then pushes the buffer back onto the
+	  operand stack.</td>
+
+	</tr>
+	
+	<tr>
+	  <td><code>bsortd</code></td>
+	  <td>Sort buffer, descending</td>
+	  <td><code>0x21</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>Buffer</td>
+
+	  <td>Pops a buffer off the operand stack, sorts its elements
+	  in descending order, then pushes the buffer back onto the
+	  operand stack.</td>
+
+	</tr> 
+
+	<tr>
+	  <td><code>bfull</code></td>
+	  <td>Buffer full?</td>
+	  <td><code>0x22</code></td>
+	  <td>Basic</td>
+	  <td>Buffer</td>
+	  <td>Value, Buffer, ...</td>
+
+	  <td>Pops a buffer off the operand stack; if the buffer is
+	  full, pushes the buffer, then the value 1. If it is not,
+	  pushes the buffer, then the value 0.</td>
+	</tr> 
+
+	<tr>
+	  <td><code>putled</code></td>
+	  <td>Actuate LEDs</td>
+	  <td><code>0x23</code></td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>None</td>
+
+	  <td><code>putled</code> takes a single operand, a value. It
+	  uses the lowest five bits of the operand to determine how to
+	  actuate the LEDs. The lowest three bits denote the 3 LEDs;
+	  bit 0 is red, bit 1 is green, and bit 2 is yellow. The next
+	  two bits (3 and 4) specify which operation to apply; 00 is
+	  set, 01 is on, 10 is off, and 11 is toggle. For example, 31
+	  (0x1f) toggles all three LEDs, 19 turns the red and green
+	  off (leaving yellow unchanged), and 0x2 sets the LEDS to be
+	  red off, green on, and yellow off.</td>
+
+	</tr> 
+
+	<tr>
+	  <td><code>cast</code></td>
+	  <td>Cast reading to value</td>
+	  <td><code>0x24</code></td>
+	  <td>Basic</td>
+	  <td>Reading</td>
+	  <td>Value</td>
+
+	  <td>Pops a sensor reading, then pushes a value equal to the
+	  reading's magnitude.</td>
+	    
+	</tr> 
+
+	<tr>
+	  <td><code>unlock</code></td>
+	  <td>Unlock single lock</td>
+	  <td><code>0x25</code></td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>None</td>
+
+	  <td>Adds the lock specified by the operand to both the
+	  relinquish and acquire sets of the context. This will cause
+	  the lock the be yielded at the next scheduling point and
+	  reacquired before resuming execution. The value operand
+	  should be in the range of 0-15 (the lock numbers). </td>
+
+	</tr>
+	
+	<tr>
+	  <td><code>unlockb</code></td>
+	  <td>Unlock set of locks</td>
+	  <td><code>0x26</td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>None</td>
+
+	  <td>Adds the locks specified by the operand to both the
+	  relinquish and acquire sets of the context. This will cause
+	  the locks the be yielded at the next scheduling point and
+	  reacquired before resuming execution. The value operand is
+	  considered a bitmask, with the least significant bit
+	  corresponding to lock 0. For example an operand of 0x1025
+	  would unlock locks 0, 2, 5, and 12.</td>
+
+	</tr>
+
+	<tr>
+	  <td><code>punlock</code></td>
+	  <td>Permanently unlock lock single lock</td>
+	  <td><code>0x27</td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>None</td>
+
+	  <td>Adds the lock specified by the operand to the relinquish
+	  set of the context. This will cause the lock the be
+	  released at the next scheduling point and
+	  <b>not</b>reacquired before resuming execution. This can
+	  cause a runtime error if the context later attempts to
+	  access the shared variable it no longer has locked. The
+	  value operand should be in the range of 0-15 (the lock
+	  numbers). </td>
+	  
+	</tr>
+
+	<tr>
+	  <td><code>punlockb</code></td>
+	  <td>Permanently unlock set of locks</td>
+	  <td><code>0x28</td>
+	  <td>Basic</td>
+	  <td>Value</td>
+	  <td>None</td>
+	  
+	  <td>Adds the locks specified by the operand to the
+	  relinquish set of the context. This will cause the locks the
+	  be released at the next scheduling point and
+	  <b>not</b>reacquired before resuming execution. This can
+	  cause a runtime error if the context later attempts to
+	  access a shared variable it no longer has locked.  The value
+	  operand is considered a bitmask, with the least significant
+	  bit corresponding to lock 0. For example an operand of
+	  0x1025 would permanently unlock locks 0, 2, 5, and 12.</td>
+	  
+	</tr>
+
+	<tr>
+	  <td><code>logwl</code></td>
+	  <td><b>not implemented</b></td>
+	  <td><code>0x2b</td>
+	  <td>Basic</td>
+	  <td>Value, Buffer, ...</td>
+	  <td>None</td>
+	  
+	  <td>Write the buffer to the area of non-volatile storage
+	  specified by a certain log index.</td>
+	  
+	</tr>
+	
+	<tr>
+	  <td><code>logr</code></td>
+	  <td><b>not implemented</b></td>
+	  <td><code>0x2c</td>
+	  <td>Basic</td>
+	  <td>Value, Buffer, ...</td>
+	  <td>None</td>
+	  
+	  <td>Read from the area of non-volatile storage
+	  specified by a certain log index to the buffer.</td>
+	  
+	</tr>
+
+	<tr>
+	  <td><code>bget</code></td>
+	  <td>Get nth element of buffer</td>
+	  <td><code>0x2d</td>
+	  <td>Basic</td>
+	  <td>Value, Buffer, ...</td>
+	  <td>&lt;type of buffer&gt;, Buffer, ...</td>
+	  
+	  <td>Make a copy of the nth variable of the buffer (specified
+	  by the value), push the buffer back onto the operand stack,
+	  then push the variable onto the operand stack.</td>
+	  
+	</tr>
+
+	<tr>
+	  <td><code>byank</code></td>
+	  <td>Yank nth element of buffer</td>
+	  <td><code>0x2e</td>
+	  <td>Basic</td>
+	  <td>Value, Buffer, ...</td>
+	  <td>&lt;type of buffer&gt;, Buffer, ...</td>
+	  
+	  <td>Remove the nth variable of the buffer (specified by the
+	  value), push the buffer back onto the operand stack, then
+	  push the variable onto the operand stack. This will result
+	  in the buffer size shrinking by 1. This operation is O(1)
+	  for the last element at O(n) for the first.</td>
+	  
+	</tr>
+
+	<tr>
+	  <td><code>motectl</code></td>
+	  <td><b>not implemented</b></td>
+	  <td><code>0x2f</td>
+	  <td>Basic</td>
+	  <td>Value, ???, ...</td>
+	  <td>???</td>
+	  
+	  <td>General purpose instruction for rare operations that
+	  modify underlying mote state; e.g. get/set AM group, mote
+	  ID, timer rates, etc.</td>
+	  
+	</tr>
+
+	<tr><td colspan=7></td></tr>
+	
+	<tr>
+	  <td><code>swap</code></td>
+	  <td>Swap top 2 variables</td>
+	  <td><code>0x30</td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;, &lt;y&gt;, ...</td>
+	  <td>&lt;y&gt;, &lt;x&gt;, ...</td>
+	  
+	  <td>Pop x then y off the operand stack, then push x, then
+	  push y. This results in y being on top of the operand stack,
+	  with x below it; they have been swapped.</td>
+	    
+	</tr>
+
+	<tr>
+	  <td><code>land</code></td>
+	  <td>Logical and</td>
+	  <td><code>0x31</td>
+	  <td>Basic</td>
+	  <td>Value, Value</td>
+	  <td>Value</td>
+	  
+	  <td>Pop two values off the operand stack, take their logical
+	  and, and push the result.</td>
+	    
+	</tr>
+
+	<tr>
+	  <td><code>lor</code></td>
+	  <td>Logical or</td>
+	  <td><code>0x32</td>
+	  <td>Basic</td>
+	  <td>Value, Value</td>
+	  <td>Value</td>
+	  
+	  <td>Pop two values off the operand stack, take their logical
+	  or, and push the result.</td>
+	    
+	</tr>
+	<tr>
+	  <td><code>and</code></td>
+	  <td>Boolean and</td>
+	  <td><code>0x33</td>
+	  <td>Basic</td>
+	  <td>Value, Value</td>
+	  <td>Value</td>
+	  
+	  <td>Pop two values off the operand stack, take their boolean
+	  and, and push the result: 1 if both were nonzero, 0 otherwise.</td>
+	    
+	</tr>
+	
+	<tr>
+	  <td><code>or</code></td>
+	  <td>Boolean or</td>
+	  <td><code>0x34</td>
+	  <td>Basic</td>
+	  <td>Value, Value</td>
+	  <td>Value</td>
+	  
+	  <td>Pop two values off the operand stack, take their boolean
+	  or, and push the result: 1 if either was non-zero, 0 otherwise.</td>
+	    
+	</tr>
+
+	<tr>
+	  <td><code>shiftr</code></td>
+	  <td>Shift right</td>
+	  <td><code>0x35</td>
+	  <td>Basic</td>
+	  <td>Value1, Value2, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (Value1, Value2) off the operand stack;
+	  shift Value2 right the number of bits specified by
+	  Value1. Push the result.</td>
+	  
+	</tr>
+
+	<tr>
+	  <td><code>shiftl</code></td>
+	  <td>Shift left</td>
+	  <td><code>0x36</td>
+	  <td>Basic</td>
+	  <td>Value1, Value2, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (Value1, Value2) off the operand stack;
+	  shift Value2 left the number of bits specified by
+	  Value1. Push the result.</td>
+	  
+	</tr>
+
+	<tr>
+	  <td><code>add</code></td>
+	  <td>Add (polymorphic)</td>
+	  <td><code>0x37</td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;, &lt;y&gt;, ...</td>
+	  <td>&lt;z&gt;, ...</td>
+	  
+	  <td>Pop two operands and perform an operation determined by
+	  their types, pushing a single result.
+	    <table border=1>
+	      <tr>
+		<td>x</td>
+		<td>y</td>
+		<td>Operation</td>
+		<td>z</td>
+	      </tr>
+
+	      <tr>
+		<td>Value</td>
+		<td>Value</td>
+		<td>z = x + y</td>
+		<td>Value</td>
+	      </tr>
+
+	      <tr>
+		<td>Buffer</td>
+		<td>*</td>
+		<td>Prepend y to buffer. If y is of the wrong type,
+		trigger an error.</td>
+		<td>Buffer</td>
+	      </tr>
+
+	      <tr>
+		<td>*</td>
+		<td>Buffer</td>
+		<td>Append x to buffer. If x is of the wrong type,
+		trigger an error.</td>
+		<td>Buffer</td>
+	      </tr>
+
+	    </table>
+
+	    If a sensor reading is added to anything except a buffer,
+	    an error is triggered.
+	  </td>
+	</tr>
+	
+	<tr>
+	  <td><code>mod</code></td>
+	  <td>Modulo</td>
+	  <td><code>0x38</td>
+	  <td>Basic</td>
+	  <td>Value1, Value2, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (Value1, Value2) off the operand stack;
+	  push Value2 module Value1.</td>
+	  
+	</tr>
+
+	<tr>
+	  <td><code>eq</code></td>
+	  <td>Equal</td>
+	  <td><code>0x39</td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;, &lt;y&gt;, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (x, y) off the operand stack; push if
+	  they are equal. They are equal iff their types are equal and
+	  if values, they are the same number, if readings, they are
+	  the same sensor and have equal magnitudes, or if buffers,
+	  they are the same buffer. If equal, push 1, else push 0.</td>
+	  
+	</tr>
+
+	
+	<tr>
+	  <td><code>neq</code></td>
+	  <td>Not equal</td>
+	  <td><code>0x3a</td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;, &lt;y&gt;, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (x, y) off the operand stack; push if
+	  they are not equal. They are equal iff their types are equal
+	  and if values, they are the same number, if readings, they
+	  are the same sensor and have equal magnitudes, or if
+	  buffers, they are the same buffer. If not equal, push 1,
+	  else push 0.</td>
+	  
+	</tr>
+
+	<tr>
+	  <td><code>lt</code></td>
+	  <td>Less than</td>
+	  <td><code>0x3b</td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;, &lt;y&gt;, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (x, y) off the operand stack; push if (x
+	  &lt; y). x is less than y iff they are both of the same
+	  type. Push 1 if x &lt; y, 0 otherwise.</td>
+	  
+	</tr>
+
+	
+	<tr>
+	  <td><code>gt</code></td>
+	  <td>Greater than</td>
+	  <td><code>0x3c</td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;, &lt;y&gt;, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (x, y) off the operand stack; push if (x
+	  &gt; y). x is greater than y iff they are both of the same
+	  type. Push 1 if x &gt; y, 0 otherwise.</td>
+	  
+	</tr>
+
+		
+	<tr>
+	  <td><code>lte</code></td>
+	  <td>Less than or equal to</td>
+	  <td><code>0x3d</td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;, &lt;y&gt;, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (x, y) off the operand stack; push if (x
+	  &lte; y). x is less than or equal to y iff they are both of the same
+	  type. Push 1 if x &lte; y, 0 otherwise.</td>
+	  
+	</tr>
+	
+	<tr>
+	  <td><code>gte</code></td>
+	  <td>Greater than or equal to</td>
+	  <td><code>0x3e</td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;, &lt;y&gt;, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (x, y) off the operand stack; push if (x
+	  &gte; y). x is greater than or equal to y iff they are both
+	  of the same type. Push 1 if x &gte; y, 0 otherwise.</td>
+	  
+	</tr>
+	
+	<tr>
+	  <td><code>eqtype</code></td>
+	  <td>Type equal</td>
+	  <td><code>0x3f</td>
+	  <td>Basic</td>
+	  <td>&lt;x&gt;, &lt;y&gt;, ...</td>
+	  <td>Value, ...</td>
+	  
+	  <td>Pop two values (x, y) off the operand stack; push 1 if x
+	  and y are the same type, 0 otherwise. If x and y are sensor
+	  readings, they are only the same type iff from the same
+	  sensor.</td>
+	  
+	</tr>
+
+	
+	<tr>
+	  <td><code>getms</code></td>
+	  <td>Get message header short</td>
+	  <td><code>0x40-47</td>
+	  <td>M-class</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  
+	  <td>Push the nth (specified by the embedded 3-bit operand)
+	  short of the message header (0-3) onto the operand stack as
+	  a value. Can only be executed by the send and receive
+	  contexts. When a receive context begins execution, the
+	  header variables are set to the received packet's; in the
+	  send context, they are zero unless having been modified in
+	  this execution by <code>setms</code> or
+	  <code>setmb</code>. </td>
+	  	  
+	</tr>
+
+	<tr>
+	  <td><code>getmb</code></td>
+	  <td>Get message header byte</td>
+	  <td><code>0x48-4f</td>
+	  <td>M-class</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  
+	  <td>Push the nth (specified by the embedded 3-bit operand)
+	  byte of the message header (0-7) onto the operand stack as a
+	  value. Can only be executed by the send and receive
+	  contexts. When a receive context begins execution, the
+	  header variables are set to the received packet's; in the
+	  send context, they are zero unless having been modified in
+	  this execution by <code>setms</code> or
+	  <code>setmb</code>. </td>
+	  	  
+	</tr>
+
+	
+		<tr>
+	  <td><code>getms</code></td>
+	  <td>Set message header short</td>
+	  <td><code>0x50-57</td>
+	  <td>M-class</td>
+	  <td>Value</td>
+	  <td>None</td>
+	  
+	  <td>Set the nth (specified by the 3-bit embedded operand)
+	  short of the message header (0-3) to Value. Can only be
+	  executed by the send and receive contexts.</td>
+	  	  
+	</tr>
+
+	<tr>
+	  <td><code>getmb</code></td>
+	  <td>Get message header byte</td>
+	  <td><code>0x58-5f</td>
+	  <td>M-class</td>
+	  <td>Value</td>
+	  <td>None</td>
+	  
+	  <td>Set the nth (specified by the 3-bit embedded operand)
+	  byte of the message header (0-7) to Value. Can only be
+	  executed by the send and receive contexts.</td>
+	  	  
+	</tr>
+
+
+	<tr>
+	  <td><code>setvar</code></td>
+	  <td>Set shared variable</td>
+	  <td><code>0x60-6f</td>
+	  <td>V-class</td>
+	  <td>Value or Reading</td>
+	  <td>None</td>
+	  
+	  <td>Set the nth (specified by the 4-bit embedded operand)
+	  shared variable to operand.</td>
+	  	  
+	</tr>
+
+	
+	<tr>
+	  <td><code>getvar</code></td>
+	  <td>Get shared variable</td>
+	  <td><code>0x70-7f</td>
+	  <td>V-class</td>
+	  <td>None</td>
+	  <td>Value or Reading</td>
+	  
+	  <td>Copy the nth (specified by the 4-bit embedded operand)
+	  shared variable and push the copy onto the operand stack.</td>
+	  	  
+	</tr>
+
+	<tr>
+	  <td><code>jumpc</code></td>
+	  <td>Jump condition</td>
+	  <td><code>0x80-9f</td>
+	  <td>J-class</td>
+	  <td>None</td>
+	  <td>None</td>
+	  
+	  <td>Jump to the absolute address of this capsule specified
+	  by the 5-bit embedded operand if the context's condition
+	  variable is > 0. If the condistion variable is > 0,
+	  decrement it after the jump.</td>
+
+	</tr>
+
+	
+	<tr>
+	  <td><code>jumps</code></td>
+	  <td>Jump stack</td>
+	  <td><code>0xa0-bf</td>
+	  <td>J-class</td>
+	  <td>Value</td>
+	  <td>None</td>
+	  
+	  <td>Jump to the absolute address of this capsule specified
+	  by the 5-bit embedded operand if the Value operand !=
+	  0.</td>
+
+	</tr>
+
+	<tr>
+	  <td><code>pushc</code></td>
+	  <td>Push constant</td>
+	  <td><code>0xc0-ff</td>
+	  <td>X-class</td>
+	  <td>None</td>
+	  <td>Value</td>
+	  
+	  <td>Push the constant specified by the 6-bit embedded
+	  operand onto the operand stack as a value.</td>
+
+	</tr>
+
+
+	
+	
+	
+	
+	
+	
+	
+      </table>
+    </center>
+    
+<b><a href="index.html"> Lesson index</a></b>
+
+</body>
+</html>

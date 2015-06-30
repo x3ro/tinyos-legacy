@@ -1,0 +1,4 @@
+COMPONENT=DemoCoryhall
+
+include ../Makerules
+

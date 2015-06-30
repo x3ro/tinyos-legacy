@@ -1,0 +1,57 @@
+More Formal notes to come later
+
+Commands
+********
+PEGSimMain	% main simulator
+SimBatchScript  % edit this to run multiple batches
+plotSN
+plotMotion
+animateMotion
+gen*Script      % edit this to create scenarios for SimBatchScript
+
+
+Pursuer Policy Files to Edit
+****************************
+*CostFun
+Ppolicy*
+clearStates % for clearing initialization
+
+
+Typical Commands Examples
+*************************
+save CovGammaTraj_400_100x100_1 P E T history Pctrlr
+BasicCostFun(Pctrlr.uHoriz(:,testT))
+
+% may be a period of time before receiving first packet
+E.pos(:,(size(E.pos,2) - size(Pctrlr.E,2))+1:end) - Pctrlr.E
+
+tGamma = calcGamma2D(SN,1,30,30)
+[X,Y] = meshgrid(0:1:SN.dimX,0:1:SN.dimY);
+mesh(X,Y,tGamma)
+
+
+
+Useful Tools
+************
+testU           % Checks trajectory from controls in Pctrlr.uHoriz
+
+Miscellaneous
+*************
+- genSNScript and genPEScript will both reset your global data structures
+- When loading files, in order to use the functions/tools, make sure the
+  appropriate variables are declared as 'global'
+
+
+
+
+
+
+Notes to self:
+* simulations with same SN topology, worse transmission probabilities
+  ~ scenarios where LQG is not good enough... loses track
+* modify seeding of initial evader speed to be more conservative
+* Use constraints: critical connectivity gamma
+* Break down cost function to two types:
+  ~ navigate near nearby sensor nodes
+  ~ navigate up routing gradient
+* layout grid scenario... check if can maintain connectivity

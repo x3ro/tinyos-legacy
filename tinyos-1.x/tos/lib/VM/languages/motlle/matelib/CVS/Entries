@@ -1,0 +1,27 @@
+/.cvsignore/1.2/Tue Oct 25 22:33:21 2005//
+/EpochChangeContext.cdf/1.2/Tue Nov 30 18:52:43 2004//
+/EpochChangeContext.nc/1.3/Tue Nov  1 02:28:11 2005//
+/FNaggavg.nc/1.3/Tue Nov  1 02:28:11 2005//
+/FNaggavgM.nc/1.4/Tue Nov  1 02:28:11 2005//
+/FNaggmax.nc/1.3/Tue Nov  1 02:28:11 2005//
+/FNaggmaxM.nc/1.4/Tue Nov  1 02:28:11 2005//
+/FNaggmin.nc/1.3/Tue Nov  1 02:28:11 2005//
+/FNaggminM.nc/1.4/Tue Nov  1 02:28:11 2005//
+/FNcomm.nc/1.3/Tue Nov  1 02:28:11 2005//
+/FNcommM.nc/1.4/Tue Nov  1 02:28:11 2005//
+/FNmhop.nc/1.7/Wed Apr 19 23:54:32 2006//
+/FNmhopM.nc/1.6/Tue Nov 29 22:51:28 2005//
+/FNquery.nc/1.7/Wed Apr 19 23:54:32 2006//
+/FNqueryM.nc/1.4/Tue Nov  1 02:28:11 2005//
+/FNrecv.nc/1.3/Tue Nov  1 02:28:11 2005//
+/FNrecvM.nc/1.4/Tue Nov  1 02:28:11 2005//
+/InterceptContext.cdf/1.2/Tue Nov 30 18:52:43 2004//
+/InterceptContext.nc/1.3/Tue Nov  1 02:28:11 2005//
+/Makefile/1.4/Sat Oct 29 20:27:16 2005//
+/MotlleMultihop.h/1.1/Tue Nov 29 22:51:28 2005//
+/QueryAgg.nc/1.3/Tue Nov  1 02:28:11 2005//
+/ReceiveContext.cdf/1.2/Tue Nov 30 18:52:43 2004//
+/ReceiveContext.nc/1.3/Tue Nov  1 02:28:11 2005//
+/SnoopContext.cdf/1.2/Tue Nov 30 18:52:43 2004//
+/SnoopContext.nc/1.3/Tue Nov  1 02:28:11 2005//
+D

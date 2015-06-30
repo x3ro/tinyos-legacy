@@ -1,0 +1,17 @@
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_START.nc 1 0 0 The MLME-SAP start primitives define how an FFD can request to start   using a new superframe configuration in order to initiate a PAN, begin   transmitting beacons on an already existing PAN, facilitating device   discovery, or to stop transmitting beacons.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_DISASSOCIATE.nc 1 0 0 The MLME-SAP dissassociation primitives define  how a device can disassociate with a PAN.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_ORPHAN.nc 1 0 0 The MLME-SAP orphan notification primitives define how a coordinator can   issue a notification of an orphaned device.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_SET.nc 1 0 0 The MLME-SAP get primitives define how to write values to the PIB.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_POLL.nc 1 0 0 The MLME-SAP polling primitives define how to request data from a   coordinator.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_SYNC.nc 1 0 0 The MLME-SAP synchronization primitives define how synchronization with  a coordinator may be achieved.   
+beta.CC2420Radio.ieee.802.15.4.MCPS.MCPS_DATA.nc 1 0 0 The MCPS-SAP supports the transport of SSCS protocol data units (SPDUs)  between peer SSCS entities. 
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_COMM_STATUS.nc 1 0 0 The MLME-SAP communication status primitive defines how the MLME  communicates to the next higher layer about transmission status,  when the transmission was not instigated by a .request primitive,  and security errors on incoming packets.  
+beta.CC2420Radio.ieee.802.15.4.MCPS.MCPS_PURGE.nc 1 0 0   MCPS_PURGE is used to manage MSDU handles in the transaction queue of  the MCPS of the MAC sublayer. 
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_BEACON_NOTIFY.nc 1 0 0 The MLME-SAP beacon notification primitive defines how a device may be   notified when a beacon is received during normal operation conditions.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_RESET.nc 1 0 0 The MLME-SAP reset primitives specify how to reset the MAC sublayer to its  default values.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_ASSOCIATE.nc 1 0 0 The MLME-SAP association primitives define how a devices becomes associated  with a PAN.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_RX_ENABLE.nc 1 0 0 The MLME-SAP receiver state primitives define how a device can enable or   disable the receiver at a given time.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_SCAN.nc 1 0 0 The MLME-SAP scan primitives define how a device can determine the energy  usage or the presence or absence of PANs in a communications channel.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_SYNC_LOSS.nc 1 0 0 The MLME-SAP primitives for how a loss of synchronization is  communicated to the next higher layer.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_GET.nc 1 0 0 The MLME-SAP get primitives define how to read values from the PIB.  
+beta.CC2420Radio.ieee.802.15.4.MLME.MLME_GTS.nc 1 0 0 The MLME-SAP GTS management primitives define how GTSs are requested  and maintained. 

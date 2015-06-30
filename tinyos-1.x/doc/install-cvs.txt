@@ -1,0 +1,33 @@
+To install the TinyOS CVS tree from sourceforge, assuming you have already
+installed the TinyOS 1.1 distribution, do the following:
+
+
+- Remove your tinyos tree from the installation (if you've made changes,
+save these somewhere first!):
+
+  rpm -e tinyos
+
+- Check tinyos out from the sourceforge CVS repository:
+
+  cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/tinyos login
+  cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/tinyos co tinyos-1.x
+
+- If you use bash, copy the tinyos-1.x/tools/scripts/tinyos.sh.in to
+  /etc/profile.d/tinyos.sh, and edit it to contain the correct value for 
+  TOSROOT (this assumes your setup runs the scripts in /etc/profile.d, if not, 
+  place the contents of tinyos.sh in your shell startup scripts)
+
+  If you use tcsh, edit your startup scripts to do the same things as tinyos.sh
+  does for bash.
+
+  From here on, work in new shells to get your new environment
+
+- If the tinyos-1.x tree has new tools, you can compile and install them by
+  doing:
+  cd $TOSROOT
+  make
+  make install # (as root on Linux)
+
+- Compile the java code:
+  cd $TOSROOT/tools/java
+  make

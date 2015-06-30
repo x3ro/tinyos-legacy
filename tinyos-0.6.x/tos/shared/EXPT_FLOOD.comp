@@ -1,0 +1,31 @@
+
+
+TOS_MODULE EXPT_FLOOD;
+
+ACCEPTS{
+	char EXPT_FLOOD_INIT();
+	char EXPT_FLOOD_START(void);
+};
+
+HANDLES{
+	void EXPT_FLOOD_CLOCK_EVENT();
+	TOS_MsgPtr EXPT_FLOOD_UPDATE(TOS_MsgPtr data);
+	TOS_MsgPtr EXPT_FLOOD_CONNECTIVITY(TOS_MsgPtr msg);
+	char EXPT_FLOOD_SEND_DONE(TOS_MsgPtr data);
+	char EXPT_FLOOD_WRITE_LOG_DONE(char success);
+};
+
+USES{
+	char EXPT_FLOOD_SUB_SEND_MSG(short addr,char type, TOS_MsgPtr data);
+	char EXPT_FLOOD_SUB_INIT();
+	char EXPT_FLOOD_SUB_TIMESTAMP_INIT();
+	char EXPT_FLOOD_SUB_CLOCK_INIT(char, char);
+	char EXPT_FLOOD_SUB_WRITE_LOG(short, char *);
+	void EXPT_FLOOD_SET_POT(char);
+	uint16_t EXPT_FLOOD_GET_RANDOM();
+};
+
+INTERNAL{
+	void check_log_write();
+};
+

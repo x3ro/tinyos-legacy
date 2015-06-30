@@ -1,0 +1,63 @@
+// $Id: SenseToLeds.gc,v 1.4 2004/04/05 01:30:37 celaine Exp $
+
+/* Copyright (C) 2003-2004 Palo Alto Research Center
+ *
+ * The attached "TinyGALS" software is provided to you under the terms and
+ * conditions of the GNU General Public License Version 2 as published by the
+ * Free Software Foundation.
+ *
+ * TinyGALS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TinyGALS; see the file COPYING.  If not, write to
+ * the Free Software Foundation, 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
+/*
+ * Author: Elaine Cheong <celaine @ users.sourceforge.net>
+ * Date: 19 February 2004
+ *
+ */
+
+/** 
+ * When the clock fires, this galsC application reads the light sensor
+ * and displays the higher 3 bits of the ADC readings to LEDs.  The
+ * sensor data is stored in a TinyGUYS variable.
+ *
+ * The TimerActor triggers SenseActor and DisplayActor with an empty
+ * token.  SenseActor gets data from a sensor and writes its value to
+ * the TinyGUYS variable.  DisplayActor reads the sensor data from the
+ * TinyGUYS variable and displays it on the LEDs.
+ *  
+ * Based on $TOSROOT/apps/SenseToLeds
+ *
+ * See ../SenseToLedsSimple
+ *
+ **/
+application SenseToLeds {
+    parameter {
+        // Declare and initialize global TinyGUYS variable.
+        uint16_t sensorData = 0;
+    } implementation {
+        actor TimerActor, SenseActor, DisplayActor;
+
+        // Connect global to local TinyGUYS variable names.
+        sensorData = SenseActor.sensorData;
+        sensorData = DisplayActor.displayData;
+
+        // Connect actor output ports to input ports.
+        TimerActor.trigger =[64]=> SenseActor.trigger;
+        TimerActor.trigger =[64]=> DisplayActor.trigger;
+        DisplayActor.displayComplete =[64]=> SenseActor.outputComplete;
+
+        appstart {
+            // Initial tokens to place in port queues.
+            DisplayActor.trigger();
+        }
+    }
+}
+

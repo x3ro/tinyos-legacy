@@ -1,0 +1,16 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: hood.extra,v 1.1 2005/09/23 10:18:00 kaminw Exp $
+
+HOOD_GEN_PL ?= $(TOSDIR)/../tools/scripts/codeGeneration/generateHood.pl
+BUILD_EXTRA_DEPS += hood_wiring
+#POST_BUILD_EXTRA_DEPS += hood_schema
+
+PFLAGS += -I$(BUILDDIR)
+
+hood_wiring:
+	@echo
+	@echo "**** GENERATING HOODS ****"
+	rm -f $(BUILDDIR)/Hood.h
+	@perl $(HOOD_GEN_PL) -d $(BUILDDIR) $(PFLAGS) $(CFLAGS) $(COMPONENT).nc
+
+

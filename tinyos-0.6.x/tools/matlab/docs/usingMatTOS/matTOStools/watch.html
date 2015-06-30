@@ -1,0 +1,80 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Watch</title>
+</head>
+
+<body>
+
+<h1>Watch</h1>
+<p><i>Watch </i>will plot data from all packets coming from a particular set of 
+motes or from a particular set of serial ports.&nbsp; To start <i>watch</i>, 
+make sure that the motes you want to listen to are <i>mapped </i>to a packetPort 
+in your <a href="../applicationEnvironment.html">environment</a>.&nbsp; Then, to 
+watch data from motes 1, 5, 101 and 34,just type</p>
+<p><font face="Courier New">h= watch([1 5 101 34])</font></p>
+<p>or, if you want to listen to all packets on a particular port, for example 
+COM1 and COM2,type</p>
+<p><font face="Courier New">h=watch(getPacketPorts({'COM1', 'COM2'}))</font></p>
+<p>or if you want to listen to all ports and all motes:</p>
+<p><font face="Courier New">h=watch('all')</font></p>
+<p>The return value 'h' is a handle to the plot that was created.&nbsp; As long 
+as you have packets coming in that have a field called '<i>samples</i>', you 
+should get output that looks like this:</p>
+<p>The <i>oscope </i>application has a '<i>samples</i>' field, so watch works 
+with packets coming from mores running <i>oscope </i>or <i>generic sensor</i>.&nbsp; 
+But what if I don't want to watch the '<i>samples</i>' field, I want to watch a 
+different field?&nbsp; You can set the field to be plot using the following 
+command:</p>
+<p><font face="Courier New">setWatchFieldName('lightReadings')</font></p>
+<p>Another thing you might want to do is filter your data before plotting it.&nbsp; 
+For example, if you are plotting light readings you might not want to plot <i>
+all </i>the readings that come in on each packet, you might want to print the 
+average of all light readings in each packet.&nbsp; You can use the following 
+command:</p>
+<p><font face="Courier New">setWatchFilterName('mean')</font></p>
+<p>To do exactly that.&nbsp; <i>Watch </i>will now plot the mean of your data in 
+each packet instead of the data itself.&nbsp; You can also write more 
+sophisticated filters and use those.&nbsp; The default filter is to not filter 
+at all.</p>
+<p>After you run <i>watch </i>for a while, you might like what you see and what 
+to access the data that was just plotted.&nbsp; You can do that with the 
+following command:</p>
+<p><font face="Courier New">myData =get(h, 'YData')</font></p>
+<p>where 'h' is the&nbsp; handle returned by the command <i>watch.</i></p>
+<p>Now, if you watch for a little while you'll notice that after 200 samples are 
+stored, the data is placed back at the beginning of the screen.&nbsp; What if I 
+want to watch more than 200 samples?&nbsp; You can use this command:</p>
+<p><font face="Courier New">setWatchDuration(400) </font></p>
+<p>Great, but actually I don't want to throw away any data at all.&nbsp; Ok, use 
+this command:</p>
+<p><font face="Courier New">setWatchCircularMode(0) </font></p>
+<p>That command toggles watch to be in or out of circular buffer mode.&nbsp; 
+That is useful, but in fact, I don't want all the data kept either.&nbsp; I want 
+neither a circular buffer nor an infinite buffer.&nbsp; What do I do?&nbsp; 
+Well, you can write a function that takes the incoming data and a handle to the 
+plot and you can add the data to the plot any way you want.&nbsp; Once you write 
+this function, you can make watch use it by using the command</p>
+<p><font face="Courier New">setWatchAddMethod('myFunction')</font></p>
+<p>The default add method is called <i>addDataToWatch</i>.&nbsp; This is 
+especially useful if you change the global variable WATCH_PLOT_FUNCTION before 
+running watch.&nbsp; WATCH_PLOT_FUNCTION is default set to '<i>plot</i>' so it 
+just calls the standard matlab plot.&nbsp; However, you may want to use '<i>plot3</i>', 
+the 3D plot function, for example, or '<i>bar</i>', the bar plot.&nbsp; If you 
+do, you will have to write your own add method.</p>
+<p>Finally, if you want to change the drawing style of your <i>watch </i>plot, 
+you can pass it the same parameters you would pass a PLOT command in matlab.&nbsp; 
+For example, you can type </p>
+<p>watch(1, 'r')</p>
+<p>to watch mote 1 with a red line.&nbsp; You can also use the HOLD, AXIS, 
+LEGEND and other commands that you can use with PLOT.</p>
+<p>Note that watch does not yet have filters for mote IDs, group IDs, or AM 
+types.&nbsp; It also does not yet support reading from multiple data channels.</p>
+
+</body>
+
+</html>

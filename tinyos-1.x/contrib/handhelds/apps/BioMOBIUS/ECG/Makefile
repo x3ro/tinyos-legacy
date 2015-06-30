@@ -1,0 +1,3 @@
+COMPONENT=ECG
+
+include ../../Makerules

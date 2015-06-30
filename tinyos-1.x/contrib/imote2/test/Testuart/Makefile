@@ -1,0 +1,3 @@
+COMPONENT=Testuart
+include ../Makerules
+

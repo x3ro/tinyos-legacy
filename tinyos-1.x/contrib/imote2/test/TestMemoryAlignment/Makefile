@@ -1,0 +1,3 @@
+COMPONENT=TestMemoryAlignment
+include ../Makerules
+

@@ -1,0 +1,33 @@
+Rutgers Mote Schematics
+-----------------------
+
+All schematics were drawn in OrCAD. If you don't have OrCAD you can view the Postscript files which were printed directly from the schematic sheets.
+
+WARNING: These drawings should be considered the "Rutgers Interpretation" of Mote hardware. They may or may not faithfully represent the original designs! Modifications were made to the Magnetic Field sensor in particular. The other schematics should match the hardware, but no guarantees!
+
+
+Folder contents:
+
+MagSensor
+   MAGS1.DSN - OrCAD 9.2.1 Magnetic Field sensor schematics - 3 sheets
+   Sensor.ps - Postscript version of magnetic sensor schematic - rev 5
+   Connector.ps - Postscript version of the 51 pin connectors schematic - rev 0
+   TestJig.ps - Postscript version of the Rutgers mag sensor board test jig - rev 2
+
+SimpleSensor
+   SIMPLESENSOR.DSN - OrCAD 9.2.1 Simple Sensor board schematic - 1 sheet
+   SimpleSensor.ps - Postscript version of simple sensor schematic - rev 0
+
+Mote
+   MOTE1.DSN - OrCAD 9.2.1 Mote schematics - 3 sheets
+   processors.ps - Postscript version of the two processors schematic - rev 1
+   radio.ps - Postscript version of the TR1000 radio schematic - rev 2
+   connectors.ps - Postscript version of the 51 pin connectors schematic - rev 0
+
+AccelSensor
+   ACCELSENSOR.DSN - OrCAD 9.2.1 Acceleration/Temp sensor board schematic - 1 sheet
+   AccelBerk.ps - Postscript version of the Accel sensor schematic - rev 0
+
+
+1/11/02
+kevinw@winlab.rutgers.edu

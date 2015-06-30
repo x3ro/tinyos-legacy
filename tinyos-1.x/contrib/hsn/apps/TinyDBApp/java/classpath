@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+
+# TinyDB Java GUI patch, has to put the local patch path before the main path
+
+$base = $0;
+$base =~ s/\/classpath$//;
+$base = `cd $base;pwd;`;
+chop $base;
+
+@add = $base;
+
+$sys = `uname`;
+if ($sys =~ /^CYGWIN/) {
+    @add = map { $f = `cygpath -w $_`; chop $f; $f; } @add;
+    $sep = ";";
+}
+else {
+    $sep = ":";
+}
+
+$oldpath = $ENV{"CLASSPATH"};
+$addpath = join($sep, @add);
+
+if ($oldpath) {
+    if ($sys =~ /^CYGWIN/) {
+        print "$base;$addpath;$oldpath\n";
+    }
+    else {
+        print "$base:$addpath:$oldpath\n";
+    }
+}
+else {
+    if ($sys =~ /^CYGWIN/) {
+        print "$base;$addpath\n";
+    }
+    else {
+        print "$base:$addpath\n";
+    }
+}
+   

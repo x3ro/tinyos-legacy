@@ -1,0 +1,401 @@
+<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+  <title>Lesson 4: Component Composition and Radio Communication</title>
+</head>
+<body bgcolor="#f8f8ff" link="#005bb7" vlink="#005bb7">
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><font face="tahoma,arial,helvetica"><font
+ size="-1">Lesson 4: Component Composition and Radio Communication</font></font></b>
+      <p><font face="tahoma,arial,helvetica">Last updated 31 July 2003</font></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This lesson introduces two concepts: hierarchical decomposition of
+component graphs, and using radio communication. The applications that
+we will consider are <tt>CntToLedsAndRfm</tt> and <tt>RfmToLeds</tt>. <tt>CntToLedsAndRfm</tt>
+is a variant of <tt>Blink</tt> that outputs the current counter value to
+multiple output interfaces: both the LEDs, and the radio communication
+stack. <tt>RfmToLeds</tt> receives data from the radio and displays it
+on the LEDs. Programming one mote with <tt>CntToLedsAndRfm</tt> will
+cause it to transmit its counter value over the radio; programming
+another with <tt>RfmToLeds</tt> causes it to display the received
+counter on its LEDs - your first distributed application!<br>
+</p>
+<p>If you're using mica2 or mica2dot motes, you will need to ensure
+that you've selected a radio frequency compatible with your motes
+(433MHz vs 916MHz motes). If your motes are unlabeled, see "<a
+ href="../mica2radio/mica2freq.html">How to determine the operating
+frequency range of a MICA2 or MICA2DOT mote</a>" for information on
+recognizing which kind of mote you have. To tell the compiler which
+frequency you are using, edit the <a href="buildenv.html">Makelocal</a>
+file in the apps directory, defining either <span
+ style="font-family: monospace;">CC1K_DEF</span><span style="font-family: monospace">_PRESET</span> (see <a
+ href="../../tos/platform/mica2/CC1000Const.h">tinyos-1.x/tos/platform/mica2/CC1000Const.h</a>
+for preset values), or <span style="font-family: monospace;">CC1K_DEF_FREQ</span> 
+with an explicit frequency
+(see example in <a
+ href="file:///home/dgay/motes/tinyos-1.x/doc/tutorial/buildenv.html">Makelocal</a>).<br>
+</p>
+<p>
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">The
+CntToRfmAndLeds Application</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>Look at <tt>CntToRfmAndLeds.nc</tt>. Note that this application
+only consists of a configuration; all of the component modules are
+located in libraries! </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>CntToLedsAndRfm.nc</b>
+      <pre>configuration CntToLedsAndRfm {<br>}<br>implementation {<br>&nbsp; components Main, Counter, IntToLeds, IntToRfm, TimerC;<br><br>&nbsp; Main.StdControl -&gt; Counter.StdControl;<br>&nbsp; Main.StdControl -&gt; IntToLeds.StdControl;<br>&nbsp; Main.StdControl -&gt; IntToRfm.StdControl;<br>&nbsp; Main.StdControl -&gt; TimerC.StdControl;<br>&nbsp; Counter.Timer -&gt; TimerC.Timer[unique("Timer")];<br>&nbsp; IntToLeds &lt;- Counter.IntOutput;<br>&nbsp; Counter.IntOutput -&gt; IntToRfm;<br>}</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>The first thing to note is that a single interface requirement (such
+as <tt>Main.StdControl</tt> or <tt>Counter.IntOutput</tt>) can be <i>fanned
+out</i> to multiple implementations. Here we wire <tt>Main.StdControl</tt>
+to the <tt>Counter</tt>, <tt>IntToLeds</tt>, <tt>IntToRfm</tt>, and <tt>TimerC</tt>components.
+(All of these components can be found in the <tt><a
+ href="../../tos/lib/Counters">tos/lib/Counters</a></tt> directory.) The
+names of the various components tell you what they do: <tt>Counter</tt>
+receives <tt>Timer.fired()</tt> events to maintain a counter. <tt>IntToLeds</tt>
+and <tt>IntToRfm</tt> provide the <tt>IntOutput</tt> interface, that has
+one command, <tt>output()</tt>, which is called with a 16-bit value,
+and one event, <tt>outputComplete()</tt>, which is called with <tt>result_t</tt>
+. <tt>IntToLeds</tt> displays the lower three bits of its value on the
+LEDs, and <tt>IntToRfm</tt> broadcasts the 16-bit value over the radio. </p>
+<p>So we're wiring the <tt>Counter.Timer</tt> interface to <tt>TimerC.Timer</tt>,
+and <tt>Counter.IntOutput</tt> to <b>both</b> <tt>IntToLeds</tt> and <tt>IntToRfm</tt>.
+The NesC compiler generates code so that all invocations of the <tt>Counter.IntOutput.output()</tt>
+command will invoke the command in both <tt>IntToLeds</tt> and <tt>IntToRfm</tt>.
+Also note that the wiring arrow can go in either direction: the arrow
+always points <i>from</i> a used interface <i>to</i> a provided
+implementation. </p>
+<p>Assuming you are using a Mica mote, try building and installing this
+application with <tt>make mica install</tt>; you should see a 3-bit
+binary counter on the mote's LEDs. Of course the mote is also
+transmitting the value over the radio, which we describe next. <br>
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">IntToRfm:
+Sending a message</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+<tt>IntToRfm</tt> is a simple component that receives an output value
+(through the <tt>IntOutput</tt> interface) and broadcasts it over the
+radio. Radio communication in TinyOS follows the Active Message (AM)
+model, in which each packet on the network specifies a <i>handler ID</i>
+that will be invoked on recipient nodes. Think of the handler ID as an
+integer or "port number" that is carried in the header of the message.
+When a message is received, the receive event associated with that
+handler ID is signaled. Different motes can associate different receive
+events with the same handler ID. </p>
+<p>In any messaging layer, there are 5 aspects involved in successful
+communication: </p>
+<ol>
+  <li> Specifying the message data to send;</li>
+  <li> Specifying which node is to receive the message;</li>
+  <li> Determining when the memory associated with the outgoing message
+can be reused;</li>
+  <li> Buffering the incoming message; and,</li>
+  <li> Processing the message on reception</li>
+</ol>
+In Tiny Active Messages, memory management is very constrained as you
+would expect from a small-scale embedded environment.
+<p>Let's look at <tt>IntToRfm.nc</tt>: </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>IntToRfm.nc</b>
+      <pre>configuration IntToRfm<br>{<br>&nbsp; provides interface IntOutput;<br>&nbsp; provides interface StdControl;<br>}<br>implementation<br>{<br>&nbsp; components IntToRfmM, GenericComm as Comm;<br><br>&nbsp; IntOutput = IntToRfmM;<br>&nbsp; StdControl = IntToRfmM;<br><br>&nbsp; IntToRfmM.Send -&gt; Comm.SendMsg[AM_INTMSG];<br>&nbsp; IntToRfmM.StdControl -&gt; Comm;<br>}</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>This component provides the <tt>IntOutput</tt> and <tt>StdControl</tt>
+interfaces. This is the first time that we have seen a <i>configuration</i>
+provide an <i>interface</i>. In the previous lessons we have always
+used configurations just to wire other components together; in this
+case, the <tt>IntToRfm</tt> configuration is itself a component that
+another configuration can wire to. Got it? </p>
+<p>In the implementation section, we see: </p>
+<pre>&nbsp; components IntToRfmM, GenericComm as Comm;</pre>
+The phrase "<tt>GenericComm as Comm</tt>" is stating that this
+configuration uses the <tt>GenericComm</tt> component, but gives it the
+(local) name <tt>Comm</tt>. The idea here is that you can easily swap
+in a different communication module in place of <tt>GenericComm</tt>,
+and only need to change this one line to do so; you don't need to
+change every line that wires to <tt>Comm</tt>.
+<p>We also see some new syntax here in the lines: </p>
+<pre>&nbsp; IntOutput = IntToRfmM;<br>&nbsp; StdControl = IntToRfmM;</pre>
+The equal sign (<tt>=</tt>) is used to indicate that the <tt>IntOutput</tt>
+interface provided by <tt>IntToRfm</tt> is<b> "equivalent to"</b> the
+implementation in <tt>IntToRfmM</tt>. We can't use the arrow (<tt>-&gt;</tt>)
+here, because the arrow is used to wire a used interface to a provided
+implementation. In this case we are "equating" the interfaces provided
+by <tt>IntToRfm</tt> with the implementation found in <tt>IntToRfmM</tt>.
+<p>The last two lines of the configuration are: </p>
+<pre>&nbsp; IntToRfmM.Send -&gt; Comm.SendMsg[AM_INTMSG];<br>&nbsp; IntToRfmM.StdControl -&gt; Comm;</pre>
+The last line is simple; we're wiring <tt>IntToRfmM.StdControl</tt> to <tt>GenericComm.StdControl</tt>.
+The first line shows us another use of <b>parameterized interfaces</b>,
+in this case, wiring up the <tt>Send</tt> interface of <tt>IntToRfmM</tt>
+to the <tt>SendMsg</tt> interface provided by <tt>Comm</tt>.
+<p>The <tt>GenericComm</tt> component declares: </p>
+<pre>&nbsp; provides {</pre>
+<pre>&nbsp;&nbsp;&nbsp; ...<br>&nbsp;&nbsp;&nbsp; interface SendMsg[uint8_t id];</pre>
+<pre>&nbsp;&nbsp;&nbsp; ...<br>&nbsp; }</pre>
+In other words, it provides 256 different instances of the <tt>SendMsg</tt>
+interface, one for each <tt>uint8_t</tt> value. This is the way that
+Active Message handler IDs are wired together. In <tt>IntToRfm</tt>,
+we are wiring the <tt>SendMsg</tt> interface corresponding to the
+handler ID <tt>AM_INTMSG</tt> to <tt>GenericComm.SendMsg</tt>. (<tt>AM_INTMSG</tt>
+is a global value defined in <tt><a
+ href="../../tos/lib/Counters/IntMsg.h">tos/lib/Counters/IntMsg.h</a></tt>.)
+When the <tt>SendMsg</tt> command is invoked, the handler ID is
+provided to it, essentially as an extra argument. You can see how this
+works by looking at <tt>tos/system/AMStandard.nc</tt> (the
+implementation module for <tt>GenericComm</tt>):
+<pre>&nbsp; command result_t SendMsg.send[uint8_t id]( ... ) { ... };</pre>
+Of course, parameterized interfaces aren't strictly necessary here -
+the same thing could be accomplished if <tt>SendMsg.send</tt> took the
+handler ID as an argument. This is just an example of the use of
+parameterized interfaces in nesC. <br>
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">IntToRfmM:
+Implementing Network Communication</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+<p>Now we know how <tt>IntToRfm</tt> is wired up, but we don't know how
+message communication is implemented. Take a look at the <tt>IntOutput.output()</tt>
+command in <tt>IntToRfmM.nc</tt>: </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>IntToRfmM.nc</b>
+      <pre>&nbsp; bool pending;<br>&nbsp; struct TOS_Msg data;<br><br>&nbsp; /* ... */&nbsp;<br><br>&nbsp; command result_t IntOutput.output(uint16_t value) {<br>&nbsp;&nbsp;&nbsp; IntMsg *message = (IntMsg *)data.data;<br><br>&nbsp;&nbsp;&nbsp; if (!pending) {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pending = TRUE;<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; message-&gt;val = value;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; atomic {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; message-&gt;src = TOS_LOCAL_ADDRESS;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (call Send.send(TOS_BCAST_ADDR, sizeof(IntMsg), &amp;data))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return SUCCESS;<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pending = FALSE;<br>&nbsp;&nbsp;&nbsp; }&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp; return FAIL;<br>&nbsp; }</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>The command is using a message structure called <tt>IntMsg</tt>,
+declared in <tt>tos/lib/Counters/IntMsg.h</tt>. It is a simple struct
+with <tt>val</tt> and <tt>src</tt> fields; the first being the data
+value and the second being the message's source address. We assign
+these two fields (using the global constant <tt>TOS_LOCAL_ADDRESS</tt>
+for the local source address) and call <tt>Send.send()</tt> with the
+destination address (<tt>TOS_BCAST_ADDR</tt> is the radio broadcast
+address), the message size, and the message data. </p>
+<p>The "raw" message data structure used by <tt>SendMsg.send()</tt> is <tt>struct
+TOS_Msg</tt>, declared in <tt>tos/system/AM.h</tt>. It contains fields
+for the destination address, message type (the AM handler ID), length,
+payload, etc. The maximum payload size is <tt>TOSH_DATA_LENGTH</tt> and
+is set to 29 by default; you are welcome to experiment with larger data
+packets but some nontrivial hacking of the code may be required :-) Here
+we are encapsulating an <tt>IntMsg</tt> within the data payload field of
+the <tt>TOS_Msg</tt> structure. </p>
+<p>The <tt>SendMsg.send()</tt> command is split-phase; it signals the <tt>SendMsg.sendDone()</tt>
+event when the message transmission has completed. If <tt>send()</tt>
+succeeds, the message is queued for transmission, and if it fails, the
+messaging component was unable to accept the message. </p>
+<p>TinyOS Active Message buffers follow a strict alternating ownership
+protocol to avoid expensive memory management, while still allowing
+concurrent operation. If the message layer accepts the <tt>send()</tt>
+command, it owns the send buffer and the requesting component should not
+modify the buffer until the send is complete (as indicated by the <tt>sendDone()</tt>
+event). </p>
+<p><tt>IntToRfmM</tt> uses a <tt>pending</tt> flag to keep track of the
+status of the buffer. If the previous message is still being sent, we
+cannot modify the buffer, so we drop the <tt>output()</tt> operation
+and return <tt>FAIL</tt>. If the send buffer is available, we can fill
+in the buffer and send a message. <br>
+&nbsp;
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">The
+GenericComm Network Stack</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>Recall that <tt>IntToRfm</tt>'s <tt>SendMsg</tt> interface is wired
+to <tt>GenericComm</tt>, a "generic" TinyOS network stack
+implementation (found in <tt>tos/system/GenericComm.nc</tt>). If you
+look at the <tt>GenricComm.nc</tt>, you'll see that it makes use of a
+number of low-level interfaces to implement communication: <tt>AMStandard</tt>
+to implement Active Message sending and reception, <tt>UARTNoCRCPacket</tt>
+to communicate over the mote's serial port, <tt>RadioCRCPacket</tt> to
+communicate over the radio, and so forth. You don't need to understand
+all of the details of these modules but you should be able to follow
+the <tt>GenericComm.nc</tt> wiring configuration by now. </p>
+<p>If you're really curious, check out <tt>AMStandard.nc</tt> for some
+details on how the ActiveMessage layer is built. For example, it
+implements <tt>SendMsg.send()</tt> by posting a task to take the
+message buffer and send it over the serial port (if the destination
+address is <tt>TOS_UART_ADDR</tt> or the radio radio (if the
+destination is anything else). You can dig down through the various
+layers of code until you see the mechanism that actually transmits a
+byte over the radio or UART.
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Receiving
+Messages with RfmToLeds</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>The <tt>RfmToLeds</tt> application is defined by a simple
+configuration that uses the <tt>RfmToInt</tt> component to receive a
+message, and the <tt>IntToLeds</tt> component to display the received
+value on the LEDs. Like <tt>IntToRfm</tt>, the <tt>RfmToInt</tt>
+component uses <tt>GenericComm</tt> to receive messages. Most of <tt>RfmToInt.nc</tt>
+should be familiar to you by now, but look at the line: </p>
+<pre>&nbsp; RfmToIntM.ReceiveIntMsg -&gt; GenericComm.ReceiveMsg[AM_INTMSG];</pre>
+This is how we specify that Active Messages received with the <tt>AM_INTMSG</tt>
+handler ID should be wired to the <tt>RfmToIntM.ReceiveMsg</tt>
+interface. The direction of the arrow might be a little confusing here.
+The <tt>ReceiveMsg</tt> interface (found in <tt>tos/interfaces/ReceiveMsg.nc</tt>)<b>only</b>
+declares an event: <tt>receive()</tt>, which is signaled with a pointer
+to the received message. So <tt>RfmToIntM</tt> <i>uses</i> the <tt>ReceiveMsg</tt>
+interface, although that interface does not have any commands to call --
+just an event that can be signaled.
+<p>Memory management for incoming messages is inherently dynamic. A
+message arrives and fills a buffer, and the Active Message layer
+decodes the handler type and dispatches it. The buffer is handed to the
+application component (through the <tt>ReceiveMsg.receive()</tt>
+event), but, critically, <b>the application component must return a
+pointer to a buffer upon completion</b>. </p>
+<p>For example, looking at <tt>RfmToIntM.nc</tt>, </p>
+<center>
+<table border="0" cellspacing="2" cellpadding="3" width="80%" hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0e0">
+      <td width="100%"><b>RfmToIntM.nc</b>
+      <pre>&nbsp; /* ... */<br>&nbsp; event TOS_MsgPtr ReceiveIntMsg.receive(TOS_MsgPtr m) {<br>&nbsp;&nbsp;&nbsp; IntMsg *message = (IntMsg *)m-&gt;data;<br>&nbsp;&nbsp;&nbsp; call IntOutput.output(message-&gt;val);<br><br>&nbsp;&nbsp;&nbsp; return m;<br>&nbsp; }</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>Note that the last line returns the original message buffer, since
+the application is done with it. If your component needs to save the
+message contents for later use, it needs to copy the message to a new
+buffer, or return a new (free) message buffer for use by the network
+stack.
+<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Underlying
+Details</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p>TinyOS messages contain a "group ID" in the header, which allows
+multiple distinct groups of motes to share the same radio channel. If
+you have multiple groups of motes in your lab, you should set the
+group ID to a unique 8-bit value to avoid receiving messages for other
+groups. The default group ID is <tt>0x7D</tt>. You can set the group
+ID by defining the preprocessor symbol <tt>DEFAULT_LOCAL_GROUP</tt>.</p>
+<pre>&nbsp; DEFAULT_LOCAL_GROUP = 0x42&nbsp;&nbsp;&nbsp; # for example...</pre>
+<p>Use the <tt><a href="buildenv.html">Makelocal</a></tt> file to set
+the group ID for all your applications.</p>
+<p>In addition, the message header carries a 16-bit destination node address. 
+Each communicating node within a group is given a unique address assigned at 
+compile time.&nbsp; Two common reserved destination addresses we've introduced 
+thus far are <tt>TOS_BCAST_ADDR (0xfff)</tt> to broadcast to all nodes or <tt>TOS_UART_ADDR 
+(0x007e)</tt> to send to the serial port. </p>
+<p>The node address may be any value EXCEPT the two reserved values described 
+above.&nbsp; To specify the local address of your mote, use the following 
+install syntax: </p>
+<pre>&nbsp; make mica install.&lt;addr&gt;</pre>
+where <i>&lt;addr&gt;</i> is the local node ID that you wish to program
+into the mote.&nbsp; For example,
+<pre>&nbsp; make mica install.38</pre>
+compiles the application for a mica and programs the mote with ID 38. Read
+<a href="programmers.html">Programming Devices</a> for additional information.<table border="0" cellspacing="2" cellpadding="3" width="100%"
+ hspace="4">
+  <tbody>
+    <tr bgcolor="#e0e0ff">
+      <td width="100%"><b><nobr><font face="arial,helvetica">Exercises</font></nobr></b></td>
+    </tr>
+  </tbody>
+</table>
+<ol>
+  <li> Question: What would happen if you built multiple <tt>CntToLedsAndRfm</tt>
+nodes and turned them on?</li>
+  <li> Program one mote with <tt>CntToLedsAndRfm</tt> and another with <tt>RfmToLeds</tt>.
+When you turn on <tt>CntToLedsAndRfm</tt>, you should see the count
+displayed on the <tt>RfmToLeds</tt> device. Congratulations - you are
+doing wireless networking. Can you change this to implement a wireless
+sensor? (Hint: Check out <tt><a href="../../apps/SenseToRfm">apps/SenseToRfm</a></tt>.)</li>
+</ol>
+<hr><b><a href="lesson3.html">&lt; Previous Lesson</a></b> | <b><a
+ href="lesson5.html">Next Lesson &gt;</a></b> | <b><a href="index.html">Top</a></b>
+</body>
+</html>
+
+<!--  LocalWords:  TinyOS nesC nc async norace BlinkM FooM ncc SingleTimer Leds
+ -->
+<!--  LocalWords:  LedsC StdControl tos init TimerC redOn redOff uint redToggle
+ -->
+<!--  LocalWords:  metadata html nesdoc gcc exe avr objcopy srec uisp mib dprog
+ -->
+<!--  LocalWords:  towards dapa xff ThinkPad dlpt Makelocal micasb Wshadow DDEF
+ -->
+<!--  LocalWords:  finline fnesc cfile lm Atmel ATmega nesC's nesc SenseM rdata
+ -->
+<!--  LocalWords:  ADCControl SounderControl dataReady getData rcombine someval
+ -->
+<!--  LocalWords:  ADControl fooControl barControl MyTimer uniqueCount basicsb
+ -->
+<!--  LocalWords:  sensorboard Makerules sensorboards SenseTask taskname INTMSG
+ -->
+<!--  LocalWords:  SenseTaskM putdata processData CntToLedsAndRfm RfmToLeds Msg
+ -->
+<!--  LocalWords:  CntToRfmAndLeds IntToLeds IntToRfm IntOutput outputComplete
+ -->
+<!--  LocalWords:  IntToRfmM GenericComm SendMsg bool struct IntMsg src BCAST
+ -->
+<!--  LocalWords:  ADDR sizeof TOSH sendDone GenricComm AMStandard RfmToInt
+ -->
+<!--  LocalWords:  UARTNoCRCPacket RadioCRCPacket ActiveMessage RfmToIntM xfff
+ -->
+<!--  LocalWords:  ReceiveIntMsg ReceiveMsg MsgPtr addr SenseToRfm
+ -->

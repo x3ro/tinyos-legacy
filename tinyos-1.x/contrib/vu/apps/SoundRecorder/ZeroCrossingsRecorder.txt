@@ -1,0 +1,47 @@
+ZeroCrossingsRecorder:
+
+Author/Contact: miklos.maroti@vanderbilt.edu (Miklos Maroti, ISIS, Vanderbilt)
+
+DESCRIPTION:
+
+This component continuously samples the microphone (at 14 KHz). When a loud enough
+noise is detected, then we start recording as many zerocrossing records as we can.
+Then we transmit the collected data back to the base station (using SendBigMsg). 
+The collected data can be stored in a file using the PrintBigMsgs java program, then
+transformed into a WAV file using the Txt2Wav java program. These programs can be 
+found in the tools/java/isis/nest/* directory.
+
+OPERATION:
+
+1. Program one mote with the ZeroCrossingsRecorderC component. 
+2. Program another one with the GenericBase component with nodeid 1973.
+3. Start them, and run the following java program on the PC connected to the
+ base station:
+
+	java isis.nest.printmsgs.PrintBigMsgs -comm COM1 -noid > recordings.txt
+
+4. Once you have enough recordings, then terminate the java program and
+ turn off the motes.
+5. Run the following program to turn the recordings.txt file into a recordings.wav file:
+
+	java isis.nest.util.Txt2Wav -type zc3 -rate 2.35 recordings.txt
+
+6. Listen what you have recorded, analize the data and enjoy!
+
+TUNABLE PARAMETERS:
+
+The ZeroCrossingsRecorderM.nc file contains an enum with the following parameters:
+
+BUFFER_LENGTH: The number of zerocrossing records we want to record and send
+to the base station.
+
+SILENCE_LENGTH: The number of zerocrossing records we want to keep and send
+before we detected the loud noise.
+
+ENERGY_THRESHOLD: This is the minimum energy level for detecting the loud noise. 
+The value is around (range 20-128 is meaningful)
+	
+	SQR(SUM((sample(i)-average)^2, i=1..N)/N)
+
+BASE_STATION: The nodeid of the base station
+

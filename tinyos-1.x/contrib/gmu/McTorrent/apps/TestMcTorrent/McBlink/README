@@ -1,0 +1,2 @@
+This is the Blink application but built with McTorrent library. After installed with the application, the motes toggle the red LED once every one second. Meanwhile, the motes are also ready to receive new code image over the air and to reboot to the new application after reception of the new code image.
+

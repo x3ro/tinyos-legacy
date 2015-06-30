@@ -1,0 +1,439 @@
+#!/usr/bin/perl -w
+
+use XML::Simple;
+use Data::Dumper;
+use strict;
+
+my $schemaVersion = 1;
+
+my $file = shift @ARGV;
+
+my %ident_flags = ();
+my $exe = "";
+my $objdump = "avr-objdump";
+my $mode = "none";
+
+for my $arg (@ARGV) {
+    if ($arg =~ /^-DIDENT_(.+)=0x(.+)$/) {
+	$ident_flags{lc($1)} = uc($2);
+    }
+    elsif ($arg =~ /^-DIDENT_(.+)=(.+)$/) {
+	$ident_flags{lc($1)} = $2;
+    }
+    elsif ($arg =~ /^--exe=(.+)$/) {
+	$exe = $1;
+    }
+    elsif ($arg =~ /^--objdump=(.+)$/) {
+	$objdump = $1;
+    }
+    elsif ($arg =~ /^--mode=(.+)$/) {
+	$mode = $1;
+    }
+}
+
+my $xs1 = XML::Simple->new();
+
+my $doc = $xs1->XMLin($file, KeyAttr=>['key', 'id'], ForceArray=>['interface','attribute-value','structured-element']);
+
+my $attributes;
+my %attributeModules;
+my %attributeIdentifiers;
+my $attributeIdCounter = 32768;
+
+my $events;
+my %eventModules;
+my %eventIdentifiers;
+my $eventIdCounter = 32768;
+
+my $symbols;
+
+my $structs;
+my %structNames;
+
+#print Dumper($doc);
+
+#find interfaces tagged as attributes and events
+
+foreach my $interfaceStruct (@{$doc->{'interfaces'}->{'interface'}}) {
+    my $nucleusInterface;
+    my $componentName;
+    my $interfaceName;
+
+#    print Dumper($interfaceStruct);
+
+    my $interface = $interfaceStruct->{'name'};
+
+    # if the interface is tagged
+    if ($interfaceStruct->{'attribute-value'}) {
+	
+	$nucleusInterface = $interfaceStruct;
+
+	$componentName = $nucleusInterface->{'component-ref'}->{'qname'};
+
+	$interfaceName = $nucleusInterface->{'instance'}->{'interfacedef-ref'}->{'qname'};
+
+	# extract the type parameter of the interface
+
+	my $type;
+	my $length;
+
+	if ($nucleusInterface->{'instance'}->{'arguments'}->{'type-int'}) {
+	    $type = $nucleusInterface->{'instance'}->{'arguments'}->{'type-int'}->{'cname'};
+	    $length = $nucleusInterface->{'instance'}->{'arguments'}->{'type-int'}->{'size'};
+	    
+	    $length =~ s/I://g;
+
+	} elsif ($nucleusInterface->{'instance'}->{'arguments'}->{'type-tag'}) {
+	    my $structName = $nucleusInterface->{'instance'}->{'arguments'}->{'type-tag'}->{'struct-ref'}->{'name'};
+
+	    print "Found Struct: $structName\n";
+
+	    $type = "struct $structName";
+
+	    $structNames{$structName} = 1;
+
+	    $length = $nucleusInterface->{'instance'}->{'arguments'}->{'type-tag'}->{'size'};
+	    $length =~ s/I://g;
+	}
+
+	# process the attributes
+	foreach my $attrVal (@{$nucleusInterface->{'attribute-value'}}) {
+
+	    # if the interface represents a nucleus attribute
+	    if ($attrVal->{'attribute-ref'}->{'name'} eq "nucleusAttr") {
+
+		my $attrName;
+		my $attrID;
+
+		foreach my $attrArg (@{$attrVal->{'value-structured'}->{'structured-element'}}) {
+
+		    if ($attrArg->{'field'} eq "name") {
+			# extract the attribute name
+			$attrName = $attrArg->{'value'}->{'cst'};
+			$attrName =~ s/S://g;
+		    } elsif ($attrArg->{'field'} eq "key") {
+			# extract the attribute ID, if there is one
+			$attrID = $attrArg->{'value'}->{'cst'};
+			$attrID =~ s/I://g;
+		    }
+		}
+
+		if (!defined($attrName)) {
+		    die "ERROR: \@nucleusAttr interface $componentName.$interface does not have a global name\n";
+		}
+		
+		# save the attribute into the table
+		if ($interface && $length) {
+
+		    print "Found Attribute: ($attrName)\n";
+		    
+		    $attributeModules{$componentName} = 1;
+
+		    my $attribute;
+
+		    if (defined($attributes) &&
+			defined($attributes->{'attribute'}) &&
+			defined($attributes->{'attribute'}->{$attrName})) {
+			$attribute = $attributes->{'attribute'}->{$attrName};
+		    }
+
+		    $attribute->{'module'} = $componentName;
+		    $attribute->{'id'} = $attrID;
+		    $attribute->{'length'} = $length;
+		    $attribute->{'type'} = $type;
+		    $attribute->{'name'} = $attrName;
+
+		    if ($interfaceName eq "Attr" || $interfaceName eq "AttrSet") {
+			$attribute->{'mode'} = "single";
+		    }
+		    if ($interfaceName eq "AttrList") {
+			$attribute->{'mode'} = "list";
+		    }
+
+		    if ($interfaceName eq "Attr" || $interfaceName eq "AttrList") {
+			$attribute->{'get-interface'} = $interface;
+		    }
+		    if ($interfaceName eq "AttrSet") {
+			$attribute->{'set-interface'} = $interface;
+		    }
+
+		    $attributes->{'attribute'}->{$attrName} = $attribute;
+		    
+		    if ($attrID) {
+			if ($attributeIdentifiers{$attrID} &&
+			    !($attributeIdentifiers{$attrID} eq $attrName)) {
+			    die "ERROR: \@nucleusAttr interface $componentName.$interface is assigned the same global identifier as attribute $attributeIdentifiers{$attrID}\n";
+			}			    
+			$attributeIdentifiers{$attrID} = $attrName;
+		    }
+		}
+
+	    # if the interface represents a nucleus event
+
+	    } elsif ($attrVal->{'attribute-ref'}->{'name'} eq "nucleusEvent") {
+
+		my $eventID;
+		
+		if ($attrVal->{'value-structured'}->{'structured-element'}) {
+		    $eventID = $attrVal->{'value-structured'}->{'structured-element'}->{'value'}->{'cst'};
+		    $eventID =~ s/I://g;
+		}
+		
+		if ($interface && $length) {
+		    
+		    $eventModules{$componentName} = 1;
+
+		    my $event;
+		    if (!$events->{'event'}->{$interface}) {
+			$events->{'event'}->{$interface} = $event;
+		    }
+
+		    $events->{'event'}->{$interface}->{'module'} = $componentName;
+		    $events->{'event'}->{$interface}->{'id'} = $eventID;
+		    $events->{'event'}->{$interface}->{'length'} = $length;
+		    $events->{'event'}->{$interface}->{'type'} = $type;
+
+		    if ($eventID) {
+			$eventIdentifiers{$eventID} = $interface;
+		    }
+		}		
+
+	    # if the interface represents a nucleus event string
+
+	    } elsif ($attrVal->{'attribute-ref'}->{'name'} eq "nucleusEventString") {
+		my $eventString;
+
+		foreach my $attrArg (@{$attrVal->{'value-structured'}->{'structured-element'}}) {
+		    if ($attrArg->{'field'} eq "string") {
+			$eventString = $attrArg->{'value'}->{'cst'};
+			$eventString =~ s/S://g;
+		    }
+		}
+		
+		my $event;
+		if (!$events->{'event'}->{$interface}) {
+		    $events->{'event'}->{$interface} = $event;
+		}
+		$events->{'event'}->{$interface}->{'string'} = $eventString;
+	    }
+	}
+    }
+}
+
+#print Dumper($doc);
+
+foreach my $struct (@{$doc->{'tags'}->{'struct'}}) {
+
+    if (exists($struct->{'name'})) {
+	if ($structNames{$struct->{'name'}}) {
+	    push(@{$structs->{'struct'}}, $struct);
+	}
+    }
+}
+
+#print Dumper($structs);
+
+# assign ids to unassigned attributes
+if (defined $attributes) {
+
+    foreach my $attr (keys %{$attributes->{'attribute'}}) {
+	my $idNumber;
+	my $attrInstance = $attributes->{'attribute'}->{$attr};
+
+	if (!($attrInstance->{'id'})) {
+	    
+	    if (!defined($idNumber)) {
+		my $tries = 0;
+		while ($attributeIdentifiers{$attributeIdCounter} && $tries < 65536) {
+		    $attributeIdCounter++;
+		    $tries++;
+		}
+		$idNumber = $attributeIdCounter;
+		$attributeIdCounter++;
+	    }
+	    
+	    $attrInstance->{'id'} = $idNumber;
+	}
+    }
+}
+
+# assign ids to unassigned events
+if (defined $events) {
+
+    foreach my $event (keys %{$events->{'event'}}) {
+	if (!($events->{'event'}->{$event}->{'id'})) {
+	    my $tries = 0;
+	    while ($eventIdentifiers{$eventIdCounter} && $tries < 65536) {
+		$eventIdCounter++;
+		$tries++;
+	    }
+	    $events->{'event'}->{$event}->{'id'} = $eventIdCounter;
+	    $eventIdCounter++;
+	}
+    }
+}
+
+if ($mode eq "wiring") {
+
+    if ($attributes->{'attribute'}) {
+
+	open(ATTRGEN, ">AttrGenC.nc");
+
+	print ATTRGEN "configuration AttrGenC {\n";
+	print ATTRGEN "}\n";
+	print ATTRGEN "implementation {\n";
+	print ATTRGEN "  components AttrsC;\n";
+	
+	foreach my $module (sort keys %attributeModules) {
+	    print ATTRGEN "  components $module;\n";
+	}
+	
+	print ATTRGEN "\n";
+	
+	foreach my $attr (sort keys %{$attributes->{'attribute'}}) {
+	    
+	    my $attrInstance = $attributes->{'attribute'}->{$attr};
+
+	    if ($attrInstance->{'mode'} eq "single") {
+		if (defined($attrInstance->{'get-interface'})) {
+		    print ATTRGEN "  components new AttrBridgeM(" . $attrInstance->{'type'} . ") as $attr" . "_get;\n";
+		}
+		if (defined($attrInstance->{'set-interface'})) {
+		    print ATTRGEN "  components new AttrSetBridgeM(" . $attrInstance->{'type'} . ") as $attr" . "_set;\n";
+		}
+	    } elsif ($attrInstance->{'mode'} eq "list") {
+		if (defined($attrInstance->{'get-interface'})) {
+		    print ATTRGEN "  components new AttrListBridgeM(" . $attrInstance->{'type'} . ") as $attr" . "_getlist;\n";
+		}
+	    }
+	}
+    
+	print ATTRGEN "\n";
+	
+	foreach my $attr (sort keys %{$attributes->{'attribute'}}) {
+	    
+	    my $attrInstance = $attributes->{'attribute'}->{$attr};
+
+	    if ($attrInstance->{'mode'} eq "single") {
+		if (defined($attrInstance->{'get-interface'})) {
+		    print ATTRGEN "  AttrsC.AnyAttr[" . $attrInstance->{'id'} . "U] -> $attr". "_get;\n";
+		    print ATTRGEN "  $attr" . "_get.Attr -> " . $attrInstance->{'module'} . "." . $attrInstance->{'get-interface'} . ";\n";
+		    print ATTRGEN "\n";
+		}
+		if (defined($attrInstance->{'set-interface'})) {
+		    print ATTRGEN "  AttrsC.AnyAttrSet[" . $attrInstance->{'id'} . "U] -> $attr" . "_set;\n";
+		    print ATTRGEN "  $attr" . "_set.AttrSet -> " . $attrInstance->{'module'} . "." . $attrInstance->{'set-interface'} . ";\n";
+		    print ATTRGEN "\n";
+		}
+	    } elsif ($attrInstance->{'mode'} eq "list") {
+		if (defined($attrInstance->{'get-interface'})) {
+		    print ATTRGEN "  AttrsC.AnyAttrList[" . $attrInstance->{'id'} . "U] -> $attr" . "_getlist;\n";
+		    print ATTRGEN "  $attr" . "_getlist.AttrList -> " . $attrInstance->{'module'} . "." . $attrInstance->{'get-interface'} . ";\n";
+		    print ATTRGEN "\n";
+		}  
+	    }
+	}
+	
+	print ATTRGEN "}\n";
+	
+	close(ATTRGEN);
+    }
+    
+    if ($events->{'event'}) {
+
+	open(EVENTGEN, ">EventGenC.nc");
+
+	print EVENTGEN "configuration EventGenC {\n";
+	print EVENTGEN "}\n";
+	print EVENTGEN "implementation {\n";
+	print EVENTGEN "  components EventsC;\n";
+	
+	foreach my $module (keys %eventModules) {
+	    print EVENTGEN "  components $module;\n";
+	}
+	
+	print EVENTGEN "\n";
+	
+	foreach my $event (keys %{$events->{'event'}}) {
+	    print EVENTGEN "  components new EventBridgeM(" . 
+		$events->{'event'}->{$event}->{'type'} . ") as $event;\n";
+	}
+	
+	print EVENTGEN "\n";
+	
+	foreach my $event (keys %{$events->{'event'}}) {
+	    print EVENTGEN "  EventsC.AnyEvent[" . $events->{'event'}->{$event}->{'id'} . "U] -> $event;\n";
+	    print EVENTGEN "  $event.Event -> " . $events->{'event'}->{$event}->{'module'} . ".$event;\n";
+	    print EVENTGEN "\n";
+	}
+	
+	print EVENTGEN "}\n";
+
+	close(EVENTGEN);
+    }
+
+} elsif ($mode eq "schema") {
+
+#extract symbol table
+    my @symtab = `$objdump -t $exe`;
+
+    my $nas;
+    $nas->{'version'} = $schemaVersion;
+    for my $flag (keys %ident_flags) {
+	$nas->{$flag} = $ident_flags{$flag};
+    }
+
+    if (defined($attributes)) {
+	$nas->{'attributes'} = $attributes;
+    }
+
+    if (defined($events)) {
+	$nas->{'events'} = $events;
+    }
+
+    if (defined($structs)) {
+	$nas->{'structs'} = $structs;
+    }
+
+    if ($? == 0) {
+	foreach (@symtab) {
+	    if( /^(\S+)\s+.+\s+\.(?:data|bss)\s+(\S+)\s+(\S+)\s*$/ ) {
+		my ($addr,$size,$sym) = ($1,$2,$3);
+		my $name = $sym;
+		$name =~ s/\$/./g;
+		$addr =~ s/^00800/00000/;
+		$symbols->{'symbol'}->{$name}->{'address'} = hex($addr);
+		$symbols->{'symbol'}->{$name}->{'length'} = hex($size);
+	    }
+	}
+	
+	# delete pseudosymbols from the schema
+	for my $sym (keys %{$symbols->{'symbol'}}) {
+	    if ($symbols->{'symbol'}->{$sym}->{'length'} == 0) {
+		delete $symbols->{'symbol'}->{$sym}
+	    }
+	}
+
+	$nas->{'symbols'} = $symbols;
+    }
+
+    open(SCHEMA, ">nucleusSchema.xml");
+
+#    print Dumper($nas);
+
+    my $str = $xs1->XMLout($nas, RootName=>"nucleusSchema", KeyAttr=>{'attribute'=>'name', 'event'=>'name', 'symbol'=>'name'}, XMLDecl=>1);
+
+    print SCHEMA $str;
+
+    close(SCHEMA);
+}
+
+
+
+
+
+
+
+
+
+

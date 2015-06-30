@@ -1,0 +1,103 @@
+This directory contains scripts for fetching data from the botanical
+garden database and making plots of it.  As it currently sits, these
+files have lots of hard coded state in them -- the numbering of the
+sensors, the names of the databases and tables, and the sets of
+sensors which should appear together in graphs.  It should be
+relatively easy to extract this stuff out into parameters if desired,
+I just never did it.
+
+The files are as follows:
+
+./get_data.sh : Does all the heavy lifting.  Runs the runqueries.sql
+script against the appropriate database, copies the data using scp to
+the local machine, cleans the data for use in gnuplot (by converting
+commas to spaces and inserting line breaks between data from
+successive sensors), and generates a number of plots.  This script
+includes the name of the database server and databases containing the
+GSK data.
+
+Note that you will need an ssh-enabled account on the remote machine
+to copy data from it.
+
+./runqueries.sql : The queries to run against the remote database.
+You may want to edit these, as they depend on some deployment specific
+state (such as the start date and some table names).  Depends on a
+table 'calib_data' existing with the same schema as the
+'gsk_query1_cooked' view, which should be defined as:
+
+create view gsk_query1_cooked as select packet_time, seq_no,
+q.mote_id, sample_rate, hamamatsu(hamamatsu_top, voltage) AS
+hamamatsu_top, hamamatsu_current(hamamatsu_top, voltage) AS
+hamamatsu_current_top, hamamatsu(hamamatsu_bot, voltage) AS
+hamamatsu_bot, hamamatsu_current(hamamatsu_bot, voltage) AS
+hamamatsu_current_bot, humidity(humidity) AS humidity,
+humid_temp(humidity_temp) AS humidity_temp, humid_adj(humidity,
+humidity_temp) AS humidity_adj, pressure_mbar(pressure, pressure_temp,
+calib) AS pressure_mbar, pressure_inhg(pressure, pressure_temp, calib)
+AS pressure_inhg, pressure_temp(pressure_temp, calib) AS
+pressure_temp, photo(taos_ch0_top, taos_ch1_top) AS photo_top,
+photo(taos_ch0_bot, taos_ch1_bot) AS photo_bot, voltage(voltage) AS
+voltage FROM (gsk_query1 q LEFT JOIN gsk_mote_info i ON ((q.mote_id =
+i.mote_id)));
+
+You must also define a view 'normalized', and a table 'normalized_table'
+with the same schema as this view.  The view definitation statement is:
+
+create view normalized as SELECT calib_data.mote_id,
+timepl('1969-12-31 16:00:00-08'::abstime, ((((1800)::double precision
+* trunc((date_part('epoch'::text, calib_data.packet_time) /
+(1800)::double precision))))::integer)::reltime) AS "time",
+avg(calib_data.humidity_adj) AS humidity,
+avg(calib_data.humidity_temp) AS humidity_temp,
+avg(calib_data.pressure_mbar) AS pressure,
+avg(calib_data.pressure_temp) AS pressure_temp,
+avg(calib_data.photo_top) AS light_top, avg(calib_data.photo_bot) AS
+light_bot FROM calib_data WHERE (calib_data.mote_id <> 1) GROUP BY
+calib_data.mote_id, trunc((date_part('epoch'::text,
+calib_data.packet_time) / (1800)::double precision));
+
+
+Note the names of the mote_info and gsk_query1 tables, which have
+the following schemas:
+
+             Table "public.gsk_mote_info"
+     Column      |          Type          | Modifiers 
+-----------------+------------------------+-----------
+ mote_id         | integer                | 
+ x_coord         | double precision       | 
+ y_coord         | double precision       | 
+ z_coord         | double precision       | 
+ calib           | bytea                  | 
+ moteinfo        | bytea                  | 
+ clientinfo_name | character varying(100) | 
+Foreign Key constraints:
+$1 FOREIGN KEY (clientinfo_name) REFERENCES gsk_client_info(name) ON
+UPDATE NO ACTION ON DELETE NO ACTION
+
+             Table "public.gsk_query1"
+    Column     |            Type             | Modifiers 
+---------------+-----------------------------+-----------
+ packet_time   | timestamp without time zone | 
+ seq_no        | integer                     | 
+ mote_id       | integer                     | 
+ sample_rate   | integer                     | 
+ hamamatsu_top | integer                     | 
+ hamamatsu_bot | integer                     | 
+ humidity      | integer                     | 
+ humidity_temp | integer                     | 
+ pressure      | integer                     | 
+ pressure_temp | integer                     | 
+ taos_ch0_top  | integer                     | 
+ taos_ch1_top  | integer                     | 
+ taos_ch0_bot  | integer                     | 
+ taos_ch1_bot  | integer                     | 
+ voltage       | integer                     | 
+ packet        | bytea                       | 
+
+insert-breaks.pl : This script inserts two newlines between each set
+of mote readings.  This defines each new mote as a different data set
+for use in gnuplot.
+
+various .gnuplot and .gp files: Generate the graphs, comparing
+different attributes.  The "xxx_nm.gnuplot" files graph different
+attributes for sets of sensors at the altitude n in the tree.

@@ -1,0 +1,1 @@
+<FUNCTION name=monibus opcode=monib numparams=1 param1=integer returnval=TRUE desc="monibus: 8-bit unsigned integer (representing an ASCII character) -> Mate integer, monibus(x) = n where x is an 8-bit unsigned integer representing an ASCII character and n is a 16-bit signed integer representing the monibus response.">

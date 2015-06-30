@@ -1,0 +1,3 @@
+COMPONENT=Oscilloscope
+include ../Makerules
+

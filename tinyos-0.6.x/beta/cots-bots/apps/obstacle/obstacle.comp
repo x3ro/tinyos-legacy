@@ -1,0 +1,35 @@
+/* 
+ * Sarah Bergbreiter
+ * 11/26/2001
+ * COTS-BOTS Project
+ *
+ * This component is the top level component for an obstacle avoidance
+ * program.  It performs different tasks based on whisker events.
+ *
+ * History:
+ * 11/26/2001 - created.
+ *
+ */
+
+TOS_MODULE OBSTACLE;
+
+ACCEPTS{
+	char OBSTACLE_INIT(void);
+	char OBSTACLE_START(void);
+};
+HANDLES{
+	char OBSTACLE_WHISKER_EVENT(unsigned char state);
+	void OBSTACLE_SERVO_EVENT(int servo, unsigned char control);
+	char OBSTACLE_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr OBSTACLE_MSG(TOS_MsgPtr val);
+};
+USES{
+	char OBSTACLE_SUB_INIT();
+	char OBSTACLE_SETSPEED(unsigned char speed);
+	char OBSTACLE_SETDIR(char direction);
+	char OBSTACLE_TURN(char turn);
+	char OBSTACLE_SEND_MSG(short addr, char type,TOS_MsgPtr data);
+	char OBSTACLE_TOGGLE_LED();
+};
+SIGNALS{
+};

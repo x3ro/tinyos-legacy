@@ -1,0 +1,104 @@
+<project name="ShockfishTinyNodeTC65" default="dist" basedir=".">
+	<property environment="env" />
+		
+	<!--- ANT Build file for TC65/MamaBoard/TinyNode             -->
+	<!--- (c) 2006 Shockfish SA	                                 -->
+	
+	<!--- #### BEGIN Configuration section ###################   -->
+
+	<!--- The WTK directory  (read IMPNG_DIR 				     -->
+	<property name="wtk.home" value="C:\Program Files\Siemens\SMTK\TC65_R2\WTK" />
+
+
+	<!--- ### END Configuration section ######################   -->
+	
+	<property name="src" value="src" />
+	<property name="build" value="build" />
+	<property name="buildtmp" value="${build}/tmp" />
+	<property name="buildjar" value="${build}/jar" />
+	<property name="dist" value="dist" />
+	<property name="lib" value="lib" />
+	<property name="tc65_bootcp" value="${wtk.home}/lib/classes.zip" />
+	<property name="tc65_preverify" value="${wtk.home}/bin/preverify.exe" />
+	<property name="antennajar" value="antenna-bin-0.9.13.jar" />
+	<taskdef name="wtkpackage" classname="de.pleumann.antenna.WtkPackage" classpath="${lib}/ant/${antennajar}" />
+	<taskdef name="wtkjad" classname="de.pleumann.antenna.WtkJad" classpath="${lib}/ant/${antennajar}" />
+	<property name="helpfail" value="Please edit the properties in this buid.xml." />
+
+	<property name="jarfile" value="MamaBoardDemo.jar" />
+	<property name="jadfile" value="${src}/com/shockfish/tinyos/apps/demo/mamaboarddemo.jad" />
+
+	<target name="init">
+		<tstamp />
+		<mkdir dir="${build}" />
+		<mkdir dir="${buildtmp}" />
+		<mkdir dir="${buildjar}" />
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/apps" />
+		<uptodate property="coreBuild.notRequired">
+			<srcfiles dir="${src}" includes="**/*.java" />
+			<mapper type="glob" from="*.java" to="${buildtmp}/*.class" />
+		</uptodate>
+	</target>
+
+	<target name="sanitycheck">
+		
+		<echo message="Detected ${os.name} platform." />
+		<echo message="Checking your configuration..." />
+		<available file="${tc65_bootcp}" type="file" property="guess.bootcpfound"/>
+		<fail unless="guess.bootcpfound" message="Your TC65 boot classpath was not found. Was set to ${tc65_bootcp}. ${helpfail}"/>
+		<echo message="Found boot classpath, using ${tc65_bootcp}" />
+		<available file="${tc65_preverify}" type="file" property="guess.preverifyfound"/>
+		<fail unless="guess.preverifyfound" message="Your preverify utility was not found. Was set to ${tc65_preverify}. ${helpfail}"/>
+		<echo message="Found preverify, using ${tc65_preverify}" />
+
+	</target>
+	
+
+  	<target name="genfiles">
+   			<exec dir="${src}/com/shockfish/tinyos/apps/demo" executable="make" />
+  	</target>
+
+
+	<target name="compile" depends="init,genfiles" unless="coreBuild.notRequired">
+		<javac target="1.4" source="1.4" destdir="${buildtmp}" compiler="modern" bootclasspath="${tc65_bootcp}" srcdir="../../../../tools/java:${src}">
+			<!--- Drop-in for TinyOS files -->
+			<include name="net/tinyos/packet/ByteSource.java" />
+			<include name="net/tinyos/packet/StreamByteSource.java" />
+			<include name="net/tinyos/packet/PacketSource.java" />
+			<include name="net/tinyos/util/PrintStreamMessenger.java" />
+			<include name="net/tinyos/util/Messenger.java" />
+			<include name="net/tinyos/message/Dump.java" />
+			<include name="com/shockfish/**/*.java" />
+		</javac>
+	</target>
+
+	<target name="preverify" depends="sanitycheck,compile">
+		<exec dir="." executable="${tc65_preverify}">
+			<arg line=" -classpath &quot;${tc65_bootcp}&quot; -d &quot;${buildjar}&quot; &quot;${buildtmp}&quot;" />
+		</exec>
+	</target>
+
+	<target name="packaging" depends="sanitycheck,preverify">
+		<jar jarfile="${dist}/apps/${jarfile}" manifest="${jadfile}">
+			<fileset dir="${buildjar}" />
+		</jar>
+	</target>
+
+	<target name="dist" depends="clean,sanitycheck,packaging">
+		
+		<copy file="${jadfile}" todir="${dist}/apps" overwrite="true" />
+		<wtkjad jadfile="${dist}/apps/mamaboarddemo.jad" jarfile="${dist}/apps/${jarfile}" update="yes" />
+		<echo file ="${dist}/BASESTATION_ID" message="Shockfish-test-basestation1" />
+		<echo file ="${dist}/IP_DATA_SERVER" message="hq.shockfish.com" />
+		<echo file ="${dist}/PORT_DATA_SERVER" message="6556" />
+		<echo file ="${dist}/GPRSCONF" message=";bearer_type=gprs;access_point=internet;dns=213.055.128.001;timeout=3600" />
+		<echo file ="${dist}/IP_DATE_SERVER" message="swisstime.ethz.ch" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+	</target>
+
+</project>

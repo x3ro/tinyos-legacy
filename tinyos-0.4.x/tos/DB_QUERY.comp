@@ -1,0 +1,50 @@
+/*									tab{4
+ *  
+ *
+ * "Copyright (c) 2001 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:  Sam Madden
+ * Date:     June, 2001
+ *
+
+ *
+ */
+
+TOS_MODULE DB_QUERY;
+
+ACCEPTS{
+	char QUERY_INIT(void);
+};
+
+SIGNALS{
+	/* char QUERY_COMPLETE(void); */
+};
+
+HANDLES{
+	char DB_QUERY_MSG_SEND_DONE(TOS_MsgPtr msg);
+	TOS_MsgPtr INFO_REQUEST_READING(TOS_MsgPtr val);
+	void QUERY_EVENT(void);
+	TOS_MsgPtr RX_PACKET(TOS_MsgPtr data);
+};
+
+USES{
+	char DB_QUERY_SUB_INIT_CLOCK(char interval, char scale);
+	char DB_QUERY_SUB_SEND_MSG(TOS_MsgPtr data);
+};

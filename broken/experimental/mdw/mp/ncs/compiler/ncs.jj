@@ -1,0 +1,496 @@
+/* 
+ * JavaCC/JTB grammar definition for NCS
+ * Adapted from C grammer definition by Doug South (dsouth@squirrel.com.au)
+ */
+
+options {
+  DEBUG_PARSER = false;
+}
+
+PARSER_BEGIN(NCSParser)
+
+package ncs.compiler;
+import java.util.*;
+
+  public class NCSParser {
+  }
+
+PARSER_END(NCSParser)
+
+SKIP : {
+ " "
+|  "\t"
+|  "\n"
+|  "\r"
+|  <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+|  <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+TOKEN : {
+ <INTEGER_LITERAL: <DECIMAL_LITERAL> (["l","L"])? | <HEX_LITERAL> (["l","L"])? | <OCTAL_LITERAL> (["l","L"])?>
+|  <#DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])*>
+|  <#HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+>
+|  <#OCTAL_LITERAL: "0" (["0"-"7"])*>
+|  <FLOATING_POINT_LITERAL: (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])? | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])? | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])? | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]>
+|  <#EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+>
+|  <CHARACTER_LITERAL: "\'" (~["\'","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"])) "\'">
+|  <STRING_LITERAL: "\"" (~["\"","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"]))* "\"">
+}
+
+TOKEN : {
+	<CONTINUE: "continue"> |
+	<VOLATILE: "volatile"> |
+	<REGISTER: "register"> |
+	<UNSIGNED: "unsigned"> |
+	<TYPEDEF: "typedef"> |
+	<DFLT: "default"> |
+	<DOUBLE: "double"> |
+	<SIZEOF: "sizeof"> |
+	<SWITCH: "switch"> |
+	<RETURN: "return"> |
+	<EXTERN: "extern"> |
+	<STRUCT: "struct"> |
+	<STATIC: "static"> |
+	<SIGNED: "signed"> |
+	<WHILE: "while"> |
+	<BREAK: "break"> |
+	<UNION: "union"> |
+	<CONST: "const"> |
+	<FLOAT: "float"> |
+	<SHORT: "short"> |
+	<ELSE: "else"> |
+	<CASE: "case"> |
+	<LONG: "long"> |
+	<ENUM: "enum"> |
+	<AUTO: "auto"> |
+	<VOID: "void"> |
+	<CHAR: "char"> |
+	<GOTO: "goto"> |
+	<FOR: "for"> |
+	<BOOL: "bool"> |
+	<INT: "int"> |
+	<UINT8T: "uint8_t"> |
+	<UINT16T: "uint16_t"> |
+	<UINT32T: "uint32_t"> |
+	<INT8T: "int8_t"> |
+	<INT16T: "int16_t"> |
+	<INT32T: "int32_t"> |
+	<IF: "if"> |
+	<DO: "do"> |
+	/* Generated NesC definitions */
+	<CALL: "call"> |
+	<SIGNAL: "signal"> |
+	/* NCS definitions */
+	<PERIODIC: "periodic"> |
+	<BLOCKING: "blocking"> |
+	<MIRRORED: "mirrored"> |
+	<ONEHOP: "onehop"> |
+	<YAO: "yao">
+}
+
+TOKEN : {
+ <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+|  <#LETTER: ["$","A"-"Z","_","a"-"z"]>
+|  <#DIGIT: ["0"-"9"]>
+}
+
+void TranslationUnit() : {}
+{
+	(ExternalDeclaration()|TopLevelBlock())+
+}
+
+void TopLevelBlock() : {}
+{
+  Periodic()
+}
+
+void Periodic() : {}
+{
+  <PERIODIC> "(" UnaryExpression() ")" CompoundStatement()
+}
+
+void ExternalDeclaration() : {}
+{
+	( LOOKAHEAD( FunctionDefinition() ) FunctionDefinition() | Declaration())
+}
+
+void FunctionDefinition() : {}
+{
+	[LOOKAHEAD(DeclarationSpecifiers()) DeclarationSpecifiers()] Declarator() [ DeclarationList() ]
+	CompoundStatement()
+}
+
+void Declaration() : {}
+{
+	DeclarationSpecifiers() [ InitDeclaratorList() ] ";"
+}
+
+void DeclarationList() : {}
+{
+	( LOOKAHEAD(Declaration()) Declaration() )+
+}
+
+void DeclarationSpecifiers() : {}
+{
+	  StorageClassSpecifier() [ LOOKAHEAD(DeclarationSpecifiers())
+	        DeclarationSpecifiers() ] |
+	  TypeSpecifier()  [ LOOKAHEAD(DeclarationSpecifiers())
+	        DeclarationSpecifiers() ] |
+	  TypeQualifier() [ LOOKAHEAD(DeclarationSpecifiers())
+	        DeclarationSpecifiers() ]
+}
+
+void StorageClassSpecifier() : {}
+{
+	( <AUTO> | <REGISTER> | <STATIC> | <EXTERN> | <TYPEDEF> | <BLOCKING> )
+}
+
+void TypeSpecifier() : {}
+{
+	( <VOID> | <CHAR> | <SHORT> | <INT> | <LONG> | <FLOAT> | <DOUBLE> | 
+	  <SIGNED> | <UNSIGNED> |
+	  <INT8T> | <INT16T> | <INT32T> | <UINT8T> | <UINT16T> | <BOOL> |
+	  // For NCS
+	  <MIRRORED> | <ONEHOP> | <YAO> |
+	  StructOrUnionSpecifier() | EnumSpecifier() )
+
+// XXX MDW: Can't deal with typedefs right now without re-introducing
+// on-the-fly typedef code into the parser
+//	  LOOKAHEAD(TypedefName()) TypedefName() )
+}
+
+void TypeQualifier() : {}
+{
+	( <CONST> | <VOLATILE> )
+}
+
+void StructOrUnionSpecifier() : {}
+{
+	StructOrUnion() ( LOOKAHEAD(3) [ <IDENTIFIER> ] "{" StructDeclarationList() "}" | <IDENTIFIER> )
+}
+
+void StructOrUnion() : {}
+{
+	( <STRUCT> | <UNION> )
+}
+
+void StructDeclarationList() : {}
+{
+	(StructDeclaration())+
+}
+
+void InitDeclaratorList() : {}
+{
+	InitDeclarator() ("," InitDeclarator())*
+}
+
+void InitDeclarator() : {}
+{
+	Declarator() [ "=" Initializer() ]
+}
+
+void StructDeclaration() : {}
+{
+	SpecifierQualifierList() StructDeclaratorList() ";"
+}
+
+void SpecifierQualifierList() : {}
+{
+	  TypeSpecifier() [ LOOKAHEAD(SpecifierQualifierList())
+	        SpecifierQualifierList() ]|
+	  TypeQualifier() [ LOOKAHEAD(SpecifierQualifierList())
+	        SpecifierQualifierList() ]
+}
+
+void StructDeclaratorList() : {}
+{
+	StructDeclarator() ( "," StructDeclarator() )*
+}
+
+void StructDeclarator() : {}
+{
+	( LOOKAHEAD(3) Declarator() | [ Declarator() ] ":" ConstantExpression() )
+}
+
+void EnumSpecifier() : {}
+{
+	<ENUM> ( LOOKAHEAD(3) [ <IDENTIFIER> ] "{" EnumeratorList() "}" | <IDENTIFIER> )
+}
+
+void EnumeratorList() : {}
+{
+	Enumerator() ("," Enumerator())*
+}
+
+void Enumerator() : {}
+{
+	<IDENTIFIER> [ "=" ConstantExpression() ]
+}
+
+void Declarator() : {}
+{
+	[ Pointer() ] DirectDeclarator()
+}
+
+void DirectDeclarator() : { Token t;}
+{
+	( <IDENTIFIER> | "(" Declarator() ")" )
+
+	( "[" [ ConstantExpression() ] "]" |
+	    LOOKAHEAD(3) "(" ParameterTypeList() ")" |
+	    "(" [ IdentifierList() ] ")" )*
+}
+
+void Pointer() : {}
+{
+	"*" [ TypeQualifierList() ] [ Pointer() ]
+}
+
+void TypeQualifierList() : {}
+{
+	(TypeQualifier())+
+}
+
+void ParameterTypeList() : {}
+{
+	ParameterList() ["," "..." ]
+}
+
+void ParameterList() : {}
+{
+	ParameterDeclaration() (LOOKAHEAD(2) "," ParameterDeclaration())*
+}
+
+void ParameterDeclaration() : {}
+{
+	DeclarationSpecifiers() ( LOOKAHEAD(Declarator()) Declarator() | [ AbstractDeclarator() ] )
+}
+
+void IdentifierList() : {}
+{
+	<IDENTIFIER> ("," <IDENTIFIER>)*
+}
+
+void Initializer() : {}
+{
+	( AssignmentExpression() |
+	  "{" InitializerList() [","] "}" )
+}
+
+void InitializerList() : {}
+{
+	Initializer() (LOOKAHEAD(2) "," Initializer())*
+}
+
+void TypeName() : {}
+{
+	SpecifierQualifierList() [ AbstractDeclarator() ]
+
+}
+
+void AbstractDeclarator() : {}
+{
+	( LOOKAHEAD(3) Pointer() |
+	  [Pointer()] DirectAbstractDeclarator() )
+}
+
+void DirectAbstractDeclarator() : {}
+{
+	( LOOKAHEAD(2) "(" AbstractDeclarator() ")" |
+	               "[" [ConstantExpression()] "]" |
+	               "(" [ParameterTypeList()] ")" )
+
+	  ( "[" [ ConstantExpression() ] "]" | "(" [ ParameterTypeList() ] ")" )*
+}
+
+void TypedefName() : {}
+{
+	<IDENTIFIER>
+}
+
+void Statement() : {}
+{
+	( LOOKAHEAD(2) LabeledStatement() |
+	  ExpressionStatement() |
+	  CompoundStatement() |
+	  SelectionStatement() |
+	  IterationStatement() |
+	  JumpStatement() )
+}
+
+void LabeledStatement() : {}
+{
+	( <IDENTIFIER> ":" Statement() |
+	  <CASE> ConstantExpression() ":" Statement() |
+	  <DFLT> ":" Statement() )
+}
+
+void ExpressionStatement() : {}
+{
+	[ Expression() ] ";"
+}
+
+void CompoundStatement() : {}
+{
+	"{" [ LOOKAHEAD(DeclarationList()) DeclarationList() ]
+	    [ StatementList() ]
+	"}"
+}
+
+void StatementList() : {}
+{
+	(Statement())+
+}
+
+void SelectionStatement() : {}
+{
+	( <IF> "(" Expression() ")" Statement() [ LOOKAHEAD(2) <ELSE> Statement() ] |
+	  <SWITCH> "(" Expression() ")" Statement() )
+}
+
+void IterationStatement() : {}
+{
+	( <WHILE> "(" Expression() ")" Statement() |
+	  <DO> Statement() <WHILE> "(" Expression() ")" ";" |
+	  <FOR> "(" [ Expression() ] ";" [ Expression() ] ";" [ Expression() ] ")" Statement() )
+}
+
+void JumpStatement() : {}
+{
+	( <GOTO> <IDENTIFIER> ";" |
+	  <CONTINUE> ";" |
+	  <BREAK> ";" |
+	  <RETURN> [ Expression() ] ";" )
+}
+
+void Expression() : {}
+{
+	AssignmentExpression() ( "," AssignmentExpression() )*
+}
+
+void AssignmentExpression() : {}
+{
+	  LOOKAHEAD(UnaryExpression() AssignmentOperator()) UnaryExpression() AssignmentOperator() AssignmentExpression() |
+	  LOOKAHEAD(3) ConditionalExpression()
+}
+
+void AssignmentOperator() : {}
+{
+	// := operator added for NCS
+	( "=" | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | "&=" | "^=" | "|=" | ":=" )
+}
+
+void ConditionalExpression() : {}
+{
+	LogicalORExpression() [ "?" Expression() ":" ConditionalExpression() ]
+}
+
+void ConstantExpression() : {}
+{
+	ConditionalExpression()
+}
+
+void LogicalORExpression() : {}
+{
+	LogicalANDExpression() [ "||" LogicalORExpression() ]
+}
+
+void LogicalANDExpression() : {}
+{
+	InclusiveORExpression() [ "&&" LogicalANDExpression() ]
+}
+
+void InclusiveORExpression() : {}
+{
+	ExclusiveORExpression() [ "|" InclusiveORExpression() ]
+}
+
+void ExclusiveORExpression() : {}
+{
+	ANDExpression() [ "^" ExclusiveORExpression() ]
+}
+
+void ANDExpression() : {}
+{
+	EqualityExpression() [ "&" ANDExpression() ]
+}
+
+void EqualityExpression() : {}
+{
+	RelationalExpression() [ ( "==" | "!=" ) EqualityExpression() ]
+}
+
+void RelationalExpression() : {}
+{
+	ShiftExpression() [ ( "<" | ">" | "<=" | ">=" ) RelationalExpression() ]
+}
+
+void ShiftExpression() : {}
+{
+	AdditiveExpression() [ ( "<<" | ">>" ) ShiftExpression() ]
+}
+
+void AdditiveExpression() : {}
+{
+	MultiplicativeExpression() [ ( "+" | "-" ) AdditiveExpression() ]
+}
+
+void MultiplicativeExpression() : {}
+{
+	CastExpression() [ ( "*" | "/" | "%" ) MultiplicativeExpression() ]
+}
+
+void CastExpression() : {}
+{
+	( LOOKAHEAD("(" TypeName() ")" CastExpression() ) "(" TypeName() ")" CastExpression() |
+	  UnaryExpression() )
+}
+
+void UnaryExpression() : {}
+{
+	( LOOKAHEAD(3) PostfixExpression() |
+	  "++" UnaryExpression() |
+	  "--" UnaryExpression() |
+	  UnaryOperator() CastExpression() |
+	  <SIZEOF> ( LOOKAHEAD(UnaryExpression() ) UnaryExpression() | "(" TypeName() ")" ) )
+}
+
+void UnaryOperator() : {}
+{
+	( "&" | "*" | "+" | "-" | "~" | "!" )
+}
+
+void PostfixExpression() : {}
+{
+
+	[LOOKAHEAD(CallOrSignal()) CallOrSignal()]
+	PrimaryExpression() ( "[" Expression() "]" |
+                "(" [ LOOKAHEAD(ArgumentExpressionList() ) ArgumentExpressionList() ] ")" |
+		  "." <IDENTIFIER> |
+		  "->" <IDENTIFIER> |
+		  "++" |
+		  "--" )*
+}
+
+void CallOrSignal() : {}
+{
+	( <CALL> | <SIGNAL> )
+}
+
+void PrimaryExpression() : {}
+{
+	( <IDENTIFIER> |
+	  Constant() |
+	  "(" Expression() ")" )
+}
+
+void ArgumentExpressionList() : {}
+{
+	AssignmentExpression() ( "," AssignmentExpression() )*
+}
+
+void Constant() : {}
+{
+ <INTEGER_LITERAL> | <FLOATING_POINT_LITERAL> | <CHARACTER_LITERAL> | <STRING_LITERAL>
+}
+

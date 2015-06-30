@@ -1,0 +1,1 @@
+<FUNCTION name=HRMPulse opcode=hrmpulse numparams=0 returnval=TRUE desc="HRMPulse: null -> null, HRMPulse() triggers a heat pulse to be fired from the heater probe.  Two minutes after a pulse is fired, new measurements are available.  (There actually is a return value, but this value is meaningless and should be ignored.)">

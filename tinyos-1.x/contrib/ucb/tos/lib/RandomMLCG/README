@@ -1,0 +1,23 @@
+README for RandomMLCG 
+Author/Contact: hohltb@cs.berkeley.edu 
+
+Description:
+
+This code is a fast implementation of the Park-Miller Minimal Standard
+Generator for pseudo-random numbers.  It uses the 32 bit multiplicative
+linear congruential generator,
+ 
+               S' = (A x S) mod (2^31 - 1)
+ 
+for A = 16807.
+
+Tools:
+
+None
+
+Known bugs/limitations:
+
+None
+
+See Also:
+ contrib/ucb/apps/TestRanomMLCG

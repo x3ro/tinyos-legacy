@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+# FILE:         createdb-task
+# AUTHOR:       Martin Turon
+# DATE CREATED: July 12, 2004
+# DESCRIPTION:  PostgreSQL start script
+#
+# $Id: createdb-task,v 1.16 2004/10/11 16:00:09 mturon Exp $
+#
+
+echo "Creating Postgres TASK database."
+cd /opt/tinyos-1.x/tools/java/net/tinyos/task/tasksvr
+
+#setup-task-db.sh
+# --> Corrected script enclosed here
+
+# start ipc-daemon
+echo "Setting up PostgreSQL database for TASK.  Only need to do this once."
+if cygpath / > /dev/null 2>/dev/null; then
+	ipc-daemon &
+	export PGDATA=/pgdata
+fi
+
+# Create database only if it wasn't created before
+if [ ! -d /pgdata ]; then
+	initdb
+	sed -e 's/#tcpip_socket = false/tcpip_socket = true/' /pgdata/postgresql.conf > /tmp/postgresql.conf
+	mv /tmp/postgresql.conf /pgdata
+fi
+
+pg_ctl start -l /tmp/postgresql.log
+# wait for postmaster to start up
+sleep 5
+psql -c "drop user tele;" template1
+psql -c "create user tele password 'tiny' createdb createuser;" template1
+createdb -U tele task
+psql -e task tele < task.sql
+
+# Add MoteView client to db
+echo "Adding MoteView as client."
+psql -c "DELETE FROM task_client_info where name='MoteView';" task
+psql -c "INSERT INTO task_client_info (name, type, clientinfo) VALUES ('MoteView', 'CONFIGURATION', '');" task
+psql -c "INSERT INTO task_mote_info (mote_id, x_coord, y_coord, z_coord, calib, moteinfo, clientinfo_name) VALUES (0, 10, 10, 0, '', 'Gateway', 'MoteView');" task
+
+# Finalize db creation with xlisten tables
+echo "Creating xlisten tables for XSensor."
+psql -c "CREATE TABLE xtest_results ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, voltage integer, light integer);" task
+psql -c "CREATE TABLE xtest_results_L ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, voltage integer, light integer);" task
+psql -c "CREATE RULE xtest_results AS ON INSERT TO xtest_results DO ( DELETE FROM xtest_results_L WHERE nodeid = NEW.nodeid; INSERT INTO xtest_results_L VALUES ( NEW.* ); );" task
+psql -c "CREATE INDEX xtest_time_idx ON xtest_results USING BTREE ( result_time ) ;" task
+psql -c "DELETE FROM task_query_time_log where query_id=8;" task
+psql -c "DELETE FROM task_query_log where query_id=8;" task
+psql -c "INSERT INTO task_query_log (query_id, tinydb_qid, query_text, query_type, table_name) VALUES (8, 8, 'SELECT nodeid,parent,light,voltage SAMPLE PERIOD 1000', 'sensor', 'xtest_results');" task
+psql -c "INSERT INTO task_query_time_log (query_id, start_time) VALUES (8, now());" task
+
+
+# Add MEP401/MEP500 enviro Tables:
+echo "Creating xlisten tables for MEP401 / MEP500."
+psql -c "INSERT INTO task_attributes (name, typeid, power_cons, description) VALUES ('inthum', 3, 1, 'Sensirion internal humidity reading') ;" task
+psql -c "INSERT INTO task_attributes (name, typeid, power_cons, description) VALUES ('inttemp', 3, 1, 'Sensirion internal temperature reading') ;" task
+psql -c "INSERT INTO task_attributes (name, typeid, power_cons, description) VALUES ('therm', 3, 1, 'Mica2dot thermistor reading') ;" task
+
+psql -c "CREATE TABLE enviro_results ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, voltage integer, therm integer, humid integer, humtemp integer, inthum integer, inttemp integer, photo1 integer, photo2 integer, photo3 integer, photo4 integer, accel_x integer, accel_y integer, prtemp integer, press integer );" task
+psql -c "CREATE TABLE enviro_results_L ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, voltage integer, therm integer, humid integer, humtemp integer, inthum integer, inttemp integer, photo1 integer, photo2 integer, photo3 integer, photo4 integer, accel_x integer, accel_y integer, prtemp integer, press integer );" task
+
+psql -c "CREATE RULE cache_enviro_results AS ON INSERT TO enviro_results DO ( DELETE FROM enviro_results_L WHERE nodeid = NEW.nodeid; INSERT INTO enviro_results_L VALUES ( NEW.* ); );" task
+psql -c "CREATE INDEX enviro_time_idx ON enviro_results USING BTREE ( result_time ) ;" task
+
+psql -c "INSERT INTO task_query_log (query_id, tinydb_qid, query_text, query_type, table_name) VALUES (10, 10, 'SELECT nodeid,parent,voltage,therm,humid,humtemp,inthum,inttemp,photo1,photo2,photo3,photo4,accel_x,accel_y,prtemp,press SAMPLE PERIOD 3000', 'sensor', 'enviro_results');" task
+psql -c "INSERT INTO task_query_time_log (query_id, start_time) VALUES (10, now()) ;" task
+
+# Add MTS300/310 Tables:
+echo "Creating tables for MTS300/310."
+psql -c "CREATE TABLE mts310_results ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, voltage integer, temp integer, light integer, accel_x integer, accel_y integer, mag_x integer, mag_y integer );" task
+psql -c "CREATE TABLE mts310_results_L ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, voltage integer, temp integer, light integer, accel_x integer, accel_y integer, mag_x integer, mag_y integer );" task
+psql -c "CREATE RULE cache_mts310_results AS ON INSERT TO mts310_results DO ( DELETE FROM mts310_results_L WHERE nodeid = NEW.nodeid; INSERT INTO mts310_results_L VALUES ( NEW.* ); );" task
+psql -c "CREATE INDEX mts310_time_idx ON mts310_results USING BTREE ( result_time ) ;" task
+psql -c "INSERT INTO task_query_log (query_id, tinydb_qid, query_text, query_type, table_name) VALUES (12, 12, 'SELECT nodeid,parent,voltage,temp,light,accel_x,accel_y,mag_x,mag_y SAMPLE PERIOD 3000', 'sensor', 'mts310_results');" task
+psql -c "INSERT INTO task_query_time_log (query_id, start_time) VALUES (12, now()) ;" task
+
+
+# Add MDA300 Plant App Tables:
+echo "Creating tables for MDA300."
+psql -c "CREATE TABLE mda300_results ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, voltage integer, humid integer, humtemp integer, echo10 integer, echo20 integer, soiltemp integer );" task
+psql -c "CREATE TABLE mda300_results_L ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, voltage integer, humid integer, humtemp integer, echo10 integer, echo20 integer, soiltemp integer );" task
+psql -c "CREATE RULE cache_mda300_results AS ON INSERT TO mda300_results DO ( DELETE FROM mda300_results_L WHERE nodeid = NEW.nodeid; INSERT INTO mda300_results_L VALUES ( NEW.* ); );" task
+psql -c "CREATE INDEX mda300_time_idx ON mda300_results USING BTREE ( result_time ) ;" task
+psql -c "INSERT INTO task_query_log (query_id, tinydb_qid, query_text, query_type, table_name) VALUES (13, 13, 'SELECT nodeid,parent,voltage,humid,humtemp,echo10,echo20,soiltemp SAMPLE PERIOD 6000', 'sensor', 'mda300_results');" task
+psql -c "INSERT INTO task_query_time_log (query_id, start_time) VALUES (13, now()) ;" task
+
+psql -c "INSERT INTO task_attributes (name, typeid, power_cons, description) VALUES ('echo10', 3, 1, 'Echo10 soil moisture probe') ;" task
+psql -c "INSERT INTO task_attributes (name, typeid, power_cons, description) VALUES ('echo20', 3, 1, 'Echo20 soil moisture probe') ;" task
+psql -c "INSERT INTO task_attributes (name, typeid, power_cons, description) VALUES ('soiltemp', 3, 1, 'Davis soil temperature probe') ;" task
+
+
+# Finalize db creation with xlisten tables
+echo "Creating tables for Surge."
+psql -c "CREATE TABLE surge_results ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, light integer, temp integer, voltage integer, mag_x integer, mag_y integer, accel_x integer, accel_y integer);" task
+psql -c "CREATE TABLE surge_results_L ( result_time timestamp without time zone, epoch integer, nodeid integer, parent integer, light integer, temp integer, voltage integer, mag_x integer, mag_y integer, accel_x integer, accel_y integer);" task
+psql -c "CREATE RULE cache_surge_results AS ON INSERT TO surge_results DO ( DELETE FROM surge_results_L WHERE nodeid = NEW.nodeid; INSERT INTO surge_results_L VALUES ( NEW.* ); );" task
+psql -c "CREATE INDEX surge_time_idx ON surge_results USING BTREE ( result_time ) ;" task
+psql -c "DELETE FROM task_query_time_log where query_id=7;" task
+psql -c "DELETE FROM task_query_log where query_id=7;" task
+psql -c "INSERT INTO task_query_log (query_id, tinydb_qid, query_text, query_type, table_name) VALUES (7, 7, 'SELECT nodeid,parent,light,temp,voltage,mag_x,mag_y,accel_x,accel_y SAMPLE PERIOD 3000', 'sensor', 'surge_results');" task
+psql -c "INSERT INTO task_query_time_log (query_id, start_time) VALUES (7, now());" task
+
+
+
+
+

@@ -1,0 +1,66 @@
+Here's Solomon and my proposal for the counter application.  The basic
+idea is as follows:
+
+Each basestation sends a "count request".  Any mote hearing this
+request enters "count mode".  Any mote hearing another mote report
+it's count also enters "count mode".
+
+Count mode works as follows:
+
+Time is divided into epochs.  
+
+Each mote has a level, which is equal to the lowest level 
+of any neighbor plus one (determined by peeking into report 
+messages, see below).  This level changes with every epoch.
+
+Report messages are sent as follows: at a random offset into the
+current epoch, each mote reports its count k from the previous epoch
+plus one (for itself).  In addition to a count, each message includes
+the following information: 
+1) The level of this mote, l 
+2) The number of reports from motes one level above this mote which 
+   were heard in the last epoch, p.  
+3) The time when this mote believes the current epoch will end, t.  
+
+1) is used by child motes to determine their level.  
+2) is used to prevent this mote from being counted by multiple parent 
+   motes 
+3) is used to provide loose time synchronization between motes
+
+Determining count from the previous epoch is done in the following
+way:
+
+During each epoch, each node accumulates the count of nodes with a
+level equal to its level plus one (by intercepting the report messages
+described above).  Given a child message m, the count is incremented
+by (m.k)/(m.p), because m.p is an approximation of the number of motes
+which will process m (assuming nodes aren't moving and symmetric
+reception and transmission radii.)
+
+After one time period, the base station should receive count messages
+reflecting the number of nodes which are one hop away.  After two time
+intervals, the count messages will include the nodes which are 1 or 2
+hops away.  Thus, after d intervals, the basestation will receive
+counts reflecting the number of nodes in a depth d multi-hop network.
+
+Obviously, this count may not be accurate if nodes are moving or
+packets collide or are lost, but it should be a reasonable
+approximation most of the time (how's that for formal reasoning!?!!?)
+Collisions can be reduced by increasing the epoch length.
+
+The last little bit of this is that some kind of time synchronization
+is needed so that nodes have the same understanding of when epochs
+begin and end. All nodes have a shared "epoch length", but the phase
+of those epochs could differ.  We propose that nodes at lower levels
+should use the m.t value from parents to adjust the time when the
+current epoch ends (or when the next epoch starts).  The router can
+examine the m.t values of messages to determine the drift of its
+neighboring nodes and send a new count message with an adjusted
+end-of-epoch time if drift of those neighbors is outside some
+threshold.
+
+
+
+
+
+   

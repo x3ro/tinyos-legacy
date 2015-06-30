@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "simply execute the hello_world program."

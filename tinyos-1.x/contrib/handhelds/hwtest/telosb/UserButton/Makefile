@@ -1,0 +1,8 @@
+#
+
+COMPONENT=UserButton
+
+include ../Makerules
+
+
+

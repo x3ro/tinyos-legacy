@@ -1,0 +1,7 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: install.extra,v 1.1 2005/01/31 21:05:14 freefrag Exp $
+
+# This file work by requiring a set of extra targets.
+NODEID = $(INSTALL)
+BUILD_DEPS = srec setid program
+

@@ -1,0 +1,20 @@
+#ifndef __CRCPACKETOBJ_SIGNAL___
+#define __CRCPACKETOBJ_SIGNAL___
+#include "super.h"
+//ACCEPTS
+char TOS_COMMAND(PACKET_INIT)(void);
+void TOS_COMMAND(PACKET_POWER)(char mode);
+char TOS_COMMAND(PACKET_TX_PACKET)(TOS_MsgPtr data);
+//HANDLES
+char TOS_EVENT(PACKET_BYTE_TX_DONE)(void);
+char TOS_EVENT(PACKET_RX_BYTE_READY)(char data, char error, short strength);
+char TOS_EVENT(PACKET_TX_BYTE_READY)(char success);
+//SIGNALS
+TOS_MsgPtr TOS_EVENT(PACKET_RX_PACKET_DONE)(TOS_MsgPtr packet);
+char TOS_EVENT(PACKET_TX_PACKET_DONE)(TOS_MsgPtr packet);
+//USES
+char TOS_COMMAND(PACKET_SUB_INIT)(void);
+char TOS_COMMAND(PACKET_SUB_PWR)(char mode);
+char TOS_COMMAND(PACKET_SUB_TX_BYTES)(char data);
+//INTERNAL
+#endif //__CRCPACKETOBJ_SIGNAL___//

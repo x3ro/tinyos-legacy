@@ -1,0 +1,101 @@
+This directory provides two demos:
+	1. Initial Time synchronization
+	2. Run-time time synchronization
+It also serves as examples of using the new Time, TimeSet, TimeUtil
+TimeSync and NewTimer interfaces. 
+
+        All demoes/tests in this directory require the use of a GenericBase base
+ mote. Programm a mote as GenericBase.
+
+1. How to setup and run the initial time synch demo/test?
+===========================================================
+
+       This dome requires some test code being added to Comm stack, 
+MicaHighSpeedRadio.nc and RadioCRCPacket.nc in detail. 
+
+step 1:  check the Makefile to make sure that the component to be build is
+InitialSync.
+
+step 2: type: "make mica" in this directory
+
+step 3: By default Time master is mote 0. So programm a  mote as mote 0
+        by typing:
+		make mica reinstall.0
+
+step 4: programming some mote as time slaves. 
+                make mica reinstall.n  ( n>0)
+
+step 5: put GenericBase on programming board and connect it to the serial 
+        port of your PC.
+
+step 6: on your PC, you could use either ListenRow to display the raw data
+        ( see SendTime.h for message format) or use the modified oscciloscope
+        tool under tinyos-1.x/tools/java/net/tinyos/timesync/ to visualize 
+        the result.
+
+
+2. How to setup and run the run-time time synch demo? 
+========================================================
+
+The run-time timesync demo description: 
+=======================================
+    In this demo, mote 0 is time master, it broadcasts its own time every 30 seconds.
+All the other mote are considered slave motes within the reach of mote 0.
+When a slave mote receives a time sync message, it adjusts its logical time. 
+One special mote, called a trigger, will broadcast a message every 10 seconds. 
+When the other motes, including mote 0, receives this trigger message, it
+time stamp this event using its local clock, and send a message containing
+ the time stamp. GenericBase mote collects these message and forwards them to 
+the PC. 
+    
+To run this demo, you need a mote programmed with the Trigger application provided 
+in this directory, a GenericBase mote, a timer master and 1 to 10 motes as time slave. If you have run the InitialSync demo first, don't forget to use the normal MicaHighSpeedRadioM.nc as you have found in the cvs tree in THIS DIRECTORY.
+The same is true for RadioCRCPacket.nc
+
+step 1: In the makefile, leave only TestTimeSync component un commented. 
+
+step 2: build the demo by typing 
+		make mica
+
+step 3: load the demo code to your motes 
+     make mica reinstall.n ( make sure one of the mote has to be id 0) 
+
+step 4: Program a mote as an event trigger by leaving only Trigger component in 
+the Makefile and do a make mica install.11
+
+step 5: put genericBase on programming board and connect it to the serial
+	port of your PC.
+
+step 7: turn all motes on
+
+step 8: on your PC, go to tinyos-1.x/tools/java dir and type:
+        java net/tinyos/sf/SerialForward &
+	java net/tinyos/timesync/oscilloscaope
+	If  you ahev somnething like CLASS not found error, do the following 
+        cd net/tinyos/timesync
+        javac oscilloscope.java
+
+3. EventSync test:
+===================
+
+ This applications showes that when logical time are syncronized with
+ our TimeSync protocol, an application event can be synchronized
+ using AbsoluteTimer event.
+
+     Test scenario: start comm stack, start TimeSync
+     Start a fast absolute timer (32ms) .
+     start a slow absolute timer (4s) .
+     When the fast timer fires, posts a long task and restart the timer.
+     When the slow timer fires, toggle green LED, take a time stamp.
+     Then post a task to send the time stamp over radio (type 0x13).
+     Yellow Leds indicates that a TimeSync msg type 0x25 is sent.
+     GenericBase can be used to collect the msg containing the time stamp.
+     and ListenRaw can be used to display the collected raw data in a PC.
+     The message type is defined in SendTime.h
+ 
+        
+Known issues:
+  Packet loss rate is high due to all motes try to send their time reading in 
+  the same time and consequently collision happens. 
+  The solution to this is to start a Absolute timer and add randum delay
+  or delay based on mote id.  

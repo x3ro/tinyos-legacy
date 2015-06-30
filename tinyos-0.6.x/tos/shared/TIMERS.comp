@@ -1,0 +1,32 @@
+
+/*
+ * Authors : Deepak Ganesan
+ * Date    : 04/20/01
+ *
+ */
+
+TOS_MODULE TIMERS;
+
+ACCEPTS{
+	char TIMERS_INIT(void);
+	char TIMERS_REGISTER(char, char);
+	char TIMERS_DEREGISTER(char);
+};
+SIGNALS{
+	void TIMERS_FIRE_EVENT_PORT_0(short);
+	void TIMERS_FIRE_EVENT_PORT_1(short);
+	void TIMERS_FIRE_EVENT_PORT_2(short);
+	void TIMERS_FIRE_EVENT_PORT_3(short);
+	void TIMERS_FIRE_EVENT_PORT_4(short);
+	void TIMERS_FIRE_EVENT_PORT_5(short);
+	void TIMERS_FIRE_EVENT_PORT_6(short);
+	void TIMERS_FIRE_EVENT_PORT_7(short);
+};
+
+USES{
+	void TIMERS_LEDS(unsigned char led_action);
+	char TIMERS_SUB_INIT(char port, char interval);
+};
+HANDLES{
+	void TIMERS_CLOCK_EVENT(void);
+};

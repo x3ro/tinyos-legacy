@@ -1,0 +1,111 @@
+/*
+ * "Copyright (c) 2000-2002 The Regents of the University  of California.  
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice, the following
+ * two paragraphs and the author appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors: Naveen Sastry
+ * Date:    9/26/02
+ */
+
+
+/**
+ * Module to exercise the block cipher interface
+ */
+module TestCipherModeM {
+  provides {
+    interface StdControl;
+  }
+  uses {
+    interface BlockCipherMode;
+  }
+}
+
+implementation {
+
+  /**
+   * Init method which does the work of testing the interface.
+   */
+  command result_t StdControl.init() {
+    uint8_t key[8] = {0x52, 0x69, 0xf1, 0x49,
+                      0xd4, 0x1b, 0xa0, 0x15};
+    uint8_t IV [8] = { 0x1, 0x2, 0x3, 0x4,
+                       0x5, 0x6, 0x7, 0x8};
+    char orig[47];
+    char dest[47];
+    char * msg =  "The quick brown fox";
+    uint16_t msgLen = strlen (msg) + 1;
+    uint16_t length ;
+    CipherModeContext context;
+    strcpy (orig, msg);
+
+    if (call BlockCipherMode.init (&context, 8, key) != SUCCESS) {
+      dbg(DBG_USR1, "TestCipherM: Couldn't itialize block cipher\n");
+      return FAIL;
+    }
+    dbg(DBG_USR1, "TestCipherModeM: Initialized Block CipherMode\n");
+
+    if (call BlockCipherMode.encrypt (&context, orig, dest, msgLen, IV) !=
+        SUCCESS) {
+      dbg(DBG_USR1, "TestCipherM: Couldn't encrypt orig buffer\n");
+      return FAIL;
+    }
+    dbg(DBG_USR1, "TestCipherM: Finished encrypting orig buffer\n");
+
+    if (call BlockCipherMode.decrypt (&context, dest, dest, msgLen, IV) !=
+        SUCCESS) {
+      dbg(DBG_USR1, "TestCipherM: Couldn't encrypt orig buffer\n");
+      return FAIL;
+    }
+    dbg(DBG_USR1, "TestCipherM: Finished decrypting orig buffer\n");
+    dbg(DBG_USR1, "TestCipherM: result (%d bytes) %s %s \n", msgLen,
+        dest, dest);
+    dbg(DBG_USR1, "TestCipherM: ------\n");
+
+    if (call BlockCipherMode.encrypt (&context, orig, orig, msgLen, IV) !=
+        SUCCESS) {
+      dbg(DBG_USR1, "TestCipherM: Couldn't encrypt orig buffer\n");
+      return FAIL;
+    }
+    dbg(DBG_USR1, "TestCipherM: Finished encrypting orig buffer\n");
+    
+    if (call BlockCipherMode.initIncrementalDecrypt (&context, IV,
+                                                     dest, 9) != SUCCESS) {
+      dbg(DBG_USR1, "TestCipherM: Couldn't call initIncrementDecrypt\n");
+      return FAIL;
+    }
+    dbg (DBG_USR1, "TestCipherM: DOne initIncrementalDecrypt\n");
+    
+    if (call BlockCipherMode.incrementalDecrypt (&context, orig, 9, 
+                                                 &length) != SUCCESS) {
+      dbg(DBG_USR1, "TestCipherM: Couldn't incrementalDecrypt\n");
+      return FAIL;
+    }
+    dbg (DBG_USR1, "TestCipherM: Finished decrypting orig buffer\n");
+    dbg (DBG_USR1, "TestCipherM: result (%s)\n", dest);
+
+    return SUCCESS;
+  }
+
+  command result_t StdControl.start() {
+    return SUCCESS;
+  }
+
+  command result_t StdControl.stop() {
+    return SUCCESS;
+  }
+}

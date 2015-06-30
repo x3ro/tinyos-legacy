@@ -1,0 +1,3 @@
+COMPONENT=TestTimer
+include ../Makerules
+

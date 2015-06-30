@@ -1,0 +1,8 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: usbinstall.extra,v 1.3 2007/03/05 01:06:30 lnachman Exp $
+
+#Installation using boot loader.
+
+BOOT_INSTALL = TRUE
+NODEID = $(INSTALL)
+BUILD_DEPS = bin program

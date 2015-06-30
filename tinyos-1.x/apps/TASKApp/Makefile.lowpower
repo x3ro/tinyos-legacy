@@ -1,0 +1,17 @@
+COMPONENT=TASKApp
+SENSORBOARD=micawbdot
+
+# use the JHill's Reliable_Low_Power as routing layer
+PFLAGS= -I%T/lib/Util -I%T/lib/Attributes -I%T/lib/Commands -I%T/lib/TinyDB -I../../contrib/xbow/tos/CC1000RadioPulse -I../../contrib/xbow/tos/lib/ReliableRoute_Low_Power -I%T/lib/Queue  -I%T/lib/FS -I%T/lib/TinyDB/Aggregates -I$(BROKEN)/broken/experimental/owl/task/logger -fno-strict-aliasing -fnesc-include=CompileDefines -DUSE_LOW_POWER_LISTENING -DMULTIHOPROUTER=EWMAMultiHopRouter
+# use JHill's ReliableRoute as routing layer
+#PFLAGS= -I%T/lib/Util -I%T/lib/Attributes -I%T/lib/Commands -I%T/lib/TinyDB -I../../beta/CC1000RadioAck -I../../contrib/xbow/tos/lib/ReliableRoute -I%T/lib/Queue  -I%T/lib/FS -I%T/lib/TinyDB/Aggregates -fno-strict-aliasing -DMULTIHOPROUTER=EWMAMultiHopRouter
+# use AWoo's MintRoute as routing layer
+#PFLAGS= -I%T/lib/Util -I%T/lib/Attributes -I%T/lib/Commands -I%T/lib/TinyDB -I%T/lib/MintRoute -I%T/lib/Queue  -I%T/lib/FS -I%T/lib/TinyDB/Aggregates -fno-strict-aliasing 
+# use AWoo's ReliableRoute with dup suppression as routing layer
+#PFLAGS= -I%T/lib/Util -I%T/lib/Attributes -I%T/lib/Commands -I%T/lib/TinyDB -I/cygdrive/z/Exp/MintRoute/ReliableRouteNew -I/cygdrive/z/Exp/MintRoute/QueueNew  -I%T/lib/FS -I%T/lib/TinyDB/Aggregates -fno-strict-aliasing -DMULTIHOPROUTER=EWMAMultiHopRouter
+# orignal lib/Route
+#PFLAGS= -I%T/lib/Util -I%T/lib/Attributes -I%T/lib/Commands -I%T/lib/TinyDB -I%T/lib/Route -I%T/lib/Queue  -I%T/lib/FS -I%T/lib/TinyDB/Aggregates -fno-strict-aliasing 
+
+MSG_SIZE=49
+
+include ../Makerules

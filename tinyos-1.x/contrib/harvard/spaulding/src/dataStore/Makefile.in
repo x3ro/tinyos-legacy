@@ -1,0 +1,2 @@
+PFLAGS += -I$(SPAULDINGSRC)/DataStore/ -I$(SPAULDINGSRC)/lib/ 
+

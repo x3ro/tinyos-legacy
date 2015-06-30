@@ -1,0 +1,55 @@
+/**
+ *  @file Xxx_Test.hh
+ *
+ *  @author Ion Yannopoulos
+ */
+
+#ifndef TESTS_TOSSIM_XXX_TEST_HH
+#define TESTS_TOSSIM_XXX_TEST_HH
+
+#include <tossim_test/public.hh>
+#include <cppunit/Test.h>
+#include <cppunit/TestCase.h>
+#include <cppunit/extensions/HelperMacros.h>
+
+namespace tests {
+namespace tos {
+namespace sim {
+
+using CppUnit::Test;
+using CppUnit::TestCase;
+
+/** 
+ */
+
+class Xxx_Test : public TestCase
+{
+public:                         // Types
+
+public:                         // Constructors
+  Xxx_Test();
+ ~Xxx_Test();
+
+public:                         // TestCase methods
+  virtual void setUp();
+  virtual void tearDown();
+
+public:                         // TestSuite setup
+  CPPUNIT_TEST_SUITE( Xxx_Test );
+  // CPPUNIT_TEST( test<Feature> );
+  CPPUNIT_TEST_SUITE_END();
+
+public:                         // Tests
+  // void test<Feature>
+
+private:                        // Fields
+  
+}; // class Xxx_Test
+
+
+} // namespace sim
+} // namespace tos
+} // namespace tests
+
+#endif // TESTS_TOSSIM_XXX_TEST_HH
+

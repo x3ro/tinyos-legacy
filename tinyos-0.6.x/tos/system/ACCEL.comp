@@ -1,0 +1,53 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2000 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Alec Woo
+ *
+ * This module encapsulates the accelerometer sensor.  It automatically gives the correct
+ * commands to the ADC and then returns the sensor reading to the application with
+ * the DATA_READY event for both X and Y Axis.
+ * 
+ * It is partially implemented by the ACCEL.c file and also the ACCEL.desc file. 
+ * ACCEL.desc file includes the ADC and the wiring between the ADC and the ACEL component.
+ */
+
+TOS_MODULE ACCEL;	
+JOINTLY IMPLEMENTED_BY ACCEL;
+
+ACCEPTS{
+	char ACCEL_INIT(void);
+	char ACCEL_GET_XDATA(void);
+	char ACCEL_GET_YDATA(void);
+	char ACCEL_PWR(char mode);
+};
+SIGNALS{
+	char ACCEL_DATAX_READY(short data);
+	char ACCEL_DATAY_READY(short data);
+};
+
+USES{
+	char ACCEL_SUB_ADC_INIT(void);
+	char ACCEL_SUB_ADC_GET_DATA(char port);
+};
+HANDLES{
+	char ACCEL_ADC_DONE(short data);
+};

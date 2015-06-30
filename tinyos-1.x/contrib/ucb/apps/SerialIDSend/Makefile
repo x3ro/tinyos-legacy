@@ -1,0 +1,3 @@
+COMPONENT = SerialIDSendC
+include $(MAKERULES)
+

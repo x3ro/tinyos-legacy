@@ -1,0 +1,179 @@
+#-*-Makefile-*- vim:syntax=make
+
+######################################################################
+# Core Makefile for TinyOS 
+#
+# Updated: 3/25/2005 Andrew Christian <andrew.christian@hp.com>
+#          Copied into contrib/hp and modified to support our local
+#          build environment
+######################################################################
+
+TOSDIR ?= $(shell ncc -print-tosdir)
+HHTOSDIR ?= $(TOSDIR)/../contrib/handhelds
+
+######################################################################
+# Define our local libraries and interfaces
+######################################################################
+
+#HHTOSDIR = $(TOSDIR)/../contrib/hp/tos
+
+HHTOS_PATH  = -I$(HHTOSDIR)/tos/interfaces
+HHTOS_PATH += -I$(HHTOSDIR)/tos/system
+
+# Automagically add all directories in contrib/handhelds/tos/lib
+HHTOS_PATH += $(addprefix -I,$(filter-out %CVS,$(wildcard $(HHTOSDIR)/tos/lib/*)))
+
+PFLAGS += $(HHTOS_PATH)
+
+######################################################################
+# Web site rules
+######################################################################
+
+ifdef USE_WEB
+COMPILE_WEB  = $(HHTOSDIR)/tools/scripts/compileWebSite.py
+GLOBAL_FUNCS = $(HHTOSDIR)/tos/lib/UIP/HTTPinternal.fun
+BUILD_EXTRA_DEPS += web_site.h
+CLEAN_EXTRA += web_site.h
+
+web_site.h:  FORCE html err $(USE_WEB)
+	$(COMPILE_WEB) -f $(GLOBAL_FUNCS) -f $(USE_WEB) html err
+
+endif
+
+######################################################################
+# Add in our local platforms
+######################################################################
+
+TOSMAKE_PATH += $(HHTOSDIR)/tools/make
+
+######################################################################
+# Execute the main makefile
+######################################################################
+
+MAKERULES ?= $(shell ncc -print-tosdir)/../tools/make/Makerules
+include $(MAKERULES)
+
+$(warning Calling include_dir on $(HHTOSDIR)/tools/make)
+$(call TOSMake_include_dir,$(HHTOSDIR)/tools/make)
+$(warning PFLAGS=$(PFLAGS))
+
+######################################################################
+# Check on required IP addresses and the like
+#
+# We put this AFTER the hardware includes so we can use information
+# on the hardware platform to check the build.
+#
+# A typical application will define:
+#
+#  USE_IP                      To specify an IP address
+#  SELECT_WIRED_OR_WIRELESS    To allow the user to select IPClient
+######################################################################
+
+ifneq ($(TARGETS:clean%=clean),clean)
+
+ifdef USE_IP
+ifdef IP
+PFLAGS += -DIP="$(shell echo $(IP) | sed -e 's/\./,/g')"
+else
+$(error You must specify an IP address.)
+endif
+endif
+
+# Specify this to allow the user to select IP over wired or wireless by command line
+ifdef SELECT_WIRED_OR_WIRELESS
+ifneq ($(HOST_IP)_x,_x)
+SELECT_WIRED=1
+else
+SELECT_WIRELESS=1
+endif
+endif
+
+# Specify this to force IP over the wired interface
+ifdef SELECT_WIRED
+ifdef HAS_USB
+USE_WIRED=1
+PFLAGS += -DIPCLIENT="WiredIPClientC"
+else
+$(error The $(PLATFORM) does not have a wired interface)
+endif
+endif
+
+# Specify this to force IP over the wireless interface
+ifdef SELECT_WIRELESS
+USE_RADIO=TxRx
+PFLAGS += -DIPCLIENT="WirelessIPClientC"
+endif
+
+######################################################################
+
+ifdef USE_RADIO
+
+CFLAGS += -I$(TOSDIR)/lib/CC2420Radio 
+
+ifdef CC2420_CHANNEL
+PFLAGS += -DCC2420_DEF_CHANNEL=$(CC2420_CHANNEL)
+endif
+
+ifdef SSID
+PFLAGS += -DSSID=\""$(SSID)\""
+endif
+
+ifneq ($(USE_RADIO),RxOnly)
+ifdef USE_ID_CHIP
+PFLAGS += -DID_CHIP=$(USE_ID_CHIP)
+ifdef HAS_ID_CHIP_POWER
+PFLAGS += -DID_CHIP_POWER
+endif
+else
+ifdef LONG_ADDRESS
+PFLAGS += -DLONG_ADDRESS="$(LONG_ADDRESS)"
+else
+$(error You must specify a valid LONG_ADDRESS.)
+endif
+
+endif  # HAS_DS2411
+endif  # USE_RADIO = RxOnly
+
+endif  # USE_RADIO
+
+######################################################################
+
+ifdef USE_WIRED
+ifdef HOST_IP
+PFLAGS += -DHOST_IP="$(shell echo $(HOST_IP) | sed -e 's/\./,/ g')"
+else
+$(error You must specify a valid HOST_IP address.)
+endif
+endif
+
+######################################################################
+# We provide TWO types of require_REGISTRAR.  Why?  Well, $(eval)
+# can't be used inside an 'ifdef' conditional.
+######################################################################
+
+require_REGISTRAR=$(eval \
+     $(if $(REGISTRAR),\
+          $(eval PFLAGS += -DREGISTRAR_IP="$(shell echo $(REGISTRAR) | sed -e 's/\./,/g')" -DDTYPE="\"$1\""),\
+          $(error You must specify a REGISTRAR address.)))
+
+ifdef USE_REGISTRAR
+ifdef REGISTRAR
+  PFLAGS += -DREGISTRAR_IP="$(shell echo $(REGISTRAR) | sed -e 's/\./,/g')"
+  PFLAGS += -DDTYPE="\"$(USE_REGISTRAR)\""
+else
+  $(error You must specify a REGISTRAR address.)
+endif
+endif
+
+
+######################################################################
+
+ifdef NTP_IP
+PFLAGS += -DNTP_IP="$(shell echo $(NTP_IP) | sed -e 's/\./,/g')"
+else
+PFLAGS += -DNTP_IP="255,255,255,255"
+endif
+
+endif  # ifneq($(TARGETS),clean)
+
+

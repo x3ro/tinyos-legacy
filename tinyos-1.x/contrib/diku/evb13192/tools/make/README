@@ -1,0 +1,24 @@
+$Id: README,v 1.1 2005/01/31 21:05:03 freefrag Exp $
+
+This is the make system support files needed for the 13192 EVB
+platform (evb13192 between friends!).
+
+The support files consists of
+
+a) The evb13192.target file
+b) The support files for the hcs08 MCU
+
+a) Is used by the TinyOS build system to define the target. To provide
+   this target it includes the hcs08/hcs08.rules file. It also sets
+   needed include files and path for actual compilation. If you need
+   to include files from other directories, set it up in here.
+
+b) Includes the various files needed for compilation for the hcs08
+   files, including the calls to the MetroWerks CodeWarrior, and so
+   on. Conceptually you can think of the chain as this:
+   evb13192.target -> hcs08.rules -> makeEvb13192.sh -> MakeHSC08
+
+See the README file in this directory for more information about the
+setup.
+
+

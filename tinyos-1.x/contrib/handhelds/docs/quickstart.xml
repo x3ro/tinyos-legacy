@@ -1,0 +1,217 @@
+<!-- Quick start -->
+
+<chapter id="quickstart">
+  <title>Getting started quickly</title>
+  <para>
+    The goal of this chapter is to get you up and running as quickly
+    as possible.  For our purposes, we will assume that you have
+    already checked out a copy of the TinyOS source tree, have a Linux
+    development machine running a 2.6 kernel, and have three Telos
+    revision B motes available.
+  </para>
+
+  <sect1><title>Setting up your environment</title>
+    <para>
+      You'll need copies of the MSP430 tool chain, the bootstrap
+      loader, and the TinyOS source tree.
+    </para>
+    <para>
+      Set up your environment variables in your
+      <filename>.bash_profile</filename> or other appropriate
+      location.  My version looks like: <informalexample><programlisting># Tiny OS settings
+PATH=$PATH:/usr/local/msp430/bin:/usr/local/tinyos/bin
+TINYOSDIR=/home/andyc/repository/tinyos-1.x
+TOSDIR=$TINYOSDIR/tos
+MAKERULES=$TINYOSDIR/tools/make/Makerules
+	</programlisting>
+      </informalexample>
+    </para>
+    <sect2>
+      <title>Running the Sniffer</title>
+      <para>
+	First, let's run an 802.15.4 scanner software.  This can be
+	found in <filename>contrib/handhelds/apps/ZSniff</filename>.  Assuming
+	that you have a Telos B mote attached to
+	<filename>/dev/ttyUSB0</filename>, type:<informalexample>
+<programlisting>make telosb install bsl,/dev/ttyUSB0
+python zdump.py sniff -d /dev/ttyUSB0</programlisting>
+	</informalexample>
+	By default, the <command>zdump</command> program uses 802.15.4
+	channel 11 and displays output on a single line.  Here's some
+	sample output:
+<screen>9.53     BEACON beacon_order=15 superframe_order=0 final_cap_slot=0 PANCOORD fcf=8000 [BEACON] dsn= 83 src=00:6e/00:00 4a:61:6d:65:79:27:73:20:4f:66:66:69:63:65:00 rssi=-9 lqi=107 crc=True
+9.53     DATA_REQUEST fcf=8023 [COMMAND ACKREQUEST] dsn= 42 src=be:ef/00:01 rssi=18 lqi=106 crc=True
+9.53     ACK fcf=0012 [ACK FRAMEPEND] dsn= 42 rssi=-10 lqi=107 crc=True
+9.55     BEACON beacon_order=15 superframe_order=0 final_cap_slot=0 PANCOORD fcf=8000 [BEACON] dsn=229 src=00:67/00:00 54:65:61:6d:41:72:65:61:00 rssi=-10 lqi=106 crc=True
+9.60     BEACON beacon_order=15 superframe_order=0 final_cap_slot=0 PANCOORD fcf=8000 [BEACON] dsn= 23 src=00:6f/00:00 4a:61:6d:65:79:27:73:20:4f:66:66:69:63:65:00 rssi=3 lqi=107 crc=True
+9.61     BEACON_REQUEST fcf=0803 [COMMAND] dsn=247 dest=ff:ff/ff:ff rssi=-44 lqi=105 crc=True
+9.61     BEACON beacon_order=15 superframe_order=0 final_cap_slot=0 PANCOORD ASSOC_OK fcf=8000 [BEACON] dsn= 38 src=be:ef/00:0c 43:52:4c:2d:4d:65:64:69:63:61:6c:00 rssi=-9 lqi=107 crc=True</screen>
+	There are options to the <command>zdump</command> program to
+	decode TCP/IP traffic, display multiple lines per packet, set
+	and hop channels, and filter packets by type.  (* Add link to
+	zdump reference here *)
+      </para>
+    </sect2>
+    <sect2>
+      <title>Setting up an Access Point</title>
+      <para>
+	The HP TinyOS tree provides clients that can communicate
+	using TCP/UDP over IP over 802.15.4.  An access point is
+	needed to connect the wireless 802.15.4 client back to the
+	wired Ethernet.  We have a hardware project to build a small
+	embedded Linux computer with wired Ethernet and 802.15.4
+	radios (* add link here *).  For people without the hardware, the
+	<filename>contrib/handhelds/apps/AccessPoint</filename> software
+	configures a Telos Mote to act as basic access point.  Wired
+	Ethernet traffic from the Mote is sent over the USB cable to a
+	host PC running a custom Linux kernel module.
+      </para>
+      <para>
+	We'll assume that you have a Linux development machine running
+	kernel version 2.6 and a Telos Mote connected to
+	<filename>/dev/ttyUSB1</filename>.
+	The first step is to build and install the kernel module that
+	routes IP traffic:<informalexample>
+	  <programlisting>cd contrib/handhelds/apps/AccessPoint/kernel
+make
+insmod ./telos_ap.ko</programlisting>
+	</informalexample>
+      </para>
+      <para>
+	Now we install the access point software on the
+	Mote.<informalexample>
+	  <programlisting>cd contrib/handhelds/apps/AccessPoint
+make telos IP=10.0.1.1 LONG_ADDRESS=1 install bsl,/dev/ttyUSB1</programlisting>
+	</informalexample>
+	A few things to note here:  First, you had to specify
+	an <envar>IP</envar> address for the access point.  The Telos Mote will be
+	acting as a network interface card for your Linux computer,
+	and as such, it needs to have a network address.  Some day we
+	will try to remove this restriction so you can assign the
+	address using <command>ifconfig</command> or equivalent.
+	Second, you had to specify a <envar>LONG_ADDRESS</envar>.
+	This two byte value is used to create a unique network MAC
+	address for the CC2420 radio.  The <envar>LONG_ADDRESS</envar>
+	is not needed for devices that have a DS2411 identification
+	chip (such as the Telos revision B or TMote Sky motes).
+      </para>
+      <para>
+	The third step is to running the access point user-space
+	daemon.  The daemon sets up the kernel module and updates
+	routing tables.<informalexample>
+	  <programlisting>cd contrib/handhelds/apps/AccessPoint/daemon
+make
+zattach -n -v /dev/ttyUSB1</programlisting>
+	</informalexample>
+	If the daemon is running correctly, you should see something
+	like:
+	<screen>Device name telos0
+
+Event: Reset
+IP:    10.0.1.1
+Addr:  a0:a0:00:00:00:00:00:01
+PanID: 0xbeef
+Freq:  2405 (channel 11)
+SSID:  CRL-Medical
+setting host ip address
+</screen>
+	The <command>zattach</command> program handles updating the
+	routing tables as clients join and leave the access point.
+	However, you won't be able to connect to those clients outside
+	of your local Linux machine unless you turn on IP forwarding:
+	<informalexample>
+	  <programlisting>echo "1" > /proc/sys/net/ipv4/ip_forward</programlisting>
+	</informalexample>
+	Remember, if you are going to forward packets off of your
+	local computer, you need to supply routable IP addresses.
+      </para>
+      <para>
+	Notice that the output of the <command>zattach</command>
+	program contains the device name <filename>telos0</filename>.
+	This is an actual Linux network device.  Try
+	<command>ifconfig</command> to see its settings or running
+	<command>ethereal</command> and watching the network traffic
+	on the device.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Running a Simple Telnet Client</title>
+      <para>
+	Now we'll install and test a simple Telnet client that runs
+	over 802.15.4.  We'll assume that you have a Telos revision B
+	mote plugged into <filename>/dev/ttyUSB2</filename>.
+	<informalexample>
+	  <programlisting>cd contrib/handhelds/swtest/TelnetServer
+make telosb IP=10.0.1.2 install bsl,/dev/ttyUSB2</programlisting>
+	</informalexample>
+	As with the access point, if you are running a client device
+	that doesn't have a DS2411 identification chip, you must
+	specify a unique <envar>LONG_ADDRESS</envar> value.
+      </para>
+      <para>
+	The client will scan all of the local 802.15.4 channels,
+	locate available access points (by sending <literal>BEACON
+	REQUEST</literal> packets), select the best access point, and
+	associate with it.  If everything goes well, you should see
+	the output of the <command>zattach</command> program
+	displaying:<screen>Event: Associate
+IP:    0.0.0.0
+Addr:  a0:a0:00:00:0c:59:f8:53
+SAddr: 0
+Flags: 0x81
+
+Event: ARP
+IP:    10.0.1.2
+Addr:  a0:a0:00:00:0c:59:f8:53
+SAddr: 0
+Flags: 0x81
+adding client route
+</screen>
+	Now you should be able to run <command>ping 10.0.1.2</command> and
+	<command>telnet</command>.  You can watch packets fly back and
+	forth both from the <command>zdump</command> software that
+	shows you what is going over the air and from
+	<command>tcpdump</command> or <command>ethereal</command>
+	running on the <literal>telos0</literal> interface.
+      </para>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Running with Wires</title>
+    <para>
+      The problem with debugging network code is that the wireless
+      mode of operation takes a long time and requires at least two
+      motes (one as an access point, one as a client).  This can be
+      avoided by running the mote in a "wired" mode.
+    </para>
+    <para>
+      From the perspective of the Linux host computer, the traffic
+      across the USB cable contains two types of traffic:  <simplelist>
+	<member>IP packets</member>
+	<member>Status packets showing clients associating and de-associating</member>
+      </simplelist>
+      To simply our debugging, the client mote can be compiled to
+      route IP traffic directly over the USB cable, rather than over
+      the 802.15.4 radio.  This "wired" mode also generates a set of
+      fake status packets for the Linux host computer so that it
+      appears to be just an ordinary access point.  To compile the
+      Telnet server sample code for wired mode, type:
+      <informalexample>
+	<programlisting>cd contrib/handhelds/swtest/TelnetServer
+make telosb IP=10.0.1.4 HOST_IP=10.0.1.5 install bsl,/dev/ttyUSB2
+cd ../../apps/AccessPoint/daemon
+zattach -n -v /dev/ttyUSB2</programlisting>
+      </informalexample>
+      The <envar>HOST_IP</envar> variable assigns an IP address to the
+      faux access point.  It also serves as a compile-time flag that
+      pulls in the <filename>WiredIPClientC.nc</filename> code 
+      instead of the <filename>WirelessIPClientC.nc</filename> code.
+    </para>
+  </sect1>
+</chapter>
+
+<!-- 
+Local Variables: 
+sgml-parent-document: ("usermanual.xml" "book" "chapter") 
+End: 
+-->

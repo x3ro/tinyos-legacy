@@ -1,0 +1,59 @@
+/*									tab:4
+ *
+ *
+ * "Copyright (c) 2001 and The Regents of the University 
+ * of California.  All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Authors:		Philip Levis
+ *
+ * This component is responsible for encoding and decoding data bytes
+ * sent over the network. It receives control from a data link layer. This
+ * component is fully compatible with SEC_DED_RADIO_BYTE.
+ */
+
+
+TOS_MODULE SEC_DED;
+
+ACCEPTS{
+	char SEC_DED_INIT(void);
+	char SEC_DED_TX_BYTES(char data);
+};
+SIGNALS{
+	char SEC_DED_RX_BYTE_READY(char data, char error, short strength);
+	char SEC_DED_TX_BYTE_READY(char success);
+	char SEC_DED_TX_DONE(void);
+};
+HANDLES{
+	char SEC_DED_RX_DATA_START();
+	char SEC_DED_RX_DATA_BIT_EVENT(char bit);
+	char SEC_DED_TX_DATA_START(void);
+	char SEC_DED_TX_DATA_BIT_EVENT(void);
+
+	char SEC_DED_SIGNAL_DATA_READY(short);
+};
+USES{
+	char SEC_DED_SUB_INIT(void);
+	char SEC_DED_SUB_TX_BIT(char data);
+	char SEC_DED_SUB_PWR_OFF(short timer);
+	char SEC_DED_SUB_PWR_ON(short bitrate);
+	char SEC_DED_SUB_SET_BIT_RATE(short bitrate);
+
+	char SEC_DED_SUB_RX_IDLE_ACTIVATE();
+	char SEC_DED_SUB_TX_MAC_ACTIVATE();
+};

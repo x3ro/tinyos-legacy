@@ -1,0 +1,69 @@
+$Id: README.Main,v 1.1.1.1 2007/11/05 19:11:28 jpolastre Exp $
+
+README for Main
+Author/Contact: info@moteiv.com
+@author Cory Sharp <cory@moteiv.com>
+
+Description:
+
+This Main component attempts to help library initialization.  In TinyOS
+1.x, the *application* was essentially require to initialize all core
+libraries in the proper order.  The OSKI TEP for TinyOS 2.x also
+attempts to address services, but with no real satisfaction or solution.
+
+Structure is specified here to allow libraries to wire themselves into
+Main with some predictability, naming convention, and dependency
+assertion.
+
+The only non-top-level components allowed to wire into main are
+Main<Library>C.n for some <Library> component like TimerMilli, Deluge,
+etc.  That component should include a header Main<Library>.h that
+declares any library dependencies and allocates a main initialization
+slot.
+
+For example, MainDelugeC.nc:
+
+    includes MainDeluge;
+
+    configuration MainDelugeC {
+    }
+    implementation {
+      components Main;
+      components DelugeC;
+      Main.MainStdControl[MAIN_DELUGE] -> DelugeC;
+    }
+
+and MainDeluge.h:
+
+    #ifndef H_MainDeluge_h
+    #define H_MainDeluge_h
+
+    #include "MainPlatform.h"
+    #include "MainDelugeMetadata.h" //dependency
+    #include "MainSP.h" //dependency
+
+    enum { MAIN_DELUGE = unique(MAIN_PLATFORM) };
+
+    #endif//H_MainDeluge_h
+
+Then DelugeC.nc asserts "components MainDelugeC;" to perform the wiring.
+MainDeluge.h declares that DelugeMetadata and SP should be initialized
+before Deluge.
+
+This structure is predictable and allows for platform-specific override
+on a per-library basis, if necessary.
+
+After all libraries initialize, the traditional Main.StdControl.start is
+called, then Boot.booted is signaled.
+
+Tools:
+
+None.
+
+Known bugs/limitations:
+
+Initialization occurs strictly sequentially, with a split-phase
+SplitControl.start blocking the next initialization until it is
+complete.  Parallel initialization of certain library components must be
+explicitly coded.
+

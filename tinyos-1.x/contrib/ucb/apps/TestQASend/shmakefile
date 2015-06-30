@@ -1,0 +1,9 @@
+# Makefile for stand alone applications - single hop
+#
+PFLAGS := -I%T/../contrib/ucb/tos/lib/BufferManager/CircleQueue -I%T/../contrib/ucb/tos/lib/BufferManager/BufferPool -I%T/../contrib/ucb/tos/lib/BufferManager/QueuedASend
+
+PFLAGS += -DSINGLE_HOP=1
+
+COMPONENT=TestQASend
+include ../Makerules
+

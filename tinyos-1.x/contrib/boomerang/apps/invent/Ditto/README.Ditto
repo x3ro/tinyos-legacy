@@ -1,0 +1,66 @@
+Application: Ditto
+Directory: moteiv/tinyos/apps/invent/tests/Ditto/
+Author: Cory Sharp <cory@moteiv.com>
+Date: 27 Jan 2006
+
+
+OVERVIEW
+
+make tmoteinvent and install on at least one node.
+
+The application is currently configured to sample at 8192 Hz for 8192 8-bit
+samples, meaning you have 1.0 seconds of record time.
+
+Double click the user button to begin recording.  The red led blinks twice
+for "warmup".  Recording occurs during the third blink of the red led.
+
+Single click the user button to play back the recording.  Playback occurs while
+the green led is on.
+
+The sample buffer is versioned and nodes advertise it.  So if you have more
+than one node, as soon as you're done recording, the node will advertise and
+share out the new recording.  Communication occurs while the blue led is on.
+
+The Java console application com.moteiv.demos.ditto.Ditto is provided to
+allow download and upload of sample buffers betweeb the mote and the PC.
+Run the application with no arguments to get a list of options, like this:
+
+$ java com.moteiv.demos.ditto.Ditto
+
+usage: Ditto cmd=[cmd] format=[format] file=[file]
+
+  cmd = help, get, put, play, playfile
+  format = auto, text, aifc, aiff, au, snd, wav
+  file = stdio, [filename]
+  motecom = [motecom_env], [motecom_spec]
+
+  cmd=help
+    Print this help text
+
+  cmd=get [file=...] [format=...]
+    Download samples from the attached mote.  Save the output to filename
+    or to "stdio" if given.  The format is deduced by the file
+    extension, or may be overridden with format=... .
+
+  cmd=put [file=...] [format=...]
+    Upload samples to the attached mote.  Similar to cmd=get, except samples
+    are loaded from the file first, then uplodaded.
+
+  cmd=play
+    Download samples from the attached mote and immediately play to the PC.
+
+  cmd=playfile [file=...] [format=...]
+    Load a file then immediately play to the PC.  A mote is not required.
+
+For instance, to download a WAV of the song over serial, run this command
+
+  java com.moteiv.demos.ditto.Ditto cmd=get file=ditto.wav
+
+Or, to download a text file of the song over serial run this command
+
+  java com.moteiv.demos.ditto.Ditto cmd=get file=ditto.txt
+
+The text format prints out each sample, one per line.  This is an ideal
+format for loading into Matlab -- in Matlab just type "load ditto.txt;".
+To play the song in Matlab, type "soundsc(ditto,8192);".
+

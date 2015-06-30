@@ -1,0 +1,3 @@
+@opts = ();
+@commonplatforms = ("c55xx");
+
